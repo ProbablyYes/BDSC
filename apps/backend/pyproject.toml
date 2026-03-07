@@ -14,6 +14,7 @@ dependencies = [
   "pypdf>=5.9.0",
   "python-pptx>=1.0.2",
   "neo4j>=5.28.0",
+  "openai>=1.109.1",
 ]
 
 [dependency-groups]

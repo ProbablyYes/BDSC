@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 from app.config import settings
+from app.services.llm_client import LlmClient
 from app.services.document_parser import ParsedDocument, TextSegment, parse_document
 from ingest.common import (
     bool_from_csv,
@@ -29,6 +32,144 @@ SECTION_KEYWORDS = {
     "execution_plan": ["里程碑", "计划", "进度", "实施路径"],
     "risk_control": ["风险", "合规", "伦理", "隐私", "数据安全"],
 }
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Extract structured cases from metadata.csv")
+    parser.add_argument(
+        "--llm",
+        action="store_true",
+        help="Use configured LLM for enhanced extraction on A/B samples.",
+    )
+    parser.add_argument(
+        "--llm-model",
+        default="",
+        help="Override model name for extraction. Default uses settings.llm_fast_model.",
+    )
+    parser.add_argument(
+        "--max-cases",
+        type=int,
+        default=0,
+        help="Optional limit for processed cases (0 means all).",
+    )
+    parser.add_argument(
+        "--category",
+        action="append",
+        default=[],
+        help="Only process selected categories (folder names). Can repeat.",
+    )
+    return parser.parse_args(argv)
+
+
+def _segment_score(text: str) -> int:
+    low = text.lower()
+    keywords = [
+        "用户",
+        "客户",
+        "痛点",
+        "需求",
+        "商业模式",
+        "盈利",
+        "收入",
+        "成本",
+        "市场",
+        "竞品",
+        "访谈",
+        "问卷",
+        "证据",
+        "风险",
+        "合规",
+    ]
+    return sum(1 for kw in keywords if kw in low)
+
+
+def select_candidate_chunks(
+    segments: list[TextSegment],
+    max_chunks: int = 10,
+    max_chars_per_chunk: int = 700,
+) -> list[dict[str, str]]:
+    if not segments:
+        return []
+
+    scored: list[tuple[int, TextSegment]] = [(_segment_score(seg.text), seg) for seg in segments if seg.text.strip()]
+    scored.sort(key=lambda x: (x[0], len(x[1].text)), reverse=True)
+
+    selected: list[TextSegment] = [seg for _, seg in scored[:max_chunks]]
+    # Keep context from beginning to avoid losing project basics.
+    for seg in segments[:2]:
+        if seg not in selected:
+            selected.append(seg)
+
+    selected = sorted(selected, key=lambda s: s.index)[:max_chunks]
+    out: list[dict[str, str]] = []
+    for idx, seg in enumerate(selected, start=1):
+        out.append(
+            {
+                "chunk_id": f"C{idx}",
+                "source_unit": seg.source_unit,
+                "text": seg.text[:max_chars_per_chunk],
+            }
+        )
+    return out
+
+
+def llm_extract_profile(
+    llm: LlmClient,
+    chunks: list[dict[str, str]],
+    default_project_name: str,
+    model_override: str = "",
+) -> dict[str, Any]:
+    if not chunks:
+        return {}
+
+    schema_hint = {
+        "project_name": "string",
+        "target_users": ["string"],
+        "pain_points": ["string"],
+        "solution": ["string"],
+        "innovation_points": ["string"],
+        "business_model": ["string"],
+        "market_analysis": ["string"],
+        "execution_plan": ["string"],
+        "risk_control": ["string"],
+        "risk_flags": ["no_competitor_claim|market_size_fallacy|weak_user_evidence|compliance_not_covered"],
+        "evidence": [
+            {
+                "type": "user_evidence|business_model_evidence|risk_evidence",
+                "quote": "string",
+                "chunk_id": "Cx",
+            }
+        ],
+    }
+    system_prompt = (
+        "你是创新创业项目结构化抽取助手。"
+        "请只基于给定chunks提取信息，输出严格JSON对象。"
+        "不确定时返回空数组，不要编造。"
+    )
+    user_prompt = (
+        f"默认项目名: {default_project_name}\n"
+        f"请按此JSON结构返回: {json.dumps(schema_hint, ensure_ascii=False)}\n"
+        f"文档片段: {json.dumps(chunks, ensure_ascii=False)}"
+    )
+    return llm.chat_json(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=model_override or None,
+        temperature=0.0,
+    )
+
+
+def _as_clean_str_list(value: Any, limit: int = 10) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out: list[str] = []
+    for item in value:
+        text = str(item).strip()
+        if text:
+            out.append(text)
+        if len(out) >= limit:
+            break
+    return unique_keep_order(out)
 
 
 def read_metadata(metadata_path: Path) -> list[dict]:
@@ -92,7 +233,12 @@ def make_case_id(file_path: str) -> str:
     return f"case_{digest}"
 
 
-def build_case_record(row: dict) -> dict:
+def build_case_record(
+    row: dict,
+    use_llm: bool = False,
+    llm: LlmClient | None = None,
+    llm_model: str = "",
+) -> dict:
     source_path = settings.teacher_examples_root / row["file_path"]
     parsed = parse_document(source_path)
     appendix_start = row.get("appendix_start_index", "")
@@ -106,6 +252,32 @@ def build_case_record(row: dict) -> dict:
     sections = {name: collect_section(core, kws) for name, kws in SECTION_KEYWORDS.items()}
     risk_flags = infer_risk_flags(core_text or full_text)
 
+    llm_data: dict[str, Any] = {}
+    chunk_map: dict[str, str] = {}
+    if use_llm and llm:
+        candidate_chunks = select_candidate_chunks(core, max_chunks=10, max_chars_per_chunk=700)
+        chunk_map = {item["chunk_id"]: item["source_unit"] for item in candidate_chunks}
+        llm_data = llm_extract_profile(
+            llm=llm,
+            chunks=candidate_chunks,
+            default_project_name=project_name,
+            model_override=llm_model,
+        )
+
+    # LLM fields override heuristics when present.
+    for field in SECTION_KEYWORDS:
+        llm_values = _as_clean_str_list(llm_data.get(field))
+        if llm_values:
+            sections[field] = llm_values
+
+    llm_project_name = str(llm_data.get("project_name", "")).strip()
+    if llm_project_name:
+        project_name = llm_project_name
+
+    llm_flags = _as_clean_str_list(llm_data.get("risk_flags"), limit=8)
+    if llm_flags:
+        risk_flags = unique_keep_order(risk_flags + llm_flags)
+
     parse_quality = row.get("parse_quality", "C")
     confidence = {"A": 0.9, "B": 0.7, "C": 0.45}.get(parse_quality, 0.5)
     if len(core_text) < 1000:
@@ -114,6 +286,34 @@ def build_case_record(row: dict) -> dict:
     case_id = make_case_id(row["file_path"])
     summary_text = (core_text or full_text).strip().replace("\n", " ")
     summary_text = re.sub(r"\s+", " ", summary_text)
+
+    evidence_items = []
+    for idx, item in enumerate(llm_data.get("evidence", []) if isinstance(llm_data, dict) else [], start=1):
+        if not isinstance(item, dict):
+            continue
+        evidence_type = str(item.get("type", "")).strip()
+        quote = str(item.get("quote", "")).strip()
+        chunk_id = str(item.get("chunk_id", "")).strip()
+        if not evidence_type or not quote:
+            continue
+        evidence_items.append(
+            {
+                "id": f"{case_id}_e{idx}",
+                "type": evidence_type,
+                "quote": quote[:400],
+                "chunk_id": chunk_id,
+                "source_unit": chunk_map.get(chunk_id, ""),
+            }
+        )
+
+    rubric_coverage = [
+        {"rubric_item": "User Evidence Strength", "covered": any(e["type"] == "user_evidence" for e in evidence_items)},
+        {
+            "rubric_item": "Business Model Consistency",
+            "covered": any(e["type"] == "business_model_evidence" for e in evidence_items),
+        },
+        {"rubric_item": "Risk Control", "covered": any(e["type"] == "risk_evidence" for e in evidence_items)},
+    ]
 
     return {
         "case_id": case_id,
@@ -148,19 +348,37 @@ def build_case_record(row: dict) -> dict:
             "risk_control": sections["risk_control"],
         },
         "risk_flags": risk_flags,
+        "evidence": evidence_items,
+        "rubric_coverage": rubric_coverage,
         "summary": summary_text[:500],
         "confidence": round(confidence, 2),
+        "llm": {
+            "enabled": use_llm,
+            "provider": settings.llm_provider,
+            "model": llm_model or settings.llm_fast_model or settings.llm_model,
+            "used": bool(llm_data),
+        },
         "generated_at": now_iso(),
     }
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
     metadata_path = settings.teacher_examples_root / "metadata.csv"
     out_dir = settings.data_root / "graph_seed" / "case_structured"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rows = read_metadata(metadata_path)
     included = [r for r in rows if bool_from_csv(r.get("include_in_kg", "true"), default=True)]
+    if args.category:
+        allowed = set(args.category)
+        included = [r for r in included if r.get("category", "") in allowed]
+    if args.max_cases and args.max_cases > 0:
+        included = included[: args.max_cases]
+
+    llm = LlmClient() if args.llm else None
+    if args.llm and (llm is None or not llm.enabled):
+        print("LLM disabled: missing llm_api_key/llm_base_url in environment or .env")
 
     manifest: list[dict] = []
     skipped = 0
@@ -169,7 +387,12 @@ def main() -> None:
             skipped += 1
             continue
         try:
-            case = build_case_record(row)
+            case = build_case_record(
+                row,
+                use_llm=bool(args.llm and llm and llm.enabled),
+                llm=llm,
+                llm_model=args.llm_model,
+            )
         except Exception as exc:  # noqa: BLE001
             skipped += 1
             print(f"skip {row.get('file_path')}: {exc}")

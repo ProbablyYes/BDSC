@@ -11,7 +11,8 @@ def main() -> None:
         auth=(settings.neo4j_username, settings.neo4j_password),
     )
 
-    with driver.session() as session:
+    session_kwargs = {"database": settings.neo4j_database} if settings.neo4j_database else {}
+    with driver.session(**session_kwargs) as session:
         result = session.run(
             """
             MATCH (c:Category)<-[:BELONGS_TO]-(p:Project)

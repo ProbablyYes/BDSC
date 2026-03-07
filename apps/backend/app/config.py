@@ -9,8 +9,13 @@ class Settings(BaseSettings):
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_username: str = "neo4j"
     neo4j_password: str = "neo4j"
+    neo4j_database: str = ""
     llm_provider: str = "mock"
     llm_model: str = "qwen-plus"
+    llm_api_key: str = ""
+    llm_base_url: str = "https://api.siliconflow.cn/v1"
+    llm_fast_model: str = "Qwen/Qwen2.5-14B-Instruct"
+    llm_reason_model: str = "Qwen/Qwen2.5-72B-Instruct"
 
     # config.py -> app -> backend -> apps -> BDSC (workspace root)
     workspace_root: Path = Path(__file__).resolve().parents[3]

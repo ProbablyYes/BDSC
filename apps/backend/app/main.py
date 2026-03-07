@@ -35,6 +35,7 @@ graph_service = GraphService(
     uri=settings.neo4j_uri,
     username=settings.neo4j_username,
     password=settings.neo4j_password,
+    database=settings.neo4j_database,
 )
 
 

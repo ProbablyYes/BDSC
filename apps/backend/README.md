@@ -43,6 +43,17 @@ uv run python -m ingest.build_metadata
 uv run python -m ingest.extract_case_struct
 ```
 
+启用千问（SiliconFlow OpenAI兼容）做增强抽取：
+
+```bash
+# .env 中配置
+# LLM_PROVIDER=qwen
+# LLM_BASE_URL=https://api.siliconflow.cn/v1
+# LLM_API_KEY=sk-...
+# LLM_FAST_MODEL=Qwen/Qwen2.5-14B-Instruct
+uv run python -m ingest.extract_case_struct --llm --max-cases 2
+```
+
 一键执行：
 
 ```bash
@@ -64,7 +75,7 @@ uv run python -m kg.query_category_patterns
 ```
 
 最小节点：`Project/Category/PainPoint/Solution/Market/RiskRule`  
-最小关系：`BELONGS_TO/HAS_PAIN/HAS_SOLUTION/HITS_RULE`
+最小关系：`BELONGS_TO/HAS_PAIN/HAS_SOLUTION/HITS_RULE/HAS_EVIDENCE/EVALUATED_BY`
 
 ## Agent 接入案例检索（Step 3）
 

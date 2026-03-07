@@ -89,6 +89,46 @@ def upsert_case(tx, case: dict) -> None:
     for market in to_list(profile.get("market_analysis", []))[:10]:
         tx.run("MERGE (:Market {name: $name})", name=market)
 
+    for item in case.get("evidence", []):
+        if not isinstance(item, dict):
+            continue
+        evidence_id = str(item.get("id", "")).strip()
+        if not evidence_id:
+            continue
+        tx.run(
+            """
+            MATCH (p:Project {id: $case_id})
+            MERGE (e:Evidence {id: $evidence_id})
+            SET e.type = $etype,
+                e.quote = $quote,
+                e.source_unit = $source_unit
+            MERGE (p)-[:HAS_EVIDENCE]->(e)
+            """,
+            case_id=case["case_id"],
+            evidence_id=evidence_id,
+            etype=str(item.get("type", "")),
+            quote=str(item.get("quote", "")),
+            source_unit=str(item.get("source_unit", "")),
+        )
+
+    for item in case.get("rubric_coverage", []):
+        if not isinstance(item, dict):
+            continue
+        rubric_name = str(item.get("rubric_item", "")).strip()
+        if not rubric_name:
+            continue
+        tx.run(
+            """
+            MATCH (p:Project {id: $case_id})
+            MERGE (r:RubricItem {name: $rubric_name})
+            MERGE (p)-[rel:EVALUATED_BY]->(r)
+            SET rel.covered = $covered
+            """,
+            case_id=case["case_id"],
+            rubric_name=rubric_name,
+            covered=bool(item.get("covered", False)),
+        )
+
 
 def main() -> None:
     cases = load_cases()
@@ -100,7 +140,8 @@ def main() -> None:
         settings.neo4j_uri,
         auth=(settings.neo4j_username, settings.neo4j_password),
     )
-    with driver.session() as session:
+    session_kwargs = {"database": settings.neo4j_database} if settings.neo4j_database else {}
+    with driver.session(**session_kwargs) as session:
         for case in cases:
             session.execute_write(upsert_case, case)
     driver.close()

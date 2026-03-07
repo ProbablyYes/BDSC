@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-07T07:25:05Z",
+  "generated_at": "2026-03-07T16:25:05Z",
   "metadata_rows": 90,
-  "included_rows": 89,
-  "generated_cases": 3,
-  "skipped": 86,
+  "included_rows": 15,
+  "generated_cases": 2,
+  "skipped": 13,
   "manifest": "manifest.json"
 }

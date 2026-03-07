@@ -1,0 +1,22 @@
+[project]
+name = "venture-agent-backend"
+version = "0.1.0"
+description = "Innovation and entrepreneurship agent backend."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.116.0",
+  "uvicorn>=0.35.0",
+  "python-multipart>=0.0.20",
+  "pydantic>=2.11.0",
+  "pydantic-settings>=2.10.0",
+  "python-docx>=1.2.0",
+  "pypdf>=5.9.0",
+  "python-pptx>=1.0.2",
+  "neo4j>=5.28.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.0",
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "无竞争对手幻觉",
+    "project_id": "eval-project-01",
+    "mode": "coursework",
+    "input_text": "我们要做一个AI平台，目前市场没有任何竞争对手。我们只要拿到全国1%的用户就能盈利。"
+  },
+  {
+    "name": "证据不足",
+    "project_id": "eval-project-02",
+    "mode": "coursework",
+    "input_text": "我们想做校园二手交易，目标用户是大学生，功能很全，但暂时还没有访谈和问卷。"
+  }
+]

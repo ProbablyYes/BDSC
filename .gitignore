@@ -20,3 +20,29 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+.idea/
+
+# Local data
+data/uploads/student_submissions/**/*
+!data/uploads/student_submissions/.gitkeep
+data/project_state/**/*
+!data/project_state/.gitkeep
+
+# Teacher examples: keep only structure docs in git
+data/corpus/teacher_examples/**/*.pdf
+data/corpus/teacher_examples/**/*.ppt
+data/corpus/teacher_examples/**/*.pptx
+data/corpus/teacher_examples/**/*.doc
+data/corpus/teacher_examples/**/*.docx
+data/corpus/teacher_examples/**/._*
+!data/corpus/teacher_examples/README.md
+!data/corpus/teacher_examples/**/.gitkeep

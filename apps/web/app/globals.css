@@ -1,0 +1,176 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: radial-gradient(1200px 700px at 0% 0%, #282356 0%, #090a12 50%, #05060c 100%);
+  color: #f8f9ff;
+}
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 44px;
+}
+
+.hero {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(130deg, rgba(117, 92, 255, 0.22), rgba(58, 148, 255, 0.15));
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 22px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.hero p {
+  margin: 10px 0 0;
+  color: rgba(235, 238, 255, 0.85);
+  max-width: 860px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 18px;
+}
+
+.card {
+  grid-column: span 6;
+  border-radius: 16px;
+  background: rgba(15, 18, 36, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px;
+}
+
+.card.full {
+  grid-column: span 12;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.role-card {
+  min-height: 220px;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nav-link {
+  color: #d9e2ff;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+label {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: 14px;
+  color: rgba(240, 245, 255, 0.86);
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8f9ff;
+  padding: 10px 12px;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 14px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ffffff;
+  background: linear-gradient(135deg, #8668ff, #439eff);
+}
+
+.fade-up {
+  animation: fadeUp 0.6s ease;
+}
+
+.glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: radial-gradient(circle, rgba(127, 96, 255, 0.15), transparent 50%);
+  animation: rotateGlow 12s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes fadeUp {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rotateGlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.hint {
+  color: #a6b5ff;
+  font-size: 13px;
+}
+
+@media (max-width: 960px) {
+  .card,
+  .card.full {
+    grid-column: span 12;
+  }
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 from pathlib import Path
 
@@ -37,6 +38,15 @@ METADATA_FIELDS = [
     "notes",
     "updated_at",
 ]
+FAILURE_FIELDS = [
+    "file_path",
+    "category",
+    "doc_type",
+    "file_size_mb",
+    "parse_quality",
+    "parse_note",
+    "suggestion",
+]
 
 MAX_PARSE_FILE_MB = 30.0
 
@@ -70,19 +80,29 @@ def discover_files(root: Path) -> list[Path]:
     return out
 
 
-def build_row(path: Path, root: Path, existing: dict[str, dict]) -> dict:
+def build_row(
+    path: Path,
+    root: Path,
+    existing: dict[str, dict],
+    parse_pdf_deep: bool,
+    max_parse_file_mb: float,
+) -> dict:
     rel_path = normalize_rel_path(path, root)
     rel_obj = Path(rel_path)
     file_size_mb = path.stat().st_size / (1024 * 1024)
     parsed = None
     appendix_start = None
 
-    if file_size_mb > MAX_PARSE_FILE_MB and path.suffix.lower() in {".pdf", ".pptx", ".docx"}:
+    suffix = path.suffix.lower()
+    if not parse_pdf_deep and suffix == ".pdf":
+        quality, note = ("C", "快速模式：PDF 未做深度文本提取，默认不进入结构化抽取。")
+        parsed = ParsedDocument(file_path=path, doc_type="pdf", segments=[])
+    elif file_size_mb > max_parse_file_mb and suffix in {".pdf", ".pptx", ".docx"}:
         quality, note = (
             "C",
             f"文件过大({file_size_mb:.2f}MB)，已跳过自动解析，可人工补充摘要后入库。",
         )
-        parsed = ParsedDocument(file_path=path, doc_type=path.suffix.lower().lstrip("."), segments=[])
+        parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
     else:
         try:
             parsed = parse_document(path)
@@ -90,7 +110,7 @@ def build_row(path: Path, root: Path, existing: dict[str, dict]) -> dict:
             appendix_start = detect_appendix_start(parsed)
         except Exception as exc:  # noqa: BLE001
             quality, note = ("C", f"解析失败：{exc}")
-            parsed = ParsedDocument(file_path=path, doc_type=path.suffix.lower().lstrip("."), segments=[])
+            parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
 
     previous = existing.get(rel_path, {})
     include_in_kg_default = quality in {"A", "B"}
@@ -124,13 +144,56 @@ def build_row(path: Path, root: Path, existing: dict[str, dict]) -> dict:
     }
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build teacher examples metadata.csv")
+    parser.add_argument(
+        "--fast",
+        action="store_true",
+        help="Skip deep PDF parsing for speed; use metadata-only estimation.",
+    )
+    parser.add_argument(
+        "--max-files",
+        type=int,
+        default=0,
+        help="Optional limit for scanned files (0 means all).",
+    )
+    parser.add_argument(
+        "--max-parse-mb",
+        type=float,
+        default=MAX_PARSE_FILE_MB,
+        help="Skip deep parsing when file size exceeds this limit.",
+    )
+    parser.add_argument(
+        "--category",
+        action="append",
+        default=[],
+        help="Only parse selected categories (folder names). Can be repeated.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
     root = settings.teacher_examples_root
     metadata_path = root / "metadata.csv"
     existing = load_existing(metadata_path)
     files = discover_files(root)
+    if args.max_files and args.max_files > 0:
+        files = files[: args.max_files]
+    if args.category:
+        allowed = set(args.category)
+        files = [p for p in files if detect_category(Path(normalize_rel_path(p, root))) in allowed]
 
-    rows = [build_row(path, root, existing) for path in files]
+    rows = [
+        build_row(
+            path,
+            root,
+            existing,
+            parse_pdf_deep=not args.fast,
+            max_parse_file_mb=args.max_parse_mb,
+        )
+        for path in files
+    ]
     rows.sort(key=lambda x: (x["category"], x["file_path"]))
 
     with metadata_path.open("w", encoding="utf-8-sig", newline="") as fp:
@@ -138,11 +201,42 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(rows)
 
+    failed_rows = []
+    for row in rows:
+        if row["parse_quality"] != "C":
+            continue
+        if "扫描" in row["parse_note"] or "未提取" in row["parse_note"]:
+            suggestion = "建议补充可编辑版源文件（pptx/docx）或走OCR。"
+        elif "过大" in row["parse_note"]:
+            suggestion = "建议先做摘要版或拆分后再深度抽取。"
+        elif "解析失败" in row["parse_note"]:
+            suggestion = "建议检查文件是否损坏，或改用其他格式重导出。"
+        else:
+            suggestion = "建议人工补充关键摘要后再纳入图谱。"
+        failed_rows.append(
+            {
+                "file_path": row["file_path"],
+                "category": row["category"],
+                "doc_type": row["doc_type"],
+                "file_size_mb": row["file_size_mb"],
+                "parse_quality": row["parse_quality"],
+                "parse_note": row["parse_note"],
+                "suggestion": suggestion,
+            }
+        )
+
+    failure_path = root / "parse_failures.csv"
+    with failure_path.open("w", encoding="utf-8-sig", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=FAILURE_FIELDS)
+        writer.writeheader()
+        writer.writerows(failed_rows)
+
     quality_count = {"A": 0, "B": 0, "C": 0}
     for row in rows:
         quality_count[row["parse_quality"]] = quality_count.get(row["parse_quality"], 0) + 1
     print("metadata generated:", metadata_path)
-    print("files:", len(rows), "quality:", quality_count)
+    print("failure list generated:", failure_path)
+    print("files:", len(rows), "quality:", quality_count, "failures:", len(failed_rows))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,10 @@
 from typing import Any
 
+from app.services.case_knowledge import (
+    category_patterns,
+    infer_category,
+    retrieve_cases_by_category,
+)
 from app.services.diagnosis_engine import run_diagnosis
 
 
@@ -22,15 +27,21 @@ def student_learning_agent(prompt: str, mode: str = "coursework") -> dict[str, A
 
 def project_coach_agent(input_text: str, mode: str = "coursework") -> dict[str, Any]:
     result = run_diagnosis(input_text=input_text, mode=mode)
+    category = infer_category(input_text)
+    references = retrieve_cases_by_category(category, limit=3)
     return {
         "agent": "project_coach",
+        "category_inference": category,
         "diagnosis": result.diagnosis,
         "next_task": result.next_task,
+        "reference_cases": references,
     }
 
 
 def competition_advisor_agent(input_text: str, mode: str = "coursework") -> dict[str, Any]:
     diagnosis = run_diagnosis(input_text=input_text, mode=mode).diagnosis
+    category = infer_category(input_text)
+    references = retrieve_cases_by_category(category, limit=3)
     rubric_rows = []
     for row in diagnosis.get("rubric", []):
         score = row["score"]
@@ -43,7 +54,12 @@ def competition_advisor_agent(input_text: str, mode: str = "coursework") -> dict
                 "minimal_fix_72h": "完成一次小规模验证并更新财务假设",
             }
         )
-    return {"agent": "competition_advisor", "rubric_advice": rubric_rows}
+    return {
+        "agent": "competition_advisor",
+        "category_inference": category,
+        "rubric_advice": rubric_rows,
+        "benchmark_cases": references,
+    }
 
 
 def instructor_assistant_agent(project_state: dict[str, Any]) -> dict[str, Any]:
@@ -75,6 +91,7 @@ def instructor_assistant_agent(project_state: dict[str, Any]) -> dict[str, Any]:
             "triggered_rule_total": total_rules,
         },
         "top_common_mistakes": top_rule_names,
+        "reference_category_patterns": category_patterns(),
         "suggested_interventions": [
             "下周先讲客户-价值主张一致性，并要求提交证据对照表。",
             "设置一次15分钟课堂压力测试，重点挑战无竞争与伪市场规模论证。",

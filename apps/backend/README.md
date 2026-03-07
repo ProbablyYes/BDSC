@@ -52,3 +52,22 @@ uv run python -m ingest.pipeline
 产物目录：
 - `data/corpus/teacher_examples/metadata.csv`
 - `data/graph_seed/case_structured/`
+
+失败清单：
+- `data/corpus/teacher_examples/parse_failures.csv`（扫描件/超大文件/解析失败）
+
+## Neo4j 最小图谱入库（Step 2）
+
+```bash
+uv run python -m kg.import_to_neo4j
+uv run python -m kg.query_category_patterns
+```
+
+最小节点：`Project/Category/PainPoint/Solution/Market/RiskRule`  
+最小关系：`BELONGS_TO/HAS_PAIN/HAS_SOLUTION/HITS_RULE`
+
+## Agent 接入案例检索（Step 3）
+
+- `project_coach`：按类别返回参考案例
+- `competition_advisor`：返回基准案例列表
+- `instructor_assistant`：返回类别级样本分布

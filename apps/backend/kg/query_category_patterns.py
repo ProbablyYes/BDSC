@@ -1,0 +1,38 @@
+from __future__ import annotations
+
+from neo4j import GraphDatabase
+
+from app.config import settings
+
+
+def main() -> None:
+    driver = GraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=(settings.neo4j_username, settings.neo4j_password),
+    )
+
+    with driver.session() as session:
+        result = session.run(
+            """
+            MATCH (c:Category)<-[:BELONGS_TO]-(p:Project)
+            OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+            OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+            RETURN c.name AS category,
+                   count(DISTINCT p) AS projects,
+                   collect(DISTINCT pain.name)[0..5] AS top_pains,
+                   collect(DISTINCT sol.name)[0..5] AS top_solutions
+            ORDER BY projects DESC
+            """
+        )
+        rows = list(result)
+
+    driver.close()
+    print("=== Category Patterns ===")
+    for row in rows:
+        print(f"\n[{row['category']}] projects={row['projects']}")
+        print(f"- pains: {row['top_pains']}")
+        print(f"- solutions: {row['top_solutions']}")
+
+
+if __name__ == "__main__":
+    main()

@@ -8,6 +8,12 @@ This pipeline converts teacher reference materials into structured case data for
 uv run python -m ingest.build_metadata
 ```
 
+快速模式（建议首次跑）：
+
+```bash
+uv run python -m ingest.build_metadata --fast
+```
+
 Outputs: `data/corpus/teacher_examples/metadata.csv`
 
 Highlights:
@@ -32,6 +38,8 @@ Outputs:
 ```bash
 uv run python -m ingest.pipeline
 ```
+
+> `pipeline` 默认使用 metadata 快速模式，避免在大量 PDF 场景下卡住。
 
 ## Notes
 

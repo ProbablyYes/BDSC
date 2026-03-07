@@ -1,0 +1,40 @@
+{
+  "case_id": "case_45b140a58759",
+  "source": {
+    "file_path": "教育服务/536732-育见先贤—基于多模态_式教育系统-项目策划书-34502047.pdf",
+    "file_name": "536732-育见先贤—基于多模态_式教育系统-项目策划书-34502047.pdf",
+    "category": "教育服务",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 15,
+    "full_text_chars": 16048,
+    "core_text_chars": 16048,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false
+  },
+  "project_profile": {
+    "project_name": "536732-育见先贤—基于多模态_式教育系统-项目策划书-34502047",
+    "target_users": [],
+    "pain_points": [],
+    "solution": [],
+    "innovation_points": [],
+    "business_model": [],
+    "market_analysis": [],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "risk_flags": [
+    "weak_user_evidence",
+    "compliance_not_covered"
+  ],
+  "summary": "2025 ୍ 3 ᄅ XXX2025 ୍็ᅞЖં໓ March. 2025 ტ༢๤ ᅦX1) ৙XX1) ຦XX1) ᅦX1)ݒX1) 1) (XXX,൧,ݓXXX) ᅋ ေ࿐༝ಣ౦a࿐༝ི ࿐ त ࿐ള ު ༢๤đ࿐ളૌॖၛ ࢝ ৯b ՍӮ EduSages: A Multimodal AI-Driven Interactive Educational System for Engaging with Historical Figures ZHANG X1) LI X1) W ANG X1) ZHANG X1) W ANG X1) GUO X1) 1) Abstract Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge. This often results in a lack of enthu- siasm fo",
+  "confidence": 0.9,
+  "generated_at": "2026-03-07T07:02:43Z"
+}

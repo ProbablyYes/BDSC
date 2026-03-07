@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     llm_provider: str = "mock"
     llm_model: str = "qwen-plus"
 
-    workspace_root: Path = Path(__file__).resolve().parents[4]
+    # config.py -> app -> backend -> apps -> BDSC (workspace root)
+    workspace_root: Path = Path(__file__).resolve().parents[3]
     data_root: Path = workspace_root / "data"
     upload_root: Path = data_root / "uploads" / "student_submissions"
     teacher_examples_root: Path = data_root / "corpus" / "teacher_examples"

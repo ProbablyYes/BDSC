@@ -35,3 +35,20 @@ uv run python eval/run_eval.py
 ```
 
 它会读取 `eval/cases.sample.json` 批量跑 4 个 Agent，输出触发规则和下一步任务，适合快速调参。
+
+## 教师范例入库流水线（metadata + 结构化抽取）
+
+```bash
+uv run python -m ingest.build_metadata
+uv run python -m ingest.extract_case_struct
+```
+
+一键执行：
+
+```bash
+uv run python -m ingest.pipeline
+```
+
+产物目录：
+- `data/corpus/teacher_examples/metadata.csv`
+- `data/graph_seed/case_structured/`

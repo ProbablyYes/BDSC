@@ -65,6 +65,16 @@ scripts\agent-eval.cmd
 
 它会批量跑 `apps/backend/eval/cases.sample.json`，方便你快速迭代规则和话术。
 
+## 教师范例自动入库（metadata + 结构化案例）
+
+```bat
+scripts\ingest-teacher-examples.cmd
+```
+
+运行后将生成：
+- `data/corpus/teacher_examples/metadata.csv`
+- `data/graph_seed/case_structured/*.json`
+
 ## 下一步建议
 
 1. 将教师范例计划书放入 `data/corpus/teacher_examples/`。

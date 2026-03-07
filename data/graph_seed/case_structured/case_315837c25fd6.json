@@ -1,0 +1,95 @@
+{
+  "case_id": "case_315837c25fd6",
+  "source": {
+    "file_path": "教育服务/477178-LectūraAgents-项目策划书-42019064.pdf",
+    "file_name": "477178-LectūraAgents-项目策划书-42019064.pdf",
+    "category": "教育服务",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 15,
+    "full_text_chars": 5145,
+    "core_text_chars": 5145,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false
+  },
+  "project_profile": {
+    "project_name": "Lectūra Agents - 基于多智能体的自适应个性化学习应用",
+    "target_users": [
+      " 多智能体协作：利用 Autogen 的 Swarm 功能实现智能体间的任",
+      "务交接与协同工作。",
+      " 可扩展研究平台：探索多智能体系统在教育领域的优化应用。",
+      "3. 系统架构",
+      "3.1 技术栈",
+      "核心框架：Microsoft Autogen（多智能体协作框架）",
+      "任务协作模式：Swarm Colab（支持智能体动态任务分配与交接）",
+      "AI 模型：gemini-2.5, gpt4o 等等（课程生成）、RAG（检索增强生",
+      "成）、coqui TTS（语音合成）",
+      "前端：Gradio（演示版）、未来计划迁移至 Web 应用"
+    ],
+    "pain_points": [
+      "上下⽂理解：底层⼤语⾔模型智能体可分析⽤⼾输⼊（主",
+      "题、受众⽔平、语调），构建最契合学习者的内容结构。",
+      "多智能体流⽔线：专业化智能体（如研究、幻灯⽚、脚",
+      "本、讲师）通过⼤模型指令与配套⼯具协同⼯作，将复杂",
+      "主题解构并重组为直观的创新学习模块。",
+      "⾃适应编排：智能体根据⽤⼾选择的⻆⾊、偏好及学习⽬",
+      "标动态调整输出内容，灵活变换表述⻛格、复杂度与呈现",
+      "形式。",
+      "语义问答：实时问题处理系统结合当前课程与历史内容的",
+      "上下⽂嵌⼊，使智能体能即时⽣成精准的针对性回答。"
+    ],
+    "solution": [
+      "Lectura Agents 多智能体自适应学",
+      "习系统项目计划书",
+      "团队：JAWARD SESAY, AZZABI JALALEDIN YOUSEF, ELAINE IMPERIAL",
+      "项目划书",
+      "www.lecturalabs.com",
+      "2025",
+      "第十九届“挑战杯”全国大学生课外学术科",
+      "技作品竞赛“人工智能+”应用赛",
+      "目录",
+      "1. 摘要 ………………………………………………… 3"
+    ],
+    "innovation_points": [
+      "目录",
+      "1. 摘要 ………………………………………………… 3",
+      "2. 项目目标 …………………………………………… 4",
+      "3. 系统架构",
+      "3.1 技术栈 ………………………………………… 4",
+      "3.2 智能体工作流 ………………………………… 4",
+      "3.3 关键创新点 …………………………………… 5",
+      "4. 项目进度与里程碑 ………………………………… 5",
+      "5. 未来研究方向 ……………………………………… 6",
+      "6. 团队与资源 ………………………………………… 7"
+    ],
+    "business_model": [],
+    "market_analysis": [],
+    "execution_plan": [
+      "Lectura Agents 多智能体自适应学",
+      "习系统项目计划书",
+      "团队：JAWARD SESAY, AZZABI JALALEDIN YOUSEF, ELAINE IMPERIAL",
+      "项目划书",
+      "www.lecturalabs.com",
+      "2025",
+      "第十九届“挑战杯”全国大学生课外学术科",
+      "技作品竞赛“人工智能+”应用赛",
+      "目录",
+      "1. 摘要 ………………………………………………… 3"
+    ],
+    "risk_control": []
+  },
+  "risk_flags": [
+    "weak_user_evidence",
+    "compliance_not_covered"
+  ],
+  "summary": "Lectura Agents 多智能体自适应学 习系统项目计划书 团队：JAWARD SESAY, AZZABI JALALEDIN YOUSEF, ELAINE IMPERIAL 项目划书 www.lecturalabs.com 2025 第十九届“挑战杯”全国大学生课外学术科 技作品竞赛“人工智能+”应用赛 目录 1. 摘要 ………………………………………………… 3 2. 项目目标 …………………………………………… 4 3. 系统架构 3.1 技术栈 ………………………………………… 4 3.2 智能体工作流 ………………………………… 4 3.3 关键创新点 …………………………………… 5 4. 项目进度与里程碑 ………………………………… 5 5. 未来研究方向 ……………………………………… 6 6. 团队与资源 ………………………………………… 7 7. 结论 ………………………………………………… 7 8. PPT ……………………………………………… 8-15 项目名称：Lectūra Agents - 基于多智能体的自适应个性化学习应用 项目阶段：研究阶段（已开",
+  "confidence": 0.9,
+  "generated_at": "2026-03-07T07:02:32Z"
+}

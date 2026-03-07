@@ -1,0 +1,73 @@
+{
+  "case_id": "case_caf19cb5d602",
+  "source": {
+    "file_path": "农业发展/476164-智禾——以“小白菜”_态监测系统-项目策划书-9016c30d.pdf",
+    "file_name": "476164-智禾——以“小白菜”_态监测系统-项目策划书-9016c30d.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 69,
+    "full_text_chars": 56537,
+    "core_text_chars": 11708,
+    "appendix_start_index": 9,
+    "has_appendix_evidence": true
+  },
+  "project_profile": {
+    "project_name": "476164-智禾——以“小白菜”_态监测系统-项目策划书-9016c30d",
+    "target_users": [],
+    "pain_points": [
+      "I",
+      "摘 要",
+      "小白菜作为我国广泛栽培且深受大众欢迎的蔬菜之一，对肥料需求高，易受非",
+      "生物胁迫影响。针对其生长过程中养分失衡及非生物胁迫问题，本研究开发了一套",
+      "集生长量化、营养检测与健康诊断于一体的智能化识系统。",
+      "（1）基于农业部\"3414\"试验设计，本研究构建了包括 14 种缺素处理和水分胁",
+      "迫在内的多环境因子试验体系。利用双摄像头连续采集全生长周期图像，建立了包",
+      "含生长阶段、叶片形态及健康状态的数据集，为模型训练提供了高质量样本。",
+      "（2）本研究提出一种基于 YOLOv5 网络和多元线性回归的小白菜生长量化估",
+      "计模型。首先通过 YOLOv5 进行位置定位与生长阶段识别，并采用改进的实例分割"
+    ],
+    "solution": [
+      "智禾——以“小白菜”为例的",
+      "植物生长健康状态监测系统",
+      "项目赛道： 人工智能+农业发展",
+      "团队成员： 韩宜彤、雷富程、王瑜佳",
+      "指导老师： ×××",
+      "第 十 九 届 “ 挑 战 杯 ” 全 国 大 学 生",
+      "课 外 学 术 科 技 作 品 竞 赛",
+      "I",
+      "II",
+      "III"
+    ],
+    "innovation_points": [],
+    "business_model": [],
+    "market_analysis": [
+      "II",
+      "Abstract",
+      "Brassica campestris L. is one of the most widely cultivated and popular vegetables in",
+      "China, with high fertilizer requirements and susceptibility to abiotic stress. Addressing",
+      "nutrient imbalance and abiotic stress during its growth, this study developed an  intelligent",
+      "recognition model integrating growth quantification, nutrient detection, and health",
+      "diagnosis.",
+      "(1) Based on the Ministry of Agriculture's \"3414\" experimental design, this study",
+      "constructed a multi-environmental factor experimental system including 14 types of nutrient",
+      "deficiency treatments and water stress. By continuously collecting images througho ut the"
+    ],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "risk_flags": [
+    "weak_user_evidence",
+    "compliance_not_covered"
+  ],
+  "summary": "智禾——以“小白菜”为例的 植物生长健康状态监测系统 项目赛道： 人工智能+农业发展 团队成员： 韩宜彤、雷富程、王瑜佳 指导老师： ××× 第 十 九 届 “ 挑 战 杯 ” 全 国 大 学 生 课 外 学 术 科 技 作 品 竞 赛 I II III I 摘 要 小白菜作为我国广泛栽培且深受大众欢迎的蔬菜之一，对肥料需求高，易受非 生物胁迫影响。针对其生长过程中养分失衡及非生物胁迫问题，本研究开发了一套 集生长量化、营养检测与健康诊断于一体的智能化识系统。 （1）基于农业部\"3414\"试验设计，本研究构建了包括 14 种缺素处理和水分胁 迫在内的多环境因子试验体系。利用双摄像头连续采集全生长周期图像，建立了包 含生长阶段、叶片形态及健康状态的数据集，为模型训练提供了高质量样本。 （2）本研究提出一种基于 YOLOv5 网络和多元线性回归的小白菜生长量化估 计模型。首先通过 YOLOv5 进行位置定位与生长阶段识别，并采用改进的实例分割 算法提取单株植株图像；然后结合叶片大小分类与叶面像素占比特征建立回归模型 估算鲜重。结果显示该模型在不同生长阶段识别中表现优异，适用于植物生长监测。",
+  "confidence": 0.9,
+  "generated_at": "2026-03-07T06:59:26Z"
+}

@@ -1,0 +1,105 @@
+{
+  "case_id": "case_16f43995280b",
+  "source": {
+    "file_path": "农业发展/515508-面向南南合作国家的智_稻种植系统-项目策划书-75203835.pdf",
+    "file_name": "515508-面向南南合作国家的智_稻种植系统-项目策划书-75203835.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 25,
+    "full_text_chars": 6109,
+    "core_text_chars": 6109,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false
+  },
+  "project_profile": {
+    "project_name": "515508-面向南南合作国家的智_稻种植系统-项目策划书-75203835",
+    "target_users": [
+      "调研 |  REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN",
+      "技术调研及相关产品调研",
+      "相关法律法规调研",
+      "实物",
+      "+",
+      "APP设计",
+      "1-2 研究路径",
+      "M E T H O D",
+      "确",
+      "定"
+    ],
+    "pain_points": [
+      "调研 |  REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN",
+      "技术调研及相关产品调研",
+      "相关法律法规调研",
+      "实物",
+      "+",
+      "APP设计",
+      "1-2 研究路径",
+      "M E T H O D",
+      "确",
+      "定"
+    ],
+    "solution": [
+      "调研 |  REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN",
+      "SUSTAINABLE AGRICULTURE",
+      "面向南南合作国家的",
+      "水稻种植智能系统",
+      "AI+农业",
+      "SUSTAINABLE DESIGN",
+      "1-1研究背景",
+      "B A C K G R O U N D",
+      "一粒种子的传承与使命",
+      "跨越"
+    ],
+    "innovation_points": [
+      "调研 |  REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN",
+      "集中在赤道-南北纬30°",
+      "2-1 场景调研",
+      "E N V IR O N M E N T",
+      "全球水稻种植地区分布情况（数据来源：FAO）",
+      "1 20 25 年 3 月中旬全球农业生态区农田水压力干旱指数",
+      "（数据来源：中国科学院空天信息创新研究院）",
+      "热带",
+      "亚热带",
+      "热带雨林气候"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "调研 |  REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN",
+      "E（经济） T（技术）",
+      "最早参与 美国 德 国 印 度 俄罗斯荷兰波兰印 度 尼西 亚英 国 法 国 泰 国",
+      "0 500 1000 1500 2000 2500 3000",
+      "美国德 国印 度俄罗斯荷兰波兰印 度 尼西 亚英 国法 国泰 国",
+      "非洲48 .7%",
+      "拉丁美洲 及加勒 比23.7%",
+      "亚洲20. 8 %",
+      "其他6.7%",
+      "S（社会）P（政策）"
+    ],
+    "execution_plan": [],
+    "risk_control": [
+      "3-3-5 设计方案",
+      "DESIGN PROJECT",
+      "WHERE",
+      "WHO",
+      "WHY",
+      "HOW",
+      "WHAT",
+      "非洲/东南亚等“南南合作”国家 水稻种植机械化水平低地区",
+      "自然条件适宜（水热资源丰富）",
+      "但农业基础设施薄弱、机械化水平低"
+    ]
+  },
+  "risk_flags": [
+    "compliance_not_covered"
+  ],
+  "summary": "调研 | REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN SUSTAINABLE AGRICULTURE 面向南南合作国家的 水稻种植智能系统 AI+农业 SUSTAINABLE DESIGN 调研 | REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN 1-1研究背景 B A C K G R O U N D 一粒种子的传承与使命 跨越 把一袋特殊的稻米带到袁隆平爷爷墓前 1.2万公里 非洲学生 突围 传承 挑战 收获 突围 传承 挑战 收获 粮食困境 种子精神 科技升级 更好未来 粮食安全 南南合作 农业现代化 可持续发展 调研 | REASEARCH背景 | BACKGROUND 方案 | PROGRAM 设计 | DESIGN E（经济） T（技术） 最早参与 美国 德 国 印 度 俄罗斯荷兰波兰印 度 尼西 亚英 国 法 国 泰 国 0 500 1000 1500 2000 2500 3000 美国德 国印 度俄罗斯荷兰波兰印 度 尼西 亚英 国法 国泰 国 非洲48 .7% 拉",
+  "confidence": 0.9,
+  "generated_at": "2026-03-07T06:59:34Z"
+}

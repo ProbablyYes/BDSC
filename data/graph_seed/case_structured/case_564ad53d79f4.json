@@ -1,0 +1,63 @@
+{
+  "case_id": "case_564ad53d79f4",
+  "source": {
+    "file_path": "农业发展/477027-赛道AGRO-AIO_能农业系统-项目策划书-4bf8428f.pdf",
+    "file_name": "477027-赛道AGRO-AIO_能农业系统-项目策划书-4bf8428f.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 32,
+    "full_text_chars": 21798,
+    "core_text_chars": 21798,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false
+  },
+  "project_profile": {
+    "project_name": "477027-赛道AGRO-AIO_能农业系统-项目策划书-4bf8428f",
+    "target_users": [],
+    "pain_points": [],
+    "solution": [
+      "AGRO-AI OS PROJECT PROPOSAL",
+      "农⽥杂草⾃动识别的智能农业系统",
+      "image-33.png",
+      "Intelligent Agricultural Weed Automatic Recognition",
+      "System",
+      "PROJECT INFORMATION",
+      "Project Title: AGRO-AI OS: An Intelligent Weed Detection System Based on YOLOv11n",
+      "Competition Track: Artificial Intelligence + Healthcare Track",
+      "Project Leader: ⻢恒  (KITOKO MUYUNGA KENNEDY)",
+      "Team Members: 向森洪 , MOUSSA MLIVA RAIDANE"
+    ],
+    "innovation_points": [],
+    "business_model": [],
+    "market_analysis": [
+      "6.2 Online Demonstration Platform",
+      "image-29.png",
+      "📸  Testing Image Display Materials:",
+      "1. Original Agricultural Field Image Samples",
+      "- Weed photos from real farms (anonymized processing)",
+      "- Weed images at different growth stages",
+      "2. Recognition Result Comparison Images",
+      "- Model detection output vs. standard answer comparison",
+      "- Precision and recall visualization displays",
+      "3. 12-category Weed Recognition Effect Images"
+    ],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "risk_flags": [
+    "market_size_fallacy",
+    "weak_user_evidence",
+    "compliance_not_covered"
+  ],
+  "summary": "AGRO-AI OS PROJECT PROPOSAL 农⽥杂草⾃动识别的智能农业系统 image-33.png Intelligent Agricultural Weed Automatic Recognition System PROJECT INFORMATION Project Title: AGRO-AI OS: An Intelligent Weed Detection System Based on YOLOv11n Competition Track: Artificial Intelligence + Healthcare Track Project Leader: ⻢恒 (KITOKO MUYUNGA KENNEDY) Team Members: 向森洪 , MOUSSA MLIVA RAIDANE Academic Supervisor: [Supervisor Anonymized] Institution: [Academic Institution Anonymized] Cover Page (Mandatory) Project Name: AGRO-A",
+  "confidence": 0.9,
+  "generated_at": "2026-03-07T06:59:26Z"
+}

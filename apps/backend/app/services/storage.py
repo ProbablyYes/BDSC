@@ -48,3 +48,12 @@ class JsonStorage:
         )
         self.save_project(project_id, data)
         return feedback_id
+
+    def list_projects(self) -> list[dict]:
+        projects: list[dict] = []
+        for path in sorted(self.root.glob("*.json")):
+            try:
+                projects.append(json.loads(path.read_text(encoding="utf-8")))
+            except Exception:  # noqa: BLE001
+                continue
+        return projects

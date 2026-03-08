@@ -41,6 +41,8 @@ class ProjectSnapshotResponse(BaseModel):
 class AnalyzePayload(BaseModel):
     project_id: str
     student_id: str
+    class_id: str | None = None
+    cohort_id: str | None = None
     input_text: str = Field(min_length=20)
     mode: Literal["coursework", "competition"] = "coursework"
 

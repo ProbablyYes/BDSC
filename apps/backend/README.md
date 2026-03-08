@@ -26,6 +26,9 @@ uv run uvicorn app.main:app --reload --port 8000
 - `POST /api/teacher-feedback`
 - `GET /api/project/{project_id}`
 - `GET /api/teacher-examples`（按分类目录返回教师范例）
+- `GET /api/teacher/dashboard`（教师画像：类别分布/高风险项目/规则命中）
+- `GET /api/teacher/project/{project_id}/evidence`（单项目证据链与rubric覆盖）
+- `GET /api/teacher/compare`（历史基线 vs 本班现状对比 + 干预建议）
 - `POST /api/agent/run`（运行指定 agent）
 
 ## Agent 调试（无需启动前端）

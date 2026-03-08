@@ -34,7 +34,28 @@
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "2025 ୍ 3 ᄅ XXX2025 ୍็ᅞЖં໓ March. 2025 ტ༢๤ ᅦX1) ৙XX1) ຦XX1) ᅦX1)ݒX1) 1) (XXX,൧,ݓXXX) ᅋ ေ࿐༝ಣ౦a࿐༝ི ࿐ त ࿐ള ު ༢๤đ࿐ളૌॖၛ ࢝ ৯b ՍӮ EduSages: A Multimodal AI-Driven Interactive Educational System for Engaging with Historical Figures ZHANG X1) LI X1) W ANG X1) ZHANG X1) W ANG X1) GUO X1) 1) Abstract Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge. This often results in a lack of enthu- siasm fo",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:02:43Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": false
+  },
+  "generated_at": "2026-03-08T13:32:28Z"
 }

@@ -1,8 +1,11 @@
 {
-  "generated_at": "2026-03-07T16:25:05Z",
+  "generated_at": "2026-03-08T13:41:37Z",
   "metadata_rows": 90,
-  "included_rows": 15,
-  "generated_cases": 2,
-  "skipped": 13,
-  "manifest": "manifest.json"
+  "included_rows": 89,
+  "generated_cases": 75,
+  "skipped": 14,
+  "manifest": "manifest.json",
+  "rejections": "rejections.csv",
+  "min_quality": "B",
+  "llm_verify": true
 }

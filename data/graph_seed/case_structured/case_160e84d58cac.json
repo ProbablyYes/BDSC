@@ -13,39 +13,74 @@
     "school": ""
   },
   "document_stats": {
-    "segment_count": 114,
-    "full_text_chars": 65753,
+    "segment_count": 80,
+    "full_text_chars": 51163,
     "core_text_chars": 1854,
     "appendix_start_index": 3,
     "has_appendix_evidence": true
   },
   "project_profile": {
-    "project_name": "478359-碳智通：AI驱动的减_同优化平台-项目策划书-228bb989",
-    "target_users": [],
-    "pain_points": [
-      "2",
-      "摘要：",
-      "随着“碳达峰、碳中和”战略目标的提出，减污降碳成为我国推",
-      "动生态文明建设和应对气候变化的重要战略。当前，政策执行层面存",
-      "在许多挑战，尤其是在减少 PM2.5 和 O3 污染、实现温室气体减排方",
-      "面，传统的政策评估与决策支持方法面临着数据量大、知识更新速度",
-      "快、决策响应需求高等问题。为此，迫切需要一种能够高效结合专业",
-      "知识、本地实践与最新技术的智能化工具，帮助政策制定者全面评估",
-      "减污降碳政策的实施效果，并提供针对性的优化建议。为此，团队开",
-      "发了“减污降碳政策协同效应智能评估模型”,该模型包含三个模块："
+    "project_name": "碳智通：AI驱动的减_同优化平台",
+    "target_users": [
+      "政策制定者"
     ],
-    "solution": [],
-    "innovation_points": [],
+    "pain_points": [
+      "政策执行层面存在许多挑战，尤其是在减少 PM2.5 和 O3 污染、实现温室气体减排方面，传统的政策评估与决策支持方法面临着数据量大、知识更新速度快、决策响应需求高等问题"
+    ],
+    "solution": [
+      "开发了“减污降碳政策协同效应智能评估模型”，该模型包含三个模块：基于 DeepSeek 与个性化语料库的减污降碳智能政策评估问答平台、基于随机森林的污染物协同减排效应评估模型以及基于文本挖掘和网络分析的政策评估模型"
+    ],
+    "innovation_points": [
+      "高效结合专业知识、本地实践与最新技术的智能化工具，提供高效的知识管理、智能问答和决策辅助功能"
+    ],
     "business_model": [],
     "market_analysis": [],
-    "execution_plan": [],
+    "execution_plan": [
+      "开展了三个应用实例，首先对中国 PM2.5 和 O3 污染的协同减轻进行现状评估，其次研究了政策协同效应的演化趋势，最后构建了政策 PMC 框架，探讨了区域政策的协同效应"
+    ],
     "risk_control": []
   },
   "risk_flags": [
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [
+    {
+      "id": "case_160e84d58cac_e1",
+      "type": "user_evidence",
+      "quote": "迫切需要一种能够高效结合专业知识、本地实践与最新技术的智能化工具，帮助政策制定者全面评估减污降碳政策的实施效果，并提供针对性的优化建议。",
+      "chunk_id": "C2",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_160e84d58cac_e2",
+      "type": "business_model_evidence",
+      "quote": "通过上述应用，本研究不仅推动了减污降碳政策的科学评估与协同优化，还为政策制定者提供了先进的技术手段和决策支持工具，促进了我国环境保护与气候治理的协同发展。",
+      "chunk_id": "C3",
+      "source_unit": "page_3"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "1 2 摘要： 随着“碳达峰、碳中和”战略目标的提出，减污降碳成为我国推 动生态文明建设和应对气候变化的重要战略。当前，政策执行层面存 在许多挑战，尤其是在减少 PM2.5 和 O3 污染、实现温室气体减排方 面，传统的政策评估与决策支持方法面临着数据量大、知识更新速度 快、决策响应需求高等问题。为此，迫切需要一种能够高效结合专业 知识、本地实践与最新技术的智能化工具，帮助政策制定者全面评估 减污降碳政策的实施效果，并提供针对性的优化建议。为此，团队开 发了“减污降碳政策协同效应智能评估模型”,该模型包含三个模块： 基于 DeepSeek 与个性化语料库的减污降碳智能政策评估问答平台、 基于随机森林的污染物协同减排效应评估模型以及基于文本挖掘和 网络分析的政策评估模型，为减污降碳政策制定提供高效的知识管理、 智能问答和决策辅助功能。我们基于此模型开展了三个应用实例，首 先对中国 PM2.5 和 O3 污染的协同减轻进行现状评估。结合随机森林 模型与智能评估模型，识别了主要的污染驱动因素，并提出在未来政 策中整体上需要优先控制 CH4、N2O、SO2 和 NOx，并根据中国各地级 市的具",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:03:15Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": true
+  },
+  "generated_at": "2026-03-08T13:33:31Z"
 }

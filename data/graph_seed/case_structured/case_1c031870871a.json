@@ -34,7 +34,28 @@
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "懂你践学 基于虚实结合视觉伺服机械臂的智能学习平台设计 指导老师：王老师 申报类别：“人工智能＋教育教学”赛道 团队成员：程静竹（负责人） 张柏展 李文卓 白晟昱 高颢祯 李昱童 1 关键内容展示（PPT） 2",
   "confidence": 0.75,
-  "generated_at": "2026-03-07T07:02:43Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": false
+  },
+  "generated_at": "2026-03-08T13:32:26Z"
 }

@@ -13,8 +13,8 @@
     "school": ""
   },
   "document_stats": {
-    "segment_count": 92,
-    "full_text_chars": 46788,
+    "segment_count": 80,
+    "full_text_chars": 44636,
     "core_text_chars": 5975,
     "appendix_start_index": 2,
     "has_appendix_evidence": true
@@ -67,7 +67,28 @@
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "第二十二届“世纪杯”学生创意竞赛 1 闻声识障 特殊地形的智能巡检守护者 目录 摘要 ..................................................................................................................................................................................... 4 第 1 章 项目简介 ........................................................................................................................................................... 6 1.1 研究背景 ...............................................................................................",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:01:54Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": false
+  },
+  "generated_at": "2026-03-08T13:31:25Z"
 }

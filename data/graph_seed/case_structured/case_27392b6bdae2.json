@@ -111,7 +111,28 @@
     "no_competitor_claim",
     "weak_user_evidence"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "生成式大语言模型安全优化模块 文思 智铠大模型 安全团队 2 时代背景 国内大语言模型算力资源、技术能力、生态环境均与世界一流水平存在差距 时代背景 人工智能大语言模型广泛应用下，安全性、公平性、稳定性成为关注焦点 大模型自主化安全化路线的下沉试验迫在眉睫 网信办《生成式人工智能服务管理暂行办法》第一章第四条：（二）在算法设计……等过程中，采取有效措施防止产生民族、信仰、国别、地域、性别、年龄、职业、健康等歧视；…… 2024年【谷歌“窃取”OpenAI模型关键信息】……还原了OpenAI大模型的整个投影矩阵，还知道了确切隐藏维度大小……并且这种方法同样适用于GPT-4。 3 时代背景 国内大语言模型算力资源、技术能力、生态环境均与世界一流水平存在差距 时代背景 人工智能大语言模型广泛应用下，安全性、公平性、稳定性成为关注焦点 大模型自主化安全化路线的下沉试验迫在眉睫 网信办《生成式人工智能服务管理暂行办法》第一章第四条：（二）在算法设计……等过程中，采取有效措施防止产生民族、信仰、国别、地域、性别、年龄、职业、健康等歧视；…… 2024年【谷歌“窃取”OpenAI模型关键信息】……还",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:02:22Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": false
+  },
+  "generated_at": "2026-03-08T13:31:50Z"
 }

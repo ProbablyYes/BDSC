@@ -43,6 +43,16 @@ uv run python -m ingest.build_metadata
 uv run python -m ingest.extract_case_struct
 ```
 
+建议高质量模式（先做质量闸门，再做增强抽取）：
+
+```bash
+# 1) 深度扫描（非 --fast），生成质量等级与失败清单
+uv run python -m ingest.build_metadata --max-parse-mb 25
+
+# 2) 仅抽取 A/B 质量文档；低质量样本写入 rejections.csv
+uv run python -m ingest.extract_case_struct --llm --llm-verify --min-quality B
+```
+
 启用千问（SiliconFlow OpenAI兼容）做增强抽取：
 
 ```bash
@@ -66,6 +76,7 @@ uv run python -m ingest.pipeline
 
 失败清单：
 - `data/corpus/teacher_examples/parse_failures.csv`（扫描件/超大文件/解析失败）
+- `data/graph_seed/case_structured/rejections.csv`（质量闸门拦截/抽取失败，建议回改后重跑）
 
 ## Neo4j 最小图谱入库（Step 2）
 

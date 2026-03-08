@@ -45,7 +45,28 @@
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "灵嗅智探 —氢能厂站 AI 智 能巡检系统 赛道：人工智能+应用赛领域 关键 ppt 内容展示 系统 氢 检 智能巡检 人 ： 氢 检 域 检 巡检 智能巡检 人 用 氢 氢 智能巡检 氢能厂站 智能巡检系统 系统 系统 能 检",
   "confidence": 0.75,
-  "generated_at": "2026-03-07T07:01:40Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": false
+  },
+  "generated_at": "2026-03-08T13:31:02Z"
 }

@@ -13,14 +13,14 @@
     "school": ""
   },
   "document_stats": {
-    "segment_count": 119,
-    "full_text_chars": 71610,
+    "segment_count": 80,
+    "full_text_chars": 61257,
     "core_text_chars": 5892,
     "appendix_start_index": 6,
     "has_appendix_evidence": true
   },
   "project_profile": {
-    "project_name": "475625-京芯智水——智慧赋能_统创新力量-项目策划书-87fb3713",
+    "project_name": "京芯智水——智慧赋能水质检测-治理协同系统创新力量",
     "target_users": [],
     "pain_points": [
       "5",
@@ -78,7 +78,28 @@
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "1 京芯智水——智慧赋能水质检测-治理协同系统创新力量 2 京芯智水——智慧赋能水质检测-治理协同系统创新力量 项目重点 PPT 展示 3 京芯智水——智慧赋能水质检测-治理协同系统创新力量 4 京芯智水——智慧赋能水质检测-治理协同系统创新力量 5 京芯智水——智慧赋能水质检测-治理协同系统创新力量 目录 摘要 ............................................................................................................................... 8 Abstract .......................................................................................................................10 第一章 研究背景 ........................................................................",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:03:10Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": true
+  },
+  "generated_at": "2026-03-08T13:33:21Z"
 }

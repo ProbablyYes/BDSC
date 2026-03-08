@@ -13,8 +13,8 @@
     "school": ""
   },
   "document_stats": {
-    "segment_count": 113,
-    "full_text_chars": 90779,
+    "segment_count": 73,
+    "full_text_chars": 67490,
     "core_text_chars": 12504,
     "appendix_start_index": 5,
     "has_appendix_evidence": true
@@ -99,7 +99,28 @@
   "risk_flags": [
     "weak_user_evidence"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "物衡智判 ——基于 DS 大模型的物权所有权纠纷智能推理系统 项 目 策 划 书 项目名称： 物衡智判——基于 DS 大模型的物权所有权纠纷智能推理系统 参加赛道： 人工智能 + 政务管理 负责人： 罗逸凡 团队成员： 陈久宸 黄偲炫 邱然 陈星颐 赵子萱 陈晋加 指导老师： 孟老师 郭老师 史老师 目录 摘要................................................................................................................................ 7 Abstract .......................................................................................................................... 9 PPT 部分核心内容展示（完整版在附加材料里面） .............................................. 13 一、项目",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:02:09Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": true
+  },
+  "generated_at": "2026-03-08T13:31:47Z"
 }

@@ -58,6 +58,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=[],
         help="Only process selected categories (folder names). Can repeat.",
     )
+    parser.add_argument(
+        "--min-quality",
+        choices=["A", "B"],
+        default="B",
+        help="Minimum parse quality to include (A only, or A/B).",
+    )
+    parser.add_argument(
+        "--llm-verify",
+        action="store_true",
+        help="Run second-pass verification with reason model for better precision.",
+    )
+    parser.add_argument(
+        "--rejection-file",
+        default="rejections.csv",
+        help="Rejected records report filename under case_structured directory.",
+    )
     return parser.parse_args(argv)
 
 
@@ -113,6 +129,23 @@ def select_candidate_chunks(
     return out
 
 
+def filter_noisy_segments(segments: list[TextSegment]) -> list[TextSegment]:
+    """Drop obvious screenshot/noise lines before LLM selection."""
+    noisy_tokens = ["图注", "figure", "截图", "附图", "图片来源", "见下图", "如下图"]
+    out: list[TextSegment] = []
+    for seg in segments:
+        text = seg.text.strip()
+        if not text:
+            continue
+        low = text.lower()
+        if len(text) < 12 and any(tok in low for tok in ["图", "表", "页"]):
+            continue
+        if any(tok in low for tok in noisy_tokens) and len(text) < 40:
+            continue
+        out.append(seg)
+    return out
+
+
 def llm_extract_profile(
     llm: LlmClient,
     chunks: list[dict[str, str]],
@@ -155,6 +188,44 @@ def llm_extract_profile(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
         model=model_override or None,
+        temperature=0.0,
+    )
+
+
+def llm_verify_profile(
+    llm: LlmClient,
+    chunks: list[dict[str, str]],
+    draft_profile: dict[str, Any],
+) -> dict[str, Any]:
+    if not chunks:
+        return {}
+    verify_schema = {
+        "project_profile_patch": {
+            "target_users": ["string"],
+            "pain_points": ["string"],
+            "solution": ["string"],
+            "business_model": ["string"],
+            "risk_control": ["string"],
+        },
+        "evidence_patch": [
+            {"type": "user_evidence|business_model_evidence|risk_evidence", "quote": "string", "chunk_id": "Cx"}
+        ],
+        "drop_flags": ["string"],
+    }
+    system_prompt = (
+        "你是结构化抽取质检助手。"
+        "只保留在文档片段中有明确证据支持的字段，删除无依据内容。"
+        "返回严格JSON对象。"
+    )
+    user_prompt = (
+        f"已有抽取草稿: {json.dumps(draft_profile, ensure_ascii=False)}\n"
+        f"文档片段: {json.dumps(chunks, ensure_ascii=False)}\n"
+        f"请按结构返回: {json.dumps(verify_schema, ensure_ascii=False)}"
+    )
+    return llm.chat_json(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=settings.llm_reason_model or settings.llm_fast_model,
         temperature=0.0,
     )
 
@@ -238,13 +309,14 @@ def build_case_record(
     use_llm: bool = False,
     llm: LlmClient | None = None,
     llm_model: str = "",
+    llm_verify: bool = False,
 ) -> dict:
     source_path = settings.teacher_examples_root / row["file_path"]
     parsed = parse_document(source_path)
     appendix_start = row.get("appendix_start_index", "")
     appendix_idx = int(appendix_start) if appendix_start.isdigit() else detect_appendix_start(parsed)
 
-    core = core_segments(parsed, appendix_idx)
+    core = filter_noisy_segments(core_segments(parsed, appendix_idx))
     core_text = text_from_segments(core)
     full_text = parsed.full_text
 
@@ -263,6 +335,17 @@ def build_case_record(
             default_project_name=project_name,
             model_override=llm_model,
         )
+        if llm_verify:
+            verify_data = llm_verify_profile(llm=llm, chunks=candidate_chunks, draft_profile=llm_data)
+            profile_patch = verify_data.get("project_profile_patch", {})
+            if isinstance(profile_patch, dict):
+                llm_data.update(profile_patch)
+            evidence_patch = verify_data.get("evidence_patch", [])
+            if isinstance(evidence_patch, list) and evidence_patch:
+                llm_data["evidence"] = evidence_patch
+            drop_flags = _as_clean_str_list(verify_data.get("drop_flags"), limit=10)
+            if drop_flags:
+                risk_flags = [f for f in risk_flags if f not in set(drop_flags)]
 
     # LLM fields override heuristics when present.
     for field in SECTION_KEYWORDS:
@@ -382,9 +465,22 @@ def main(argv: list[str] | None = None) -> None:
 
     manifest: list[dict] = []
     skipped = 0
+    rejected: list[dict[str, str]] = []
+    min_quality_rank = {"A": 2, "B": 1}.get(args.min_quality, 1)
     for row in included:
-        if row.get("parse_quality", "C") == "C":
+        row_quality = row.get("parse_quality", "C")
+        quality_rank = {"A": 2, "B": 1, "C": 0}.get(row_quality, 0)
+        if quality_rank < min_quality_rank:
             skipped += 1
+            rejected.append(
+                {
+                    "file_path": row.get("file_path", ""),
+                    "category": row.get("category", ""),
+                    "parse_quality": row_quality,
+                    "reason": f"quality below threshold ({args.min_quality})",
+                    "suggestion": "补充可编辑文本版本、减少截图附录或人工摘要后重试。",
+                }
+            )
             continue
         try:
             case = build_case_record(
@@ -392,10 +488,20 @@ def main(argv: list[str] | None = None) -> None:
                 use_llm=bool(args.llm and llm and llm.enabled),
                 llm=llm,
                 llm_model=args.llm_model,
+                llm_verify=bool(args.llm and args.llm_verify),
             )
         except Exception as exc:  # noqa: BLE001
             skipped += 1
             print(f"skip {row.get('file_path')}: {exc}")
+            rejected.append(
+                {
+                    "file_path": row.get("file_path", ""),
+                    "category": row.get("category", ""),
+                    "parse_quality": row_quality,
+                    "reason": f"extract_failed: {exc}",
+                    "suggestion": "检查文档格式或手工补充关键字段。",
+                }
+            )
             continue
 
         out_path = out_dir / f"{case['case_id']}.json"
@@ -412,7 +518,12 @@ def main(argv: list[str] | None = None) -> None:
 
     manifest_path = out_dir / "manifest.json"
     summary_path = out_dir / "summary.json"
+    rejection_path = out_dir / args.rejection_file
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    with rejection_path.open("w", encoding="utf-8-sig", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=["file_path", "category", "parse_quality", "reason", "suggestion"])
+        writer.writeheader()
+        writer.writerows(rejected)
     summary_path.write_text(
         json.dumps(
             {
@@ -422,6 +533,9 @@ def main(argv: list[str] | None = None) -> None:
                 "generated_cases": len(manifest),
                 "skipped": skipped,
                 "manifest": manifest_path.name,
+                "rejections": rejection_path.name,
+                "min_quality": args.min_quality,
+                "llm_verify": bool(args.llm and args.llm_verify),
             },
             ensure_ascii=False,
             indent=2,
@@ -430,6 +544,7 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     print("structured cases generated:", len(manifest))
+    print("rejected cases:", len(rejected), "->", rejection_path)
     print("output:", out_dir)
 
 

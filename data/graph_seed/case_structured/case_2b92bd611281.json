@@ -20,7 +20,7 @@
     "has_appendix_evidence": true
   },
   "project_profile": {
-    "project_name": "478844-AI赋能空天地海一体_体天线设计-项目策划书-c45d831a",
+    "project_name": "AI 赋能空天地海一体化场景下无人飞行器的多波束多极化透-反一体天线设计",
     "target_users": [],
     "pain_points": [],
     "solution": [],
@@ -45,7 +45,28 @@
     "weak_user_evidence",
     "compliance_not_covered"
   ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Risk Control",
+      "covered": false
+    }
+  ],
   "summary": "申报赛道：人工智能+工业制造赛道 团队成员：崔亮亮、杨锡娇、陈昊、秦梓丹、袁乐瑶、江仕维 指导老师：李老师、杨老师、刘老师 第十九届“挑战杯”全国大学生课外学术科技作品竞赛“人工智能+”专项赛 第十九届“挑战杯”全国大学生课外学术科技作品竞赛 作品说明书 作品名称： AI 赋能空天地海一体化场景下无人飞行器的多波束多极化透-反一体天线 设计 申请类别 “人工智能＋”应用赛 团队成员： 崔亮亮、杨锡娇、陈昊、秦梓丹、袁乐瑶、江仕维 类别 “人工智能＋”创意赛 “人工智能＋”应用赛 “人工智能＋”挑战赛 第十九届“挑战杯”全国大学生课外学术科技作品竞赛“人工智能+”专项赛 核心技术 Ka波段透射阵天线 双材料透射阵天线 多波束多极化透反一体天线 基于深度学习设计的无人机载3D打印天线实物与模型：实测与所设计的仿真 效果一致性较高。同时具有成本低、重量轻（均小于200g ）的特点。 团队具有一定的工程落地能力和技术壁垒。 模型内部示意 优化后模型结构 第十九届“挑战杯”全国大学生课外学术科技作品竞赛“人工智能+”专项赛 目录 第一章 引言 .......................",
   "confidence": 0.9,
-  "generated_at": "2026-03-07T07:01:38Z"
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "used": true
+  },
+  "generated_at": "2026-03-08T13:31:01Z"
 }

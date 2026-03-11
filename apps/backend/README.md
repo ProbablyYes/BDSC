@@ -2,6 +2,23 @@
 
 ## Run
 
+首次启动前，先在 `apps/backend` 下准备本地环境变量：
+
+```bash
+copy .env.example .env
+```
+
+或在仓库根目录直接运行：
+
+```bat
+scripts\setup-backend-env.cmd
+```
+
+说明：
+- `.env.example` 是共享模板，会提交到 Git。
+- `.env` 是本地真实配置，会被 `.gitignore` 忽略。
+- 如果要启用真实 LLM，请把你的 `LLM_API_KEY` 填到本地 `.env`；不要把真实 key 提交到仓库。
+
 ```bash
 uv sync
 uv run uvicorn app.main:app --reload --port 8000

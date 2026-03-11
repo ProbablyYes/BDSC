@@ -21,6 +21,14 @@ data/
 
 ## 后端启动（FastAPI）
 
+首次协作开发建议先初始化本地环境变量：
+
+```bat
+scripts\setup-backend-env.cmd
+```
+
+这会在 `apps/backend/` 下按 `.env.example -> .env` 复制一份本地配置模板。真实 `API Key` 不会进入 Git；如果团队需要共用同一个 key，请通过私下安全渠道分发后各自填入本地 `.env`。
+
 ```bash
 cd apps/backend
 uv sync

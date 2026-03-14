@@ -338,6 +338,744 @@
         }
       },
       "timestamp": "2026-03-14T06:11:45.687582"
+    },
+    {
+      "role": "user",
+      "content": "你有这方面的历史项目的资料给我参考一下吗",
+      "timestamp": "2026-03-14T07:02:20.918620"
+    },
+    {
+      "role": "assistant",
+      "content": "哈哈，看来你准备“上硬菜”了！要参考历史获奖项目，我的知识库里有不少干货。\n\n**以“京工智演”为例**，这个项目在用户证据上做得非常扎实。他们不仅访谈了导演、演员，还精准引用了创意到排练的**数据鸿沟**原话。这直接回答了评委最关心的问题：“需求是真的吗？”\n\n**给你的核心建议**：别只停留在“我觉得”。立刻去和你目标用户（比如校园里的“懒人吃货”）聊，记录他们**原汁原味的吐槽**和**愿意付多少钱**。这是你项目从“点子”到“项目”最关键的一步。\n\n**模拟评委提问**：你提到“大学生想吃正宗回锅肉”，你和多少位同学深入聊过？他们为“吃不到”这个问题，目前愿意付出什么代价（时间、金钱）？\n\n先搞定这个，我们再聊下一步！",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "confidence": 0.85,
+          "pipeline": [
+            "diagnosis",
+            "rag_retrieve",
+            "competition",
+            "critic",
+            "composer"
+          ],
+          "nodes_visited": [
+            "intent",
+            "diagnosis",
+            "rag_retrieve",
+            "competition",
+            "critic",
+            "composer"
+          ],
+          "strategy": "langgraph_v2"
+        },
+        "kg_analysis": {},
+        "rag_cases": [
+          {
+            "case_id": "case_43210f67ee34",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.4729,
+            "pain_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "solution": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "innovation_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "1"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.4729,
+            "pain_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "solution": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "innovation_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "1"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_6c6304f12169",
+            "category": "科技创新",
+            "project_name": "京工智演 —— 数字表演产业化的领航者",
+            "similarity": 0.4185,
+            "pain_points": [
+              "创意方案难落地",
+              "整体个体难协同",
+              "转播跟拍效率低"
+            ],
+            "solution": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术",
+              "数据驱动三维全要素预演仿真技术"
+            ],
+            "innovation_points": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术"
+            ],
+            "evidence_quotes": [
+              "创意阶段形成的创意内容包括对导演设计描述的文字、视频图片等，但是在排练阶段，演员必须要通过表演执行数据来排练学习，包括每个演员的动作和走位数据。而现有过程中并没有从创意内容到执行数据精准有效的转换方式，创意内容也没有经过仿真数字的验证，比如按照创意设计演员的路线会有交叉产生碰撞，但创作团队预先无法发现。",
+              "服务类型为定制化的数字表演解决方案与标准化产品。初期配合实验室完成 2022 北京冬奥会仿真工作的同时，已承接张艺谋导演的湖南某大型演出项目，同时与恒大集团达成若干主题公园仿真合作意向。中期针对中小型演出，推广标准化产品，为中小型演艺公司赋能，整体提升中国文艺表演质量。公司的盈利模式主要包括产品研发费用、现场服务费用和票房收入分成。"
+            ],
+            "risk_flags": [
+              "no_competitor_claim",
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "1 目录 第一章 项目背景................................ ................................ ................................ ..........2 1.1 文艺演出发展趋势 ........................................................................................................................2 1.2 依托平台 ................................"
+          }
+        ],
+        "critic": {
+          "challenge_questions": [
+            "基于策略库的精准追问1: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+            "追问2: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+            "追问3: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+          ],
+          "missing_evidence": [
+            ">=5份用户访谈原话",
+            "付费意愿数据",
+            "需求频次统计"
+          ],
+          "risk_summary": "项目需求验证存在'礼貌性认可'陷阱，缺乏真实用户行为证据支撑",
+          "counterfactual": "如果需求仅来自身边朋友的礼貌性认可而非真实用户行为数据，项目将面临市场验证失败风险",
+          "evidence_standard": "优秀项目通常提供定量数据（如用户行为日志/订单量/留存率）与定性反馈（痛点描述/竞品对比）的三角验证"
+        },
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS03",
+            "name": "技术门槛幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "可复制性检验: 一个同等水平的团队，需要多长时间能复现你的核心技术？",
+              "技术与需求脱钩检验: 你的技术虽好，但用户真正在乎的是技术本身还是它带来的效果？有更简单的方案能达到80%效果吗？",
+              "资源匹配检验: 你的技术路线需要什么资源（GPU、数据、人才）？你团队现在有多少？差距有多大？"
+            ],
+            "expected_evidence": [
+              "技术复现时间估算",
+              "用户需求优先级排序",
+              "资源-需求匹配表"
+            ],
+            "counterfactual": "如果你的技术优势在12个月后被开源方案追平，你的产品还有存在价值吗？"
+          },
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。"
+          }
+        ],
+        "competition": {
+          "judge_questions": [
+            "请提供具体的用户调研数据或客户验证案例来证明市场需求的真实性",
+            "如何确保商业模式在技术尚未完全成熟时的可持续性？",
+            "与其他AI生成技术相比，项目的独特竞争优势是什么？"
+          ],
+          "defense_tips": [
+            "用图表直观展示用户画像和需求分析数据",
+            "准备技术路线图与商业化阶段匹配的详细计划",
+            "强调跨领域团队的技术转化能力和行业资源"
+          ],
+          "presentation_structure": [
+            "行业痛点与需求分析",
+            "技术方案与创新点解析",
+            "商业模式与市场验证",
+            "发展规划与风险预案"
+          ],
+          "prize_readiness": 50,
+          "key_improvement": "需要补充用户行为数据、商业合作意向书等实证材料，并完善技术迭代与风险应对机制"
+        },
+        "learning": null,
+        "category": "科技创新",
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 0.0,
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "severity": "medium"
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "severity": "high"
+            },
+            {
+              "id": "H7",
+              "name": "创新点不可验证",
+              "severity": "high"
+            },
+            {
+              "id": "H13",
+              "name": "实验设计不合格",
+              "severity": "medium"
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "severity": "low"
+            },
+            {
+              "id": "H15",
+              "name": "评分项证据覆盖不足",
+              "severity": "medium"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        },
+        "hypergraph_insight": {}
+      },
+      "timestamp": "2026-03-14T07:02:20.922642"
+    },
+    {
+      "role": "user",
+      "content": "你有这方面的历史项目给我参考一下吗",
+      "timestamp": "2026-03-14T07:03:18.212802"
+    },
+    {
+      "role": "assistant",
+      "content": "哈哈，看来你准备“上硬菜”了！要参考历史获奖项目，我的知识库里有不少干货。\n\n**以“京工智演”为例**，这个项目在用户证据上做得非常扎实。他们不仅访谈了导演、演员，还精准引用了创意到排练的**数据鸿沟**原话。这直接回答了评委最关心的问题：“需求是真的吗？”\n\n**给你的核心建议**：别只停留在“很多人需要”，要像“京工智演”那样，拿出**具体数字**和**用户原话**。比如，你访谈了8个目标用户，其中5个人明确表示“愿意每月花200元解决XX问题”。\n\n**评委一定会追问**：“你具体跟多少人聊过？他们怎么描述痛点？”现在就去准备，把答案变成你的路演“杀手锏”！",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "confidence": 0.85,
+          "pipeline": [
+            "diagnosis",
+            "rag_retrieve",
+            "competition",
+            "critic",
+            "composer"
+          ],
+          "nodes_visited": [
+            "intent",
+            "diagnosis",
+            "rag_retrieve",
+            "competition",
+            "critic",
+            "composer"
+          ],
+          "strategy": "langgraph_v2"
+        },
+        "kg_analysis": {},
+        "rag_cases": [
+          {
+            "case_id": "case_43210f67ee34",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.4731,
+            "pain_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "solution": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "innovation_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "1"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.4731,
+            "pain_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "solution": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "2",
+              "目录"
+            ],
+            "innovation_points": [
+              "第九届中国国际“互联网+”大学生创新创业大赛参赛作品",
+              "1"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_6c6304f12169",
+            "category": "科技创新",
+            "project_name": "京工智演 —— 数字表演产业化的领航者",
+            "similarity": 0.4269,
+            "pain_points": [
+              "创意方案难落地",
+              "整体个体难协同",
+              "转播跟拍效率低"
+            ],
+            "solution": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术",
+              "数据驱动三维全要素预演仿真技术"
+            ],
+            "innovation_points": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术"
+            ],
+            "evidence_quotes": [
+              "创意阶段形成的创意内容包括对导演设计描述的文字、视频图片等，但是在排练阶段，演员必须要通过表演执行数据来排练学习，包括每个演员的动作和走位数据。而现有过程中并没有从创意内容到执行数据精准有效的转换方式，创意内容也没有经过仿真数字的验证，比如按照创意设计演员的路线会有交叉产生碰撞，但创作团队预先无法发现。",
+              "服务类型为定制化的数字表演解决方案与标准化产品。初期配合实验室完成 2022 北京冬奥会仿真工作的同时，已承接张艺谋导演的湖南某大型演出项目，同时与恒大集团达成若干主题公园仿真合作意向。中期针对中小型演出，推广标准化产品，为中小型演艺公司赋能，整体提升中国文艺表演质量。公司的盈利模式主要包括产品研发费用、现场服务费用和票房收入分成。"
+            ],
+            "risk_flags": [
+              "no_competitor_claim",
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "1 目录 第一章 项目背景................................ ................................ ................................ ..........2 1.1 文艺演出发展趋势 ........................................................................................................................2 1.2 依托平台 ................................"
+          }
+        ],
+        "critic": {
+          "challenge_questions": [
+            "基于策略库的精准追问1: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+            "追问2: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+            "追问3: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+          ],
+          "missing_evidence": [
+            ">=5份用户访谈原话",
+            "付费意愿数据",
+            "需求频次统计"
+          ],
+          "risk_summary": "需求证据不足将导致产品缺乏真实市场验证基础",
+          "counterfactual": "如果需求只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上",
+          "evidence_standard": "优秀项目通常提供可量化的用户行为数据、第三方调研报告、预购订单或支付截图等硬证据"
+        },
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS03",
+            "name": "技术门槛幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "可复制性检验: 一个同等水平的团队，需要多长时间能复现你的核心技术？",
+              "技术与需求脱钩检验: 你的技术虽好，但用户真正在乎的是技术本身还是它带来的效果？有更简单的方案能达到80%效果吗？",
+              "资源匹配检验: 你的技术路线需要什么资源（GPU、数据、人才）？你团队现在有多少？差距有多大？"
+            ],
+            "expected_evidence": [
+              "技术复现时间估算",
+              "用户需求优先级排序",
+              "资源-需求匹配表"
+            ],
+            "counterfactual": "如果你的技术优势在12个月后被开源方案追平，你的产品还有存在价值吗？"
+          },
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。"
+          }
+        ],
+        "competition": {
+          "judge_questions": [
+            "请说明用户证据的具体数据来源和验证方式",
+            "如何量化评估技术方案的创新性与行业应用前景",
+            "现有商业模式是否具备可持续性和规模化潜力"
+          ],
+          "defense_tips": [
+            "准备用户调研问卷/测试报告等实证材料",
+            "用对比实验数据突出技术优势",
+            "设计分阶段落地路径增强说服力"
+          ],
+          "presentation_structure": [
+            "行业痛点与需求分析",
+            "技术方案与核心创新",
+            "商业模式与市场前景",
+            "团队能力与发展规划"
+          ],
+          "prize_readiness": 50,
+          "key_improvement": "补充用户验证数据并完善风险控制体系"
+        },
+        "learning": null,
+        "category": "科技创新",
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 0.0,
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "severity": "medium"
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "severity": "high"
+            },
+            {
+              "id": "H7",
+              "name": "创新点不可验证",
+              "severity": "high"
+            },
+            {
+              "id": "H13",
+              "name": "实验设计不合格",
+              "severity": "medium"
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "severity": "low"
+            },
+            {
+              "id": "H15",
+              "name": "评分项证据覆盖不足",
+              "severity": "medium"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        },
+        "hypergraph_insight": {}
+      },
+      "timestamp": "2026-03-14T07:03:18.218086"
     }
   ]
 }

@@ -1,0 +1,56 @@
+{
+  "conversation_id": "0f12e3de-6079-40c7-8d62-f982b051b496",
+  "project_id": "test-v3",
+  "student_id": "s001",
+  "title": "你好",
+  "created_at": "2026-03-14T07:50:59.084633",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你好",
+      "timestamp": "2026-03-14T07:51:08.870539"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！最近在忙什么有趣的项目呢？需要聊聊创业思路或者寻求一些帮助吗？",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.95,
+          "pipeline": [
+            "orchestrator"
+          ],
+          "nodes_visited": [
+            "router",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router"
+          ],
+          "strategy": "langgraph_v3_role_agents"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "diagnosis": {},
+        "next_task": {},
+        "hypergraph_insight": {}
+      },
+      "timestamp": "2026-03-14T07:51:08.870539"
+    }
+  ]
+}

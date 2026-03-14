@@ -267,9 +267,11 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     kg_analysis = result.get("kg_analysis", {})
     assistant_message = result.get("assistant_message", "")
     nodes_visited = result.get("nodes_visited", [])
+    agents_called = result.get("agents_called", [])
 
     hyper_insight = result.get("hypergraph_insight", {})
     rag_cases = result.get("rag_cases", [])
+    web_search = result.get("web_search_result", {})
 
     agent_trace = {
         "orchestration": {
@@ -279,10 +281,19 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "confidence": result.get("intent_confidence", 0),
             "pipeline": result.get("intent_pipeline", []),
             "nodes_visited": nodes_visited,
-            "strategy": "langgraph_v2",
+            "agents_called": agents_called,
+            "strategy": "langgraph_v3_role_agents",
+        },
+        "role_agents": {
+            "coach": result.get("coach_output", {}),
+            "analyst": result.get("analyst_output", {}),
+            "advisor": result.get("advisor_output", {}),
+            "tutor": result.get("tutor_output", {}),
+            "grader": result.get("grader_output", {}),
         },
         "kg_analysis": kg_analysis,
         "rag_cases": rag_cases,
+        "web_search": web_search,
         "critic": result.get("critic"),
         "challenge_strategies": result.get("challenge_strategies"),
         "competition": result.get("competition"),
@@ -384,6 +395,33 @@ async def dialogue_turn_upload(
     kg_analysis = result.get("kg_analysis", {})
     assistant_message = result.get("assistant_message", "")
     hyper_insight = result.get("hypergraph_insight", {})
+    agents_called = result.get("agents_called", [])
+
+    agent_trace = {
+        "orchestration": {
+            "mode": mode,
+            "intent": result.get("intent", ""),
+            "confidence": result.get("intent_confidence", 0),
+            "pipeline": result.get("intent_pipeline", []),
+            "nodes_visited": result.get("nodes_visited", []),
+            "agents_called": agents_called,
+            "strategy": "langgraph_v3_role_agents",
+        },
+        "role_agents": {
+            "coach": result.get("coach_output", {}),
+            "analyst": result.get("analyst_output", {}),
+            "advisor": result.get("advisor_output", {}),
+            "tutor": result.get("tutor_output", {}),
+            "grader": result.get("grader_output", {}),
+        },
+        "kg_analysis": kg_analysis,
+        "rag_cases": result.get("rag_cases", []),
+        "web_search": result.get("web_search_result", {}),
+        "critic": result.get("critic"),
+        "competition": result.get("competition"),
+        "learning": result.get("learning"),
+        "category": result.get("category", ""),
+    }
 
     json_store.append_submission(project_id, {
         "student_id": student_id,
@@ -395,6 +433,7 @@ async def dialogue_turn_upload(
         "next_task": next_task,
         "kg_analysis": kg_analysis,
         "hypergraph_insight": hyper_insight,
+        "agent_outputs": agent_trace,
     })
 
     conv_store.append_message(project_id, conv_id, {
@@ -403,9 +442,7 @@ async def dialogue_turn_upload(
     conv_store.append_message(project_id, conv_id, {
         "role": "assistant", "content": assistant_message,
         "agent_trace": {
-            "intent": result.get("intent", ""),
-            "nodes_visited": result.get("nodes_visited", []),
-            "rag_cases": result.get("rag_cases", []),
+            **agent_trace,
             "diagnosis": diagnosis,
             "next_task": next_task,
             "kg_analysis": kg_analysis,
@@ -423,10 +460,7 @@ async def dialogue_turn_upload(
         "kg_analysis": kg_analysis,
         "hypergraph_insight": hyper_insight,
         "rag_cases": result.get("rag_cases", []),
-        "agent_trace": {
-            "intent": result.get("intent", ""),
-            "nodes_visited": result.get("nodes_visited", []),
-        },
+        "agent_trace": agent_trace,
     }
 
 

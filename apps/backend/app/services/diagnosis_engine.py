@@ -106,6 +106,27 @@ def _suggest_next_task(primary_rule_id: str) -> dict:
 
 def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
     normalized_text = input_text.lower()
+    is_file = "[上传文件:" in input_text
+    text_len = len(normalized_text)
+
+    if not is_file and text_len < 50:
+        return DiagnosisResult(
+            diagnosis={
+                "mode": mode,
+                "overall_score": None,
+                "bottleneck": "",
+                "triggered_rules": [],
+                "rubric": [],
+                "capability_map": CAPABILITY_MAP,
+                "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+                "info_sufficient": False,
+            },
+            next_task={
+                "title": "描述你的项目",
+                "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+                "acceptance_criteria": ["项目一句话描述", "目标用户是谁", "解决什么问题"],
+            },
+        )
 
     triggered_rules: list[dict] = []
     for rule in RULES:

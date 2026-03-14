@@ -44,6 +44,46 @@ class CaseChunk:
     embedding: np.ndarray | None = field(default=None, repr=False)
 
 
+_GARBAGE_PATTERNS = re.compile(
+    r"^[\d\s\.…·—]+$|^目录$|^前言|^第[一二三四五六七八九十]|^参赛作品|^\d+$"
+)
+
+
+def _clean_list(items: list) -> list[str]:
+    """Remove garbage entries from extracted lists."""
+    cleaned: list[str] = []
+    for item in items:
+        s = str(item).strip()
+        if len(s) < 3 or _GARBAGE_PATTERNS.match(s):
+            continue
+        cleaned.append(s)
+    return cleaned
+
+
+def _case_quality_score(case: dict) -> float:
+    """Score 0-1 indicating how well the case was parsed."""
+    score = 0.0
+    stats = case.get("document_stats", {})
+    core = stats.get("core_text_chars", 0)
+    full = stats.get("full_text_chars", 1)
+    if core > 500:
+        score += 0.3
+    if full > 0 and core / full > 0.3:
+        score += 0.2
+
+    profile = case.get("project_profile", {})
+    for key in ("pain_points", "solution", "target_users"):
+        items = _clean_list(profile.get(key, []))
+        if len(items) >= 2:
+            score += 0.1
+
+    evidence = case.get("evidence", [])
+    real_quotes = [e for e in evidence if len(str(e.get("quote", ""))) > 20]
+    if len(real_quotes) >= 2:
+        score += 0.2
+    return min(1.0, score)
+
+
 def _build_search_text(case: dict) -> str:
     """Flatten case JSON into a single searchable text block."""
     parts: list[str] = []
@@ -52,25 +92,31 @@ def _build_search_text(case: dict) -> str:
         parts.append(f"项目：{profile['project_name']}")
     for key in ("target_users", "pain_points", "solution", "innovation_points",
                 "business_model", "market_analysis", "execution_plan", "risk_control"):
-        items = profile.get(key, [])
+        items = _clean_list(profile.get(key, []))
         if items:
-            parts.append(" ".join(str(x) for x in items[:5]))
+            parts.append(" ".join(items[:5]))
     evidence = case.get("evidence", [])
     for ev in evidence[:6]:
-        if ev.get("quote"):
-            parts.append(ev["quote"])
+        quote = str(ev.get("quote", ""))
+        if len(quote) > 20:
+            parts.append(quote)
     if case.get("summary"):
         parts.append(case["summary"][:500])
     return "\n".join(parts)[:2000]
 
 
 def _load_cases(case_dir: Path) -> list[CaseChunk]:
-    chunks: list[CaseChunk] = []
+    raw_chunks: list[tuple[float, CaseChunk]] = []
     for fp in sorted(case_dir.glob("case_*.json")):
         try:
             data = json.loads(fp.read_text(encoding="utf-8"))
         except Exception:
             continue
+
+        quality = _case_quality_score(data)
+        if quality < 0.2:
+            continue
+
         profile = data.get("project_profile", {})
         evidence = data.get("evidence", [])
         chunk = CaseChunk(
@@ -78,18 +124,29 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
             category=data.get("source", {}).get("category", "未分类"),
             project_name=profile.get("project_name", "未知项目"),
             summary=data.get("summary", "")[:600],
-            pain_points=profile.get("pain_points", []),
-            solution=profile.get("solution", []),
-            innovation_points=profile.get("innovation_points", []),
-            business_model=profile.get("business_model", [])[:4],
-            evidence_quotes=[e.get("quote", "") for e in evidence[:4] if e.get("quote")],
+            pain_points=_clean_list(profile.get("pain_points", [])),
+            solution=_clean_list(profile.get("solution", [])),
+            innovation_points=_clean_list(profile.get("innovation_points", [])),
+            business_model=_clean_list(profile.get("business_model", []))[:4],
+            evidence_quotes=[e.get("quote", "") for e in evidence[:4]
+                             if len(str(e.get("quote", ""))) > 20],
             risk_flags=data.get("risk_flags", []),
             rubric_coverage=data.get("rubric_coverage", []),
             confidence=float(data.get("confidence", 0)),
             text_for_search=_build_search_text(data),
         )
-        chunks.append(chunk)
-    logger.info("RAG: loaded %d case chunks from %s", len(chunks), case_dir)
+        raw_chunks.append((quality, chunk))
+
+    # deduplicate by project_name: keep the one with highest quality
+    seen: dict[str, tuple[float, CaseChunk]] = {}
+    for quality, chunk in raw_chunks:
+        key = chunk.project_name.strip()
+        if key not in seen or quality > seen[key][0]:
+            seen[key] = (quality, chunk)
+
+    chunks = [chunk for _, chunk in seen.values()]
+    logger.info("RAG: loaded %d unique cases (filtered from %d raw, dir=%s)",
+                len(chunks), len(raw_chunks), case_dir)
     return chunks
 
 
@@ -199,10 +256,16 @@ class RagEngine:
             texts = [c.text_for_search for c in working_chunks]
             scores = _tfidf_similarity(query, texts)
 
-        top_indices = np.argsort(scores)[::-1][:top_k]
+        ranked = np.argsort(scores)[::-1]
         results: list[dict[str, Any]] = []
-        for idx in top_indices:
+        seen_names: set[str] = set()
+        for idx in ranked:
+            if len(results) >= top_k:
+                break
             c = working_chunks[idx]
+            if c.project_name in seen_names:
+                continue
+            seen_names.add(c.project_name)
             results.append({
                 "case_id": c.case_id,
                 "category": c.category,

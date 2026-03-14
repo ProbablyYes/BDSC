@@ -1,0 +1,547 @@
+{
+  "conversation_id": "b396d901-a1bf-48b0-9827-290128a63f82",
+  "project_id": "test-e2e",
+  "student_id": "s001",
+  "title": "我想做一个校园二手交易平台，解决大学生闲置物品处理难的问题，",
+  "created_at": "2026-03-14T07:19:19.980532",
+  "messages": [
+    {
+      "role": "user",
+      "content": "我想做一个校园二手交易平台，解决大学生闲置物品处理难的问题，主要通过AI智能定价和推荐来匹配买卖双方",
+      "timestamp": "2026-03-14T07:21:13.884259"
+    },
+    {
+      "role": "assistant",
+      "content": "同学你好，我是你的双创导师。很高兴看到你关注校园循环经济，并尝试用AI技术解决实际问题。你的项目思路清晰，**聚焦校园垂直场景**和**引入AI提升效率**是两个非常不错的起点。这让你避开了与闲鱼、转转等巨头在泛人群市场的正面竞争，找到了一个可以深耕的差异化切口。\n\n然而，根据我的经验和对知识库中类似项目的分析，**当前项目面临的最大风险是“需求证据不足”**，这几乎是所有早期项目夭折的“头号杀手”。你的描述停留在概念层面，缺乏来自真实用户的、可量化的证据支撑。知识库中优秀的科技项目，如**“推送家”**，其成功前提是精准量化了市场（如“每天75万篇推送文章”）和用户痛点（“普通消费者难与设计者联系”）。你的项目目前还缺少这样的“硬核”证据。\n\n### 关键风险与深度剖析\n\n1.  **核心假设未经检验，商业模式悬空**\n    你提到的“AI智能定价”和“AI推荐”是亮点，但也是最大的风险点。联网搜索结果和我的经验都表明，**信任是二手交易的核心壁垒**。用户凭什么相信你的AI定价比他自己搜索、比价更合理？这需要一个强有力的验证。\n    *   **对比参考案例**：**“禾光智能”** 项目之所以能获得认可，是因为其“低延迟植物识别算法”解决了“高污染、低效率”的明确痛点，且优势可被客观验证（除草精度、对作物伤害率）。你的AI功能也需要类似的、可被用户感知和验证的价值证明。\n    *   **具体风险**：如果AI定价出现偏差（哪怕只有10%），导致卖家觉得“卖亏了”或买家觉得“买贵了”，会迅速摧毁你辛苦建立的校园信任。正如压力追问所提，**一旦投诉率超过20%，你的平台声誉和商业模式将瞬间崩塌**。\n\n2.  **对现有竞争格局理解不足**\n    你提到了解决“处理难”，但忽略了用户“为什么不用闲鱼”的真实原因。搜索结果指出，闲鱼等平台的问题是“职业卖家和微商扰乱秩序”。那么，你的核心优势是否应该是 **“纯净的校园社区”和“强信任背书”** ，而不仅仅是“AI工具”？AI应该是为这个核心社区体验服务的“加速器”，而不是全部。\n\n### 给你的下一步行动建议\n\n**立即暂停所有技术开发，转向“用户证据闭环”验证。** 这是你当前唯一且最重要的任务。\n\n1.  **进行精准的深度访谈（完成至少8份）**：\n    *   **对象**：4名最近一个月有成功卖出闲置物品的同学，4名有失败或放弃出售经历的同学。\n    *   **核心问题（围绕你的AI功能）**：\n        *   “你上次给物品定价时，参考了什么？如果有一个工具能根据闲鱼历史成交价、物品新旧程度自动给出参考价，你愿意用吗？”\n        *   “为了把东西卖出去，你做了哪些努力？（拍照、描述、发多个群、降价）如果平台能根据你的物品自动生成优质文案并推荐给可能感兴趣的人，你觉得能帮你节省多少时间？”\n        *   “在闲鱼上交易，你最不爽的一点是什么？（引导至对微商、信任问题的吐槽）如果有一个平台，所有卖家都经过本校学生认证，你觉得会提升多少信任感？”\n\n2.  **设计一个最小可行性测试**：\n    *   不要直接做平台。可以先创建一个微信群或使用简道云等工具，手动扮演“AI”。\n    *   **测试定价**：让同学提交物品信息，你手动搜索闲鱼、转转给出“AI建议价”，看他们是否采纳。\n    *   **测试推荐**：在群里，将有明确购买意向的同学和出售相关物品的同学进行手动匹配，观察匹配成功率。\n    *   **记录所有数据和反馈**，这将成为你项目最宝贵的早期证据。\n\n### 苏格拉底式追问，请你思考：\n\n**你设想中的“AI智能定价”，其核心价值究竟是“绝对准确的估价”（这几乎不可能），还是“提供一个有说服力的、能快速促成交易的参考依据”？如果是后者，除了价格数据，这个“依据”还需要包含哪些元素（比如：本校历史成交记录、物品的详细质检标签、卖家的信用评分）才能让买卖双方都感到公平并愿意接受？**\n\n想清楚这个问题，你才能找到AI技术真正应该发力的方向。期待你带着用户访谈的发现回来，我们再做下一步的推演。记住，**一个被真实需求验证过的简单方案，远胜过一个想象中完美的复杂系统。**",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "confidence": 0.4,
+          "pipeline": [
+            "diagnosis",
+            "rag_retrieve",
+            "web_search",
+            "kg_extract",
+            "hypergraph",
+            "critic",
+            "composer"
+          ],
+          "nodes_visited": [
+            "intent",
+            "diagnosis",
+            "rag_retrieve",
+            "web_search",
+            "kg_extract",
+            "hypergraph",
+            "critic",
+            "composer"
+          ],
+          "strategy": "langgraph_v2"
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "校园二手交易平台",
+              "type": "product"
+            },
+            {
+              "id": "e2",
+              "label": "大学生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e3",
+              "label": "闲置物品处理难",
+              "type": "pain_point"
+            },
+            {
+              "id": "e4",
+              "label": "AI智能定价",
+              "type": "technology"
+            },
+            {
+              "id": "e5",
+              "label": "AI推荐系统",
+              "type": "technology"
+            },
+            {
+              "id": "e6",
+              "label": "校园二手市场",
+              "type": "market"
+            },
+            {
+              "id": "e7",
+              "label": "闲鱼",
+              "type": "competitor"
+            },
+            {
+              "id": "e8",
+              "label": "校园资源",
+              "type": "resource"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "solves"
+            },
+            {
+              "source": "e1",
+              "target": "e4",
+              "relation": "uses"
+            },
+            {
+              "source": "e1",
+              "target": "e5",
+              "relation": "uses"
+            },
+            {
+              "source": "e1",
+              "target": "e6",
+              "relation": "serves"
+            },
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "targets"
+            },
+            {
+              "source": "e8",
+              "target": "e1",
+              "relation": "supports"
+            },
+            {
+              "source": "e1",
+              "target": "e7",
+              "relation": "competes_with"
+            }
+          ],
+          "structural_gaps": [
+            "缺少具体用户需求数据支撑（如未引用大学生闲置物品处理行为调研）",
+            "未明确商业模式（如交易抽成比例、增值服务设计等）",
+            "未提及风险控制机制（如交易纠纷处理、物品质量保障方案）"
+          ],
+          "content_strengths": [
+            "聚焦垂直领域（校园场景）的精准需求",
+            "AI技术应用提升定价和匹配效率",
+            "符合循环经济趋势的环保价值主张"
+          ],
+          "completeness_score": 6,
+          "section_scores": {
+            "problem_definition": 7,
+            "user_evidence": 4,
+            "solution_feasibility": 6,
+            "business_model": 5,
+            "competitive_advantage": 6
+          },
+          "insight": "项目通过AI技术切入校园二手交易场景，具备垂直市场聚焦优势。需补充用户行为数据验证需求真实性，并构建差异化的校园生态合作模式。技术实现路径清晰但需考虑数据积累周期，建议优先建立校园社群信任机制作为护城河。"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.5606,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5534,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_1512b0f26aa4",
+            "category": "科技创新",
+            "project_name": "禾光智能——智能激光除草机器人系统",
+            "similarity": 0.5173,
+            "pain_points": [
+              "高污染",
+              "低效率",
+              "高成本"
+            ],
+            "solution": [
+              "智能激光除草机器人系统",
+              "低延迟的植物识别算法",
+              "亚毫米级精度的高能激光除草技术"
+            ],
+            "innovation_points": [
+              "无人驾驶激光除草机器人",
+              "智能激光除草技术"
+            ],
+            "evidence_quotes": [
+              "激光除草机器人凭借其精准识别杂草、最大限度减少对作物伤害的独特优势，迅速赢得了大规模种植农场、有机农业基地以及农机租赁公司的广泛青睐。",
+              "项目的主要收入来源包括设备销售收入、设备租赁收入和市场拓展与合作收入。设备销售收入是项目的主要收入来源，主要来自无人驾驶激光除草机器人的市场需求以及政府的政策支持；设备租赁收入通过与农机租赁公司合作，提供设备租赁服务；技术服务与维护收入来自提供机器人设备的技术支持和维护服务；市场拓展与合作收入则通过与农业合作社、农场等合作，带来联合研发或市场推广的收入。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "第 22 届北京理工大学“挑战杯” 1 / 39 项目介绍书 智能激光除草机器人系统 项目总负责人：王宇行 指导老师：李秀星 所在单位：计算机学院 第 22 届北京理工大学“挑战杯” Intelligent Laser Weeding Robot System 第 22 届北京理工大学“挑战杯” 2 / 39 智能激光除草机器人系统 王宇行，田甜，朱啸闻，林馨耀，杜一苇，郭宸溪，王德浩，毛子鸣 摘要：随着全球农业向智能化、绿色化、高效化转型，传统杂草管理方式面临 高污染、低效率、高成本等多重瓶颈，严重制约农业可持续发展。为此，本文 提出并研发了“禾光智能”无人驾驶激光除草机器人系统，融合计算机"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业项目 分析 做一个校园二手交易平台，解决大学生闲置物",
+          "results": [
+            {
+              "title": "校园二手交易平台创业项目计划书",
+              "snippet": "概览随着环保和节约资源的理念日益深入人心，校园内的二手交易活动逐渐受到重视。我们计划开展一项校园二手交易平台创业项目。本计划书旨在详细阐述我们的创业项目构想、市场分析、运营模式、预期成果及风险评估等，以便为项目的顺利启动与实施提供明确的方向和坚实的基石。本项目立足于当前校园内的二手物品交易需求，旨在解决传统二手交易中存在的信息不对称、交易效率低下等问题。通过搭建一个集中、便捷、安全的线上交易平台，",
+              "url": "https://doc.quark.cn/preview/shiyongmoban-yingyongwenshu-cehuashu/jihuashu/267BE9541245106BD68A35E61A318BDA"
+            },
+            {
+              "title": "构建公益性校园闲置物品交易平台的可行性分析_参考网",
+              "snippet": "首先是大学生对二手平台上卖家的信任程度不够，担心卖家描述的物品与实物不同，这会导致一些用户不愿意在平台上购买闲置物品；其次，闲鱼、转转等二手交易平台已经获得了一定的发展，并在消费者心里形成了一定的认知，因而让用户重新接受并使用一个新的二手交易平台有很大的困难；最后，我们的平台也与一些存在于校园专门解决闲置物品问题的社群组织有一定的竞争关系，一些学生对这些组织已有一定的信任。",
+              "url": "https://m.fx361.com/news/2021/0106/11789807.html"
+            },
+            {
+              "title": "想做一款基于LBS的校园二手闲置物品交易平台 - 过早客",
+              "snippet": "闲鱼、转转等现有的二手平台用户比较宽泛不仅限校园，导致了很多职业卖家和微商扰乱了正常的交易秩序，如果只做独立校园的二手市场，并对卖家进行学生认证的话，可以让学生在自己校区发布和收购商品这样减少物流环节，可以促成有很多不方便物流的闲置，和价值较低的闲置的交易，买卖双方都是认证的同学也可以解决信任问题，因为本来同学关系就是一种“次强”的熟人关系，后面可以加入一些校园服务并以此为切入点，去构建校园社区",
+              "url": "https://www.guozaoke.com/t/48244"
+            }
+          ],
+          "summary": "- 概览随着环保和节约资源的理念日益深入人心，校园内的二手交易活动逐渐受到重视。我们计划开展一项校园二手交易平台创业项目。本计划书旨在详细阐述我们的创业项目构想、市场分析、运营模式、预期成果及风险评估等，以便为项目的顺利启动与实施提供明确的方向和坚实的基石。本项目立足于当前校园内的二手物品交易需求，旨在解决传统二手交易中存在的信息不对称、交易效率低下等问题。通过搭建一个集中、便捷、安全的线上交易平台，\n- 首先是大学生对二手平台上卖家的信任程度不够，担心卖家描述的物品与实物不同，这会导致一些用户不愿意在平台上购买闲置物品；其次，闲鱼、转转等二手交易平台已经获得了一定的发展，并在消费者心里形成了一定的认知，因而让用户重新接受并使用一个新的二手交易平台有很大的困难；最后，我们的平台也与一些存在于校园专门解决闲置物品问题的社群组织有一定的竞争关系，一些学生对这些组织已有一定的信任。\n- 闲鱼、转转等现有的二手平台用户比较宽泛不仅限校园，导致了很多职业卖家和微商扰乱了正常的交易秩序，如果只做独立校园的二手市场，并对卖家进行学生认证的话，可以让学生在自己校区发布和收购商品这样减少物流环节，可以促成有很多不方便物流的闲置，和价值较低的闲置的交易，买卖双方都是认证的同学也可以解决信任问题，因为本来同学关系就是一种“次强”的熟人关系，后面可以加入一些校园服务并以此为切入点，去构建校园社区"
+        },
+        "critic": {
+          "challenge_questions": [
+            "基于策略库的精准追问1: 你的AI定价和推荐功能如何验证能比现有免费平台（如闲鱼）带来更高的交易转化率？做过用户支付意愿测试吗？",
+            "追问2: 校园二手交易市场现有竞品的月均交易频次是多少？你的AI功能能提升多少倍效率？有数据支撑吗？",
+            "追问3: 如果AI定价算法出现10%的错误率，导致用户投诉率超过20%，你的商业模式还能维持吗？"
+          ],
+          "missing_evidence": [
+            "用户支付意愿测试数据",
+            "现有校园二手平台交易转化率基准数据",
+            "AI算法错误率与用户投诉率的关联分析"
+          ],
+          "risk_summary": "需求证据不足与合规风险叠加，可能面临用户真实需求验证失败和校园运营资质缺失的双重挑战",
+          "counterfactual": "如果大学生群体对AI定价服务的支付意愿为0，且校园二手交易市场存在政策性准入限制，项目将无法突破现有免费平台的垄断格局",
+          "evidence_standard": "优秀项目通常提供：1. 校园用户交易行为调研报告 2. 竞品功能对比测试数据 3. 教育主管部门对校园交易平台的合规性文件 4. AI算法在真实交易场景中的A/B测试结果"
+        },
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 5.0,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？"
+          },
+          {
+            "strategy_id": "CS03",
+            "name": "技术门槛幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "可复制性检验: 一个同等水平的团队，需要多长时间能复现你的核心技术？",
+              "技术与需求脱钩检验: 你的技术虽好，但用户真正在乎的是技术本身还是它带来的效果？有更简单的方案能达到80%效果吗？",
+              "资源匹配检验: 你的技术路线需要什么资源（GPU、数据、人才）？你团队现在有多少？差距有多大？"
+            ],
+            "expected_evidence": [
+              "技术复现时间估算",
+              "用户需求优先级排序",
+              "资源-需求匹配表"
+            ],
+            "counterfactual": "如果你的技术优势在12个月后被开源方案追平，你的产品还有存在价值吗？"
+          }
+        ],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 0.0,
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "severity": "medium"
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "severity": "high"
+            },
+            {
+              "id": "H7",
+              "name": "创新点不可验证",
+              "severity": "high"
+            },
+            {
+              "id": "H13",
+              "name": "实验设计不合格",
+              "severity": "medium"
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "severity": "low"
+            },
+            {
+              "id": "H15",
+              "name": "评分项证据覆盖不足",
+              "severity": "medium"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_001",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ]
+            },
+            {
+              "hyperedge_id": "he_risk_002",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+              "categories": [
+                "教育服务"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ]
+            },
+            {
+              "hyperedge_id": "he_risk_003",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ]
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [
+              "H3",
+              "H5",
+              "H7",
+              "H13",
+              "H14",
+              "H15"
+            ],
+            "expanded_rule_ids": [
+              "H13",
+              "H14",
+              "H15",
+              "H3",
+              "H5",
+              "H7",
+              "weak_user_evidence"
+            ]
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 18
+          }
+        }
+      },
+      "timestamp": "2026-03-14T07:21:13.889943"
+    }
+  ]
+}

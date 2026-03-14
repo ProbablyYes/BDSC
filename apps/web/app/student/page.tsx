@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
-type RightTab = "task" | "risk" | "score" | "kg" | "cases" | "upload" | "feedback" | "debug";
+type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "cases" | "upload" | "feedback" | "debug";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
 let _msgId = 0;
@@ -252,6 +252,8 @@ export default function StudentPage() {
   const kgAnalysis = latestResult?.kg_analysis ?? latestResult?.agent_trace?.kg_analysis ?? null;
   const ragCases = useMemo(() => latestResult?.rag_cases ?? latestResult?.agent_trace?.rag_cases ?? [], [latestResult]);
   const orchestration = latestResult?.agent_trace?.orchestration ?? {};
+  const roleAgents = latestResult?.agent_trace?.role_agents ?? {};
+  const agentsCalled = orchestration?.agents_called ?? [];
   const overallScore = latestResult?.diagnosis?.overall_score ?? null;
 
   return (
@@ -447,14 +449,49 @@ export default function StudentPage() {
           <aside className="chat-right" style={{ width: rightWidth }}>
             <div className="right-drag-handle" onMouseDown={startDrag} />
             <div className="right-tabs">
-              {(["task", "risk", "score", "kg", "cases", "upload", "feedback", "debug"] as RightTab[]).map((t) => (
+              {(["agents", "task", "risk", "score", "kg", "cases", "upload", "feedback", "debug"] as RightTab[]).map((t) => (
                 <button key={t} className={`right-tab ${rightTab === t ? "active" : ""}`} onClick={() => { setRightTab(t); if (t === "feedback") loadFeedback(); }}>
-                  {{ task: "任务", risk: "风险", score: "评分", kg: "图谱", cases: "案例", upload: "上传", feedback: "批注", debug: "调试" }[t]}
+                  {{ agents: "智能体", task: "任务", risk: "风险", score: "评分", kg: "图谱", cases: "案例", upload: "上传", feedback: "批注", debug: "调试" }[t]}
                 </button>
               ))}
             </div>
 
             <div className="right-body">
+              {rightTab === "agents" && (
+                <div className="right-section">
+                  <h4>多智能体协作</h4>
+                  <div className="panel-desc">你的问题由多位专家Agent协同分析，每位Agent有独立的角色定位和分析工具。</div>
+                  {agentsCalled.length > 0 ? (
+                    <>
+                      <div className="agent-flow">
+                        {agentsCalled.map((a: string, i: number) => (
+                          <span key={i} className="agent-flow-node">
+                            {a === "router" ? "🔀 路由" : a}
+                            {i < agentsCalled.length - 1 && <span className="agent-flow-arrow">→</span>}
+                          </span>
+                        ))}
+                      </div>
+                      {Object.entries(roleAgents).map(([key, val]: [string, any]) => {
+                        if (!val || !val.analysis) return null;
+                        const nameMap: Record<string, string> = { coach: "🎯 项目教练", analyst: "⚠️ 风险分析师", advisor: "🏆 竞赛顾问", tutor: "📚 学习导师", grader: "📊 评分官" };
+                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "知识图谱", web_search: "联网搜索", hypergraph: "超图分析", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "图谱评分" };
+                        return (
+                          <details key={key} className="agent-card" open>
+                            <summary className="agent-card-header">
+                              <span className="agent-card-name">{nameMap[key] ?? val.agent ?? key}</span>
+                              <span className="agent-card-tools">{(val.tools_used ?? []).map((t: string) => toolMap[t] ?? t).join(" · ")}</span>
+                            </summary>
+                            <div className="agent-card-body">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{val.analysis}</ReactMarkdown>
+                            </div>
+                          </details>
+                        );
+                      })}
+                    </>
+                  ) : <p className="right-hint">发送消息后，这里会展示各专家Agent的协作过程和独立分析结果</p>}
+                </div>
+              )}
+
               {rightTab === "task" && (
                 <>
                   <div className="panel-desc">系统根据你的描述，自动推荐当前最应该完成的一项任务，帮你聚焦方向。</div>
@@ -608,8 +645,8 @@ export default function StudentPage() {
                   <div className="panel-desc">系统内部运行状态，开发调试用。</div>
                   <div className="debug-row"><span>识别意图</span><span>{orchestration?.intent ?? "-"}</span></div>
                   <div className="debug-row"><span>置信度</span><span>{orchestration?.confidence ?? "-"}</span></div>
-                  <div className="debug-row"><span>智能体管线</span><span>{(orchestration?.pipeline ?? []).join(" → ") || "-"}</span></div>
-                  <div className="debug-row"><span>实际执行节点</span><span>{(orchestration?.nodes_visited ?? []).join(" → ") || "-"}</span></div>
+                  <div className="debug-row"><span>调用Agent</span><span>{(orchestration?.agents_called ?? []).join(" → ") || "-"}</span></div>
+                  <div className="debug-row"><span>执行管线</span><span>{(orchestration?.pipeline ?? []).join(" → ") || "-"}</span></div>
                   <div className="debug-row"><span>编排策略</span><span>{orchestration?.strategy ?? "-"}</span></div>
                   <div className="debug-row"><span>LLM启用</span><span>{String(orchestration?.llm_enabled ?? false)}</span></div>
                   <div className="debug-row"><span>会话ID</span><span className="debug-conv-id">{conversationId ?? "无"}</span></div>

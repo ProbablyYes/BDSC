@@ -21,8 +21,10 @@ from app.services.agent_router import run_agents
 from app.services.case_knowledge import infer_category
 from app.services.document_parser import extract_text
 from app.services.graph_service import GraphService
+from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
+from app.services.rag_engine import RagEngine
 from app.services.storage import ConversationStorage, JsonStorage
 
 app = FastAPI(title=settings.app_name)
@@ -46,6 +48,9 @@ graph_service = GraphService(
 )
 hypergraph_service = HypergraphService(graph_service=graph_service)
 composer_llm = LlmClient()
+rag_engine = RagEngine()
+rag_engine.initialize()
+init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -263,9 +268,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     assistant_message = result.get("assistant_message", "")
     nodes_visited = result.get("nodes_visited", [])
 
-    # ── hypergraph insight (service lives in main, not in workflow) ──
-    rule_ids = [str(r.get("id")) for r in (diagnosis.get("triggered_rules", []) or []) if isinstance(r, dict)]
-    hyper_insight = hypergraph_service.insight(category=category, rule_ids=rule_ids, limit=3)
+    hyper_insight = result.get("hypergraph_insight", {})
+    rag_cases = result.get("rag_cases", [])
 
     agent_trace = {
         "orchestration": {
@@ -275,10 +279,12 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "confidence": result.get("intent_confidence", 0),
             "pipeline": result.get("intent_pipeline", []),
             "nodes_visited": nodes_visited,
-            "strategy": "langgraph",
+            "strategy": "langgraph_v2",
         },
         "kg_analysis": kg_analysis,
+        "rag_cases": rag_cases,
         "critic": result.get("critic"),
+        "challenge_strategies": result.get("challenge_strategies"),
         "competition": result.get("competition"),
         "learning": result.get("learning"),
         "category": category,
@@ -308,7 +314,13 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     })
     conv_store.append_message(payload.project_id, conv_id, {
         "role": "assistant", "content": assistant_message,
-        "agent_trace": agent_trace,
+        "agent_trace": {
+            **agent_trace,
+            "diagnosis": diagnosis,
+            "next_task": next_task,
+            "kg_analysis": kg_analysis,
+            "hypergraph_insight": hyper_insight,
+        },
     })
 
     return DialogueTurnResponse(
@@ -371,10 +383,7 @@ async def dialogue_turn_upload(
     next_task = result.get("next_task", {})
     kg_analysis = result.get("kg_analysis", {})
     assistant_message = result.get("assistant_message", "")
-
-    category = result.get("category", "")
-    rule_ids = [str(r.get("id")) for r in (diagnosis.get("triggered_rules", []) or []) if isinstance(r, dict)]
-    hyper_insight = hypergraph_service.insight(category=category, rule_ids=rule_ids, limit=3)
+    hyper_insight = result.get("hypergraph_insight", {})
 
     json_store.append_submission(project_id, {
         "student_id": student_id,
@@ -393,6 +402,15 @@ async def dialogue_turn_upload(
     })
     conv_store.append_message(project_id, conv_id, {
         "role": "assistant", "content": assistant_message,
+        "agent_trace": {
+            "intent": result.get("intent", ""),
+            "nodes_visited": result.get("nodes_visited", []),
+            "rag_cases": result.get("rag_cases", []),
+            "diagnosis": diagnosis,
+            "next_task": next_task,
+            "kg_analysis": kg_analysis,
+            "hypergraph_insight": hyper_insight,
+        },
     })
 
     return {
@@ -404,6 +422,7 @@ async def dialogue_turn_upload(
         "next_task": next_task,
         "kg_analysis": kg_analysis,
         "hypergraph_insight": hyper_insight,
+        "rag_cases": result.get("rag_cases", []),
         "agent_trace": {
             "intent": result.get("intent", ""),
             "nodes_visited": result.get("nodes_visited", []),
@@ -473,6 +492,9 @@ def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None 
                 "triggered_rules": [r.get("id") for r in diagnosis.get("triggered_rules", []) if isinstance(r, dict)],
                 "next_task": (sub.get("next_task") or {}).get("title", ""),
                 "text_preview": (sub.get("raw_text") or "")[:120],
+                "full_text": (sub.get("raw_text") or "")[:4000],
+                "kg_analysis": sub.get("kg_analysis"),
+                "bottleneck": diagnosis.get("bottleneck", ""),
             })
     rows.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return {"count": len(rows), "submissions": rows[:limit]}

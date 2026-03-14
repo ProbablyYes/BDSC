@@ -19,6 +19,7 @@ dependencies = [
   "fastjsonschema>=2.21.2",
   "pandas<3",
   "langgraph>=0.2.0",
+  "numpy>=2.2.6",
 ]
 
 [dependency-groups]

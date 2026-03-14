@@ -187,6 +187,78 @@ class GraphService:
         except Exception as exc:  # noqa: BLE001
             return {"error": f"project evidence query failed: {exc}"}
 
+    def merge_student_entities(self, project_id: str, entities: list[dict], relationships: list[dict]) -> dict[str, Any]:
+        """Write student-extracted KG entities and relationships into Neo4j via MERGE."""
+        if not entities:
+            return {"ok": True, "merged": 0}
+        try:
+            def _write(session):
+                merged = 0
+                for ent in entities[:20]:
+                    label = str(ent.get("label", ""))[:100]
+                    etype = str(ent.get("type", "concept"))[:50]
+                    eid = str(ent.get("id", ""))[:50]
+                    if not label:
+                        continue
+                    session.run(
+                        """
+                        MERGE (e:Entity {label: $label})
+                        ON CREATE SET e.type = $etype, e.source_project = $pid, e.id = $eid
+                        ON MATCH SET e.last_seen_project = $pid
+                        """,
+                        label=label, etype=etype, pid=project_id, eid=eid,
+                    )
+                    merged += 1
+                for rel in relationships[:30]:
+                    src = str(rel.get("source", ""))
+                    tgt = str(rel.get("target", ""))
+                    desc = str(rel.get("relation", "related"))[:100]
+                    src_label = next((e.get("label", "") for e in entities if e.get("id") == src), src)
+                    tgt_label = next((e.get("label", "") for e in entities if e.get("id") == tgt), tgt)
+                    if not src_label or not tgt_label:
+                        continue
+                    session.run(
+                        """
+                        MATCH (a:Entity {label: $src}), (b:Entity {label: $tgt})
+                        MERGE (a)-[r:RELATES_TO {description: $desc}]->(b)
+                        ON CREATE SET r.source_project = $pid
+                        """,
+                        src=src_label, tgt=tgt_label, desc=desc, pid=project_id,
+                    )
+                return merged
+
+            merged = self._query_with_fallback(_write)
+            return {"ok": True, "merged": merged}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+    def find_similar_entities(self, labels: list[str], limit: int = 5) -> list[dict[str, Any]]:
+        """Find entities in Neo4j that match given labels and return their relationships."""
+        if not labels:
+            return []
+        try:
+            def _query(session):
+                results = []
+                for label in labels[:5]:
+                    rows = list(session.run(
+                        """
+                        MATCH (e:Entity)
+                        WHERE toLower(e.label) CONTAINS toLower($label)
+                        OPTIONAL MATCH (e)-[r]-(other)
+                        RETURN e.label AS entity, e.type AS type, e.source_project AS project,
+                               type(r) AS rel_type, other.label AS related_entity
+                        LIMIT $limit
+                        """,
+                        label=label, limit=limit,
+                    ))
+                    for row in rows:
+                        results.append(dict(row))
+                return results
+
+            return self._query_with_fallback(_query)
+        except Exception:
+            return []
+
     def baseline_snapshot(self, limit: int = 8) -> dict[str, Any]:
         try:
             def _query(session):

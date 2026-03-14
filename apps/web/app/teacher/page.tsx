@@ -27,6 +27,7 @@ export default function TeacherPage() {
   const [feedbackResult, setFeedbackResult] = useState("");
 
   const [selectedProject, setSelectedProject] = useState("");
+  const [expandedSubmission, setExpandedSubmission] = useState<number | null>(null);
 
   async function api(path: string, opts?: RequestInit) {
     const r = await fetch(`${API}${path}`, opts);
@@ -157,15 +158,17 @@ export default function TeacherPage() {
           {tab === "overview" && (
             <div className="tch-panel fade-up">
               <h2>班级总览</h2>
+              <p className="tch-desc">基于Neo4j图数据库中存储的全部项目数据实时计算。数据来源：学生每次提交或对话时自动入库。</p>
               {dashboard?.error && <p className="right-hint">图数据读取失败：{dashboard.error}</p>}
               <div className="kpi-grid">
-                <div className="kpi"><span>项目总数</span><strong>{dashboard?.overview?.total_projects ?? "-"}</strong></div>
-                <div className="kpi"><span>证据总数</span><strong>{dashboard?.overview?.total_evidence ?? "-"}</strong></div>
-                <div className="kpi"><span>规则命中</span><strong>{dashboard?.overview?.total_rule_hits ?? "-"}</strong></div>
+                <div className="kpi"><span>项目总数</span><strong>{dashboard?.overview?.total_projects ?? "-"}</strong><em className="kpi-hint">图数据库中的项目节点数</em></div>
+                <div className="kpi"><span>证据总数</span><strong>{dashboard?.overview?.total_evidence ?? "-"}</strong><em className="kpi-hint">学生提交的证据条数</em></div>
+                <div className="kpi"><span>规则命中</span><strong>{dashboard?.overview?.total_rule_hits ?? "-"}</strong><em className="kpi-hint">触发风险规则的总次数</em></div>
               </div>
               <div className="viz-grid">
                 <div className="viz-card">
                   <h3>类别分布</h3>
+                  <p className="tch-desc">学生项目的领域分类统计。点击类别可筛选。</p>
                   {(dashboard?.category_distribution ?? []).map((row: any) => (
                     <div key={row.category} className="bar-row" style={{ cursor: "pointer" }} onClick={() => setCategoryFilter(row.category)}>
                       <span>{row.category}</span>
@@ -176,6 +179,7 @@ export default function TeacherPage() {
                 </div>
                 <div className="viz-card">
                   <h3>Top 风险规则</h3>
+                  <p className="tch-desc">被触发最多次的风险规则。高频风险=班级共性问题，适合课堂重点讲解。</p>
                   {(dashboard?.top_risk_rules ?? []).map((row: any) => (
                     <div key={row.rule} className="bar-row">
                       <span>{row.rule}</span>
@@ -186,6 +190,7 @@ export default function TeacherPage() {
                 </div>
               </div>
               <h3>高风险项目</h3>
+              <p className="tch-desc">触发风险规则最多的项目，建议优先关注和干预。点击可查看详细证据链。</p>
               <div className="table-like">
                 {(dashboard?.high_risk_projects ?? []).slice(0, 8).map((row: any) => (
                   <button key={row.project_id} className="project-item" onClick={() => loadEvidence(row.project_id)}>
@@ -202,22 +207,54 @@ export default function TeacherPage() {
           {tab === "submissions" && (
             <div className="tch-panel fade-up">
               <h2>学生提交记录 ({submissions.length})</h2>
+              <p className="tch-desc">学生每次发消息或上传文件，系统自动记录并分析。评分来自规则引擎（满分10），风险为触发的规则ID。点击"展开"查看学生提交的原始内容。</p>
               <div className="tch-table">
                 <div className="tch-table-header">
                   <span>时间</span><span>项目</span><span>学生</span><span>来源</span><span>评分</span><span>风险</span><span>操作</span>
                 </div>
                 {submissions.map((s, i) => (
-                  <div key={i} className="tch-table-row">
-                    <span className="tch-cell-time">{(s.created_at ?? "").slice(0, 16)}</span>
-                    <span>{s.project_id}</span>
-                    <span>{s.student_id}</span>
-                    <span>{s.source_type}</span>
-                    <span className="tch-cell-score">{s.overall_score}</span>
-                    <span>{(s.triggered_rules ?? []).join(", ") || "-"}</span>
-                    <span>
-                      <button className="tch-sm-btn" onClick={() => loadEvidence(s.project_id)}>查看</button>
-                      <button className="tch-sm-btn" onClick={() => { setSelectedProject(s.project_id); setTab("feedback"); }}>批注</button>
-                    </span>
+                  <div key={i} className="tch-submission-block">
+                    <div className="tch-table-row">
+                      <span className="tch-cell-time">{(s.created_at ?? "").slice(0, 16)}</span>
+                      <span>{s.project_id}</span>
+                      <span>{s.student_id}</span>
+                      <span>{s.source_type}{s.filename ? ` (${s.filename})` : ""}</span>
+                      <span className="tch-cell-score">{s.overall_score}</span>
+                      <span>{(s.triggered_rules ?? []).join(", ") || "-"}</span>
+                      <span>
+                        <button className="tch-sm-btn" onClick={() => setExpandedSubmission(expandedSubmission === i ? null : i)}>
+                          {expandedSubmission === i ? "收起" : "展开"}
+                        </button>
+                        <button className="tch-sm-btn" onClick={() => loadEvidence(s.project_id)}>证据链</button>
+                        <button className="tch-sm-btn" onClick={() => { setSelectedProject(s.project_id); setTab("feedback"); }}>批注</button>
+                      </span>
+                    </div>
+                    {expandedSubmission === i && (
+                      <div className="tch-submission-detail">
+                        <div className="tch-detail-section">
+                          <h4>学生提交的原始内容</h4>
+                          <div className="tch-raw-text">{s.full_text || s.text_preview || "（无文本内容）"}</div>
+                        </div>
+                        {s.bottleneck && (
+                          <div className="tch-detail-section">
+                            <h4>系统诊断瓶颈</h4>
+                            <p>{s.bottleneck}</p>
+                          </div>
+                        )}
+                        {s.next_task && (
+                          <div className="tch-detail-section">
+                            <h4>系统建议的下一步</h4>
+                            <p>{s.next_task}</p>
+                          </div>
+                        )}
+                        {s.kg_analysis?.insight && (
+                          <div className="tch-detail-section">
+                            <h4>知识图谱分析</h4>
+                            <p>{s.kg_analysis.insight}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {!submissions.length && <p className="right-hint">暂无提交记录。学生对话后这里会自动出现。</p>}
@@ -229,17 +266,19 @@ export default function TeacherPage() {
           {tab === "compare" && (
             <div className="tch-panel fade-up">
               <h2>历史基线 vs 本班现状</h2>
+              <p className="tch-desc">将本班数据与历史所有班级的平均水平对比。"风险强度"=平均每个项目触发的风险规则数，数值越低越好。差值为正表示本班风险高于历史平均。</p>
               <div className="kpi-grid">
-                <div className="kpi"><span>基线风险强度</span><strong>{compareData?.baseline?.avg_rule_hits_per_project ?? "-"}</strong></div>
-                <div className="kpi"><span>本班风险强度</span><strong>{compareData?.current_class?.avg_rule_hits_per_submission ?? "-"}</strong></div>
-                <div className="kpi"><span>差值</span><strong>{compareData?.comparison?.risk_intensity_delta ?? "-"}</strong></div>
+                <div className="kpi"><span>基线风险强度</span><strong>{compareData?.baseline?.avg_rule_hits_per_project ?? "-"}</strong><em className="kpi-hint">历史全部项目的平均值</em></div>
+                <div className="kpi"><span>本班风险强度</span><strong>{compareData?.current_class?.avg_rule_hits_per_submission ?? "-"}</strong><em className="kpi-hint">本班学生提交的平均值</em></div>
+                <div className="kpi"><span>差值</span><strong>{compareData?.comparison?.risk_intensity_delta ?? "-"}</strong><em className="kpi-hint">正数=高于基线，负数=优于基线</em></div>
               </div>
               <div className="kpi-grid">
-                <div className="kpi"><span>基线高风险占比</span><strong>{compareData?.baseline?.high_risk_ratio ?? "-"}</strong></div>
-                <div className="kpi"><span>本班高风险占比</span><strong>{compareData?.current_class?.high_risk_ratio ?? "-"}</strong></div>
-                <div className="kpi"><span>Rubric 均分</span><strong>{compareData?.current_class?.avg_rubric_score ?? "-"}</strong></div>
+                <div className="kpi"><span>基线高风险占比</span><strong>{compareData?.baseline?.high_risk_ratio ?? "-"}</strong><em className="kpi-hint">历史高危项目的比例</em></div>
+                <div className="kpi"><span>本班高风险占比</span><strong>{compareData?.current_class?.high_risk_ratio ?? "-"}</strong><em className="kpi-hint">本班高危项目的比例</em></div>
+                <div className="kpi"><span>Rubric 均分</span><strong>{compareData?.current_class?.avg_rubric_score ?? "-"}</strong><em className="kpi-hint">9维度评分的平均值(满分10)</em></div>
               </div>
               <h3>自动干预建议</h3>
+              <p className="tch-desc">系统根据对比差异自动生成的教学建议。建议在课堂上针对性讲解。</p>
               <div className="tch-recs">
                 {(compareData?.recommendations ?? []).map((item: string, i: number) => (
                   <div key={i} className="right-tag">{item}</div>
@@ -252,6 +291,7 @@ export default function TeacherPage() {
           {tab === "evidence" && (
             <div className="tch-panel fade-up">
               <h2>项目证据链 — {selectedProject || projectId}</h2>
+              <p className="tch-desc">证据链来自Neo4j图数据库，记录学生项目中被识别的关键证据（如用户访谈、市场数据、技术验证等）。证据越完整，项目越成熟。</p>
               <div className="tch-evidence-actions">
                 <input value={selectedProject || projectId} onChange={(e) => setSelectedProject(e.target.value)} placeholder="项目ID" />
                 <button className="topbar-btn" onClick={() => loadEvidence(selectedProject || projectId)}>加载</button>
@@ -270,7 +310,7 @@ export default function TeacherPage() {
                     ))}
                   </div>
                 </>
-              ) : <p className="right-hint">选择一个项目查看证据链</p>}
+              ) : <p className="right-hint">从"班级总览"的高风险项目或"学生提交"中选择一个项目查看</p>}
             </div>
           )}
 
@@ -278,17 +318,18 @@ export default function TeacherPage() {
           {tab === "report" && (
             <div className="tch-panel fade-up">
               <h2>AI 班级报告</h2>
+              <p className="tch-desc">由AI基于全班提交数据自动生成的评估报告，包含风险分布、共性问题和教学建议。可反复生成获取最新分析。</p>
               <button className="topbar-btn" onClick={generateReport} disabled={loading} style={{ marginBottom: 16 }}>
                 {loading ? "生成中…" : "重新生成"}
               </button>
               {report ? (
                 <div className="tch-report-content">{report}</div>
               ) : (
-                <p className="right-hint">点击"生成AI报告"，系统将基于所有学生数据生成班级潜力评估报告。</p>
+                <p className="right-hint">点击上方按钮，系统将汇总所有学生的提交数据、风险分布和评分情况，生成一份班级分析报告。</p>
               )}
               {reportSnapshot && (
                 <details className="debug-json" style={{ marginTop: 16 }}>
-                  <summary>班级数据快照</summary>
+                  <summary>报告依据的原始数据</summary>
                   <pre>{JSON.stringify(reportSnapshot, null, 2)}</pre>
                 </details>
               )}
@@ -299,7 +340,7 @@ export default function TeacherPage() {
           {tab === "feedback" && (
             <div className="tch-panel fade-up">
               <h2>教师反馈 → 学生端</h2>
-              <p className="right-hint">提交的反馈会实时回传到学生端对话中，影响AI下次回复的上下文。</p>
+              <p className="tch-desc">您写的反馈会存储到该项目的数据中。当学生下次与AI对话时，AI会参考您的反馈调整建议方向。"关注标签"帮助AI理解您希望学生优先改进的领域。</p>
               <form className="tch-feedback-form" onSubmit={submitFeedback}>
                 <label>目标项目 <input value={selectedProject || projectId} onChange={(e) => setSelectedProject(e.target.value)} /></label>
                 <label>教师ID <input value={teacherId} onChange={(e) => setTeacherId(e.target.value)} /></label>

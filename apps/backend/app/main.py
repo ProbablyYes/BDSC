@@ -9,6 +9,8 @@ from app.schemas import (
     AgentRunPayload,
     AgentRunResponse,
     AnalyzePayload,
+    DialogueTurnPayload,
+    DialogueTurnResponse,
     HealthResponse,
     ProjectSnapshotResponse,
     TeacherFeedbackRequest,
@@ -19,7 +21,11 @@ from app.services.agent_router import run_agents
 from app.services.case_knowledge import infer_category
 from app.services.document_parser import extract_text
 from app.services.graph_service import GraphService
-from app.services.storage import JsonStorage
+from app.services.graph_workflow import init_workflow_services
+from app.services.hypergraph_service import HypergraphService
+from app.services.llm_client import LlmClient
+from app.services.rag_engine import RagEngine
+from app.services.storage import ConversationStorage, JsonStorage
 
 app = FastAPI(title=settings.app_name)
 app.add_middleware(
@@ -33,12 +39,18 @@ settings.upload_root.mkdir(parents=True, exist_ok=True)
 settings.teacher_examples_root.mkdir(parents=True, exist_ok=True)
 
 json_store = JsonStorage(settings.data_root / "project_state")
+conv_store = ConversationStorage(settings.data_root / "conversations")
 graph_service = GraphService(
     uri=settings.neo4j_uri,
     username=settings.neo4j_username,
     password=settings.neo4j_password,
     database=settings.neo4j_database,
 )
+hypergraph_service = HypergraphService(graph_service=graph_service)
+composer_llm = LlmClient()
+rag_engine = RagEngine()
+rag_engine.initialize()
+init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -56,6 +68,9 @@ def analyze_text(payload: AnalyzePayload) -> dict:
         project_state=project_state,
     )
     coach = multi_agent_result["project_coach"]
+    inferred_category = infer_category(payload.input_text)
+    rule_ids = [str(x.get("id")) for x in (coach.get("diagnosis", {}).get("triggered_rules", []) or []) if isinstance(x, dict)]
+    hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
     json_store.append_submission(
         payload.project_id,
         {
@@ -63,9 +78,11 @@ def analyze_text(payload: AnalyzePayload) -> dict:
             "class_id": payload.class_id,
             "cohort_id": payload.cohort_id,
             "source_type": "text",
+            "mode": payload.mode,
             "raw_text": payload.input_text[:6000],
             "diagnosis": coach["diagnosis"],
             "next_task": coach["next_task"],
+            "hypergraph_insight": hyper_insight,
             "agent_outputs": multi_agent_result,
         },
     )
@@ -74,6 +91,7 @@ def analyze_text(payload: AnalyzePayload) -> dict:
         "student_id": payload.student_id,
         "diagnosis": coach["diagnosis"],
         "next_task": coach["next_task"],
+        "hypergraph_insight": hyper_insight,
         "agent_outputs": multi_agent_result,
     }
 
@@ -106,6 +124,9 @@ async def upload_and_analyze(
         project_state=project_state,
     )
     coach = multi_agent_result["project_coach"]
+    inferred_category = infer_category(extracted_text)
+    rule_ids = [str(x.get("id")) for x in (coach.get("diagnosis", {}).get("triggered_rules", []) or []) if isinstance(x, dict)]
+    hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
     json_store.append_submission(
         project_id,
         {
@@ -113,10 +134,12 @@ async def upload_and_analyze(
             "class_id": class_id or None,
             "cohort_id": cohort_id or None,
             "source_type": "file",
+            "mode": mode,
             "filename": file.filename,
             "raw_text": extracted_text[:6000],
             "diagnosis": coach["diagnosis"],
             "next_task": coach["next_task"],
+            "hypergraph_insight": hyper_insight,
             "agent_outputs": multi_agent_result,
         },
     )
@@ -128,7 +151,317 @@ async def upload_and_analyze(
         extracted_length=len(extracted_text),
         diagnosis=coach["diagnosis"],
         next_task=coach["next_task"],
+        hypergraph_insight=hyper_insight,
     )
+
+
+def _compose_assistant_message(
+    user_message: str,
+    coach: dict,
+    critic: dict,
+    planner: dict,
+    grader: dict | None = None,
+    hyper_insight: dict | None = None,
+) -> str:
+    diagnosis = coach.get("diagnosis", {}) if isinstance(coach, dict) else {}
+    next_task = coach.get("next_task", {}) if isinstance(coach, dict) else {}
+    bottleneck = str(diagnosis.get("bottleneck") or "暂无")
+    rules = diagnosis.get("triggered_rules", []) or []
+    rule_text = "；".join(f"{r.get('id')}:{r.get('name')}" for r in rules[:5] if isinstance(r, dict)) or "暂无"
+    task_title = str(next_task.get("title") or "暂无")
+    task_desc = str(next_task.get("description") or "")
+    accept = next_task.get("acceptance_criteria", []) or []
+    challenge = (critic.get("counterfactual_questions") or critic.get("challenge_points") or []) if isinstance(critic, dict) else []
+    plan = planner.get("execution_plan", []) if isinstance(planner, dict) else []
+    socratic = diagnosis.get("socratic_questions", []) or []
+    score = (grader or {}).get("overall_score", diagnosis.get("overall_score", ""))
+    hyper_edges = (hyper_insight or {}).get("edges", []) or []
+    hyper_note = hyper_edges[0].get("teaching_note", "") if hyper_edges else ""
+
+    context_block = (
+        f"## 诊断结果\n瓶颈: {bottleneck}\n触发风险: {rule_text}\n综合评分: {score}\n"
+        f"## 下一步任务\n标题: {task_title}\n描述: {task_desc}\n验收标准: {accept}\n"
+        f"## Critic反驳\n反事实追问: {challenge[:3]}\n"
+        f"## Planner建议\n执行计划: {plan[:3]}\n"
+        f"## 苏格拉底追问\n{socratic[:3]}\n"
+    )
+    if hyper_note:
+        context_block += f"## 超图洞察\n{hyper_note}\n"
+
+    if composer_llm.enabled:
+        reply = composer_llm.chat_text(
+            system_prompt=(
+                "你是一位经验丰富、温和但严格的双创项目教练。\n"
+                "请基于以下多Agent诊断结果，用自然流畅的中文给学生写一段回复。\n"
+                "要求：\n"
+                "1. 先简要回应学生说的话，体现你在认真倾听\n"
+                "2. 指出最关键的1-2个风险，用通俗语言解释为什么这是问题\n"
+                "3. 给出唯一的下一步任务，说清楚要做什么、怎么做\n"
+                "4. 用苏格拉底式追问收尾——提一个让学生深入思考的问题\n"
+                "5. 语气像导师跟学生聊天，不要用表格或列表标记符号，不要说'根据诊断结果'\n"
+                "6. 控制在200-400字\n"
+            ),
+            user_prompt=f"学生说：{user_message}\n\n诊断上下文：\n{context_block}",
+            model=settings.llm_reason_model,
+            temperature=0.35,
+        )
+        if reply and len(reply.strip()) > 30:
+            return reply.strip()
+
+    msg = f"{bottleneck}\n\n触发风险：{rule_text}\n\n下一步任务：{task_title}\n{task_desc}"
+    if accept:
+        msg += "\n验收标准：" + "；".join(str(a) for a in accept[:3])
+    if challenge:
+        msg += f"\n\n追问：{challenge[0]}"
+    if plan:
+        msg += f"\n执行建议：{plan[0]}"
+    return msg
+
+
+@app.post("/api/dialogue/turn", response_model=DialogueTurnResponse)
+def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
+    from app.services.graph_workflow import run_workflow
+
+    project_state = json_store.load_project(payload.project_id)
+
+    # ── conversation management ──
+    conv_id = payload.conversation_id
+    conv_messages: list[dict] = []
+    if conv_id:
+        conv = conv_store.get(payload.project_id, conv_id)
+        if conv:
+            conv_messages = conv.get("messages", [])
+    else:
+        new_conv = conv_store.create(payload.project_id, payload.student_id)
+        conv_id = new_conv["conversation_id"]
+
+    # ── history from past submissions ──
+    submissions = project_state.get("submissions", []) or []
+    history_context = ""
+    for row in submissions[-4:]:
+        snippet = (row.get("raw_text") or "")[:200]
+        task = (row.get("next_task") or {}).get("title", "")
+        if snippet:
+            history_context += f"- 学生曾说：{snippet}… → 建议任务：{task}\n"
+
+    # ── teacher feedback context ──
+    teacher_fb = project_state.get("teacher_feedback", [])
+    tfb_ctx = ""
+    if teacher_fb:
+        latest = teacher_fb[-1]
+        tfb_ctx = f"{latest.get('comment','')}\n关注点: {latest.get('focus_tags',[])}"
+
+    # ── run LangGraph workflow ──
+    result = run_workflow(
+        message=payload.message,
+        mode=payload.mode,
+        project_state=project_state,
+        history_context=history_context,
+        conversation_messages=conv_messages,
+        teacher_feedback_context=tfb_ctx,
+    )
+
+    diagnosis = result.get("diagnosis", {})
+    next_task = result.get("next_task", {})
+    category = result.get("category", "")
+    kg_analysis = result.get("kg_analysis", {})
+    assistant_message = result.get("assistant_message", "")
+    nodes_visited = result.get("nodes_visited", [])
+    agents_called = result.get("agents_called", [])
+
+    hyper_insight = result.get("hypergraph_insight", {})
+    rag_cases = result.get("rag_cases", [])
+    web_search = result.get("web_search_result", {})
+
+    agent_trace = {
+        "orchestration": {
+            "mode": payload.mode,
+            "llm_enabled": composer_llm.enabled,
+            "intent": result.get("intent", ""),
+            "confidence": result.get("intent_confidence", 0),
+            "pipeline": result.get("intent_pipeline", []),
+            "nodes_visited": nodes_visited,
+            "agents_called": agents_called,
+            "strategy": "langgraph_v3_role_agents",
+        },
+        "role_agents": {
+            "coach": result.get("coach_output", {}),
+            "analyst": result.get("analyst_output", {}),
+            "advisor": result.get("advisor_output", {}),
+            "tutor": result.get("tutor_output", {}),
+            "grader": result.get("grader_output", {}),
+        },
+        "kg_analysis": kg_analysis,
+        "rag_cases": rag_cases,
+        "web_search": web_search,
+        "critic": result.get("critic"),
+        "challenge_strategies": result.get("challenge_strategies"),
+        "competition": result.get("competition"),
+        "learning": result.get("learning"),
+        "category": category,
+    }
+
+    # ── persist to project state ──
+    json_store.append_submission(
+        payload.project_id,
+        {
+            "student_id": payload.student_id,
+            "class_id": payload.class_id,
+            "cohort_id": payload.cohort_id,
+            "source_type": "dialogue_turn",
+            "mode": payload.mode,
+            "raw_text": payload.message[:6000],
+            "diagnosis": diagnosis,
+            "next_task": next_task,
+            "kg_analysis": kg_analysis,
+            "hypergraph_insight": hyper_insight,
+            "agent_outputs": agent_trace,
+        },
+    )
+
+    # ── persist to conversation ──
+    conv_store.append_message(payload.project_id, conv_id, {
+        "role": "user", "content": payload.message,
+    })
+    conv_store.append_message(payload.project_id, conv_id, {
+        "role": "assistant", "content": assistant_message,
+        "agent_trace": {
+            **agent_trace,
+            "diagnosis": diagnosis,
+            "next_task": next_task,
+            "kg_analysis": kg_analysis,
+            "hypergraph_insight": hyper_insight,
+        },
+    })
+
+    return DialogueTurnResponse(
+        project_id=payload.project_id,
+        student_id=payload.student_id,
+        conversation_id=conv_id,
+        assistant_message=assistant_message.strip(),
+        diagnosis=diagnosis,
+        next_task=next_task,
+        kg_analysis=kg_analysis,
+        hypergraph_insight=hyper_insight,
+        agent_trace=agent_trace,
+    )
+
+
+@app.post("/api/dialogue/turn-upload")
+async def dialogue_turn_upload(
+    project_id: str = Form(...),
+    student_id: str = Form(...),
+    message: str = Form(""),
+    conversation_id: str = Form(""),
+    mode: str = Form("coursework"),
+    file: UploadFile = File(...),
+) -> dict:
+    """Handle file upload within a conversation context."""
+    from app.services.graph_workflow import run_workflow
+
+    upload_target = settings.upload_root / project_id
+    upload_target.mkdir(parents=True, exist_ok=True)
+    target_path = upload_target / file.filename
+    content = await file.read()
+    target_path.write_bytes(content)
+
+    extracted = extract_text(target_path)
+    if not extracted.strip():
+        raise HTTPException(status_code=400, detail="无法解析该文件。")
+
+    combined_msg = f"{message}\n\n[上传文件: {file.filename}]\n{extracted[:3000]}" if message.strip() else f"[上传文件: {file.filename}]\n{extracted[:3000]}"
+
+    # conversation
+    conv_id = conversation_id
+    conv_messages: list[dict] = []
+    if conv_id:
+        conv = conv_store.get(project_id, conv_id)
+        if conv:
+            conv_messages = conv.get("messages", [])
+    else:
+        new_conv = conv_store.create(project_id, student_id)
+        conv_id = new_conv["conversation_id"]
+
+    project_state = json_store.load_project(project_id)
+    result = run_workflow(
+        message=combined_msg,
+        mode=mode,
+        project_state=project_state,
+        conversation_messages=conv_messages,
+    )
+
+    diagnosis = result.get("diagnosis", {})
+    next_task = result.get("next_task", {})
+    kg_analysis = result.get("kg_analysis", {})
+    assistant_message = result.get("assistant_message", "")
+    hyper_insight = result.get("hypergraph_insight", {})
+    agents_called = result.get("agents_called", [])
+
+    agent_trace = {
+        "orchestration": {
+            "mode": mode,
+            "intent": result.get("intent", ""),
+            "confidence": result.get("intent_confidence", 0),
+            "pipeline": result.get("intent_pipeline", []),
+            "nodes_visited": result.get("nodes_visited", []),
+            "agents_called": agents_called,
+            "strategy": "langgraph_v3_role_agents",
+        },
+        "role_agents": {
+            "coach": result.get("coach_output", {}),
+            "analyst": result.get("analyst_output", {}),
+            "advisor": result.get("advisor_output", {}),
+            "tutor": result.get("tutor_output", {}),
+            "grader": result.get("grader_output", {}),
+        },
+        "kg_analysis": kg_analysis,
+        "rag_cases": result.get("rag_cases", []),
+        "web_search": result.get("web_search_result", {}),
+        "critic": result.get("critic"),
+        "competition": result.get("competition"),
+        "learning": result.get("learning"),
+        "category": result.get("category", ""),
+    }
+
+    json_store.append_submission(project_id, {
+        "student_id": student_id,
+        "source_type": "file_in_chat",
+        "mode": mode,
+        "filename": file.filename,
+        "raw_text": extracted[:6000],
+        "diagnosis": diagnosis,
+        "next_task": next_task,
+        "kg_analysis": kg_analysis,
+        "hypergraph_insight": hyper_insight,
+        "agent_outputs": agent_trace,
+    })
+
+    conv_store.append_message(project_id, conv_id, {
+        "role": "user", "content": f"[上传文件: {file.filename}] {message}",
+    })
+    conv_store.append_message(project_id, conv_id, {
+        "role": "assistant", "content": assistant_message,
+        "agent_trace": {
+            **agent_trace,
+            "diagnosis": diagnosis,
+            "next_task": next_task,
+            "kg_analysis": kg_analysis,
+            "hypergraph_insight": hyper_insight,
+        },
+    })
+
+    return {
+        "conversation_id": conv_id,
+        "assistant_message": assistant_message,
+        "filename": file.filename,
+        "extracted_length": len(extracted),
+        "diagnosis": diagnosis,
+        "next_task": next_task,
+        "kg_analysis": kg_analysis,
+        "hypergraph_insight": hyper_insight,
+        "rag_cases": result.get("rag_cases", []),
+        "agent_trace": agent_trace,
+    }
 
 
 @app.post("/api/teacher-feedback", response_model=TeacherFeedbackResponse)
@@ -159,6 +492,93 @@ def project_snapshot(project_id: str) -> ProjectSnapshotResponse:
         teacher_feedback=data["teacher_feedback"],
         graph_signals={"connected": graph.connected, "detail": graph.detail},
     )
+
+
+@app.get("/api/project/{project_id}/feedback")
+def get_project_feedback(project_id: str) -> dict:
+    data = json_store.load_project(project_id)
+    return {
+        "project_id": project_id,
+        "feedback": data.get("teacher_feedback", []),
+    }
+
+
+@app.get("/api/teacher/submissions")
+def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None = None, limit: int = 50) -> dict:
+    projects = json_store.list_projects()
+    rows: list[dict[str, Any]] = []
+    for project in projects:
+        pid = project.get("project_id", "")
+        for sub in project.get("submissions", []):
+            if class_id and sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+            diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+            rows.append({
+                "project_id": pid,
+                "student_id": sub.get("student_id", ""),
+                "class_id": sub.get("class_id"),
+                "created_at": sub.get("created_at", ""),
+                "source_type": sub.get("source_type", ""),
+                "filename": sub.get("filename"),
+                "overall_score": diagnosis.get("overall_score", 0),
+                "triggered_rules": [r.get("id") for r in diagnosis.get("triggered_rules", []) if isinstance(r, dict)],
+                "next_task": (sub.get("next_task") or {}).get("title", ""),
+                "text_preview": (sub.get("raw_text") or "")[:120],
+                "full_text": (sub.get("raw_text") or "")[:4000],
+                "kg_analysis": sub.get("kg_analysis"),
+                "bottleneck": diagnosis.get("bottleneck", ""),
+            })
+    rows.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"count": len(rows), "submissions": rows[:limit]}
+
+
+@app.post("/api/teacher/generate-report")
+def teacher_generate_report(class_id: str | None = None, cohort_id: str | None = None) -> dict:
+    snapshot = _build_class_snapshot(class_id=class_id, cohort_id=cohort_id)
+    if not composer_llm.enabled:
+        return {"report": "LLM未启用，无法生成报告。", "snapshot": snapshot}
+
+    report = composer_llm.chat_text(
+        system_prompt=(
+            "你是教学辅助决策智能体。请基于班级数据生成一份简洁的班级项目潜力评估报告。\n"
+            "要求：\n"
+            "1. 先给出班级整体概况（提交数、风险分布）\n"
+            "2. 列出Top 3高频风险和对应教学建议\n"
+            "3. 给出下周重点教学建议（具体可执行）\n"
+            "4. 列出需要优先干预的项目特征\n"
+            "5. 用自然段落，不超过500字\n"
+        ),
+        user_prompt=f"班级数据：\n{snapshot}",
+        model=settings.llm_reason_model,
+        temperature=0.3,
+    )
+    return {"report": report.strip() if report else "报告生成失败", "snapshot": snapshot}
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Conversation management APIs
+# ═══════════════════════════════════════════════════════════════════
+
+@app.get("/api/conversations")
+def list_conversations(project_id: str) -> dict:
+    convs = conv_store.list_conversations(project_id)
+    return {"project_id": project_id, "conversations": convs}
+
+
+@app.post("/api/conversations")
+def create_conversation(project_id: str, student_id: str) -> dict:
+    conv = conv_store.create(project_id, student_id)
+    return conv
+
+
+@app.get("/api/conversations/{conversation_id}")
+def get_conversation(project_id: str, conversation_id: str) -> dict:
+    conv = conv_store.get(project_id, conversation_id)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conv
 
 
 @app.get("/api/teacher-examples")
@@ -208,6 +628,28 @@ def teacher_project_evidence(project_id: str) -> dict:
     data = graph_service.project_evidence(project_id=project_id)
     return {
         "project_id": project_id,
+        "data": data,
+    }
+
+
+@app.post("/api/hypergraph/rebuild")
+def rebuild_hypergraph(min_pattern_support: int = 2, max_edges: int = 30) -> dict:
+    data = hypergraph_service.rebuild(min_pattern_support=min_pattern_support, max_edges=max_edges)
+    return {
+        "min_pattern_support": min_pattern_support,
+        "max_edges": max_edges,
+        "data": data,
+    }
+
+
+@app.get("/api/hypergraph/insight")
+def hypergraph_insight(category: str | None = None, rule_ids: str = "", limit: int = 5) -> dict:
+    parsed_rule_ids = [x.strip() for x in rule_ids.split(",") if x.strip()]
+    data = hypergraph_service.insight(category=category, rule_ids=parsed_rule_ids, limit=limit)
+    return {
+        "category": category,
+        "rule_ids": parsed_rule_ids,
+        "limit": limit,
         "data": data,
     }
 

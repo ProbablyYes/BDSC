@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000";
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 type ViewMode = "dashboard" | "compare" | "evidence" | "agent";
 
 export default function TeacherPage() {
@@ -26,7 +26,11 @@ export default function TeacherPage() {
     const resp = await fetch(`${API_BASE}/api/teacher/dashboard${q}`);
     const data = await resp.json();
     setDashboard(data.data);
-    setResponse(JSON.stringify(data, null, 2));
+    if (data?.data?.error) {
+      setResponse(`dashboard_error: ${data.data.error}`);
+    } else {
+      setResponse(JSON.stringify(data, null, 2));
+    }
     setLoading(false);
   }
 
@@ -35,7 +39,11 @@ export default function TeacherPage() {
     const resp = await fetch(`${API_BASE}/api/teacher/project/${encodeURIComponent(projectId)}/evidence`);
     const data = await resp.json();
     setEvidence(data.data);
-    setResponse(JSON.stringify(data, null, 2));
+    if (data?.data?.error) {
+      setResponse(`evidence_error: ${data.data.error}`);
+    } else {
+      setResponse(JSON.stringify(data, null, 2));
+    }
     setLoading(false);
   }
 
@@ -48,7 +56,11 @@ export default function TeacherPage() {
     const resp = await fetch(`${API_BASE}/api/teacher/compare${query ? `?${query}` : ""}`);
     const data = await resp.json();
     setCompareData(data);
-    setResponse(JSON.stringify(data, null, 2));
+    if (data?.baseline?.error) {
+      setResponse(`compare_error: ${data.baseline.error}`);
+    } else {
+      setResponse(JSON.stringify(data, null, 2));
+    }
     setLoading(false);
   }
 
@@ -164,6 +176,7 @@ export default function TeacherPage() {
         {viewMode === "dashboard" && (
           <article className="card full fade-up">
             <h2>教师画像看板</h2>
+            {dashboard?.error && <p className="hint">图数据读取失败：{dashboard.error}</p>}
             <div className="kpi-grid">
               <div className="kpi">
                 <span>项目总数</span>

@@ -25,16 +25,16 @@ class JsonStorage:
             encoding="utf-8",
         )
 
-    def append_submission(self, project_id: str, submission: dict) -> None:
+    def append_submission(self, project_id: str, submission: dict) -> dict:
         data = self.load_project(project_id)
-        data["submissions"].append(
-            {
-                **submission,
-                "submission_id": str(uuid4()),
-                "created_at": datetime.utcnow().isoformat(),
-            }
-        )
+        saved_submission = {
+            **submission,
+            "submission_id": str(uuid4()),
+            "created_at": datetime.utcnow().isoformat(),
+        }
+        data["submissions"].append(saved_submission)
         self.save_project(project_id, data)
+        return saved_submission
 
     def append_teacher_feedback(self, project_id: str, teacher_feedback: dict) -> str:
         data = self.load_project(project_id)

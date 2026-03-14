@@ -9,6 +9,8 @@ from app.schemas import (
     AgentRunPayload,
     AgentRunResponse,
     AnalyzePayload,
+    DialogueTurnPayload,
+    DialogueTurnResponse,
     HealthResponse,
     ProjectSnapshotResponse,
     TeacherFeedbackRequest,
@@ -19,6 +21,8 @@ from app.services.agent_router import run_agents
 from app.services.case_knowledge import infer_category
 from app.services.document_parser import extract_text
 from app.services.graph_service import GraphService
+from app.services.hypergraph_service import HypergraphService
+from app.services.llm_client import LlmClient
 from app.services.storage import JsonStorage
 
 app = FastAPI(title=settings.app_name)
@@ -39,6 +43,8 @@ graph_service = GraphService(
     password=settings.neo4j_password,
     database=settings.neo4j_database,
 )
+hypergraph_service = HypergraphService(graph_service=graph_service)
+composer_llm = LlmClient()
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -56,6 +62,9 @@ def analyze_text(payload: AnalyzePayload) -> dict:
         project_state=project_state,
     )
     coach = multi_agent_result["project_coach"]
+    inferred_category = infer_category(payload.input_text)
+    rule_ids = [str(x.get("id")) for x in (coach.get("diagnosis", {}).get("triggered_rules", []) or []) if isinstance(x, dict)]
+    hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
     json_store.append_submission(
         payload.project_id,
         {
@@ -63,9 +72,11 @@ def analyze_text(payload: AnalyzePayload) -> dict:
             "class_id": payload.class_id,
             "cohort_id": payload.cohort_id,
             "source_type": "text",
+            "mode": payload.mode,
             "raw_text": payload.input_text[:6000],
             "diagnosis": coach["diagnosis"],
             "next_task": coach["next_task"],
+            "hypergraph_insight": hyper_insight,
             "agent_outputs": multi_agent_result,
         },
     )
@@ -74,6 +85,7 @@ def analyze_text(payload: AnalyzePayload) -> dict:
         "student_id": payload.student_id,
         "diagnosis": coach["diagnosis"],
         "next_task": coach["next_task"],
+        "hypergraph_insight": hyper_insight,
         "agent_outputs": multi_agent_result,
     }
 
@@ -106,6 +118,9 @@ async def upload_and_analyze(
         project_state=project_state,
     )
     coach = multi_agent_result["project_coach"]
+    inferred_category = infer_category(extracted_text)
+    rule_ids = [str(x.get("id")) for x in (coach.get("diagnosis", {}).get("triggered_rules", []) or []) if isinstance(x, dict)]
+    hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
     json_store.append_submission(
         project_id,
         {
@@ -113,10 +128,12 @@ async def upload_and_analyze(
             "class_id": class_id or None,
             "cohort_id": cohort_id or None,
             "source_type": "file",
+            "mode": mode,
             "filename": file.filename,
             "raw_text": extracted_text[:6000],
             "diagnosis": coach["diagnosis"],
             "next_task": coach["next_task"],
+            "hypergraph_insight": hyper_insight,
             "agent_outputs": multi_agent_result,
         },
     )
@@ -128,6 +145,179 @@ async def upload_and_analyze(
         extracted_length=len(extracted_text),
         diagnosis=coach["diagnosis"],
         next_task=coach["next_task"],
+        hypergraph_insight=hyper_insight,
+    )
+
+
+def _compose_assistant_message(
+    user_message: str,
+    coach: dict,
+    critic: dict,
+    planner: dict,
+    grader: dict | None = None,
+    hyper_insight: dict | None = None,
+) -> str:
+    diagnosis = coach.get("diagnosis", {}) if isinstance(coach, dict) else {}
+    next_task = coach.get("next_task", {}) if isinstance(coach, dict) else {}
+    bottleneck = str(diagnosis.get("bottleneck") or "暂无")
+    rules = diagnosis.get("triggered_rules", []) or []
+    rule_text = "；".join(f"{r.get('id')}:{r.get('name')}" for r in rules[:5] if isinstance(r, dict)) or "暂无"
+    task_title = str(next_task.get("title") or "暂无")
+    task_desc = str(next_task.get("description") or "")
+    accept = next_task.get("acceptance_criteria", []) or []
+    challenge = (critic.get("counterfactual_questions") or critic.get("challenge_points") or []) if isinstance(critic, dict) else []
+    plan = planner.get("execution_plan", []) if isinstance(planner, dict) else []
+    socratic = diagnosis.get("socratic_questions", []) or []
+    score = (grader or {}).get("overall_score", diagnosis.get("overall_score", ""))
+    hyper_edges = (hyper_insight or {}).get("edges", []) or []
+    hyper_note = hyper_edges[0].get("teaching_note", "") if hyper_edges else ""
+
+    context_block = (
+        f"## 诊断结果\n瓶颈: {bottleneck}\n触发风险: {rule_text}\n综合评分: {score}\n"
+        f"## 下一步任务\n标题: {task_title}\n描述: {task_desc}\n验收标准: {accept}\n"
+        f"## Critic反驳\n反事实追问: {challenge[:3]}\n"
+        f"## Planner建议\n执行计划: {plan[:3]}\n"
+        f"## 苏格拉底追问\n{socratic[:3]}\n"
+    )
+    if hyper_note:
+        context_block += f"## 超图洞察\n{hyper_note}\n"
+
+    if composer_llm.enabled:
+        reply = composer_llm.chat_text(
+            system_prompt=(
+                "你是一位经验丰富、温和但严格的双创项目教练。\n"
+                "请基于以下多Agent诊断结果，用自然流畅的中文给学生写一段回复。\n"
+                "要求：\n"
+                "1. 先简要回应学生说的话，体现你在认真倾听\n"
+                "2. 指出最关键的1-2个风险，用通俗语言解释为什么这是问题\n"
+                "3. 给出唯一的下一步任务，说清楚要做什么、怎么做\n"
+                "4. 用苏格拉底式追问收尾——提一个让学生深入思考的问题\n"
+                "5. 语气像导师跟学生聊天，不要用表格或列表标记符号，不要说'根据诊断结果'\n"
+                "6. 控制在200-400字\n"
+            ),
+            user_prompt=f"学生说：{user_message}\n\n诊断上下文：\n{context_block}",
+            model=settings.llm_reason_model,
+            temperature=0.35,
+        )
+        if reply and len(reply.strip()) > 30:
+            return reply.strip()
+
+    msg = f"{bottleneck}\n\n触发风险：{rule_text}\n\n下一步任务：{task_title}\n{task_desc}"
+    if accept:
+        msg += "\n验收标准：" + "；".join(str(a) for a in accept[:3])
+    if challenge:
+        msg += f"\n\n追问：{challenge[0]}"
+    if plan:
+        msg += f"\n执行建议：{plan[0]}"
+    return msg
+
+
+@app.post("/api/dialogue/turn", response_model=DialogueTurnResponse)
+def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
+    from app.services.diagnosis_engine import run_diagnosis
+    from app.services.case_knowledge import retrieve_cases_by_category
+
+    project_state = json_store.load_project(payload.project_id)
+    submissions = project_state.get("submissions", []) or []
+    history_context = ""
+    for row in submissions[-4:]:
+        snippet = (row.get("raw_text") or "")[:200]
+        task = (row.get("next_task") or {}).get("title", "")
+        if snippet:
+            history_context += f"- 学生曾说：{snippet}… → 建议任务：{task}\n"
+
+    diag_result = run_diagnosis(input_text=payload.message, mode=payload.mode)
+    diagnosis = diag_result.diagnosis
+    next_task = diag_result.next_task
+
+    inferred_category = infer_category(payload.message)
+    references = retrieve_cases_by_category(inferred_category, limit=2)
+    rule_ids = [str(r.get("id")) for r in (diagnosis.get("triggered_rules", []) or []) if isinstance(r, dict)]
+    hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
+
+    hyper_edges = (hyper_insight or {}).get("edges", []) or []
+    hyper_note = hyper_edges[0].get("teaching_note", "") if hyper_edges else ""
+    rules = diagnosis.get("triggered_rules", []) or []
+    rule_text = "；".join(f"{r.get('id')}:{r.get('name')}" for r in rules[:5] if isinstance(r, dict)) or "暂无"
+
+    context_block = (
+        f"## 规则诊断\n瓶颈: {diagnosis.get('bottleneck','')}\n"
+        f"触发风险: {rule_text}\n综合评分: {diagnosis.get('overall_score',0)}/10\n"
+        f"## 下一步任务\n标题: {next_task.get('title','')}\n描述: {next_task.get('description','')}\n"
+        f"验收标准: {next_task.get('acceptance_criteria',[])}\n"
+        f"## 推断类别\n{inferred_category}\n"
+    )
+    if references:
+        context_block += f"## 参考案例\n{references[:2]}\n"
+    if hyper_note:
+        context_block += f"## 超图洞察\n{hyper_note}\n"
+    if history_context:
+        context_block += f"## 对话历史\n{history_context}\n"
+
+    assistant_message = ""
+    if composer_llm.enabled:
+        assistant_message = composer_llm.chat_text(
+            system_prompt=(
+                "你是一位经验丰富、温和但严格的双创项目教练（创新创业导师）。\n"
+                "你会接收学生的消息和系统自动诊断的结构化上下文。\n"
+                "请基于这些信息，用自然流畅的中文给学生写一段回复。\n\n"
+                "要求：\n"
+                "1. 先简要回应学生说的话，体现你在认真倾听和理解\n"
+                "2. 如果有风险命中，用通俗语言解释1-2个最关键的问题是什么、为什么重要\n"
+                "3. 给出明确的下一步行动建议，说清楚要做什么、怎么做、交付物是什么\n"
+                "4. 用苏格拉底式追问收尾——提一个引导学生深入思考的好问题\n"
+                "5. 如果学生只是闲聊或问好，也要热情回应，然后自然引导到项目话题\n"
+                "6. 语气像资深导师跟学生聊天，亲切专业，不要用markdown列表符号\n"
+                "7. 控制在150-350字，简洁有力\n"
+            ),
+            user_prompt=f"学生说：{payload.message}\n\n诊断上下文：\n{context_block}",
+            model=settings.llm_reason_model,
+            temperature=0.4,
+        )
+
+    if not assistant_message or len(assistant_message.strip()) < 20:
+        bottleneck = str(diagnosis.get("bottleneck") or "暂无")
+        task_title = str(next_task.get("title") or "暂无")
+        task_desc = str(next_task.get("description") or "")
+        assistant_message = f"{bottleneck}\n\n下一步任务：{task_title}\n{task_desc}"
+
+    agent_trace = {
+        "orchestration": {
+            "mode": payload.mode,
+            "llm_enabled": composer_llm.enabled,
+            "called_agents": ["diagnosis_engine", "composer"],
+            "skipped_agents": [],
+            "strategy": "fast_dialogue",
+        },
+        "diagnosis_engine": "rule",
+        "composer": "llm" if composer_llm.enabled else "template",
+        "inferred_category": inferred_category,
+    }
+
+    json_store.append_submission(
+        payload.project_id,
+        {
+            "student_id": payload.student_id,
+            "class_id": payload.class_id,
+            "cohort_id": payload.cohort_id,
+            "source_type": "dialogue_turn",
+            "mode": payload.mode,
+            "raw_text": payload.message[:6000],
+            "diagnosis": diagnosis,
+            "next_task": next_task,
+            "hypergraph_insight": hyper_insight,
+            "agent_outputs": agent_trace,
+        },
+    )
+
+    return DialogueTurnResponse(
+        project_id=payload.project_id,
+        student_id=payload.student_id,
+        assistant_message=assistant_message.strip(),
+        diagnosis=diagnosis,
+        next_task=next_task,
+        hypergraph_insight=hyper_insight,
+        agent_trace=agent_trace,
     )
 
 
@@ -208,6 +398,28 @@ def teacher_project_evidence(project_id: str) -> dict:
     data = graph_service.project_evidence(project_id=project_id)
     return {
         "project_id": project_id,
+        "data": data,
+    }
+
+
+@app.post("/api/hypergraph/rebuild")
+def rebuild_hypergraph(min_pattern_support: int = 2, max_edges: int = 30) -> dict:
+    data = hypergraph_service.rebuild(min_pattern_support=min_pattern_support, max_edges=max_edges)
+    return {
+        "min_pattern_support": min_pattern_support,
+        "max_edges": max_edges,
+        "data": data,
+    }
+
+
+@app.get("/api/hypergraph/insight")
+def hypergraph_insight(category: str | None = None, rule_ids: str = "", limit: int = 5) -> dict:
+    parsed_rule_ids = [x.strip() for x in rule_ids.split(",") if x.strip()]
+    data = hypergraph_service.insight(category=category, rule_ids=parsed_rule_ids, limit=limit)
+    return {
+        "category": category,
+        "rule_ids": parsed_rule_ids,
+        "limit": limit,
         "data": data,
     }
 

@@ -71,7 +71,8 @@ class AgentRunResponse(BaseModel):
 class DialogueTurnPayload(BaseModel):
     project_id: str
     student_id: str
-    message: str = Field(min_length=5)
+    message: str = Field(min_length=1)
+    conversation_id: str | None = None
     class_id: str | None = None
     cohort_id: str | None = None
     mode: Literal["coursework", "competition"] = "coursework"
@@ -80,8 +81,10 @@ class DialogueTurnPayload(BaseModel):
 class DialogueTurnResponse(BaseModel):
     project_id: str
     student_id: str
+    conversation_id: str = ""
     assistant_message: str
     diagnosis: dict
     next_task: dict
+    kg_analysis: dict = Field(default_factory=dict)
     hypergraph_insight: dict = Field(default_factory=dict)
     agent_trace: dict = Field(default_factory=dict)

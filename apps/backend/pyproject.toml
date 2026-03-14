@@ -18,6 +18,7 @@ dependencies = [
   "hypernetx>=2.4.0",
   "fastjsonschema>=2.21.2",
   "pandas<3",
+  "langgraph>=0.2.0",
 ]
 
 [dependency-groups]

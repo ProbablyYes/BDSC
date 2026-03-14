@@ -1,12 +1,15 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string };
-type RightTab = "task" | "risk" | "score" | "upload" | "debug";
+type RightTab = "task" | "risk" | "score" | "kg" | "upload" | "feedback" | "debug";
+type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
 export default function StudentPage() {
   const [projectId, setProjectId] = useState("demo-project-001");
@@ -21,12 +24,28 @@ export default function StudentPage() {
   const [rightTab, setRightTab] = useState<RightTab>("task");
   const [rightOpen, setRightOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [teacherFeedback, setTeacherFeedback] = useState<any[]>([]);
+  const [convSidebarOpen, setConvSidebarOpen] = useState(true);
+  const [conversations, setConversations] = useState<ConvMeta[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  const loadConversations = useCallback(async () => {
+    try {
+      const r = await fetch(`${API_BASE}/api/conversations?project_id=${encodeURIComponent(projectId)}`);
+      const d = await r.json();
+      setConversations(d.conversations ?? []);
+    } catch { /* ignore */ }
+  }, [projectId]);
+
+  useEffect(() => { loadConversations(); }, [loadConversations]);
 
   function autoResize() {
     const el = textareaRef.current;
@@ -35,64 +54,91 @@ export default function StudentPage() {
     el.style.height = Math.min(el.scrollHeight, 160) + "px";
   }
 
+  async function newChat() {
+    setMessages([]);
+    setLatestResult(null);
+    setConversationId(null);
+    setAttachedFile(null);
+  }
+
+  async function loadConversation(cid: string) {
+    try {
+      const r = await fetch(`${API_BASE}/api/conversations/${encodeURIComponent(cid)}?project_id=${encodeURIComponent(projectId)}`);
+      const d = await r.json();
+      setConversationId(cid);
+      const msgs: ChatMessage[] = (d.messages ?? []).map((m: any) => ({
+        role: m.role as "user" | "assistant",
+        text: m.content ?? "",
+        ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : undefined,
+      }));
+      setMessages(msgs);
+      setLatestResult(null);
+    } catch { /* ignore */ }
+  }
+
   async function send(e: FormEvent) {
     e.preventDefault();
     const text = input.trim();
-    if (!text || loading) return;
+    if ((!text && !attachedFile) || loading) return;
     setLoading(true);
-    setMessages((p) => [...p, { role: "user", text, ts: new Date().toLocaleTimeString() }]);
+
+    const displayText = attachedFile ? `${text ? text + " " : ""}📎 ${attachedFile.name}` : text;
+    setMessages((p) => [...p, { role: "user", text: displayText, ts: new Date().toLocaleTimeString() }]);
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     try {
-      const resp = await fetch(`${API_BASE}/api/dialogue/turn`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          project_id: projectId,
-          student_id: studentId,
-          class_id: classId || undefined,
-          cohort_id: cohortId || undefined,
-          message: text,
-          mode,
-        }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-        setMessages((p) => [...p, { role: "assistant", text: `请求出错：${data?.detail ?? resp.statusText}` }]);
+      let data: any;
+
+      if (attachedFile) {
+        const form = new FormData();
+        form.set("project_id", projectId);
+        form.set("student_id", studentId);
+        form.set("message", text);
+        form.set("conversation_id", conversationId ?? "");
+        form.set("mode", mode);
+        form.set("file", attachedFile);
+        const resp = await fetch(`${API_BASE}/api/dialogue/turn-upload`, { method: "POST", body: form });
+        data = await resp.json();
+        if (!resp.ok) throw new Error(data?.detail ?? resp.statusText);
       } else {
-        setLatestResult(data);
-        const reply = (data?.assistant_message ?? "").trim() || "（智能体未返回有效回复，请查看调试面板）";
-        setMessages((p) => [...p, { role: "assistant", text: reply, ts: new Date().toLocaleTimeString() }]);
+        const resp = await fetch(`${API_BASE}/api/dialogue/turn`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            project_id: projectId,
+            student_id: studentId,
+            conversation_id: conversationId || undefined,
+            class_id: classId || undefined,
+            cohort_id: cohortId || undefined,
+            message: text,
+            mode,
+          }),
+        });
+        data = await resp.json();
+        if (!resp.ok) throw new Error(data?.detail ?? resp.statusText);
       }
+
+      setLatestResult(data);
+      if (data.conversation_id && !conversationId) {
+        setConversationId(data.conversation_id);
+      }
+      const reply = (data?.assistant_message ?? "").trim() || "（智能体未返回有效回复）";
+      setMessages((p) => [...p, { role: "assistant", text: reply, ts: new Date().toLocaleTimeString() }]);
+      setAttachedFile(null);
+      loadConversations();
     } catch (err: any) {
-      setMessages((p) => [...p, { role: "assistant", text: `网络错误：${err?.message ?? "无法连接后端"}` }]);
+      setMessages((p) => [...p, { role: "assistant", text: `错误：${err?.message ?? "无法连接后端"}` }]);
     }
     setLoading(false);
   }
 
-  async function uploadFile(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const form = new FormData(e.currentTarget);
-    form.set("project_id", projectId);
-    form.set("student_id", studentId);
-    form.set("class_id", classId);
-    form.set("cohort_id", cohortId);
-    form.set("mode", mode);
+  async function loadFeedback() {
     try {
-      const resp = await fetch(`${API_BASE}/api/upload`, { method: "POST", body: form });
+      const resp = await fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}/feedback`);
       const data = await resp.json();
-      setLatestResult(data);
-      setMessages((p) => [
-        ...p,
-        { role: "user", text: `[上传文件] ${data?.filename ?? "未知文件"}` },
-        { role: "assistant", text: `文件已解析（${data?.extracted_length ?? 0}字）。\n当前瓶颈：${data?.diagnosis?.bottleneck ?? "暂无"}\n下一步：${data?.next_task?.title ?? "暂无"}` },
-      ]);
-    } catch (err: any) {
-      setMessages((p) => [...p, { role: "assistant", text: `上传失败：${err?.message}` }]);
-    }
-    setLoading(false);
+      setTeacherFeedback(data.feedback ?? []);
+    } catch { /* ignore */ }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -102,18 +148,28 @@ export default function StudentPage() {
     }
   }
 
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (f) setAttachedFile(f);
+    e.target.value = "";
+  }
+
   const rubric = useMemo(() => latestResult?.diagnosis?.rubric ?? [], [latestResult]);
   const triggeredRules = useMemo(() => latestResult?.diagnosis?.triggered_rules ?? [], [latestResult]);
   const nextTask = latestResult?.next_task ?? null;
   const hyperEdges = useMemo(() => latestResult?.hypergraph_insight?.edges ?? [], [latestResult]);
+  const kgAnalysis = latestResult?.kg_analysis ?? latestResult?.agent_trace?.kg_analysis ?? null;
   const orchestration = latestResult?.agent_trace?.orchestration ?? {};
-  const overallScore = latestResult?.agent_trace?.grader?.overall_score ?? latestResult?.diagnosis?.overall_score ?? null;
+  const overallScore = latestResult?.diagnosis?.overall_score ?? null;
 
   return (
     <div className="chat-app">
       {/* ── Top Bar ── */}
       <header className="chat-topbar">
         <div className="topbar-left">
+          <button type="button" className="topbar-btn sidebar-toggle" onClick={() => setConvSidebarOpen((v) => !v)} title="会话列表">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
           <Link href="/" className="topbar-brand">VentureAgent</Link>
           <span className="topbar-sep" />
           <span className="topbar-label">双创智能教练</span>
@@ -127,7 +183,7 @@ export default function StudentPage() {
         </div>
         <div className="topbar-right">
           <button type="button" className="topbar-btn" onClick={() => setSettingsOpen((v) => !v)}>设置</button>
-          <button type="button" className="topbar-btn" onClick={() => { setRightOpen((v) => !v); }} title="工具面板">
+          <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
             {rightOpen ? "收起" : "工具"}
           </button>
           <Link href="/teacher" className="topbar-btn">教师端</Link>
@@ -147,6 +203,29 @@ export default function StudentPage() {
       )}
 
       <div className="chat-body">
+        {/* ── Conversation Sidebar ── */}
+        {convSidebarOpen && (
+          <aside className="conv-sidebar">
+            <button className="new-chat-btn" onClick={newChat}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+              新对话
+            </button>
+            <div className="conv-list">
+              {conversations.map((c) => (
+                <button
+                  key={c.conversation_id}
+                  className={`conv-item ${c.conversation_id === conversationId ? "active" : ""}`}
+                  onClick={() => loadConversation(c.conversation_id)}
+                >
+                  <span className="conv-title">{c.title || "新对话"}</span>
+                  <span className="conv-meta">{c.message_count}条 · {(c.created_at ?? "").slice(5, 16)}</span>
+                </button>
+              ))}
+              {conversations.length === 0 && <p className="conv-empty">暂无历史对话</p>}
+            </div>
+          </aside>
+        )}
+
         {/* ── Messages ── */}
         <main className="chat-main">
           <div className="chat-scroll">
@@ -155,7 +234,7 @@ export default function StudentPage() {
                 <h2>你好，我是你的双创教练</h2>
                 <p>告诉我你的项目想法、当前困惑，或上传计划书，我会帮你诊断风险并给出下一步行动。</p>
                 <div className="chat-hints">
-                  {["我想做一个校园二手交易平台，目标用户是大学生", "帮我分析一下我的商业模式有什么问题", "我做了5份用户访谈，下一步该怎么做"].map((h) => (
+                  {["我想做一个校园二手交易平台，目标用户是大学生", "帮我分析一下我的商业模式有什么问题", "什么是MVP，教我怎么做"].map((h) => (
                     <button key={h} className="hint-chip" onClick={() => { setInput(h); textareaRef.current?.focus(); }}>
                       {h}
                     </button>
@@ -168,7 +247,13 @@ export default function StudentPage() {
               <div key={i} className={`msg-row ${m.role}`}>
                 <div className="msg-avatar">{m.role === "user" ? "你" : "AI"}</div>
                 <div className="msg-content">
-                  <div className="msg-bubble">{m.text}</div>
+                  <div className="msg-bubble">
+                    {m.role === "assistant" ? (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                    ) : (
+                      m.text
+                    )}
+                  </div>
                   {m.ts && <span className="msg-time">{m.ts}</span>}
                 </div>
               </div>
@@ -177,36 +262,53 @@ export default function StudentPage() {
             {loading && (
               <div className="msg-row assistant">
                 <div className="msg-avatar">AI</div>
-                <div className="msg-content"><div className="msg-bubble typing">思考中...</div></div>
+                <div className="msg-content"><div className="msg-bubble typing">
+                  <span className="dot-pulse" />
+                  思考中...
+                </div></div>
               </div>
             )}
             <div ref={bottomRef} />
           </div>
 
           {/* ── Input Bar ── */}
-          <form className="chat-inputbar" onSubmit={send}>
-            <textarea
-              ref={textareaRef}
-              className="chat-textarea"
-              value={input}
-              onChange={(e) => { setInput(e.target.value); autoResize(); }}
-              onKeyDown={handleKeyDown}
-              placeholder="描述你的项目想法、困惑或问题…  (Shift+Enter 换行)"
-              rows={1}
-            />
-            <button type="submit" className="send-btn" disabled={loading || !input.trim()}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
-            </button>
-          </form>
+          <div className="chat-inputbar-wrapper">
+            {attachedFile && (
+              <div className="attached-file-badge">
+                <span>📎 {attachedFile.name}</span>
+                <button type="button" onClick={() => setAttachedFile(null)} className="remove-file">✕</button>
+              </div>
+            )}
+            <form className="chat-inputbar" onSubmit={send}>
+              <input ref={fileInputRef} type="file" hidden accept=".pdf,.docx,.pptx,.txt,.md" onChange={handleFileSelect} />
+              <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title="上传文件">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+              </button>
+              <textarea
+                ref={textareaRef}
+                className="chat-textarea"
+                value={input}
+                onChange={(e) => { setInput(e.target.value); autoResize(); }}
+                onKeyDown={handleKeyDown}
+                placeholder="描述你的项目想法、困惑或问题…  (Shift+Enter 换行)"
+                rows={1}
+              />
+              <button type="submit" className="send-btn" disabled={loading || (!input.trim() && !attachedFile)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+              </button>
+            </form>
+          </div>
         </main>
 
         {/* ── Right Panel ── */}
         {rightOpen && (
           <aside className="chat-right">
             <div className="right-tabs">
-              {(["task", "risk", "score", "upload", "debug"] as RightTab[]).map((t) => (
-                <button key={t} className={`right-tab ${rightTab === t ? "active" : ""}`} onClick={() => setRightTab(t)}>
-                  {{ task: "任务", risk: "风险", score: "评分", upload: "上传", debug: "调试" }[t]}
+              {(["task", "risk", "score", "kg", "upload", "feedback", "debug"] as RightTab[]).map((t) => (
+                <button key={t} className={`right-tab ${rightTab === t ? "active" : ""}`} onClick={() => { setRightTab(t); if (t === "feedback") loadFeedback(); }}>
+                  {{ task: "任务", risk: "风险", score: "评分", kg: "图谱", upload: "上传", feedback: "批注", debug: "调试" }[t]}
                 </button>
               ))}
             </div>
@@ -262,19 +364,88 @@ export default function StudentPage() {
                 ) : <p className="right-hint">暂无评分</p>
               )}
 
+              {rightTab === "kg" && (
+                <div className="right-section">
+                  <h4>知识图谱分析</h4>
+                  {kgAnalysis ? (
+                    <>
+                      <div className="kg-score-row">
+                        <span>结构完整度</span>
+                        <div className="score-bar-track">
+                          <div className="score-bar-fill kg-bar" style={{ width: `${Math.min(100, (kgAnalysis.completeness_score ?? 0) * 10)}%` }} />
+                        </div>
+                        <span className="score-value">{kgAnalysis.completeness_score ?? 0}/10</span>
+                      </div>
+                      {kgAnalysis.insight && <p className="kg-insight">{kgAnalysis.insight}</p>}
+
+                      {(kgAnalysis.entities ?? []).length > 0 && (
+                        <div className="kg-entities">
+                          <h5>提取实体 ({kgAnalysis.entities.length})</h5>
+                          <div className="kg-entity-grid">
+                            {kgAnalysis.entities.map((e: any) => (
+                              <span key={e.id} className={`kg-entity-chip ${e.type}`}>{e.label}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {(kgAnalysis.relationships ?? []).length > 0 && (
+                        <div className="kg-relations">
+                          <h5>关系 ({kgAnalysis.relationships.length})</h5>
+                          {kgAnalysis.relationships.map((r: any, i: number) => (
+                            <div key={i} className="kg-rel-row">
+                              <span className="kg-rel-src">{r.source}</span>
+                              <span className="kg-rel-arrow">→ {r.relation} →</span>
+                              <span className="kg-rel-tgt">{r.target}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {(kgAnalysis.structural_gaps ?? []).length > 0 && (
+                        <div className="kg-gaps">
+                          <h5>结构缺陷</h5>
+                          {kgAnalysis.structural_gaps.map((g: string, i: number) => (
+                            <div key={i} className="kg-gap-item">⚠ {g}</div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : <p className="right-hint">发送项目描述后显示图谱分析</p>}
+                </div>
+              )}
+
               {rightTab === "upload" && (
-                <form className="upload-form" onSubmit={uploadFile}>
+                <div className="right-section">
+                  <p className="right-hint">可在输入栏旁点击 📎 按钮上传文件，文件将在对话中分析。</p>
                   <p className="right-hint">支持 docx / pdf / pptx / txt / md</p>
-                  <input type="file" name="file" required />
-                  <button type="submit" className="upload-btn" disabled={loading}>{loading ? "分析中..." : "上传并分析"}</button>
-                </form>
+                </div>
+              )}
+
+              {rightTab === "feedback" && (
+                <div className="right-section">
+                  <h4>教师批注</h4>
+                  {teacherFeedback.length > 0 ? teacherFeedback.map((fb, i) => (
+                    <div key={i} className="right-card">
+                      <p>{fb.comment}</p>
+                      <span className="msg-time">{fb.teacher_id} · {(fb.created_at ?? "").slice(0, 16)}</span>
+                      {(fb.focus_tags ?? []).length > 0 && (
+                        <div className="tch-tag-row">{fb.focus_tags.map((t: string) => <span key={t} className="tch-tag">{t}</span>)}</div>
+                      )}
+                    </div>
+                  )) : <p className="right-hint">暂无教师批注</p>}
+                </div>
               )}
 
               {rightTab === "debug" && (
                 <div className="right-section">
+                  <div className="debug-row"><span>意图</span><span>{orchestration?.intent ?? "-"}</span></div>
+                  <div className="debug-row"><span>置信度</span><span>{orchestration?.confidence ?? "-"}</span></div>
+                  <div className="debug-row"><span>管线</span><span>{(orchestration?.pipeline ?? []).join(" → ") || "-"}</span></div>
+                  <div className="debug-row"><span>访问节点</span><span>{(orchestration?.nodes_visited ?? []).join(" → ") || "-"}</span></div>
+                  <div className="debug-row"><span>策略</span><span>{orchestration?.strategy ?? "-"}</span></div>
                   <div className="debug-row"><span>LLM</span><span>{String(orchestration?.llm_enabled ?? false)}</span></div>
-                  <div className="debug-row"><span>调用链</span><span>{(orchestration?.called_agents ?? []).join(" → ") || "-"}</span></div>
-                  <div className="debug-row"><span>跳过</span><span>{(orchestration?.skipped_agents ?? []).join(", ") || "-"}</span></div>
+                  <div className="debug-row"><span>会话ID</span><span className="debug-conv-id">{conversationId ?? "无"}</span></div>
                   <details className="debug-json">
                     <summary>原始 JSON</summary>
                     <pre>{JSON.stringify(latestResult, null, 2) ?? "暂无"}</pre>

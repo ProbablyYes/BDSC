@@ -103,24 +103,10 @@ def select_candidate_chunks(
     segments: list[TextSegment],
     max_chunks: int = 10,
     max_chars_per_chunk: int = 700,
-    split_by: str = "auto",  # Options: "auto", "page", "chapter"
 ) -> list[dict[str, str]]:
     if not segments:
         return []
 
-    # Detect split strategy
-    if split_by == "page":
-        page_markers = [seg for seg in segments if "page" in seg.text.lower()]
-        if page_markers:
-            # Split by page markers
-            return _split_by_markers(segments, page_markers, max_chunks, max_chars_per_chunk)
-    elif split_by == "chapter":
-        chapter_markers = [seg for seg in segments if HEADING_RE.match(seg.text)]
-        if chapter_markers:
-            # Split by chapter markers
-            return _split_by_markers(segments, chapter_markers, max_chunks, max_chars_per_chunk)
-
-    # Default scoring-based chunk selection
     scored: list[tuple[int, TextSegment]] = [(_segment_score(seg.text), seg) for seg in segments if seg.text.strip()]
     scored.sort(key=lambda x: (x[0], len(x[1].text)), reverse=True)
 
@@ -141,43 +127,6 @@ def select_candidate_chunks(
             }
         )
     return out
-
-def _split_by_markers(
-    segments: list[TextSegment],
-    markers: list[TextSegment],
-    max_chunks: int,
-    max_chars_per_chunk: int,
-) -> list[dict[str, str]]:
-    """Split segments by detected markers (e.g., pages or chapters)."""
-    chunks: list[dict[str, str]] = []
-    current_chunk: list[str] = []
-    chunk_id = 1
-
-    for seg in segments:
-        if seg in markers and current_chunk:
-            # Finalize current chunk
-            chunks.append(
-                {
-                    "chunk_id": f"C{chunk_id}",
-                    "source_unit": seg.source_unit,
-                    "text": "\n".join(current_chunk)[:max_chars_per_chunk],
-                }
-            )
-            chunk_id += 1
-            current_chunk = []
-        current_chunk.append(seg.text)
-
-    # Add the last chunk
-    if current_chunk:
-        chunks.append(
-            {
-                "chunk_id": f"C{chunk_id}",
-                "source_unit": segments[-1].source_unit,
-                "text": "\n".join(current_chunk)[:max_chars_per_chunk],
-            }
-        )
-
-    return chunks[:max_chunks]
 
 
 def filter_noisy_segments(segments: list[TextSegment]) -> list[TextSegment]:

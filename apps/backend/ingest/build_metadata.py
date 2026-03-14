@@ -6,7 +6,6 @@ from pathlib import Path
 
 from app.config import settings
 from app.services.document_parser import ParsedDocument, parse_document
-from app.services.ocr import process_with_ocr  # Assuming OCR integration
 from ingest.common import (
     SUPPORTED_DOC_SUFFIXES,
     bool_from_csv,
@@ -49,7 +48,7 @@ FAILURE_FIELDS = [
     "suggestion",
 ]
 
-MAX_PARSE_FILE_MB = settings.max_parse_file_mb
+MAX_PARSE_FILE_MB = 30.0
 
 
 def load_existing(metadata_path: Path) -> dict[str, dict]:
@@ -86,7 +85,7 @@ def build_row(
     root: Path,
     existing: dict[str, dict],
     parse_pdf_deep: bool,
-    max_parse_file_mb: float = MAX_PARSE_FILE_MB,
+    max_parse_file_mb: float,
 ) -> dict:
     rel_path = normalize_rel_path(path, root)
     rel_obj = Path(rel_path)
@@ -99,22 +98,19 @@ def build_row(
         quality, note = ("C", "快速模式：PDF 未做深度文本提取，默认不进入结构化抽取。")
         parsed = ParsedDocument(file_path=path, doc_type="pdf", segments=[])
     elif file_size_mb > max_parse_file_mb and suffix in {".pdf", ".pptx", ".docx"}:
-        # Handle large files
-        if suffix == ".pdf":
-            note = f"文件过大({file_size_mb:.2f}MB)，尝试生成摘要。"
-            parsed = process_with_ocr(path)  # OCR processing for large files
-            quality = "B"
-        else:
-            note = f"文件过大({file_size_mb:.2f}MB)，已跳过自动解析，可人工补充摘要后入库。"
-            quality = "C"
+        quality, note = (
+            "C",
+            f"文件过大({file_size_mb:.2f}MB)，已跳过自动解析，可人工补充摘要后入库。",
+        )
         parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
     else:
         try:
             parsed = parse_document(path)
             quality, note = parse_quality(parsed)
             appendix_start = detect_appendix_start(parsed)
-        except Exception as e:
-            quality, note = ("F", f"解析失败: {str(e)}")
+        except Exception as exc:  # noqa: BLE001
+            quality, note = ("C", f"解析失败：{exc}")
+            parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
 
     previous = existing.get(rel_path, {})
     include_in_kg_default = quality in {"A", "B"}

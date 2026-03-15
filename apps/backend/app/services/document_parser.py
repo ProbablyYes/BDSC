@@ -7,7 +7,7 @@ from pypdf import PdfReader
 from pptx import Presentation
 
 
-SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".docx", ".pptx"}
+SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".docx", ".pptx", ".ppt"}
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 
@@ -92,6 +92,30 @@ def parse_document(file_path: Path, max_pdf_pages: int = 80) -> ParsedDocument:
                     )
                 )
         return ParsedDocument(file_path=file_path, doc_type="pptx", segments=segments)
+
+    if suffix == ".ppt":
+        try:
+            # Attempt to parse .ppt (97-2003) files with python-pptx
+            prs = Presentation(str(file_path))
+            segments: list[TextSegment] = []
+            for i, slide in enumerate(prs.slides):
+                slide_lines: list[str] = []
+                for shape in slide.shapes:
+                    text = getattr(shape, "text", "")
+                    if text and text.strip():
+                        slide_lines.append(text.strip())
+                if slide_lines:
+                    segments.append(
+                        TextSegment(
+                            index=i,
+                            source_unit=f"slide_{i+1}",
+                            text="\n".join(slide_lines),
+                        )
+                    )
+            return ParsedDocument(file_path=file_path, doc_type="ppt", segments=segments)
+        except Exception:  # noqa: BLE001
+            # If parsing fails (format not supported), return empty segments
+            return ParsedDocument(file_path=file_path, doc_type="ppt", segments=[])
 
     return ParsedDocument(file_path=file_path, doc_type=suffix.lstrip("."), segments=[])
 

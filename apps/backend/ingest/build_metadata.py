@@ -4,7 +4,7 @@ import csv
 from pathlib import Path
 from app.config import settings
 from app.services.document_parser import ParsedDocument, parse_document
-from app.services.ocr import process_with_ocr  # Assuming OCR integration
+from app.services.ocr import process_with_ocr  # OCR integration
 from ingest.common import (
     SUPPORTED_DOC_SUFFIXES,
     bool_from_csv,
@@ -96,28 +96,13 @@ def build_row(
     if not parse_pdf_deep and suffix == ".pdf":
         quality, note = ("C", "快速模式：PDF 未做深度文本提取，默认不进入结构化抽取。")
         parsed = ParsedDocument(file_path=path, doc_type="pdf", segments=[])
-    elif file_size_mb > max_parse_file_mb and suffix in {".pdf", ".pptx", ".ppt", ".docx"}:
+    elif file_size_mb > max_parse_file_mb:
         # Handle large files with OCR processing
-        if suffix == ".pdf":
-            note = f"文件过大({file_size_mb:.2f}MB)，尝试生成摘要。"
+        if suffix in {".pdf", ".pptx", ".ppt"}:
             parsed = process_with_ocr(path)  # OCR processing for large files
-            quality = "B"
-        elif suffix in {".pptx", ".ppt"}:
-            # For large presentation files, try to extract text first, then OCR if needed
-            note = f"文件过大({file_size_mb:.2f}MB)，尝试文本提取与OCR扫描。"
-            try:
-                parsed = parse_document(path)
-                if parsed.text_chars < 500:
-                    # If text extraction yielded little content, try OCR
-                    parsed_ocr = process_with_ocr(path)
-                    if parsed_ocr.text_chars > parsed.text_chars:
-                        parsed = parsed_ocr
-                        note = f"文件过大({file_size_mb:.2f}MB)，已通过OCR扫描生成摘要。"
-            except Exception:
-                # If parsing fails, try OCR directly
-                parsed = process_with_ocr(path)
-                note = f"文件过大({file_size_mb:.2f}MB)，已通过OCR扫描生成摘要。"
-            quality = "B"
+            quality, note = parse_quality(parsed)
+            note = f"文件({file_size_mb:.2f}MB)，通过OCR生成摘要。"
+            appendix_start = detect_appendix_start(parsed)
         else:
             note = f"文件过大({file_size_mb:.2f}MB)，已跳过自动解析，可人工补充摘要后入库。"
             quality = "C"
@@ -125,14 +110,24 @@ def build_row(
     else:
         try:
             parsed = parse_document(path)
+                # a possible solution:
+                # try to extract text first, then OCR if needed
+                # If text extraction yielded little content, try OCR
             quality, note = parse_quality(parsed)
             appendix_start = detect_appendix_start(parsed)
         except Exception as e:
             quality, note = ("F", f"解析失败: {str(e)}")
+            parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
 
     previous = existing.get(rel_path, {})
-    include_in_kg_default = quality in {"A", "B"}
-    include_in_kg = bool_from_csv(previous.get("include_in_kg", ""), default=include_in_kg_default)
+    # Quality C/F should never be included in KG, regardless of previous marking
+    if quality in {"C", "F"}:
+        include_in_kg = False
+    else:
+        # For A/B quality, preserve user's previous choice if exists, else use default (True)
+        include_in_kg_default = quality in {"A", "B"}
+        include_in_kg = bool_from_csv(previous.get("include_in_kg", ""), default=include_in_kg_default)
+        # strict kg-input allowance
 
     appendix_unit = ""
     if appendix_start is not None:

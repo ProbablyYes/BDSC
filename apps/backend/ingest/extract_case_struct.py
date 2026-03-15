@@ -98,7 +98,7 @@ def _segment_score(text: str) -> int:
     ]
     return sum(1 for kw in keywords if kw in low)
 
-
+# split policy
 def select_candidate_chunks(
     segments: list[TextSegment],
     max_chunks: int = 10,

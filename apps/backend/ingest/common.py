@@ -7,7 +7,7 @@ from typing import Iterable
 from app.services.document_parser import ParsedDocument
 
 SUPPORTED_DOC_SUFFIXES = {".pdf", ".pptx", ".ppt", ".docx", ".txt", ".md"}
-
+# support ppt
 APPENDIX_KEYWORDS = [
     "附录",
     "附件",

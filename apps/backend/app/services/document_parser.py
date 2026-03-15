@@ -9,7 +9,7 @@ from pptx import Presentation
 
 SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".docx", ".pptx", ".ppt"}
 logging.getLogger("pypdf").setLevel(logging.ERROR)
-
+# add ppt support
 
 @dataclass
 class TextSegment:

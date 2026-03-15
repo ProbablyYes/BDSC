@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     llm_fast_model: str = "Qwen/Qwen2.5-14B-Instruct"
     llm_reason_model: str = "Qwen/Qwen2.5-72B-Instruct"
 
-    max_parse_file_mb: float = 50.0  # Default file size limit in MB
+    max_parse_file_mb: float = 30.0  # modify default file size limit in MB
 
     # config.py -> app -> backend -> apps -> BDSC (workspace root)
     workspace_root: Path = Path(__file__).resolve().parents[3]

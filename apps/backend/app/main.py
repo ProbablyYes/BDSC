@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 from typing import Any
 
@@ -351,6 +352,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
 async def dialogue_turn_upload(
     project_id: str = Form(...),
     student_id: str = Form(...),
+    class_id: str = Form(""),
+    cohort_id: str = Form(""),
     message: str = Form(""),
     conversation_id: str = Form(""),
     mode: str = Form("coursework"),
@@ -383,6 +386,12 @@ async def dialogue_turn_upload(
         conv_id = new_conv["conversation_id"]
 
     project_state = json_store.load_project(project_id)
+    # 如果没有指定class_id，从project_state的最新提交中获取
+    if not class_id and project_state.get("submissions"):
+        class_id = project_state["submissions"][-1].get("class_id", "")
+    if not cohort_id and project_state.get("submissions"):
+        cohort_id = project_state["submissions"][-1].get("cohort_id", "")
+    
     result = run_workflow(
         message=combined_msg,
         mode=mode,
@@ -425,6 +434,8 @@ async def dialogue_turn_upload(
 
     json_store.append_submission(project_id, {
         "student_id": student_id,
+        "class_id": class_id or None,
+        "cohort_id": cohort_id or None,
         "source_type": "file_in_chat",
         "mode": mode,
         "filename": file.filename,
@@ -625,10 +636,91 @@ def teacher_dashboard(category: str | None = None, limit: int = 8) -> dict:
 
 @app.get("/api/teacher/project/{project_id}/evidence")
 def teacher_project_evidence(project_id: str) -> dict:
-    data = graph_service.project_evidence(project_id=project_id)
+    # Helper function to generate summary from filename and diagnosis
+    def generate_file_summary(filename: str, diagnosis: dict, raw_text: str) -> str:
+        """生成文件摘要，显示项目核心信息"""
+        summary_parts = []
+        
+        # Extract project name from filename (remove pdf extension and hash)
+        project_name = filename.rsplit("-", 1)[0] if "-" in filename else filename
+        project_name = project_name.replace(".pdf", "").replace(".docx", "").strip()
+        summary_parts.append(f"项目：{project_name}")
+        
+        # Add diagnosis bottleneck if available
+        if diagnosis and diagnosis.get("bottleneck"):
+            bottleneck = diagnosis["bottleneck"]
+            # Limit bottleneck length to ~100 chars
+            if len(bottleneck) > 100:
+                bottleneck = bottleneck[:100] + "..."
+            summary_parts.append(f"瓶颈：{bottleneck}")
+        
+        # Add overall score if available
+        if diagnosis and diagnosis.get("overall_score") is not None:
+            score = diagnosis["overall_score"]
+            summary_parts.append(f"评分：{score:.2f}")
+        
+        return " | ".join(summary_parts)
+    
+    # Get Neo4j evidence data
+    neo4j_data = graph_service.project_evidence(project_id=project_id)
+    
+    # Get student file submissions from JSON
+    project_state = json_store.load_project(project_id)
+    
+    file_submissions = []
+    
+    if project_state and "submissions" in project_state:
+        for idx, submission in enumerate(project_state["submissions"]):
+            source_type = submission.get("source_type")
+            
+            # Only include file submissions
+            if source_type not in ["file", "file_in_chat"]:
+                continue
+            
+            # Build file evidence entry
+            raw_text = submission.get("raw_text", "")
+            diagnosis = submission.get("diagnosis", {})
+            filename = submission.get("filename", "unknown")
+            
+            # Generate summary instead of full preview
+            summary = generate_file_summary(filename, diagnosis, raw_text)
+            
+            file_evidence = {
+                "type": "student_submission",
+                "filename": filename,
+                "student_id": submission.get("student_id", ""),
+                "submission_id": submission.get("submission_id", ""),
+                "created_at": submission.get("created_at", ""),
+                "summary": summary,  # Key summary instead of long preview
+                "diagnosis": diagnosis,
+            }
+            file_submissions.append(file_evidence)
+    
+    # Build response: always include file_submissions even if Neo4j fails
+    # Create a base response structure that works with or without Neo4j data
+    if neo4j_data and "error" not in neo4j_data:
+        # Neo4j data is valid, use it as base
+        merged_data = neo4j_data.copy()
+    else:
+        # Neo4j failed or no data, create minimal structure
+        merged_data = {
+            "project": {
+                "project_id": project_id,
+                "project_name": project_state.get("project_id", project_id) if project_state else project_id,
+                "category": "unknown",
+                "confidence": 0
+            },
+            "evidence": [],
+            "rubric_coverage": [],
+            "risk_rules": []
+        }
+    
+    # Always add file submissions
+    merged_data["file_submissions"] = file_submissions
+    
     return {
         "project_id": project_id,
-        "data": data,
+        "data": merged_data,
     }
 
 
@@ -702,6 +794,7 @@ def _build_class_snapshot(class_id: str | None = None, cohort_id: str | None = N
             if not isinstance(item, dict):
                 continue
             rule_id = str(item.get("id") or "UNKNOWN")
+            # 复合规则ID？
             risk_rule_counter[rule_id] = risk_rule_counter.get(rule_id, 0) + 1
             sev = str(item.get("severity") or "low").lower()
             if sev in risk_levels:
@@ -809,3 +902,444 @@ def run_agent(payload: AgentRunPayload) -> AgentRunResponse:
         agent_type=payload.agent_type,
         result=result,
     )
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Enhanced Teacher APIs (V2: Capability Map, Rubric, Rule Coverage)
+# ═══════════════════════════════════════════════════════════════════
+
+@app.get("/api/teacher/capability-map/{class_id}")
+def teacher_capability_map(class_id: str, cohort_id: str | None = None) -> dict:
+    """班级能力映射雷达图：5维度（基于学生提交的文件数据）"""
+    # 从JSON数据源获取班级的所有文件提交
+    projects = json_store.list_projects()
+    submissions = []
+    for project in projects:
+        for sub in project.get("submissions", []):
+            # 只统计文件提交（file 或 file_in_chat）
+            source_type = sub.get("source_type", "")
+            if source_type not in ["file", "file_in_chat"]:
+                continue
+            if sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+            submissions.append(sub)
+    
+    if not submissions:
+        return {
+            "class_id": class_id,
+            "submission_count": 0,
+            "data_source": "json_file_only",
+            "dimensions": [
+                {"name": "痛点发现 (Empathy)", "score": 0, "max": 10},
+                {"name": "方案策划 (Ideation)", "score": 0, "max": 10},
+                {"name": "商业建模 (Business)", "score": 0, "max": 10},
+                {"name": "资源杠杆 (Execution)", "score": 0, "max": 10},
+                {"name": "路演表达 (Pitching)", "score": 0, "max": 10},
+            ],
+            "radar_avg": [0] * 5,
+        }
+    
+    dimension_scores = {"empathy": [], "ideation": [], "business": [], "execution": [], "pitching": []}
+    diagnosis_keywords = {
+        "empathy": ["痛点", "需求", "用户", "验证"],
+        "ideation": ["方案", "设计", "创新", "功能"],
+        "business": ["盈利", "商业模式", "定价", "收入"],
+        "execution": ["资源", "团队", "执行", "里程碑"],
+        "pitching": ["路演", "表达", "叙事", "数据"],
+    }
+    
+    for sub in submissions:
+        diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+        overall_score = _safe_float(diagnosis.get("overall_score", 0))
+        
+        # 根据诊断中的关键词计算各维度评分
+        raw_text = str(sub.get("raw_text") or "").lower()
+        
+        for dim_name, keywords in diagnosis_keywords.items():
+            keyword_hit_count = sum(1 for kw in keywords if kw in raw_text)
+            score = min(10, overall_score * 0.7 + keyword_hit_count * 0.3)
+            dimension_scores[dim_name].append(score)
+    
+    # 计算平均分
+    dimension_names = ["痛点发现 (Empathy)", "方案策划 (Ideation)", "商业建模 (Business)", 
+                       "资源杠杆 (Execution)", "路演表达 (Pitching)"]
+    dimension_keys = list(dimension_scores.keys())
+    radar_avg = []
+    dimensions = []
+    
+    for i, (name, key) in enumerate(zip(dimension_names, dimension_keys)):
+        scores = dimension_scores[key]
+        avg_score = round(sum(scores) / len(scores), 2) if scores else 0
+        dimensions.append({"name": name, "score": avg_score, "max": 10})
+        radar_avg.append(avg_score)
+    
+    return {
+        "class_id": class_id,
+        "submission_count": len(submissions),
+        "data_source": "json_file_only",
+        "dimensions": dimensions,
+        "radar_avg": radar_avg,
+        "student_count": len(set(s.get("student_id") for s in submissions)),
+    }
+
+
+@app.get("/api/teacher/rule-coverage/{class_id}")
+def teacher_rule_coverage(class_id: str, cohort_id: str | None = None) -> dict:
+    """规则检查覆盖率：H1-H15规则在班级中的触发情况（基于学生提交的文件数据）"""
+    # 规则定义（H1-H15）
+    rules = {
+        "H1": "客户--价值主张错位",
+        "H2": "渠道不可达",
+        "H3": "定价无支付意愿证据",
+        "H4": "TAM/SAM/SOM 口径混乱",
+        "H5": "需求证据不足",
+        "H6": "竞品对比不可比",
+        "H7": "创新点不可验证",
+        "H8": "单位经济不成立",
+        "H9": "增长逻辑跳跃",
+        "H10": "里程碑不可交付",
+        "H11": "合规/伦理缺口",
+        "H12": "技术路线与资源不匹配",
+        "H13": "实验设计不合格",
+        "H14": "路演叙事断裂",
+        "H15": "评分项证据覆盖不足",
+    }
+    
+    # 从JSON数据源查询班级的规则覆盖率数据（只统计文件提交）
+    projects = json_store.list_projects()
+    rule_coverage = {}
+    total_submissions = 0
+    
+    for rule_id in rules:
+        rule_coverage[rule_id] = {"name": rules[rule_id], "hit_count": 0, "projects": []}
+    
+    for project in projects:
+        for sub in project.get("submissions", []):
+            # 只统计文件提交（file 或 file_in_chat）
+            source_type = sub.get("source_type", "")
+            if source_type not in ["file", "file_in_chat"]:
+                continue
+            if sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+            total_submissions += 1
+            diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+            triggered_rules = diagnosis.get("triggered_rules", []) or []
+            
+            for rule in triggered_rules:
+                if isinstance(rule, dict):
+                    rule_id = str(rule.get("id", "")).upper()
+                    if rule_id in rule_coverage:
+                        rule_coverage[rule_id]["hit_count"] += 1
+                        rule_coverage[rule_id]["projects"].append(sub.get("project_id", ""))
+    
+    # 生成热力图数据
+    heatmap_data = []
+    for rule_id in sorted(rules.keys()):
+        hit_count = rule_coverage[rule_id]["hit_count"]
+        coverage_ratio = round(hit_count / total_submissions, 3) if total_submissions > 0 else 0
+        severity = "high" if coverage_ratio > 0.4 else "medium" if coverage_ratio > 0.2 else "low"
+        
+        heatmap_data.append({
+            "rule_id": rule_id,
+            "rule_name": rules[rule_id],
+            "hit_count": hit_count,
+            "coverage_ratio": coverage_ratio,
+            "severity": severity,
+        })
+    
+    return {
+        "class_id": class_id,
+        "total_submissions": total_submissions,
+        "data_source": "json_file_only",
+        "rule_coverage": heatmap_data,
+        "high_risk_count": sum(1 for r in heatmap_data if r["severity"] == "high"),
+    }
+
+
+@app.get("/api/teacher/project/{project_id}/deep-diagnosis")
+def teacher_project_deep_diagnosis(project_id: str) -> dict:
+    """项目深度诊断：瓶颈、影响、修复建议"""
+    project_state = json_store.load_project(project_id)
+    submissions = project_state.get("submissions", []) or []
+    
+    if not submissions:
+        return {
+            "project_id": project_id,
+            "error": "该项目还没有提交记录",
+        }
+    
+    # 取最新提交
+    latest_sub = submissions[-1]
+    diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
+    next_task = latest_sub.get("next_task", {}) or {}
+    triggered_rules = diagnosis.get("triggered_rules", []) or []
+    
+    # 构建修复方案
+    fix_strategies = []
+    for rule in triggered_rules[:3]:
+        if isinstance(rule, dict):
+            rule_id = str(rule.get("id", ""))
+            rule_name = str(rule.get("name", ""))
+            severity = str(rule.get("severity", "medium"))
+            
+            # 根据规则ID生成修复建议
+            fix_map = {
+                "H1": "重新定义目标客户群体，验证他们对该价值主张的需求程度",
+                "H2": "分析客户获取路径，确保渠道能够有效触达目标用户",
+                "H3": "通过用户访谈/调查收集支付意愿的直接证据",
+                "H4": "清晰定义TAM/SAM/SOM，确保口径统一",
+                "H5": "补充真实用户访谈记录、行为数据或第三方报告",
+                "H6": "选择可比的竞品，说明差异点的商业意义",
+                "H7": "通过实验/原型验证创新点的技术可行性",
+                "H8": "重新计算单位经济：CAC、LTV、毛利率等指标",
+                "H9": "补充增长逻辑的中间步骤，确保因果关系合理",
+                "H10": "细化里程碑，确保每个里程碑都有明确的交付物与时间表",
+                "H11": "咨询行业专家，评估合规/伦理风险，给出缓解方案",
+                "H12": "调整技术路线或补充资源计划，确保匹配度",
+                "H13": "设计受控的A/B实验或前后对比研究",
+                "H14": "重新组织路演逻辑，确保故事有起承转合",
+                "H15": "对标Rubric，逐项补齐缺失的证据",
+            }
+            
+            fix_strategy = fix_map.get(rule_id, f"针对规则{rule_id}进行改进")
+            fix_strategies.append({
+                "rule_id": rule_id,
+                "rule_name": rule_name,
+                "severity": severity,
+                "fix_strategy": fix_strategy,
+            })
+    
+    bottleneck = str(diagnosis.get("bottleneck", "暂无诊断"))
+    overall_score = _safe_float(diagnosis.get("overall_score", 0))
+    
+    return {
+        "project_id": project_id,
+        "student_id": latest_sub.get("student_id", ""),
+        "submission_count": len(submissions),
+        "latest_submission_time": latest_sub.get("created_at", ""),
+        "overall_score": overall_score,
+        "bottleneck": bottleneck,
+        "bottleneck_impact": f"该瓶颈可能导致项目在以下方面受阻：评分降低、融资难度增加、用户获取成本上升",
+        "triggered_rules": triggered_rules[:5],
+        "fix_strategies": fix_strategies,
+        "next_task": next_task,
+        "socratic_questions": diagnosis.get("socratic_questions", [])[:3],
+    }
+
+
+@app.get("/api/teacher/project/{project_id}/rubric-assessment")
+def teacher_rubric_assessment(project_id: str) -> dict:
+    """形成性评价：Rubric评分表（9个维度R1-R9）"""
+    project_state = json_store.load_project(project_id)
+    submissions = project_state.get("submissions", []) or []
+    
+    if not submissions:
+        return {
+            "project_id": project_id,
+            "error": "该项目还没有提交记录",
+        }
+    
+    latest_sub = submissions[-1]
+    diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
+    raw_text = str(latest_sub.get("raw_text", "") or "")
+    
+    # Rubric定义
+    rubric_items = [
+        {"id": "R1", "name": "问题定义", "description": "问题清晰、具体，基于真实用户痛点", "weight": 0.1},
+        {"id": "R2", "name": "用户证据强度", "description": "声明由充分且相关的证据支持", "weight": 0.15},
+        {"id": "R3", "name": "方案可行性", "description": "方案在技术和运营上都可行", "weight": 0.1},
+        {"id": "R4", "name": "商业模式一致性", "description": "客户、价值、渠道、收入、成本之间逻辑一致", "weight": 0.15},
+        {"id": "R5", "name": "市场与竞争", "description": "市场规模估算和竞争分析合理", "weight": 0.1},
+        {"id": "R6", "name": "财务逻辑", "description": "单位经济和财务假设合理", "weight": 0.1},
+        {"id": "R7", "name": "创新与差异化", "description": "有清晰的差异化优势和可验证的优点", "weight": 0.1},
+        {"id": "R8", "name": "团队与执行", "description": "团队能力与项目雄心相匹配", "weight": 0.05},
+        {"id": "R9", "name": "展示与材料质量", "description": "材料清晰、逻辑连贯、有说服力", "weight": 0.05},
+    ]
+    
+    # 根据诊断数据估算评分（0-5分制）
+    rubric_scores = []
+    overall_weighted_score = 0
+    
+    for item in rubric_items:
+        item_id = item["id"]
+        
+        # 基于历史数据和规则触发情况进行评分
+        score = 3  # 默认中等
+        
+        # 根据关键词和规则调整
+        if item_id == "R1":
+            score = 3 if "痛点" in raw_text or "需求" in raw_text else 2
+        elif item_id == "R2":
+            score = 4 if len(diagnosis.get("triggered_rules", [])) < 3 else 2
+        elif item_id == "R3":
+            score = 3 if "技术" in raw_text else 2
+        elif item_id == "R4":
+            score = 2 if "H1" in str(diagnosis.get("triggered_rules", [])) else 4
+        elif item_id == "R5":
+            score = 3 if "市场" in raw_text or "竞争" in raw_text else 2
+        elif item_id == "R6":
+            score = 2 if "H8" in str(diagnosis.get("triggered_rules", [])) else 3
+        elif item_id == "R7":
+            score = 3 if "创新" in raw_text else 2
+        elif item_id == "R8":
+            score = 3 if "团队" in raw_text else 2
+        elif item_id == "R9":
+            score = _safe_float(diagnosis.get("overall_score", 3)) / 2
+        
+        score = max(0, min(5, round(score, 1)))
+        overall_weighted_score += score * item["weight"]
+        
+        # 生成修改建议
+        revision_suggestions = {
+            "R1": "补充至少2名真实用户的访谈记录，说明他们的具体痛点和频率",
+            "R2": "提供量化的用户验证数据（如调查样本数、转化率）",
+            "R3": "明确技术实现路线，细化MVP设计与资源需求",
+            "R4": "绘制商业模式画布，确保5个要素相互支持",
+            "R5": "用TAM/SAM/SOM三层法估算市场规模，列出主要竞品表",
+            "R6": "详细计算CAC、LTV、毛利率等核心单位经济指标",
+            "R7": "准备竞品对比表，说明该方案相比竞品的3个核心优势",
+            "R8": "列出团队成员背景，说明各自在项目中的关键角色",
+            "R9": "重新组织Pitch大纲，确保有明确的开头、3个主体论点、结尾",
+        }
+        
+        rubric_scores.append({
+            "item_id": item_id,
+            "item_name": item["name"],
+            "description": item["description"],
+            "score": score,
+            "max_score": 5,
+            "weight": item["weight"],
+            "revision_suggestion": revision_suggestions.get(item_id, ""),
+            "evidence_quotes": raw_text[:100],  # 简化的证据引用
+        })
+    
+    return {
+        "project_id": project_id,
+        "student_id": latest_sub.get("student_id", ""),
+        "evaluation_time": datetime.utcnow().isoformat(),
+        "rubric_items": rubric_scores,
+        "overall_weighted_score": round(overall_weighted_score, 2),
+        "max_weighted_score": 5.0,
+        "missing_evidence": ["用户验证数据", "竞品对比", "财务模型"],
+    }
+
+
+@app.get("/api/teacher/project/{project_id}/competition-score")
+def teacher_competition_score_predict(project_id: str) -> dict:
+    """竞赛评分预测与快速修复清单"""
+    project_state = json_store.load_project(project_id)
+    submissions = project_state.get("submissions", []) or []
+    
+    if not submissions:
+        return {
+            "project_id": project_id,
+            "error": "该项目还没有提交记录",
+        }
+    
+    latest_sub = submissions[-1]
+    diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
+    overall_score = _safe_float(diagnosis.get("overall_score", 0))
+    triggered_rules = diagnosis.get("triggered_rules", []) or []
+    
+    # 竞赛预测评分（模拟）
+    competition_score = min(100, max(0, overall_score * 10 + 20 - len(triggered_rules) * 5))
+    
+    # 计算评分范围，并进行精确的四舍五入
+    score_lower = max(0, competition_score - 10)
+    score_upper = min(100, competition_score + 10)
+    
+    # 四舍五入到1位小数
+    predicted_score = round(competition_score, 1)
+    # 调整范围为十的整倍数
+    score_lower_rounded = int(round(score_lower / 10) * 10)
+    score_upper_rounded = int(round(score_upper / 10) * 10)
+    
+    return {
+        "project_id": project_id,
+        "student_id": latest_sub.get("student_id", ""),
+        "predicted_competition_score": predicted_score,
+        "score_range": f"{score_lower_rounded}-{score_upper_rounded}",  # 格式化为字符串
+        "score_range_min": score_lower_rounded,
+        "score_range_max": score_upper_rounded,
+        "quick_fixes_24h": [
+            "完成高风险规则（H1-H5）的证据补充",
+            "制作1页对标用户验证的数据总结",
+            "更新Pitch开场和结尾逻辑",
+        ],
+        "quick_fixes_72h": [
+            "完成商业模式画布的全部9个要素",
+            "补齐竞品对比表和市场规模估算",
+            "制作完整的财务模型（CAC、LTV、BEP）",
+            "进行班级内部模拟路演，录制视频",
+        ],
+        "high_risk_rules_for_competition": [
+            {"rule": r.get("id"), "name": r.get("name"), "priority": "高"}
+            for r in triggered_rules[:3]
+        ] if triggered_rules else [],
+    }
+
+
+@app.get("/api/teacher/teaching-interventions/{class_id}")
+def teacher_teaching_interventions(class_id: str, cohort_id: str | None = None) -> dict:
+    """教学干预建议：班级共性问题识别与优先级排序"""
+    projects = json_store.list_projects()
+    rule_frequency = {}
+    common_mistakes = {}
+    student_count = 0
+    
+    for project in projects:
+        for sub in project.get("submissions", []):
+            if sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+            
+            student_count += 1
+            diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+            triggered_rules = diagnosis.get("triggered_rules", []) or []
+            
+            for rule in triggered_rules:
+                if isinstance(rule, dict):
+                    rule_id = str(rule.get("id", ""))
+                    rule_frequency[rule_id] = rule_frequency.get(rule_id, 0) + 1
+    
+    if student_count == 0:
+        return {
+            "class_id": class_id,
+            "student_count": 0,
+            "error": "班级还没有学生提交记录",
+        }
+    
+    # 识别共性问题（出现在>40%的学生提交中）
+    shared_problems = []
+    for rule_id, count in sorted(rule_frequency.items(), key=lambda x: x[1], reverse=True):
+        ratio = count / student_count
+        if ratio > 0.4:
+            # 生成教学建议
+            teaching_tips = {
+                "H1": "组织课堂讨论'客户是谁？他们的痛点是什么？'，用案例引导学生定义清晰的目标用户",
+                "H4": "讲授TAM/SAM/SOM三层市场估算法，布置一个市场规模计算作业",
+                "H5": "强调'Validation is King'，布置用户访谈作业，要求每人20min访谈至少3个用户",
+                "H8": "讲授单位经济学基础，用失败案例展示不健康的CAC/LTV比例有多危险",
+                "H14": "组织Pitch工作坊，邀请创业导师进行实时反馈，录制优秀案例供学生学习",
+            }
+            
+            shared_problems.append({
+                "rule_id": rule_id,
+                "problem_description": f"规则{rule_id}：{count}名学生触发，占比{round(ratio*100)}%",
+                "teaching_suggestion": teaching_tips.get(rule_id, f"针对{rule_id}进行专项讲解"),
+                "priority": "高" if ratio > 0.6 else "中",
+                "estimated_teaching_time": "45分钟 / 1个课时",
+            })
+    
+    return {
+        "class_id": class_id,
+        "student_count": student_count,
+        "total_shared_problems": len(shared_problems),
+        "shared_problems": shared_problems[:5],  # Top 5问题
+        "recommended_next_class_focus": "针对Top 2-3的共性问题设计专项讲解与练习",
+    }

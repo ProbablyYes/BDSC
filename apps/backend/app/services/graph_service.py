@@ -334,3 +334,95 @@ class GraphService:
             return self._query_with_fallback(_query)
         except Exception as exc:  # noqa: BLE001
             return {"error": f"baseline query failed: {exc}"}
+
+    def class_capability_map(self, class_id: str) -> dict[str, Any]:
+        """从neo4j查询班级的5维度能力映射数据（通过Category过滤）"""
+        try:
+            def _query(session):
+                # 查询指定category的所有Project的维度评分
+                dimension_keys = ["empathy", "ideation", "business", "execution", "pitching"]
+                dimension_data = {}
+                
+                # 先获取该category下的所有project
+                projects = list(
+                    session.run(
+                        """
+                        MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
+                        WHERE c.name = $category OR c.id = $category
+                        RETURN DISTINCT p.id AS project_id
+                        """,
+                        category=class_id,
+                    )
+                )
+                
+                project_ids = [r["project_id"] for r in projects]
+                
+                if not project_ids:
+                    return {"dimension_data": {}, "project_count": 0}
+                
+                # 对于每个维度，查询平均评分
+                for dim in dimension_keys:
+                    result = session.run(
+                        f"""
+                        MATCH (p:Project)-[:{dim.upper()}]->(d)
+                        WHERE p.id IN $project_ids
+                        RETURN avg(COALESCE(d.score, 6.0)) AS avg_score
+                        """,
+                        project_ids=project_ids,
+                    ).single()
+                    
+                    avg_score = float(result["avg_score"]) if result and result["avg_score"] else 6.0
+                    dimension_data[dim] = round(avg_score, 2)
+                
+                return {
+                    "dimension_data": dimension_data,
+                    "project_count": len(project_ids),
+                }
+            
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"capability map query failed: {exc}"}
+
+    def class_rule_coverage(self, class_id: str) -> dict[str, Any]:
+        """从neo4j查询班级的规则覆盖率数据（通过Category过滤）"""
+        try:
+            def _query(session):
+                # 查询指定category的所有Project触发的规则
+                projects = list(
+                    session.run(
+                        """
+                        MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
+                        WHERE c.name = $category OR c.id = $category
+                        RETURN DISTINCT p.id AS project_id
+                        """,
+                        category=class_id,
+                    )
+                )
+                
+                project_ids = [r["project_id"] for r in projects]
+                
+                if not project_ids:
+                    return {"rule_data": [], "total_projects": 0}
+                
+                # 查询这些项目触发的规则及其计数
+                rule_data = list(
+                    session.run(
+                        """
+                        MATCH (p:Project)-[:HITS_RULE]->(r:RiskRule)
+                        WHERE p.id IN $project_ids
+                        WITH r, count(DISTINCT p) AS hit_count
+                        RETURN r.id AS rule_id, r.name AS rule_name, hit_count
+                        ORDER BY hit_count DESC
+                        """,
+                        project_ids=project_ids,
+                    )
+                )
+                
+                return {
+                    "rule_data": [dict(r) for r in rule_data],
+                    "total_projects": len(project_ids),
+                }
+            
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"rule coverage query failed: {exc}"}

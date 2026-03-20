@@ -11,6 +11,7 @@ from typing import Any
 from app.config import settings
 from app.services.llm_client import LlmClient
 from app.services.document_parser import ParsedDocument, TextSegment, parse_document
+from app.services.hypergraph_document import HypergraphDocument
 from ingest.common import (
     bool_from_csv,
     detect_appendix_start,
@@ -363,7 +364,15 @@ def build_case_record(
     llm_verify: bool = False,
 ) -> dict:
     source_path = settings.teacher_examples_root / row["file_path"]
-    parsed = parse_document(source_path)
+    
+    # Use HypergraphDocument for unified processing
+    hypergraph_doc = HypergraphDocument.from_file(source_path)
+    parsed = ParsedDocument(
+        file_path=source_path,
+        doc_type=hypergraph_doc.doc_type,
+        segments=hypergraph_doc.get_segments(),
+    )
+    
     appendix_start = row.get("appendix_start_index", "")
     appendix_idx = int(appendix_start) if appendix_start.isdigit() else detect_appendix_start(parsed)
 
@@ -449,8 +458,12 @@ def build_case_record(
         {"rubric_item": "Risk Control", "covered": any(e["type"] == "risk_evidence" for e in evidence_items)},
     ]
 
+    # Get hypergraph statistics
+    hypergraph_stats = hypergraph_doc.get_stats()
+
     return {
         "case_id": case_id,
+        "document_id": hypergraph_doc.document_id,
         "source": {
             "file_path": row["file_path"],
             "file_name": row.get("file_name", source_path.name),
@@ -469,6 +482,11 @@ def build_case_record(
             "core_text_chars": len(core_text),
             "appendix_start_index": appendix_idx,
             "has_appendix_evidence": appendix_idx is not None,
+            # Hypergraph statistics
+            "hypergraph_nodes": hypergraph_stats.get("node_count", 0),
+            "hypergraph_edges": hypergraph_stats.get("edge_count", 0),
+            "hypergraph_hypernode_count": hypergraph_stats.get("hypergraph_nodes", 0),
+            "hypergraph_hyperedge_count": hypergraph_stats.get("hypergraph_edges", 0),
         },
         "project_profile": {
             "project_name": project_name,
@@ -492,6 +510,7 @@ def build_case_record(
             "model": llm_model or settings.llm_fast_model or settings.llm_model,
             "used": bool(llm_data),
         },
+        "engine": "hypernetx",
         "generated_at": now_iso(),
     }
 

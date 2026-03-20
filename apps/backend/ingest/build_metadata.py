@@ -4,6 +4,7 @@ import csv
 from pathlib import Path
 from app.config import settings
 from app.services.document_parser import ParsedDocument, parse_document
+from app.services.hypergraph_document import HypergraphDocument
 from app.services.ocr import process_with_ocr  # OCR integration
 from ingest.common import (
     SUPPORTED_DOC_SUFFIXES,
@@ -29,6 +30,10 @@ METADATA_FIELDS = [
     "appendix_start_index",
     "appendix_start_unit",
     "include_in_kg",
+    # hypergraph metadata
+    "document_id",
+    "hypergraph_nodes",
+    "hypergraph_edges",
     # manual columns
     "education_level",
     "year",
@@ -90,6 +95,7 @@ def build_row(
     rel_obj = Path(rel_path)
     file_size_mb = path.stat().st_size / (1024 * 1024)
     parsed = None
+    hypergraph_doc = None
     appendix_start = None
 
     suffix = path.suffix.lower()
@@ -110,29 +116,49 @@ def build_row(
     else:
         try:
             parsed = parse_document(path)
-                # a possible solution:
-                # try to extract text first, then OCR if needed
-                # If text extraction yielded little content, try OCR
+            # Convert to HypergraphDocument for unified processing
+            hypergraph_doc = HypergraphDocument.from_parsed_document(parsed)
             quality, note = parse_quality(parsed)
             appendix_start = detect_appendix_start(parsed)
         except Exception as e:
             quality, note = ("F", f"解析失败: {str(e)}")
             parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
 
+    # Ensure we have a parsed document to work with
+    if parsed is None:
+        parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
+
+    # Create HypergraphDocument if not already created
+    if hypergraph_doc is None and parsed.segments:
+        hypergraph_doc = HypergraphDocument.from_parsed_document(parsed)
+
     previous = existing.get(rel_path, {})
-    # Quality C/F should never be included in KG, regardless of previous marking
+    # KG inclusion logic:
+    # - A质量：必须进入（强制True）
+    # - B质量：遵循历史记录（如无历史默认True）
+    # - C/F质量：永不进入（强制False）
     if quality in {"C", "F"}:
         include_in_kg = False
-    else:
-        # For A/B quality, preserve user's previous choice if exists, else use default (True)
-        include_in_kg_default = quality in {"A", "B"}
+    elif quality == "A":
+        # A质量强制进入KG（最高优先级）
+        include_in_kg = True
+    elif quality == "B":
+        # B质量遵循历史记录，如无历史则默认为True
+        include_in_kg_default = True
         include_in_kg = bool_from_csv(previous.get("include_in_kg", ""), default=include_in_kg_default)
-        # strict kg-input allowance
+    else:
+        # 其他未知质量等级不进入
+        include_in_kg = False
 
     appendix_unit = ""
     if appendix_start is not None:
         matched = next((seg for seg in parsed.segments if seg.index == appendix_start), None)
         appendix_unit = matched.source_unit if matched else ""
+
+    # Get hypergraph statistics if available
+    hypergraph_stats = {}
+    if hypergraph_doc:
+        hypergraph_stats = hypergraph_doc.get_stats()
 
     return {
         "file_path": rel_path,
@@ -148,6 +174,11 @@ def build_row(
         "appendix_start_index": "" if appendix_start is None else str(appendix_start),
         "appendix_start_unit": appendix_unit,
         "include_in_kg": "true" if include_in_kg else "false",
+        # Hypergraph metadata
+        "document_id": hypergraph_stats.get("document_id", ""),
+        "hypergraph_nodes": str(hypergraph_stats.get("node_count", 0)),
+        "hypergraph_edges": str(hypergraph_stats.get("edge_count", 0)),
+        # Manual columns
         "education_level": previous.get("education_level", "unknown"),
         "year": previous.get("year", ""),
         "award_level": previous.get("award_level", ""),

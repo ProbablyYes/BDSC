@@ -32,12 +32,14 @@ export default function StudentPage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
-  // document review
-  const [docReview, setDocReview] = useState<{ filename: string; sections: any[]; annotations: any[] } | null>(null);
+  // document review (now with PDF viewer)
+  const [docReview, setDocReview] = useState<{ filename: string; sections: any[]; annotations: any[]; fileUrl?: string } | null>(null);
   const [docReviewOpen, setDocReviewOpen] = useState(false);
   const [docReviewLoading, setDocReviewLoading] = useState(false);
   const [docSelectedText, setDocSelectedText] = useState("");
   const [docAskPos, setDocAskPos] = useState<{ x: number; y: number } | null>(null);
+  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
+  const [pdfViewerUrl, setPdfViewerUrl] = useState<string>("");
 
   // new features
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -51,6 +53,8 @@ export default function StudentPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dragRef = useRef<{ active: boolean; startX: number; startW: number }>({ active: false, startX: 0, startW: 360 });
+  const abortRef = useRef<AbortController | null>(null);
+  // canvas ref removed — now using SVG
 
   // apply theme
   useEffect(() => {
@@ -143,11 +147,32 @@ export default function StudentPage() {
     } catch { /* ignore */ }
   }
 
+  function abortResponse() {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setLoading(false);
+    setMessages((p) => {
+      const last = p[p.length - 1];
+      if (last && last.role === "assistant" && !last.text) {
+        return [...p.slice(0, -1), { ...last, text: "（已中断回答）" }];
+      }
+      if (last && last.role === "user") {
+        return [...p, { role: "assistant" as const, text: "（已中断回答）", ts: new Date().toLocaleTimeString(), id: ++_msgId }];
+      }
+      return p;
+    });
+  }
+
   async function send(e: FormEvent) {
     e.preventDefault();
     const text = input.trim();
     if ((!text && !attachedFile) || loading) return;
     setLoading(true);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     const displayText = attachedFile ? `${text ? text + " " : ""}📎 ${attachedFile.name}` : text;
     const userMsg: ChatMessage = { role: "user", text: displayText, ts: new Date().toLocaleTimeString(), id: ++_msgId };
@@ -166,55 +191,63 @@ export default function StudentPage() {
         form.set("conversation_id", conversationId ?? "");
         form.set("mode", mode);
         form.set("file", attachedFile);
-        const resp = await fetch(`${API_BASE}/api/dialogue/turn-upload`, { method: "POST", body: form });
+        const resp = await fetch(`${API_BASE}/api/dialogue/turn-upload`, { method: "POST", body: form, signal: controller.signal });
         data = await resp.json();
         if (!resp.ok) throw new Error(data?.detail ?? resp.statusText);
+
+        if (data.doc_sections?.length > 0) {
+          const fUrl = data.file_url ? `${API_BASE}${data.file_url}` : "";
+          setDocReview({ filename: attachedFile.name, sections: data.doc_sections, annotations: [], fileUrl: fUrl });
+          const isPdf = attachedFile.name.toLowerCase().endsWith(".pdf");
+          if (isPdf && fUrl) { setPdfViewerUrl(fUrl); setPdfViewerOpen(true); } else { setDocReviewOpen(true); }
+          setDocReviewLoading(true);
+          fetch(`${API_BASE}/api/document-review`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sections: data.doc_sections, mode, context: text }),
+          }).then((r) => r.json())
+            .then((d) => setDocReview((prev) => prev ? { ...prev, annotations: d.annotations ?? [] } : prev))
+            .catch(() => {}).finally(() => setDocReviewLoading(false));
+        }
+        setAttachedFile(null);
       } else {
         const resp = await fetch(`${API_BASE}/api/dialogue/turn`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            project_id: projectId,
-            student_id: studentId,
+            project_id: projectId, student_id: studentId,
             conversation_id: conversationId || undefined,
-            class_id: classId || undefined,
-            cohort_id: cohortId || undefined,
-            message: text,
-            mode,
+            class_id: classId || undefined, cohort_id: cohortId || undefined,
+            message: text, mode,
           }),
+          signal: controller.signal,
         });
         data = await resp.json();
         if (!resp.ok) throw new Error(data?.detail ?? resp.statusText);
       }
 
       setLatestResult(data);
-      if (data.conversation_id && !conversationId) {
-        setConversationId(data.conversation_id);
-      }
+      if (data.conversation_id && !conversationId) setConversationId(data.conversation_id);
       const reply = (data?.assistant_message ?? "").trim() || "（智能体未返回有效回复）";
-      setMessages((p) => [...p, { role: "assistant", text: reply, ts: new Date().toLocaleTimeString(), id: ++_msgId }]);
 
-      // trigger doc review if file was uploaded and sections returned
-      if (attachedFile && data.doc_sections?.length > 0) {
-        setDocReview({ filename: attachedFile.name, sections: data.doc_sections, annotations: [] });
-        setDocReviewOpen(true);
-        setDocReviewLoading(true);
-        fetch(`${API_BASE}/api/document-review`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sections: data.doc_sections, mode, context: text }),
-        })
-          .then((r) => r.json())
-          .then((d) => setDocReview((prev) => prev ? { ...prev, annotations: d.annotations ?? [] } : prev))
-          .catch(() => {})
-          .finally(() => setDocReviewLoading(false));
+      // Typewriter effect: reveal the reply character by character
+      const typeMsgId = ++_msgId;
+      setMessages((p) => [...p, { role: "assistant", text: "", ts: new Date().toLocaleTimeString(), id: typeMsgId }]);
+
+      const CHUNK = 3;
+      for (let i = 0; i < reply.length; i += CHUNK) {
+        if (!abortRef.current) break;
+        const slice = reply.slice(0, i + CHUNK);
+        setMessages((p) => p.map((m) => m.id === typeMsgId ? { ...m, text: slice } : m));
+        await new Promise((r) => setTimeout(r, 12));
       }
+      setMessages((p) => p.map((m) => m.id === typeMsgId ? { ...m, text: reply } : m));
 
-      setAttachedFile(null);
       loadConversations();
     } catch (err: any) {
+      if (err?.name === "AbortError") return;
       setMessages((p) => [...p, { role: "assistant", text: `错误：${err?.message ?? "无法连接后端"}`, id: ++_msgId }]);
     }
+    abortRef.current = null;
     setLoading(false);
   }
 
@@ -313,24 +346,61 @@ export default function StudentPage() {
     });
   }, [resultHistory, latestResult]);
 
-  const taskHistory = useMemo(() => {
-    const tasks: { task: any; turn: number }[] = [];
-    resultHistory.forEach((r, i) => {
-      const t = r?.next_task;
-      if (t?.title && t.title !== "描述你的项目") tasks.push({ task: t, turn: i + 1 });
-    });
-    return tasks;
-  }, [resultHistory]);
+  // taskHistory removed — task tab now uses planner output directly
 
   const nextTask = latestResult?.next_task ?? null;
   const hyperEdges = useMemo(() => latestResult?.hypergraph_insight?.edges ?? [], [latestResult]);
-  const hyperStudent = latestResult?.hypergraph_student ?? latestResult?.agent_trace?.hypergraph_student ?? null;
-  const kgAnalysis = latestResult?.kg_analysis ?? latestResult?.agent_trace?.kg_analysis ?? null;
-  const ragCases = useMemo(() => latestResult?.rag_cases ?? latestResult?.agent_trace?.rag_cases ?? [], [latestResult]);
+
+  // Cumulative KG & HyperStudent: merge across turns so data is never lost
+  const kgAnalysis = useMemo(() => {
+    const pick = (r: any) => r?.kg_analysis ?? r?.agent_trace?.kg_analysis ?? null;
+    const all = [...resultHistory.map(pick), pick(latestResult)].filter(Boolean);
+    if (all.length === 0) return null;
+    const entMap = new Map<string, any>();
+    const relSet = new Set<string>();
+    const rels: any[] = [];
+    let gaps: string[] = [], strengths: string[] = [], insight = "", scores: any = {}, completeness = 0;
+    for (const kg of all) {
+      for (const e of kg.entities ?? []) entMap.set(e.id, e);
+      for (const r of kg.relationships ?? []) { const k = `${r.source}-${r.relation}-${r.target}`; if (!relSet.has(k)) { relSet.add(k); rels.push(r); } }
+      if (kg.structural_gaps?.length) gaps = kg.structural_gaps;
+      if (kg.content_strengths?.length) strengths = kg.content_strengths;
+      if (kg.insight) insight = kg.insight;
+      if (kg.section_scores) scores = kg.section_scores;
+      if (kg.completeness_score) completeness = kg.completeness_score;
+    }
+    return { entities: Array.from(entMap.values()), relationships: rels, structural_gaps: gaps, content_strengths: strengths, insight, section_scores: scores, completeness_score: completeness };
+  }, [resultHistory, latestResult]);
+
+  const hyperStudent = useMemo(() => {
+    const pick = (r: any) => r?.hypergraph_student ?? r?.agent_trace?.hypergraph_student ?? null;
+    const all = [...resultHistory.map(pick), pick(latestResult)].filter((h) => h?.ok);
+    return all.length > 0 ? all[all.length - 1] : null;
+  }, [resultHistory, latestResult]);
+
+  const ragCases = useMemo(() => {
+    const all = resultHistory.map((r) => r?.rag_cases ?? r?.agent_trace?.rag_cases ?? []).flat();
+    const latest = latestResult?.rag_cases ?? latestResult?.agent_trace?.rag_cases ?? [];
+    const seen = new Set<string>();
+    return [...all, ...latest].filter((c) => { const k = c?.title ?? JSON.stringify(c); if (seen.has(k)) return false; seen.add(k); return true; });
+  }, [resultHistory, latestResult]);
   const webSearch = latestResult?.agent_trace?.web_search ?? latestResult?.web_search ?? null;
   const orchestration = latestResult?.agent_trace?.orchestration ?? {};
   const roleAgents = latestResult?.agent_trace?.role_agents ?? {};
   const agentsCalled = orchestration?.agents_called ?? [];
+
+  // Cumulative planner tasks — kept across turns
+  const cumulativePlannerTasks = useMemo(() => {
+    const pick = (r: any) => r?.agent_trace?.role_agents?.planner?.plan_data?.this_week;
+    const all = [...resultHistory.map(pick), pick(latestResult)].filter(Array.isArray);
+    return all.length > 0 ? all[all.length - 1] : [];
+  }, [resultHistory, latestResult]);
+
+  const cumulativeMilestone = useMemo(() => {
+    const pick = (r: any) => r?.agent_trace?.role_agents?.planner?.plan_data?.milestone;
+    const all = [...resultHistory.map(pick), pick(latestResult)].filter(Boolean);
+    return all.length > 0 ? all[all.length - 1] : "";
+  }, [resultHistory, latestResult]);
   const overallScore = useMemo(() => {
     const scores = resultHistory.map((r) => r?.diagnosis?.overall_score).filter((s) => s != null);
     return scores.length > 0 ? scores[scores.length - 1] : latestResult?.diagnosis?.overall_score ?? null;
@@ -389,9 +459,9 @@ export default function StudentPage() {
         </div>
       )}
 
-      <div className="chat-body">
+      <div className={`chat-body ${pdfViewerOpen ? "pdf-split-mode" : ""}`}>
         {/* ── Conversation Sidebar ── */}
-        {convSidebarOpen && (
+        {convSidebarOpen && !pdfViewerOpen && (
           <aside className="conv-sidebar">
             <button className="new-chat-btn" onClick={newChat}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
@@ -468,6 +538,7 @@ export default function StudentPage() {
                           </details>
                         )}
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                        {loading && i === messages.length - 1 && <span className="streaming-cursor" />}
                       </>
                     ) : (
                       m.text
@@ -504,12 +575,12 @@ export default function StudentPage() {
               </div>
             ))}
 
-            {loading && (
+            {loading && messages.length > 0 && messages[messages.length - 1].role === "user" && (
               <div className="msg-row assistant">
                 <div className="msg-avatar">AI</div>
                 <div className="msg-content"><div className="msg-bubble typing">
                   <div className="typing-dots"><span /><span /><span /></div>
-                  思考中...
+                  正在分析...
                 </div></div>
               </div>
             )}
@@ -518,8 +589,13 @@ export default function StudentPage() {
 
           {/* ── Input Bar ── */}
           <div className="chat-inputbar-wrapper">
-            {docReview && !docReviewOpen && (
-              <div className="attached-file-badge doc-review-reopen" onClick={() => setDocReviewOpen(true)} style={{ cursor: "pointer" }}>
+            {docReview && !docReviewOpen && !pdfViewerOpen && (
+              <div className="attached-file-badge doc-review-reopen" style={{ cursor: "pointer" }}
+                onClick={() => {
+                  if (docReview.fileUrl && docReview.filename.toLowerCase().endsWith(".pdf")) {
+                    setPdfViewerUrl(docReview.fileUrl); setPdfViewerOpen(true);
+                  } else { setDocReviewOpen(true); }
+                }}>
                 <span>📄 打开文档审阅：{docReview.filename}</span>
                 {docReview.annotations.length > 0 && <span className="doc-annot-count">{docReview.annotations.length}条批注</span>}
               </div>
@@ -546,32 +622,81 @@ export default function StudentPage() {
                 placeholder="描述你的项目想法、困惑或问题…  (Shift+Enter 换行)"
                 rows={1}
               />
-              <button type="submit" className="send-btn" disabled={loading || (!input.trim() && !attachedFile)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
-              </button>
+              {loading ? (
+                <button type="button" className="send-btn stop-btn" onClick={abortResponse} title="停止回答">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                </button>
+              ) : (
+                <button type="submit" className="send-btn" disabled={!input.trim() && !attachedFile}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                </button>
+              )}
             </form>
           </div>
         </main>
 
+        {/* ── PDF Split Viewer (right side) ── */}
+        {pdfViewerOpen && pdfViewerUrl && (
+          <div className="pdf-viewer-pane">
+            <div className="pdf-viewer-header">
+              <span className="pdf-viewer-title">📄 {docReview?.filename ?? "文档预览"}</span>
+              <div className="pdf-viewer-actions">
+                <button className="pdf-viewer-btn" onClick={() => { setDocReviewOpen(true); setPdfViewerOpen(false); }} title="查看批注">📝 批注</button>
+                <button className="pdf-viewer-btn" onClick={() => setPdfViewerOpen(false)} title="关闭">✕</button>
+              </div>
+            </div>
+            {/* AI annotations overlay on top of the PDF section list */}
+            {docReview && docReview.annotations.length > 0 ? (
+              <div className="pdf-annot-scroll">
+                {docReview.sections.map((sec: any) => {
+                  const annots = docReview.annotations.filter((a: any) => a.section_id === sec.id);
+                  return (
+                    <div key={sec.id} className={`pdf-annot-section ${annots.length > 0 ? "has-annot" : ""}`}>
+                      <div className="pdf-annot-secnum">§{sec.id + 1}</div>
+                      <div className="pdf-annot-text">{sec.text.slice(0, 200)}{sec.text.length > 200 ? "..." : ""}</div>
+                      {annots.map((a: any, ai: number) => (
+                        <div key={ai} className={`pdf-annot-badge ${a.type}`}>
+                          <span className="pdf-annot-type">{{ praise: "✅", issue: "⚠️", suggestion: "💡", question: "❓" }[a.type as string] ?? "📌"} {a.type === "praise" ? "优点" : a.type === "issue" ? "问题" : a.type === "suggestion" ? "建议" : "提问"}</span>
+                          <span className="pdf-annot-content">{a.content}</span>
+                        </div>
+                      ))}
+                      {annots.length === 0 && <div className="pdf-annot-ok">✓ 此段无问题</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : docReviewLoading ? (
+              <div className="pdf-annot-loading">
+                <div className="typing-dots"><span /><span /><span /></div>
+                <p>AI 正在逐段阅读你的文档...</p>
+              </div>
+            ) : (
+              <iframe src={pdfViewerUrl} className="pdf-viewer-iframe" title="PDF Preview" />
+            )}
+            <div className="pdf-viewer-hint">
+              AI 批注会逐段显示。你可以在左侧聊天中针对具体内容提问。
+            </div>
+          </div>
+        )}
+
         {/* ── Right Panel (resizable) ── */}
-        {rightOpen && (
+        {rightOpen && !pdfViewerOpen && (
           <aside className="chat-right" style={{ width: rightWidth }}>
             <div className="right-drag-handle" onMouseDown={startDrag} />
             <div className="right-tabs-scroll">
               {([
-                { id: "agents", icon: "🤖", label: "智能体" },
-                { id: "task",   icon: "📋", label: "任务" },
-                { id: "risk",   icon: "⚠️", label: "风险" },
-                { id: "score",  icon: "📊", label: "评分" },
-                { id: "kg",     icon: "🔗", label: "图谱" },
-                { id: "hyper",  icon: "🌐", label: "超图" },
-                { id: "cases",  icon: "📚", label: "案例" },
-                { id: "feedback", icon: "💬", label: "批注" },
-                { id: "debug",  icon: "🛠", label: "调试" },
-              ] as { id: RightTab; icon: string; label: string }[]).map((t) => (
+                { id: "agents", label: "智能体" },
+                { id: "task",   label: "任务" },
+                { id: "risk",   label: "风险" },
+                { id: "score",  label: "评分" },
+                { id: "kg",     label: "图谱" },
+                { id: "hyper",  label: "超图" },
+                { id: "cases",  label: "案例" },
+                { id: "feedback", label: "批注" },
+                { id: "debug",  label: "调试" },
+              ] as { id: RightTab; label: string }[]).map((t) => (
                 <button key={t.id} className={`rtab-pill ${rightTab === t.id ? "active" : ""}`} onClick={() => { setRightTab(t.id); if (t.id === "feedback") loadFeedback(); }}>
-                  <span className="rtab-icon">{t.icon}</span>
-                  <span className="rtab-label">{t.label}</span>
+                  {t.label}
                 </button>
               ))}
             </div>
@@ -583,6 +708,14 @@ export default function StudentPage() {
                   <div className="panel-desc">你的问题由多位专家Agent协同分析，每位Agent有独立的角色定位和分析工具。</div>
                   {agentsCalled.length > 0 ? (
                     <>
+                      {/* Intent detection info */}
+                      {latestResult?.agent_trace?.orchestration && (
+                        <div className="agent-intent-badge">
+                          <span className="intent-label">意图识别</span>
+                          <span className="intent-value">{{ project_diagnosis: "项目诊断", evidence_check: "证据检查", business_model: "商业模式", competition_prep: "竞赛准备", pressure_test: "压力测试", learning_concept: "概念学习", idea_brainstorm: "头脑风暴", general_chat: "日常对话" }[latestResult.agent_trace.orchestration.intent as string] ?? latestResult.agent_trace.orchestration.intent}</span>
+                          <span className="intent-engine">({latestResult.agent_trace.orchestration.engine})</span>
+                        </div>
+                      )}
                       <div className="agent-flow">
                         {agentsCalled.map((a: string, i: number) => (
                           <span key={i} className="agent-flow-node">
@@ -607,7 +740,7 @@ export default function StudentPage() {
                       {Object.entries(roleAgents).map(([key, val]: [string, any]) => {
                         if (!val || !val.analysis) return null;
                         const nameMap: Record<string, string> = { coach: "🎯 项目教练", analyst: "⚠️ 风险分析师", advisor: "🏆 竞赛顾问", tutor: "📚 学习导师", grader: "📊 评分官", planner: "📋 行动规划师" };
-                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "知识图谱", web_search: "联网搜索", hypergraph: "超图分析", hypergraph_student: "超图维度", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "图谱评分", next_task: "任务建议", critic: "批判分析" };
+                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "项目分析", web_search: "联网搜索", hypergraph: "多维分析", hypergraph_student: "维度覆盖", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "维度评分", next_task: "任务建议", critic: "批判分析" };
                         return (
                           <details key={key} className="agent-card" open>
                             <summary className="agent-card-header">
@@ -626,43 +759,50 @@ export default function StudentPage() {
               )}
 
               {rightTab === "task" && (
-                <>
-                  <div className="panel-desc">基于对话上下文智能推荐的行动任务，随对话深入会不断细化。</div>
-                  {nextTask && nextTask.title !== "描述你的项目" ? (
-                    <div className="task-current-card">
-                      <div className="task-current-badge">当前最优先</div>
-                      <h4>{nextTask.title}</h4>
-                      <p>{nextTask.description}</p>
-                      {(nextTask.acceptance_criteria ?? []).length > 0 && (
-                        <div className="task-criteria">
-                          <h5>验收标准</h5>
-                          <ul>{(nextTask.acceptance_criteria ?? []).map((c: string, ci: number) => <li key={ci}>{c}</li>)}</ul>
+                <div className="right-section">
+                  <div className="panel-desc">基于你的全部对话累积生成的行动建议，不会因追问而丢失。</div>
+                  {(() => {
+                    const s = (v: any): string => (v == null ? "" : typeof v === "string" ? v : JSON.stringify(v));
+                    const tasks = cumulativePlannerTasks;
+                    const milestone = s(cumulativeMilestone);
+                    if (tasks.length > 0) {
+                      return (
+                        <div className="task-rich">
+                          {milestone && <div className="task-milestone">{milestone}</div>}
+                          {tasks.map((t: any, ti: number) => (
+                            <details key={ti} className="task-card-v2" open={ti === 0}>
+                              <summary className="task-card-head">
+                                <span className="task-num">{ti + 1}</span>
+                                <span className="task-title-v2">{s(t.task)}</span>
+                              </summary>
+                              <div className="task-card-body">
+                                {s(t.why) && <p className="task-why">{s(t.why)}</p>}
+                                {s(t.how) && <div className="task-how"><ReactMarkdown remarkPlugins={[remarkGfm]}>{s(t.how)}</ReactMarkdown></div>}
+                                {s(t.acceptance) && <div className="task-accept">{s(t.acceptance)}</div>}
+                              </div>
+                            </details>
+                          ))}
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="task-empty-state">
-                      <div className="task-empty-icon">📋</div>
-                      <p>详细描述你的项目后，系统会推荐针对性的行动任务</p>
-                    </div>
-                  )}
-                  {taskHistory.length > 1 && (
-                    <div className="task-timeline">
-                      <h5>历史建议轨迹</h5>
-                      <div className="task-tl-list">
-                        {taskHistory.slice().reverse().slice(0, 6).map((th, ti) => (
-                          <div key={ti} className={`task-tl-item ${ti === 0 ? "latest" : ""}`}>
-                            <div className="task-tl-dot" />
-                            <div className="task-tl-content">
-                              <span className="task-tl-turn">第{th.turn}轮</span>
-                              <span className="task-tl-title">{th.task.title}</span>
+                      );
+                    }
+                    if (nextTask && nextTask.title && s(nextTask.title) !== "描述你的项目") {
+                      return (
+                        <div className="task-rich">
+                          <details className="task-card-v2" open>
+                            <summary className="task-card-head">
+                              <span className="task-num">1</span>
+                              <span className="task-title-v2">{s(nextTask.title)}</span>
+                            </summary>
+                            <div className="task-card-body">
+                              <p className="task-why">{s(nextTask.description)}</p>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
+                          </details>
+                        </div>
+                      );
+                    }
+                    return <p className="right-hint">描述你的项目后，这里会生成针对性的行动建议</p>;
+                  })()}
+                </div>
               )}
 
               {rightTab === "risk" && (
@@ -775,12 +915,15 @@ export default function StudentPage() {
                         const pct = Math.min(100, (r.score / 10) * 100);
                         const color = pct >= 70 ? "var(--accent-green)" : pct >= 40 ? "var(--accent-yellow)" : "var(--accent-red)";
                         return (
-                          <div key={r.item} className="score-row">
+                          <details key={r.item} className="score-row-details">
+                            <summary className="score-row">
                             <span className="score-label">{r.item}</span>
                             <div className="score-bar-track"><div className="score-bar-fill" style={{ width: `${pct}%`, background: color }} /></div>
                             <span className="score-value">{r.score}</span>
                             {r.trend && <span className={`score-trend ${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "="}</span>}
-                          </div>
+                            </summary>
+                            {r.reason && <p className="score-reason">{r.reason}</p>}
+                          </details>
                         );
                       })}
                     </div>
@@ -789,118 +932,138 @@ export default function StudentPage() {
               )}
 
               {rightTab === "kg" && (
-                <div className="right-section">
-                  <h4>项目结构体检</h4>
-                  <div className="panel-desc">AI 将你的描述拆解为核心要素（用户、产品、技术、市场等），检测你是否遗漏了关键部分。<strong>结构缺陷</strong>是你最需要补充的内容。</div>
-                  {kgAnalysis ? (
-                    <>
-                      {/* Stats overview */}
-                      <div className="kg-stats-row">
-                        <div className="kg-stat-box">
-                          <span className="kg-stat-num">{(kgAnalysis.entities ?? []).length}</span>
-                          <span className="kg-stat-label">实体</span>
-                        </div>
-                        <div className="kg-stat-box">
-                          <span className="kg-stat-num">{(kgAnalysis.relationships ?? []).length}</span>
-                          <span className="kg-stat-label">关系</span>
-                        </div>
-                        <div className="kg-stat-box">
-                          <span className="kg-stat-num">{kgAnalysis.completeness_score ?? 0}<small>/10</small></span>
-                          <span className="kg-stat-label">完整度</span>
-                        </div>
-                        <div className="kg-stat-box">
-                          <span className="kg-stat-num">{(kgAnalysis.structural_gaps ?? []).length}</span>
-                          <span className="kg-stat-label">缺陷</span>
-                        </div>
-                      </div>
-                      {kgAnalysis.insight && <p className="kg-insight">{kgAnalysis.insight}</p>}
+                <div className="right-section kg-overview">
+                  {kgAnalysis && (kgAnalysis.entities ?? []).length > 0 ? (() => {
+                    const s = (v: any): string => (v == null ? "" : typeof v === "string" ? v : JSON.stringify(v));
+                    const typeColors: Record<string, string> = {
+                      stakeholder: "#69c0e0", pain_point: "#e07070", solution: "#5cbd8a",
+                      technology: "#a88ccc", market: "#e0a84c", competitor: "#c8a048",
+                      resource: "#60b8b8", product: "#6ba3d6", team: "#d4a5d0",
+                      business_model: "#e8b960", evidence: "#7ec87e",
+                    };
+                    const typeNames: Record<string, string> = {
+                      stakeholder: "用户", pain_point: "痛点", solution: "方案",
+                      technology: "技术", market: "市场", competitor: "竞品",
+                      resource: "资源", product: "产品", team: "团队",
+                      business_model: "商业", evidence: "证据",
+                    };
+                    const entities: any[] = kgAnalysis.entities ?? [];
+                    const rels: any[] = kgAnalysis.relationships ?? [];
+                    const gaps: string[] = kgAnalysis.structural_gaps ?? [];
+                    const strengths: string[] = kgAnalysis.content_strengths ?? [];
+                    const secScores = kgAnalysis.section_scores ?? {};
+                    const grouped: Record<string, any[]> = {};
+                    entities.forEach((e: any) => { const t = e.type || "other"; if (!grouped[t]) grouped[t] = []; grouped[t].push(e); });
+                    const branches = Object.entries(grouped);
+                    const cx = 160, cy = 160, R = 120;
+                    const planTasks: any[] = cumulativePlannerTasks;
 
-                      {/* Interactive Mind Map by entity type */}
-                      {(kgAnalysis.entities ?? []).length > 0 && (() => {
-                        const entities: any[] = kgAnalysis.entities ?? [];
-                        const typeNames: Record<string, string> = {
-                          stakeholder: "👥 目标用户", product: "📦 产品", market: "📊 市场",
-                          pain_point: "🔴 痛点", solution: "💡 方案", technology: "⚙️ 技术",
-                          competitor: "🏁 竞品", resource: "🔧 资源", team: "👤 团队",
-                          business_model: "💰 商业模式", evidence: "📋 证据",
-                        };
-                        const typeColors: Record<string, string> = {
-                          stakeholder: "#69c0e0", product: "#6ba3d6", market: "#e0a84c",
-                          pain_point: "#e07070", solution: "#5cbd8a", technology: "#a88ccc",
-                          competitor: "#c8a048", resource: "#60b8b8", team: "#d4a5d0",
-                          business_model: "#e8b960", evidence: "#7ec87e",
-                        };
-                        const grouped: Record<string, any[]> = {};
-                        entities.forEach((e: any) => {
-                          const t = e.type || "other";
-                          if (!grouped[t]) grouped[t] = [];
-                          grouped[t].push(e);
-                        });
-                        return (
-                          <div className="kg-mindmap">
-                            <h5>🧠 项目结构思维导图</h5>
-                            <div className="panel-desc">按维度分组展示你描述中的核心要素，点击展开/折叠。</div>
-                            {Object.entries(grouped).map(([type, items]) => {
-                              const color = typeColors[type] ?? "#6ba3d6";
-                              const name = typeNames[type] ?? type;
-                              const rels = (kgAnalysis.relationships ?? []).filter((r: any) =>
-                                items.some((e: any) => e.id === r.source || e.id === r.target)
-                              );
+                    return (
+                      <div className="kg-full">
+                        {/* SVG Radial Graph */}
+                        <svg viewBox="0 0 320 320" className="kg-svg-graph">
+                          <circle cx={cx} cy={cy} r={R + 20} fill="none" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.4" />
+                          {rels.map((r: any, ri: number) => {
+                            const si = entities.findIndex((e: any) => e.id === r.source);
+                            const ti = entities.findIndex((e: any) => e.id === r.target);
+                            if (si < 0 || ti < 0) return null;
+                            const a1 = (2 * Math.PI * si) / entities.length - Math.PI / 2;
+                            const a2 = (2 * Math.PI * ti) / entities.length - Math.PI / 2;
+                            return <line key={ri} x1={cx + R * Math.cos(a1)} y1={cy + R * Math.sin(a1)} x2={cx + R * Math.cos(a2)} y2={cy + R * Math.sin(a2)} stroke="var(--text-secondary)" strokeWidth="0.6" opacity="0.25" />;
+                          })}
+                          <circle cx={cx} cy={cy} r="20" fill="var(--accent)" opacity="0.15" />
+                          <text x={cx} y={cy - 4} textAnchor="middle" fontSize="8" fill="var(--accent)" fontWeight="700">{kgAnalysis.completeness_score ?? "?"}/10</text>
+                          <text x={cx} y={cy + 7} textAnchor="middle" fontSize="6" fill="var(--text-secondary)">完整度</text>
+                          {entities.map((e: any, i: number) => {
+                            const angle = (2 * Math.PI * i) / entities.length - Math.PI / 2;
+                            const nx = cx + R * Math.cos(angle), ny = cy + R * Math.sin(angle);
+                            const color = typeColors[e.type] ?? "#6ba3d6";
+                            return (
+                              <g key={e.id} className="kg-node-g">
+                                <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={color} strokeWidth="0.5" opacity="0.2" />
+                                <circle cx={nx} cy={ny} r="14" fill={color + "20"} stroke={color} strokeWidth="1.2" />
+                                <text x={nx} y={ny - 2} textAnchor="middle" fontSize="6.5" fill="var(--text-primary)" fontWeight="600">{e.label.length > 5 ? e.label.slice(0, 4) + ".." : e.label}</text>
+                                <text x={nx} y={ny + 6} textAnchor="middle" fontSize="5" fill={color}>{typeNames[e.type] ?? e.type}</text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+
+                        {/* Dimension scores */}
+                        {Object.keys(secScores).length > 0 && (
+                          <div className="kg-dim-scores">
+                            <h5>维度完成度</h5>
+                            {Object.entries(secScores).map(([k, v]: [string, any]) => {
+                              const score = Number(v);
+                              const pct = Math.min(100, (score / 10) * 100);
+                              const color = pct >= 70 ? "#5cbd8a" : pct >= 40 ? "#e0a84c" : "#e07070";
+                              const names: Record<string, string> = { problem_definition: "问题定义", user_evidence: "用户证据", solution_feasibility: "方案可行性", business_model: "商业模式", competitive_advantage: "竞争优势" };
                               return (
-                                <details key={type} className="kg-mm-group" open>
-                                  <summary className="kg-mm-header" style={{ borderLeftColor: color }}>
-                                    <span className="kg-mm-type">{name}</span>
-                                    <span className="kg-mm-count">{items.length}</span>
-                                  </summary>
-                                  <div className="kg-mm-body">
-                                    {items.map((e: any) => (
-                                      <div key={e.id} className="kg-mm-entity" style={{ borderColor: color }}>
-                                        <span className="kg-mm-dot" style={{ background: color }} />
-                                        <span className="kg-mm-label">{e.label}</span>
-                                      </div>
-                                    ))}
-                                    {rels.length > 0 && (
-                                      <div className="kg-mm-rels">
-                                        {rels.slice(0, 4).map((r: any, ri: number) => (
-                                          <div key={ri} className="kg-mm-rel">
-                                            <span>{entities.find((e: any) => e.id === r.source)?.label ?? r.source}</span>
-                                            <span className="kg-mm-arrow">→ {r.relation} →</span>
-                                            <span>{entities.find((e: any) => e.id === r.target)?.label ?? r.target}</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </details>
+                                <div key={k} className="kg-score-row">
+                                  <span className="kg-score-name">{names[k] ?? k}</span>
+                                  <div className="kg-score-bar"><div className="kg-score-fill" style={{ width: `${pct}%`, background: color }} /></div>
+                                  <span className="kg-score-val">{score}</span>
+                                </div>
                               );
                             })}
                           </div>
-                        );
-                      })()}
+                        )}
 
-                      {(kgAnalysis.content_strengths ?? []).length > 0 && (
-                        <div className="kg-strengths"><h5>✅ 你的项目优势</h5><div className="panel-desc">这些是你已经做得比较好的部分，可以在路演中重点突出。</div>{kgAnalysis.content_strengths.map((s: string, si: number) => <div key={si} className="kg-strength-item">{s}</div>)}</div>
-                      )}
-                      {kgAnalysis.section_scores && Object.keys(kgAnalysis.section_scores).length > 0 && (
-                        <div className="kg-section-scores"><h5>📐 各维度完成度</h5><div className="panel-desc">分数越低的维度越需要你补充内容。</div>{Object.entries(kgAnalysis.section_scores).map(([k, v]: [string, any]) => (
-                          <div key={k} className="score-row">
-                            <span className="score-label">{{ problem_definition: "问题定义", user_evidence: "用户证据", solution_feasibility: "方案可行性", business_model: "商业模式", competitive_advantage: "竞争优势" }[k] ?? k}</span>
-                            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: `${Math.min(100, (Number(v) / 10) * 100)}%` }} /></div>
-                            <span className="score-value">{String(v)}</span>
+                        {/* Strengths */}
+                        {strengths.length > 0 && (
+                          <div className="kg-list-section good">
+                            <h5>做得好的</h5>
+                            {strengths.map((item, i) => <div key={i} className="kg-list-item good">{item}</div>)}
                           </div>
-                        ))}</div>
-                      )}
-                      {(kgAnalysis.entities ?? []).length > 0 && (
-                        <div className="kg-entities"><h5>提取的关键实体</h5><div className="panel-desc">从你的描述中识别出的核心要素，颜色代表类型。</div><div className="kg-entity-grid">{kgAnalysis.entities.map((e: any) => <span key={e.id} className={`kg-entity-chip ${e.type}`} title={e.type}>{e.label}</span>)}</div></div>
-                      )}
-                      {(kgAnalysis.relationships ?? []).length > 0 && (
-                        <div className="kg-relations"><h5>实体之间的关系</h5>{kgAnalysis.relationships.map((r: any, ri: number) => <div key={ri} className="kg-rel-row"><span className="kg-rel-src">{r.source}</span><span className="kg-rel-arrow">→ {r.relation} →</span><span className="kg-rel-tgt">{r.target}</span></div>)}</div>
-                      )}
-                      {(kgAnalysis.structural_gaps ?? []).length > 0 && (
-                        <div className="kg-gaps"><h5>🔴 你需要补充的内容</h5><div className="panel-desc">以下是优秀项目通常会涵盖但你还没提到的关键要素。补上它们能显著提高项目完整度和评分。</div>{kgAnalysis.structural_gaps.map((g: string, gi: number) => <div key={gi} className="kg-gap-item">⚠ {g}</div>)}</div>
-                      )}
-                    </>
-                  ) : <p className="right-hint">发送项目描述后显示知识图谱分析</p>}
+                        )}
+
+                        {/* Gaps */}
+                        {gaps.length > 0 && (
+                          <div className="kg-list-section gap">
+                            <h5>需要补强</h5>
+                            {gaps.map((item, i) => <div key={i} className="kg-list-item gap">{item}</div>)}
+                          </div>
+                        )}
+
+                        {/* Insight */}
+                        {kgAnalysis.insight && (
+                          <div className="kg-insight-box">{kgAnalysis.insight}</div>
+                        )}
+
+                        {/* Merged Tasks */}
+                        {planTasks.length > 0 && (
+                          <div className="kg-tasks-section">
+                            <h5>建议行动</h5>
+                            {planTasks.map((t: any, ti: number) => (
+                              <details key={ti} className="kg-task-card" open={ti === 0}>
+                                <summary>{s(t.task)}</summary>
+                                <div className="kg-task-body">
+                                  {s(t.why) && <p>{s(t.why)}</p>}
+                                  {s(t.how) && <div><ReactMarkdown remarkPlugins={[remarkGfm]}>{s(t.how)}</ReactMarkdown></div>}
+                                </div>
+                              </details>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Relationships summary */}
+                        {rels.length > 0 && (
+                          <div className="kg-rels-section">
+                            <h5>关键关系 ({rels.length})</h5>
+                            {rels.slice(0, 8).map((r: any, ri: number) => {
+                              const srcLabel = entities.find((e: any) => e.id === r.source)?.label ?? r.source;
+                              const tgtLabel = entities.find((e: any) => e.id === r.target)?.label ?? r.target;
+                              return <div key={ri} className="kg-rel-row">{srcLabel} <span className="kg-rel-arrow">→ {r.relation} →</span> {tgtLabel}</div>;
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })() : (
+                    <div className="proj-empty-guide">
+                      <p>发送项目描述或上传计划书，AI 会自动提取关键信息生成项目梳理。数据跨轮次累积，不会因追问而丢失。</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1019,16 +1182,17 @@ export default function StudentPage() {
                       )}
                     </>
                   ) : (
-                    <>
-                      {hyperEdges.length > 0 ? (
-                        <div className="hyper-teaching">
-                          <h5>教学超图洞察</h5>
-                          {hyperEdges.map((e: any) => (
-                            <div key={e.hyperedge_id} className="right-tag">{e.teaching_note}</div>
-                          ))}
-                        </div>
-                      ) : <p className="right-hint">发送项目描述后，超图将分析你的项目跨维度覆盖情况</p>}
-                    </>
+                    <div className="hyper-empty-guide">
+                      <div className="hyper-guide-icon">🌐</div>
+                      <h5>什么是超图分析？</h5>
+                      <p>超图分析从<strong>10个关键维度</strong>检测你的项目完整度：</p>
+                      <div className="hyper-guide-dims">
+                        {["👥 目标用户","🔴 痛点","💡 方案","⚙️ 技术","📊 市场","🏁 竞品","🔧 资源","💰 商业模式","👤 团队","📋 证据"].map((d,i) => (
+                          <span key={i} className="hyper-guide-dim">{d}</span>
+                        ))}
+                      </div>
+                      <p style={{marginTop:"12px",fontSize:"13px",color:"var(--text-muted)"}}>发送一段项目描述或上传商业计划书，AI会自动分析覆盖情况、发现缺口、对比历史案例模式。</p>
+                    </div>
                   )}
                 </div>
               )}

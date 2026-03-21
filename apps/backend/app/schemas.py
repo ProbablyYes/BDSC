@@ -87,4 +87,6 @@ class DialogueTurnResponse(BaseModel):
     next_task: dict
     kg_analysis: dict = Field(default_factory=dict)
     hypergraph_insight: dict = Field(default_factory=dict)
+    hypergraph_student: dict = Field(default_factory=dict)
+    rag_cases: list = Field(default_factory=list)
     agent_trace: dict = Field(default_factory=dict)

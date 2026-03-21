@@ -53,6 +53,47 @@ class LlmClient:
                 max_retries=1,
             )
 
+    def chat_text_stream(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        model: str | None = None,
+        temperature: float = 0.2,
+    ):
+        """Yield text chunks as a generator (for SSE streaming)."""
+        if not self.enabled or self._client is None:
+            yield ""
+            return
+        model_name = model or settings.llm_fast_model or settings.llm_model
+        safe_temp = max(0.0, min(float(temperature), 1.2))
+        try:
+            stream = self._client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=safe_temp,
+                stream=True,
+            )
+            in_think = False
+            for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta and delta.content:
+                    text = delta.content
+                    if "<think>" in text:
+                        in_think = True
+                        continue
+                    if "</think>" in text:
+                        in_think = False
+                        continue
+                    if in_think:
+                        continue
+                    yield text
+        except Exception as exc:
+            logger.warning("LLM stream failed (model=%s): %s", model_name, exc)
+            yield ""
+
     def chat_json(
         self,
         system_prompt: str,

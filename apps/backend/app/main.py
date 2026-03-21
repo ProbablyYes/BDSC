@@ -1,9 +1,12 @@
+import json
 import math
 from datetime import datetime
 from typing import Any
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.schemas import (
@@ -38,6 +41,8 @@ app.add_middleware(
 
 settings.upload_root.mkdir(parents=True, exist_ok=True)
 settings.teacher_examples_root.mkdir(parents=True, exist_ok=True)
+
+app.mount("/uploads", StaticFiles(directory=str(settings.upload_root)), name="uploads")
 
 json_store = JsonStorage(settings.data_root / "project_state")
 conv_store = ConversationStorage(settings.data_root / "conversations")
@@ -348,8 +353,95 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         next_task=next_task,
         kg_analysis=kg_analysis,
         hypergraph_insight=hyper_insight,
+        hypergraph_student=hyper_student,
+        rag_cases=rag_cases,
         agent_trace=agent_trace,
     )
+
+
+@app.post("/api/dialogue/turn-stream")
+async def dialogue_turn_stream(request: Request):
+    """SSE streaming endpoint: runs workflow, then streams orchestrator reply."""
+    from app.services.graph_workflow import run_workflow_pre_orchestrate, stream_orchestrator
+
+    payload = await request.json()
+    msg = payload.get("message", "")
+    project_id = payload.get("project_id", "demo")
+    student_id = payload.get("student_id", "student")
+    conv_id = payload.get("conversation_id", "")
+    mode_val = payload.get("mode", "coursework")
+
+    conv_messages: list[dict] = []
+    if conv_id:
+        conv = conv_store.get(project_id, conv_id)
+        if conv:
+            conv_messages = conv.get("messages", [])
+    else:
+        new_conv = conv_store.create(project_id, student_id)
+        conv_id = new_conv["conversation_id"]
+
+    project_state = json_store.load_project(project_id)
+    history_context = ""
+    for row in (project_state.get("submissions", []) or [])[-4:]:
+        snippet = (row.get("raw_text") or "")[:200]
+        task = (row.get("next_task") or {}).get("title", "")
+        if snippet:
+            history_context += f"- {snippet}… → {task}\n"
+
+    teacher_fb = project_state.get("teacher_feedback", [])
+    tfb_ctx = ""
+    if teacher_fb:
+        latest = teacher_fb[-1]
+        tfb_ctx = f"{latest.get('comment','')}"
+
+    pre = run_workflow_pre_orchestrate(
+        message=msg, mode=mode_val,
+        project_state=project_state,
+        history_context=history_context,
+        conversation_messages=conv_messages,
+        teacher_feedback_context=tfb_ctx,
+    )
+
+    side_data = {
+        "conversation_id": conv_id,
+        "diagnosis": pre.get("diagnosis", {}),
+        "next_task": pre.get("next_task", {}),
+        "kg_analysis": pre.get("kg_analysis", {}),
+        "hypergraph_student": pre.get("hypergraph_student", {}),
+        "hypergraph_insight": pre.get("hypergraph_insight", {}),
+        "rag_cases": pre.get("rag_cases", []),
+        "agent_trace": {
+            "orchestration": {
+                "mode": mode_val,
+                "intent": pre.get("intent", ""),
+                "confidence": pre.get("intent_confidence", 0),
+                "engine": pre.get("intent_engine", ""),
+                "agents_called": pre.get("agents_called", []),
+            },
+            "kg_analysis": pre.get("kg_analysis", {}),
+            "rag_cases": pre.get("rag_cases", []),
+            "web_search": pre.get("web_search_result", {}),
+            "hypergraph_student": pre.get("hypergraph_student", {}),
+        },
+    }
+
+    def event_stream():
+        yield f"data: {json.dumps({'type': 'meta', 'data': side_data}, ensure_ascii=False)}\n\n"
+
+        full_text = ""
+        for chunk in stream_orchestrator(pre):
+            full_text += chunk
+            yield f"data: {json.dumps({'type': 'token', 'data': chunk}, ensure_ascii=False)}\n\n"
+
+        yield f"data: {json.dumps({'type': 'done', 'data': full_text}, ensure_ascii=False)}\n\n"
+
+        conv_store.append_message(project_id, conv_id, {"role": "user", "content": msg})
+        conv_store.append_message(project_id, conv_id, {
+            "role": "assistant", "content": full_text,
+            "agent_trace": side_data.get("agent_trace", {}),
+        })
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 def _build_doc_sections(parsed_doc) -> list[dict]:
@@ -503,10 +595,13 @@ async def dialogue_turn_upload(
         },
     })
 
+    file_url = f"/uploads/{project_id}/{file.filename}"
+
     return {
         "conversation_id": conv_id,
         "assistant_message": assistant_message,
         "filename": file.filename,
+        "file_url": file_url,
         "extracted_length": len(extracted),
         "diagnosis": diagnosis,
         "next_task": next_task,

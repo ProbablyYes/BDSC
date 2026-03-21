@@ -142,7 +142,7 @@ INTENTS: dict[str, dict] = {
     "general_chat": {
         "keywords": [],
         "desc": "闲聊/问好",
-        "agents": [],
+        "agents": ["coach"],
     },
 }
 
@@ -425,10 +425,9 @@ def _standalone_hypergraph_analysis(
 
 def gather_context_node(state: WorkflowState) -> dict:
     intent = state.get("intent", "general_chat")
-    if intent == "general_chat":
-        return {"nodes_visited": ["gather_context"]}
-
     msg = state.get("message", "")
+    if intent == "general_chat" and len(msg) < 30:
+        return {"nodes_visited": ["gather_context"]}
     mode = state.get("mode", "coursework")
     is_file = "[上传文件:" in msg
 
@@ -554,13 +553,13 @@ def gather_context_node(state: WorkflowState) -> dict:
                       "competition_prep", "pressure_test"}
     _LIGHT_INTENTS = {"learning_concept", "idea_brainstorm"}
 
-    tasks: list[Callable] = [_task_rag]
+    tasks: list[Callable] = [_task_rag, _task_kg]
     if intent in _HEAVY_INTENTS or is_file:
-        tasks.extend([_task_kg, _task_diag_enhance, _task_critic, _task_hyper])
+        tasks.extend([_task_diag_enhance, _task_critic, _task_hyper])
     elif intent in _LIGHT_INTENTS:
         tasks.append(_task_web)
     else:
-        tasks.extend([_task_kg, _task_web])
+        tasks.append(_task_web)
 
     if intent in ("business_model", "project_diagnosis", "competition_prep", "learning_concept"):
         if _task_web not in tasks:
@@ -703,15 +702,14 @@ def _coach_analyze(state: dict) -> dict:
         system_prompt=(
             "你是一位有10年双创辅导经验的导师，正在为学生的项目做深度分析。\n"
             + (f"**模式**: {mode_hint}\n" if mode_hint else "")
-            + "你的分析必须：\n"
-            "1. 紧扣学生的具体内容，引用学生原话或具体细节来讨论\n"
-            "2. 如果有参考案例，用'比如XX项目的做法是...'来自然引用\n"
-            "3. 如果有联网搜索结果，引用具体的行业数据或市场信息\n"
-            "4. 如果有超图分析数据，指出维度覆盖情况和缺失的关键维度\n"
-            "5. 指出项目最核心的1-2个问题，而不是列一堆\n"
-            "6. 给出非常具体的下一步行动（具体到这周该做什么）\n"
-            "7. 如果有对话上下文，结合前面讨论过的内容来延伸，不要重复已讲过的点\n"
-            "用4-6段话输出，深入而具体。"
+            + "你的分析结构必须是**先总后分**：\n"
+            "1. 先用1-2句话总结你对整个项目的总体判断（方向对不对、核心逻辑通不通）\n"
+            "2. 简要梳理项目的逻辑链路：用户是谁→他们的痛点→你的方案→如何变现→竞争壁垒\n"
+            "3. 然后聚焦最关键的1-2个问题深入分析，引用学生原话来讨论\n"
+            "4. 如果有参考案例，自然引用对比\n"
+            "5. 给出具体的下一步行动\n"
+            "6. 结合前面对话延伸，不重复已讲过的点\n"
+            "用4-6段话输出，**深度远比广度重要**。"
         ),
         user_prompt=(
             f"学生说: {msg[:2000]}\n\n"
@@ -1118,27 +1116,22 @@ def orchestrator(state: WorkflowState) -> dict:
                 "你已经从多个专业角度对学生的问题进行了深入分析，"
                 "现在需要将这些分析整合成一份自然、连贯、有深度的回复。\n\n"
                 "## 绝对禁止\n"
-                "- **绝对不要提到任何Agent、分析师、教练、导师、评分官、规划师等角色名称**\n"
-                "- 不要说'我们的XX分析师认为'、'XX Agent建议'等暴露系统结构的话\n"
-                "- 不要说'根据多维度分析'、'经过系统分析'等套话\n"
-                "- 不要用千篇一律的开头和结尾模板\n\n"
+                "- **绝对不要提到Agent、分析师、教练等角色名称**\n"
+                "- 不要说'根据分析'、'经过系统分析'等套话\n"
+                "- **严禁万金油建议**：不许动不动就建议'做用户访谈''发放问卷''做市场调研'。"
+                "  这些是最敷衍最没用的回答。如果确实需要调研，必须说清楚：调研什么假设、"
+                "  找什么人、问什么问题、如何验证。没有这些细节就不要提。\n"
+                "- 不要罗列大量建议，宁可只讲1-2点讲透\n\n"
+                "## 回复逻辑结构\n"
+                "1. **总览**（1-2句）：概括你对项目的整体判断\n"
+                "2. **逻辑链路**：用户是谁→痛点→方案→变现→壁垒，哪些通哪些断\n"
+                "3. **深入1-2个核心问题**：引用学生原话讨论，给具体例子说明怎么改\n"
+                "4. **追问**：提出1-2个深入问题引导思考\n\n"
                 "## 必须做到\n"
-                "- **以第一人称'我'来回复**，就像一个真正的导师在面对面和学生聊天\n"
-                "- **紧扣学生的具体内容**：引用学生原话、具体数据、项目细节来讨论\n"
-                "- **引用参考案例时自然融入**：如'比如XX项目也做了类似的事，他们的做法是...'，不要说'根据知识库'\n"
-                "- **追问要有针对性**：基于学生内容的具体漏洞来追问\n"
-                "- **如果有行动计划，自然地告诉学生本周该做什么**，不要说'规划师建议'\n"
-                "- **排版必须美观易读**：\n"
-                "  - 用 ## 和 ### 标题把回复分成清晰的几个板块\n"
-                "  - 关键数据或对比用 **表格** 呈现（如竞品对比、TAM/SAM/SOM拆分、评分对比）\n"
-                "  - 重要观点用 > 引用块 突出\n"
-                "  - 核心结论用 **加粗** 标注\n"
-                "  - 列举要点不超过5条，每条一句话精炼\n"
-                "  - 段落之间保持呼吸感，不要挤在一起\n"
-                "  - 如果内容可以用表格、对比列表呈现就不要用长段文字\n"
-                "- **每次回复的结构要不同**：根据内容自然组织，不要套公式\n"
+                "- 第一人称回复，像导师面对面聊天\n"
+                "- 紧扣学生具体内容，引用原话讨论\n"
+                "- 排版清晰：## 标题分块、> 引用突出、**加粗**关键词、表格呈现对比\n"
                 f"- **回复长度**: {length_guide}\n"
-                "- 深度优于广度：宁可讲透一个核心问题，也不要浮皮潦草地列10个要点\n"
             ),
             user_prompt=(
                 f"学生说：\n{msg[:3000]}\n\n"
@@ -1219,3 +1212,109 @@ def run_workflow(
         "teacher_feedback_context": teacher_feedback_context,
     }
     return workflow.invoke(initial)
+
+
+def run_workflow_pre_orchestrate(
+    message: str,
+    mode: str = "coursework",
+    project_state: dict | None = None,
+    history_context: str = "",
+    conversation_messages: list | None = None,
+    teacher_feedback_context: str = "",
+) -> dict[str, Any]:
+    """Run router + gather + agents but NOT orchestrator. Returns state for streaming."""
+    initial: WorkflowState = {
+        "message": message,
+        "mode": mode,
+        "project_state": project_state or {},
+        "history_context": history_context,
+        "conversation_messages": conversation_messages or [],
+        "teacher_feedback_context": teacher_feedback_context,
+    }
+    state = dict(initial)
+    state.update(router_agent(state))
+    state.update(gather_context_node(state))
+    state.update(run_role_agents_node(state))
+    return state
+
+
+def stream_orchestrator(state: dict):
+    """Generator that yields text chunks from the orchestrator LLM call."""
+    msg = state.get("message", "")
+    intent = state.get("intent", "general_chat")
+    mode = state.get("mode", "coursework")
+    conv_msgs = state.get("conversation_messages", [])
+    hist = state.get("history_context", "")
+    tfb = state.get("teacher_feedback_context", "")
+    is_file = "[" + "\u4e0a\u4f20\u6587\u4ef6:" in msg
+
+    analysis_parts: list[str] = []
+    for key in ("coach_output", "analyst_output", "advisor_output",
+                "tutor_output", "grader_output", "planner_output"):
+        out = state.get(key, {})
+        if out and out.get("analysis"):
+            analysis_parts.append(str(out["analysis"]))
+
+    conv_ctx = ""
+    if conv_msgs:
+        recent = conv_msgs[-6:]
+        conv_ctx = "\n".join(
+            f"{'学生' if m.get('role')=='user' else '教练'}: {str(m.get('content',''))[:200]}"
+            for m in recent
+        )
+
+    msg_len = len(msg)
+    n_analyses = len(analysis_parts)
+    if is_file:
+        length_guide = "1200-2500字"
+    elif intent == "general_chat" or msg_len < 20:
+        length_guide = "100-250字"
+    elif n_analyses >= 3:
+        length_guide = "900-1500字"
+    else:
+        length_guide = "500-900字"
+
+    analyses_ctx = "\n\n---\n\n".join(analysis_parts)
+    persona = _MODE_PERSONA.get(mode, _MODE_PERSONA["coursework"])
+
+    if not _llm.enabled or not analyses_ctx:
+        diag = state.get("diagnosis", {})
+        bn = str(diag.get("bottleneck") or "")
+        yield bn if bn else "你好！告诉我你的项目想法，我来帮你诊断和分析。"
+        return
+
+    system_prompt = (
+        f"{persona}\n"
+        "你已经从多个专业角度对学生的问题进行了深入分析，"
+        "现在需要将这些分析整合成一份自然、连贯、有深度的回复。\n\n"
+        "## 绝对禁止\n"
+        "- 不要提到任何Agent、分析师等角色名称\n"
+        "- 不要说'根据多维度分析'等套话\n\n"
+        "## 回复逻辑结构\n"
+        "1. 总览定位（1-2句话概括整体判断）\n"
+        "2. 宏观框架梳理（用户→痛点→方案→变现逻辑链）\n"
+        "3. 聚焦核心问题（最多2-3个深入分析）\n"
+        "4. 具体行动建议\n"
+        "5. 引导性追问\n\n"
+        "## 必须做到\n"
+        "- 以第一人称'我'回复\n"
+        "- 紧扣学生具体内容，引用原话\n"
+        "- 排版美观：## ### 标题、表格、> 引用块、**加粗**\n"
+        f"- 回复长度: {length_guide}\n"
+    )
+
+    user_prompt = (
+        f"学生说：\n{msg[:3000]}\n\n"
+        + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+        + (f"教师批注: {tfb}\n\n" if tfb else "")
+        + (f"历史: {hist[:300]}\n\n" if hist else "")
+        + f"以下是已完成的深入分析结果，请整合为自然的回复：\n\n{analyses_ctx}"
+    )
+
+    for chunk in _llm.chat_text_stream(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=settings.llm_reason_model,
+        temperature=0.55,
+    ):
+        yield chunk

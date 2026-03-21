@@ -1,0 +1,834 @@
+{
+  "conversation_id": "6ac45841-15e4-4855-9682-5e72b53d7f13",
+  "project_id": "demo-project-001",
+  "student_id": "student-001",
+  "title": "[上传文件: Mini奶吧创业计划书.pdf] 这是我的计划",
+  "created_at": "2026-03-21T10:22:41.270893",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[上传文件: Mini奶吧创业计划书.pdf] 这是我的计划书，请带我从头开始检查其中写的问题",
+      "timestamp": "2026-03-21T10:25:58.785109"
+    },
+    {
+      "role": "assistant",
+      "content": "亚芳同学，你好。很高兴能和你一起打磨这份《Mini奶吧创业计划书》。我仔细读了几遍，能感受到你对这个项目的热情和初步的构想，这是一个很好的起点。不过，就像我们做任何研究一样，一个好的想法要变成一个经得起推敲的商业计划，关键在于用扎实的证据和严谨的逻辑把它支撑起来。目前这份计划书更像一份“构想说明书”，距离一份能打动自己、说服他人的“行动蓝图”还有不小的距离。\n\n别担心，我们一步一步来。今天我们先集中精力，解决最核心、最致命的一个问题：**你为谁解决什么问题？这个问题真的存在吗？** 这是所有商业计划的基石，如果这里站不稳，后面的所有设计都像是建在沙子上。\n\n## 一、核心问题：模糊的“需求”与缺失的“证据”\n\n你的计划书里多次提到了“社区场景化定位”、“解决年轻人健康需求”，这是一个很好的方向。但问题在于，这些描述都停留在“感觉”和“宣称”的层面，缺乏实证。\n\n> **计划书原文摘录**：\n> - 第一章：市场定位（目标市场）—— “社区场景化定位”\n> - 第二章：宗旨—— “提供健康饮品”\n> - 第三章：产品—— “特色产品”（但未具体说明）\n\n这些表述引出了几个我必须向你追问的关键问题：\n\n1.  **你说的“年轻人”具体是谁？** 是桃李苑社区里的大学生？刚工作的白领？还是带孩子的年轻父母？他们的年龄、收入、作息时间、消费习惯有什么具体特征？一个大学生和一个年轻妈妈对“健康饮品”的理解和需求可能天差地别。\n2.  **“健康需求”具体指什么？** 是觉得现有奶茶太甜？是乳糖不耐受想找替代品？是追求高蛋白营养？还是想要成分更简单的鲜奶？你计划书里提到的“特色产品”到底在健康层面解决了哪个具体问题？\n3.  **最重要的：你怎么知道他们“需要”？** 是听到了身边几个朋友的抱怨，还是做过系统的调研？如果只是前者，这很可能是一种“熟人礼貌性反馈”，并非真实的市场需求。很多失败的创业项目都倒在了这里——把少数人的喜好当成了普遍需求。\n\n**一个对比案例**：我之前辅导过一个做校园食品溯源的项目。他们的计划书里没有空泛地说“大家关心食品安全”，而是直接引用了学校后勤部门的数据：“当前食堂日均检测样本XX份，但现有系统处理能力仅为XX份，导致30%的样品检测滞后，形成管理压力与风险点。”你看，这就把一个模糊的“关心”变成了一个具体、可量化、有紧迫性的“问题”。\n\n你的计划书目前缺少的，正是这种“问题感”和“证据链”。这直接导致了评审维度中 **“Problem Definition”（问题定义，3.0分）和“User Evidence Strength”（用户证据强度，2.0分）得分极低**，这是最大的短板。\n\n## 二、本周行动建议：从“空想”到“验证”\n\n我建议我们暂时把笔放下，走出门去，用这一周的时间，为你的计划书打下第一个坚实的地基。请你集中完成以下三件事：\n\n### **行动一：设计并执行一份社区实地调研问卷（周三前完成设计，周末前完成至少100份有效回收）**\n\n不要想得太复杂，核心就是验证上面那几个问题。问卷可以包括：\n- **基本信息**：年龄、职业、家庭结构。\n- **消费行为**：每周购买饮品的频率、金额、通常在哪里买（便利店、奶茶店、超市）？\n- **痛点与需求**：对现有购买的饮品有哪些不满意？（可多选：太甜、价格高、不新鲜、选择少、排队久等）\n- **产品概念测试**：简单描述一下你设想中的“Mini奶吧”（比如：社区内、主打鲜奶/轻乳饮品、可定制糖度），询问他们的购买意愿、能接受的价格区间。\n\n**目标**：获得关于目标用户画像和需求假设的第一手数据。\n\n### **行动二：实地勘察周边3公里内的竞争对手（周五前完成）**\n\n你提到了“江干区”，这范围太大了。聚焦到你选址的“桃李苑”周边。去数一数：\n- 有多少家奶茶店（喜茶、古茗、蜜雪冰城等）？\n- 有多少家便利店（罗森、全家等，它们也卖低温奶和饮品）？\n- 有没有类似的鲜奶屋或酸奶店？\n\n做一个简单的竞品记录表，例如：\n\n| **竞品名称** | **类型** | **客单价（估算）** | **观察时段客流量** | **核心产品/特点** | **与你设想的重合度** |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| 蜜雪冰城（XX路店） | 连锁奶茶店 | 8元 | 周六下午3点，15分钟进店10人 | 平价冰饮、冰淇淋 | 高（都是即饮饮品） |\n| 罗森便利店（桃李苑店） | 便利店 | 15元（含其他商品） | 同上，进店6人 | 货架冷藏鲜奶、瓶装酸奶 | 中（供应标准化乳制品） |\n| （如果你发现的独立奶吧） | 独立店铺 | 待核实 | 待核实 | 待核实 | 极高 |\n\n**目标**：清晰了解你即将进入的战场，你的“社区化”和“健康”定位是否能形成有效的差异化。\n\n### **行动三：搜集并分析宏观数据（贯穿本周）**\n\n- **消费能力**：查一下“杭州市江干区（或上城区，因区划调整）2023年人均可支配收入及消费支出数据”，特别是食品烟酒类支出。这能帮你判断市场容量和定价空间。\n- **行业数据**：搜索“中国现制饮品行业报告”、“低温乳制品消费趋势”等，看看有没有关于健康化、社区化趋势的数据支持你的方向。\n- **供应链初探**：简单了解一下杭州周边（如金华、嘉兴）有没有中小型牧场或乳品厂，思考潜在的合作可能性。**先不用谈合作**，主要是了解产业环境。\n\n## 三、计划书具体修改方向（基于调研结果）\n\n完成以上调研后，你的计划书至少需要在这些地方进行重大升级：\n\n1.  **第一章 摘要 / 第二章 企业介绍**：\n    - **宗旨要更具体**：从“提供健康饮品”改为“为桃李苑及周边社区的（根据调研确定的，例如）20-35岁年轻家庭，提供新鲜、低糖、可定制的优质乳制品即时解决方案”。\n    - **补充强有力的开篇**：在摘要最开头，用1-2句话引用你的调研核心发现。例如：“据我们对桃李苑社区100位居民的调研，超过65%的受访者对现有奶茶过甜表示不满，且70%的人表示愿意为‘更新鲜、更健康’的乳制品支付10%-20%的溢价。”\n\n2.  **第三章 产品与服务**：\n    - **产品描述要对应痛点**：你的每一款主打产品，都应该明确回应调研中发现的某一个具体痛点。比如，如果调研发现“怕胖”是主要顾虑，那么你的“招牌鲜奶”就应该突出“零添加糖、蛋白质含量高”；如果“给孩子买”是场景，那么可以设计“儿童营养酸奶杯”。\n    - **未来规划要有依据**：未来要上的新产品，应该是基于初期用户反馈和数据（比如哪款口味复购率高、哪个时间段销量好）来规划，而不是凭空想象。\n\n3.  **第四章 竞争性分析（这是你需要新增或大幅强化的部分）**：\n    - 把你实地调研的竞品表格整理后放进来。\n    - 做一个简单的**竞争态势分析**：你的Mini奶吧 vs. 连锁奶茶店 vs. 便利店，在**产品、价格、便利性、健康性**这几个维度上的对比。清晰地向读者展示你的**差异化优势**和**可能存在的劣势**（比如品牌知名度低）。\n\n4.  **关于你自己（冯亚芳店长）**：\n    - 在管理层介绍部分，除了基本信息，**务必补充你个人与这个项目的“为什么”**。你对乳制品行业的兴趣从何而来？是否有相关的学习、工作或深度消费经验？这份事业对你意味着什么？投资人和评委非常看重创始人与项目之间的内在连接。\n\n## 四、需要警惕的深层逻辑漏洞与风险\n\n最后，我想提醒你几个在后续深化时需要特别注意的“坑”，它们已经在你目前的计划书里露出了苗头：\n\n- **“健康”承诺与产品脱节的风险**：你提到了“健康”，但产品描述里没有任何支撑。是用了零卡糖？还是获得了低脂认证？或者原料有可溯源的有机证明？如果不能在产品层面落实“健康”的具体定义并让消费者感知到，这就可能成为一个“伪需求”。\n- **供应链与损耗的隐性杀手**：乳制品是典型的高损耗、短保质期商品。计划书里提到了“灵活供应链”，但这恰恰是最需要细节的地方。每日配送如何实现？预估的损耗率是多少（行业平均可能在10%-15%）？你计划如何通过预售、会员制等方式来精准控制采购量？这部分需要单独、详细的规划。\n- **财务逻辑的缺失**：目前只有“资金需求”，没有基本的财务模型。一家开在社区的小店，日均要卖多少杯才能覆盖房租、人工、原料成本并实现盈利？这需要你根据调研的客单价、预估客流来做一个简单的盈亏平衡测算。\n\n**总结一下**：\n亚芳，现在最重要的事情不是把计划书写得更长、更漂亮，而是**按下暂停键，先去验证你的基本假设**。你需要的不是完美的猜测，而是不完美但真实的数据。\n\n请先专注于我上面提到的**本周三项调研行动**。在这个过程中，有任何问题，比如问卷设计拿不准、数据不知道去哪里找，随时可以再来找我讨论。当你带着这些真实的信息回来时，我们再一起动笔修改，你的计划书将会焕然一新，真正拥有说服人的力量。\n\n期待你调研的成果，我们一步一步来。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "intent": "project_diagnosis",
+          "confidence": 0.95,
+          "engine": "file_detect",
+          "pipeline": [
+            "coach",
+            "analyst",
+            "grader",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "评分官",
+            "行动规划师"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "根据计划书内容和KG分析结果，当前最核心的两个问题是：1）目标用户画像与痛点缺乏实证数据支撑；2）社区场景化定位未形成闭环验证。这两个问题直接导致商业模式可行性评估无法推进。\n\n在用户证据方面，计划书仅提到\"社区场景化定位\"，但未明确目标用户的具体特征。参考案例2中溯源项目通过\"现有检测系统压力大\"的痛点描述建立了需求场景，而Mini奶吧需要更精准的用户洞察。建议本周完成三个动作：1）在桃李苑社区进行至少100份实地问卷调研（本周三前设计问卷）；2）统计周边3公里内现有乳制品店的客流量数据（本周五前完成）；3）分析社区居民的消费能力与乳制品消费习惯（结合江干区2023年人均消费数据）。\n\n商业模式层面，计划书提到\"灵活供应链设计\"但未说明具体运作方式。参考案例1讯海智航在产品概述部分详细描述了AI平台的全流程应用，而Mini奶吧需要补充：1）每日鲜奶供应量与社区人口的匹配计算（建议使用杭州市统计局2023年社区人口数据）；2）与本地牧场/供应商的协议细节（本周二前补充合作意向书样本）；3）损耗率控制方案（需引用乳制品行业平均损耗率12%的数据作对比）。\n\n建议本周重点完善：1）在摘要部分增加用户调研数据可视化（饼图展示社区居民年龄分布与消费偏好）；2）补充竞争对手分析矩阵（包括3家现有店铺的SKU数量、客单价、营业时间等维度）；3）细化实施阶段的时间表，特别是供应链搭建的里程碑节点（建议使用甘特图呈现）。注意需在企业介绍章节增加冯亚芳的乳制品行业从业经历，增强管理层可信度。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "最致命风险：需求验证存在致命漏洞。计划书宣称\"很多人需要\"但未提供任何可验证的用户行为数据。若该项目的\"需求\"仅建立在熟人圈层的礼貌性反馈上（如反事实所述），当投资人要求提供真实用户订单数据时，将面临无法证明需求真实性的困境。更严重的是，若目标市场实际规模被高估（如市场定位章节未提供江干区奶茶消费数据），可能导致选址决策失误，出现\"奶吧建在写字楼但周边无办公人群\"的致命场景。\n\n尖锐追问：1）你们如何定义\"目标用户\"？是学生群体/上班族/社区居民？是否有年龄/消费能力/购买频次的交叉分析数据？2）市场定位中提到\"江干区\"，该区域奶茶店密度是多少？单店日均客流量/客单价/复购率的行业基准数据是什么？3）计划书提到\"特色产品\"但未说明差异化，是否有第三方机构或竞品分析报告验证该产品的不可替代性？\n\n可行性证据标准：优秀项目会提供至少3个月的试运营数据（如预售订单量/试饮转化率）、第三方市场调研报告（如江干区奶茶消费市场规模）、用户访谈视频或文字记录（需包含具体痛点描述和价格敏感度测试）。例如，某成功奶茶品牌在计划书中展示了200份用户访谈中83%受访者愿意为\"低糖芝士奶盖\"支付溢价的定量数据。\n\n逻辑漏洞识别：摘要部分提到\"解决年轻人健康需求\"，但未说明当前解决方案的缺陷（如竞品含糖量数据）。第2页\"宗旨\"章节承诺\"提供健康饮品\"，但第3页产品描述却未提及营养成分表或健康认证，这种\"健康\"承诺与产品实际属性的割裂，暗示伪需求风险。若无法证明目标用户对\"健康\"的支付溢价（如反事实中提到的200元/月验证），项目将失去核心竞争力。\n\n跨维度风险警示：虽然超图系统将该项目归类为智能制造类风险，但实际属于餐饮零售领域。该领域特有的风险维度如食品安全合规（compliance_not_covered）、供应链稳定性等在计划书中完全缺失。更需警惕的是，项目未建立用户需求-产品设计-运营策略的闭环验证逻辑，这种\"先有产品再找用户\"的模式在餐饮行业存活率不足15%（根据2023年《中国餐饮业白皮书》数据）。",
+            "tools_used": [
+              "hypergraph",
+              "hypergraph_student",
+              "challenge_strategies",
+              "critic_llm"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {
+            "agent": "评分官",
+            "analysis": "评审反馈报告：\n\n当前项目总分为3.67/10，各维度得分呈现严重两极分化。其中Problem Definition（3.0）和User Evidence Strength（2.0）为最薄弱环节，Solution Feasibility（4.0）、Financial Logic（3.0）等维度也存在明显短板。Business Model Consistency（5.0）和Team & Execution（5.0）表现相对稳定，但尚未形成竞争优势支撑点。\n\nProblem Definition维度得分偏低主要源于问题描述缺乏量化支撑和行业权威数据引用，未清晰界定目标用户群体的痛点规模与紧迫性。User Evidence Strength维度则完全缺失有效验证，既没有用户调研数据（如问卷样本量、NPS值），也未提供用户访谈记录、行为分析或第三方机构认证。这两个维度的不足直接导致项目基础立论薄弱，无法说服评委该问题具有商业价值。\n\n建议在Problem Definition部分补充：1）行业白皮书/政府报告中的问题规模数据（如目标市场年损失金额、政策监管痛点）；2）用户分层模型（按年龄/职业/地域划分的痛点差异）；3）问题演进时间轴（从历史数据看问题发展趋势）。在User Evidence部分需添加：1）至少3组典型用户访谈逐字稿（含痛点描述与解决方案期待）；2）用户行为数据可视化图表（如现有解决方案的使用频率/失败率）；3）与2家以上行业协会的合作证明或调研报告。\n\n距离优秀项目（8/10）仍需提升4.33分，重点补足方向为：①强化问题定义的行业深度（建议引用3个以上权威数据源）；②建立用户证据的三角验证体系（定量数据+定性访谈+第三方背书）；③完善解决方案的技术路线图（需包含3个关键里程碑的验证节点）；④补充财务模型的敏感性分析（至少展示3种市场渗透率下的现金流预测）。当前项目最需要突破的是从\"问题感知\"向\"数据驱动\"的转变，建议优先投入资源进行用户验证和行业数据收集。",
+            "tools_used": [
+              "rubric_engine",
+              "kg_scores"
+            ]
+          },
+          "planner": {
+            "agent": "行动规划师",
+            "analysis": "",
+            "tools_used": [
+              "diagnosis",
+              "next_task",
+              "critic"
+            ],
+            "plan_data": {}
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "Mini奶吧",
+              "type": "项目名称"
+            },
+            {
+              "id": "e2",
+              "label": "冯亚芳",
+              "type": "联系人"
+            },
+            {
+              "id": "e3",
+              "label": "店长",
+              "type": "职务"
+            },
+            {
+              "id": "e4",
+              "label": "13606703458",
+              "type": "电话号码"
+            },
+            {
+              "id": "e5",
+              "label": "913639475@qq.com",
+              "type": "电子邮件"
+            },
+            {
+              "id": "e6",
+              "label": "杭州市江干区桃李苑17幢1楼",
+              "type": "地址"
+            },
+            {
+              "id": "e7",
+              "label": "杭州",
+              "type": "城市"
+            },
+            {
+              "id": "e8",
+              "label": "310018",
+              "type": "邮政编码"
+            },
+            {
+              "id": "e9",
+              "label": "保密须知",
+              "type": "文档章节"
+            },
+            {
+              "id": "e10",
+              "label": "摘要",
+              "type": "文档章节"
+            },
+            {
+              "id": "e11",
+              "label": "企业介绍",
+              "type": "文档章节"
+            },
+            {
+              "id": "e12",
+              "label": "产品与服务",
+              "type": "文档章节"
+            },
+            {
+              "id": "e13",
+              "label": "竞争性分析",
+              "type": "文档章节"
+            },
+            {
+              "id": "e14",
+              "label": "SWOT分析",
+              "type": "分析方法"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "联系人"
+            },
+            {
+              "source": "e2",
+              "target": "e3",
+              "relation": "担任职务"
+            },
+            {
+              "source": "e2",
+              "target": "e4",
+              "relation": "拥有电话"
+            },
+            {
+              "source": "e2",
+              "target": "e5",
+              "relation": "拥有邮箱"
+            },
+            {
+              "source": "e1",
+              "target": "e6",
+              "relation": "位于地址"
+            },
+            {
+              "source": "e6",
+              "target": "e7",
+              "relation": "所在城市"
+            },
+            {
+              "source": "e6",
+              "target": "e8",
+              "relation": "邮政编码"
+            },
+            {
+              "source": "e1",
+              "target": "e9",
+              "relation": "包含章节"
+            },
+            {
+              "source": "e1",
+              "target": "e10",
+              "relation": "包含章节"
+            },
+            {
+              "source": "e1",
+              "target": "e11",
+              "relation": "包含章节"
+            },
+            {
+              "source": "e1",
+              "target": "e12",
+              "relation": "包含章节"
+            },
+            {
+              "source": "e1",
+              "target": "e13",
+              "relation": "包含章节"
+            },
+            {
+              "source": "e13",
+              "target": "e14",
+              "relation": "包含分析"
+            }
+          ],
+          "structural_gaps": [
+            "缺少具体产品描述",
+            "缺少市场定位细节",
+            "缺少资金需求数据",
+            "缺少管理层详细介绍",
+            "缺少风险分析内容",
+            "缺少实施阶段详情",
+            "缺少服务与支持方案",
+            "缺少竞争分析数据",
+            "缺少SWOT具体内容"
+          ],
+          "content_strengths": [
+            "有完整的计划书结构",
+            "包含联系信息和地址",
+            "有明确的保密条款",
+            "目录清晰，涵盖主要章节"
+          ],
+          "completeness_score": 2,
+          "section_scores": {
+            "problem_definition": 0,
+            "user_evidence": 0,
+            "solution_feasibility": 0,
+            "business_model": 0,
+            "competitive_advantage": 0
+          },
+          "insight": "计划书目前仅提供了框架和基本信息，缺乏实质性内容，如产品详情、市场分析、财务数据等，需要进一步填充具体内容以评估其完整性和可行性。"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_fd6daf935bd8",
+            "category": "智能制造",
+            "project_name": "商业计划书-讯海智航——全流程新闻写作AI辅助平台",
+            "similarity": 0.5241,
+            "pain_points": [
+              "第 2 页",
+              "2.1 产品概述 .............................................................................................................. 5",
+              "2.2 产品功能 .............................................................................................................. 6"
+            ],
+            "solution": [
+              "第 2 页",
+              "2.1 产品概述 .............................................................................................................. 5",
+              "2.2 产品功能 .............................................................................................................. 6"
+            ],
+            "innovation_points": [
+              "第 1 页",
+              "第 2 页"
+            ],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "weak_user_evidence"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第四届京彩大创北京大学生创新创业大赛 第 1 页 第四届京彩大创北京大学生创新创业大赛 第 2 页 目录 第一章 项目概况 ..............................................................................................................4 第二章 产品与技术分析 .................................................................................................5 2.1 产品概述 ......"
+          },
+          {
+            "case_id": "case_1d81de8aafb9",
+            "category": "智能制造",
+            "project_name": "溯源：国内首创呼吸道病原拉曼检测仪项目计划书",
+            "similarity": 0.4406,
+            "pain_points": [
+              "医疗资源不足",
+              "现有检测系统压力大",
+              "传统检测手段落后"
+            ],
+            "solution": [
+              "提供高效准确的检测方法",
+              "开发操作简便的呼吸道病原检测仪",
+              "打破国外技术垄断"
+            ],
+            "innovation_points": [
+              "基于SERS技术的检测仪",
+              "独特的预处理手段"
+            ],
+            "evidence_quotes": [
+              "调查现有产品能否满足普通呼吸道疾病检测的需求",
+              "专注于病原检测仪器的研发及应用、 相关试剂的生产和销售， 实行轻资产的商业模式"
+            ],
+            "risk_flags": [
+              "market_size_fallacy",
+              "no_competitor_claim"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "目 录 第一章 执行总结 ................................................................................ 1 1.1 科技创新，智能服务—厦门溯源医疗科技有限公司 ........................................... 2 1.2 天时地利，应势而生—四大优势 ........................................................................... 2 1.3 团队优秀，分工明确—“化时代”创业团队 .........."
+          },
+          {
+            "case_id": "case_0c59fb7eec8e",
+            "category": "智能制造",
+            "project_name": "慧心晰影-智能数字放射科医生辅助诊断系统",
+            "similarity": 0.4162,
+            "pain_points": [
+              "1.1 项目背景：国家医疗重大需求",
+              "事关国家医疗发展前景，亟需智能高效的辅助诊断方案",
+              "尖端设备平均200-2000万元"
+            ],
+            "solution": [
+              "智能数字放射科医生辅助诊断系统",
+              "“秦创原”创新挑战赛",
+              "项目组别 ：数字经济"
+            ],
+            "innovation_points": [
+              "智能数字放射科医生辅助诊断系统",
+              "“秦创原”创新挑战赛"
+            ],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [],
+            "summary": "智能数字放射科医生辅助诊断系统 “秦创原”创新挑战赛 项目组别 ：数字经济 项目负责人：赵山博 第十四届“ ”中国大学生创业计划竞赛 1.1 项目背景：医学影像举足轻重 医学影像诊断水平直接决定整体医疗水平的高低 骨折与创伤快速检测 疑难杂病远程专家会诊 医学影像是临床诊断的重要依据，约80%以上的诊断必需影像检查的支持 神经系统疾病定位与诊断 肺癌早期筛查与监测 1.1 项目背景：国家医疗重大需求 事关国家医疗发展前景，亟需智能高效的辅助诊断方案 尖端设备平均200-2000万元 资源少 三甲医院主治医师8年培养 培养难 当前，中国社会面临严重的医学影像资源不均衡问题！ 人力缺 =人均5万/"
+          }
+        ],
+        "web_search": {
+          "searched": false,
+          "query": "创业项目 分析 商业模式 创业计划书",
+          "results": [],
+          "summary": "",
+          "error": "('error sending request for url (https://search.yahoo.com/search;_ylt=SlWp-3qKEyzGEXijyUouyMbL;_ylu=tsUSKcXpI7iAE3NFtTGSqv1wg5M1dgfgsQNuoGTwg8u9zEg?p=%E5%88%9B%E4%B8%9A%E9%A1%B9%E7%9B%AE+%E5%88%86%E6%9E%90+%E5%95%86%E4%B8%9A%E6%A8%A1%E5%BC%8F+%E5%88%9B%E4%B8%9A%E8%AE%A1%E5%88%92%E4%B9%A6)', 'https://search.yahoo.com/search;_ylt=SlWp-3qKEyzGEXijyUouyMbL;_ylu=tsUSKcXpI7iAE3NFtTGSqv1wg5M1dgfgsQNuoGTwg8u9zEg?p=%E5%88%9B%E4%B8%9A%E9%A1%B9%E7%9B%AE+%E5%88%86%E6%9E%90+%E5%95%86%E4%B8%9A%E6%A8%A1%E5%BC%8F+%E5%88%9B%E4%B8%9A%E8%AE%A1%E5%88%92%E4%B9%A6')"
+        },
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 0.0,
+          "covered_count": 0,
+          "total_dimensions": 10,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "product": {
+              "name": "产品形态",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "market": {
+              "name": "目标市场",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "competitor": {
+              "name": "竞争格局",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "resource": {
+              "name": "资源优势",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            }
+          },
+          "cross_links": [],
+          "hub_entities": [
+            {
+              "entity": "e1",
+              "type": "项目名称",
+              "connections": 7,
+              "note": "「e1」连接7个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e2",
+              "type": "联系人",
+              "connections": 4,
+              "note": "「e2」连接4个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e6",
+              "type": "地址",
+              "connections": 3,
+              "note": "「e6」连接3个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e13",
+              "type": "文档章节",
+              "connections": 2,
+              "note": "「e13」连接2个维度，是项目的核心支撑点"
+            }
+          ],
+          "pattern_warnings": [
+            {
+              "pattern_id": "he_risk_015",
+              "warning": "智能制造类项目常见风险组合：compliance_not_covered、market_size_fallacy、weak_user_evidence（1个项目出现此模式）",
+              "matched_rules": [
+                "market_size_fallacy",
+                "weak_user_evidence"
+              ],
+              "support": 1
+            },
+            {
+              "pattern_id": "he_risk_016",
+              "warning": "智能制造类项目常见风险组合：weak_user_evidence（1个项目出现此模式）",
+              "matched_rules": [
+                "weak_user_evidence"
+              ],
+              "support": 1
+            },
+            {
+              "pattern_id": "he_risk_017",
+              "warning": "智能制造类项目常见风险组合：market_size_fallacy、no_competitor_claim（1个项目出现此模式）",
+              "matched_rules": [
+                "market_size_fallacy",
+                "no_competitor_claim"
+              ],
+              "support": 1
+            }
+          ],
+          "pattern_strengths": [],
+          "missing_dimensions": [
+            {
+              "dimension": "痛点问题",
+              "importance": "极高",
+              "recommendation": "没有清晰的痛点描述，项目缺乏存在的理由"
+            },
+            {
+              "dimension": "目标用户",
+              "importance": "极高",
+              "recommendation": "缺少明确的目标用户画像，评委会质疑'你为谁解决问题'"
+            },
+            {
+              "dimension": "目标市场",
+              "importance": "高",
+              "recommendation": "没有市场分析，无法评估商业可行性"
+            },
+            {
+              "dimension": "解决方案",
+              "importance": "高",
+              "recommendation": "缺少具体的解决方案描述"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少具体产品描述"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少市场定位细节"
+            }
+          ],
+          "student_graph_stats": {
+            "nodes": 28,
+            "edges": 23
+          }
+        },
+        "critic": {
+          "challenge_questions": [
+            "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+            "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+            "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+          ],
+          "missing_evidence": [
+            "未提供用户访谈原话",
+            "缺乏定量需求数据",
+            "无实际交易验证"
+          ],
+          "risk_summary": "需求证据不足导致项目可行性存疑",
+          "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+          "evidence_standard": "需提供>=5份用户访谈原话, 付费意愿数据, 需求频次统计"
+        },
+        "competition": null,
+        "learning": null,
+        "category": "智能制造",
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 3.67,
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "severity": "medium",
+              "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "支付意愿",
+                "愿意付费"
+              ]
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+              "fix_hint": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研"
+              ]
+            },
+            {
+              "id": "H7",
+              "name": "创新点不可验证",
+              "severity": "high",
+              "explanation": "提到了创新/颠覆，但缺少验证手段。创新点必须是可验证的，否则就是口号。",
+              "fix_hint": "设计一个MVP实验来验证核心创新假设，定义成功指标和对照组。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "实验",
+                "验证",
+                "对照"
+              ]
+            },
+            {
+              "id": "H13",
+              "name": "实验设计不合格",
+              "severity": "medium",
+              "explanation": "提到了实验/测试，但缺少样本量和评价指标的说明。没有指标的实验无法得出结论。",
+              "fix_hint": "明确：样本量≥多少、核心指标是什么、对照组如何设置、多长时间。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "样本",
+                "指标"
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 3.0,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "缺乏明确的痛点描述和用户画像，仅提到目标市场但未具体说明场景"
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 2.0,
+              "status": "risk",
+              "weight": 0.15,
+              "reason": "未提供任何用户访谈、问卷或原话等直接证据"
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.0,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "技术路线和资源部分描述较简略，未明确MVP设计"
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 5.0,
+              "status": "ok",
+              "weight": 0.15,
+              "reason": "价值主张和渠道描述存在但不够具体，收入成本结构需补充"
+            },
+            {
+              "item": "Market & Competition",
+              "score": 4.0,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "未量化市场规模（TAM/SAM/SOM），竞品分析仅提及SWOT"
+            },
+            {
+              "item": "Financial Logic",
+              "score": 3.0,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "资金需求部分缺失CAC/LTV/现金流等核心财务指标计算"
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.0,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "产品描述提及差异化但无创新点细节，对比矩阵缺失"
+            },
+            {
+              "item": "Team & Execution",
+              "score": 5.0,
+              "status": "ok",
+              "weight": 0.05,
+              "reason": "团队介绍存在但缺乏分工和里程碑计划的详细说明"
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.0,
+              "status": "risk",
+              "weight": 0.05,
+              "reason": "目录结构完整但内容排版较简略，数据支撑不足"
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+          "llm_enhancement": {
+            "deep_bottleneck": "需求证据不足导致商业模式可行性存疑",
+            "evidence_gaps": [
+              "缺乏目标客户支付意愿的量化数据",
+              "未提供市场容量测算依据",
+              "缺少竞品分析及差异化验证"
+            ],
+            "strength": "社区场景化定位与灵活供应链设计",
+            "stage": "validation"
+          }
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_001",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "医疗健康类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ],
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::compliance_not_covered",
+                "RiskRule::weak_user_evidence"
+              ]
+            },
+            {
+              "hyperedge_id": "he_risk_002",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "教育服务类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+              "categories": [
+                "教育服务"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ],
+              "nodes": [
+                "Category::教育服务",
+                "RiskRule::compliance_not_covered",
+                "RiskRule::weak_user_evidence"
+              ]
+            },
+            {
+              "hyperedge_id": "he_risk_003",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "科技创新类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ],
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::compliance_not_covered",
+                "RiskRule::weak_user_evidence"
+              ]
+            }
+          ],
+          "matched_by": {
+            "category": "智能制造",
+            "rule_ids": [
+              "H3",
+              "H5",
+              "H7",
+              "H13"
+            ],
+            "expanded_rule_ids": [
+              "H13",
+              "H3",
+              "H5",
+              "H7",
+              "weak_user_evidence"
+            ]
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "RiskRule::weak_user_evidence",
+                "degree": 36,
+                "interpretation": "风险规则「weak_user_evidence」关联36种模式，是最普遍的问题"
+              },
+              {
+                "node": "RiskRule::compliance_not_covered",
+                "degree": 22,
+                "interpretation": "风险规则「compliance_not_covered」关联22种模式，是最普遍的问题"
+              },
+              {
+                "node": "RiskRule::market_size_fallacy",
+                "degree": 16,
+                "interpretation": "风险规则「market_size_fallacy」关联16种模式，是最普遍的问题"
+              },
+              {
+                "node": "RiskRule::no_competitor_claim",
+                "degree": 11,
+                "interpretation": "风险规则「no_competitor_claim」关联11种模式，是最普遍的问题"
+              },
+              {
+                "node": "Category::科技创新",
+                "degree": 7,
+                "interpretation": "「科技创新」类别出现在7种超边中，是最活跃的赛道"
+              }
+            ],
+            "avg_edge_size": 3.1,
+            "max_edge_size": 4
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 45,
+            "node_count": 16
+          }
+        }
+      },
+      "timestamp": "2026-03-21T10:25:58.785109"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
-type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "cases" | "upload" | "feedback" | "debug";
+type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "debug";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
 let _msgId = 0;
@@ -126,6 +126,7 @@ export default function StudentPage() {
           next_task: lastAssistant.agent_trace.next_task ?? {},
           kg_analysis: lastAssistant.agent_trace.kg_analysis ?? {},
           hypergraph_insight: lastAssistant.agent_trace.hypergraph_insight ?? {},
+          hypergraph_student: lastAssistant.agent_trace.hypergraph_student ?? {},
           rag_cases: lastAssistant.agent_trace.rag_cases ?? [],
           agent_trace: lastAssistant.agent_trace,
         });
@@ -245,16 +246,71 @@ export default function StudentPage() {
     return conversations.filter((c) => c.title.toLowerCase().includes(q) || c.last_message.toLowerCase().includes(q));
   }, [conversations, searchQuery]);
 
-  const rubric = useMemo(() => latestResult?.diagnosis?.rubric ?? [], [latestResult]);
-  const triggeredRules = useMemo(() => latestResult?.diagnosis?.triggered_rules ?? [], [latestResult]);
+  const [resultHistory, setResultHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (latestResult && latestResult.diagnosis) {
+      setResultHistory((prev) => [...prev, latestResult]);
+    }
+  }, [latestResult]);
+
+  useEffect(() => { setResultHistory([]); }, [conversationId]);
+
+  const rubric = useMemo(() => {
+    if (resultHistory.length === 0) return latestResult?.diagnosis?.rubric ?? [];
+    const merged: Record<string, { item: string; scores: number[]; weight: number }> = {};
+    for (const r of resultHistory) {
+      for (const row of r?.diagnosis?.rubric ?? []) {
+        if (!merged[row.item]) merged[row.item] = { item: row.item, scores: [], weight: row.weight ?? 0 };
+        merged[row.item].scores.push(row.score);
+      }
+    }
+    return Object.values(merged).map((m) => ({
+      item: m.item,
+      score: Math.round(Math.max(...m.scores) * 100) / 100,
+      bestScore: Math.round(Math.max(...m.scores) * 100) / 100,
+      prevScore: m.scores.length > 1 ? Math.round(m.scores[m.scores.length - 2] * 100) / 100 : null,
+      trend: m.scores.length > 1 ? (m.scores[m.scores.length - 1] > m.scores[m.scores.length - 2] ? "up" : m.scores[m.scores.length - 1] < m.scores[m.scores.length - 2] ? "down" : "same") : null,
+      weight: m.weight,
+    }));
+  }, [resultHistory, latestResult]);
+
+  const triggeredRules = useMemo(() => {
+    const all: Record<string, any> = {};
+    for (const r of resultHistory) {
+      for (const rule of r?.diagnosis?.triggered_rules ?? []) {
+        all[rule.id] = { ...rule, turnCount: (all[rule.id]?.turnCount ?? 0) + 1 };
+      }
+    }
+    if (Object.keys(all).length === 0) return latestResult?.diagnosis?.triggered_rules ?? [];
+    return Object.values(all).sort((a: any, b: any) => {
+      const sev = { high: 3, medium: 2, low: 1 } as Record<string, number>;
+      return (sev[b.severity] ?? 0) - (sev[a.severity] ?? 0);
+    });
+  }, [resultHistory, latestResult]);
+
+  const taskHistory = useMemo(() => {
+    const tasks: { task: any; turn: number }[] = [];
+    resultHistory.forEach((r, i) => {
+      const t = r?.next_task;
+      if (t?.title && t.title !== "描述你的项目") tasks.push({ task: t, turn: i + 1 });
+    });
+    return tasks;
+  }, [resultHistory]);
+
   const nextTask = latestResult?.next_task ?? null;
   const hyperEdges = useMemo(() => latestResult?.hypergraph_insight?.edges ?? [], [latestResult]);
+  const hyperStudent = latestResult?.hypergraph_student ?? latestResult?.agent_trace?.hypergraph_student ?? null;
   const kgAnalysis = latestResult?.kg_analysis ?? latestResult?.agent_trace?.kg_analysis ?? null;
   const ragCases = useMemo(() => latestResult?.rag_cases ?? latestResult?.agent_trace?.rag_cases ?? [], [latestResult]);
+  const webSearch = latestResult?.agent_trace?.web_search ?? latestResult?.web_search ?? null;
   const orchestration = latestResult?.agent_trace?.orchestration ?? {};
   const roleAgents = latestResult?.agent_trace?.role_agents ?? {};
   const agentsCalled = orchestration?.agents_called ?? [];
-  const overallScore = latestResult?.diagnosis?.overall_score ?? null;
+  const overallScore = useMemo(() => {
+    const scores = resultHistory.map((r) => r?.diagnosis?.overall_score).filter((s) => s != null);
+    return scores.length > 0 ? scores[scores.length - 1] : latestResult?.diagnosis?.overall_score ?? null;
+  }, [resultHistory, latestResult]);
 
   return (
     <div className={`chat-app ${theme}`}>
@@ -274,7 +330,8 @@ export default function StudentPage() {
         <div className="topbar-center">
           <div className="topbar-mode-toggle">
             <button type="button" className={`topbar-mode-opt${mode === "coursework" ? " active" : ""}`} onClick={() => setMode("coursework")}>课程辅导</button>
-            <button type="button" className={`topbar-mode-opt${mode === "competition" ? " active" : ""}`} onClick={() => setMode("competition")}>竞赛模式</button>
+            <button type="button" className={`topbar-mode-opt${mode === "competition" ? " active" : ""}`} onClick={() => setMode("competition")}>竞赛冲刺</button>
+            <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>个人学习</button>
           </div>
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
         </div>
@@ -422,7 +479,7 @@ export default function StudentPage() {
               </div>
             )}
             <form className="chat-inputbar" onSubmit={send}>
-              <input ref={fileInputRef} type="file" hidden accept=".pdf,.docx,.pptx,.txt,.md" onChange={handleFileSelect} />
+              <input ref={fileInputRef} type="file" hidden accept=".pdf,.docx,.pptx,.ppt,.txt,.md" onChange={handleFileSelect} />
               <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title="上传文件">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
@@ -448,10 +505,21 @@ export default function StudentPage() {
         {rightOpen && (
           <aside className="chat-right" style={{ width: rightWidth }}>
             <div className="right-drag-handle" onMouseDown={startDrag} />
-            <div className="right-tabs">
-              {(["agents", "task", "risk", "score", "kg", "cases", "upload", "feedback", "debug"] as RightTab[]).map((t) => (
-                <button key={t} className={`right-tab ${rightTab === t ? "active" : ""}`} onClick={() => { setRightTab(t); if (t === "feedback") loadFeedback(); }}>
-                  {{ agents: "智能体", task: "任务", risk: "风险", score: "评分", kg: "图谱", cases: "案例", upload: "上传", feedback: "批注", debug: "调试" }[t]}
+            <div className="right-tabs-scroll">
+              {([
+                { id: "agents", icon: "🤖", label: "智能体" },
+                { id: "task",   icon: "📋", label: "任务" },
+                { id: "risk",   icon: "⚠️", label: "风险" },
+                { id: "score",  icon: "📊", label: "评分" },
+                { id: "kg",     icon: "🔗", label: "图谱" },
+                { id: "hyper",  icon: "🌐", label: "超图" },
+                { id: "cases",  icon: "📚", label: "案例" },
+                { id: "feedback", icon: "💬", label: "批注" },
+                { id: "debug",  icon: "🛠", label: "调试" },
+              ] as { id: RightTab; icon: string; label: string }[]).map((t) => (
+                <button key={t.id} className={`rtab-pill ${rightTab === t.id ? "active" : ""}`} onClick={() => { setRightTab(t.id); if (t.id === "feedback") loadFeedback(); }}>
+                  <span className="rtab-icon">{t.icon}</span>
+                  <span className="rtab-label">{t.label}</span>
                 </button>
               ))}
             </div>
@@ -471,10 +539,23 @@ export default function StudentPage() {
                           </span>
                         ))}
                       </div>
+                      {/* Web Search Results */}
+                      {webSearch?.searched && (webSearch.results ?? []).length > 0 && (
+                        <div className="ws-results-card">
+                          <h5>🔍 联网搜索 <span className="ws-query">{webSearch.query}</span></h5>
+                          {webSearch.results.map((r: any, ri: number) => (
+                            <a key={ri} href={r.url} target="_blank" rel="noopener noreferrer" className="ws-result-item">
+                              <span className="ws-result-title">{r.title}</span>
+                              <span className="ws-result-snippet">{r.snippet}</span>
+                              <span className="ws-result-url">{r.url?.replace(/^https?:\/\//, "").split("/")[0]}</span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
                       {Object.entries(roleAgents).map(([key, val]: [string, any]) => {
                         if (!val || !val.analysis) return null;
                         const nameMap: Record<string, string> = { coach: "🎯 项目教练", analyst: "⚠️ 风险分析师", advisor: "🏆 竞赛顾问", tutor: "📚 学习导师", grader: "📊 评分官", planner: "📋 行动规划师" };
-                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "知识图谱", web_search: "联网搜索", hypergraph: "超图分析", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "图谱评分", next_task: "任务建议", critic: "批判分析" };
+                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "知识图谱", web_search: "联网搜索", hypergraph: "超图分析", hypergraph_student: "超图维度", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "图谱评分", next_task: "任务建议", critic: "批判分析" };
                         return (
                           <details key={key} className="agent-card" open>
                             <summary className="agent-card-header">
@@ -494,24 +575,39 @@ export default function StudentPage() {
 
               {rightTab === "task" && (
                 <>
-                  <div className="panel-desc">系统根据你的描述，自动推荐当前最应该完成的一项任务，帮你聚焦方向。</div>
-                  {nextTask ? (
-                    <div className="right-card">
+                  <div className="panel-desc">基于对话上下文智能推荐的行动任务，随对话深入会不断细化。</div>
+                  {nextTask && nextTask.title !== "描述你的项目" ? (
+                    <div className="task-current-card">
+                      <div className="task-current-badge">当前最优先</div>
                       <h4>{nextTask.title}</h4>
                       <p>{nextTask.description}</p>
                       {(nextTask.acceptance_criteria ?? []).length > 0 && (
-                        <>
-                          <h5 className="right-sub-label">验收标准（完成这些才算做好）</h5>
-                          <ul className="right-list">{(nextTask.acceptance_criteria ?? []).map((c: string, ci: number) => <li key={ci}>{c}</li>)}</ul>
-                        </>
+                        <div className="task-criteria">
+                          <h5>验收标准</h5>
+                          <ul>{(nextTask.acceptance_criteria ?? []).map((c: string, ci: number) => <li key={ci}>{c}</li>)}</ul>
+                        </div>
                       )}
                     </div>
-                  ) : <p className="right-hint">发送一条消息后，这里会显示你下一步最应该做的事</p>}
-                  {hyperEdges.length > 0 && (
-                    <div className="right-section">
-                      <h4>超图洞察</h4>
-                      <div className="panel-desc">基于知识超图发现的跨维度关联模式，帮助你发现隐藏的问题。</div>
-                      {hyperEdges.map((e: any) => <div key={e.hyperedge_id} className="right-tag">{e.teaching_note}</div>)}
+                  ) : (
+                    <div className="task-empty-state">
+                      <div className="task-empty-icon">📋</div>
+                      <p>详细描述你的项目后，系统会推荐针对性的行动任务</p>
+                    </div>
+                  )}
+                  {taskHistory.length > 1 && (
+                    <div className="task-timeline">
+                      <h5>历史建议轨迹</h5>
+                      <div className="task-tl-list">
+                        {taskHistory.slice().reverse().slice(0, 6).map((th, ti) => (
+                          <div key={ti} className={`task-tl-item ${ti === 0 ? "latest" : ""}`}>
+                            <div className="task-tl-dot" />
+                            <div className="task-tl-content">
+                              <span className="task-tl-turn">第{th.turn}轮</span>
+                              <span className="task-tl-title">{th.task.title}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </>
@@ -519,15 +615,59 @@ export default function StudentPage() {
 
               {rightTab === "risk" && (
                 <>
-                  <div className="panel-desc">基于50+创业风险规则库，检测你的描述中可能存在的隐患。颜色越深代表风险越高。</div>
+                  <div className="panel-desc">基于15条创业风险规则库，检测你描述中的隐患并给出修复建议。风险跨轮次累积。</div>
                   {triggeredRules.length > 0 ? (
                     <div className="right-section">
+                      {(() => {
+                        const high = triggeredRules.filter((r: any) => r.severity === "high").length;
+                        const med = triggeredRules.filter((r: any) => r.severity === "medium").length;
+                        const low = triggeredRules.filter((r: any) => r.severity === "low").length;
+                        const total = triggeredRules.length;
+                        return (
+                          <div className="risk-summary-bar">
+                            <div className="risk-summary-stats">
+                              <span className="risk-stat high">{high} 高危</span>
+                              <span className="risk-stat medium">{med} 中等</span>
+                              <span className="risk-stat low">{low} 轻微</span>
+                            </div>
+                            <div className="risk-dist-track">
+                              {high > 0 && <div className="risk-dist-seg high" style={{ width: `${(high / total) * 100}%` }} />}
+                              {med > 0 && <div className="risk-dist-seg medium" style={{ width: `${(med / total) * 100}%` }} />}
+                              {low > 0 && <div className="risk-dist-seg low" style={{ width: `${(low / total) * 100}%` }} />}
+                            </div>
+                          </div>
+                        );
+                      })()}
                       {triggeredRules.map((r: any) => (
-                        <div key={r.id} className={`risk-item ${r.severity}`}>
-                          <span className="risk-id">{r.id}</span>
-                          <span className="risk-name">{r.name}</span>
-                          <span className={`risk-badge ${r.severity}`}>{{ high: "高危", medium: "中等", low: "轻微" }[r.severity as string] ?? r.severity}</span>
-                        </div>
+                        <details key={r.id} className={`risk-detail-card ${r.severity}`}>
+                          <summary className="risk-detail-header">
+                            <span className="risk-id">{r.id}</span>
+                            <span className="risk-name">{r.name}</span>
+                            <span className={`risk-badge ${r.severity}`}>{{ high: "高危", medium: "中等", low: "轻微" }[r.severity as string] ?? r.severity}</span>
+                            {r.turnCount > 1 && <span className="risk-repeat-badge">连续{r.turnCount}轮</span>}
+                          </summary>
+                          <div className="risk-detail-body">
+                            {r.explanation && <p className="risk-explanation">{r.explanation}</p>}
+                            {(r.matched_keywords ?? []).length > 0 && (
+                              <div className="risk-matched">
+                                <span className="risk-field-label">触发关键词：</span>
+                                {r.matched_keywords.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip triggered">{k}</span>)}
+                              </div>
+                            )}
+                            {(r.missing_requires ?? []).length > 0 && (
+                              <div className="risk-matched">
+                                <span className="risk-field-label">缺失要素：</span>
+                                {r.missing_requires.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip missing">{k}</span>)}
+                              </div>
+                            )}
+                            {r.fix_hint && (
+                              <div className="risk-fix">
+                                <span className="risk-field-label">修复建议：</span>
+                                <p>{r.fix_hint}</p>
+                              </div>
+                            )}
+                          </div>
+                        </details>
                       ))}
                     </div>
                   ) : <p className="right-hint">暂无风险命中——描述越详细，风险检测越准确</p>}
@@ -536,17 +676,61 @@ export default function StudentPage() {
 
               {rightTab === "score" && (
                 <>
-                  <div className="panel-desc">9维度量化评分，对标创业竞赛评审标准。每个维度满分10分，帮你发现短板。</div>
+                  <div className="panel-desc">9维度量化评分，对标创业竞赛评审标准。评分取历史最高值，箭头显示本轮变化趋势。</div>
                   {rubric.length > 0 ? (
                     <div className="right-section">
-                      {rubric.map((r: any) => (
-                        <div key={r.item} className="score-row">
-                          <span className="score-label">{r.item}</span>
-                          <div className="score-bar-track"><div className="score-bar-fill" style={{ width: `${Math.min(100, (r.score / 10) * 100)}%` }} /></div>
-                          <span className="score-value">{r.score}</span>
-                        </div>
-                      ))}
-                      {overallScore !== null && <div className="score-total">综合评分: <strong>{overallScore}/10</strong></div>}
+                      {/* ── Radar Chart ── */}
+                      {(() => {
+                        const cx = 130, cy = 130, R = 100;
+                        const n = rubric.length;
+                        const angleStep = (2 * Math.PI) / n;
+                        const tiers = [0.25, 0.5, 0.75, 1.0];
+                        const pt = (i: number, r: number) => {
+                          const a = -Math.PI / 2 + i * angleStep;
+                          return [cx + R * r * Math.cos(a), cy + R * r * Math.sin(a)];
+                        };
+                        const dataPoints = rubric.map((r: any, i: number) => pt(i, Math.min(1, r.score / 10)));
+                        const polygon = dataPoints.map(([x, y]: number[]) => `${x},${y}`).join(" ");
+                        return (
+                          <svg className="radar-svg" viewBox="0 0 260 260">
+                            {tiers.map((t) => (
+                              <polygon key={t} points={Array.from({ length: n }, (_, i) => pt(i, t)).map(([x, y]: number[]) => `${x},${y}`).join(" ")} className="radar-grid" />
+                            ))}
+                            {rubric.map((_: any, i: number) => {
+                              const [ex, ey] = pt(i, 1);
+                              return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} className="radar-axis" />;
+                            })}
+                            <polygon points={polygon} className="radar-area" />
+                            {dataPoints.map(([x, y]: number[], i: number) => (
+                              <circle key={i} cx={x} cy={y} r="3.5" className="radar-dot" />
+                            ))}
+                            {rubric.map((r: any, i: number) => {
+                              const [lx, ly] = pt(i, 1.22);
+                              return <text key={i} x={lx} y={ly} className="radar-label" textAnchor="middle" dominantBaseline="central">{r.item.length > 4 ? r.item.slice(0, 4) : r.item}</text>;
+                            })}
+                          </svg>
+                        );
+                      })()}
+                      {overallScore !== null && <div className="score-total-ring">
+                        <svg viewBox="0 0 80 80" className="ring-svg">
+                          <circle cx="40" cy="40" r="32" className="ring-bg" />
+                          <circle cx="40" cy="40" r="32" className="ring-fg" strokeDasharray={`${(overallScore / 10) * 201} 201`} />
+                        </svg>
+                        <div className="ring-text"><span className="ring-num">{overallScore}</span><span className="ring-max">/10</span></div>
+                      </div>}
+                      {/* ── Bar rows with trend ── */}
+                      {rubric.map((r: any) => {
+                        const pct = Math.min(100, (r.score / 10) * 100);
+                        const color = pct >= 70 ? "var(--accent-green)" : pct >= 40 ? "var(--accent-yellow)" : "var(--accent-red)";
+                        return (
+                          <div key={r.item} className="score-row">
+                            <span className="score-label">{r.item}</span>
+                            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: `${pct}%`, background: color }} /></div>
+                            <span className="score-value">{r.score}</span>
+                            {r.trend && <span className={`score-trend ${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "="}</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : <p className="right-hint">提交项目描述后显示评分，描述越完整评分越有参考价值</p>}
                 </>
@@ -558,12 +742,88 @@ export default function StudentPage() {
                   <div className="panel-desc">AI将你的内容拆解为实体和关系，构建知识图谱。结构缺陷=你没提到但很重要的部分。</div>
                   {kgAnalysis ? (
                     <>
-                      <div className="kg-score-row">
-                        <span>结构完整度</span>
-                        <div className="score-bar-track"><div className="score-bar-fill kg-bar" style={{ width: `${Math.min(100, (kgAnalysis.completeness_score ?? 0) * 10)}%` }} /></div>
-                        <span className="score-value">{kgAnalysis.completeness_score ?? 0}/10</span>
+                      {/* Stats overview */}
+                      <div className="kg-stats-row">
+                        <div className="kg-stat-box">
+                          <span className="kg-stat-num">{(kgAnalysis.entities ?? []).length}</span>
+                          <span className="kg-stat-label">实体</span>
+                        </div>
+                        <div className="kg-stat-box">
+                          <span className="kg-stat-num">{(kgAnalysis.relationships ?? []).length}</span>
+                          <span className="kg-stat-label">关系</span>
+                        </div>
+                        <div className="kg-stat-box">
+                          <span className="kg-stat-num">{kgAnalysis.completeness_score ?? 0}<small>/10</small></span>
+                          <span className="kg-stat-label">完整度</span>
+                        </div>
+                        <div className="kg-stat-box">
+                          <span className="kg-stat-num">{(kgAnalysis.structural_gaps ?? []).length}</span>
+                          <span className="kg-stat-label">缺陷</span>
+                        </div>
                       </div>
                       {kgAnalysis.insight && <p className="kg-insight">{kgAnalysis.insight}</p>}
+
+                      {/* SVG Graph Visualization */}
+                      {(kgAnalysis.entities ?? []).length > 0 && (() => {
+                        const entities: any[] = kgAnalysis.entities ?? [];
+                        const rels: any[] = kgAnalysis.relationships ?? [];
+                        const W = rightWidth - 32;
+                        const H = Math.min(320, Math.max(200, entities.length * 30));
+                        const cx = W / 2, cy = H / 2;
+                        const radius = Math.min(cx, cy) - 30;
+                        const positions: Record<string, { x: number; y: number }> = {};
+                        entities.forEach((e: any, i: number) => {
+                          const angle = (2 * Math.PI * i) / entities.length - Math.PI / 2;
+                          positions[e.id] = { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+                        });
+                        const typeColors: Record<string, string> = {
+                          stakeholder: "#69c0e0", product: "#6ba3d6", market: "#e0a84c",
+                          pain_point: "#e07070", solution: "#5cbd8a", technology: "#a88ccc",
+                          competitor: "#c8a048", resource: "#60b8b8",
+                        };
+                        return (
+                          <div className="kg-graph-wrap">
+                            <h5>关系图谱</h5>
+                            <svg width={W} height={H} className="kg-graph-svg">
+                              <defs>
+                                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                  <polygon points="0 0, 8 3, 0 6" fill="var(--text-muted)" opacity="0.5" />
+                                </marker>
+                              </defs>
+                              {rels.map((r: any, ri: number) => {
+                                const from = positions[r.source];
+                                const to = positions[r.target];
+                                if (!from || !to) return null;
+                                const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2;
+                                return (
+                                  <g key={`edge-${ri}`}>
+                                    <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                                      stroke="var(--text-muted)" strokeWidth="1" opacity="0.35"
+                                      markerEnd="url(#arrowhead)" />
+                                    <text x={mx} y={my - 4} textAnchor="middle" fontSize="9"
+                                      fill="var(--text-muted)" opacity="0.7">{r.relation}</text>
+                                  </g>
+                                );
+                              })}
+                              {entities.map((e: any) => {
+                                const pos = positions[e.id];
+                                if (!pos) return null;
+                                const color = typeColors[e.type] ?? "#6ba3d6";
+                                return (
+                                  <g key={`node-${e.id}`} className="kg-graph-node">
+                                    <circle cx={pos.x} cy={pos.y} r="16" fill={color} opacity="0.15"
+                                      stroke={color} strokeWidth="1.5" />
+                                    <circle cx={pos.x} cy={pos.y} r="4" fill={color} opacity="0.8" />
+                                    <text x={pos.x} y={pos.y + 26} textAnchor="middle" fontSize="10"
+                                      fill="var(--right-text)" fontWeight="500">{e.label}</text>
+                                  </g>
+                                );
+                              })}
+                            </svg>
+                          </div>
+                        );
+                      })()}
+
                       {(kgAnalysis.content_strengths ?? []).length > 0 && (
                         <div className="kg-strengths"><h5>做得好的地方</h5>{kgAnalysis.content_strengths.map((s: string, si: number) => <div key={si} className="kg-strength-item">{s}</div>)}</div>
                       )}
@@ -590,39 +850,166 @@ export default function StudentPage() {
                 </div>
               )}
 
+              {rightTab === "hyper" && (
+                <div className="right-section">
+                  <h4>超图跨维度分析</h4>
+                  <div className="panel-desc">基于 HyperNetX 超图技术，将你的项目映射到10个关键维度，发现跨维度关联模式和缺失。</div>
+                  {hyperStudent?.ok ? (
+                    <>
+                      {/* Dimension Coverage Ring + Grid */}
+                      <div className="hyper-coverage">
+                        <div className="hyper-cov-head">
+                          <div className="score-total-ring" style={{ margin: "0" }}>
+                            <svg viewBox="0 0 80 80" className="ring-svg">
+                              <circle cx="40" cy="40" r="32" className="ring-bg" />
+                              <circle cx="40" cy="40" r="32" className="ring-fg" strokeDasharray={`${((hyperStudent.coverage_score ?? 0) / 10) * 201} 201`} />
+                            </svg>
+                            <div className="ring-text"><span className="ring-num">{hyperStudent.coverage_score}</span><span className="ring-max">/10</span></div>
+                          </div>
+                          <div className="hyper-cov-meta">
+                            <span className="hyper-cov-title">维度覆盖度</span>
+                            <span className="hyper-cov-sub">{hyperStudent.covered_count ?? 0}个已覆盖 / {hyperStudent.total_dimensions ?? 10}个总维度</span>
+                          </div>
+                        </div>
+                        <div className="hyper-dim-grid">
+                          {Object.entries(hyperStudent.dimensions ?? {}).map(([k, v]: [string, any]) => (
+                            <div key={k} className={`hyper-dim-chip ${v.covered ? "covered" : "missing"}`} title={v.covered ? `${v.count}个实体` : "未覆盖"}>
+                              <span className="hdim-dot" />{v.name}
+                              {v.covered && <span className="hdim-count">{v.count}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Missing Dimensions */}
+                      {(hyperStudent.missing_dimensions ?? []).length > 0 && (
+                        <div className="hyper-missing">
+                          <h5>缺失维度（按紧急度排序）</h5>
+                          {hyperStudent.missing_dimensions.map((m: any, mi: number) => (
+                            <div key={mi} className={`hyper-missing-item importance-${m.importance}`}>
+                              <span className="hyper-missing-dim">{m.dimension}</span>
+                              <span className={`hyper-importance-badge ${m.importance}`}>{m.importance}</span>
+                              <p className="hyper-missing-reason">{m.recommendation}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Hub Entities */}
+                      {(hyperStudent.hub_entities ?? []).length > 0 && (
+                        <div className="hyper-hubs">
+                          <h5>核心支撑实体</h5>
+                          <div className="panel-desc">连接多个维度的关键实体，是你项目的核心支撑点。</div>
+                          {hyperStudent.hub_entities.map((h: any, hi: number) => (
+                            <div key={hi} className="hyper-hub-item">
+                              <span className="hyper-hub-name">{h.entity}</span>
+                              <span className="hyper-hub-deg">{h.connections}个维度</span>
+                              <p className="hyper-hub-note">{h.note}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Cross-dimensional Links */}
+                      {(hyperStudent.cross_links ?? []).length > 0 && (
+                        <div className="hyper-cross">
+                          <h5>跨维度关联</h5>
+                          {hyperStudent.cross_links.map((cl: any, ci: number) => (
+                            <div key={ci} className="hyper-cross-row">
+                              <span className="hyper-cross-from">{cl.from_dim}</span>
+                              <span className="hyper-cross-arrow">→ {cl.relation} →</span>
+                              <span className="hyper-cross-to">{cl.to_dim}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Pattern Warnings */}
+                      {(hyperStudent.pattern_warnings ?? []).length > 0 && (
+                        <div className="hyper-warnings">
+                          <h5>⚠ 风险模式匹配</h5>
+                          <div className="panel-desc">你的项目和历史数据中的风险模式相匹配。</div>
+                          {hyperStudent.pattern_warnings.map((w: any, wi: number) => (
+                            <div key={wi} className="hyper-warning-item">{w.warning}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Pattern Strengths */}
+                      {(hyperStudent.pattern_strengths ?? []).length > 0 && (
+                        <div className="hyper-strengths">
+                          <h5>✓ 优势模式匹配</h5>
+                          {hyperStudent.pattern_strengths.map((s: any, si: number) => (
+                            <div key={si} className="hyper-strength-item">{s.note}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Teaching Hypergraph Edges */}
+                      {hyperEdges.length > 0 && (
+                        <div className="hyper-teaching">
+                          <h5>教学超图洞察</h5>
+                          <div className="panel-desc">从历史案例库中发现的跨维度关联模式。</div>
+                          {hyperEdges.map((e: any) => (
+                            <div key={e.hyperedge_id} className="hyper-edge-card">
+                              <span className={`hyper-edge-type ${e.type}`}>{{ Risk_Pattern_Edge: "风险", Value_Loop_Edge: "价值", Resource_Leverage_Edge: "资源" }[e.type as string] ?? e.type}</span>
+                              <span className="hyper-edge-note">{e.teaching_note}</span>
+                              {(e.nodes ?? []).length > 0 && (
+                                <div className="hyper-edge-nodes">{e.nodes.map((n: string, ni: number) => <span key={ni} className="hyper-node-chip">{n.split("::").pop()}</span>)}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {hyperEdges.length > 0 ? (
+                        <div className="hyper-teaching">
+                          <h5>教学超图洞察</h5>
+                          {hyperEdges.map((e: any) => (
+                            <div key={e.hyperedge_id} className="right-tag">{e.teaching_note}</div>
+                          ))}
+                        </div>
+                      ) : <p className="right-hint">发送项目描述后，超图将分析你的项目跨维度覆盖情况</p>}
+                    </>
+                  )}
+                </div>
+              )}
+
               {rightTab === "cases" && (
                 <div className="right-section">
                   <h4>参考案例</h4>
                   <div className="panel-desc">基于 RAG 语义检索，从89份优秀案例知识库中找到与你项目最相似的参考。点击可查看详情。</div>
-                  {ragCases.length > 0 ? ragCases.map((c: any, ci: number) => (
-                    <details key={ci} className="rag-case-card">
-                      <summary className="rag-case-header">
-                        <span className="rag-case-name">{c.project_name ?? c.case_id}</span>
-                        <span className="rag-case-cat">{c.category}</span>
-                        <span className="rag-case-sim">{(c.similarity * 100).toFixed(0)}%</span>
-                      </summary>
-                      <div className="rag-case-body">
-                        {c.summary && <p className="rag-case-summary">{c.summary}</p>}
-                        {(c.pain_points ?? []).length > 0 && <div className="rag-case-field"><strong>痛点：</strong>{c.pain_points.join("；")}</div>}
-                        {(c.solution ?? []).length > 0 && <div className="rag-case-field"><strong>方案：</strong>{c.solution.join("；")}</div>}
-                        {(c.innovation_points ?? []).length > 0 && <div className="rag-case-field"><strong>创新点：</strong>{c.innovation_points.join("；")}</div>}
-                        {(c.evidence_quotes ?? []).length > 0 && <div className="rag-case-field"><strong>证据引用：</strong>{c.evidence_quotes.map((q: string, qi: number) => <blockquote key={qi}>{q}</blockquote>)}</div>}
-                        {(c.risk_flags ?? []).length > 0 && <div className="rag-case-field"><strong>风险标记：</strong>{c.risk_flags.join("、")}</div>}
-                      </div>
-                    </details>
-                  )) : <p className="right-hint">发送项目描述后，这里会显示知识库中最相似的参考案例</p>}
-                </div>
-              )}
-
-              {rightTab === "upload" && (
-                <div className="right-section">
-                  <h4>文件上传</h4>
-                  <div className="panel-desc">上传你的计划书、PPT或文档，AI会深度阅读全文并给出具体修改建议。</div>
-                  <p className="right-hint">点击输入栏左侧的 📎 按钮选择文件，支持以下格式：</p>
-                  <div className="upload-formats">
-                    {[".pdf", ".docx", ".pptx", ".txt", ".md"].map((f) => <span key={f} className="format-chip">{f}</span>)}
-                  </div>
-                  <p className="right-hint">上传后可以附带一句话描述你想重点关注的问题。</p>
+                  {ragCases.length > 0 ? ragCases.map((c: any, ci: number) => {
+                    const simPct = Math.round((c.similarity ?? 0) * 100);
+                    const simColor = simPct >= 70 ? "var(--accent-green)" : simPct >= 40 ? "var(--accent-yellow)" : "var(--text-muted)";
+                    return (
+                      <details key={ci} className="rag-case-card">
+                        <summary className="rag-case-header">
+                          <div className="rag-case-left">
+                            <span className="rag-case-name">{c.project_name ?? c.case_id}</span>
+                            <span className="rag-case-cat">{c.category}</span>
+                          </div>
+                          <div className="rag-case-sim-ring">
+                            <svg viewBox="0 0 36 36" className="sim-ring-svg">
+                              <circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" strokeWidth="3" />
+                              <circle cx="18" cy="18" r="14" fill="none" stroke={simColor} strokeWidth="3" strokeLinecap="round" strokeDasharray={`${simPct * 0.88} 88`} transform="rotate(-90 18 18)" />
+                            </svg>
+                            <span className="sim-ring-num">{simPct}</span>
+                          </div>
+                        </summary>
+                        <div className="rag-case-body">
+                          {c.summary && <p className="rag-case-summary">{c.summary}</p>}
+                          {(c.pain_points ?? []).length > 0 && <div className="rag-case-field"><strong>痛点：</strong>{c.pain_points.join("；")}</div>}
+                          {(c.solution ?? []).length > 0 && <div className="rag-case-field"><strong>方案：</strong>{c.solution.join("；")}</div>}
+                          {(c.innovation_points ?? []).length > 0 && <div className="rag-case-field"><strong>创新点：</strong>{c.innovation_points.join("；")}</div>}
+                          {(c.evidence_quotes ?? []).length > 0 && <div className="rag-case-field"><strong>证据引用：</strong>{c.evidence_quotes.map((q: string, qi: number) => <blockquote key={qi}>{q}</blockquote>)}</div>}
+                          {(c.risk_flags ?? []).length > 0 && <div className="rag-case-field"><strong>风险标记：</strong>{c.risk_flags.join("、")}</div>}
+                        </div>
+                      </details>
+                    );
+                  }) : <p className="right-hint">发送项目描述后，这里会显示知识库中最相似的参考案例</p>}
                 </div>
               )}
 
@@ -645,10 +1032,10 @@ export default function StudentPage() {
                   <div className="panel-desc">系统内部运行状态，开发调试用。</div>
                   <div className="debug-row"><span>识别意图</span><span>{orchestration?.intent ?? "-"}</span></div>
                   <div className="debug-row"><span>置信度</span><span>{orchestration?.confidence ?? "-"}</span></div>
+                  <div className="debug-row"><span>识别引擎</span><span>{{ rule: "关键词匹配", llm: "LLM分类", follow_up: "追问继承", file_detect: "文件检测", heuristic_long: "长文启发", heuristic_short: "短文启发" }[orchestration?.engine as string] ?? orchestration?.engine ?? "-"}</span></div>
                   <div className="debug-row"><span>调用Agent</span><span>{(orchestration?.agents_called ?? []).join(" → ") || "-"}</span></div>
                   <div className="debug-row"><span>执行管线</span><span>{(orchestration?.pipeline ?? []).join(" → ") || "-"}</span></div>
                   <div className="debug-row"><span>编排策略</span><span>{orchestration?.strategy ?? "-"}</span></div>
-                  <div className="debug-row"><span>管线Agent</span><span>{(orchestration?.pipeline ?? []).join(", ") || "-"}</span></div>
                   <div className="debug-row"><span>LLM启用</span><span>{String(orchestration?.llm_enabled ?? false)}</span></div>
                   <div className="debug-row"><span>会话ID</span><span className="debug-conv-id">{conversationId ?? "无"}</span></div>
                   <details className="debug-json"><summary>原始 JSON</summary><pre>{JSON.stringify(latestResult, null, 2) ?? "暂无"}</pre></details>

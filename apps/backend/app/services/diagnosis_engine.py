@@ -2,21 +2,51 @@ from dataclasses import dataclass
 
 
 RULES = [
-    {"id": "H1", "name": "客户-价值主张错位", "severity": "high", "keywords": ["万能", "所有人", "任何人"]},
-    {"id": "H2", "name": "渠道不可达", "severity": "high", "keywords": ["全靠社交媒体", "自然增长", "裂变即可"]},
-    {"id": "H3", "name": "定价无支付意愿证据", "severity": "medium", "keywords": ["定价", "收费"], "requires": ["支付意愿", "愿意付费"]},
-    {"id": "H4", "name": "TAM/SAM/SOM口径混乱", "severity": "high", "keywords": ["tam", "sam", "som", "市场规模"]},
-    {"id": "H5", "name": "需求证据不足", "severity": "high", "requires": ["访谈", "问卷", "用户证据", "调研"]},
-    {"id": "H6", "name": "竞品对比不可比", "severity": "medium", "keywords": ["无竞争对手", "没有对手", "独一无二"]},
-    {"id": "H7", "name": "创新点不可验证", "severity": "high", "keywords": ["创新", "颠覆"], "requires": ["实验", "验证", "对照"]},
-    {"id": "H8", "name": "单位经济不成立", "severity": "high", "keywords": ["cac", "ltv", "获客成本", "复购"]},
-    {"id": "H9", "name": "增长逻辑跳跃", "severity": "medium", "keywords": ["1%", "百分之一", "指数增长"]},
-    {"id": "H10", "name": "里程碑不可交付", "severity": "medium", "keywords": ["一个月内", "三个月内全部完成"]},
-    {"id": "H11", "name": "合规/伦理缺口", "severity": "high", "keywords": ["隐私", "合规", "伦理", "数据安全"]},
-    {"id": "H12", "name": "技术路线与资源不匹配", "severity": "high", "keywords": ["大模型", "芯片", "复杂硬件"]},
-    {"id": "H13", "name": "实验设计不合格", "severity": "medium", "keywords": ["实验", "ab测试", "对照组"], "requires": ["样本", "指标"]},
-    {"id": "H14", "name": "路演叙事断裂", "severity": "low", "keywords": ["愿景"], "min_length": 260},
-    {"id": "H15", "name": "评分项证据覆盖不足", "severity": "medium", "keywords": []},
+    {"id": "H1", "name": "客户-价值主张错位", "severity": "high", "keywords": ["万能", "所有人", "任何人"],
+     "explanation": "你的描述中出现了面向「所有人」的表述。创业项目必须先聚焦到一个明确的核心客群，否则价值主张会失焦、渠道策略无从下手。",
+     "fix_hint": "选定1个最具体的目标人群（如'25-35岁一线城市职场妈妈'），重新围绕她的痛点写价值主张。"},
+    {"id": "H2", "name": "渠道不可达", "severity": "high", "keywords": ["全靠社交媒体", "自然增长", "裂变即可"],
+     "explanation": "获客渠道依赖'自然增长/裂变'缺乏可控性。评委会质疑：如果裂变不起来怎么办？",
+     "fix_hint": "列出至少2条可控的付费/合作获客渠道，并估算CAC。"},
+    {"id": "H3", "name": "定价无支付意愿证据", "severity": "medium", "keywords": ["定价", "收费"], "requires": ["支付意愿", "愿意付费"],
+     "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+     "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。"},
+    {"id": "H4", "name": "TAM/SAM/SOM口径混乱", "severity": "high", "keywords": ["tam", "sam", "som", "市场规模"],
+     "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+     "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。"},
+    {"id": "H5", "name": "需求证据不足", "severity": "high", "requires": ["访谈", "问卷", "用户证据", "调研"],
+     "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+     "fix_hint": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。"},
+    {"id": "H6", "name": "竞品对比不可比", "severity": "medium", "keywords": ["无竞争对手", "没有对手", "独一无二"],
+     "explanation": "声称'没有竞争对手'反而是危险信号——要么市场不存在，要么分析不够深入。",
+     "fix_hint": "列出至少3个直接/间接竞品，做功能对比矩阵，标明你的差异化维度。"},
+    {"id": "H7", "name": "创新点不可验证", "severity": "high", "keywords": ["创新", "颠覆"], "requires": ["实验", "验证", "对照"],
+     "explanation": "提到了创新/颠覆，但缺少验证手段。创新点必须是可验证的，否则就是口号。",
+     "fix_hint": "设计一个MVP实验来验证核心创新假设，定义成功指标和对照组。"},
+    {"id": "H8", "name": "单位经济不成立", "severity": "high", "keywords": ["cac", "ltv", "获客成本", "复购"],
+     "explanation": "涉及了获客成本/复购等概念，但需要确保LTV>CAC，否则越卖越亏。",
+     "fix_hint": "建立CAC/LTV/BEP三表：获客成本估算、用户终身价值计算、盈亏平衡时间点。"},
+    {"id": "H9", "name": "增长逻辑跳跃", "severity": "medium", "keywords": ["1%", "百分之一", "指数增长"],
+     "explanation": "'只要拿到1%的市场'这类表述是经典误区——自上而下的市场估算缺乏说服力。",
+     "fix_hint": "改用自下而上的方法：列出可触达的渠道→预估每个渠道的转化率→汇总。"},
+    {"id": "H10", "name": "里程碑不可交付", "severity": "medium", "keywords": ["一个月内", "三个月内全部完成"],
+     "explanation": "里程碑设置过于激进，缺乏可交付性。不切实际的时间表会让评委质疑执行力。",
+     "fix_hint": "将大目标拆成2周一个的小里程碑，每个都有明确的交付物和验收标准。"},
+    {"id": "H11", "name": "合规/伦理缺口", "severity": "high", "keywords": ["隐私", "合规", "伦理", "数据安全"],
+     "explanation": "涉及隐私/数据安全领域但未说明合规措施。这在评审中是一票否决项。",
+     "fix_hint": "列出数据采集→存储→使用→销毁的全链路，标明每一步的合规依据。"},
+    {"id": "H12", "name": "技术路线与资源不匹配", "severity": "high", "keywords": ["大模型", "芯片", "复杂硬件"],
+     "explanation": "技术方案的资源需求（算力/硬件/团队能力）可能超出当前条件。",
+     "fix_hint": "评估团队现有技术栈，如果要用大模型考虑用API调用而非自研训练。"},
+    {"id": "H13", "name": "实验设计不合格", "severity": "medium", "keywords": ["实验", "ab测试", "对照组"], "requires": ["样本", "指标"],
+     "explanation": "提到了实验/测试，但缺少样本量和评价指标的说明。没有指标的实验无法得出结论。",
+     "fix_hint": "明确：样本量≥多少、核心指标是什么、对照组如何设置、多长时间。"},
+    {"id": "H14", "name": "路演叙事断裂", "severity": "low", "keywords": ["愿景"], "min_length": 260,
+     "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+     "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。"},
+    {"id": "H15", "name": "评分项证据覆盖不足", "severity": "medium", "keywords": [],
+     "explanation": "多个评分维度缺少支撑证据，整体内容丰富度不够。补充更多数据和调研结果可以显著提分。",
+     "fix_hint": "检查9个评分维度，找出得分最低的2-3项，针对性补充证据。"},
 ]
 
 RUBRICS = [
@@ -131,12 +161,27 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
     triggered_rules: list[dict] = []
     for rule in RULES:
         if _is_hit_rule(rule, normalized_text):
-            triggered_rules.append({"id": rule["id"], "name": rule["name"], "severity": rule["severity"]})
+            matched_kws = [k for k in rule.get("keywords", []) if k in normalized_text]
+            missing_reqs = [k for k in rule.get("requires", []) if k not in normalized_text]
+            triggered_rules.append({
+                "id": rule["id"],
+                "name": rule["name"],
+                "severity": rule["severity"],
+                "explanation": rule.get("explanation", ""),
+                "fix_hint": rule.get("fix_hint", ""),
+                "matched_keywords": matched_kws,
+                "missing_requires": missing_reqs,
+            })
 
-    # H15: 如果命中规则较多或文本证据词偏少，则视为评分项覆盖不足。
     evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑"] if k in normalized_text)
     if len(triggered_rules) >= 4 or evidence_hits < 2:
-        triggered_rules.append({"id": "H15", "name": "评分项证据覆盖不足", "severity": "medium"})
+        h15 = next((r for r in RULES if r["id"] == "H15"), {})
+        triggered_rules.append({
+            "id": "H15", "name": "评分项证据覆盖不足", "severity": "medium",
+            "explanation": h15.get("explanation", ""),
+            "fix_hint": h15.get("fix_hint", ""),
+            "matched_keywords": [], "missing_requires": [],
+        })
 
     unique_triggered = {r["id"]: r for r in triggered_rules}
     triggered_rules = list(unique_triggered.values())

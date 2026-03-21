@@ -271,6 +271,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     agents_called = result.get("agents_called", [])
 
     hyper_insight = result.get("hypergraph_insight", {})
+    hyper_student = result.get("hypergraph_student", {})
     rag_cases = result.get("rag_cases", [])
     web_search = result.get("web_search_result", {})
 
@@ -280,6 +281,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "llm_enabled": composer_llm.enabled,
             "intent": result.get("intent", ""),
             "confidence": result.get("intent_confidence", 0),
+            "engine": result.get("intent_engine", ""),
             "pipeline": result.get("intent_pipeline", []),
             "nodes_visited": nodes_visited,
             "agents_called": agents_called,
@@ -296,6 +298,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         "kg_analysis": kg_analysis,
         "rag_cases": rag_cases,
         "web_search": web_search,
+        "hypergraph_student": hyper_student,
         "critic": result.get("critic"),
         "challenge_strategies": result.get("challenge_strategies"),
         "competition": result.get("competition"),
@@ -405,6 +408,7 @@ async def dialogue_turn_upload(
     kg_analysis = result.get("kg_analysis", {})
     assistant_message = result.get("assistant_message", "")
     hyper_insight = result.get("hypergraph_insight", {})
+    hyper_student = result.get("hypergraph_student", {})
     agents_called = result.get("agents_called", [])
 
     agent_trace = {
@@ -412,6 +416,7 @@ async def dialogue_turn_upload(
             "mode": mode,
             "intent": result.get("intent", ""),
             "confidence": result.get("intent_confidence", 0),
+            "engine": result.get("intent_engine", "file_detect"),
             "pipeline": result.get("intent_pipeline", []),
             "nodes_visited": result.get("nodes_visited", []),
             "agents_called": agents_called,
@@ -428,6 +433,7 @@ async def dialogue_turn_upload(
         "kg_analysis": kg_analysis,
         "rag_cases": result.get("rag_cases", []),
         "web_search": result.get("web_search_result", {}),
+        "hypergraph_student": hyper_student,
         "critic": result.get("critic"),
         "competition": result.get("competition"),
         "learning": result.get("learning"),

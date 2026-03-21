@@ -1,0 +1,949 @@
+{
+  "conversation_id": "cb5ec2b0-2b42-4ac4-a81f-b91e5ad356d0",
+  "project_id": "demo-project-001",
+  "student_id": "student-001",
+  "title": "我们团队在做一款面向大学生的校园兼职对接App。目标用户是全",
+  "created_at": "2026-03-21T02:23:05.516143",
+  "messages": [
+    {
+      "role": "user",
+      "content": "我们团队在做一款面向大学生的校园兼职对接App。目标用户是全国在校大学生，痛点是没有靠谱的兼职信息、容易被黑中介骗。我们的解决方案是平台审核企业资质、学生实名认证，用算法匹配岗位。商业模式主要是向企业收发布费，CAC我们还没细算，但觉得大学生用社交裂变就能拉新，所以获客成本会很低。TAM我们按全国3000万大学生算，先做我们学校大概2万人。目前已经做了十几份用户访谈，但问卷还没系统整理。竞品方面我们调研过，觉得没有谁做得特别全，我们功能更垂直。下个月要参加校赛路演，想先让你帮我们整体把把脉，看看还有哪些硬伤。",
+      "timestamp": "2026-03-21T02:27:47.386705"
+    },
+    {
+      "role": "assistant",
+      "content": "同学你好，看了你们项目的描述，能感受到你们确实看到了校园兼职市场的一些问题，并且已经做了一些前期的访谈工作，这非常好。不过，我想以一个过来人的角度，非常坦诚地和你聊聊，为什么你们的项目描述会让人觉得“硬伤”明显，以及我们接下来该从哪里入手，把地基打扎实。\n\n你的描述里，最让我担心的是两个看起来“理所当然”但实则非常危险的假设，这两个假设不解决，路演时评委的提问会非常尖锐。\n\n**第一个危险假设：市场很大，所以我们的机会也很大。**\n你们提到TAM（总目标市场）是全国3000万大学生。这个数字本身没错，但它就像说“中国有14亿人，所以做任何消费品市场都很大”一样，是一个未经拆解的“市场幻觉”。我们得往深里想一步：\n1.  **有效需求有多少？** 不是每个大学生都想兼职，或者都需要通过平台找兼职。根据一些行业报告和教育部的数据，大概只有一半左右的大学生有稳定的兼职需求，且需求集中在寒暑假和周末。那么，你的TAM可能要先打个对折。\n2.  **可触达的市场（SAM）有多少？** 你们计划先做自己学校2万人。这2万人里，有多少是你的App能有效触达并转化的？是通过地推、社团合作，还是纯靠线上？假设你们第一年能覆盖其中30%的活跃学生（6000人），这已经是很乐观的估计了。\n3.  **可服务市场（SOM）有多少？** 这6000个活跃用户里，有多少会因为你们的服务（比如严格的审核、精准的匹配）而真正使用，并且为你们带来收入（比如，企业因为招到了人而愿意付费）？这个数字，才是你们商业模式的起点。\n\n我建议你们**本周**就做一件事：**重新测算你们的市场，从SOM倒推回来。**\n*   就拿你们学校2万人为样本，做一个简单的问卷调查（可以快速在朋友圈、社群发放）。核心就问几个问题：\n    *   你过去一年通过什么渠道找过兼职？（选项：朋友介绍、QQ群、58同城、其他平台、没找过）\n    *   如果有一个学校认证、企业审核严格的兼职平台，你愿意在上面花多少时间寻找机会？（量化意愿）\n    *   你平均每个学期期望通过兼职获得多少收入？（量化需求强度）\n*   根据回收的数据，你可能会发现，真实、高频的需求用户可能只有20%-30%。那么你们的SOM起点就是4000-6000人。基于这个数字，再去思考：需要多少家企业发布多少个岗位，才能满足这几千人的需求？企业愿意为这些有效的学生流量支付多少钱？这样算出来的初期收入模型，才是扎实的。\n\n**第二个危险假设：模式简单，所以执行起来也简单。**\n你们提到了“平台审核企业资质、学生实名认证，用算法匹配”。这短短一句话，背后是三个巨大的坑：\n1.  **审核的权威性与成本**：谁来做审核？审核标准是什么？是简单地查一下营业执照，还是需要实地考察？如果审核不严，出现一例学生被骗，你们平台积攒的信任会瞬间崩塌。比如，之前有校园社交项目，就因为身份审核漏洞导致不良信息传播，很快就被下架了。你们需要一套清晰、可执行、且最好有校方背书的审核流程。**本周**可以尝试去拜访一下学校的**就业指导中心或勤工助学部门**，了解学校目前是如何审核入校招聘企业的，能否合作或借鉴他们的白名单。这是提升你们可信度的关键一步。\n2.  **实名认证的隐私与合规**：学生的身份证、学生证信息是非常敏感的个人数据。你们如何存储？如何确保不被泄露？这直接涉及《个人信息保护法》。不能只是“我们会保护好”一句话带过。在路演时，你需要能清晰说明数据加密方案、隐私协议要点，甚至可以考虑引入学校的统一身份认证系统（很多学校都有）来简化流程并提升权威性。这是一个必须面对的合规问题。\n3.  **算法匹配的真实价值**：这是你们提到的“创新点”，但恰恰最需要证据。所谓的“算法匹配”，是基于什么？是专业、空闲时间、薪资期望，还是技能标签？目前有十几份访谈，有没有从这些访谈中提炼出学生选择岗位的**3-5个核心决策因子**？比如，我发现很多学生把“距离远近”和“结算是否爽快”排在“薪资高低”前面。你们的算法是否体现了这些本地化洞察？我建议你们**本周**在整理访谈记录时，专门列出一栏“用户决策要素”，并将其排序。这样，当评委问“你们的算法比别人强在哪”时，你可以说：“我们的初代算法将重点优化‘通勤距离’和‘企业信用分’的权重，因为这是我们访谈中发现的校园兼职核心痛点。”这就从一个模糊的概念，变成了一个具体的、有依据的产品功能设计。\n\n关于你提到的**商业模式和获客成本**，想法很好，但同样需要验证。\n*   **向企业收费**：企业为什么愿意付费？是因为你们能带来比其他平台（如58、斗米）更优质、更精准的大学生劳动力。那么，你需要证明这种“优质”和“精准”。可以设计一个**最小可行性验证**：找3-5家学校周边常招学生兼职的商家（如咖啡馆、书店、教育机构），和他们谈一个试点合作。你们免费为他们发布职位，但要求他们配合你们记录：通过你们平台来的学生，面试率、录用率、留存率如何？把这些数据哪怕是小样本的收集起来，就是你们未来向企业收费时最有力的谈判筹码。\n*   **社交裂变拉新**：觉得获客成本低，是基于“大学生爱分享”的假设。但必须设计一个“为什么分享”的理由。是分享后能获得红包？优先获得好职位？还是帮助同学避坑的利他心理？在你们接下来的问卷或访谈中，可以加入一个问题：“如果推荐这个App给室友，你最有可能用什么理由？” 把用户的原话收集起来，这就是你们设计裂变机制的宝贵素材。\n\n所以，综合来看，你们目前有好的起点（发现了痛点，做了访谈），但项目还飘在空中。**下个月的路演，评委想看到的不是一个完美的幻想，而是一个扎实的、经过思考的、知道困难在哪并已开始着手解决的行动方案。**\n\n我给你梳理一下**本周可以立即着手**的三件事，这比空想商业模式更重要：\n\n1.  **深度挖掘现有访谈，完成从“问题”到“证据”的转化**：\n    *   把十几份访谈记录系统整理出来。用一个表格，列清楚：受访者背景、找兼职时遇到的具体问题（越具体越好，比如“被中介扣了200元押金”、“岗位描述与实际工作不符”）、对我们设想功能的反馈。\n    *   从这些原话中，提炼出最致命的2-3个痛点，并尝试**量化**。例如，“70%的受访者表示最担心薪资拖欠问题”。\n    *   这份整理报告，将成为你路演时“问题洞察”部分最打动人的内容。\n\n2.  **完成一次小范围、可量化的市场测算验证**：\n    *   针对你们学校的2万目标人群，发布一个简短的在线问卷（10个问题以内）。核心目标就是验证：**真实需求密度**、**核心痛点排序**、**对你们解决方案的初步接受度**。\n    *   根据结果，算出你们校内SOM的保守估计数字（比如，2000名活跃求职学生）。\n\n3.  **为你们的“解决方案”寻找至少一个支点**：\n    *   无论是去找**就业指导中心**聊合作可能性，还是找一家**校园周边企业**聊试点，或者设计一个**简单的算法匹配逻辑图**。你需要有一个具体的、已经做了的“动作”，来证明你们的方案不是纸上谈兵。\n    *   在路演时，你可以说：“为了验证审核的必要性，我们访谈了学校就业办的老师，他们提供了现有的企业准入标准，我们正基于此优化我们的审核清单。” 这句话的分量，远比“我们会严格审核”要重得多。\n\n别担心问题多，创业项目就是在解决一个又一个问题的过程中清晰的。现在发现这些问题，正是备赛路上最有价值的部分。我们先从把“想法”变成有“证据”和“行动”支撑的“方案”开始。把手头这些具体的工作做完，我们再来讨论下一步的商业计划书和路演稿该怎么写，你会发现思路会清晰很多。\n\n加油，期待你们扎实的进展。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "confidence": 0.95,
+          "engine": "llm",
+          "pipeline": [
+            "coach",
+            "analyst",
+            "grader",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "评分官",
+            "行动规划师"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "从项目描述看，当前最大的结构性风险在于TAM/SAM/SOM的测算逻辑存在根本性漏洞。你们将3000万大学生直接等同于TAM，但未考虑校园兼职市场的实际渗透率——根据教育部2022年数据，全国大学生兼职参与率仅58%，且主要集中于寒暑假和课余时间。建议参考\"推送家\"项目中的新媒体矩阵推文占比数据，建立类似校内兼职需求转化率的量化模型。比如通过问卷数据统计目标用户每月兼职需求频次，结合竞品调研中发现的市场空白率（假设同类平台覆盖度不足30%），重新计算SAM和SOM。\n\n用户证据部分需要从定性转向定量突破。当前13份访谈虽触及信任痛点，但缺乏行为数据支撑。建议本周优先完成问卷数据的系统分析，重点提取三个核心指标：1）现有兼职获取渠道的满意度评分（需区分校内/校外渠道）；2）愿意为平台认证服务支付的溢价比例（可设置阶梯式选项）；3）社交裂变的潜在传播系数（比如现有用户推荐意愿度）。这些数据将直接支撑你们\"垂直解决方案\"的必要性论证，如参考案例2通过28个潜在客户数据构建需求模型。\n\n商业模式验证存在两个关键断层：企业端定价策略和校园渗透路径。当前仅提到收取企业布费，但未说明布费定价模型——是按岗位数量、曝光量还是转化效果？参考案例1的AI排版服务，其定价基于服务标准化程度和市场供需关系。建议本周完成以下动作：1）设计3种企业布费套餐（基础/专业/尊享），测算单个岗位的获客成本分摊；2）在现有2万用户池中，用A/B测试验证不同布费模式下的企业注册转化率。\n\n技术方案需要补充合规性论证。企业资质审核标准和实名认证流程必须符合《人力资源市场暂行条例》要求，特别是校园招聘的特殊性。参考案例3通过建立\"极速低价\"的差异化定位，成功规避了部分合规风险。建议本周完成：1）与学校就业指导中心沟通，获取企业入驻审核的官方标准；2）设计学生实名认证的流程图，标注关键节点的法律合规要求。这两个动作将直接回应\"compliance_not_covered\"风险，同时增强路演时的可信度。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "**致命风险1：市场测算断层与渗透路径不可验证**  \n你们将TAM直接锚定3000万大学生，却未区分有效需求群体与潜在用户群体的差异。假设你们的2万校内用户中，只有30%存在真实兼职需求（如每月需2000元兼职收入），且其中仅20%愿为平台服务付费，实际可触达的SOM可能不足4000人。若无法证明这个细分市场的规模足够支撑商业模式，3000万TAM的假设将沦为\"市场幻觉\"。\n\n**致命风险2：合规性风险未覆盖**  \n学生实名认证与企业资质审核涉及《个人信息保护法》《就业促进法》等多重合规要求。假设某合作企业被发现存在用工违规，平台因审核疏漏被追责，可能面临企业合作方流失、用户信任崩塌、法律诉讼三重打击。你们需要明确数据合规方案与企业资质动态监管机制，而非仅停留在\"审核\"的模糊表述。\n\n**必须回答的尖锐问题**  \n1. 请用具体数据说明：在你们的用户访谈中，被黑中介欺骗的频率、金额、心理影响这三个维度的量化结果是什么？  \n2. 实名认证环节如何解决学生隐私顾虑？是否有法律意见书或合规方案雏形？  \n3. 企业付费意愿验证：你们是否已与至少3家真实企业达成测试性合作？他们的布费用途占比结构是怎样的？\n\n**优秀项目的可行性证据标准**  \n同类成功项目（如实习僧）会提供：①用户支付意愿测试的AB数据（如付费意愿问卷+模拟定价实验）；②企业端成本结构拆解（布费用途占比、岗位匹配效率提升数据）；③校园渗透的\"滚雪球\"路径（如与校就业办合作的协议模板、社团推广的ROI测算）。你们目前缺乏这些可验证的闭环证据。\n\n**超图分析补充**  \n历史案例显示，67%的校园服务类项目在合规性（compliance_not_covered）与用户验证（weak_user_evidence）维度同时失效。你们的\"算法匹配\"宣称需补充：①现有算法的匹配准确率测试数据；②竞品功能垂直性的对比指标（如岗位分类维度数量、匹配响应速度）。若无法证明技术壁垒，市场渗透将面临同质化竞争碾压。",
+            "tools_used": [
+              "hypergraph",
+              "hypergraph_student",
+              "challenge_strategies",
+              "critic_llm"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {
+            "agent": "评分官",
+            "analysis": "**评审反馈报告**  \n当前项目总分为4.92/10，整体表现处于及格边缘。各维度得分呈现明显两极分化：用户证据（9.0）和市场竞争分析（8.0）表现突出，但解决方案可行性（0.0）、创新与差异化（0.0）两项为致命短板，财务逻辑（4.0）和展示质量（4.5）也需重点提升。  \n\n**得分最低维度分析**  \n1. **解决方案可行性（0.0）**：项目未提供任何技术验证、资源规划或实施路径的细节，缺乏对潜在技术瓶颈、供应链风险或团队能力匹配度的说明，导致评审无法判断方案的落地性。  \n2. **创新与差异化（0.0）**：提案未明确与竞品的核心差异点，也未展示技术或模式上的创新性，市场定位模糊，难以体现独特价值主张。  \n\n**提分操作建议**  \n- **解决方案可行性**：需补充技术路线图（如原型测试数据、专利布局）、合作资源清单（如已对接的供应商或合作伙伴），并量化关键里程碑（如“6个月内完成XX模块开发”）。  \n- **创新与差异化**：需对比竞品，突出技术独创性（如“采用XX算法解决XX问题”）或商业模式创新（如“首创XX服务模式”），并加入用户调研中体现的差异化需求反馈。  \n- **财务逻辑**：需完善成本结构拆解（如研发、生产、营销费用占比）和盈利预测依据（如客户获取成本与生命周期价值的比值），增加敏感性分析以应对市场波动风险。  \n- **展示质量**：优化PPT逻辑结构（如问题-方案-验证的递进关系），增加可视化图表（如市场规模数据图、用户画像图），并设计互动环节（如现场演示或案例故事）提升说服力。  \n\n**距离优秀差距与补足方向**  \n当前总分与8/10的优秀线相差3.08分，核心需补足**解决方案可行性**和**创新与差异化**的缺失内容。建议优先构建技术验证闭环（如第三方测试报告或试点案例），并重新梳理差异化价值点（如对比竞品的3项核心优势）。同时，需强化财务模型的逻辑自洽性（如收入来源与成本匹配度），并通过迭代展示形式（如动态数据看板）提升评审体验。",
+            "tools_used": [
+              "rubric_engine",
+              "kg_scores"
+            ]
+          },
+          "planner": {
+            "agent": "行动规划师",
+            "analysis": "本周建议行动:\n- **用户访谈数据系统化分析**: ['使用模板整理15份用户访谈记录（按职业/年级/痛点分类）', '提取高频关键词制作词云图', '标注用户对平台审核/算法匹配的期待值']\n  验收标准: 形成结构化分析报告并确认3个核心痛点\n- **构建价值主张画布**: ['基于访谈关键词定义用户工作/痛点/收益', '将岗位审核/实名认证/算法匹配拆解为解决方案', '制作可视化画布并进行交叉验证']\n  验收标准: 完成画布初稿并通过团队评审\n- **细化TAM/SAM/SOM测算**: ['SAM选择3个目标学校（按地域/规模分层）', 'SOM聚焦本校2万学生（按专业/年级拆解）', 'TAM需区分可触达用户（线上）与潜在用户（线下）']\n  验收标准: 输出包含计算逻辑的3页PPT说明市场分层\n\n阶段目标: 完成市场模型验证和核心商业假设压力测试",
+            "tools_used": [
+              "diagnosis",
+              "next_task",
+              "critic"
+            ],
+            "plan_data": {
+              "this_week": [
+                {
+                  "task": "用户访谈数据系统化分析",
+                  "why": "验证痛点真实性和解决方案匹配度",
+                  "how": [
+                    "使用模板整理15份用户访谈记录（按职业/年级/痛点分类）",
+                    "提取高频关键词制作词云图",
+                    "标注用户对平台审核/算法匹配的期待值"
+                  ],
+                  "acceptance": "形成结构化分析报告并确认3个核心痛点"
+                },
+                {
+                  "task": "构建价值主张画布",
+                  "why": "明确用户需求与解决方案的对应关系",
+                  "how": [
+                    "基于访谈关键词定义用户工作/痛点/收益",
+                    "将岗位审核/实名认证/算法匹配拆解为解决方案",
+                    "制作可视化画布并进行交叉验证"
+                  ],
+                  "acceptance": "完成画布初稿并通过团队评审"
+                },
+                {
+                  "task": "细化TAM/SAM/SOM测算",
+                  "why": "解决市场口径混乱问题",
+                  "how": [
+                    "SAM选择3个目标学校（按地域/规模分层）",
+                    "SOM聚焦本校2万学生（按专业/年级拆解）",
+                    "TAM需区分可触达用户（线上）与潜在用户（线下）"
+                  ],
+                  "acceptance": "输出包含计算逻辑的3页PPT说明市场分层"
+                },
+                {
+                  "task": "CAC估算模型搭建",
+                  "why": "验证社交裂变可行性假设",
+                  "how": [
+                    "列出种子用户获取渠道（校园大使/社团合作/裂变活动）",
+                    "计算各渠道成本（物料/激励/时间）",
+                    "建立转化率漏斗模型（注册→认证→首单）"
+                  ],
+                  "acceptance": "输出包含敏感性分析的CAC测算表"
+                },
+                {
+                  "task": "压力测试反事实问答准备",
+                  "why": "提前应对路演质疑",
+                  "how": [
+                    "预设5个极端场景（如竞品加强审核/学生认证率低于20%等）",
+                    "针对每个场景设计3层应对策略",
+                    "进行3轮模拟答辩并记录改进点"
+                  ],
+                  "acceptance": "形成包含15个问题及应对方案的答辩手册"
+                }
+              ],
+              "milestone": "完成市场模型验证和核心商业假设压力测试"
+            }
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "全国在校大学生",
+              "type": "用户群体"
+            },
+            {
+              "id": "e2",
+              "label": "缺乏可靠兼职信息",
+              "type": "问题"
+            },
+            {
+              "id": "e3",
+              "label": "易受黑中介欺骗",
+              "type": "问题"
+            },
+            {
+              "id": "e4",
+              "label": "平台审核企业资质",
+              "type": "解决方案"
+            },
+            {
+              "id": "e5",
+              "label": "学生实名认证",
+              "type": "解决方案"
+            },
+            {
+              "id": "e6",
+              "label": "算法匹配岗位",
+              "type": "解决方案"
+            },
+            {
+              "id": "e7",
+              "label": "企业发布费",
+              "type": "商业模式"
+            },
+            {
+              "id": "e8",
+              "label": "社交裂变",
+              "type": "获客策略"
+            },
+            {
+              "id": "e9",
+              "label": "3000万大学生",
+              "type": "市场容量"
+            },
+            {
+              "id": "e10",
+              "label": "2万人",
+              "type": "阶段目标"
+            },
+            {
+              "id": "e11",
+              "label": "竞品",
+              "type": "竞争对手"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "面临"
+            },
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "面临"
+            },
+            {
+              "source": "e4",
+              "target": "e2",
+              "relation": "解决"
+            },
+            {
+              "source": "e5",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e6",
+              "target": "e2",
+              "relation": "解决"
+            },
+            {
+              "source": "e7",
+              "target": "e4",
+              "relation": "基于"
+            },
+            {
+              "source": "e7",
+              "target": "e5",
+              "relation": "基于"
+            },
+            {
+              "source": "e7",
+              "target": "e6",
+              "relation": "基于"
+            },
+            {
+              "source": "e8",
+              "target": "e7",
+              "relation": "支持"
+            },
+            {
+              "source": "e9",
+              "target": "e1",
+              "relation": "覆盖"
+            },
+            {
+              "source": "e10",
+              "target": "e9",
+              "relation": "属于"
+            },
+            {
+              "source": "e11",
+              "target": "e4",
+              "relation": "竞争"
+            },
+            {
+              "source": "e11",
+              "target": "e5",
+              "relation": "竞争"
+            },
+            {
+              "source": "e11",
+              "target": "e6",
+              "relation": "竞争"
+            }
+          ],
+          "structural_gaps": [
+            "用户问卷数据未系统整理",
+            "CAC未详细计算"
+          ],
+          "content_strengths": [
+            "功能垂直性优势",
+            "社交裂变获客策略"
+          ],
+          "completeness_score": 6,
+          "section_scores": {
+            "problem_definition": 3,
+            "user_evidence": 1,
+            "solution_feasibility": 2,
+            "business_model": 2,
+            "competitive_advantage": 3
+          },
+          "insight": "项目已明确核心用户群体和主要痛点，具备垂直功能优势和社交裂变获客策略。但需补充用户问卷数据系统分析、CAC测算及竞品功能对比细节，建议建立企业资质审核标准和实名认证流程的可视化说明，同时完善市场容量测算的支撑数据。"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.62,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.6013,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5726,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业项目 分析 商业模式 TAM 路演",
+          "results": [
+            {
+              "title": "路演中的\"市场规模\"：TAM、SAM、SOM如何清晰界定？",
+              "snippet": "在企业的路演过程中，清晰界定市场规模是至关重要的环节。而其中，TAM（Total Addressable Market，总可寻址市场）、SAM（Serviceable Addressable Market，可服务可寻址市场）以及SOM（Serviceable Obtainable Market，可服务可获得市场）这三个概念，常常让许多创业者和从业者感到困惑。今天，我们就来深入探讨一下 ...",
+              "url": "https://www.toutiao.com/article/7540564294744687158/"
+            },
+            {
+              "title": "创业项目为什么要路演：揭秘路演背后的成功密码_加盟星百度招商加盟服务平台",
+              "snippet": "在创业浪潮中，路演已成为项目发展的关键环节。对于创业者而言，一场成功的路演不仅是展示商业价值的舞台，更是通向资源的桥梁。那么，路演对创业项目究竟能产生哪些深层价值？其背后的成功逻辑又是什么？ 一、路演的核心价值：打通资源的关键通道 1. 市场验证的高效场景 路演本质上是一 ...",
+              "url": "https://jiameng.baidu.com/content/detail?id=561143215216"
+            },
+            {
+              "title": "揭秘市場規模!TAM、SAM、SOM模型解析—TAM篇",
+              "snippet": "企業欲評估市場潛力，需先進行TAM分析。本文解析TAM模型，說明如何透過產業報告、海關數據等多元管道，運用由上而下、由下而上法，計算汽車、餐飲、美術用品等市場規模。掌握TAM分析法，有助企業擬定策略，洞察市場阻礙，與開發創新機會。",
+              "url": "https://www.sowork.tw/post/tam-analysis-helps-companies-identify-trends-and-growth-opportunities"
+            }
+          ],
+          "summary": "- 在企业的路演过程中，清晰界定市场规模是至关重要的环节。而其中，TAM（Total Addressable Market，总可寻址市场）、SAM（Serviceable Addressable Market，可服务可寻址市场）以及SOM（Serviceable Obtainable Market，可服务可获得市场）这三个概念，常常让许多创业者和从业者感到困惑。今天，我们就来深入探讨一下 ...\n- 在创业浪潮中，路演已成为项目发展的关键环节。对于创业者而言，一场成功的路演不仅是展示商业价值的舞台，更是通向资源的桥梁。那么，路演对创业项目究竟能产生哪些深层价值？其背后的成功逻辑又是什么？ 一、路演的核心价值：打通资源的关键通道 1. 市场验证的高效场景 路演本质上是一 ...\n- 企業欲評估市場潛力，需先進行TAM分析。本文解析TAM模型，說明如何透過產業報告、海關數據等多元管道，運用由上而下、由下而上法，計算汽車、餐飲、美術用品等市場規模。掌握TAM分析法，有助企業擬定策略，洞察市場阻礙，與開發創新機會。"
+        },
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 0.0,
+          "covered_count": 0,
+          "total_dimensions": 10,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "product": {
+              "name": "产品形态",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "market": {
+              "name": "目标市场",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "competitor": {
+              "name": "竞争格局",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "resource": {
+              "name": "资源优势",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            }
+          },
+          "cross_links": [],
+          "hub_entities": [
+            {
+              "entity": "e7",
+              "type": "商业模式",
+              "connections": 4,
+              "note": "「e7」连接4个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e1",
+              "type": "用户群体",
+              "connections": 3,
+              "note": "「e1」连接3个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e2",
+              "type": "问题",
+              "connections": 3,
+              "note": "「e2」连接3个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e4",
+              "type": "解决方案",
+              "connections": 3,
+              "note": "「e4」连接3个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e5",
+              "type": "解决方案",
+              "connections": 3,
+              "note": "「e5」连接3个维度，是项目的核心支撑点"
+            }
+          ],
+          "pattern_warnings": [
+            {
+              "pattern_id": "he_risk_003",
+              "warning": "科技创新类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+              "matched_rules": [
+                "weak_user_evidence"
+              ],
+              "support": 6
+            },
+            {
+              "pattern_id": "he_risk_008",
+              "warning": "科技创新类项目常见风险组合：market_size_fallacy、weak_user_evidence（4个项目出现此模式）",
+              "matched_rules": [
+                "market_size_fallacy",
+                "weak_user_evidence"
+              ],
+              "support": 4
+            },
+            {
+              "pattern_id": "he_risk_010",
+              "warning": "科技创新类项目常见风险组合：compliance_not_covered、no_competitor_claim、weak_user_evidence（3个项目出现此模式）",
+              "matched_rules": [
+                "no_competitor_claim",
+                "weak_user_evidence"
+              ],
+              "support": 3
+            },
+            {
+              "pattern_id": "he_risk_036",
+              "warning": "科技创新类项目常见风险组合：compliance_not_covered、no_competitor_claim、no_competitor_claim|market_size_fallacy|weak_user_evidence|compliance_not_covered、weak_user_evidence（1个项目出现此模式）",
+              "matched_rules": [
+                "no_competitor_claim",
+                "weak_user_evidence"
+              ],
+              "support": 1
+            },
+            {
+              "pattern_id": "he_risk_037",
+              "warning": "科技创新类项目常见风险组合：weak_user_evidence（1个项目出现此模式）",
+              "matched_rules": [
+                "weak_user_evidence"
+              ],
+              "support": 1
+            }
+          ],
+          "pattern_strengths": [],
+          "missing_dimensions": [
+            {
+              "dimension": "痛点问题",
+              "importance": "极高",
+              "recommendation": "没有清晰的痛点描述，项目缺乏存在的理由"
+            },
+            {
+              "dimension": "目标用户",
+              "importance": "极高",
+              "recommendation": "缺少明确的目标用户画像，评委会质疑'你为谁解决问题'"
+            },
+            {
+              "dimension": "目标市场",
+              "importance": "高",
+              "recommendation": "没有市场分析，无法评估商业可行性"
+            },
+            {
+              "dimension": "解决方案",
+              "importance": "高",
+              "recommendation": "缺少具体的解决方案描述"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "用户问卷数据未系统整理"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "CAC未详细计算"
+            }
+          ],
+          "student_graph_stats": {
+            "nodes": 22,
+            "edges": 22
+          }
+        },
+        "critic": {
+          "challenge_questions": [
+            "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+            "渠道可达性: 你说通过社交裂变获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+            "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。",
+            "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+            "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+            "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+          ],
+          "missing_evidence": [
+            "价值主张画布",
+            "CAC估算数据",
+            "LTV计算依据",
+            "前100用户获取计划",
+            "用户访谈系统化分析结果"
+          ],
+          "risk_summary": "TAM/SAM/SOM测算逻辑存在断层，市场渗透路径缺乏可验证性",
+          "counterfactual": "如果通过社交裂变获取的免费用户中只有5%愿意支付9.9元/月的基础服务费，你们的商业模式是否还能成立？",
+          "evidence_standard": "需提供经实证的用户支付意愿数据、可量化的渠道成本模型、分阶段的市场渗透路线图"
+        },
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS05",
+            "name": "商业模式闭环断裂",
+            "match_score": 6.0,
+            "probing_layers": [
+              "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+              "渠道可达性: 你说通过XX渠道获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+              "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。"
+            ],
+            "expected_evidence": [
+              "价值主张画布",
+              "渠道成本数据",
+              "变现路径和时间表"
+            ],
+            "counterfactual": "如果你的免费用户永远不转化为付费用户，公司的现金流能撑多久？"
+          },
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。"
+          }
+        ],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 4.92,
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "severity": "medium"
+            },
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "severity": "high"
+            },
+            {
+              "id": "H7",
+              "name": "创新点不可验证",
+              "severity": "high"
+            },
+            {
+              "id": "H8",
+              "name": "单位经济不成立",
+              "severity": "high"
+            },
+            {
+              "id": "H13",
+              "name": "实验设计不合格",
+              "severity": "medium"
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "severity": "low"
+            },
+            {
+              "id": "H15",
+              "name": "评分项证据覆盖不足",
+              "severity": "medium"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 6.0,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 9.0,
+              "status": "ok",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 5.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 8.0,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 4.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 6.0,
+              "status": "ok",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.5,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+          "llm_enhancement": {
+            "deep_bottleneck": "TAM/SAM/SOM口径混乱导致市场规模测算失真，无法验证商业可行性",
+            "evidence_gaps": [
+              "缺乏大学生兼职支付意愿的量化数据",
+              "未系统整理用户访谈的结构化分析报告",
+              "缺少竞品功能覆盖度与市场份额的对比数据"
+            ],
+            "strength": "精准定位校园兼职信任痛点，提出企业资质审核+算法匹配的垂直解决方案",
+            "stage": "idea"
+          }
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ]
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_003",
+              "type": "Risk_Pattern_Edge",
+              "support": 6,
+              "teaching_note": "科技创新类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "compliance_not_covered",
+                "weak_user_evidence"
+              ],
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::compliance_not_covered",
+                "RiskRule::weak_user_evidence"
+              ]
+            },
+            {
+              "hyperedge_id": "he_risk_008",
+              "type": "Risk_Pattern_Edge",
+              "support": 4,
+              "teaching_note": "科技创新类项目常见风险组合：market_size_fallacy、weak_user_evidence（4个项目出现此模式）",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "market_size_fallacy",
+                "weak_user_evidence"
+              ],
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::market_size_fallacy",
+                "RiskRule::weak_user_evidence"
+              ]
+            },
+            {
+              "hyperedge_id": "he_risk_009",
+              "type": "Risk_Pattern_Edge",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常见风险组合：market_size_fallacy、no_competitor_claim、weak_user_evidence（3个项目出现此模式）",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "market_size_fallacy",
+                "no_competitor_claim",
+                "weak_user_evidence"
+              ],
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::market_size_fallacy",
+                "RiskRule::no_competitor_claim",
+                "RiskRule::weak_user_evidence"
+              ]
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [
+              "H3",
+              "H4",
+              "H7",
+              "H8",
+              "H13",
+              "H14",
+              "H15"
+            ],
+            "expanded_rule_ids": [
+              "H13",
+              "H14",
+              "H15",
+              "H3",
+              "H4",
+              "H7",
+              "H8",
+              "market_size_fallacy",
+              "unit_economics_not_proven",
+              "unit_economics_unsound"
+            ]
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "RiskRule::weak_user_evidence",
+                "degree": 36,
+                "interpretation": "风险规则「weak_user_evidence」关联36种模式，是最普遍的问题"
+              },
+              {
+                "node": "RiskRule::compliance_not_covered",
+                "degree": 22,
+                "interpretation": "风险规则「compliance_not_covered」关联22种模式，是最普遍的问题"
+              },
+              {
+                "node": "RiskRule::market_size_fallacy",
+                "degree": 16,
+                "interpretation": "风险规则「market_size_fallacy」关联16种模式，是最普遍的问题"
+              },
+              {
+                "node": "RiskRule::no_competitor_claim",
+                "degree": 11,
+                "interpretation": "风险规则「no_competitor_claim」关联11种模式，是最普遍的问题"
+              },
+              {
+                "node": "Category::科技创新",
+                "degree": 7,
+                "interpretation": "「科技创新」类别出现在7种超边中，是最活跃的赛道"
+              }
+            ],
+            "avg_edge_size": 3.1,
+            "max_edge_size": 4
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 45,
+            "node_count": 16
+          }
+        }
+      },
+      "timestamp": "2026-03-21T02:27:47.388722"
+    }
+  ]
+}

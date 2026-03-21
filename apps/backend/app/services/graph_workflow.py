@@ -322,6 +322,103 @@ def _fmt_ws(ws: dict) -> str:
     return "\n".join(parts)[:600]
 
 
+def _standalone_hypergraph_analysis(
+    entities: list[dict],
+    relationships: list[dict],
+    structural_gaps: list[str] | None = None,
+) -> dict:
+    """Hypergraph-style analysis that works without Neo4j, purely from KG entities."""
+    DIMS = {
+        "stakeholder": "目标用户", "pain_point": "痛点问题",
+        "solution": "解决方案", "technology": "技术路线",
+        "market": "市场环境", "competitor": "竞品对手",
+        "resource": "关键资源", "business_model": "商业模式",
+        "team": "团队能力", "evidence": "验证证据",
+    }
+    dim_entities: dict[str, list[str]] = {k: [] for k in DIMS}
+    for e in entities:
+        etype = str(e.get("type", "")).lower().replace(" ", "_")
+        label = e.get("label", "")
+        if etype in dim_entities:
+            dim_entities[etype].append(label)
+        elif "user" in etype or "customer" in etype:
+            dim_entities["stakeholder"].append(label)
+        elif "pain" in etype or "problem" in etype:
+            dim_entities["pain_point"].append(label)
+        elif "tech" in etype:
+            dim_entities["technology"].append(label)
+        elif "market" in etype:
+            dim_entities["market"].append(label)
+        elif "compet" in etype:
+            dim_entities["competitor"].append(label)
+
+    dimensions = {}
+    covered = 0
+    for k, name in DIMS.items():
+        ents = dim_entities[k]
+        is_covered = len(ents) > 0
+        if is_covered:
+            covered += 1
+        dimensions[k] = {"name": name, "covered": is_covered, "count": len(ents), "entities": ents[:3]}
+
+    cross_links = []
+    for r in relationships:
+        src_type = next((e.get("type", "") for e in entities if e.get("id") == r.get("source")), "")
+        tgt_type = next((e.get("type", "") for e in entities if e.get("id") == r.get("target")), "")
+        if src_type != tgt_type and src_type and tgt_type:
+            src_dim = DIMS.get(src_type.lower(), src_type)
+            tgt_dim = DIMS.get(tgt_type.lower(), tgt_type)
+            cross_links.append({"from_dim": src_dim, "relation": r.get("relation", ""), "to_dim": tgt_dim})
+
+    IMPORTANCE = {"stakeholder": "极高", "pain_point": "极高", "solution": "高", "technology": "高",
+                  "market": "高", "business_model": "高", "competitor": "中", "resource": "中",
+                  "team": "中", "evidence": "极高"}
+    missing = []
+    for k, name in DIMS.items():
+        if not dim_entities[k]:
+            missing.append({"dimension": name, "importance": IMPORTANCE.get(k, "中"),
+                            "recommendation": f"请补充{name}相关的描述"})
+    missing.sort(key=lambda x: {"极高": 0, "高": 1, "中": 2}.get(x["importance"], 3))
+
+    hub_entities = []
+    entity_connections: dict[str, int] = {}
+    for r in relationships:
+        for key in ["source", "target"]:
+            eid = r.get(key, "")
+            entity_connections[eid] = entity_connections.get(eid, 0) + 1
+    for e in entities:
+        count = entity_connections.get(e.get("id", ""), 0)
+        if count >= 2:
+            hub_entities.append({"entity": e.get("label", ""), "connections": count})
+    hub_entities.sort(key=lambda x: -x["connections"])
+
+    warnings = []
+    strengths = []
+    if not dim_entities["evidence"] and not dim_entities["stakeholder"]:
+        warnings.append({"warning": "缺少用户证据和目标用户定义——这是评审中最容易被质疑的部分"})
+    if dim_entities["solution"] and not dim_entities["pain_point"]:
+        warnings.append({"warning": "有方案但缺少痛点分析——方案可能无的放矢"})
+    if dim_entities["stakeholder"] and dim_entities["pain_point"] and dim_entities["solution"]:
+        strengths.append({"note": "用户-痛点-方案三角关系完整，项目逻辑基础扎实"})
+    if dim_entities["technology"] and dim_entities["market"]:
+        strengths.append({"note": "技术路线与市场定位都有涉及，项目可行性有基础"})
+    if len(cross_links) >= 3:
+        strengths.append({"note": f"跨维度联动较多({len(cross_links)}条)，说明项目内在逻辑串联较好"})
+
+    return {
+        "ok": True,
+        "coverage_score": covered,
+        "covered_count": covered,
+        "total_dimensions": len(DIMS),
+        "dimensions": dimensions,
+        "cross_links": cross_links[:8],
+        "missing_dimensions": missing,
+        "hub_entities": hub_entities[:5],
+        "pattern_warnings": warnings,
+        "pattern_strengths": strengths,
+    }
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  Node 2: DataGatherer — runs ALL tools in parallel
 # ═══════════════════════════════════════════════════════════════════
@@ -496,16 +593,23 @@ def gather_context_node(state: WorkflowState) -> dict:
         except Exception as exc:
             logger.warning("Neo4j merge failed: %s", exc)
 
-    # ── Student dynamic hypergraph analysis (uses KG result) ──
+    # ── Student dynamic hypergraph analysis (works with or without Neo4j) ──
     hyper_student: dict = {}
-    if _hypergraph_service and kg.get("entities"):
+    if kg.get("entities"):
         try:
-            hyper_student = _hypergraph_service.analyze_student_content(
-                entities=kg.get("entities", []),
-                relationships=kg.get("relationships", []),
-                structural_gaps=kg.get("structural_gaps"),
-                category=cat,
-            )
+            if _hypergraph_service:
+                hyper_student = _hypergraph_service.analyze_student_content(
+                    entities=kg.get("entities", []),
+                    relationships=kg.get("relationships", []),
+                    structural_gaps=kg.get("structural_gaps"),
+                    category=cat,
+                )
+            else:
+                hyper_student = _standalone_hypergraph_analysis(
+                    entities=kg.get("entities", []),
+                    relationships=kg.get("relationships", []),
+                    structural_gaps=kg.get("structural_gaps"),
+                )
         except Exception as exc:
             logger.warning("Hypergraph student analysis failed: %s", exc)
 
@@ -822,26 +926,38 @@ def _planner_analyze(state: dict) -> dict:
                 f"{m['dimension']}({m['importance']})" for m in missing[:4]
             )
 
+    kg_entities = kg.get("entities", [])
+    entity_ctx = ""
+    if kg_entities:
+        entity_ctx = "已识别的核心实体: " + "; ".join(
+            f"{e.get('label','')}({e.get('type','')})" for e in kg_entities[:8]
+        )
+
     plan = _llm.chat_json(
         system_prompt=(
-            "你是行动规划师。基于所有分析结果，为学生生成本周具体可执行的行动计划。\n"
-            "每个任务必须足够具体（谁、做什么、怎么做、完成标准）。\n"
-            "如果超图分析显示有缺失维度，优先为最紧急的缺失维度安排任务。\n"
-            "如果对话上下文显示之前已建议过某些任务，不要重复，给出递进的新任务。\n"
+            "你是行动规划师。基于学生具体内容的分析结果，为学生生成具体可执行的行动任务。\n\n"
+            "**核心原则**：\n"
+            "- 每个任务必须紧密结合学生实际描述的内容，引用学生提到的具体产品/人群/技术\n"
+            "- 不要给出泛泛的建议如'做调研'，而是'针对你提到的XX用户群，在XX场景下做8份深度访谈'\n"
+            "- 如果学生上传了文件，任务应该针对文件中具体薄弱的部分给出修改建议\n"
+            "- 如果对话上下文显示之前已建议过某些任务，不要重复，给出递进的新任务\n"
+            "- 任务数量1-3个即可，宁精勿多\n\n"
             '输出JSON: {"this_week":['
-            '{"task":"任务名","why":"为什么重要","how":"具体做法(3-5步)","acceptance":"验收标准"}],'
-            '"milestone":"本阶段目标"}'
+            '{"task":"针对XX的具体任务名","why":"为什么这对你的项目关键",'
+            '"how":"具体做法(3-5步，引用学生内容)","acceptance":"可衡量的验收标准"}],'
+            '"milestone":"本阶段目标(用学生的项目语言描述)"}'
         ),
         user_prompt=(
-            f"学生: {msg[:500]}\n"
+            f"学生说: {msg[:800]}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
             + f"诊断瓶颈: {diag.get('bottleneck','')}\n"
-            f"建议任务: {next_task.get('title','')}: {next_task.get('description','')}\n"
-            f"结构缺陷: {kg.get('structural_gaps',[])}\n"
-            f"缺失证据: {critic.get('missing_evidence',[])}\n"
+            + (f"{entity_ctx}\n" if entity_ctx else "")
+            + f"结构缺陷: {kg.get('structural_gaps',[])}\n"
+            + f"内容优势: {kg.get('content_strengths',[][:2])}\n"
+            + f"缺失证据: {critic.get('missing_evidence',[])}\n"
             + (f"{hs_missing_ctx}\n" if hs_missing_ctx else "")
         ),
-        temperature=0.2,
+        temperature=0.25,
     )
 
     analysis_text = ""
@@ -1012,7 +1128,14 @@ def orchestrator(state: WorkflowState) -> dict:
                 "- **引用参考案例时自然融入**：如'比如XX项目也做了类似的事，他们的做法是...'，不要说'根据知识库'\n"
                 "- **追问要有针对性**：基于学生内容的具体漏洞来追问\n"
                 "- **如果有行动计划，自然地告诉学生本周该做什么**，不要说'规划师建议'\n"
-                "- 灵活使用Markdown：标题层级体现思路结构，加粗突出关键点，表格对比信息，引用块引述证据\n"
+                "- **排版必须美观易读**：\n"
+                "  - 用 ## 和 ### 标题把回复分成清晰的几个板块\n"
+                "  - 关键数据或对比用 **表格** 呈现（如竞品对比、TAM/SAM/SOM拆分、评分对比）\n"
+                "  - 重要观点用 > 引用块 突出\n"
+                "  - 核心结论用 **加粗** 标注\n"
+                "  - 列举要点不超过5条，每条一句话精炼\n"
+                "  - 段落之间保持呼吸感，不要挤在一起\n"
+                "  - 如果内容可以用表格、对比列表呈现就不要用长段文字\n"
                 "- **每次回复的结构要不同**：根据内容自然组织，不要套公式\n"
                 f"- **回复长度**: {length_guide}\n"
                 "- 深度优于广度：宁可讲透一个核心问题，也不要浮皮潦草地列10个要点\n"

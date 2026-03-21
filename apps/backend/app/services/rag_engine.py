@@ -48,12 +48,79 @@ _GARBAGE_PATTERNS = re.compile(
     r"^[\d\s\.…·—]+$|^目录$|^前言|^第[一二三四五六七八九十]|^参赛作品|^\d+$"
 )
 
+_MOJIBAKE_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+_LATIN_GARBLE_RE = re.compile(r"[\xc0-\xff]{3,}")
+_CJK_RARE_RE = re.compile(
+    r"[\u3400-\u4DBF"   # CJK Extension A (rare)
+    r"\U00020000-\U0002A6DF"  # CJK Extension B (very rare)
+    r"\U0002A700-\U0002EBEF"  # CJK Extensions C-F
+    r"\u2E80-\u2EFF"    # CJK Radicals Supplement
+    r"\u2FF0-\u2FFF"    # Ideographic Description Characters
+    r"\u31C0-\u31EF"    # CJK Strokes
+    r"⃻↯☛]"
+)
+
+
+def _has_cjk_garble(text: str) -> bool:
+    """Detect if text contains rare CJK characters that indicate mojibake."""
+    if not text:
+        return False
+    rare_count = len(_CJK_RARE_RE.findall(text))
+    total_cjk = len(re.findall(r"[\u4e00-\u9fff\u3400-\u4DBF]", text))
+    if total_cjk == 0:
+        return False
+    return rare_count / max(total_cjk, 1) > 0.15
+
+
+def _fix_garbled(text: str) -> str:
+    """Attempt to fix common encoding issues in PDF-extracted Chinese text."""
+    if not text:
+        return text
+    if _has_cjk_garble(text):
+        text = _CJK_RARE_RE.sub("", text)
+        allowed = (
+            "\u4e00-\u9fffA-Za-z0-9\\s"
+            "\uff0c\u3002\u3001\uff1b\uff1a"
+            "\u201c\u201d\u2018\u2019"
+            "\uff08\uff09\u3010\u3011\u300a\u300b"
+            "\uff01\uff1f.%/\u3000\uff01-\uff5e\\-"
+        )
+        text = re.sub(f"[^{allowed}]", " ", text)
+        text = re.sub(r"\s{2,}", " ", text)
+    text = _MOJIBAKE_RE.sub("", text)
+    try:
+        if _LATIN_GARBLE_RE.search(text):
+            fixed = text.encode("latin-1").decode("utf-8", errors="ignore")
+            if len(fixed) > len(text) * 0.3:
+                text = fixed
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        pass
+    try:
+        if _LATIN_GARBLE_RE.search(text):
+            fixed = text.encode("cp1252").decode("utf-8", errors="ignore")
+            if len(fixed) > len(text) * 0.3:
+                text = fixed
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        pass
+    text = (
+        text
+        .replace("\ufffd", "")
+        .replace("\u00e2\u0080\u0093", "\u2013")
+        .replace("\u00e2\u0080\u0094", "\u2014")
+        .replace("\u00e2\u0080\u0098", "\u2018")
+        .replace("\u00e2\u0080\u0099", "\u2019")
+        .replace("\u00e2\u0080\u009c", "\u201c")
+        .replace("\u00e2\u0080\u009d", "\u201d")
+        .replace("\u00c3\u00a9", "\u00e9")
+    )
+    return text.strip()
+
 
 def _clean_list(items: list) -> list[str]:
     """Remove garbage entries from extracted lists."""
     cleaned: list[str] = []
     for item in items:
-        s = str(item).strip()
+        s = _fix_garbled(str(item).strip())
         if len(s) < 3 or _GARBAGE_PATTERNS.match(s):
             continue
         cleaned.append(s)
@@ -117,18 +184,23 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
         if quality < 0.2:
             continue
 
+        raw_summary = data.get("summary", "")
+        if _has_cjk_garble(raw_summary):
+            logger.info("Skipping garbled case: %s", fp.name)
+            continue
+
         profile = data.get("project_profile", {})
         evidence = data.get("evidence", [])
         chunk = CaseChunk(
             case_id=data.get("case_id", fp.stem),
             category=data.get("source", {}).get("category", "未分类"),
-            project_name=profile.get("project_name", "未知项目"),
-            summary=data.get("summary", "")[:600],
+            project_name=_fix_garbled(profile.get("project_name", "未知项目")),
+            summary=_fix_garbled(raw_summary)[:600],
             pain_points=_clean_list(profile.get("pain_points", [])),
             solution=_clean_list(profile.get("solution", [])),
             innovation_points=_clean_list(profile.get("innovation_points", [])),
             business_model=_clean_list(profile.get("business_model", []))[:4],
-            evidence_quotes=[e.get("quote", "") for e in evidence[:4]
+            evidence_quotes=[_fix_garbled(e.get("quote", "")) for e in evidence[:4]
                              if len(str(e.get("quote", ""))) > 20],
             risk_flags=data.get("risk_flags", []),
             rubric_coverage=data.get("rubric_coverage", []),

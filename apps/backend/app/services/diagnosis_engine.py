@@ -76,24 +76,59 @@ class DiagnosisResult:
     next_task: dict
 
 
+_EVIDENCE_SYNONYMS: dict[str, list[str]] = {
+    "tam": ["市场总量", "total addressable", "总体市场", "市场容量"],
+    "sam": ["可服务市场", "serviceable addressable", "目标市场规模"],
+    "som": ["可获得市场", "serviceable obtainable", "实际可获取"],
+    "cac": ["获客成本", "customer acquisition", "获取成本", "拉新成本"],
+    "ltv": ["用户价值", "lifetime value", "生命周期价值", "终身价值"],
+    "访谈": ["用户访谈", "深度访谈", "调研访谈", "用户反馈", "用户洞察"],
+    "问卷": ["调研问卷", "问卷调查", "线上调研", "需求调研"],
+    "竞品": ["竞争分析", "竞争对手", "竞品分析", "市场竞争", "对标分析"],
+    "市场规模": ["market size", "市场空间", "行业规模", "市场前景"],
+    "技术路线": ["技术方案", "技术架构", "技术栈", "系统架构"],
+    "mvp": ["最小可行", "原型", "demo", "试点", "pilot"],
+    "里程碑": ["发展阶段", "规划", "路线图", "时间表", "计划表"],
+    "团队": ["核心成员", "创始人", "合伙人", "团队成员", "人员构成"],
+    "创新点": ["差异化", "核心优势", "独特价值", "技术壁垒"],
+    "价值主张": ["价值定位", "核心价值", "用户价值", "产品价值"],
+    "渠道": ["获客渠道", "销售渠道", "推广方式", "营销渠道"],
+    "收入": ["营收", "收入模式", "盈利模式", "变现", "收费模式"],
+    "成本": ["成本结构", "运营成本", "固定成本", "可变成本"],
+}
+
+
+def _fuzzy_match(keyword: str, text: str) -> bool:
+    if keyword in text:
+        return True
+    for syn in _EVIDENCE_SYNONYMS.get(keyword, []):
+        if syn.lower() in text:
+            return True
+    return False
+
+
 def _is_hit_rule(rule: dict, text: str) -> bool:
-    has_keyword = bool(rule.get("keywords")) and any(k in text for k in rule.get("keywords", []))
+    has_keyword = bool(rule.get("keywords")) and any(_fuzzy_match(k, text) for k in rule.get("keywords", []))
     requires = rule.get("requires", [])
-    requires_missing = bool(requires) and not any(k in text for k in requires)
+    requires_missing = bool(requires) and not any(_fuzzy_match(k, text) for k in requires)
     too_short = bool(rule.get("min_length")) and len(text) < int(rule["min_length"])
     return has_keyword or requires_missing or too_short
 
 
-def _rule_penalty(severity: str) -> float:
-    if severity == "high":
-        return 2.0
-    if severity == "medium":
-        return 1.0
-    return 0.5
+def _rule_penalty(severity: str, is_file: bool = False) -> float:
+    base = {"high": 2.0, "medium": 1.0}.get(severity, 0.5)
+    return base * 0.5 if is_file else base
 
 
-def _evidence_score(text: str, evidence_keywords: list[str]) -> float:
-    hit = sum(1 for k in evidence_keywords if k in text)
+def _evidence_score(text: str, evidence_keywords: list[str], is_file: bool = False) -> float:
+    hit = sum(1 for k in evidence_keywords if _fuzzy_match(k, text))
+    total = len(evidence_keywords)
+    ratio = hit / max(total, 1)
+    if is_file:
+        base = 2.0
+        return base + ratio * 6.0
+    if hit >= 3:
+        return 6.0
     if hit >= 2:
         return 5.0
     if hit == 1:
@@ -134,9 +169,40 @@ def _suggest_next_task(primary_rule_id: str) -> dict:
     )
 
 
+def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
+    """Use LLM to intelligently score each rubric dimension for uploaded files."""
+    try:
+        from app.services.llm_client import LlmClient
+        llm = LlmClient()
+        if not llm.enabled:
+            return None
+
+        rubric_desc = "\n".join(
+            f"- {r['item']} (weight {r['weight']}): evidence={r['evidence']}"
+            for r in RUBRICS
+        )
+        result = llm.chat_json(
+            system_prompt=(
+                "You are a startup project evaluator. Score each rubric dimension 0-10.\n"
+                "Be fair and nuanced: a complete business plan typically scores 5-8.\n"
+                "Only give <3 if the dimension is completely missing.\n"
+                "Only give >8 if there is exceptional evidence.\n\n"
+                f"Rubric dimensions:\n{rubric_desc}\n\n"
+                'Output JSON: {"scores": [{"item": "...", "score": 0-10, "reason": "one sentence"}]}'
+            ),
+            user_prompt=f"Evaluate this project content (mode={mode}):\n\n{text[:4000]}",
+            temperature=0.2,
+        )
+        if result and "scores" in result:
+            return result["scores"]
+    except Exception:
+        pass
+    return None
+
+
 def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
     normalized_text = input_text.lower()
-    is_file = "[上传文件:" in input_text
+    is_file = "[" + "上传文件:" in input_text
     text_len = len(normalized_text)
 
     if not is_file and text_len < 50:
@@ -161,8 +227,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
     triggered_rules: list[dict] = []
     for rule in RULES:
         if _is_hit_rule(rule, normalized_text):
-            matched_kws = [k for k in rule.get("keywords", []) if k in normalized_text]
-            missing_reqs = [k for k in rule.get("requires", []) if k not in normalized_text]
+            matched_kws = [k for k in rule.get("keywords", []) if _fuzzy_match(k, normalized_text)]
+            missing_reqs = [k for k in rule.get("requires", []) if not _fuzzy_match(k, normalized_text)]
             triggered_rules.append({
                 "id": rule["id"],
                 "name": rule["name"],
@@ -173,8 +239,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
                 "missing_requires": missing_reqs,
             })
 
-    evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑"] if k in normalized_text)
-    if len(triggered_rules) >= 4 or evidence_hits < 2:
+    evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑"] if _fuzzy_match(k, normalized_text))
+    if len(triggered_rules) >= 5 or (evidence_hits < 2 and not is_file):
         h15 = next((r for r in RULES if r["id"] == "H15"), {})
         triggered_rules.append({
             "id": "H15", "name": "评分项证据覆盖不足", "severity": "medium",
@@ -186,27 +252,52 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
     unique_triggered = {r["id"]: r for r in triggered_rules}
     triggered_rules = list(unique_triggered.values())
 
+    # ── LLM-based scoring for uploaded files ──
+    llm_scores = None
+    if is_file and text_len > 200:
+        llm_scores = _llm_rubric_score(input_text, mode)
+
     rubric: list[dict] = []
     weighted_total = 0.0
     total_weight = 0.0
-    for row in RUBRICS:
-        ev_score = _evidence_score(normalized_text, row["evidence"])
-        penalties = sum(
-            _rule_penalty(r["severity"])
-            for r in triggered_rules
-            if r["id"] in row["rules"]
-        )
-        dim_score = max(0.0, min(10.0, ev_score * 2.0 - penalties))
-        rubric.append(
-            {
+
+    if llm_scores:
+        llm_map = {s["item"]: s for s in llm_scores}
+        for row in RUBRICS:
+            llm_s = llm_map.get(row["item"])
+            if llm_s:
+                dim_score = max(0.0, min(10.0, float(llm_s.get("score", 5))))
+                rubric.append({
+                    "item": row["item"],
+                    "score": round(dim_score, 2),
+                    "status": "risk" if dim_score < 5.0 else "ok",
+                    "weight": row["weight"],
+                    "reason": llm_s.get("reason", ""),
+                })
+            else:
+                rubric.append({
+                    "item": row["item"], "score": 5.0,
+                    "status": "ok", "weight": row["weight"],
+                })
+            weighted_total += rubric[-1]["score"] * row["weight"]
+            total_weight += row["weight"]
+    else:
+        length_bonus = min(2.0, text_len / 2000) if is_file else 0.0
+        for row in RUBRICS:
+            ev_score = _evidence_score(normalized_text, row["evidence"], is_file=is_file)
+            penalties = sum(
+                _rule_penalty(r["severity"], is_file=is_file)
+                for r in triggered_rules if r["id"] in row["rules"]
+            )
+            dim_score = max(0.0, min(10.0, ev_score * 1.8 + length_bonus - penalties))
+            rubric.append({
                 "item": row["item"],
                 "score": round(dim_score, 2),
-                "status": "risk" if dim_score < 6.0 else "ok",
+                "status": "risk" if dim_score < 5.0 else "ok",
                 "weight": row["weight"],
-            }
-        )
-        weighted_total += dim_score * row["weight"]
-        total_weight += row["weight"]
+            })
+            weighted_total += dim_score * row["weight"]
+            total_weight += row["weight"]
 
     overall_score = round(weighted_total / total_weight, 2) if total_weight else 0.0
     high_rules = [r for r in triggered_rules if r["severity"] == "high"]

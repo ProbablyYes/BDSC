@@ -352,6 +352,36 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     )
 
 
+def _build_doc_sections(parsed_doc) -> list[dict]:
+    """Merge small segments into logical sections for document review."""
+    sections: list[dict] = []
+    buf_text = ""
+    buf_source = ""
+    for seg in parsed_doc.segments:
+        text = seg.text.strip()
+        if not text:
+            continue
+        is_heading = (
+            text.startswith("#")
+            or (len(text) < 80 and text.isupper())
+            or (len(text) < 60 and seg.source_unit.startswith("slide"))
+        )
+        if is_heading and buf_text:
+            sections.append({"id": len(sections), "source": buf_source, "text": buf_text.strip()})
+            buf_text = ""
+            buf_source = ""
+        buf_text += text + "\n"
+        if not buf_source:
+            buf_source = seg.source_unit
+        if len(buf_text) > 800:
+            sections.append({"id": len(sections), "source": buf_source, "text": buf_text.strip()})
+            buf_text = ""
+            buf_source = ""
+    if buf_text.strip():
+        sections.append({"id": len(sections), "source": buf_source, "text": buf_text.strip()})
+    return sections[:40]
+
+
 @app.post("/api/dialogue/turn-upload")
 async def dialogue_turn_upload(
     project_id: str = Form(...),
@@ -372,9 +402,13 @@ async def dialogue_turn_upload(
     content = await file.read()
     target_path.write_bytes(content)
 
-    extracted = extract_text(target_path)
+    from app.services.document_parser import parse_document
+    parsed_doc = parse_document(target_path)
+    extracted = parsed_doc.full_text
     if not extracted.strip():
         raise HTTPException(status_code=400, detail="无法解析该文件。")
+
+    doc_sections = _build_doc_sections(parsed_doc)
 
     combined_msg = f"{message}\n\n[上传文件: {file.filename}]\n{extracted[:3000]}" if message.strip() else f"[上传文件: {file.filename}]\n{extracted[:3000]}"
 
@@ -480,7 +514,48 @@ async def dialogue_turn_upload(
         "hypergraph_insight": hyper_insight,
         "rag_cases": result.get("rag_cases", []),
         "agent_trace": agent_trace,
+        "doc_sections": doc_sections,
     }
+
+
+@app.post("/api/document-review")
+def document_review(payload: dict):
+    """LLM-based section-by-section document annotation."""
+    from app.services.llm_client import LlmClient
+    llm = LlmClient()
+    sections = payload.get("sections", [])
+    mode = payload.get("mode", "coursework")
+    context = payload.get("context", "")
+
+    if not sections or not llm.enabled:
+        return {"annotations": []}
+
+    batch_text = ""
+    for s in sections[:20]:
+        batch_text += f"\n[Section {s['id']}]\n{s['text'][:500]}\n"
+
+    result = llm.chat_json(
+        system_prompt=(
+            "你是一位资深创业导师，正在逐段审阅学生的商业计划书。\n"
+            "针对每个Section，给出简短但有针对性的批注（1-3句话）。\n"
+            "批注类型: praise(亮点)、issue(问题)、suggestion(建议)、question(追问)\n"
+            "如果某个段落没什么好批注的，可以跳过(不必为每段都批注)。\n\n"
+            '输出JSON: {"annotations": [\n'
+            '  {"section_id": 0, "type": "issue", "comment": "..."},\n'
+            '  {"section_id": 1, "type": "praise", "comment": "..."},\n'
+            '  ...\n'
+            "]}"
+        ),
+        user_prompt=(
+            f"模式: {mode}\n"
+            + (f"对话背景: {context[:300]}\n\n" if context else "")
+            + f"以下是学生文档的各个段落:\n{batch_text}"
+        ),
+        temperature=0.3,
+    )
+
+    annotations = (result or {}).get("annotations", [])
+    return {"annotations": annotations}
 
 
 @app.post("/api/teacher-feedback", response_model=TeacherFeedbackResponse)

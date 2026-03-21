@@ -32,6 +32,13 @@ export default function StudentPage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
+  // document review
+  const [docReview, setDocReview] = useState<{ filename: string; sections: any[]; annotations: any[] } | null>(null);
+  const [docReviewOpen, setDocReviewOpen] = useState(false);
+  const [docReviewLoading, setDocReviewLoading] = useState(false);
+  const [docSelectedText, setDocSelectedText] = useState("");
+  const [docAskPos, setDocAskPos] = useState<{ x: number; y: number } | null>(null);
+
   // new features
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,6 +193,23 @@ export default function StudentPage() {
       }
       const reply = (data?.assistant_message ?? "").trim() || "（智能体未返回有效回复）";
       setMessages((p) => [...p, { role: "assistant", text: reply, ts: new Date().toLocaleTimeString(), id: ++_msgId }]);
+
+      // trigger doc review if file was uploaded and sections returned
+      if (attachedFile && data.doc_sections?.length > 0) {
+        setDocReview({ filename: attachedFile.name, sections: data.doc_sections, annotations: [] });
+        setDocReviewOpen(true);
+        setDocReviewLoading(true);
+        fetch(`${API_BASE}/api/document-review`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sections: data.doc_sections, mode, context: text }),
+        })
+          .then((r) => r.json())
+          .then((d) => setDocReview((prev) => prev ? { ...prev, annotations: d.annotations ?? [] } : prev))
+          .catch(() => {})
+          .finally(() => setDocReviewLoading(false));
+      }
+
       setAttachedFile(null);
       loadConversations();
     } catch (err: any) {
@@ -422,7 +446,29 @@ export default function StudentPage() {
                 <div className="msg-content">
                   <div className="msg-bubble">
                     {m.role === "assistant" ? (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                      <>
+                        {/* Inline web search sources (DeepSeek style) */}
+                        {i === messages.length - 1 && webSearch?.searched && (webSearch.results ?? []).length > 0 && (
+                          <details className="ws-inline-block">
+                            <summary className="ws-inline-summary">
+                              <span className="ws-inline-icon">🔍</span>
+                              已搜索 {webSearch.results.length} 个网络来源
+                            </summary>
+                            <div className="ws-inline-list">
+                              {webSearch.results.map((r: any, ri: number) => (
+                                <a key={ri} href={r.url} target="_blank" rel="noopener noreferrer" className="ws-inline-item">
+                                  <span className="ws-inline-idx">{ri + 1}</span>
+                                  <span className="ws-inline-info">
+                                    <span className="ws-inline-title">{r.title}</span>
+                                    <span className="ws-inline-domain">{r.url?.replace(/^https?:\/\//, "").split("/")[0]}</span>
+                                  </span>
+                                </a>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                      </>
                     ) : (
                       m.text
                     )}
@@ -472,6 +518,12 @@ export default function StudentPage() {
 
           {/* ── Input Bar ── */}
           <div className="chat-inputbar-wrapper">
+            {docReview && !docReviewOpen && (
+              <div className="attached-file-badge doc-review-reopen" onClick={() => setDocReviewOpen(true)} style={{ cursor: "pointer" }}>
+                <span>📄 打开文档审阅：{docReview.filename}</span>
+                {docReview.annotations.length > 0 && <span className="doc-annot-count">{docReview.annotations.length}条批注</span>}
+              </div>
+            )}
             {attachedFile && (
               <div className="attached-file-badge">
                 <span>📎 {attachedFile.name}</span>
@@ -738,8 +790,8 @@ export default function StudentPage() {
 
               {rightTab === "kg" && (
                 <div className="right-section">
-                  <h4>知识图谱分析</h4>
-                  <div className="panel-desc">AI将你的内容拆解为实体和关系，构建知识图谱。结构缺陷=你没提到但很重要的部分。</div>
+                  <h4>项目结构体检</h4>
+                  <div className="panel-desc">AI 将你的描述拆解为核心要素（用户、产品、技术、市场等），检测你是否遗漏了关键部分。<strong>结构缺陷</strong>是你最需要补充的内容。</div>
                   {kgAnalysis ? (
                     <>
                       {/* Stats overview */}
@@ -763,72 +815,74 @@ export default function StudentPage() {
                       </div>
                       {kgAnalysis.insight && <p className="kg-insight">{kgAnalysis.insight}</p>}
 
-                      {/* SVG Graph Visualization */}
+                      {/* Interactive Mind Map by entity type */}
                       {(kgAnalysis.entities ?? []).length > 0 && (() => {
                         const entities: any[] = kgAnalysis.entities ?? [];
-                        const rels: any[] = kgAnalysis.relationships ?? [];
-                        const W = rightWidth - 32;
-                        const H = Math.min(320, Math.max(200, entities.length * 30));
-                        const cx = W / 2, cy = H / 2;
-                        const radius = Math.min(cx, cy) - 30;
-                        const positions: Record<string, { x: number; y: number }> = {};
-                        entities.forEach((e: any, i: number) => {
-                          const angle = (2 * Math.PI * i) / entities.length - Math.PI / 2;
-                          positions[e.id] = { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
-                        });
+                        const typeNames: Record<string, string> = {
+                          stakeholder: "👥 目标用户", product: "📦 产品", market: "📊 市场",
+                          pain_point: "🔴 痛点", solution: "💡 方案", technology: "⚙️ 技术",
+                          competitor: "🏁 竞品", resource: "🔧 资源", team: "👤 团队",
+                          business_model: "💰 商业模式", evidence: "📋 证据",
+                        };
                         const typeColors: Record<string, string> = {
                           stakeholder: "#69c0e0", product: "#6ba3d6", market: "#e0a84c",
                           pain_point: "#e07070", solution: "#5cbd8a", technology: "#a88ccc",
-                          competitor: "#c8a048", resource: "#60b8b8",
+                          competitor: "#c8a048", resource: "#60b8b8", team: "#d4a5d0",
+                          business_model: "#e8b960", evidence: "#7ec87e",
                         };
+                        const grouped: Record<string, any[]> = {};
+                        entities.forEach((e: any) => {
+                          const t = e.type || "other";
+                          if (!grouped[t]) grouped[t] = [];
+                          grouped[t].push(e);
+                        });
                         return (
-                          <div className="kg-graph-wrap">
-                            <h5>关系图谱</h5>
-                            <svg width={W} height={H} className="kg-graph-svg">
-                              <defs>
-                                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                                  <polygon points="0 0, 8 3, 0 6" fill="var(--text-muted)" opacity="0.5" />
-                                </marker>
-                              </defs>
-                              {rels.map((r: any, ri: number) => {
-                                const from = positions[r.source];
-                                const to = positions[r.target];
-                                if (!from || !to) return null;
-                                const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2;
-                                return (
-                                  <g key={`edge-${ri}`}>
-                                    <line x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                                      stroke="var(--text-muted)" strokeWidth="1" opacity="0.35"
-                                      markerEnd="url(#arrowhead)" />
-                                    <text x={mx} y={my - 4} textAnchor="middle" fontSize="9"
-                                      fill="var(--text-muted)" opacity="0.7">{r.relation}</text>
-                                  </g>
-                                );
-                              })}
-                              {entities.map((e: any) => {
-                                const pos = positions[e.id];
-                                if (!pos) return null;
-                                const color = typeColors[e.type] ?? "#6ba3d6";
-                                return (
-                                  <g key={`node-${e.id}`} className="kg-graph-node">
-                                    <circle cx={pos.x} cy={pos.y} r="16" fill={color} opacity="0.15"
-                                      stroke={color} strokeWidth="1.5" />
-                                    <circle cx={pos.x} cy={pos.y} r="4" fill={color} opacity="0.8" />
-                                    <text x={pos.x} y={pos.y + 26} textAnchor="middle" fontSize="10"
-                                      fill="var(--right-text)" fontWeight="500">{e.label}</text>
-                                  </g>
-                                );
-                              })}
-                            </svg>
+                          <div className="kg-mindmap">
+                            <h5>🧠 项目结构思维导图</h5>
+                            <div className="panel-desc">按维度分组展示你描述中的核心要素，点击展开/折叠。</div>
+                            {Object.entries(grouped).map(([type, items]) => {
+                              const color = typeColors[type] ?? "#6ba3d6";
+                              const name = typeNames[type] ?? type;
+                              const rels = (kgAnalysis.relationships ?? []).filter((r: any) =>
+                                items.some((e: any) => e.id === r.source || e.id === r.target)
+                              );
+                              return (
+                                <details key={type} className="kg-mm-group" open>
+                                  <summary className="kg-mm-header" style={{ borderLeftColor: color }}>
+                                    <span className="kg-mm-type">{name}</span>
+                                    <span className="kg-mm-count">{items.length}</span>
+                                  </summary>
+                                  <div className="kg-mm-body">
+                                    {items.map((e: any) => (
+                                      <div key={e.id} className="kg-mm-entity" style={{ borderColor: color }}>
+                                        <span className="kg-mm-dot" style={{ background: color }} />
+                                        <span className="kg-mm-label">{e.label}</span>
+                                      </div>
+                                    ))}
+                                    {rels.length > 0 && (
+                                      <div className="kg-mm-rels">
+                                        {rels.slice(0, 4).map((r: any, ri: number) => (
+                                          <div key={ri} className="kg-mm-rel">
+                                            <span>{entities.find((e: any) => e.id === r.source)?.label ?? r.source}</span>
+                                            <span className="kg-mm-arrow">→ {r.relation} →</span>
+                                            <span>{entities.find((e: any) => e.id === r.target)?.label ?? r.target}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </details>
+                              );
+                            })}
                           </div>
                         );
                       })()}
 
                       {(kgAnalysis.content_strengths ?? []).length > 0 && (
-                        <div className="kg-strengths"><h5>做得好的地方</h5>{kgAnalysis.content_strengths.map((s: string, si: number) => <div key={si} className="kg-strength-item">{s}</div>)}</div>
+                        <div className="kg-strengths"><h5>✅ 你的项目优势</h5><div className="panel-desc">这些是你已经做得比较好的部分，可以在路演中重点突出。</div>{kgAnalysis.content_strengths.map((s: string, si: number) => <div key={si} className="kg-strength-item">{s}</div>)}</div>
                       )}
                       {kgAnalysis.section_scores && Object.keys(kgAnalysis.section_scores).length > 0 && (
-                        <div className="kg-section-scores"><h5>各维度深度评估</h5>{Object.entries(kgAnalysis.section_scores).map(([k, v]: [string, any]) => (
+                        <div className="kg-section-scores"><h5>📐 各维度完成度</h5><div className="panel-desc">分数越低的维度越需要你补充内容。</div>{Object.entries(kgAnalysis.section_scores).map(([k, v]: [string, any]) => (
                           <div key={k} className="score-row">
                             <span className="score-label">{{ problem_definition: "问题定义", user_evidence: "用户证据", solution_feasibility: "方案可行性", business_model: "商业模式", competitive_advantage: "竞争优势" }[k] ?? k}</span>
                             <div className="score-bar-track"><div className="score-bar-fill" style={{ width: `${Math.min(100, (Number(v) / 10) * 100)}%` }} /></div>
@@ -843,7 +897,7 @@ export default function StudentPage() {
                         <div className="kg-relations"><h5>实体之间的关系</h5>{kgAnalysis.relationships.map((r: any, ri: number) => <div key={ri} className="kg-rel-row"><span className="kg-rel-src">{r.source}</span><span className="kg-rel-arrow">→ {r.relation} →</span><span className="kg-rel-tgt">{r.target}</span></div>)}</div>
                       )}
                       {(kgAnalysis.structural_gaps ?? []).length > 0 && (
-                        <div className="kg-gaps"><h5>结构性缺陷</h5><div className="panel-desc">你的内容中缺失的关键要素——这些是最需要补充的部分。</div>{kgAnalysis.structural_gaps.map((g: string, gi: number) => <div key={gi} className="kg-gap-item">⚠ {g}</div>)}</div>
+                        <div className="kg-gaps"><h5>🔴 你需要补充的内容</h5><div className="panel-desc">以下是优秀项目通常会涵盖但你还没提到的关键要素。补上它们能显著提高项目完整度和评分。</div>{kgAnalysis.structural_gaps.map((g: string, gi: number) => <div key={gi} className="kg-gap-item">⚠ {g}</div>)}</div>
                       )}
                     </>
                   ) : <p className="right-hint">发送项目描述后显示知识图谱分析</p>}
@@ -852,8 +906,8 @@ export default function StudentPage() {
 
               {rightTab === "hyper" && (
                 <div className="right-section">
-                  <h4>超图跨维度分析</h4>
-                  <div className="panel-desc">基于 HyperNetX 超图技术，将你的项目映射到10个关键维度，发现跨维度关联模式和缺失。</div>
+                  <h4>项目全景诊断</h4>
+                  <div className="panel-desc">一个好的创业项目需要覆盖10个关键维度（用户、市场、技术、团队等）。这里检测你覆盖了几个，哪些<strong>还缺</strong>，以及和历史优秀/失败项目的模式对比。</div>
                   {hyperStudent?.ok ? (
                     <>
                       {/* Dimension Coverage Ring + Grid */}
@@ -884,7 +938,8 @@ export default function StudentPage() {
                       {/* Missing Dimensions */}
                       {(hyperStudent.missing_dimensions ?? []).length > 0 && (
                         <div className="hyper-missing">
-                          <h5>缺失维度（按紧急度排序）</h5>
+                          <h5>🔴 你还没提到的关键维度</h5>
+                          <div className="panel-desc">按紧急度排序，优先补充排在前面的。</div>
                           {hyperStudent.missing_dimensions.map((m: any, mi: number) => (
                             <div key={mi} className={`hyper-missing-item importance-${m.importance}`}>
                               <span className="hyper-missing-dim">{m.dimension}</span>
@@ -913,7 +968,8 @@ export default function StudentPage() {
                       {/* Cross-dimensional Links */}
                       {(hyperStudent.cross_links ?? []).length > 0 && (
                         <div className="hyper-cross">
-                          <h5>跨维度关联</h5>
+                          <h5>🔗 你项目中的维度间联动</h5>
+                          <div className="panel-desc">这些联动关系说明你的项目有内在逻辑串联，联动越多越好。</div>
                           {hyperStudent.cross_links.map((cl: any, ci: number) => (
                             <div key={ci} className="hyper-cross-row">
                               <span className="hyper-cross-from">{cl.from_dim}</span>
@@ -927,8 +983,8 @@ export default function StudentPage() {
                       {/* Pattern Warnings */}
                       {(hyperStudent.pattern_warnings ?? []).length > 0 && (
                         <div className="hyper-warnings">
-                          <h5>⚠ 风险模式匹配</h5>
-                          <div className="panel-desc">你的项目和历史数据中的风险模式相匹配。</div>
+                          <h5>⚠ 历史失败模式预警</h5>
+                          <div className="panel-desc">你的项目和以往失败/高风险项目的某些模式相似，需要注意规避。</div>
                           {hyperStudent.pattern_warnings.map((w: any, wi: number) => (
                             <div key={wi} className="hyper-warning-item">{w.warning}</div>
                           ))}
@@ -938,7 +994,7 @@ export default function StudentPage() {
                       {/* Pattern Strengths */}
                       {(hyperStudent.pattern_strengths ?? []).length > 0 && (
                         <div className="hyper-strengths">
-                          <h5>✓ 优势模式匹配</h5>
+                          <h5>✅ 和优秀项目的相似之处</h5>
                           {hyperStudent.pattern_strengths.map((s: any, si: number) => (
                             <div key={si} className="hyper-strength-item">{s.note}</div>
                           ))}
@@ -1045,6 +1101,126 @@ export default function StudentPage() {
           </aside>
         )}
       </div>
+
+      {/* ═══ Document Review Panel (slides in from the right) ═══ */}
+      {docReviewOpen && docReview && (
+        <div className="doc-review-overlay" onClick={(e) => { if (e.target === e.currentTarget) setDocReviewOpen(false); }}>
+          <div className="doc-review-panel">
+            <div className="doc-review-header">
+              <div className="doc-review-title">
+                <span className="doc-review-icon">📄</span>
+                <div>
+                  <span>文档审阅</span>
+                  <span className="doc-review-filename">{docReview.filename}</span>
+                </div>
+              </div>
+              <div className="doc-review-header-actions">
+                {docReview.annotations.length > 0 && (
+                  <span className="doc-review-stat">
+                    {docReview.annotations.filter((a: any) => a.type === "issue").length} 个问题 · {docReview.annotations.filter((a: any) => a.type === "suggestion").length} 个建议 · {docReview.annotations.filter((a: any) => a.type === "praise").length} 个亮点
+                  </span>
+                )}
+                <button className="doc-review-close" onClick={() => setDocReviewOpen(false)}>✕</button>
+              </div>
+            </div>
+
+            {/* Section quick nav */}
+            {docReview.sections.length > 3 && (
+              <div className="doc-nav-bar">
+                {docReview.sections.map((sec) => {
+                  const hasAnnot = docReview.annotations.some((a: any) => a.section_id === sec.id);
+                  const hasIssue = docReview.annotations.some((a: any) => a.section_id === sec.id && a.type === "issue");
+                  return (
+                    <button
+                      key={sec.id}
+                      className={`doc-nav-dot ${hasIssue ? "issue" : hasAnnot ? "annotated" : ""}`}
+                      title={`${sec.source} ${hasIssue ? "(有问题)" : hasAnnot ? "(有批注)" : ""}`}
+                      onClick={() => document.getElementById(`doc-sec-${sec.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            {docReviewLoading && (
+              <div className="doc-review-loading">
+                <div className="typing-dots"><span /><span /><span /></div>
+                <span>AI 正在逐段分析你的文档...</span>
+              </div>
+            )}
+
+            <div
+              className="doc-review-body"
+              onMouseUp={() => {
+                const sel = window.getSelection();
+                const text = sel?.toString().trim() ?? "";
+                if (text.length > 5 && text.length < 500) {
+                  const range = sel?.getRangeAt(0);
+                  const rect = range?.getBoundingClientRect();
+                  if (rect) {
+                    setDocSelectedText(text);
+                    setDocAskPos({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+                  }
+                } else {
+                  setDocSelectedText("");
+                  setDocAskPos(null);
+                }
+              }}
+            >
+              {docReview.sections.map((sec) => {
+                const annots = docReview.annotations.filter((a: any) => a.section_id === sec.id);
+                return (
+                  <div key={sec.id} id={`doc-sec-${sec.id}`} className={`doc-section ${annots.length > 0 ? "has-annot" : ""}`}>
+                    <div className="doc-section-source">
+                      <span className="doc-section-num">§{sec.id + 1}</span>
+                      {sec.source}
+                    </div>
+                    <div className="doc-section-text">{sec.text}</div>
+                    {annots.map((a: any, ai: number) => (
+                      <div key={ai} className={`doc-annot doc-annot-${a.type}`}>
+                        <span className="doc-annot-badge">
+                          {{ praise: "✅ 亮点", issue: "⚠️ 问题", suggestion: "💡 建议", question: "❓ 追问" }[a.type as string] ?? a.type}
+                        </span>
+                        <span className="doc-annot-text">{a.comment}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Floating "ask about selection" popup */}
+            {docSelectedText && docAskPos && (
+              <div className="doc-ask-popup" style={{ left: docAskPos.x, top: docAskPos.y }}>
+                <button
+                  className="doc-ask-btn"
+                  onClick={() => {
+                    setInput(`关于这段内容请帮我分析：「${docSelectedText.slice(0, 200)}」`);
+                    setDocSelectedText("");
+                    setDocAskPos(null);
+                    setDocReviewOpen(false);
+                    setTimeout(() => textareaRef.current?.focus(), 100);
+                  }}
+                >
+                  🤖 询问AI关于这段
+                </button>
+                <button
+                  className="doc-ask-btn secondary"
+                  onClick={() => {
+                    setInput(`这段内容有什么问题吗？如何改进？\n\n「${docSelectedText.slice(0, 200)}」`);
+                    setDocSelectedText("");
+                    setDocAskPos(null);
+                    setDocReviewOpen(false);
+                    setTimeout(() => textareaRef.current?.focus(), 100);
+                  }}
+                >
+                  🔍 帮我改进这段
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from typing import Any
 
@@ -8,6 +9,7 @@ from openai import OpenAI
 
 from app.config import settings
 
+logger = logging.getLogger(__name__)
 _THINK_RE = re.compile(r"<think>[\s\S]*?</think>", re.DOTALL)
 
 
@@ -44,7 +46,12 @@ class LlmClient:
         self.enabled = bool(settings.llm_api_key and settings.llm_base_url)
         self._client: OpenAI | None = None
         if self.enabled:
-            self._client = OpenAI(api_key=settings.llm_api_key, base_url=settings.llm_base_url)
+            self._client = OpenAI(
+                api_key=settings.llm_api_key,
+                base_url=settings.llm_base_url,
+                timeout=120.0,
+                max_retries=1,
+            )
 
     def chat_json(
         self,
@@ -89,6 +96,7 @@ class LlmClient:
             if resp.choices and resp.choices[0].message:
                 raw = resp.choices[0].message.content or ""
                 return _strip_think_tags(raw)
-        except Exception:  # noqa: BLE001
+        except Exception as exc:
+            logger.warning("LLM call failed (model=%s): %s", model_name, exc)
             return ""
         return ""

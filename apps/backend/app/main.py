@@ -283,7 +283,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "pipeline": result.get("intent_pipeline", []),
             "nodes_visited": nodes_visited,
             "agents_called": agents_called,
-            "strategy": "langgraph_v3_role_agents",
+            "strategy": "langgraph_v4_parallel",
         },
         "role_agents": {
             "coach": result.get("coach_output", {}),
@@ -291,6 +291,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "advisor": result.get("advisor_output", {}),
             "tutor": result.get("tutor_output", {}),
             "grader": result.get("grader_output", {}),
+            "planner": result.get("planner_output", {}),
         },
         "kg_analysis": kg_analysis,
         "rag_cases": rag_cases,
@@ -414,7 +415,7 @@ async def dialogue_turn_upload(
             "pipeline": result.get("intent_pipeline", []),
             "nodes_visited": result.get("nodes_visited", []),
             "agents_called": agents_called,
-            "strategy": "langgraph_v3_role_agents",
+            "strategy": "langgraph_v4_parallel",
         },
         "role_agents": {
             "coach": result.get("coach_output", {}),
@@ -422,6 +423,7 @@ async def dialogue_turn_upload(
             "advisor": result.get("advisor_output", {}),
             "tutor": result.get("tutor_output", {}),
             "grader": result.get("grader_output", {}),
+            "planner": result.get("planner_output", {}),
         },
         "kg_analysis": kg_analysis,
         "rag_cases": result.get("rag_cases", []),

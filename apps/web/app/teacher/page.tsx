@@ -4209,11 +4209,11 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .kpi span {
-          color: #cccccc;
+          color: #ffffff;
         }
 
         [data-theme="dark"] .kpi em {
-          color: #aaaaaa;
+          color: #dddddd;
         }
 
         [data-theme="dark"] .kpi:hover {
@@ -4233,7 +4233,7 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .topbar-label {
-          color: #cccccc;
+          color: #ffffff;
         }
 
         [data-theme="dark"] .topbar-sep {
@@ -4336,15 +4336,27 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .risk-badge {
-          background-color: #1a0a0a;
-          border-color: #4a2a2a;
-          color: #ffaa88;
+          background-color: #3a2020;
+          border-color: #6a4040;
+          color: #ffffff;
         }
 
         [data-theme="dark"] .risk-badge.high {
-          background-color: #2a1515;
-          color: #ff9999;
-          border-color: #6a3a3a;
+          background-color: #4a2520;
+          color: #ffffff;
+          border-color: #8a5a4a;
+        }
+
+        [data-theme="dark"] .risk-badge.medium {
+          background-color: #4a4a20;
+          color: #ffffff;
+          border-color: #8a8a40;
+        }
+
+        [data-theme="dark"] .risk-badge.low {
+          background-color: #204a20;
+          color: #ffffff;
+          border-color: #408a40;
         }
 
         [data-theme="dark"] .tch-feedback-form {
@@ -4377,7 +4389,11 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .viz-card p {
-          color: #cccccc;
+          color: #dddddd;
+        }
+
+        [data-theme="dark"] .viz-card span {
+          color: #ffffff;
         }
 
         [data-theme="dark"] .evidence-item {
@@ -4394,7 +4410,7 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .evidence-item em {
-          color: #aaaaaa;
+          color: #dddddd;
         }
 
         [data-theme="dark"] .tch-submission-detail {
@@ -4447,15 +4463,15 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .right-hint {
-          background-color: #0a1a3a;
+          background-color: #1a3a5a;
           border-left-color: #4a90e2;
-          color: #aaddff;
+          color: #ffffff;
         }
 
         [data-theme="dark"] .right-tag {
-          background-color: #0a2a1a;
+          background-color: #1a4a2a;
           border-left-color: #4fbb6a;
-          color: #88ff99;
+          color: #ffffff;
         }
 
         [data-theme="dark"] .bar-row span:first-child {
@@ -4479,7 +4495,7 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .debug-json summary {
-          color: #4a90e2;
+          color: #ffffff;
         }
 
         [data-theme="dark"] .debug-json pre {
@@ -4489,11 +4505,11 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .tch-desc {
-          color: #cccccc;
+          color: #dddddd;
         }
 
         [data-theme="dark"] .tch-cell-time {
-          color: #aaaaaa;
+          color: #dddddd;
         }
 
         [data-theme="dark"] .tch-cell-score {
@@ -4501,9 +4517,9 @@ export default function TeacherPage() {
         }
 
         [data-theme="dark"] .tch-feedback-success {
-          background-color: #0a2a0a;
-          border: 1px solid #4a7a4a;
-          color: #88ff88;
+          background-color: #1a4a1a;
+          border: 1px solid #5a9a5a;
+          color: #ffffff;
         }
 
         [data-theme="dark"] ::selection {

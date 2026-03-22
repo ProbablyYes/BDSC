@@ -24,7 +24,7 @@ class JsonStorage:
                 "teacher_document_edits": [],
             }
         data = json.loads(target.read_text(encoding="utf-8"))
-        # 确保新增字段存在
+        # new确保新增字段存在
         if "teacher_annotations" not in data:
             data["teacher_annotations"] = []
         if "teacher_feedback_files" not in data:

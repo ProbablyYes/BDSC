@@ -781,6 +781,7 @@ def teacher_generate_report(class_id: str | None = None, cohort_id: str | None =
     return {"report": report.strip() if report else "报告生成失败", "snapshot": snapshot}
 
 
+
 # ═══════════════════════════════════════════════════════════════════
 #  Conversation management APIs
 # ═══════════════════════════════════════════════════════════════════

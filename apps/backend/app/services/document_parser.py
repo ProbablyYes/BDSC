@@ -214,7 +214,7 @@ def extract_pdf_text_chunked(file_path: Path, max_pdf_pages: int = 20) -> dict:
         logging.error(f"PDF text extraction failed: {str(e)}")
         return {"total_pages": 0, "extracted_pages": [], "error": str(e)}
 
-
+# new function to analyze PDF with LLM and extract key insights for teachers
 def analyze_pdf_with_llm(pdf_text: str, llm_client) -> dict:
     """
     使用LLM分析PDF文本，提取关键内容、要点、总结

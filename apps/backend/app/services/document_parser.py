@@ -172,6 +172,7 @@ def docx_to_html(file_path: Path) -> str:
         return f'<div style="color: red; padding: 20px;">无法转换DOCX文件: {str(e)}</div>'
 
 
+
 def extract_pdf_text_chunked(file_path: Path, max_pdf_pages: int = 20) -> dict:
     """
     提取PDF文本，分页面返回

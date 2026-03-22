@@ -22,8 +22,11 @@ def _build_search_query(message: str, intent: str) -> str | None:
         "competition_prep": "互联网+ 创业大赛 评审标准",
         "learning_concept": "创新创业",
         "idea_brainstorm": "创业方向 趋势",
+        "market_competitor": "竞品分析 同类产品",
+        "pressure_test": "创业 风险分析",
+        "general_chat": "创新创业",
     }
-    prefix = INTENT_SEARCH_PREFIXES.get(intent)
+    prefix = INTENT_SEARCH_PREFIXES.get(intent, "创新创业")
     if not prefix:
         return None
 

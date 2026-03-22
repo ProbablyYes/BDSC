@@ -284,6 +284,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     hyper_student = result.get("hypergraph_student", {})
     rag_cases = result.get("rag_cases", [])
     web_search = result.get("web_search_result", {})
+    import logging as _log
+    _log.getLogger("main").info("API response: hyper_student.ok=%s, kg_entities=%d", hyper_student.get("ok"), len(kg_analysis.get("entities", [])))
 
     agent_trace = {
         "orchestration": {
@@ -586,6 +588,30 @@ async def dialogue_turn_upload(
         "agent_outputs": agent_trace,
     })
 
+    file_url = f"/uploads/{project_id}/{file.filename}"
+
+    # Generate annotations synchronously so they persist in the conversation
+    doc_annotations: list[dict] = []
+    if doc_sections and composer_llm.enabled:
+        batch_text = ""
+        for s in doc_sections[:20]:
+            batch_text += f"\n[Section {s['id']}]\n{s['text'][:500]}\n"
+        ann_result = composer_llm.chat_json(
+            system_prompt=(
+                "你是一位资深创业导师，正在逐段审阅学生的商业计划书。\n"
+                "针对每个Section，给出简短但有针对性的批注（1-3句话）。\n"
+                "批注类型: praise(亮点)、issue(问题)、suggestion(建议)、question(追问)\n"
+                "如果某个段落没什么好批注的，可以跳过。\n\n"
+                '输出JSON: {"annotations": [\n'
+                '  {"section_id": 0, "type": "issue", "comment": "..."},\n'
+                '  {"section_id": 1, "type": "praise", "comment": "..."},\n'
+                "  ...\n]}"
+            ),
+            user_prompt=f"模式: {mode}\n以下是学生文档的各个段落:\n{batch_text}",
+            temperature=0.3,
+        )
+        doc_annotations = (ann_result or {}).get("annotations", [])
+
     conv_store.append_message(project_id, conv_id, {
         "role": "user", "content": f"[上传文件: {file.filename}] {message}",
     })
@@ -597,10 +623,12 @@ async def dialogue_turn_upload(
             "next_task": next_task,
             "kg_analysis": kg_analysis,
             "hypergraph_insight": hyper_insight,
+            "doc_sections": doc_sections,
+            "doc_annotations": doc_annotations,
+            "file_url": file_url,
+            "filename": file.filename,
         },
     })
-
-    file_url = f"/uploads/{project_id}/{file.filename}"
 
     return {
         "conversation_id": conv_id,
@@ -612,9 +640,11 @@ async def dialogue_turn_upload(
         "next_task": next_task,
         "kg_analysis": kg_analysis,
         "hypergraph_insight": hyper_insight,
+        "hypergraph_student": hyper_student,
         "rag_cases": result.get("rag_cases", []),
         "agent_trace": agent_trace,
         "doc_sections": doc_sections,
+        "doc_annotations": doc_annotations,
     }
 
 
@@ -772,7 +802,86 @@ def get_conversation(project_id: str, conversation_id: str) -> dict:
     conv = conv_store.get(project_id, conversation_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
+
+    enriched = _enrich_docs_in_conversation(conv, project_id)
+    if enriched:
+        _save_conv(project_id, conversation_id, conv)
+
     return conv
+
+
+def _enrich_docs_in_conversation(conv: dict, project_id: str) -> bool:
+    """Lazy migration: retroactively add doc_sections to old conversations.
+
+    Scans messages for file uploads that lack doc_sections in their
+    corresponding assistant agent_trace.  Parses the file from disk and
+    patches the trace.  Returns True if anything was enriched (caller
+    should persist).
+    """
+    import re
+    from app.services.document_parser import parse_document
+
+    _UPLOAD_RE = re.compile(r"\[上传文件:\s*(.+?)\]")
+    messages = conv.get("messages", [])
+    changed = False
+
+    for i, msg in enumerate(messages):
+        if msg.get("role") != "user":
+            continue
+        m = _UPLOAD_RE.search(msg.get("content", ""))
+        if not m:
+            continue
+        filename = m.group(1).strip()
+
+        # Find the next assistant message
+        assist = None
+        for j in range(i + 1, min(i + 3, len(messages))):
+            if messages[j].get("role") == "assistant":
+                assist = messages[j]
+                break
+        if assist is None:
+            continue
+
+        trace = assist.get("agent_trace")
+        if not isinstance(trace, dict):
+            trace = {}
+            assist["agent_trace"] = trace
+
+        if trace.get("doc_sections"):
+            continue
+
+        file_path = settings.upload_root / project_id / filename
+        if not file_path.exists():
+            continue
+
+        try:
+            parsed = parse_document(file_path)
+            sections = _build_doc_sections(parsed)
+        except Exception:
+            continue
+
+        if not sections:
+            continue
+
+        file_url = f"/uploads/{project_id}/{filename}"
+        trace["doc_sections"] = sections
+        trace["doc_annotations"] = []
+        trace["file_url"] = file_url
+        trace["filename"] = filename
+        changed = True
+
+    return changed
+
+
+def _save_conv(project_id: str, conversation_id: str, conv: dict) -> None:
+    """Persist enriched conversation data back to disk."""
+    import json as _json
+
+    path = conv_store._conv_dir(project_id) / f"{conversation_id}.json"
+    if path.exists():
+        path.write_text(
+            _json.dumps(conv, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
 
 @app.get("/api/teacher-examples")

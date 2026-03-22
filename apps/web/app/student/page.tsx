@@ -114,13 +114,16 @@ export default function StudentPage() {
     setLatestResult(null);
     setConversationId(null);
     setAttachedFile(null);
+    setResultHistory([]);
+    setDocReview(null);
+    setDocReviewOpen(false);
+    setPdfViewerOpen(false);
   }
 
   async function loadConversation(cid: string) {
     try {
       const r = await fetch(`${API_BASE}/api/conversations/${encodeURIComponent(cid)}?project_id=${encodeURIComponent(projectId)}`);
       const d = await r.json();
-      setConversationId(cid);
       const rawMsgs = d.messages ?? [];
       const msgs: ChatMessage[] = rawMsgs.map((m: any) => ({
         role: m.role as "user" | "assistant",
@@ -130,20 +133,62 @@ export default function StudentPage() {
       }));
       setMessages(msgs);
 
-      const lastAssistant = [...rawMsgs].reverse().find((m: any) => m.role === "assistant" && m.agent_trace);
-      if (lastAssistant?.agent_trace) {
-        setLatestResult({
-          diagnosis: lastAssistant.agent_trace.diagnosis ?? lastAssistant.agent_trace.orchestration ?? {},
-          next_task: lastAssistant.agent_trace.next_task ?? {},
-          kg_analysis: lastAssistant.agent_trace.kg_analysis ?? {},
-          hypergraph_insight: lastAssistant.agent_trace.hypergraph_insight ?? {},
-          hypergraph_student: lastAssistant.agent_trace.hypergraph_student ?? {},
-          rag_cases: lastAssistant.agent_trace.rag_cases ?? [],
-          agent_trace: lastAssistant.agent_trace,
+      // Rebuild FULL resultHistory from ALL assistant messages (persistence!)
+      const history: any[] = [];
+      let lastDoc: { filename: string; sections: any[]; annotations: any[]; fileUrl?: string } | null = null;
+
+      for (const m of rawMsgs) {
+        if (m.role !== "assistant" || !m.agent_trace) continue;
+        const t = m.agent_trace;
+        history.push({
+          diagnosis: t.diagnosis ?? t.orchestration ?? {},
+          next_task: t.next_task ?? {},
+          kg_analysis: t.kg_analysis ?? {},
+          hypergraph_insight: t.hypergraph_insight ?? {},
+          hypergraph_student: t.hypergraph_student ?? {},
+          rag_cases: t.rag_cases ?? [],
+          agent_trace: t,
         });
+        // Restore document review from stored conversation
+        if (t.doc_sections?.length) {
+          const fUrl = t.file_url ? `${API_BASE}${t.file_url}` : "";
+          lastDoc = {
+            filename: t.filename ?? "document",
+            sections: t.doc_sections,
+            annotations: t.doc_annotations ?? [],
+            fileUrl: fUrl,
+          };
+        }
+      }
+
+      setResultHistory(history);
+      if (history.length > 0) {
+        setLatestResult(history[history.length - 1]);
       } else {
         setLatestResult(null);
       }
+      if (lastDoc) {
+        setDocReview(lastDoc);
+        // If we have sections but no annotations (old conversation), fetch them async
+        if (lastDoc.sections.length > 0 && lastDoc.annotations.length === 0) {
+          setDocReviewLoading(true);
+          fetch(`${API_BASE}/api/document-review`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sections: lastDoc.sections, mode }),
+          })
+            .then((r) => r.json())
+            .then((d) => {
+              const anns = d.annotations ?? [];
+              setDocReview((prev) => prev ? { ...prev, annotations: anns } : prev);
+            })
+            .catch(() => {})
+            .finally(() => setDocReviewLoading(false));
+        }
+      } else {
+        setDocReview(null);
+      }
+      setConversationId(cid);
     } catch { /* ignore */ }
   }
 
@@ -197,16 +242,20 @@ export default function StudentPage() {
 
         if (data.doc_sections?.length > 0) {
           const fUrl = data.file_url ? `${API_BASE}${data.file_url}` : "";
-          setDocReview({ filename: attachedFile.name, sections: data.doc_sections, annotations: [], fileUrl: fUrl });
+          const annotations = data.doc_annotations ?? [];
+          setDocReview({ filename: attachedFile.name, sections: data.doc_sections, annotations, fileUrl: fUrl });
           const isPdf = attachedFile.name.toLowerCase().endsWith(".pdf");
           if (isPdf && fUrl) { setPdfViewerUrl(fUrl); setPdfViewerOpen(true); } else { setDocReviewOpen(true); }
-          setDocReviewLoading(true);
-          fetch(`${API_BASE}/api/document-review`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sections: data.doc_sections, mode, context: text }),
-          }).then((r) => r.json())
-            .then((d) => setDocReview((prev) => prev ? { ...prev, annotations: d.annotations ?? [] } : prev))
-            .catch(() => {}).finally(() => setDocReviewLoading(false));
+          // If backend didn't generate annotations, fetch them async
+          if (annotations.length === 0) {
+            setDocReviewLoading(true);
+            fetch(`${API_BASE}/api/document-review`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ sections: data.doc_sections, mode, context: text }),
+            }).then((r) => r.json())
+              .then((d) => setDocReview((prev) => prev ? { ...prev, annotations: d.annotations ?? [] } : prev))
+              .catch(() => {}).finally(() => setDocReviewLoading(false));
+          }
         }
         setAttachedFile(null);
       } else {
@@ -226,6 +275,7 @@ export default function StudentPage() {
       }
 
       setLatestResult(data);
+      setResultHistory((prev) => [...prev, data]);
       if (data.conversation_id && !conversationId) setConversationId(data.conversation_id);
       const reply = (data?.assistant_message ?? "").trim() || "（智能体未返回有效回复）";
 
@@ -304,14 +354,6 @@ export default function StudentPage() {
   }, [conversations, searchQuery]);
 
   const [resultHistory, setResultHistory] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (latestResult && latestResult.diagnosis) {
-      setResultHistory((prev) => [...prev, latestResult]);
-    }
-  }, [latestResult]);
-
-  useEffect(() => { setResultHistory([]); }, [conversationId]);
 
   const rubric = useMemo(() => {
     if (resultHistory.length === 0) return latestResult?.diagnosis?.rubric ?? [];
@@ -1164,6 +1206,33 @@ export default function StudentPage() {
                         </div>
                       )}
 
+                      {/* Value Loops */}
+                      {(hyperStudent.value_loops ?? []).length > 0 && (
+                        <div className="hyper-loops">
+                          <h5>价值链路完整度</h5>
+                          <div className="panel-desc">一个成功的创业项目需要完整的逻辑链路，断裂的链路是评委最容易追问的点。</div>
+                          {hyperStudent.value_loops.map((vl: any, vi: number) => (
+                            <div key={vi} className={`hyper-loop-item ${vl.complete ? "complete" : "broken"}`}>
+                              <span className="loop-status">{vl.complete ? "✓" : "✗"}</span>
+                              <span className="loop-chain">{vl.chain}</span>
+                            </div>
+                          ))}
+                          {hyperStudent.complete_loops != null && (
+                            <div className="hyper-loop-summary">
+                              {hyperStudent.complete_loops}/{(hyperStudent.value_loops ?? []).length} 条链路完整
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* LLM Cross-dimensional Insight */}
+                      {hyperStudent.llm_insight && (
+                        <div className="hyper-llm-insight">
+                          <h5>AI 跨维度洞察</h5>
+                          <div className="hyper-insight-text">{hyperStudent.llm_insight}</div>
+                        </div>
+                      )}
+
                       {/* Teaching Hypergraph Edges */}
                       {hyperEdges.length > 0 && (
                         <div className="hyper-teaching">
@@ -1258,6 +1327,11 @@ export default function StudentPage() {
                   <div className="debug-row"><span>编排策略</span><span>{orchestration?.strategy ?? "-"}</span></div>
                   <div className="debug-row"><span>LLM启用</span><span>{String(orchestration?.llm_enabled ?? false)}</span></div>
                   <div className="debug-row"><span>会话ID</span><span className="debug-conv-id">{conversationId ?? "无"}</span></div>
+                  <div className="debug-row"><span>超图(顶层)</span><span>{latestResult?.hypergraph_student?.ok ? `覆盖${latestResult.hypergraph_student.coverage_score}/10` : "无"}</span></div>
+                  <div className="debug-row"><span>超图(trace)</span><span>{latestResult?.agent_trace?.hypergraph_student?.ok ? `覆盖${latestResult.agent_trace.hypergraph_student.coverage_score}/10` : "无"}</span></div>
+                  <div className="debug-row"><span>超图(累积)</span><span>{hyperStudent?.ok ? `覆盖${hyperStudent.coverage_score}/10` : "无"}</span></div>
+                  <div className="debug-row"><span>KG实体(累积)</span><span>{kgAnalysis?.entities?.length ?? 0}</span></div>
+                  <div className="debug-row"><span>历史轮次</span><span>{resultHistory.length}</span></div>
                   <details className="debug-json"><summary>原始 JSON</summary><pre>{JSON.stringify(latestResult, null, 2) ?? "暂无"}</pre></details>
                 </div>
               )}

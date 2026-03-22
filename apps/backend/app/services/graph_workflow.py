@@ -1,17 +1,39 @@
 """
-LangGraph role-based multi-agent system for VentureAgent (V4).
+LangGraph multi-agent system for VentureAgent (V5).
 
-Architecture: Router → DataGatherer → ParallelAgents → Orchestrator
+Architecture: Static Foundation + Dynamic Agents
+═══════════════════════════════════════════════════
 
-V4 improvements over V3:
- - DataGatherer runs ALL tools in parallel (diagnosis, RAG, KG, search,
-   hypergraph, critic) before any agent sees the data.
- - Role agents run in parallel via ThreadPoolExecutor — each is a single
-   LLM call that consumes the shared gathered context.
- - New Planner agent generates concrete weekly action items.
- - Every intent gets full data (KG/RAG/diagnosis not locked to Coach).
- - Total serial LLM groups: 3  (gather ‖ agents ‖ orchestrator)
-   ⇒ expected latency ~60-90s vs V3's ~8-10 min.
+Layer 0 — Router
+  Classify user intent via keyword scoring + LLM fallback.
+
+Layer 1 — Static Foundation (ALWAYS runs, ensures data consistency)
+  Parallel I/O tasks that produce deterministic, reproducible data:
+   • Diagnosis Engine  (rule-based)  → rubric scores, risk rules, bottleneck
+   • KG Extraction     (structured LLM) → entities, relationships, section_scores
+   • RAG Retrieval     (vector search)  → similar cases
+   • Hypergraph Analysis (rules + LLM insight) → coverage, value loops, patterns
+  Conditionally enhanced:
+   • Web Search → when intent or message keywords suggest external info
+
+Layer 2 — Agent Selection (hybrid: static rules + dynamic heuristics)
+  STATIC RULES (non-negotiable, guarantee consistency):
+   • File upload            → Coach + Grader + Planner
+   • competition mode/intent → + Advisor
+   • Explicit scoring request → + Grader
+  DYNAMIC HEURISTICS (data-driven, provide flexibility):
+   • Coach   : diagnosis risks > 0 OR KG entities ≥ 2 OR project intent
+   • Analyst : high-severity risks OR pressure_test intent
+   • Tutor   : learning mode inside complex context
+   • Planner : sufficient KG context AND project intent
+  FOCUSED INTENTS (skip agents, orchestrator single-call):
+   • market_competitor, learning_concept, idea_brainstorm, general_chat
+  Selected agents execute serially; each sees output of preceding agents.
+
+Layer 3 — Orchestrator
+  Multi-agent synthesis (complex) or focused single-call (simple).
+
+Total serial LLM groups: 3  (foundation ‖ agents → orchestrator)
 """
 
 from __future__ import annotations
@@ -95,14 +117,18 @@ INTENTS: dict[str, dict] = {
                       "什么方向", "推荐", "建议做什么", "有什么项目"],
         "desc": "学生想要创业点子/方向建议",
         "agents": ["coach", "tutor", "planner"],
+        "need_web": True, "web_results": 3,
+        "focused": True,
     },
     "project_diagnosis": {
         "keywords": ["我想做", "我的项目", "产品是", "我们做的", "分析一下",
                       "怎么样", "可行吗", "痛点", "商业计划", "帮我看看",
                       "打算做", "项目是", "我们的产品", "想做一个",
-                      "可以吗", "有没有问题", "帮我分析", "评价一下"],
+                      "可以吗", "有没有问题", "帮我分析", "评价一下",
+                      "打分", "评分", "得分", "几分"],
         "desc": "学生描述项目并希望获得诊断",
         "agents": ["coach", "analyst", "grader", "planner"],
+        "need_web": False,
     },
     "evidence_check": {
         "keywords": ["访谈", "问卷", "调研", "证据", "用户", "验证",
@@ -110,6 +136,7 @@ INTENTS: dict[str, dict] = {
                       "调查", "测试", "用户研究", "实地", "采访"],
         "desc": "学生讨论证据/调研",
         "agents": ["coach", "analyst", "planner"],
+        "need_web": False,
     },
     "business_model": {
         "keywords": ["商业模式", "盈利", "收入", "成本", "市场规模",
@@ -117,6 +144,7 @@ INTENTS: dict[str, dict] = {
                       "赚钱", "营收", "变现", "价格", "怎么盈利", "收费"],
         "desc": "学生讨论商业模式",
         "agents": ["coach", "analyst", "tutor", "planner"],
+        "need_web": True, "web_results": 2,
     },
     "competition_prep": {
         "keywords": ["路演", "竞赛", "答辩", "比赛", "评委",
@@ -124,6 +152,18 @@ INTENTS: dict[str, dict] = {
                       "备赛", "获奖", "演示", "展板"],
         "desc": "学生准备竞赛/路演",
         "agents": ["coach", "advisor", "analyst", "planner"],
+        "need_web": True, "web_results": 3,
+    },
+    "market_competitor": {
+        "keywords": ["竞品", "类似", "对手", "同类", "市面上", "行业",
+                      "对标", "参考", "借鉴", "有没有什么", "有哪些",
+                      "别人怎么做", "类似的", "替代品", "竞争者",
+                      "先行者", "已有的", "现有产品", "同类产品",
+                      "有什么软件", "有什么平台", "有什么app"],
+        "desc": "学生想了解市场竞品/类似产品",
+        "agents": ["coach", "analyst", "tutor"],
+        "need_web": True, "web_results": 5,
+        "focused": True,
     },
     "pressure_test": {
         "keywords": ["压力测试", "挑战", "反驳", "护城河", "巨头",
@@ -131,6 +171,7 @@ INTENTS: dict[str, dict] = {
                       "质疑", "弱点", "风险", "万一"],
         "desc": "学生要求压力测试",
         "agents": ["coach", "analyst", "advisor"],
+        "need_web": False,
     },
     "learning_concept": {
         "keywords": ["什么是", "怎么做", "教我", "学习", "方法", "理论",
@@ -138,13 +179,19 @@ INTENTS: dict[str, dict] = {
                       "解释一下", "是什么意思", "举例", "怎么理解"],
         "desc": "学生想学创业概念/方法论",
         "agents": ["tutor", "planner"],
+        "need_web": True, "web_results": 3,
+        "focused": True,
     },
     "general_chat": {
         "keywords": [],
         "desc": "闲聊/问好",
         "agents": ["coach"],
+        "need_web": False,
+        "focused": True,
     },
 }
+
+_FOCUSED_INTENTS = frozenset(k for k, v in INTENTS.items() if v.get("focused"))
 
 _FOLLOW_UP_SIGNALS = frozenset([
     "继续", "然后呢", "详细说说", "还有呢", "接着说", "展开讲讲",
@@ -194,17 +241,22 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
         kws = spec.get("keywords", [])
         matched = [k for k in kws if k in text]
         score = (len(matched) / max(len(kws), 1) + 0.3) if matched else 0.0
+        if matched:
+            logger.debug("classify kw: intent=%s matched=%s score=%.3f", iid, matched, score)
         scores.append((iid, score))
     scores.sort(key=lambda x: x[1], reverse=True)
     kw_best, kw_score = scores[0]
+    logger.info("classify: msg='%s…' kw_best=%s kw_score=%.3f", text[:40], kw_best, kw_score)
 
     # Very strong keyword hit → trust it directly
     if kw_score >= 0.65:
-        return {
+        r = {
             "intent": kw_best, "confidence": min(1.0, kw_score),
             "agents": list(INTENTS[kw_best]["agents"]),
             "engine": "rule",
         }
+        logger.info("classify → %s (rule, score=%.2f)", kw_best, kw_score)
+        return r
 
     # ── LLM classification (primary for anything not obvious) ──
     if _llm.enabled:
@@ -223,6 +275,7 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
                 f"意图分类器。根据学生最新消息和对话上下文，选一个最匹配的意图。\n"
                 f"可选意图:\n{intent_list}\n\n"
                 "分类原则:\n"
+                "- 学生问'有没有类似的/竞品/市面上'等→选market_competitor\n"
                 "- 学生在描述一个项目想法(哪怕很模糊)就选project_diagnosis\n"
                 "- 学生追问前面的话题，根据话题选对应意图\n"
                 "- 只有完全无关创业/项目的寒暄才选general_chat\n"
@@ -235,34 +288,55 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
             ),
             temperature=0.05,
         )
+        logger.info("classify LLM: %s", llm_r)
         if llm_r and llm_r.get("intent") in INTENTS:
             llm_conf = float(llm_r.get("confidence", 0))
             if llm_conf > 0.3:
-                return {
+                r = {
                     "intent": llm_r["intent"],
                     "confidence": llm_conf,
                     "agents": list(INTENTS[llm_r["intent"]]["agents"]),
                     "engine": "llm",
                 }
+                logger.info("classify → %s (llm, conf=%.2f)", llm_r["intent"], llm_conf)
+                return r
 
     # ── Fallback: use keyword result or heuristic ──
     if kw_score >= 0.15:
-        return {
+        r = {
             "intent": kw_best, "confidence": kw_score,
             "agents": list(INTENTS[kw_best]["agents"]),
             "engine": "rule",
         }
+        logger.info("classify → %s (rule-fallback, score=%.2f)", kw_best, kw_score)
+        return r
     if len(text) > 60:
-        return {
+        r = {
             "intent": "project_diagnosis", "confidence": 0.45,
             "agents": list(INTENTS["project_diagnosis"]["agents"]),
             "engine": "heuristic_long",
         }
-    return {
+        logger.info("classify → project_diagnosis (heuristic_long)")
+        return r
+
+    # For any message about a project (even short), use project_diagnosis
+    if conv and _infer_prev_intent(conv):
+        prev = _infer_prev_intent(conv)
+        r = {
+            "intent": prev, "confidence": 0.5,
+            "agents": list(INTENTS[prev]["agents"]),
+            "engine": "context_inherit",
+        }
+        logger.info("classify → %s (context_inherit)", prev)
+        return r
+
+    r = {
         "intent": "general_chat", "confidence": 0.4,
         "agents": list(INTENTS["general_chat"]["agents"]),
         "engine": "heuristic_short",
     }
+    logger.info("classify → general_chat (heuristic_short)")
+    return r
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -392,6 +466,7 @@ def _standalone_hypergraph_analysis(
             hub_entities.append({"entity": e.get("label", ""), "connections": count})
     hub_entities.sort(key=lambda x: -x["connections"])
 
+    # ── Rule-based pattern detection ──
     warnings = []
     strengths = []
     if not dim_entities["evidence"] and not dim_entities["stakeholder"]:
@@ -405,6 +480,52 @@ def _standalone_hypergraph_analysis(
     if len(cross_links) >= 3:
         strengths.append({"note": f"跨维度联动较多({len(cross_links)}条)，说明项目内在逻辑串联较好"})
 
+    # ── Value loop detection ──
+    _LOOP_CHAINS = [
+        (["stakeholder", "pain_point", "solution"], "用户→痛点→方案"),
+        (["solution", "business_model"], "方案→商业模式"),
+        (["stakeholder", "pain_point", "solution", "business_model"], "完整价值环路"),
+        (["pain_point", "evidence"], "痛点→证据验证"),
+        (["solution", "technology"], "方案→技术实现"),
+    ]
+    value_loops = []
+    for chain, label in _LOOP_CHAINS:
+        present = all(len(dim_entities.get(d, [])) > 0 for d in chain)
+        value_loops.append({"chain": label, "complete": present, "dims": chain})
+    complete_loops = sum(1 for v in value_loops if v["complete"])
+
+    if complete_loops == 0:
+        warnings.append({"warning": "没有完整的价值环路——项目逻辑链存在断点，评委会直接追问"})
+    elif complete_loops >= 3:
+        strengths.append({"note": f"有{complete_loops}条完整价值链路，项目逻辑闭环性强"})
+
+    # ── LLM-driven cross-dimensional insight (if available) ──
+    llm_insight = ""
+    if _llm.enabled and len(entities) >= 3:
+        dim_summary = "; ".join(
+            f"{name}: {', '.join(dim_entities[k][:2]) if dim_entities[k] else '缺失'}"
+            for k, name in DIMS.items()
+        )
+        missing_str = ", ".join(m["dimension"] for m in missing[:3])
+        loop_str = "; ".join(
+            f"{'✓' if v['complete'] else '✗'} {v['chain']}" for v in value_loops
+        )
+
+        llm_insight = _llm.chat_text(
+            system_prompt=(
+                "你是超图拓扑分析引擎。基于项目的维度覆盖和价值链路，用2-3句话给出最关键的结构性洞察。\n"
+                "要求：不要泛泛而谈，必须指出具体的断裂点和最紧迫的补强方向。直接输出分析文字。"
+            ),
+            user_prompt=(
+                f"维度覆盖({covered}/10): {dim_summary}\n"
+                f"缺失维度: {missing_str or '无'}\n"
+                f"价值链路: {loop_str}\n"
+                f"跨维度连接: {len(cross_links)}条\n"
+                f"枢纽实体: {', '.join(h['entity'] for h in hub_entities[:3]) if hub_entities else '无'}"
+            ),
+            temperature=0.3,
+        )
+
     return {
         "ok": True,
         "coverage_score": covered,
@@ -416,24 +537,51 @@ def _standalone_hypergraph_analysis(
         "hub_entities": hub_entities[:5],
         "pattern_warnings": warnings,
         "pattern_strengths": strengths,
+        "value_loops": value_loops,
+        "complete_loops": complete_loops,
+        "llm_insight": llm_insight,
     }
 
 
 # ═══════════════════════════════════════════════════════════════════
-#  Node 2: DataGatherer — runs ALL tools in parallel
+#  Node 2: Static Foundation + Conditional Enhancement
 # ═══════════════════════════════════════════════════════════════════
 
+_WEB_SIGNAL_WORDS = frozenset([
+    "类似", "竞品", "市面上", "有哪些", "行业", "趋势", "最新",
+    "别人怎么做", "什么是", "怎么理解", "解释", "方法", "怎么做",
+])
+
+
 def gather_context_node(state: WorkflowState) -> dict:
+    """Layer 1: Static Foundation + Conditional Enhancement.
+
+    STATIC (always runs — guarantees scoring consistency & knowledge accumulation):
+      • Diagnosis engine (rule-based rubric, <50ms, deterministic)
+      • KG extraction   (structured LLM, runs for any project-related content)
+      • RAG retrieval   (vector search, always)
+      • Hypergraph      (from KG entities, rules + LLM insight)
+
+    CONDITIONAL (intent/signal driven — avoids wasteful calls):
+      • Web search      → only when intent or keywords suggest external info
+      • Hyper-teaching  → only when file uploaded or diagnosis-type intent
+      • Neo4j merge     → only when KG produces entities (side-effect)
+    """
     intent = state.get("intent", "general_chat")
     msg = state.get("message", "")
-    if intent == "general_chat" and len(msg) < 30:
-        return {"nodes_visited": ["gather_context"]}
     mode = state.get("mode", "coursework")
     is_file = "[上传文件:" in msg
 
-    # ── Phase 1: instant synchronous operations ──
+    if intent == "general_chat" and len(msg) < 25 and not is_file:
+        return {"nodes_visited": ["gather_context"]}
+
+    # ────────────────────────────────────────────────────────────────
+    # STATIC: Diagnosis Engine (rule-based, deterministic, <50ms)
+    #   Produces rubric scores, triggered rules, bottleneck.
+    #   Runs for EVERY non-trivial message to ensure scoring consistency.
+    # ────────────────────────────────────────────────────────────────
     from app.services.case_knowledge import infer_category
-    from app.services.challenge_strategies import format_for_critic, match_strategies
+    from app.services.challenge_strategies import match_strategies
     from app.services.diagnosis_engine import run_diagnosis
 
     diag_obj = run_diagnosis(input_text=msg, mode=mode)
@@ -442,14 +590,14 @@ def gather_context_node(state: WorkflowState) -> dict:
     cat = infer_category(msg)
     rules = diag_data.get("triggered_rules", []) or []
     rule_ids = [r.get("id", "") for r in rules if isinstance(r, dict)]
-    bottleneck = diag_data.get("bottleneck", "")
-
     strategies = match_strategies(msg, rule_ids, max_results=2)
-    strategy_ctx = format_for_critic(strategies)
 
-    # ── Phase 2: parallel I/O-bound operations ──
+    # ────────────────────────────────────────────────────────────────
+    # STATIC + CONDITIONAL: Parallel I/O tasks
+    # ────────────────────────────────────────────────────────────────
     collected: dict[str, Any] = {}
 
+    # -- STATIC: RAG (always, fast vector search) --
     def _task_rag():
         if _rag is None or _rag.case_count == 0:
             return {"rag_cases": [], "rag_context": ""}
@@ -457,22 +605,31 @@ def gather_context_node(state: WorkflowState) -> dict:
         ctx = _rag.format_for_llm(cases)
         return {"rag_cases": cases, "rag_context": ctx}
 
+    # -- STATIC: KG Extraction (structured LLM, produces section_scores) --
     def _task_kg():
-        if not _llm.enabled or len(msg) < 15:
+        if not _llm.enabled or len(msg) < 10:
             return {"kg_analysis": _default_kg()}
         kg = _llm.chat_json(
             system_prompt=(
-                "你是知识图谱抽取模块。从学生内容中提取实体和关系。\n"
+                "你是知识图谱抽取引擎。从学生的创业项目描述中提取所有关键实体和关系。\n"
                 + ("学生上传了文件，请逐段分析。\n" if is_file else "")
-                + '输出JSON: {"entities":[{"id":"e1","label":"名","type":"类型"}],'
-                '"relationships":[{"source":"e1","target":"e2","relation":"关系"}],'
-                '"structural_gaps":["缺失"],"content_strengths":["优势"],'
-                '"completeness_score":6,'
-                '"section_scores":{"problem_definition":0,"user_evidence":0,'
-                '"solution_feasibility":0,"business_model":0,"competitive_advantage":0},'
-                '"insight":"总结"}'
+                + "实体type必须从以下选择: stakeholder, pain_point, solution, technology, "
+                "market, competitor, resource, business_model, team, evidence\n\n"
+                "示例:\n"
+                '{"entities":[{"id":"e1","label":"6-12岁儿童","type":"stakeholder"},'
+                '{"id":"e2","label":"编程学习枯燥","type":"pain_point"},'
+                '{"id":"e3","label":"游戏化编程平台","type":"solution"}],'
+                '"relationships":[{"source":"e1","target":"e2","relation":"面临"},'
+                '{"source":"e3","target":"e2","relation":"解决"}],'
+                '"structural_gaps":["缺少商业模式","缺少竞品分析"],'
+                '"content_strengths":["目标用户清晰"],'
+                '"completeness_score":4,'
+                '"section_scores":{"problem_definition":6,"user_evidence":2,'
+                '"solution_feasibility":5,"business_model":1,"competitive_advantage":1},'
+                '"insight":"项目方向明确但缺少证据支撑"}\n\n'
+                "要求：即使信息很少也要尽力提取，至少提取2-3个实体。"
             ),
-            user_prompt=f"内容:\n{msg[:4000]}",
+            user_prompt=f"学生内容:\n{msg[:4000]}",
             model=settings.llm_reason_model if is_file else None,
             temperature=0.15,
         )
@@ -480,31 +637,14 @@ def gather_context_node(state: WorkflowState) -> dict:
             return {"kg_analysis": _default_kg()}
         return {"kg_analysis": kg}
 
-    def _task_diag_enhance():
-        if not _llm.enabled or (not is_file and len(msg) < 100):
-            return {}
-        enh = _llm.chat_json(
-            system_prompt=(
-                "你是诊断增强模块。基于规则引擎结果做深度分析。\n"
-                '输出JSON: {"deep_bottleneck":"核心问题",'
-                '"evidence_gaps":["缺失1"],"strength":"亮点",'
-                '"stage":"idea|validation|growth"}'
-            ),
-            user_prompt=(
-                f"规则瓶颈: {bottleneck}\n"
-                f"触发规则: {[r.get('name') for r in rules[:5] if isinstance(r,dict)]}\n"
-                f"学生内容: {msg[:1500]}"
-            ),
-            temperature=0.15,
-        )
-        return {"_diag_enh": enh} if enh else {}
-
-    def _task_web():
+    # -- CONDITIONAL: Web Search --
+    def _task_web(n_results: int = 3):
         from app.services.web_search import web_search
-        ws = web_search(msg, intent, max_results=3)
+        ws = web_search(msg, intent, max_results=n_results)
         return {"web_search_result": ws}
 
-    def _task_hyper():
+    # -- CONDITIONAL: Hypergraph teaching insight (Neo4j DB query) --
+    def _task_hyper_teaching():
         if not _hypergraph_service:
             return {"hypergraph_insight": {}}
         try:
@@ -514,56 +654,33 @@ def gather_context_node(state: WorkflowState) -> dict:
             logger.warning("Hypergraph insight failed: %s", exc)
             return {"hypergraph_insight": {}}
 
-    def _task_critic():
-        if not _llm.enabled:
-            return {"critic": _fallback_critic()}
-        hyper_note = ""
-        if _hypergraph_service:
-            try:
-                hi = _hypergraph_service.insight(category=cat, rule_ids=rule_ids, limit=2)
-                edges = (hi or {}).get("edges", []) or []
-                hyper_note = "; ".join(e.get("teaching_note", "") for e in edges[:2])
-            except Exception:
-                pass
-        critic = _llm.chat_json(
-            system_prompt=(
-                "你是批判思维模块。对学生项目做深度反事实挑战。\n"
-                + (f"追问策略库:\n{strategy_ctx}\n\n" if strategy_ctx else "")
-                + (f"超图风险模式: {hyper_note}\n\n" if hyper_note else "")
-                + '输出JSON: {"challenge_questions":["追问1","追问2","追问3"],'
-                '"missing_evidence":["缺失1","缺失2"],"risk_summary":"一句话",'
-                '"counterfactual":"反事实","evidence_standard":"优秀标准"}'
-            ),
-            user_prompt=f"学生:{msg[:800]}\n瓶颈:{bottleneck}\n规则:{rule_ids}",
-            temperature=0.25,
-        )
-        return {"critic": critic} if critic else {"critic": _fallback_critic()}
+    # ── Assemble parallel task list ──
+    tasks: list[Callable] = [_task_rag]  # RAG: always
 
-    def _fallback_critic():
-        return {
-            "challenge_questions": (
-                [s["probing_layers"][0] for s in strategies[:3]] if strategies else ["需要更多信息"]
-            ),
-            "missing_evidence": [],
-            "risk_summary": bottleneck or "暂无",
-        }
+    # KG: for all project-related content (ensures section_scores consistency)
+    is_project_intent = intent not in _FOCUSED_INTENTS
+    run_kg = is_file or len(msg) > 30 or (is_project_intent and len(msg) > 12)
+    if run_kg:
+        tasks.append(_task_kg)
 
-    # ── Build task list based on intent ──
-    _HEAVY_INTENTS = {"project_diagnosis", "evidence_check", "business_model",
-                      "competition_prep", "pressure_test"}
-    _LIGHT_INTENTS = {"learning_concept", "idea_brainstorm"}
+    # Web search: conditional on intent config + message keywords
+    intent_spec = INTENTS.get(intent, {})
+    msg_wants_web = any(w in msg for w in _WEB_SIGNAL_WORDS)
+    need_web = msg_wants_web or intent_spec.get("need_web", False)
+    if need_web:
+        web_n = intent_spec.get("web_results", 3)
+        if intent == "market_competitor":
+            web_n = max(web_n, 5)
+        tasks.append(lambda n=web_n: _task_web(n))
 
-    tasks: list[Callable] = [_task_rag, _task_kg]
-    if intent in _HEAVY_INTENTS or is_file:
-        tasks.extend([_task_diag_enhance, _task_critic, _task_hyper])
-    elif intent in _LIGHT_INTENTS:
-        tasks.append(_task_web)
-    else:
-        tasks.append(_task_web)
+    # Hypergraph teaching: conditional on file or diagnostic intents
+    if is_file or intent in ("project_diagnosis", "evidence_check", "competition_prep"):
+        tasks.append(_task_hyper_teaching)
 
-    if intent in ("business_model", "project_diagnosis", "competition_prep", "learning_concept"):
-        if _task_web not in tasks:
-            tasks.append(_task_web)
+    logger.info(
+        "gather[static+cond]: intent=%s tasks=%d (kg=%s web=%s)",
+        intent, len(tasks), run_kg, need_web,
+    )
 
     with ThreadPoolExecutor(max_workers=max(1, len(tasks))) as pool:
         future_map = {pool.submit(fn): fn.__name__ for fn in tasks}
@@ -577,11 +694,11 @@ def gather_context_node(state: WorkflowState) -> dict:
         except TimeoutError:
             logger.warning("gather_context timed out — some tasks incomplete")
 
-    # ── Post-parallel: merge results ──
-    enh = collected.pop("_diag_enh", None)
-    if enh:
-        diag_data = {**diag_data, "llm_enhancement": enh}
-
+    # ────────────────────────────────────────────────────────────────
+    # STATIC: Post-parallel — KG merge + Hypergraph student analysis
+    #   Hypergraph analysis always runs when KG found entities.
+    #   Neo4j merge is a side-effect (conditional on service availability).
+    # ────────────────────────────────────────────────────────────────
     kg = collected.get("kg_analysis", _default_kg())
     if _graph_service and kg.get("entities"):
         pid = state.get("project_state", {}).get("project_id", "unknown")
@@ -592,23 +709,14 @@ def gather_context_node(state: WorkflowState) -> dict:
         except Exception as exc:
             logger.warning("Neo4j merge failed: %s", exc)
 
-    # ── Student dynamic hypergraph analysis (works with or without Neo4j) ──
     hyper_student: dict = {}
-    if kg.get("entities"):
+    if len(kg.get("entities", [])) > 0:
         try:
-            if _hypergraph_service:
-                hyper_student = _hypergraph_service.analyze_student_content(
-                    entities=kg.get("entities", []),
-                    relationships=kg.get("relationships", []),
-                    structural_gaps=kg.get("structural_gaps"),
-                    category=cat,
-                )
-            else:
-                hyper_student = _standalone_hypergraph_analysis(
-                    entities=kg.get("entities", []),
-                    relationships=kg.get("relationships", []),
-                    structural_gaps=kg.get("structural_gaps"),
-                )
+            hyper_student = _standalone_hypergraph_analysis(
+                entities=kg.get("entities", []),
+                relationships=kg.get("relationships", []),
+                structural_gaps=kg.get("structural_gaps"),
+            )
         except Exception as exc:
             logger.warning("Hypergraph student analysis failed: %s", exc)
 
@@ -622,7 +730,6 @@ def gather_context_node(state: WorkflowState) -> dict:
         "web_search_result": collected.get("web_search_result", {}),
         "hypergraph_insight": collected.get("hypergraph_insight", {}),
         "hypergraph_student": hyper_student,
-        "critic": collected.get("critic", {}),
         "challenge_strategies": strategies,
         "nodes_visited": ["gather_context"],
     }
@@ -674,7 +781,6 @@ def _coach_analyze(state: dict) -> dict:
     kg = state.get("kg_analysis", {})
     ws = state.get("web_search_result", {})
     ws_ctx = _fmt_ws(ws)
-    llm_enh = diag.get("llm_enhancement", {})
     conv_ctx = _build_conv_ctx(state)
     hs = state.get("hypergraph_student", {})
     hs_ctx = _fmt_hyper_student(hs)
@@ -715,7 +821,7 @@ def _coach_analyze(state: dict) -> dict:
             f"学生说: {msg[:2000]}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
             + f"诊断瓶颈: {diag.get('bottleneck','')}\n"
-            + (f"深度分析: {llm_enh.get('deep_bottleneck','')} | 亮点: {llm_enh.get('strength','')} | 阶段: {llm_enh.get('stage','')}\n" if llm_enh else "")
+            + f"触发规则: {[r.get('name') for r in (diag.get('triggered_rules') or [])[:4] if isinstance(r,dict)]}\n"
             + f"KG洞察: {kg.get('insight','')}\n结构缺陷: {kg.get('structural_gaps',[])}\n"
             + f"维度评分: {kg.get('section_scores',{})}\n"
             + (f"超图跨维度分析:\n{hs_ctx}\n" if hs_ctx else "")
@@ -735,19 +841,23 @@ def _coach_analyze(state: dict) -> dict:
 def _analyst_analyze(state: dict) -> dict:
     msg = state.get("message", "")
     diag = state.get("diagnosis", {})
-    critic = state.get("critic", {})
-    hyper = state.get("hypergraph_insight", {})
-    hyper_edges = (hyper or {}).get("edges", []) or []
-    hyper_note = "; ".join(e.get("teaching_note", "") for e in hyper_edges[:2])
+    kg = state.get("kg_analysis", {})
     hs = state.get("hypergraph_student", {})
     conv_ctx = _build_conv_ctx(state)
+    coach_out = state.get("coach_output", {})
+
+    rules = diag.get("triggered_rules", []) or []
+    bottleneck = diag.get("bottleneck", "")
+    rule_summary = "; ".join(
+        f"{r.get('id','')}:{r.get('name','')}" for r in rules[:5] if isinstance(r, dict)
+    )
 
     hyper_risk_ctx = ""
     if hs.get("ok"):
         warnings = hs.get("pattern_warnings", [])
         missing = hs.get("missing_dimensions", [])
         if warnings:
-            hyper_risk_ctx += "超图风险模式匹配: " + "; ".join(w["warning"] for w in warnings[:2]) + "\n"
+            hyper_risk_ctx += "超图风险预警: " + "; ".join(w["warning"] for w in warnings[:2]) + "\n"
         if missing:
             critical = [m for m in missing if m.get("importance") in ("极高", "高")]
             if critical:
@@ -764,26 +874,24 @@ def _analyst_analyze(state: dict) -> dict:
             "3. 说明优秀项目在同一维度通常提供什么证据来证明可行性\n"
             "4. 引用学生内容中的具体表述来指出逻辑漏洞\n"
             "5. 如果超图分析发现了缺失维度或风险模式，重点分析其影响\n"
-            "6. 如果对话中已讨论过某些风险，不要重复，聚焦新发现\n"
+            "6. 如果前面的教练分析已经指出某些问题，你聚焦补充而不重复\n"
             "语气专业犀利但建设性。用3-5段话输出。"
         ),
         user_prompt=(
             f"学生说: {msg[:1200]}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
-            + f"风险总结: {critic.get('risk_summary','')}\n"
-            f"关键追问: {critic.get('challenge_questions',[])}\n"
-            f"缺失证据: {critic.get('missing_evidence',[])}\n"
-            f"反事实: {critic.get('counterfactual','')}\n"
-            f"证据标准: {critic.get('evidence_standard','')}\n"
-            + (f"超图风险模式(历史): {hyper_note}\n" if hyper_note else "")
-            + (f"超图跨维度分析(本项目):\n{hyper_risk_ctx}" if hyper_risk_ctx else "")
+            + f"诊断瓶颈: {bottleneck}\n"
+            + f"触发风险规则: {rule_summary}\n"
+            + f"KG结构缺陷: {kg.get('structural_gaps', [])}\n"
+            + (f"教练分析摘要: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
+            + (f"{hyper_risk_ctx}" if hyper_risk_ctx else "")
         ),
         temperature=0.35,
     )
     return {
         "agent": "风险分析师",
         "analysis": analysis or "",
-        "tools_used": ["hypergraph", "hypergraph_student", "challenge_strategies", "critic_llm"],
+        "tools_used": ["diagnosis", "kg_analysis", "hypergraph_student"],
     }
 
 
@@ -791,8 +899,9 @@ def _advisor_analyze(state: dict) -> dict:
     msg = state.get("message", "")
     mode = state.get("mode", "coursework")
     rag_ctx = state.get("rag_context", "")
-    critic = state.get("critic", {})
+    diag = state.get("diagnosis", {})
     conv_ctx = _build_conv_ctx(state)
+    coach_out = state.get("coach_output", {})
 
     comp_urgency = "竞赛冲刺模式——学生正在备赛，请以获奖为最高目标来分析。" if mode == "competition" else ""
 
@@ -805,14 +914,15 @@ def _advisor_analyze(state: dict) -> dict:
             "2. 基于项目当前状态，评估竞赛准备度，指出最大差距\n"
             "3. 给出路演/PPT的具体优化建议（具体的结构调整，不是泛泛的'注意逻辑'）\n"
             "4. 引用评审标准中的评分要点来说明为什么这些很重要\n"
-            "5. 如果对话中学生提过具体的答辩/路演细节，针对那些细节做点评\n"
+            "5. 不要重复教练已指出的问题，补充竞赛特有的视角\n"
             "用3-5段话输出，实操性强。"
         ),
         user_prompt=(
             f"学生说: {msg[:1000]}\n模式: {mode}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
             + (f"参考获奖案例:\n{rag_ctx[:500]}\n" if rag_ctx else "")
-            + (f"项目风险: {critic.get('risk_summary','')}\n" if critic else "")
+            + (f"诊断瓶颈: {diag.get('bottleneck','')}\n" if diag.get("bottleneck") else "")
+            + (f"教练分析摘要: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
         ),
         temperature=0.35,
     )
@@ -912,9 +1022,9 @@ def _planner_analyze(state: dict) -> dict:
     diag = state.get("diagnosis", {})
     next_task = state.get("next_task", {})
     kg = state.get("kg_analysis", {})
-    critic = state.get("critic", {})
     hs = state.get("hypergraph_student", {})
     conv_ctx = _build_conv_ctx(state, limit=4)
+    coach_out = state.get("coach_output", {})
 
     hs_missing_ctx = ""
     if hs.get("ok"):
@@ -952,7 +1062,7 @@ def _planner_analyze(state: dict) -> dict:
             + (f"{entity_ctx}\n" if entity_ctx else "")
             + f"结构缺陷: {kg.get('structural_gaps',[])}\n"
             + f"内容优势: {kg.get('content_strengths',[][:2])}\n"
-            + f"缺失证据: {critic.get('missing_evidence',[])}\n"
+            + (f"教练核心发现: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
             + (f"{hs_missing_ctx}\n" if hs_missing_ctx else "")
         ),
         temperature=0.25,
@@ -999,45 +1109,143 @@ AGENT_DISPLAY: dict[str, str] = {
 
 
 # ═══════════════════════════════════════════════════════════════════
-#  Node 3: Parallel Role Agents
+#  Node 3: Hybrid Agent Selection (Static Rules + Dynamic Heuristics)
+#           + Serial Execution
 # ═══════════════════════════════════════════════════════════════════
 
+_SCORING_SIGNALS = frozenset(["评分", "打分", "得分", "几分", "怎么评", "多少分", "分数"])
+
+_AGENT_ORDER = ("coach", "analyst", "advisor", "tutor", "grader", "planner")
+
+
+def _decide_agents(state: WorkflowState) -> list[str]:
+    """Hybrid agent selection: static guarantees + dynamic heuristics.
+
+    STATIC RULES — non-negotiable, ensure consistent behaviour:
+      • File upload (any intent)            → Coach + Grader + Planner
+      • competition mode OR intent          → + Advisor
+      • Explicit scoring keywords in msg    → + Grader
+
+    DYNAMIC HEURISTICS — data-driven, provide flexibility:
+      • Coach   : diagnosis triggered rules > 0 OR KG entities ≥ 2
+                   OR intent is a project-analysis type
+      • Analyst : high-severity risks detected OR pressure_test intent
+                   OR evidence_check intent with multiple rules
+      • Tutor   : learning mode AND intent is not a focused-type
+      • Planner : KG entities ≥ 3 with project intent,
+                   OR coach is running AND diagnosis rules ≥ 2
+
+    Returns agents in canonical order (Coach → Analyst → Advisor →
+    Tutor → Grader → Planner) so later agents can reference earlier output.
+    """
+    intent = state.get("intent", "general_chat")
+    mode = state.get("mode", "coursework")
+    msg = state.get("message", "")
+    is_file = "[上传文件:" in msg
+    diag = state.get("diagnosis", {})
+    kg = state.get("kg_analysis", {})
+    rules = diag.get("triggered_rules", []) or []
+    kg_entity_count = len(kg.get("entities", []))
+    high_risk = sum(1 for r in rules if isinstance(r, dict) and r.get("severity") == "high")
+
+    selected: set[str] = set()
+
+    # ═══ STATIC RULES (guaranteed, non-negotiable) ═══
+
+    if is_file:
+        selected.update(("coach", "grader", "planner"))
+
+    if mode == "competition" or intent == "competition_prep":
+        selected.add("advisor")
+
+    if any(w in msg for w in _SCORING_SIGNALS):
+        selected.add("grader")
+
+    # ═══ DYNAMIC HEURISTICS (data-driven) ═══
+
+    # Coach: primary analyst — needs project substance
+    if "coach" not in selected:
+        if len(rules) > 0 or kg_entity_count >= 2:
+            selected.add("coach")
+        elif intent in ("project_diagnosis", "business_model", "evidence_check"):
+            selected.add("coach")
+
+    # Analyst: risk assessment — only when risks are real
+    if intent == "pressure_test":
+        selected.add("analyst")
+    elif high_risk >= 1 or len(rules) >= 3:
+        selected.add("analyst")
+    elif intent == "evidence_check" and len(rules) >= 2:
+        selected.add("analyst")
+
+    # Tutor: learning guidance — in learning mode for complex contexts
+    if mode == "learning" and intent not in _FOCUSED_INTENTS:
+        selected.add("tutor")
+
+    # Planner: action items — only when there's enough context to plan
+    if "planner" not in selected:
+        has_planning_context = (
+            kg_entity_count >= 3
+            and intent in ("project_diagnosis", "evidence_check", "business_model")
+        ) or (len(rules) >= 2 and "coach" in selected)
+        if has_planning_context:
+            selected.add("planner")
+
+    # ═══ Return in canonical execution order ═══
+    return [a for a in _AGENT_ORDER if a in selected]
+
+
 def run_role_agents_node(state: WorkflowState) -> dict:
-    pipeline = state.get("intent_pipeline", [])
-    agents_to_run = [a for a in pipeline if a in AGENT_FNS]
+    intent = state.get("intent", "general_chat")
+
+    # ── PATH A: Focused intents → orchestrator handles alone ──
+    if intent in _FOCUSED_INTENTS and "[上传文件:" not in state.get("message", ""):
+        logger.info("intent '%s' → focused mode, no agents", intent)
+        return {
+            "agents_called": [f"[聚焦模式: {intent}]"],
+            "nodes_visited": ["role_agents"],
+        }
+
+    # ── PATH B: Static + dynamic selection → serial execution ──
+    agents_to_run = _decide_agents(state)
 
     if not agents_to_run:
-        return {"nodes_visited": ["role_agents"]}
+        logger.info("_decide_agents returned empty → orchestrator-only")
+        return {
+            "agents_called": ["[数据不足，直接回复]"],
+            "nodes_visited": ["role_agents"],
+        }
 
+    logger.info("Dynamic agent selection: %s (intent=%s)", agents_to_run, intent)
     outputs: dict[str, dict] = {}
     state_snapshot = dict(state)
-    with ThreadPoolExecutor(max_workers=max(1, len(agents_to_run))) as pool:
-        future_map = {pool.submit(AGENT_FNS[a], state_snapshot): a for a in agents_to_run}
-        try:
-            for future in as_completed(future_map, timeout=130):
-                key = future_map[future]
-                try:
-                    outputs[key] = future.result()
-                except Exception as exc:
-                    logger.warning("Agent %s failed: %s", key, exc)
-                    outputs[key] = {
-                        "agent": AGENT_DISPLAY.get(key, key),
-                        "analysis": "",
-                        "tools_used": [],
-                        "error": str(exc),
-                    }
-        except TimeoutError:
-            logger.warning("role_agents timed out — some agents incomplete")
 
-    result: dict[str, Any] = {
+    for agent_key in agents_to_run:
+        fn = AGENT_FNS.get(agent_key)
+        if not fn:
+            continue
+        try:
+            result = fn(state_snapshot)
+            outputs[agent_key] = result
+            state_snapshot[f"{agent_key}_output"] = result
+        except Exception as exc:
+            logger.warning("Agent %s failed: %s", agent_key, exc)
+            outputs[agent_key] = {
+                "agent": AGENT_DISPLAY.get(agent_key, agent_key),
+                "analysis": "",
+                "tools_used": [],
+                "error": str(exc),
+            }
+
+    result_dict: dict[str, Any] = {
         "agents_called": [AGENT_DISPLAY.get(a, a) for a in agents_to_run],
         "nodes_visited": ["role_agents"],
     }
     for key in ("coach", "analyst", "advisor", "tutor", "grader", "planner"):
         if key in outputs:
-            result[f"{key}_output"] = outputs[key]
+            result_dict[f"{key}_output"] = outputs[key]
 
-    return result
+    return result_dict
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -1063,6 +1271,90 @@ _MODE_PERSONA: dict[str, str] = {
 }
 
 
+# ── Intent-specific prompts for focused (single-call) mode ──
+_FOCUSED_PROMPTS: dict[str, str] = {
+    "market_competitor": (
+        "学生在问竞品/同类产品/市场情况。你的任务：\n"
+        "1. 基于搜索结果列出3-5个真实的同类产品/竞品，每个用1-2句介绍核心卖点\n"
+        "2. 做一个对比表格（产品名、核心功能、目标用户、定价、优劣势）\n"
+        "3. 分析学生项目和这些竞品的差异化在哪里\n"
+        "4. 推荐2-3个最值得学习的产品，具体说明学什么\n"
+        "5. 如果搜索结果不够，基于你的知识补充\n"
+        "用600-1000字回复。必须有具体产品名和对比表格。"
+    ),
+    "learning_concept": (
+        "学生想学习一个概念或方法论。你的任务：\n"
+        "1. 用一句话通俗定义这个概念（不要教科书式定义）\n"
+        "2. 举2-3个真实的创业案例来解释（具体公司名、做了什么、结果如何）\n"
+        "3. 如果搜索结果有最新信息，引用具体数据和事实\n"
+        "4. 给学生一个本周就能做的练习任务（非常具体，可执行）\n"
+        "5. 指出学生最容易踩的坑\n"
+        "6. 如果学生的项目上下文已知，把概念和他的项目关联起来解释\n"
+        "用500-900字回复。生动有趣，多用类比。"
+    ),
+    "idea_brainstorm": (
+        "学生想要创业方向建议。你的任务：\n"
+        "1. 基于搜索到的趋势和学生的兴趣/背景，给出3-5个具体的方向\n"
+        "2. 每个方向说清楚：目标用户是谁、解决什么痛点、变现方式\n"
+        "3. 简要分析每个方向的难度和资源要求\n"
+        "4. 推荐一个最适合学生现状的方向，说明理由\n"
+        "5. 给出这个方向的第一步行动\n"
+        "用500-800字回复。具体、可行、有启发性。"
+    ),
+    "general_chat": (
+        "学生在闲聊或打招呼。你的任务：\n"
+        "1. 热情友好地回复\n"
+        "2. 如果有对话上下文（之前讨论过项目），自然地衔接：'上次你提到的XX项目，现在进展如何？'\n"
+        "3. 如果完全是新对话，引导学生聊他的项目想法\n"
+        "用100-250字回复。自然、亲切。"
+    ),
+}
+
+
+def _build_gathered_context(state: WorkflowState) -> str:
+    """Build context string from all gathered data for focused single-call mode."""
+    parts: list[str] = []
+
+    # Web search results (primary for market/learning questions)
+    ws = state.get("web_search_result", {})
+    if ws.get("searched") and ws.get("results"):
+        parts.append(f"## 联网搜索结果（关键词: {ws.get('query', '')}）")
+        for r in ws.get("results", [])[:5]:
+            parts.append(f"- **{r.get('title','')}**: {r.get('snippet','')}")
+            if r.get("url"):
+                parts.append(f"  链接: {r['url']}")
+
+    # KG analysis
+    kg = state.get("kg_analysis", {})
+    if kg.get("entities"):
+        entities_str = "; ".join(f"{e.get('label','')}({e.get('type','')})" for e in kg["entities"][:10])
+        parts.append(f"\n## 已识别实体\n{entities_str}")
+        if kg.get("insight"):
+            parts.append(f"KG洞察: {kg['insight']}")
+        if kg.get("structural_gaps"):
+            parts.append(f"结构缺陷: {', '.join(kg['structural_gaps'][:3])}")
+
+    # RAG cases
+    rag_ctx = state.get("rag_context", "")
+    if rag_ctx:
+        parts.append(f"\n## 参考案例\n{rag_ctx[:600]}")
+
+    # Hypergraph
+    hs = state.get("hypergraph_student", {})
+    if hs.get("ok"):
+        parts.append(f"\n## 超图分析\n维度覆盖: {hs.get('coverage_score', 0)}/10")
+        missing = hs.get("missing_dimensions", [])
+        if missing:
+            parts.append(f"缺失维度: {', '.join(m['dimension'] for m in missing[:3])}")
+
+    # Diagnosis
+    diag = state.get("diagnosis", {})
+    if diag.get("bottleneck"):
+        parts.append(f"\n## 诊断\n瓶颈: {diag['bottleneck']}")
+
+    return "\n".join(parts)
+
+
 def orchestrator(state: WorkflowState) -> dict:
     msg = state.get("message", "")
     intent = state.get("intent", "general_chat")
@@ -1072,6 +1364,7 @@ def orchestrator(state: WorkflowState) -> dict:
     tfb = state.get("teacher_feedback_context", "")
     is_file = "[上传文件:" in msg
 
+    # Collect multi-agent analyses (only present for complex intents)
     analysis_parts: list[str] = []
     for key in ("coach_output", "analyst_output", "advisor_output",
                 "tutor_output", "grader_output", "planner_output"):
@@ -1087,29 +1380,26 @@ def orchestrator(state: WorkflowState) -> dict:
             for m in recent
         )
 
-    msg_len = len(msg)
-    n_analyses = len(analysis_parts)
-    if is_file:
-        length_guide = "1200-2500字。必须逐段分析文件内容，引用原文，对比案例，给出具体修改建议。用标题/表格/引用块组织。"
-    elif intent == "general_chat" or msg_len < 20:
-        length_guide = "100-250字。热情友好，自然引导到项目话题。"
-    elif intent == "learning_concept":
-        length_guide = "500-900字。通俗解释概念→真实案例→练习任务→常见误区。用标题分层。"
-    elif n_analyses >= 3:
-        length_guide = "900-1500字。多维度深入分析，引用具体案例和数据对比。用标题、表格、引用块丰富排版。"
-    elif n_analyses >= 2:
-        length_guide = "600-1100字。深入分析关键问题，引用案例和证据。"
-    elif msg_len > 200:
-        length_guide = "500-800字。针对学生具体内容深入展开。"
-    else:
-        length_guide = "350-600字。聚焦问题给出有深度的建议。"
-
+    persona = _MODE_PERSONA.get(mode, _MODE_PERSONA["coursework"])
     analyses_ctx = "\n\n---\n\n".join(analysis_parts)
 
-    persona = _MODE_PERSONA.get(mode, _MODE_PERSONA["coursework"])
-
     reply = ""
+
     if _llm.enabled and analyses_ctx:
+        # ── PATH A: Multi-agent synthesis (complex intents) ──
+        msg_len = len(msg)
+        n_analyses = len(analysis_parts)
+        if is_file:
+            length_guide = "1200-2500字。逐段分析文件内容，引用原文，对比案例，给出具体修改建议。"
+        elif n_analyses >= 3:
+            length_guide = "900-1500字。多维度深入分析，引用具体案例和数据对比。"
+        elif n_analyses >= 2:
+            length_guide = "600-1100字。深入分析关键问题，引用案例和证据。"
+        elif msg_len > 200:
+            length_guide = "500-800字。针对学生具体内容深入展开。"
+        else:
+            length_guide = "350-600字。聚焦问题给出有深度的建议。"
+
         reply = _llm.chat_text(
             system_prompt=(
                 f"{persona}\n"
@@ -1119,8 +1409,7 @@ def orchestrator(state: WorkflowState) -> dict:
                 "- **绝对不要提到Agent、分析师、教练等角色名称**\n"
                 "- 不要说'根据分析'、'经过系统分析'等套话\n"
                 "- **严禁万金油建议**：不许动不动就建议'做用户访谈''发放问卷''做市场调研'。"
-                "  这些是最敷衍最没用的回答。如果确实需要调研，必须说清楚：调研什么假设、"
-                "  找什么人、问什么问题、如何验证。没有这些细节就不要提。\n"
+                "  如果确实需要调研，必须说清楚：调研什么假设、找什么人、问什么问题。\n"
                 "- 不要罗列大量建议，宁可只讲1-2点讲透\n\n"
                 "## 回复逻辑结构\n"
                 "1. **总览**（1-2句）：概括你对项目的整体判断\n"
@@ -1143,16 +1432,43 @@ def orchestrator(state: WorkflowState) -> dict:
             model=settings.llm_reason_model,
             temperature=0.55,
         )
+
     elif _llm.enabled:
-        reply = _llm.chat_text(
-            system_prompt=(
-                f"{persona}\n"
-                "用第一人称自然回复学生，引导到项目话题。"
-                "不要暴露任何系统内部结构。"
-            ),
-            user_prompt=f"学生说: {msg[:500]}" + (f"\n上下文: {conv_ctx}" if conv_ctx else ""),
-            temperature=0.55,
-        )
+        # ── PATH B: Focused single-call (simple/focused intents) ──
+        gathered = _build_gathered_context(state)
+        focused_prompt = _FOCUSED_PROMPTS.get(intent, "")
+
+        if focused_prompt:
+            logger.info("Orchestrator: focused mode for intent '%s'", intent)
+            reply = _llm.chat_text(
+                system_prompt=(
+                    f"{persona}\n{focused_prompt}\n\n"
+                    "## 通用要求\n"
+                    "- 第一人称回复，像导师面对面聊天\n"
+                    "- 不要提到任何系统内部结构（Agent、模块等）\n"
+                    "- 排版清晰：## 标题、> 引用、**加粗**、表格\n"
+                    "- 紧扣学生的实际项目和上下文\n"
+                ),
+                user_prompt=(
+                    f"学生说：{msg[:2000]}\n\n"
+                    + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+                    + (f"已收集的信息：\n{gathered}\n" if gathered else "")
+                ),
+                model=settings.llm_reason_model,
+                temperature=0.5,
+            )
+        else:
+            reply = _llm.chat_text(
+                system_prompt=(
+                    f"{persona}\n"
+                    "用第一人称自然回复学生。不要暴露任何系统内部结构。"
+                ),
+                user_prompt=(
+                    f"学生说: {msg[:500]}"
+                    + (f"\n上下文: {conv_ctx}" if conv_ctx else "")
+                ),
+                temperature=0.55,
+            )
 
     if not reply or len(reply.strip()) < 20:
         diag = state.get("diagnosis", {})
@@ -1277,19 +1593,50 @@ def stream_orchestrator(state: dict):
     analyses_ctx = "\n\n---\n\n".join(analysis_parts)
     persona = _MODE_PERSONA.get(mode, _MODE_PERSONA["coursework"])
 
-    if not _llm.enabled or not analyses_ctx:
-        diag = state.get("diagnosis", {})
-        bn = str(diag.get("bottleneck") or "")
-        yield bn if bn else "你好！告诉我你的项目想法，我来帮你诊断和分析。"
+    if not _llm.enabled:
+        yield "你好！告诉我你的项目想法，我来帮你诊断和分析。"
         return
 
+    if not analyses_ctx:
+        # ── Focused intent path (no agents ran) ──
+        gathered = _build_gathered_context(state)
+        focused_prompt = _FOCUSED_PROMPTS.get(intent, "")
+        if focused_prompt and gathered:
+            _sys = (
+                f"{persona}\n{focused_prompt}\n\n"
+                "## 通用要求\n"
+                "- 第一人称回复，像导师面对面聊天\n"
+                "- 不要提到任何系统内部结构（Agent、模块等）\n"
+                "- 排版清晰：## 标题、> 引用、**加粗**、表格\n"
+                "- 紧扣学生的实际项目和上下文\n"
+            )
+            _usr = (
+                f"学生说：{msg[:2000]}\n\n"
+                + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+                + f"已收集的信息：\n{gathered}\n"
+            )
+            for chunk in _llm.chat_text_stream(
+                system_prompt=_sys, user_prompt=_usr,
+                model=settings.llm_reason_model, temperature=0.5,
+            ):
+                yield chunk
+            return
+        else:
+            diag = state.get("diagnosis", {})
+            bn = str(diag.get("bottleneck") or "")
+            yield bn if bn else "你好！告诉我你的项目想法，我来帮你诊断和分析。"
+            return
+
+    # ── Multi-agent synthesis path ──
     system_prompt = (
         f"{persona}\n"
         "你已经从多个专业角度对学生的问题进行了深入分析，"
         "现在需要将这些分析整合成一份自然、连贯、有深度的回复。\n\n"
         "## 绝对禁止\n"
         "- 不要提到任何Agent、分析师等角色名称\n"
-        "- 不要说'根据多维度分析'等套话\n\n"
+        "- 不要说'根据多维度分析'等套话\n"
+        "- **严禁万金油建议**：不许动不动就建议'做用户访谈''发放问卷''做市场调研'。"
+        "  如果确实需要调研，必须说清楚：调研什么假设、找什么人、问什么问题。\n\n"
         "## 回复逻辑结构\n"
         "1. 总览定位（1-2句话概括整体判断）\n"
         "2. 宏观框架梳理（用户→痛点→方案→变现逻辑链）\n"

@@ -2146,8 +2146,31 @@ pre {
   line-height: 1.5;
 }
 
-.hyper-hubs, .hyper-cross, .hyper-warnings, .hyper-strengths, .hyper-teaching {
+.hyper-hubs, .hyper-cross, .hyper-warnings, .hyper-strengths, .hyper-teaching, .hyper-loops, .hyper-llm-insight {
   margin: 12px 0;
+}
+.hyper-loop-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; margin: 4px 0;
+  border-radius: 6px; font-size: 13px;
+  background: var(--surface-hover);
+}
+.hyper-loop-item.complete { border-left: 3px solid #4ade80; }
+.hyper-loop-item.broken { border-left: 3px solid #f87171; opacity: 0.85; }
+.loop-status { font-size: 14px; font-weight: 700; min-width: 16px; }
+.hyper-loop-item.complete .loop-status { color: #4ade80; }
+.hyper-loop-item.broken .loop-status { color: #f87171; }
+.loop-chain { flex: 1; }
+.hyper-loop-summary {
+  margin-top: 6px; font-size: 12px; color: var(--text-muted);
+  text-align: right; font-weight: 500;
+}
+.hyper-llm-insight { margin-top: 14px; }
+.hyper-insight-text {
+  padding: 10px 14px; border-radius: 8px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.08));
+  border: 1px solid rgba(99,102,241,0.2);
+  font-size: 13px; line-height: 1.6; color: var(--text-primary);
 }
 .hyper-hub-item {
   padding: 5px 0;

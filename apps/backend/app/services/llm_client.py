@@ -17,16 +17,31 @@ def _strip_think_tags(text: str) -> str:
     return _THINK_RE.sub("", text).strip()
 
 
+_CODE_FENCE_RE = re.compile(r"```(?:json)?\s*\n?([\s\S]*?)```", re.DOTALL)
+
+
 def _extract_json_obj(text: str) -> dict[str, Any]:
     text = _strip_think_tags(text or "")
     if not text:
         return {}
+
+    # Try direct parse first
     try:
         parsed = json.loads(text)
         return parsed if isinstance(parsed, dict) else {}
     except json.JSONDecodeError:
         pass
 
+    # Strip markdown code fences (```json ... ```)
+    m = _CODE_FENCE_RE.search(text)
+    if m:
+        try:
+            parsed = json.loads(m.group(1).strip())
+            return parsed if isinstance(parsed, dict) else {}
+        except json.JSONDecodeError:
+            pass
+
+    # Fallback: extract substring between first { and last }
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1 or end <= start:
@@ -110,7 +125,10 @@ class LlmClient:
             model=model,
             temperature=temperature,
         )
-        return _extract_json_obj(raw)
+        result = _extract_json_obj(raw)
+        if not result and raw:
+            logger.warning("chat_json: failed to parse JSON from LLM response (len=%d): %.200s", len(raw), raw)
+        return result
 
     def chat_text(
         self,

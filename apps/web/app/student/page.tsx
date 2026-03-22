@@ -9,6 +9,7 @@ const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").t
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
 type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "debug";
+type CompetitionType = "" | "internet_plus" | "challenge_cup" | "innovation" | "math_modeling";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
 let _msgId = 0;
@@ -41,6 +42,13 @@ export default function StudentPage() {
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [pdfViewerUrl, setPdfViewerUrl] = useState<string>("");
 
+  // competition & pitch simulation
+  const [competitionType, setCompetitionType] = useState<CompetitionType>("");
+  const [pitchTimer, setPitchTimer] = useState<number>(0);
+  const [pitchTimerRunning, setPitchTimerRunning] = useState(false);
+  const [pitchDuration, setPitchDuration] = useState(300);
+  const pitchIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   // new features
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,6 +63,31 @@ export default function StudentPage() {
   const dragRef = useRef<{ active: boolean; startX: number; startW: number }>({ active: false, startX: 0, startW: 360 });
   const abortRef = useRef<AbortController | null>(null);
   // canvas ref removed — now using SVG
+
+  // pitch timer
+  useEffect(() => {
+    if (pitchTimerRunning && pitchTimer > 0) {
+      pitchIntervalRef.current = setInterval(() => {
+        setPitchTimer((t) => {
+          if (t <= 1) { setPitchTimerRunning(false); return 0; }
+          return t - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (pitchIntervalRef.current) clearInterval(pitchIntervalRef.current); };
+  }, [pitchTimerRunning]);
+
+  function startPitchTimer() {
+    setPitchTimer(pitchDuration);
+    setPitchTimerRunning(true);
+  }
+  function stopPitchTimer() {
+    setPitchTimerRunning(false);
+    setPitchTimer(0);
+  }
+  function formatTime(s: number) {
+    return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
+  }
 
   // apply theme
   useEffect(() => {
@@ -267,6 +300,7 @@ export default function StudentPage() {
             conversation_id: conversationId || undefined,
             class_id: classId || undefined, cohort_id: cohortId || undefined,
             message: text, mode,
+            competition_type: competitionType || undefined,
           }),
           signal: controller.signal,
         });
@@ -469,7 +503,21 @@ export default function StudentPage() {
             <button type="button" className={`topbar-mode-opt${mode === "competition" ? " active" : ""}`} onClick={() => setMode("competition")}>竞赛冲刺</button>
             <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>个人学习</button>
           </div>
+          {mode === "competition" && (
+            <select className="topbar-competition-select" value={competitionType} onChange={(e) => setCompetitionType(e.target.value as CompetitionType)}>
+              <option value="">通用评分</option>
+              <option value="internet_plus">互联网+/中国国际大学生创新大赛</option>
+              <option value="challenge_cup">挑战杯</option>
+              <option value="innovation">创新创业大赛</option>
+              <option value="math_modeling">数学建模</option>
+            </select>
+          )}
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
+          {pitchTimerRunning && (
+            <span className={`topbar-pitch-timer ${pitchTimer <= 30 ? "urgent" : ""}`}>
+              🎤 {formatTime(pitchTimer)}
+            </span>
+          )}
         </div>
         <div className="topbar-right">
           <button type="button" className="topbar-icon-btn" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} title={theme === "dark" ? "切换日间模式" : "切换夜间模式"}>
@@ -482,6 +530,20 @@ export default function StudentPage() {
           <button type="button" className="topbar-icon-btn" onClick={() => setSettingsOpen((v) => !v)} title="设置">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           </button>
+          {mode === "competition" && !pitchTimerRunning && (
+            <div className="topbar-pitch-group">
+              <select className="topbar-pitch-dur" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
+                <option value={180}>3分钟</option>
+                <option value={300}>5分钟</option>
+                <option value={420}>7分钟</option>
+                <option value={600}>10分钟</option>
+              </select>
+              <button type="button" className="topbar-btn pitch-start" onClick={startPitchTimer}>🎤 路演计时</button>
+            </div>
+          )}
+          {pitchTimerRunning && (
+            <button type="button" className="topbar-btn pitch-stop" onClick={stopPitchTimer}>停止计时</button>
+          )}
           <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
             {rightOpen ? "收起面板" : "分析面板"}
           </button>
@@ -497,6 +559,15 @@ export default function StudentPage() {
             <label>学生ID <input value={studentId} onChange={(e) => setStudentId(e.target.value)} /></label>
             <label>班级 <input value={classId} onChange={(e) => setClassId(e.target.value)} /></label>
             <label>学期 <input value={cohortId} onChange={(e) => setCohortId(e.target.value)} /></label>
+            <label>目标赛事
+              <select value={competitionType} onChange={(e) => setCompetitionType(e.target.value as CompetitionType)} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg-secondary)",color:"var(--text-primary)"}}>
+                <option value="">不指定</option>
+                <option value="internet_plus">互联网+/中国国际大学生创新大赛</option>
+                <option value="challenge_cup">挑战杯</option>
+                <option value="innovation">创新创业大赛</option>
+                <option value="math_modeling">数学建模</option>
+              </select>
+            </label>
           </div>
         </div>
       )}
@@ -541,7 +612,8 @@ export default function StudentPage() {
                   {[
                     { icon: "💡", text: "我想做一个校园二手交易平台，目标用户是大学生" },
                     { icon: "🔍", text: "帮我分析一下我的商业模式有什么问题" },
-                    { icon: "📚", text: "什么是MVP，教我怎么做" },
+                    { icon: "📚", text: "什么是TAM/SAM/SOM？我应该怎么写？" },
+                    { icon: "🏆", text: "我要参加中国国际大学生创新大赛，帮我评估项目" },
                   ].map((h) => (
                     <button key={h.text} className="hint-chip" onClick={() => { setInput(h.text); textareaRef.current?.focus(); }}>
                       <span className="hint-icon">{h.icon}</span>
@@ -581,6 +653,7 @@ export default function StudentPage() {
                         )}
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
                         {loading && i === messages.length - 1 && <span className="streaming-cursor" />}
+                        {m.text && !loading && <div className="ai-disclaimer">⚠ AI生成，仅供参考</div>}
                       </>
                     ) : (
                       m.text

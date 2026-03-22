@@ -15,8 +15,23 @@ class JsonStorage:
     def load_project(self, project_id: str) -> dict:
         target = self._project_file(project_id)
         if not target.exists():
-            return {"project_id": project_id, "submissions": [], "teacher_feedback": []}
-        return json.loads(target.read_text(encoding="utf-8"))
+            return {
+                "project_id": project_id,
+                "submissions": [],
+                "teacher_feedback": [],
+                "teacher_annotations": [],
+                "teacher_feedback_files": [],
+                "teacher_document_edits": [],
+            }
+        data = json.loads(target.read_text(encoding="utf-8"))
+        # 确保新增字段存在
+        if "teacher_annotations" not in data:
+            data["teacher_annotations"] = []
+        if "teacher_feedback_files" not in data:
+            data["teacher_feedback_files"] = []
+        if "teacher_document_edits" not in data:
+            data["teacher_document_edits"] = []
+        return data
 
     def save_project(self, project_id: str, payload: dict) -> None:
         target = self._project_file(project_id)

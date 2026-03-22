@@ -30,6 +30,7 @@ from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
 from app.services.rag_engine import RagEngine
 from app.services.storage import ConversationStorage, JsonStorage
+from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
 app = FastAPI(title=settings.app_name)
 app.add_middleware(
@@ -57,6 +58,9 @@ composer_llm = LlmClient()
 rag_engine = RagEngine()
 rag_engine.initialize()
 init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
+
+# Setup teacher file feedback routes
+setup_teacher_file_feedback_routes(app, json_store, settings)
 
 
 @app.get("/health", response_model=HealthResponse)

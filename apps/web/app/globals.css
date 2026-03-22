@@ -4158,46 +4158,106 @@ pre {
   cursor: pointer;
 }
 
-/* ── Student Page: Pitch Timer ── */
-.topbar-pitch-group {
+/* ── Student Page: Pitch Timer (Launcher) ── */
+.pitch-launcher {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(224,112,112,0.35);
+  background: rgba(224,112,112,0.06);
 }
-.topbar-pitch-dur {
+.pitch-dur-select {
   font-size: 11px;
-  padding: 3px 6px;
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  padding: 5px 8px;
+  border: none;
+  border-right: 1px solid rgba(224,112,112,0.25);
+  background: transparent;
+  color: var(--text-secondary);
   cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  width: auto;
+  border-radius: 0;
 }
-.pitch-start {
-  background: linear-gradient(135deg, #e07070, #e0a84c) !important;
+.pitch-start-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: none;
+  background: linear-gradient(135deg, #e07070, #d45050);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+  border-radius: 0;
+  transition: filter 0.15s;
 }
-.pitch-stop {
-  background: #e07070 !important;
+.pitch-start-btn:hover { filter: brightness(1.15); }
+.pitch-stop-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  border: 1px solid rgba(224,112,112,0.4);
+  background: rgba(224,112,112,0.12);
+  color: #e07070;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0;
+  transition: all 0.15s;
 }
-.topbar-pitch-timer {
-  font-size: 18px;
+.pitch-stop-btn:hover { background: rgba(224,112,112,0.2); }
+
+/* ── Pitch Timer Ring Display ── */
+.pitch-timer-display {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 2px;
+  border-radius: 20px;
+  background: rgba(92,189,138,0.08);
+  border: 1px solid rgba(92,189,138,0.25);
+  animation: timerGlow 2s ease-in-out infinite;
+}
+.pitch-timer-display.warning {
+  background: rgba(224,168,76,0.08);
+  border-color: rgba(224,168,76,0.3);
+}
+.pitch-timer-display.urgent {
+  background: rgba(224,112,112,0.1);
+  border-color: rgba(224,112,112,0.4);
+  animation: timerUrgent 0.6s ease-in-out infinite;
+}
+.pitch-timer-ring {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+.pitch-timer-text {
+  font-size: 16px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: #5cbd8a;
-  padding: 2px 10px;
-  border-radius: 6px;
-  background: rgba(92,189,138,0.1);
-  border: 1px solid rgba(92,189,138,0.3);
-  animation: timerPulse 1s ease-in-out infinite;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
 }
-.topbar-pitch-timer.urgent {
+.pitch-timer-display.urgent .pitch-timer-text {
   color: #e07070;
-  background: rgba(224,112,112,0.12);
-  border-color: rgba(224,112,112,0.4);
-  animation: timerUrgent 0.5s ease-in-out infinite;
 }
-@keyframes timerPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.85; } }
-@keyframes timerUrgent { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes timerGlow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 8px rgba(92,189,138,0.15); }
+}
+@keyframes timerUrgent {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 transparent; }
+  50% { opacity: 0.7; box-shadow: 0 0 12px rgba(224,112,112,0.3); }
+}
 
 /* ═══════════════════════════════════════ */
 /* ═══  Admin Page Styles  ═══════════════ */

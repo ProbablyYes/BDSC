@@ -514,9 +514,16 @@ export default function StudentPage() {
           )}
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
           {pitchTimerRunning && (
-            <span className={`topbar-pitch-timer ${pitchTimer <= 30 ? "urgent" : ""}`}>
-              🎤 {formatTime(pitchTimer)}
-            </span>
+            <div className={`pitch-timer-display ${pitchTimer <= 30 ? "urgent" : pitchTimer <= 60 ? "warning" : ""}`}>
+              <svg className="pitch-timer-ring" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--border)" strokeWidth="2" />
+                <circle cx="18" cy="18" r="15.5" fill="none" strokeWidth="2.5" strokeLinecap="round"
+                  stroke={pitchTimer <= 30 ? "#e07070" : pitchTimer <= 60 ? "#e0a84c" : "#5cbd8a"}
+                  strokeDasharray={`${(pitchTimer / pitchDuration) * 97.4} 97.4`}
+                  transform="rotate(-90 18 18)" />
+              </svg>
+              <span className="pitch-timer-text">{formatTime(pitchTimer)}</span>
+            </div>
           )}
         </div>
         <div className="topbar-right">
@@ -531,18 +538,24 @@ export default function StudentPage() {
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           </button>
           {mode === "competition" && !pitchTimerRunning && (
-            <div className="topbar-pitch-group">
-              <select className="topbar-pitch-dur" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
-                <option value={180}>3分钟</option>
-                <option value={300}>5分钟</option>
-                <option value={420}>7分钟</option>
-                <option value={600}>10分钟</option>
+            <div className="pitch-launcher">
+              <select className="pitch-dur-select" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
+                <option value={180}>3 min</option>
+                <option value={300}>5 min</option>
+                <option value={420}>7 min</option>
+                <option value={600}>10 min</option>
               </select>
-              <button type="button" className="topbar-btn pitch-start" onClick={startPitchTimer}>🎤 路演计时</button>
+              <button type="button" className="pitch-start-btn" onClick={startPitchTimer}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                路演模拟
+              </button>
             </div>
           )}
           {pitchTimerRunning && (
-            <button type="button" className="topbar-btn pitch-stop" onClick={stopPitchTimer}>停止计时</button>
+            <button type="button" className="pitch-stop-btn" onClick={stopPitchTimer}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              结束
+            </button>
           )}
           <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
             {rightOpen ? "收起面板" : "分析面板"}

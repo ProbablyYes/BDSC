@@ -187,9 +187,9 @@ def _compose_assistant_message(
     context_block = (
         f"## 诊断结果\n瓶颈: {bottleneck}\n触发风险: {rule_text}\n综合评分: {score}\n"
         f"## 下一步任务\n标题: {task_title}\n描述: {task_desc}\n验收标准: {accept}\n"
-        f"## Critic反驳\n反事实追问: {challenge[:3]}\n"
-        f"## Planner建议\n执行计划: {plan[:3]}\n"
-        f"## 苏格拉底追问\n{socratic[:3]}\n"
+        f"## Critic反驳\n反事实追问: {challenge[:6]}\n"
+        f"## Planner建议\n执行计划: {plan[:5]}\n"
+        f"## 苏格拉底追问\n{socratic[:5]}\n"
     )
     if hyper_note:
         context_block += f"## 超图洞察\n{hyper_note}\n"
@@ -201,11 +201,12 @@ def _compose_assistant_message(
                 "请基于以下多Agent诊断结果，用自然流畅的中文给学生写一段回复。\n"
                 "要求：\n"
                 "1. 先简要回应学生说的话，体现你在认真倾听\n"
-                "2. 指出最关键的1-2个风险，用通俗语言解释为什么这是问题\n"
+                "2. 将诊断中发现的所有重要风险都展开讨论，用通俗语言解释为什么这是问题\n"
                 "3. 给出唯一的下一步任务，说清楚要做什么、怎么做\n"
-                "4. 用苏格拉底式追问收尾——提一个让学生深入思考的问题\n"
-                "5. 语气像导师跟学生聊天，不要用表格或列表标记符号，不要说'根据诊断结果'\n"
-                "6. 控制在200-400字\n"
+                "4. 用苏格拉底式追问收尾——提2-3个让学生深入思考的问题\n"
+                "5. 语气像导师跟学生聊天，不要说'根据诊断结果'\n"
+                "6. 回复长度600-1200字，宁可长一些也不要丢掉有价值的分析洞察\n"
+                "7. 回复末尾附上：⚠ AI生成，仅供参考\n"
             ),
             user_prompt=f"学生说：{user_message}\n\n诊断上下文：\n{context_block}",
             model=settings.llm_reason_model,

@@ -21,7 +21,6 @@ from app.services.document_parser import (
 )
 from app.services.llm_client import LlmClient
 
-
 def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
     """配置所有教师文件反馈相关的路由"""
     

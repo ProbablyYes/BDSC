@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
@@ -21,16 +21,17 @@ function getRuleDisplayName(ruleName: string): string {
 // 骨架屏加载器组件
 function SkeletonLoader({ rows = 3, type = "bar" }: { rows?: number; type?: "bar" | "card" | "table" }) {
   return (
-    <div style={{ animation: "skeleton-pulse 2s infinite" }}>
+    <div style={{ opacity: 0.7 }}>
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
           style={{
-            height: type === "bar" ? 40 : type === "card" ? 120 : 50,
-            backgroundColor: "var(--skeleton-bg, #e8e8e8)",
-            borderRadius: 8,
-            marginBottom: 12,
+            height: type === "bar" ? 40 : type === "card" ? 100 : 44,
+            background: "var(--bg-card)",
+            borderRadius: 10,
+            marginBottom: 10,
             animation: "skeleton-loading 1.5s ease-in-out infinite",
+            border: "1px solid var(--border)",
           }}
         />
       ))}
@@ -49,15 +50,18 @@ function SuccessToast({ message, onClose }: { message: string; onClose: () => vo
     <div
       style={{
         position: "fixed",
-        top: 80,
+        top: 72,
         right: 20,
         padding: "12px 20px",
-        backgroundColor: "#2ecc71",
-        color: "white",
-        borderRadius: 8,
-        boxShadow: "0 4px 12px rgba(46, 204, 113, 0.3)",
+        background: "var(--tch-success-soft, rgba(92,189,138,0.15))",
+        color: "var(--tch-success, #5cbd8a)",
+        border: "1px solid rgba(92,189,138,0.3)",
+        borderRadius: 10,
+        backdropFilter: "blur(12px)",
         animation: "toast-slide-in 0.3s ease-out",
         zIndex: 1000,
+        fontWeight: 600,
+        fontSize: 13,
       }}
     >
       ✓ {message}
@@ -65,7 +69,6 @@ function SuccessToast({ message, onClose }: { message: string; onClose: () => vo
   );
 }
 
-// 错误提示组件
 function ErrorToast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onClose, 4000);
@@ -76,18 +79,21 @@ function ErrorToast({ message, onClose }: { message: string; onClose: () => void
     <div
       style={{
         position: "fixed",
-        top: 80,
+        top: 72,
         right: 20,
         padding: "12px 20px",
-        backgroundColor: "#e74c3c",
-        color: "white",
-        borderRadius: 8,
-        boxShadow: "0 4px 12px rgba(231, 76, 60, 0.3)",
+        background: "var(--tch-danger-soft, rgba(224,112,112,0.15))",
+        color: "var(--tch-danger, #e07070)",
+        border: "1px solid rgba(224,112,112,0.3)",
+        borderRadius: 10,
+        backdropFilter: "blur(12px)",
         animation: "toast-slide-in 0.3s ease-out",
         zIndex: 1001,
+        fontWeight: 600,
+        fontSize: 13,
       }}
     >
-      ⚠️ {message}
+      ⚠ {message}
     </div>
   );
 }
@@ -146,7 +152,7 @@ function PieChart({
             x="100"
             y="110"
             textAnchor="middle"
-            fill="#333"
+            fill="var(--text-primary)"
             fontSize="12"
             fontWeight="600"
             style={{ pointerEvents: "none" }}
@@ -172,7 +178,7 @@ function PieChart({
 
 export default function TeacherPage() {
   const [tab, setTab] = useState<Tab>("overview");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [projectId, setProjectId] = useState("demo-project-001");
   const [teacherId, setTeacherId] = useState("teacher-001");
   const [classId, setClassId] = useState("");
@@ -327,7 +333,7 @@ export default function TeacherPage() {
       // 编辑模式：显示可编辑的纯文本框（无图片）
       return (
         <div>
-          <div style={{ fontSize: "12px", color: "#666", marginBottom: "8px", padding: "0 4px" }}>
+          <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginBottom: "8px", padding: "0 4px" }}>
             ✏️ 编辑模式 - 纯文本（仅显示文字内容，不包含图片或格式）
           </div>
           <textarea
@@ -337,13 +343,13 @@ export default function TeacherPage() {
               width: "100%",
               maxHeight: "400px",
               padding: "12px",
-              borderRadius: "6px",
-              border: "2px solid #4a90e2",
+              borderRadius: "8px",
+              border: "2px solid var(--accent)",
               fontSize: "13px",
               lineHeight: "1.6",
               fontFamily: "monospace",
               boxSizing: "border-box",
-              backgroundColor: "#fffef5",
+              background: "var(--bg-card)",
             }}
           />
         </div>
@@ -366,16 +372,16 @@ export default function TeacherPage() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "10px 12px",
-            backgroundColor: "#f5f5f5",
-            borderRadius: "4px",
-            border: "1px solid #e0e0e0",
+            backgroundColor: "var(--bg-card)",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
           }}>
-            <div style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: "500" }}>
               📄 PDF 文档 - 共 {onlinePreviewData.page_count || "?"} 页 ({Math.round((onlinePreviewData.file_size || 0) / 1024)} KB)
             </div>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
               {pdfAnalysisLoading && (
-                <span style={{ fontSize: "12px", color: "#ff9800" }}>⚙️ 正在分析...</span>
+                <span style={{ fontSize: "12px", color: "var(--tch-warning)" }}>⚙️ 正在分析...</span>
               )}
               <a
                 href={pdfDataUrl}
@@ -383,11 +389,11 @@ export default function TeacherPage() {
                 style={{
                   padding: "6px 12px",
                   fontSize: "12px",
-                  backgroundColor: "#4a90e2",
-                  color: "white",
+                  backgroundColor: "var(--accent)",
+                  color: "var(--bg-secondary)",
                   textDecoration: "none",
                   border: "none",
-                  borderRadius: "3px",
+                  borderRadius: "8px",
                   cursor: "pointer",
                   transition: "background-color 0.2s",
                 }}
@@ -404,18 +410,18 @@ export default function TeacherPage() {
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              backgroundColor: "#fff",
-              borderRadius: "4px",
-              border: "1px solid #e0e0e0",
+              backgroundColor: "var(--bg-secondary)",
+              borderRadius: "8px",
+              border: "1px solid var(--border)",
               overflow: "hidden",
             }}>
               <div style={{
                 fontSize: "12px",
                 fontWeight: "500",
                 padding: "8px 12px",
-                backgroundColor: "#f9f9f9",
-                borderBottom: "1px solid #e0e0e0",
-                color: "#666",
+                backgroundColor: "var(--bg-card)",
+                borderBottom: "1px solid var(--border)",
+                color: "var(--text-secondary)",
               }}>
                 原文件预览
               </div>
@@ -424,7 +430,7 @@ export default function TeacherPage() {
                 style={{
                   flex: 1,
                   border: "none",
-                  borderRadius: "0 0 4px 0",
+                  borderRadius: "0 0 8px 0",
                 }}
                 title="PDF Preview"
               />
@@ -435,18 +441,18 @@ export default function TeacherPage() {
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              backgroundColor: "#fafafa",
-              borderRadius: "4px",
-              border: "1px solid #e0e0e0",
+              backgroundColor: "var(--bg-card)",
+              borderRadius: "8px",
+              border: "1px solid var(--border)",
               overflow: "hidden",
             }}>
               <div style={{
                 fontSize: "12px",
                 fontWeight: "500",
                 padding: "8px 12px",
-                backgroundColor: "#e8f5e9",
-                borderBottom: "1px solid #e0e0e0",
-                color: "#2e7d32",
+                background: "var(--tch-success-soft, rgba(92,189,138,0.12))",
+                borderBottom: "1px solid var(--border)",
+                color: "var(--tch-success)",
               }}>
                 🤖 AI智能分析摘要
               </div>
@@ -466,13 +472,13 @@ export default function TeacherPage() {
                     justifyContent: "center",
                     height: "100%",
                     gap: "12px",
-                    color: "#999",
+                    color: "var(--text-muted)",
                   }}>
                     <div style={{
                       width: "30px",
                       height: "30px",
-                      border: "3px solid #e0e0e0",
-                      borderTopColor: "#4a90e2",
+                      border: "3px solid var(--border)",
+                      borderTopColor: "var(--accent)",
                       borderRadius: "50%",
                       animation: "spin 0.8s linear infinite",
                     }} />
@@ -482,15 +488,15 @@ export default function TeacherPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                     {/* 总结 */}
                     <div>
-                      <div style={{ fontWeight: "600", color: "#1976d2", marginBottom: "6px" }}>
+                      <div style={{ fontWeight: "600", color: "var(--accent)", marginBottom: "6px" }}>
                         📝 内容总结
                       </div>
                       <div style={{
-                        backgroundColor: "#fff",
+                        backgroundColor: "var(--bg-secondary)",
                         padding: "10px",
-                        borderRadius: "3px",
-                        border: "1px solid #e3f2fd",
-                        color: "#333",
+                        borderRadius: "8px",
+                        border: "1px solid var(--border)",
+                        color: "var(--text-primary)",
                       }}>
                         {analysis?.summary || "暂无总结"}
                       </div>
@@ -499,19 +505,19 @@ export default function TeacherPage() {
                     {/* 关键要点 */}
                     {analysis?.key_points && analysis.key_points.length > 0 && (
                       <div>
-                        <div style={{ fontWeight: "600", color: "#d32f2f", marginBottom: "6px" }}>
+                        <div style={{ fontWeight: "600", color: "var(--tch-danger)", marginBottom: "6px" }}>
                           ⭐ 关键要点
                         </div>
                         <ul style={{
                           margin: 0,
                           paddingLeft: "20px",
-                          backgroundColor: "#fff",
+                          backgroundColor: "var(--bg-secondary)",
                           padding: "10px",
-                          borderRadius: "3px",
-                          border: "1px solid #ffebee",
+                          borderRadius: "8px",
+                          border: "1px solid var(--border)",
                         }}>
                           {analysis.key_points.map((point: string, idx: number) => (
-                            <li key={idx} style={{ marginBottom: idx < analysis.key_points.length - 1 ? "6px" : 0, color: "#333" }}>
+                            <li key={idx} style={{ marginBottom: idx < analysis.key_points.length - 1 ? "6px" : 0, color: "var(--text-primary)" }}>
                               {point}
                             </li>
                           ))}
@@ -522,26 +528,26 @@ export default function TeacherPage() {
                     {/* 重点关注领域 */}
                     {analysis?.focus_areas && analysis.focus_areas.length > 0 && (
                       <div>
-                        <div style={{ fontWeight: "600", color: "#f57c00", marginBottom: "6px" }}>
+                        <div style={{ fontWeight: "600", color: "var(--tch-warning)", marginBottom: "6px" }}>
                           🎯 重点领域
                         </div>
                         <div style={{
                           display: "flex",
                           flexWrap: "wrap",
                           gap: "6px",
-                          backgroundColor: "#fff",
+                          backgroundColor: "var(--bg-secondary)",
                           padding: "10px",
-                          borderRadius: "3px",
-                          border: "1px solid #ffe0b2",
+                          borderRadius: "8px",
+                          border: "1px solid var(--border)",
                         }}>
                           {analysis.focus_areas.map((area: string, idx: number) => (
                             <div key={idx} style={{
-                              backgroundColor: "#fff3cd",
+                              background: "var(--tch-warning-soft)",
                               padding: "4px 10px",
-                              borderRadius: "12px",
+                              borderRadius: "8px",
                               fontSize: "12px",
-                              color: "#856404",
-                              border: "1px solid #ffeeba",
+                              color: "var(--tch-warning)",
+                              border: "1px solid var(--border)",
                             }}>
                               {area}
                             </div>
@@ -553,15 +559,15 @@ export default function TeacherPage() {
                     {/* 深度见解 */}
                     {analysis?.insights && (
                       <div>
-                        <div style={{ fontWeight: "600", color: "#7b1fa2", marginBottom: "6px" }}>
+                        <div style={{ fontWeight: "600", color: "var(--accent-text)", marginBottom: "6px" }}>
                           💡 深度见解
                         </div>
                         <div style={{
-                          backgroundColor: "#fff",
+                          backgroundColor: "var(--bg-secondary)",
                           padding: "10px",
-                          borderRadius: "3px",
-                          border: "1px solid #f3e5f5",
-                          color: "#333",
+                          borderRadius: "8px",
+                          border: "1px solid var(--border)",
+                          color: "var(--text-primary)",
                           whiteSpace: "pre-wrap",
                           wordBreak: "break-word",
                         }}>
@@ -574,9 +580,9 @@ export default function TeacherPage() {
                     {pdfStats && (
                       <div style={{
                         fontSize: "11px",
-                        color: "#999",
+                        color: "var(--text-muted)",
                         paddingTop: "8px",
-                        borderTop: "1px solid #e0e0e0",
+                        borderTop: "1px solid var(--border)",
                       }}>
                         文档统计: 共 {pdfStats.total_pages} 页 | 已分析 {pdfStats.extracted_pages} 页 | 共 {pdfStats.total_chars} 字符
                       </div>
@@ -588,7 +594,7 @@ export default function TeacherPage() {
                     alignItems: "center",
                     justifyContent: "center",
                     height: "100%",
-                    color: "#999",
+                    color: "var(--text-muted)",
                     textAlign: "center",
                   }}>
                     <div>
@@ -619,11 +625,11 @@ export default function TeacherPage() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "8px 12px",
-            backgroundColor: "#f5f5f5",
-            borderRadius: "4px",
-            borderBottom: "1px solid #e0e0e0",
+            backgroundColor: "var(--bg-card)",
+            borderRadius: "8px",
+            borderBottom: "1px solid var(--border)",
           }}>
-            <div style={{ fontSize: "12px", color: "#666" }}>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
               {displayName} 
               {onlinePreviewData.slide_count ? ` - 共 ${onlinePreviewData.slide_count} 页` : ""}
               ({onlinePreviewData.file_size || 0} 字节)
@@ -632,13 +638,13 @@ export default function TeacherPage() {
           <div style={{
             maxHeight: "500px",
             overflowY: "auto",
-            backgroundColor: "white",
-            borderRadius: "4px",
-            border: "1px solid #e0e0e0",
+            backgroundColor: "var(--bg-secondary)",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
             padding: "12px",
             fontSize: "14px",
             lineHeight: "1.8",
-            color: "#333",
+            color: "var(--text-primary)",
           }}>
             <div 
               dangerouslySetInnerHTML={{ __html: onlinePreviewData.html_content }}
@@ -646,7 +652,7 @@ export default function TeacherPage() {
                 "& h1, & h2, & h3": { marginTop: "16px", marginBottom: "8px" },
                 "& p": { marginBottom: "8px" },
                 "& table": { width: "100%", borderCollapse: "collapse" },
-                "& td, & th": { border: "1px solid #ddd", padding: "8px" }
+                "& td, & th": { border: "1px solid var(--border)", padding: "8px" }
               } as any}
             />
           </div>
@@ -663,15 +669,15 @@ export default function TeacherPage() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "300px",
-          backgroundColor: "#f9f9f9",
-          borderRadius: "6px",
-          border: "1px solid #e0e0e0",
+          backgroundColor: "var(--bg-card)",
+          borderRadius: "8px",
+          border: "1px solid var(--border)",
           textAlign: "center",
         }}>
           <div style={{ fontSize: "24px", marginBottom: "12px", animation: "spin 1s linear infinite" }}>
             ⚙️
           </div>
-          <div style={{ fontSize: "14px", color: "#666" }}>正在加载文件预览...</div>
+          <div style={{ fontSize: "14px", color: "var(--text-secondary)" }}>正在加载文件预览...</div>
         </div>
       );
     }
@@ -681,19 +687,19 @@ export default function TeacherPage() {
       if (onlinePreviewData?.raw_text && onlinePreviewData.raw_text.trim()) {
         return (
           <div>
-            <div style={{ fontSize: "12px", color: "#f39c12", marginBottom: "8px", padding: "8px", backgroundColor: "#fffef5", borderRadius: "4px" }}>
+            <div style={{ fontSize: "12px", color: "var(--tch-warning)", marginBottom: "8px", padding: "8px", background: "var(--bg-card)", borderRadius: "8px" }}>
               💡 原始文件不可用，显示的是提取的文本内容预览
             </div>
             <div style={{
               maxHeight: "450px",
               overflowY: "auto",
-              backgroundColor: "white",
+              backgroundColor: "var(--bg-secondary)",
               padding: "12px",
-              borderRadius: "6px",
-              border: "1px solid #e0e0e0",
+              borderRadius: "8px",
+              border: "1px solid var(--border)",
               fontSize: "13px",
               lineHeight: "1.6",
-              color: "#333",
+              color: "var(--text-primary)",
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
             }}>
@@ -711,13 +717,13 @@ export default function TeacherPage() {
         <div style={{
           maxHeight: "400px",
           overflowY: "auto",
-          backgroundColor: "white",
+          backgroundColor: "var(--bg-secondary)",
           padding: "12px",
-          borderRadius: "6px",
-          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+          border: "1px solid var(--border)",
           fontSize: "13px",
           lineHeight: "1.6",
-          color: "#333",
+          color: "var(--text-primary)",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
         }}>
@@ -734,30 +740,30 @@ export default function TeacherPage() {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "300px",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "6px",
-        border: "2px dashed #ccc",
+        backgroundColor: "var(--bg-card)",
+        borderRadius: "8px",
+        border: "2px dashed var(--border)",
         padding: "20px",
         textAlign: "center",
       }}>
         <div style={{ fontSize: "48px", marginBottom: "12px" }}>{fileInfo.icon}</div>
-        <div style={{ fontSize: "16px", fontWeight: "600", color: "#333", marginBottom: "8px" }}>
+        <div style={{ fontSize: "16px", fontWeight: "600", color: "var(--text-primary)", marginBottom: "8px" }}>
           {fileInfo.displayName}
         </div>
-        <div style={{ fontSize: "13px", color: "#666", marginBottom: "12px" }}>
+        <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "12px" }}>
           {selectedFile.filename}
         </div>
-        <div style={{ fontSize: "12px", color: "#999", maxWidth: "300px", lineHeight: "1.6" }}>
+        <div style={{ fontSize: "12px", color: "var(--text-muted)", maxWidth: "300px", lineHeight: "1.6" }}>
           文件预览功能正在加载或暂时不可用，但已自动提取文本内容。您可以在编辑模式中查看和修改提取的文本。
         </div>
         {editedContent && (
           <div style={{
             fontSize: "12px",
-            color: "#2196f3",
+            color: "var(--accent)",
             marginTop: "12px",
             padding: "8px 12px",
-            backgroundColor: "#e3f2fd",
-            borderRadius: "4px",
+            background: "var(--tch-accent-soft, rgba(107,138,255,0.12))",
+            borderRadius: "8px",
           }}>
             ✓ 已提取 {editedContent.length} 个字符的文本内容
           </div>
@@ -1155,17 +1161,14 @@ export default function TeacherPage() {
   }
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("tch-theme") || "light";
-    const isDark = savedTheme === "dark";
-    setIsDarkMode(isDark);
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const saved = localStorage.getItem("tch-theme") as "dark" | "light" | null;
+    if (saved) setTheme(saved);
   }, []);
 
   useEffect(() => {
-    const theme = isDarkMode ? "dark" : "light";
     localStorage.setItem("tch-theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
-  }, [isDarkMode]);
+  }, [theme]);
 
   useEffect(() => { loadDashboard(); }, []);
 
@@ -1209,12 +1212,17 @@ export default function TeacherPage() {
         </div>
         <div className="topbar-right">
           <button 
-            className="topbar-btn theme-toggle" 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            title={isDarkMode ? "切换到白天模式" : "切换到黑夜模式"}
+            type="button"
+            className="topbar-icon-btn" 
+            onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")}
+            title={theme === "dark" ? "切换日间模式" : "切换夜间模式"}
             suppressHydrationWarning
           >
-            <span suppressHydrationWarning>{isDarkMode ? "☀️ 白天" : "🌙 黑夜"}</span>
+            {theme === "dark" ? (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            ) : (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            )}
           </button>
           <button className="topbar-btn" onClick={generateReport} disabled={loading}>生成AI报告</button>
           <Link href="/student" className="topbar-btn">学生端</Link>
@@ -1263,10 +1271,9 @@ export default function TeacherPage() {
                 left: 0,
                 right: 0,
                 height: "3px",
-                background: "linear-gradient(90deg, #4a90e2, #2ecc71)",
-                animation: "progress-line 1.5s ease-in-out infinite",
                 zIndex: 999,
               }}
+              className="tch-progress-bar"
             />
           )}
 
@@ -1287,14 +1294,14 @@ export default function TeacherPage() {
                 style={{
                   width: 40,
                   height: 40,
-                  border: "3px solid #e8e8e8",
-                  borderTop: "3px solid #4a90e2",
+                  border: "3px solid var(--border)",
+                  borderTop: "3px solid var(--accent)",
                   borderRadius: "50%",
                   animation: "spin 0.8s linear infinite",
                 }}
               />
               <p>{loadingMessage}...</p>
-              <p style={{ fontSize: 12, color: "#999" }}>请稍候</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)" }}>请稍候</p>
             </div>
           )}
 
@@ -1335,7 +1342,7 @@ export default function TeacherPage() {
                       <h3>📊 类别分布</h3>
                       <p className="tch-desc">学生项目的领域分类统计。点击类别可筛选。</p>
                       {(dashboard?.category_distribution ?? []).length === 0 ? (
-                        <p style={{ color: "#999", fontSize: 12 }}>暂无类别数据</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无类别数据</p>
                       ) : (
                         <>
                           <PieChart
@@ -1394,7 +1401,7 @@ export default function TeacherPage() {
                       <h3>⚠️ 最高风险规则</h3>
                       <p className="tch-desc">被触发最多次的风险规则。高频风险=班级共性问题，适合课堂重点讲解。</p>
                       {(dashboard?.top_risk_rules ?? []).length === 0 ? (
-                        <p style={{ color: "#999", fontSize: 12 }}>暂无风险规则数据</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无风险规则数据</p>
                       ) : (
                         <>
                           <PieChart
@@ -1453,7 +1460,7 @@ export default function TeacherPage() {
                   <p className="tch-desc">触发风险规则最多的项目，建议优先关注和干预。点击可查看详细证据链。</p>
                   <div className="table-like">
                     {(dashboard?.high_risk_projects ?? []).length === 0 ? (
-                      <p style={{ color: "#999", fontSize: 12, padding: 16 }}>暂无高风险项目数据</p>
+                      <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 16 }}>暂无高风险项目数据</p>
                     ) : (
                       (dashboard?.high_risk_projects ?? []).slice(0, 8).map((row: any, idx: number) => (
                         <button 
@@ -1487,7 +1494,7 @@ export default function TeacherPage() {
                   <span>时间</span><span>项目</span><span>学生</span><span>来源</span><span>评分</span><span>风险</span><span>操作</span>
                 </div>
                 {submissions.length === 0 ? (
-                  <p style={{ color: "#999", fontSize: 12, padding: 20, textAlign: "center" }}>📭 暂无提交记录。学生对话后这里会自动出现。</p>
+                  <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 20, textAlign: "center" }}>📭 暂无提交记录。学生对话后这里会自动出现。</p>
                 ) : (
                   submissions.map((s, i) => (
                     <div 
@@ -1503,7 +1510,7 @@ export default function TeacherPage() {
                         <span>{s.project_id}</span>
                         <span>{s.student_id}</span>
                         <span>{s.source_type}{s.filename ? ` (${s.filename})` : ""}</span>
-                        <span className="tch-cell-score" style={{ color: Number(s.overall_score) >= 7 ? "#2ecc71" : Number(s.overall_score) >= 5 ? "#f39c12" : "#e74c3c" }}>
+                        <span className="tch-cell-score" style={{ color: Number(s.overall_score) >= 7 ? "var(--tch-success)" : Number(s.overall_score) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>
                           {s.overall_score}
                         </span>
                         <span>{(s.triggered_rules ?? []).join(", ") || "-"}</span>
@@ -1554,21 +1561,7 @@ export default function TeacherPage() {
           {tab === "compare" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("class")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回班级
-                </button>
+                <button onClick={() => setTab("class")} className="tch-back-btn">← 返回班级</button>
               </div>
               <h2>📊 历史基线 vs 本班现状</h2>
               <p className="tch-desc">将本班数据与历史所有班级的平均水平对比。"风险强度"=平均每个项目触发的风险规则数，数值越低越好。差值为正表示本班风险高于历史平均。</p>
@@ -1587,7 +1580,7 @@ export default function TeacherPage() {
                   <span>📊 差值</span>
                   <strong style={{ 
                     fontSize: 28, 
-                    color: Number(compareData?.comparison?.risk_intensity_delta) > 0 ? "#e74c3c" : "#2ecc71"
+                    color: Number(compareData?.comparison?.risk_intensity_delta) > 0 ? "var(--tch-danger)" : "var(--tch-success)"
                   }}>
                     {compareData?.comparison?.risk_intensity_delta ?? "-"}
                   </strong>
@@ -1607,7 +1600,7 @@ export default function TeacherPage() {
                 </div>
                 <div className="kpi" style={{ transition: "all 0.3s ease" }}>
                   <span>⭐ Rubric 均分</span>
-                  <strong style={{ fontSize: 28, color: "#f39c12" }}>{compareData?.current_class?.avg_rubric_score ?? "-"}</strong>
+                  <strong style={{ fontSize: 28, color: "var(--tch-warning)" }}>{compareData?.current_class?.avg_rubric_score ?? "-"}</strong>
                   <em className="kpi-hint">9维度评分的平均值(满分10)</em>
                 </div>
               </div>
@@ -1615,7 +1608,7 @@ export default function TeacherPage() {
               <p className="tch-desc">系统根据对比差异自动生成的教学建议。建议在课堂上针对性讲解。</p>
               <div className="tch-recs" style={{ animation: "fade-in 0.6s ease-out" }}>
                 {(compareData?.recommendations ?? []).length === 0 ? (
-                  <p style={{ color: "#999", fontSize: 12 }}>暂无建议</p>
+                  <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无建议</p>
                 ) : (
                   (compareData?.recommendations ?? []).map((item: string, i: number) => (
                     <div 
@@ -1638,21 +1631,7 @@ export default function TeacherPage() {
           {tab === "evidence" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("project")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回项目
-                </button>
+                <button onClick={() => setTab("project")} className="tch-back-btn">← 返回项目</button>
               </div>
               <h2>🔗 项目证据链 — {selectedProject || projectId}</h2>
               <p className="tch-desc">证据链包括从Neo4j图数据库中提取的关键证据，以及学生提交的项目文件。证据越完整，项目越成熟。</p>
@@ -1688,16 +1667,16 @@ export default function TeacherPage() {
                               transition: "all 0.2s ease",
                             }}
                           >
-                            <strong style={{ color: "#4a90e2" }}>📝 {e.type}</strong>
+                            <strong style={{ color: "var(--accent-text)" }}>📝 {e.type}</strong>
                             <p style={{ margin: "8px 0" }}>{e.quote}</p>
-                            <em style={{ color: "#999" }}>来源: {e.source_unit}</em>
+                            <em style={{ color: "var(--text-muted)" }}>来源: {e.source_unit}</em>
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <div style={{ marginTop: 20, padding: 16, backgroundColor: "#f5f5f5", borderRadius: 8 }}>
-                      <p style={{ fontSize: 12, color: "#999" }}>📭 Neo4j中暂无结构化证据数据</p>
+                    <div style={{ marginTop: 20, padding: 16, background: "var(--bg-card)", borderRadius: 8 }}>
+                      <p style={{ fontSize: 12, color: "var(--text-muted)" }}>📭 Neo4j中暂无结构化证据数据</p>
                     </div>
                   )}
                   
@@ -1711,19 +1690,19 @@ export default function TeacherPage() {
                             key={s.submission_id} 
                             className="evidence-item" 
                             style={{ 
-                              borderLeft: "4px solid #2ecc71",
+                              borderLeft: "3px solid var(--tch-success)",
                               animation: `fade-in 0.3s ease-out ${idx * 0.05}s both`,
                               transition: "all 0.2s ease",
                             }}
                           >
                             <strong>📄 {s.filename}</strong>
-                            <p style={{ marginTop: 8, marginBottom: 10, fontSize: 12, color: "#666" }}>
+                            <p style={{ marginTop: 8, marginBottom: 10, fontSize: 12, color: "var(--text-secondary)" }}>
                               <em suppressHydrationWarning>学生: {s.student_id} | 提交时间: {s.created_at ? '已提交' : '未知'}</em>
                             </p>
                             
                             {/* Summary Section */}
                             {s.summary ? (
-                              <p style={{ fontSize: 13, color: "#333", fontWeight: 500, marginBottom: 10, padding: "8px 10px", backgroundColor: "#f0f8ff", borderRadius: 4 }}>
+                              <p style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500, marginBottom: 10, padding: "8px 10px", background: "var(--bg-card)", borderRadius: 4 }}>
                                 {s.summary}
                               </p>
                             ) : null}
@@ -1731,8 +1710,8 @@ export default function TeacherPage() {
                             {/* Diagnosis Details */}
                             {s.diagnosis && Object.keys(s.diagnosis).length > 0 ? (
                               <details style={{ fontSize: 12, marginTop: 8 }}>
-                                <summary style={{ cursor: "pointer", color: "#4a90e2", fontWeight: 500 }}>📊 查看详细诊断信息</summary>
-                                <div style={{ fontSize: 12, backgroundColor: "#f5f5f5", padding: 10, borderRadius: 4, marginTop: 8 }}>
+                                <summary style={{ cursor: "pointer", color: "var(--accent-text)", fontWeight: 500 }}>📊 查看详细诊断信息</summary>
+                                <div style={{ fontSize: 12, background: "var(--bg-card)", padding: 10, borderRadius: 4, marginTop: 8 }}>
                                   {s.diagnosis.overall_score !== undefined && (
                                     <p><strong>诊断评分:</strong> {s.diagnosis.overall_score.toFixed(2)}/5.0</p>
                                   )}
@@ -1742,7 +1721,7 @@ export default function TeacherPage() {
                                   {s.diagnosis.triggered_rules && s.diagnosis.triggered_rules.length > 0 ? (
                                     <p>
                                       <strong>触发规则:</strong> {s.diagnosis.triggered_rules.map((r: any) => (
-                                        <span key={r.id} style={{ display: "inline-block", marginRight: 8, padding: "2px 6px", backgroundColor: "#ffe6e6", borderRadius: 3, fontSize: 11 }}>
+                                        <span key={r.id} style={{ display: "inline-block", marginRight: 8, padding: "2px 6px", background: "var(--tch-danger-soft)", borderRadius: 3, fontSize: 11 }}>
                                           {r.id}: {r.name}
                                         </span>
                                       ))}
@@ -1756,8 +1735,8 @@ export default function TeacherPage() {
                       </div>
                     </div>
                   ) : (
-                    <div style={{ marginTop: 20, padding: 16, backgroundColor: "#f5f5f5", borderRadius: 8 }}>
-                      <p style={{ fontSize: 12, color: "#999" }}>📭 该项目暂无学生提交的文件</p>
+                    <div style={{ marginTop: 20, padding: 16, background: "var(--bg-card)", borderRadius: 8 }}>
+                      <p style={{ fontSize: 12, color: "var(--text-muted)" }}>📭 该项目暂无学生提交的文件</p>
                     </div>
                   )}
                   
@@ -1777,21 +1756,7 @@ export default function TeacherPage() {
           {tab === "report" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("class")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回班级
-                </button>
+                <button onClick={() => setTab("class")} className="tch-back-btn">← 返回班级</button>
               </div>
               <h2>🤖 AI 班级报告</h2>
               <p className="tch-desc">由AI基于全班提交数据自动生成的评估报告，包含风险分布、共性问题和教学建议。可反复生成获取最新分析。</p>
@@ -1807,8 +1772,8 @@ export default function TeacherPage() {
                   </div>
                   {reportSnapshot && (
                     <details className="debug-json" style={{ marginTop: 16, animation: "fade-in 0.5s ease-out" }}>
-                      <summary style={{ cursor: "pointer", color: "#4a90e2", fontWeight: "600" }}>📊 查看报告依据的原始数据</summary>
-                      <pre style={{ marginTop: 12, padding: 12, backgroundColor: "#f5f5f5", borderRadius: 6, overflow: "auto", maxHeight: 400 }}>
+                      <summary style={{ cursor: "pointer", color: "var(--accent-text)", fontWeight: "600" }}>📊 查看报告依据的原始数据</summary>
+                      <pre style={{ marginTop: 12, padding: 12, background: "var(--bg-card)", borderRadius: 6, overflow: "auto", maxHeight: 400 }}>
                         {JSON.stringify(reportSnapshot, null, 2)}
                       </pre>
                     </details>
@@ -1831,25 +1796,25 @@ export default function TeacherPage() {
               
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "20px" }}>
                 {/* 左侧：学生文件列表 + 文件查看 */}
-                <div style={{ backgroundColor: "#f9f9f9", padding: "16px", borderRadius: "8px", border: "1px solid #e0e0e0" }}>
-                  <h3 style={{ marginTop: 0, fontSize: "16px", color: "#333" }}>📤 学生提交文件</h3>
+                <div style={{ background: "var(--bg-card)", padding: "16px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                  <h3 style={{ marginTop: 0, fontSize: "16px", color: "var(--text-primary)" }}>📤 学生提交文件</h3>
                   
                   <div style={{marginBottom: "16px"}}>
                     <input 
                       value={selectedProject || projectId} 
                       onChange={(e) => setSelectedProject(e.target.value)}
                       placeholder="项目ID"
-                      style={{ width: "100%", padding: "8px", marginBottom: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
+                      style={{ width: "100%", padding: "8px", marginBottom: "8px", borderRadius: "8px", border: "1px solid var(--border)" }}
                     />
                     <button 
                       onClick={loadStudentFiles}
                       style={{
                         width: "100%",
                         padding: "8px 16px",
-                        backgroundColor: "#4a90e2",
-                        color: "white",
+                        background: "var(--accent)",
+                        color: "#fff",
                         border: "none",
-                        borderRadius: "4px",
+                        borderRadius: "8px",
                         cursor: "pointer",
                         fontSize: "14px",
                       }}
@@ -1867,30 +1832,30 @@ export default function TeacherPage() {
                           style={{
                             padding: "12px",
                             marginBottom: "8px",
-                            backgroundColor: selectedFile?.submission_id === file.submission_id ? "#e3f2fd" : "white",
-                            border: selectedFile?.submission_id === file.submission_id ? "2px solid #4a90e2" : "1px solid #ddd",
-                            borderRadius: "6px",
+                            background: selectedFile?.submission_id === file.submission_id ? "var(--tch-accent-soft)" : "var(--bg-secondary)",
+                            border: selectedFile?.submission_id === file.submission_id ? "2px solid var(--accent)" : "1px solid var(--border)",
+                            borderRadius: "8px",
                             cursor: "pointer",
                             transition: "all 0.2s ease",
                           }}
                         >
-                          <div style={{ fontSize: "13px", fontWeight: "600", color: "#333" }}>
+                          <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary)" }}>
                             {getFileTypeInfo(file.filename).icon} {file.filename}
                           </div>
-                          <div style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}>
+                          <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
                             {getFileTypeInfo(file.filename).displayName}
                           </div>
-                          <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-                            学生: {file.student_id} | 评分: <span style={{color: file.overall_score >= 7 ? "#2ecc71" : file.overall_score >= 5 ? "#f39c12" : "#e74c3c"}}>{file.overall_score}</span>
+                          <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                            学生: {file.student_id} | 评分: <span style={{color: file.overall_score >= 7 ? "var(--tch-success)" : file.overall_score >= 5 ? "var(--tch-warning)" : "var(--tch-danger)"}}>{file.overall_score}</span>
                           </div>
-                          <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>
+                          <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
                             <span suppressHydrationWarning>{file.created_at ? '已上传' : '未知'}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p style={{ fontSize: "13px", color: "#999", textAlign: "center", padding: "20px 0" }}>
+                    <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center", padding: "20px 0" }}>
                       📭 暂无学生文件提交，点击"刷新文件列表"查看
                     </p>
                   )}
@@ -1910,10 +1875,10 @@ export default function TeacherPage() {
                           style={{
                             padding: "6px 12px",
                             fontSize: "12px",
-                            backgroundColor: isEditMode ? "#ff9800" : "#e0e0e0",
-                            color: isEditMode ? "white" : "#333",
+                            background: isEditMode ? "var(--tch-warning)" : "var(--bg-card-hover)",
+                            color: isEditMode ? "#fff" : "var(--text-primary)",
                             border: "none",
-                            borderRadius: "4px",
+                            borderRadius: "8px",
                             cursor: "pointer",
                             transition: "all 0.2s",
                           }}
@@ -1928,10 +1893,10 @@ export default function TeacherPage() {
                               style={{
                                 padding: "6px 12px",
                                 fontSize: "12px",
-                                backgroundColor: "#ccc",
-                                color: "#333",
+                                background: "var(--bg-card-hover)",
+                                color: "var(--text-primary)",
                                 border: "none",
-                                borderRadius: "4px",
+                                borderRadius: "8px",
                                 cursor: "pointer",
                               }}
                             >
@@ -1942,10 +1907,10 @@ export default function TeacherPage() {
                               style={{
                                 padding: "6px 12px",
                                 fontSize: "12px",
-                                backgroundColor: "#4caf50",
-                                color: "white",
+                                background: "var(--tch-success)",
+                                color: "#fff",
                                 border: "none",
-                                borderRadius: "4px",
+                                borderRadius: "8px",
                                 cursor: "pointer",
                                 fontWeight: "600",
                               }}
@@ -1962,10 +1927,10 @@ export default function TeacherPage() {
                               style={{
                                 padding: "6px 12px",
                                 fontSize: "12px",
-                                backgroundColor: "#2196f3",
-                                color: "white",
+                                background: "var(--accent)",
+                                color: "#fff",
                                 border: "none",
-                                borderRadius: "4px",
+                                borderRadius: "8px",
                                 cursor: "pointer",
                               }}
                             >
@@ -1985,8 +1950,8 @@ export default function TeacherPage() {
                             width: "100%",
                             padding: "6px",
                             marginBottom: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ddd",
+                            borderRadius: "8px",
+                            border: "1px solid var(--border)",
                             fontSize: "12px",
                             boxSizing: "border-box",
                           }}
@@ -1998,13 +1963,13 @@ export default function TeacherPage() {
                       
                       {/* 编辑历史 */}
                       {documentEdits.length > 0 && !isEditMode && (
-                        <div style={{marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #e0e0e0"}}>
-                          <div style={{fontSize: "12px", fontWeight: "600", color: "#333", marginBottom: "6px"}}>📝 编辑历史：</div>
+                        <div style={{marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)"}}>
+                          <div style={{fontSize: "12px", fontWeight: "600", color: "var(--text-primary)", marginBottom: "6px"}}>📝 编辑历史：</div>
                           <div style={{maxHeight: "150px", overflowY: "auto"}}>
                             {documentEdits.slice(0, 5).map((edit, idx) => (
-                              <div key={idx} style={{fontSize: "11px", padding: "6px", marginBottom: "4px", backgroundColor: "#f0f0f0", borderRadius: "3px", borderLeft: "3px solid #2196f3"}}>
-                                <div style={{color: "#333"}}>{edit.edit_summary || "文档编辑"}</div>
-                                <div style={{color: "#999", marginTop: "2px"}}>
+                              <div key={idx} style={{fontSize: "11px", padding: "6px", marginBottom: "4px", background: "var(--bg-card)", borderRadius: "3px", borderLeft: "3px solid var(--accent)"}}>
+                                <div style={{color: "var(--text-primary)"}}>{edit.edit_summary || "文档编辑"}</div>
+                                <div style={{color: "var(--text-muted)", marginTop: "2px"}}>
                                   {edit.edited_length || 0} 字符 · <span suppressHydrationWarning>{edit.created_at ? '已编辑' : '未知'}</span>
                                 </div>
                               </div>
@@ -2017,14 +1982,14 @@ export default function TeacherPage() {
                 </div>
                 
                 {/* 右侧：反馈和批注 */}
-                <div style={{ backgroundColor: "#f9f9f9", padding: "16px", borderRadius: "8px", border: "1px solid #e0e0e0" }}>
-                  <h3 style={{ marginTop: 0, fontSize: "16px", color: "#333" }}>✏️ 添加批注 & 反馈</h3>
+                <div style={{ background: "var(--bg-card)", padding: "16px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                  <h3 style={{ marginTop: 0, fontSize: "16px", color: "var(--text-primary)" }}>✏️ 添加批注 & 反馈</h3>
                   
                   {selectedFile ? (
                     <>
                       {/* 文本级反馈 */}
                       <div style={{marginBottom: "16px"}}>
-                        <label style={{fontSize: "13px", fontWeight: "600", color: "#333", display: "block", marginBottom: "6px"}}>📝 文本反馈</label>
+                        <label style={{fontSize: "13px", fontWeight: "600", color: "var(--text-primary)", display: "block", marginBottom: "6px"}}>📝 文本反馈</label>
                         <textarea 
                           value={feedbackText} 
                           onChange={(e) => setFeedbackText(e.target.value)}
@@ -2033,13 +1998,13 @@ export default function TeacherPage() {
                           style={{
                             width: "100%",
                             padding: "8px",
-                            borderRadius: "4px",
-                            border: "1px solid #ddd",
+                            borderRadius: "8px",
+                            border: "1px solid var(--border)",
                             fontSize: "13px",
                             boxSizing: "border-box",
                           }}
                         />
-                        <div style={{fontSize: "12px", color: "#666", marginTop: "4px"}}>
+                        <div style={{fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px"}}>
                           关注标签：
                           <input 
                             value={feedbackTags} 
@@ -2050,7 +2015,7 @@ export default function TeacherPage() {
                               padding: "4px",
                               marginTop: "4px",
                               borderRadius: "3px",
-                              border: "1px solid #ddd",
+                              border: "1px solid var(--border)",
                               fontSize: "12px",
                             }}
                           />
@@ -2061,10 +2026,10 @@ export default function TeacherPage() {
                             width: "100%",
                             padding: "8px",
                             marginTop: "8px",
-                            backgroundColor: "#2ecc71",
-                            color: "white",
+                            background: "var(--tch-success)",
+                            color: "#fff",
                             border: "none",
-                            borderRadius: "4px",
+                            borderRadius: "8px",
                             cursor: "pointer",
                             fontSize: "13px",
                             fontWeight: "600",
@@ -2075,8 +2040,8 @@ export default function TeacherPage() {
                       </div>
                       
                       {/* 批注 */}
-                      <div style={{marginBottom: "16px", borderTop: "1px solid #e0e0e0", paddingTop: "12px"}}>
-                        <label style={{fontSize: "13px", fontWeight: "600", color: "#333", display: "block", marginBottom: "6px"}}>🎯 段落批注</label>
+                      <div style={{marginBottom: "16px", borderTop: "1px solid var(--border)", paddingTop: "12px"}}>
+                        <label style={{fontSize: "13px", fontWeight: "600", color: "var(--text-primary)", display: "block", marginBottom: "6px"}}>🎯 段落批注</label>
                         <select 
                           value={annotationType}
                           onChange={(e) => setAnnotationType(e.target.value)}
@@ -2085,7 +2050,7 @@ export default function TeacherPage() {
                             padding: "6px",
                             marginBottom: "8px",
                             borderRadius: "3px",
-                            border: "1px solid #ddd",
+                            border: "1px solid var(--border)",
                             fontSize: "12px",
                           }}
                         >
@@ -2103,7 +2068,7 @@ export default function TeacherPage() {
                             width: "100%",
                             padding: "6px",
                             borderRadius: "3px",
-                            border: "1px solid #ddd",
+                            border: "1px solid var(--border)",
                             fontSize: "12px",
                             boxSizing: "border-box",
                           }}
@@ -2114,8 +2079,8 @@ export default function TeacherPage() {
                             width: "100%",
                             padding: "6px",
                             marginTop: "6px",
-                            backgroundColor: "#f39c12",
-                            color: "white",
+                            background: "var(--tch-warning)",
+                            color: "#fff",
                             border: "none",
                             borderRadius: "3px",
                             cursor: "pointer",
@@ -2127,8 +2092,8 @@ export default function TeacherPage() {
                       </div>
                       
                       {/* 上传反馈文件 */}
-                      <div style={{borderTop: "1px solid #e0e0e0", paddingTop: "12px"}}>
-                        <label style={{fontSize: "13px", fontWeight: "600", color: "#333", display: "block", marginBottom: "6px"}}>📎 上传反馈文件</label>
+                      <div style={{borderTop: "1px solid var(--border)", paddingTop: "12px"}}>
+                        <label style={{fontSize: "13px", fontWeight: "600", color: "var(--text-primary)", display: "block", marginBottom: "6px"}}>📎 上传反馈文件</label>
                         <input 
                           ref={feedbackFileInputRef}
                           type="file"
@@ -2137,7 +2102,7 @@ export default function TeacherPage() {
                           style={{width: "100%", marginBottom: "6px"}}
                         />
                         {feedbackFileToUpload && (
-                          <div style={{fontSize: "12px", color: "#666", marginBottom: "6px"}}>
+                          <div style={{fontSize: "12px", color: "var(--text-secondary)", marginBottom: "6px"}}>
                             ✓ 已选择: {feedbackFileToUpload.name}
                           </div>
                         )}
@@ -2147,8 +2112,8 @@ export default function TeacherPage() {
                           style={{
                             width: "100%",
                             padding: "6px",
-                            backgroundColor: feedbackFileToUpload ? "#4a90e2" : "#ccc",
-                            color: "white",
+                            background: feedbackFileToUpload ? "var(--accent)" : "var(--bg-card-hover)",
+                            color: "#fff",
                             border: "none",
                             borderRadius: "3px",
                             cursor: feedbackFileToUpload ? "pointer" : "not-allowed",
@@ -2161,11 +2126,11 @@ export default function TeacherPage() {
                       
                       {/* 已上传的反馈文件列表 */}
                       {feedbackFiles.length > 0 && (
-                        <div style={{marginTop: "12px", borderTop: "1px solid #e0e0e0", paddingTop: "12px"}}>
-                          <div style={{fontSize: "12px", fontWeight: "600", color: "#333", marginBottom: "6px"}}>已上传反馈文件：</div>
+                        <div style={{marginTop: "12px", borderTop: "1px solid var(--border)", paddingTop: "12px"}}>
+                          <div style={{fontSize: "12px", fontWeight: "600", color: "var(--text-primary)", marginBottom: "6px"}}>已上传反馈文件：</div>
                           {feedbackFiles.map((file, idx) => (
-                            <div key={idx} style={{fontSize: "11px", color: "#666", padding: "4px", marginBottom: "4px", backgroundColor: "white", borderRadius: "3px"}}>
-                              📄 {file.original_filename} &nbsp; <a href={`${API}${file.file_url}`} target="_blank" style={{color: "#4a90e2"}}>下载</a>
+                            <div key={idx} style={{fontSize: "11px", color: "var(--text-secondary)", padding: "4px", marginBottom: "4px", background: "var(--bg-secondary)", borderRadius: "3px"}}>
+                              📄 {file.original_filename} &nbsp; <a href={`${API}${file.file_url}`} target="_blank" style={{color: "var(--accent)"}}>下载</a>
                             </div>
                           ))}
                         </div>
@@ -2173,13 +2138,13 @@ export default function TeacherPage() {
                       
                       {/* 批注列表 */}
                       {feedbackAnnotations.length > 0 && (
-                        <div style={{marginTop: "12px", borderTop: "1px solid #e0e0e0", paddingTop: "12px"}}>
-                          <div style={{fontSize: "12px", fontWeight: "600", color: "#333", marginBottom: "6px"}}>已保存的批注：</div>
+                        <div style={{marginTop: "12px", borderTop: "1px solid var(--border)", paddingTop: "12px"}}>
+                          <div style={{fontSize: "12px", fontWeight: "600", color: "var(--text-primary)", marginBottom: "6px"}}>已保存的批注：</div>
                           <div style={{maxHeight: "200px", overflowY: "auto"}}>
                             {feedbackAnnotations.map((ann, idx) => (
-                              <div key={idx} style={{fontSize: "11px", padding: "6px", marginBottom: "6px", backgroundColor: "white", borderRadius: "3px", borderLeft: "3px solid #f39c12"}}>
-                                <div style={{color: "#666"}}>{ann.overall_feedback || (ann.annotations?.[0]?.content || "")}</div>
-                                <div style={{color: "#999", marginTop: "2px"}} suppressHydrationWarning>{ann.created_at ? '已添加' : '未知'}</div>
+                              <div key={idx} style={{fontSize: "11px", padding: "6px", marginBottom: "6px", background: "var(--bg-secondary)", borderRadius: "3px", borderLeft: "3px solid var(--tch-warning)"}}>
+                                <div style={{color: "var(--text-secondary)"}}>{ann.overall_feedback || (ann.annotations?.[0]?.content || "")}</div>
+                                <div style={{color: "var(--text-muted)", marginTop: "2px"}} suppressHydrationWarning>{ann.created_at ? '已添加' : '未知'}</div>
                               </div>
                             ))}
                           </div>
@@ -2187,7 +2152,7 @@ export default function TeacherPage() {
                       )}
                     </>
                   ) : (
-                    <p style={{ fontSize: "13px", color: "#999", textAlign: "center", padding: "40px 20px" }}>
+                    <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center", padding: "40px 20px" }}>
                       👈 请从左侧选择一个学生文件以开始批注
                     </p>
                   )}
@@ -2203,21 +2168,7 @@ export default function TeacherPage() {
           {tab === "capability" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("class")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回班级
-                </button>
+                <button onClick={() => setTab("class")} className="tch-back-btn">← 返回班级</button>
               </div>
               <h2>🎯 班级能力映射</h2>
               <p className="tch-desc">基于5个维度（痛点发现、方案策划、商业建模、资源杠杆、路演表达）评估班级整体能力水平。雷达图越接近外圆表示能力越强。</p>
@@ -2230,7 +2181,7 @@ export default function TeacherPage() {
                       <h3>📊 班级能力分布（满分10）</h3>
                       <p className="tch-desc">班级平均成绩</p>
                       {(capabilityMap.dimensions ?? []).length === 0 ? (
-                        <p style={{ color: "#999", fontSize: 12 }}>暂无维度数据</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无维度数据</p>
                       ) : (
                         (capabilityMap.dimensions ?? []).map((dim: any, idx: number) => (
                           <div 
@@ -2248,7 +2199,7 @@ export default function TeacherPage() {
                                 style={{ width: `${(dim.score / dim.max) * 100}%`, transition: "width 0.4s ease" }} 
                               />
                             </div>
-                            <em style={{ fontWeight: "600", color: dim.score >= 7 ? "#2ecc71" : dim.score >= 5 ? "#f39c12" : "#e74c3c" }}>
+                            <em style={{ fontWeight: "600", color: dim.score >= 7 ? "var(--tch-success)" : dim.score >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>
                               {dim.score.toFixed(1)}
                             </em>
                           </div>
@@ -2261,7 +2212,7 @@ export default function TeacherPage() {
                       {(() => {
                         const sorted = [...(capabilityMap.dimensions ?? [])].sort((a, b) => a.score - b.score);
                         return sorted.length === 0 ? (
-                          <p style={{ color: "#999", fontSize: 12 }}>暂无数据</p>
+                          <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无数据</p>
                         ) : (
                           <div>
                             {sorted.slice(0, 3).map((dim: any, i: number) => (
@@ -2271,14 +2222,14 @@ export default function TeacherPage() {
                                 style={{
                                   animation: `fade-in 0.3s ease-out ${i * 0.1}s both`,
                                   padding: "8px 12px",
-                                  backgroundColor: i === 0 ? "#ffe6e6" : i === 1 ? "#fff3cd" : "#e8f5e9",
+                                  background: i === 0 ? "var(--tch-danger-soft)" : i === 1 ? "var(--tch-warning-soft)" : "var(--tch-success-soft)",
                                   borderRadius: 4,
                                   marginBottom: 8
                                 }}
                               >
                                 <span>{i === 0 ? "🔴 最弱" : i === 1 ? "🟡 较弱" : "🟢 需强化"}</span>
                                 <span style={{ fontWeight: "600", flex: 1 }}>{dim.name}</span>
-                                <strong style={{ color: i === 0 ? "#e74c3c" : i === 1 ? "#f39c12" : "#2ecc71" }}>
+                                <strong style={{ color: i === 0 ? "var(--tch-danger)" : i === 1 ? "var(--tch-warning)" : "var(--tch-success)" }}>
                                   {dim.score.toFixed(1)}
                                 </strong>
                               </div>
@@ -2298,21 +2249,7 @@ export default function TeacherPage() {
           {tab === "rule-coverage" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("class")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回班级
-                </button>
+                <button onClick={() => setTab("class")} className="tch-back-btn">← 返回班级</button>
               </div>
               <h2>🔥 规则检查覆盖率</h2>
               <p className="tch-desc">15条关键业务规则（H1-H15）的触发统计。热力图显示哪些规则在班级中最常被触发，即班级共性风险点。</p>
@@ -2320,14 +2257,14 @@ export default function TeacherPage() {
                 <SkeletonLoader rows={5} type="table" />
               ) : (
                 <>
-                  <div style={{ marginBottom: 16, padding: 12, backgroundColor: "#f5f5f5", borderRadius: 8, animation: "fade-in 0.3s ease-out" }}>
+                  <div style={{ marginBottom: 16, padding: 12, background: "var(--bg-card)", borderRadius: 8, animation: "fade-in 0.3s ease-out" }}>
                     <strong>⚠️ 高危规则：</strong>
-                    <span style={{ fontSize: 18, fontWeight: "bold", color: "#e74c3c", marginLeft: 8 }}>
+                    <span style={{ fontSize: 18, fontWeight: "bold", color: "var(--tch-danger)", marginLeft: 8 }}>
                       {ruleCoverage.high_risk_count}
                     </span>
                     <span style={{ marginLeft: 16 }}> | </span>
                     <strong style={{ marginLeft: 16 }}>📊 总提交数：</strong>
-                    <span style={{ fontSize: 18, fontWeight: "bold", color: "#4a90e2", marginLeft: 8 }}>
+                    <span style={{ fontSize: 18, fontWeight: "bold", color: "var(--accent)", marginLeft: 8 }}>
                       {ruleCoverage.total_submissions}
                     </span>
                   </div>
@@ -2336,7 +2273,7 @@ export default function TeacherPage() {
                       <span>规则ID</span><span>规则名称</span><span>触发次数</span><span>覆盖率</span><span>风险等级</span>
                     </div>
                     {ruleCoverage.rule_coverage.length === 0 ? (
-                      <p style={{ color: "#999", fontSize: 12, padding: 20 }}>暂无规则覆盖率数据</p>
+                      <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 20 }}>暂无规则覆盖率数据</p>
                     ) : (
                       ruleCoverage.rule_coverage.map((rule: any, idx: number) => (
                         <div 
@@ -2344,7 +2281,7 @@ export default function TeacherPage() {
                           className="tch-table-row"
                           style={{
                             animation: `fade-in 0.3s ease-out ${idx * 0.05}s both`,
-                            backgroundColor: rule.severity === "high" ? "#ffe6e6" : rule.severity === "medium" ? "#fff3cd" : "#f0f0f0",
+                            backgroundColor: rule.severity === "high" ? "var(--tch-danger-soft)" : rule.severity === "medium" ? "var(--tch-warning-soft)" : "var(--bg-card)",
                             transition: "all 0.2s ease",
                           }}
                         >
@@ -2358,7 +2295,7 @@ export default function TeacherPage() {
                                 style={{ 
                                   width: `${(rule.coverage_ratio * 100)}%`, 
                                   height: "100%",
-                                  backgroundColor: rule.severity === "high" ? "#e74c3c" : rule.severity === "medium" ? "#f39c12" : "#2ecc71"
+                                  backgroundColor: rule.severity === "high" ? "var(--tch-danger)" : rule.severity === "medium" ? "var(--tch-warning)" : "var(--tch-success)"
                                 }} 
                               />
                             </div>
@@ -2381,21 +2318,7 @@ export default function TeacherPage() {
           {tab === "rubric" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("project")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回项目
-                </button>
+                <button onClick={() => setTab("project")} className="tch-back-btn">← 返回项目</button>
               </div>
               <h2>📋 Rubric评分与项目诊断</h2>
               <p className="tch-desc">针对单个项目的深度评估，包括9个维度（R1-R9）的Rubric评分，触发的规则及修复建议。</p>
@@ -2416,7 +2339,7 @@ export default function TeacherPage() {
                   <div className="kpi-grid">
                     <div className="kpi">
                       <span>⭐ 加权总分</span>
-                      <strong style={{ fontSize: 32, color: "#f39c12" }}>
+                      <strong style={{ fontSize: 32, color: "var(--tch-warning)" }}>
                         {rubricAssessment.overall_weighted_score}
                       </strong>
                       <em>满分5分</em>
@@ -2429,7 +2352,7 @@ export default function TeacherPage() {
                       <span>维度</span><span>得分</span><span>权重</span><span>修改建议</span>
                     </div>
                     {rubricAssessment.rubric_items.length === 0 ? (
-                      <p style={{ color: "#999", fontSize: 12, padding: 20 }}>暂无评分数据</p>
+                      <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 20 }}>暂无评分数据</p>
                     ) : (
                       rubricAssessment.rubric_items.map((item: any, idx: number) => (
                         <div 
@@ -2437,17 +2360,17 @@ export default function TeacherPage() {
                           className="tch-table-row"
                           style={{
                             animation: `fade-in 0.3s ease-out ${idx * 0.05}s both`,
-                            backgroundColor: Number(item.score) >= item.max_score * 0.7 ? "#e8f5e9" : 
-                                           Number(item.score) >= item.max_score * 0.5 ? "#fff3cd" : "#ffe6e6",
+                            backgroundColor: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success-soft)" : 
+                                           Number(item.score) >= item.max_score * 0.5 ? "var(--tch-warning-soft)" : "var(--tch-danger-soft)",
                             transition: "all 0.2s ease",
                           }}
                         >
                           <span><strong>{item.item_id}</strong> {item.item_name}</span>
-                          <span style={{ fontWeight: "600", color: Number(item.score) >= item.max_score * 0.7 ? "#2ecc71" : "#f39c12" }}>
+                          <span style={{ fontWeight: "600", color: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success)" : "var(--tch-warning)" }}>
                             {item.score}/{item.max_score}
                           </span>
                           <span>{(item.weight * 100).toFixed(0)}%</span>
-                          <span style={{ fontSize: "0.9em", color: "#555" }}>{item.revision_suggestion}</span>
+                          <span style={{ fontSize: "0.9em", color: "var(--text-secondary)" }}>{item.revision_suggestion}</span>
                         </div>
                       ))
                     )}
@@ -2481,21 +2404,7 @@ export default function TeacherPage() {
           {tab === "competition" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("project")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回项目
-                </button>
+                <button onClick={() => setTab("project")} className="tch-back-btn">← 返回项目</button>
               </div>
               <h2>🏆 竞赛评分预测</h2>
               <p className="tch-desc">基于项目当前状态预测在竞赛中的得分（0-100分），并给出24小时和72小时的快速修复清单。</p>
@@ -2519,8 +2428,8 @@ export default function TeacherPage() {
                       <strong 
                         style={{ 
                           fontSize: 40, 
-                          color: competitionScore.predicted_competition_score >= 75 ? "#2ecc71" : 
-                                 competitionScore.predicted_competition_score >= 60 ? "#f39c12" : "#e74c3c",
+                          color: competitionScore.predicted_competition_score >= 75 ? "var(--tch-success)" : 
+                                 competitionScore.predicted_competition_score >= 60 ? "var(--tch-warning)" : "var(--tch-danger)",
                           animation: "number-scale 0.6s ease-out"
                         }}
                       >
@@ -2533,21 +2442,21 @@ export default function TeacherPage() {
                           : `${competitionScore.score_range_min || competitionScore.score_range?.[0]}-${competitionScore.score_range_max || competitionScore.score_range?.[1]}`}
                         分
                       </em>
-                      <p style={{ fontSize: 12, color: "#666", marginTop: 8 }}>
+                      <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 8 }}>
                         <strong>📌 评分说明：</strong>基于项目诊断评分、触发规则数量等因素综合计算。
                       </p>
                     </div>
                   </div>
 
                   <h3 style={{ marginTop: 24, marginBottom: 12, fontSize: 18 }}>⚡ 24小时快速修复（最关键的3项）</h3>
-                  <ul style={{ paddingLeft: 20, lineHeight: 2, backgroundColor: "#f0f8ff", padding: 16, borderRadius: 8, borderLeft: "4px solid #4a90e2" }}>
+                  <ul style={{ paddingLeft: 20, lineHeight: 2, background: "var(--tch-accent-soft)", padding: 16, borderRadius: 8, borderLeft: "3px solid var(--accent)" }}>
                     {(competitionScore.quick_fixes_24h ?? []).map((fix: string, i: number) => (
                       <li key={i} style={{ animation: `fade-in 0.3s ease-out ${i * 0.1}s both` }}>✓ {fix}</li>
                     ))}
                   </ul>
 
                   <h3 style={{ marginTop: 24, marginBottom: 12, fontSize: 18 }}>📋 72小时完整改进方案</h3>
-                  <ul style={{ paddingLeft: 20, lineHeight: 2, backgroundColor: "#f5f5f5", padding: 16, borderRadius: 8, borderLeft: "4px solid #666" }}>
+                  <ul style={{ paddingLeft: 20, lineHeight: 2, background: "var(--bg-card)", padding: 16, borderRadius: 8, borderLeft: "3px solid var(--text-muted)" }}>
                     {(competitionScore.quick_fixes_72h ?? []).map((fix: string, i: number) => (
                       <li key={i} style={{ animation: `fade-in 0.3s ease-out ${i * 0.1}s both` }}>→ {fix}</li>
                     ))}
@@ -2561,9 +2470,9 @@ export default function TeacherPage() {
                         gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                         gap: 12,
                         padding: "12px",
-                        backgroundColor: "#fef5f5",
-                        borderRadius: "8px",
-                        borderLeft: "4px solid #ff4d4d",
+                        background: "var(--tch-danger-soft)",
+                        borderRadius: "10px",
+                        borderLeft: "3px solid var(--tch-danger)",
                         animation: "fade-in 0.5s ease-out"
                       }}>
                         {competitionScore.high_risk_rules_for_competition.map((rule: any, idx: number) => (
@@ -2571,10 +2480,10 @@ export default function TeacherPage() {
                             key={rule.rule} 
                             style={{ 
                               padding: "10px 12px", 
-                              backgroundColor: "white",
-                              border: "1px solid #ffb3b3",
-                              borderRadius: "6px",
-                              boxShadow: "0 2px 4px rgba(255, 77, 77, 0.1)",
+                              background: "var(--bg-card)",
+                              border: "1px solid var(--border)",
+                              borderRadius: "8px",
+                              boxShadow: "var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08))",
                               display: "flex",
                               alignItems: "center",
                               gap: "8px",
@@ -2584,10 +2493,10 @@ export default function TeacherPage() {
                           >
                             <span style={{ 
                               display: "inline-block",
-                              backgroundColor: "#ff4d4d",
-                              color: "white",
+                              background: "var(--tch-danger)",
+                              color: "#fff",
                               padding: "4px 8px",
-                              borderRadius: "4px",
+                              borderRadius: "8px",
                               fontSize: "12px",
                               fontWeight: "bold",
                               minWidth: "32px",
@@ -2595,7 +2504,7 @@ export default function TeacherPage() {
                             }}>
                               {rule.rule}
                             </span>
-                            <span style={{ fontSize: "12px", color: "#555", flex: 1 }}>
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)", flex: 1 }}>
                               {rule.name}
                             </span>
                           </div>
@@ -2614,21 +2523,7 @@ export default function TeacherPage() {
           {tab === "interventions" && !loading && (
             <div className="tch-panel fade-up">
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-                <button
-                  onClick={() => setTab("class")}
-                  style={{
-                    padding: "8px 12px",
-                    fontSize: "14px",
-                    backgroundColor: "#f0f0f0",
-                    color: "#333",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  ← 返回班级
-                </button>
+                <button onClick={() => setTab("class")} className="tch-back-btn">← 返回班级</button>
               </div>
               <h2>💡 教学干预建议</h2>
               <p className="tch-desc">基于全班共性问题智能生成的教学干预优先级清单。系统识别出现在40%以上学生提交中的问题，并给出针对性教学方案。</p>
@@ -2648,7 +2543,7 @@ export default function TeacherPage() {
                     </div>
                     <div className="kpi" style={{ transition: "all 0.3s ease" }}>
                       <span>🚨 共性问题</span>
-                      <strong style={{ fontSize: 28, color: "#e74c3c" }}>
+                      <strong style={{ fontSize: 28, color: "var(--tch-danger)" }}>
                         {teachingInterventions.total_shared_problems ?? 0}
                       </strong>
                       <em>需干预</em>
@@ -2657,7 +2552,7 @@ export default function TeacherPage() {
 
                   <h3 style={{ marginTop: 24, marginBottom: 12 }}>⚡ 优先级教学方案</h3>
                   {teachingInterventions.shared_problems.length === 0 ? (
-                    <p style={{ color: "#999", fontSize: 12, padding: 20, textAlign: "center" }}>暂无共性问题识别</p>
+                    <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 20, textAlign: "center" }}>暂无共性问题识别</p>
                   ) : (
                     teachingInterventions.shared_problems.map((problem: any, idx: number) => (
                       <div 
@@ -2665,7 +2560,7 @@ export default function TeacherPage() {
                         className="viz-card"
                         style={{
                           animation: `fade-in 0.3s ease-out ${idx * 0.08}s both`,
-                          borderLeft: `4px solid ${problem.priority === "高" ? "#e74c3c" : problem.priority === "中" ? "#f39c12" : "#2ecc71"}`,
+                          borderLeft: `3px solid ${problem.priority === "高" ? "var(--tch-danger)" : problem.priority === "中" ? "var(--tch-warning)" : "var(--tch-success)"}`,
                           transition: "all 0.2s ease",
                         }}
                       >
@@ -2680,7 +2575,7 @@ export default function TeacherPage() {
                         <p style={{ marginBottom: 8 }}>
                           <strong>📚 教学建议：</strong>{problem.teaching_suggestion}
                         </p>
-                        <p style={{ color: "#666", fontSize: 13 }}>
+                        <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
                           <em>⏱️ 预计课时：{problem.estimated_teaching_time}</em>
                         </p>
                       </div>
@@ -2692,11 +2587,11 @@ export default function TeacherPage() {
                     className="right-tag"
                     style={{
                       animation: "fade-in 0.5s ease-out",
-                      backgroundColor: "#f0f8ff",
-                      color: "#333",
+                      background: "var(--tch-accent-soft)",
+                      color: "var(--text-primary)",
                       padding: 16,
-                      borderRadius: 8,
-                      borderLeft: "4px solid #4a90e2",
+                      borderRadius: 10,
+                      borderLeft: "3px solid var(--accent)",
                     }}
                   >
                     ✨ {teachingInterventions.recommended_next_class_focus}
@@ -2727,8 +2622,8 @@ export default function TeacherPage() {
                         fontSize: "16px",
                         marginBottom: "16px",
                         boxSizing: "border-box",
-                        border: "1px solid #d0d0d0",
-                        borderRadius: "6px",
+                        border: "1px solid var(--border)",
+                        borderRadius: "10px",
                       }}
                       onKeyPress={(e) => {
                         if (e.key === "Enter" && projectTabInput.trim()) {
@@ -2748,12 +2643,12 @@ export default function TeacherPage() {
                         width: "100%",
                         padding: "12px 16px",
                         fontSize: "16px",
-                        backgroundColor: projectTabInput.trim() ? "#4a90e2" : "#ccc",
-                        color: "white",
+                        background: projectTabInput.trim() ? "var(--accent)" : "var(--bg-card-hover)",
+                        color: projectTabInput.trim() ? "#fff" : "var(--text-muted)",
                         border: "none",
-                        borderRadius: "6px",
+                        borderRadius: "10px",
                         cursor: projectTabInput.trim() ? "pointer" : "not-allowed",
-                        transition: "all 0.3s ease",
+                        transition: "all 0.2s",
                       }}
                       disabled={!projectTabInput.trim()}
                     >
@@ -2763,21 +2658,13 @@ export default function TeacherPage() {
                 </div>
               ) : (
                 <>
-                  <div style={{ marginBottom: "24px", padding: "16px", backgroundColor: "#fff3cd", borderRadius: "8px" }}>
-                    <p style={{ margin: "0", color: "#333" }}>
+                  <div className="tch-info-banner">
+                    <p style={{ margin: "0" }}>
                       <strong>当前项目 ID：</strong> {selectedProject}
                       <button
                         onClick={() => setProjectIdConfirmed(false)}
-                        style={{
-                          marginLeft: "16px",
-                          padding: "6px 12px",
-                          fontSize: "12px",
-                          backgroundColor: "#ddd",
-                          color: "#333",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
+                        className="tch-back-btn"
+                        style={{ marginLeft: 16, fontSize: 12 }}
                       >
                         切换项目
                       </button>
@@ -2788,22 +2675,12 @@ export default function TeacherPage() {
                     {PROJECT_SUB_TABS.map((subTab) => (
                       <button
                         key={subTab.id}
+                        className="tch-sub-tab-btn"
                         onClick={() => {
                           setTab(subTab.id as Tab);
                           if (subTab.id === "rubric") loadProjectDiagnosis();
                           if (subTab.id === "competition") loadCompetitionScore();
                           if (subTab.id === "evidence") loadEvidence(selectedProject);
-                        }}
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          backgroundColor: "#f0f0f0",
-                          color: "#333",
-                          border: "1px solid #ddd",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          transition: "all 0.3s ease",
                         }}
                       >
                         {subTab.label}
@@ -2834,8 +2711,8 @@ export default function TeacherPage() {
                         fontSize: "16px",
                         marginBottom: "16px",
                         boxSizing: "border-box",
-                        border: "1px solid #d0d0d0",
-                        borderRadius: "6px",
+                        border: "1px solid var(--border)",
+                        borderRadius: "10px",
                       }}
                       onKeyPress={(e) => {
                         if (e.key === "Enter" && classTabInput.trim()) {
@@ -2855,12 +2732,12 @@ export default function TeacherPage() {
                         width: "100%",
                         padding: "12px 16px",
                         fontSize: "16px",
-                        backgroundColor: classTabInput.trim() ? "#4a90e2" : "#ccc",
-                        color: "white",
+                        background: classTabInput.trim() ? "var(--accent)" : "var(--bg-card-hover)",
+                        color: classTabInput.trim() ? "#fff" : "var(--text-muted)",
                         border: "none",
-                        borderRadius: "6px",
+                        borderRadius: "10px",
                         cursor: classTabInput.trim() ? "pointer" : "not-allowed",
-                        transition: "all 0.3s ease",
+                        transition: "all 0.2s",
                       }}
                       disabled={!classTabInput.trim()}
                     >
@@ -2870,21 +2747,13 @@ export default function TeacherPage() {
                 </div>
               ) : (
                 <>
-                  <div style={{ marginBottom: "24px", padding: "16px", backgroundColor: "#f0f8ff", borderRadius: "8px" }}>
-                    <p style={{ margin: "0", color: "#333" }}>
+                  <div className="tch-info-banner">
+                    <p style={{ margin: "0" }}>
                       <strong>当前班级 ID：</strong> {classId}
                       <button
                         onClick={() => setClassIdConfirmed(false)}
-                        style={{
-                          marginLeft: "16px",
-                          padding: "6px 12px",
-                          fontSize: "12px",
-                          backgroundColor: "#ddd",
-                          color: "#333",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
+                        className="tch-back-btn"
+                        style={{ marginLeft: 16, fontSize: 12 }}
                       >
                         切换班级
                       </button>
@@ -2895,6 +2764,7 @@ export default function TeacherPage() {
                     {CLASS_SUB_TABS.map((subTab) => (
                       <button
                         key={subTab.id}
+                        className="tch-sub-tab-btn"
                         onClick={() => {
                           setTab(subTab.id as Tab);
                           if (subTab.id === "compare") loadCompare();
@@ -2902,17 +2772,6 @@ export default function TeacherPage() {
                           if (subTab.id === "rule-coverage") loadRuleCoverage();
                           if (subTab.id === "interventions") loadTeachingInterventions();
                           if (subTab.id === "report") generateReport();
-                        }}
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          backgroundColor: "#f0f0f0",
-                          color: "#333",
-                          border: "1px solid #ddd",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          transition: "all 0.3s ease",
                         }}
                       >
                         {subTab.label}
@@ -2927,1743 +2786,264 @@ export default function TeacherPage() {
       </div>
 
       <style>{`
-        /* ══════════════════════════════════════ */
-        /* 全局样式 - 白底黑字高对比度 */
-        /* ══════════════════════════════════════ */
-        
         .tch-app {
-          background-color: #ffffff;
-          color: #222222;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-          --skeleton-bg: #e8e8e8;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          --skeleton-bg: var(--bg-card);
+          --tch-accent: var(--accent);
+          --tch-accent-soft: var(--accent-soft);
+          --tch-accent-text: var(--accent-text);
+          --tch-success: #5cbd8a;
+          --tch-danger: #e07070;
+          --tch-warning: #e0a84c;
+          --tch-success-soft: rgba(92,189,138,0.12);
+          --tch-danger-soft: rgba(224,112,112,0.12);
+          --tch-warning-soft: rgba(224,168,76,0.12);
         }
 
-        .tch-body {
-          display: flex;
-          background-color: #ffffff;
-          min-height: calc(100vh - 64px);
-        }
+        .tch-body { display: flex; background: var(--bg-primary); min-height: calc(100vh - 56px); }
 
-        .tch-app h1, .tch-app h2, .tch-app h3, .tch-app h4, .tch-app h5 {
-          color: #1a1a1a;
-        }
+        .tch-app h1,.tch-app h2,.tch-app h3,.tch-app h4,.tch-app h5 { color: var(--heading-color); }
+        .tch-app p,.tch-app span,.tch-app div { color: var(--text-primary); }
 
-        .tch-app p, .tch-app span, .tch-app div {
-          color: #333333;
-        }
-
-        /* 顶部导航栏 */
-        .chat-topbar {
-          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-          border-bottom: 2px solid #e8e8e8;
-          color: #1a1a1a;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .topbar-brand {
-          color: #000000 !important;
-          font-weight: 700;
-        }
-
-        .topbar-label {
-          color: #444444;
-          font-weight: 600;
-        }
-
-        .topbar-sep {
-          border-left: 2px solid #e0e0e0;
-        }
-
-        .tch-filter-input {
-          background-color: #ffffff;
-          border: 1px solid #d0d0d0;
-          color: #333333 !important;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 14px;
-        }
-
-        .tch-filter-input::placeholder {
-          color: #999999;
-        }
-
-        .tch-filter-input:focus {
-          border-color: #4a90e2;
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        /* 按钮样式 */
-        .topbar-btn {
-          background-color: #4a90e2;
-          color: #ffffff;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s ease;
-        }
-
-        .topbar-btn:hover {
-          background-color: #3a7bc8;
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-        }
-
-        .topbar-btn.theme-toggle {
-          background-color: #667ecc;
-          margin-right: 8px;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 14px;
-          padding: 8px 14px;
-        }
-
-        .topbar-btn.theme-toggle:hover {
-          background-color: #5a6eb8;
-          box-shadow: 0 4px 12px rgba(102, 126, 204, 0.3);
-        }
-
-        /* 侧边栏 */
         .tch-sidebar {
-          background: linear-gradient(180deg, #f5f6f7 0%, #eeeff2 100%);
-          border-right: 1px solid #e0e0e0;
-          min-width: 240px;
-          overflow-y: auto;
-          max-height: calc(100vh - 64px);
-          padding: 8px 0;
+          background: var(--bg-secondary);
+          border-right: 1px solid var(--border);
+          min-width: 220px; overflow-y: auto; max-height: calc(100vh - 56px); padding: 12px 8px;
         }
-
         .tch-nav-btn {
-          background-color: transparent;
-          color: #333333;
-          border: none;
-          border-left: 4px solid transparent;
-          padding: 14px 16px;
-          width: 100%;
-          text-align: left;
-          cursor: pointer;
-          font-weight: 500;
-          font-size: 15px;
-          transition: all 0.3s ease;
-          margin: 4px 0;
+          background: transparent; color: var(--text-secondary); border: none;
+          border-left: 3px solid transparent; padding: 11px 14px; width: 100%;
+          text-align: left; cursor: pointer; font-weight: 500; font-size: 13.5px;
+          transition: all 0.2s; margin: 2px 0; border-radius: 0 8px 8px 0;
         }
+        .tch-nav-btn:hover:not(.disabled) { background: var(--bg-card-hover); color: var(--text-primary); }
+        .tch-nav-btn.active { background: var(--tch-accent-soft); color: var(--tch-accent-text); border-left-color: var(--tch-accent); font-weight: 600; }
+        .tch-nav-btn.disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .tch-nav-btn:hover:not(.disabled) {
-          background-color: #e8ecf0;
-          color: #1a1a1a;
-          transform: translateX(4px);
-        }
-
-        .tch-nav-btn.active {
-          background-color: #e3f2fd;
-          color: #1a1a1a;
-          border-left-color: #4a90e2;
-          font-weight: 700;
-        }
-
-        .tch-nav-btn.disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        /* 主容器 */
         .tch-main {
-          background-color: #ffffff;
-          padding: 40px 48px;
-          flex: 1;
-          overflow-y: auto;
-          max-height: calc(100vh - 64px);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+          background: var(--bg-primary); padding: 28px 36px; flex: 1;
+          overflow-y: auto; max-height: calc(100vh - 56px);
+          display: flex; flex-direction: column; align-items: center;
         }
+        .tch-main > * { width: 100%; max-width: 1100px; margin: 0 auto; }
 
-        .tch-main > * {
-          width: 100%;
-          max-width: 1200px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        /* 面板卡片 */
         .tch-panel {
-          background-color: #f9fafb;
-          border: 1px solid #e0e0e0;
-          border-radius: 12px;
-          padding: 36px 40px;
-          margin-bottom: 32px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          background: var(--bg-card); border: 1px solid var(--border);
+          border-radius: 16px; padding: 28px 32px; margin-bottom: 24px;
+          animation: fade-up 0.3s ease-out;
         }
-
         .tch-panel h2 {
-          color: #1a1a1a;
-          font-size: 28px;
-          margin: 0 0 20px 0;
-          border-bottom: 2px solid #e8e8e8;
-          padding-bottom: 16px;
-          font-weight: 700;
-          letter-spacing: -0.5px;
+          color: var(--heading-color); font-size: 22px; margin: 0 0 16px;
+          padding-bottom: 12px; border-bottom: 1px solid var(--border); font-weight: 700;
         }
+        .tch-panel h3 { color: var(--text-primary); font-size: 16px; margin: 24px 0 12px; font-weight: 600; }
+        .tch-desc { color: var(--text-secondary); font-size: 13.5px; line-height: 1.7; margin-bottom: 16px; }
 
-        .tch-panel h3 {
-          color: #222222;
-          font-size: 18px;
-          margin: 32px 0 16px 0;
-          font-weight: 600;
-        }
-
-        .tch-desc {
-          color: #666666;
-          font-size: 15px;
-          line-height: 1.8;
-          margin-bottom: 24px;
-          letter-spacing: 0.3px;
-        }
-
-        /* KPI 卡片 */
-        .kpi-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 24px;
-          margin-bottom: 32px;
-        }
-
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .kpi {
-          background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
-          border: 1px solid #e0e0e0;
-          border-radius: 12px;
-          padding: 32px 28px;
-          text-align: center;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
-          min-height: 160px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+          background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+          padding: 24px 20px; text-align: center; transition: all 0.25s;
+          display: flex; flex-direction: column; justify-content: center;
         }
+        .kpi:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-2px); }
+        .kpi span { display: block; color: var(--text-secondary); font-size: 12px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .kpi strong { display: block; color: var(--text-primary); font-size: 32px; font-weight: 700; margin-bottom: 8px; line-height: 1.2; }
+        .kpi em { display: block; color: var(--text-muted); font-size: 12px; font-style: normal; margin-top: 4px; }
+        .kpi-hint { color: var(--text-muted); font-size: 11px; font-style: normal; }
 
-        .kpi:hover {
-          background-color: #ffffff;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          transform: translateY(-2px);
-        }
-
-        .kpi span {
-          display: block;
-          color: #666666;
-          font-size: 13px;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.8px;
-          margin-bottom: 12px;
-        }
-
-        .kpi strong {
-          display: block;
-          color: #1a1a1a;
-          font-size: 40px;
-          font-weight: 700;
-          margin-bottom: 12px;
-          line-height: 1.2;
-        }
-
-        .kpi em {
-          display: block;
-          color: #999999;
-          font-size: 13px;
-          font-style: normal;
-          margin-top: 8px;
-          line-height: 1.6;
-        }
-
-        /* 视觉卡片 */
-        .viz-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-          gap: 24px;
-          margin-bottom: 32px;
-        }
-
+        .viz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .viz-card {
-          background-color: #ffffff;
-          border: 1px solid #e0e0e0;
-          border-radius: 12px;
-          padding: 28px 32px;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+          background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px;
         }
+        .viz-card h3 { color: var(--heading-color); margin-top: 0; margin-bottom: 12px; font-size: 16px; }
+        .viz-card p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
 
-        .viz-card h3 {
-          color: #1a1a1a;
-          margin-top: 0;
-          margin-bottom: 16px;
-          font-size: 18px;
-          font-weight: 600;
-        }
-
-        .viz-card p {
-          color: #666666;
-          font-size: 14px;
-          line-height: 1.7;
-          margin-bottom: 16px;
-        }
-
-        /* 表格样式 */
-        .tch-table {
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          overflow: hidden;
-          background-color: #ffffff;
-        }
-
-        .table-like {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          background-color: #ffffff;
-        }
-
+        .tch-table { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg-card); }
+        .table-like { display: flex; flex-direction: column; gap: 8px; }
         .tch-table-header {
-          display: grid;
-          grid-template-columns: repeat(7, minmax(100px, 1fr));
-          gap: 0;
-          background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf0 100%);
-          border-bottom: 2px solid #e0e0e0;
-          padding: 18px 16px;
-          font-weight: 700;
-          color: #1a1a1a;
-          font-size: 13px;
-          text-transform: uppercase;
-          letter-spacing: 0.6px;
+          display: grid; grid-template-columns: repeat(7, minmax(80px, 1fr));
+          background: var(--bg-card-hover); border-bottom: 1px solid var(--border);
+          padding: 12px 14px; font-weight: 600; color: var(--text-secondary);
+          font-size: 12px; letter-spacing: 0.3px;
         }
-
         .tch-table-row {
-          display: grid;
-          grid-template-columns: repeat(7, minmax(100px, 1fr));
-          gap: 0;
-          padding: 18px 16px;
-          border-bottom: 1px solid #e8e8e8;
-          align-items: center;
-          color: #333333;
-          transition: all 0.2s ease;
-          font-size: 15px;
-          line-height: 1.6;
+          display: grid; grid-template-columns: repeat(7, minmax(80px, 1fr));
+          padding: 12px 14px; border-bottom: 1px solid var(--border);
+          align-items: center; color: var(--text-primary);
+          transition: background 0.15s; font-size: 13px;
         }
+        .tch-table-row:hover { background: var(--bg-card-hover); }
+        .tch-cell-time { color: var(--text-muted); font-size: 12px; }
+        .tch-cell-score { font-weight: 700; color: var(--accent2); }
 
-        .tch-table-row:hover {
-          background-color: #f5f5f5;
-          border-left: 3px solid #4a90e2;
-          padding-left: calc(16px - 3px);
-        }
+        .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px 0; }
+        .bar-row span:first-child { min-width: 120px; color: var(--text-primary); font-weight: 500; font-size: 13px; }
+        .bar-track { flex: 1; height: 22px; background: var(--bg-card-hover); border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s; border-radius: 6px; }
+        .bar-fill.danger { background: linear-gradient(90deg, #e07070, #c85050); }
+        .bar-row em { min-width: 40px; text-align: right; color: var(--text-primary); font-weight: 600; font-style: normal; font-size: 13px; }
 
-        /* 表格单元格 */
-        .tch-cell-time {
-          color: #666666;
-          font-size: 13px;
-        }
-
-        .tch-cell-score {
-          font-weight: 700;
-          color: #1a1a1a;
-        }
-
-        /* 柱状图 */
-        .bar-row {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 18px;
-          padding: 12px 0;
-        }
-
-        .bar-row span:first-child {
-          min-width: 140px;
-          color: #333333;
-          font-weight: 500;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        .bar-track {
-          flex: 1;
-          height: 28px;
-          background-color: #e8e8e8;
-          border-radius: 6px;
-          overflow: hidden;
-        }
-
-        .bar-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #4a90e2, #2ecc71);
-          transition: width 0.4s ease;
-        }
-
-        .bar-fill.danger {
-          background: linear-gradient(90deg, #ff6b6b, #e74c3c);
-        }
-
-        .bar-row em {
-          min-width: 50px;
-          text-align: right;
-          color: #1a1a1a;
-          font-weight: 600;
-          font-style: normal;
-          font-size: 15px;
-        }
-
-        /* 按钮 */
         .tch-sm-btn {
-          background-color: #e3f2fd;
-          color: #1976d2;
-          border: 1px solid #90caf9;
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          margin-right: 12px;
-          margin-bottom: 8px;
-          transition: all 0.2s ease;
-          line-height: 1.5;
+          background: var(--tch-accent-soft); color: var(--tch-accent-text);
+          border: 1px solid transparent; padding: 6px 12px; border-radius: 8px;
+          cursor: pointer; font-size: 12px; font-weight: 500; margin-right: 8px;
+          margin-bottom: 6px; transition: all 0.2s;
         }
+        .tch-sm-btn:hover { background: var(--bg-card-hover); border-color: var(--border-strong); }
 
-        .tch-sm-btn:hover {
-          background-color: #bbdefb;
-          border-color: #64b5f6;
-          transform: scale(1.05);
-        }
-
-        .tch-sm-btn:active {
-          transform: scale(0.95);
-        }
-
-        /* 项目项 */
         .project-item {
-          background-color: #ffffff;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          padding: 16px 20px;
-          margin-bottom: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          cursor: pointer;
-          color: #333333;
-          transition: all 0.2s ease;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        .project-item:hover {
-          background-color: #f5f5f5;
-          border-color: #4a90e2;
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
-          transform: translateX(4px);
-        }
-
-        /* 风险徽章 */
-        .risk-badge {
-          display: inline-block;
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 700;
-          white-space: nowrap;
-          line-height: 1.4;
-        }
-
-        .risk-badge.high {
-          background-color: #ffebee;
-          color: #c62828;
-          border: 1px solid #ef5350;
-        }
-
-        .risk-badge.high em {
-          color: #c62828;
-        }
-
-        /* 输入框 */
-        input[type="text"],
-        input[type="email"],
-        textarea {
-          background-color: #ffffff;
-          color: #333333;
-          border: 1px solid #d0d0d0;
-          padding: 12px 16px;
-          border-radius: 6px;
-          font-size: 15px;
-          font-family: inherit;
-          transition: all 0.2s ease;
-          line-height: 1.6;
-        }
-
-        input[type="text"]::placeholder,
-        input[type="email"]::placeholder,
-        textarea::placeholder {
-          color: #999999;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        textarea:focus {
-          border-color: #4a90e2;
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-          background-color: #ffffff;
-          color: #333333;
-        }
-
-        /* 表单 */
-        .tch-feedback-form {
-          background-color: #f5f5f5;
-          padding: 32px;
-          border-radius: 8px;
-          border: 1px solid #e0e0e0;
-        }
-
-        .tch-feedback-form label {
-          display: block;
-          margin-bottom: 16px;
-          color: #333333;
-          font-weight: 600;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        .tch-feedback-form input,
-        .tch-feedback-form textarea {
-          width: 100%;
-          margin-bottom: 20px;
-          box-sizing: border-box;
-        }
-
-        .tch-feedback-form button {
-          background: linear-gradient(135deg, #4a90e2, #2ecc71);
-          color: #ffffff;
-          border: none;
-          padding: 12px 28px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 15px;
-          transition: all 0.2s ease;
-          line-height: 1.6;
-        }
-
-        .tch-feedback-form button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-        }
-
-        /* 反馈成功信息 */
-        .tch-feedback-success {
-          background-color: #c8e6c9;
-          border: 1px solid #81c784;
-          color: #2e7d32;
-          padding: 12px 16px;
-          border-radius: 6px;
-          margin-top: 12px;
-          font-weight: 600;
-        }
-
-        /* 证据项 */
-        .evidence-item {
-          background-color: #ffffff;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          padding: 20px;
-          margin-bottom: 16px;
-        }
-
-        .tch-evidence-actions {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .tch-evidence-actions input {
-          flex: 1;
-        }
-
-        .evidence-item strong {
-          color: #1a1a1a;
-          display: block;
-          margin-bottom: 12px;
-          font-size: 15px;
-          font-weight: 600;
-        }
-
-        .evidence-item p {
-          color: #333333;
-          margin: 12px 0;
-          font-size: 15px;
-          line-height: 1.7;
-        }
-
-        .evidence-item em {
-          color: #999999;
-          font-style: italic;
-          font-size: 14px;
-          display: block;
-        }
-
-        /* 提交详情 */
-        .tch-submission-detail {
-          background-color: #f5f5f5;
-          border-left: 3px solid #4a90e2;
-          padding: 24px;
-          margin-top: 16px;
-          border-radius: 4px;
-        }
-
-        .tch-detail-section {
-          margin-bottom: 24px;
-        }
-
-        .tch-detail-section:last-child {
-          margin-bottom: 0;
-        }
-
-        .tch-detail-section h4 {
-          color: #1a1a1a;
-          margin: 0 0 12px 0;
-          font-size: 15px;
-          font-weight: 600;
-        }
-
-        .tch-detail-section p {
-          color: #333333;
-          margin: 8px 0;
-          font-size: 15px;
-          line-height: 1.7;
-        }
-
-        .tch-raw-text {
-          background-color: #ffffff;
-          border: 1px solid #e0e0e0;
-          padding: 12px;
-          border-radius: 4px;
-          color: #333333;
-          line-height: 1.6;
-          font-size: 13px;
-          max-height: 300px;
-          overflow-y: auto;
-        }
-
-        /* 右侧提示 */
-        .right-hint {
-          background-color: #e3f2fd;
-          border-left: 4px solid #2196f3;
-          color: #1565c0;
-          padding: 12px 16px;
-          border-radius: 4px;
-          margin: 12px 0;
-          font-size: 13px;
-        }
-
-        .right-tag {
-          display: inline-block;
-          background-color: #e8f5e9;
-          border-left: 4px solid #4caf50;
-          color: #2e7d32;
-          padding: 12px 16px;
-          border-radius: 4px;
-          margin: 8px 0;
-          font-size: 13px;
-        }
-
-        /* 加载状态 */
-        .tch-loading {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          min-height: 200px;
-        }
-
-        .tch-loading p {
-          color: #333333;
-          font-weight: 600;
-        }
-
-        /* 报告内容 */
-        .tch-report-content {
-          background-color: #f9fafb;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          padding: 20px;
-          color: #333333;
-          line-height: 1.8;
-          white-space: pre-wrap;
-          word-wrap: break-word;
-        }
-
-        .debug-json summary {
-          cursor: pointer;
-          color: #4a90e2;
-          font-weight: 600;
-          margin-bottom: 8px;
-          user-select: none;
-        }
-
-        .debug-json pre {
-          background-color: #f5f5f5;
-          border: 1px solid #e0e0e0;
-          color: #222222;
-          padding: 12px;
-          border-radius: 4px;
-          overflow-x: auto;
-          font-size: 12px;
-          line-height: 1.5;
-        }
-
-        /* ══════════════════════════════════════ */
-        /* 动画定义 */
-        /* ══════════════════════════════════════ */
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes fade-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes slide-down {
-          from {
-            opacity: 0;
-            max-height: 0;
-          }
-          to {
-            opacity: 1;
-            max-height: 2000px;
-          }
-        }
-
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes progress-line {
-          0% {
-            width: 0%;
-          }
-          50% {
-            width: 80%;
-          }
-          100% {
-            width: 100%;
-          }
-        }
-
-        @keyframes toast-slide-in {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes number-scale {
-          from {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes skeleton-loading {
-          0% {
-            background-color: #e8e8e8;
-          }
-          50% {
-            background-color: #f0f0f0;
-          }
-          100% {
-            background-color: #e8e8e8;
-          }
-        }
-
-        @keyframes skeleton-pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
-        }
-
-        /* 优化加载状态 */
-        .tch-loading {
-          animation: fade-in 0.3s ease-out;
-        }
-
-        /* 过渡效果 */
-        .tch-panel {
-          animation: fade-up 0.4s ease-out;
-        }
-
-        .tch-nav-btn {
-          position: relative;
-          transition: all 0.3s ease;
-        }
-
-        .tch-nav-btn:hover:not(.disabled) {
-          transform: translateX(4px);
-          box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
-        }
-
-        .tch-nav-btn.active {
-          font-weight: 600;
-          border-left: 3px solid #4a90e2;
-          padding-left: calc(1rem - 3px);
-        }
-
-        .tch-nav-btn.disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        /* 按钮优化 */
-        .tch-sm-btn {
-          transition: all 0.2s ease;
-          transform: scale(1);
-        }
-
-        .tch-sm-btn:hover {
-          transform: scale(1.05);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .tch-sm-btn:active {
-          transform: scale(0.95);
-        }
-
-        /* KPI 卡片优化 */
-        .kpi {
-          transition: all 0.3s ease;
-          transform: translateY(0);
-        }
-
-        .kpi:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 项目项优化 */
-        .project-item {
-          transition: all 0.2s ease;
-        }
-
-        .project-item:hover {
-          transform: translateX(4px);
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
-        }
-
-        /* 表格行优化 */
-        .tch-table-row {
-          transition: all 0.2s ease, background-color 0.2s ease;
-        }
-
-        .tch-table-row:hover {
-          background-color: #f9f9f9;
-        }
-
-        /* 输入框优化 */
-        input[type="text"],
-        input[type="email"],
-        textarea {
-          transition: all 0.2s ease;
-          border: 1px solid #ddd;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        textarea:focus {
-          border-color: #4a90e2;
-          box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-          outline: none;
-        }
-
-        /* 反馈表单样式 */
-        .tch-feedback-form {
-          animation: fade-in 0.4s ease-out;
-        }
-
-        .tch-feedback-form button {
-          transition: all 0.2s ease;
-          background: linear-gradient(135deg, #4a90e2, #2ecc71);
-          border: none;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 600;
-        }
-
-        .tch-feedback-form button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-        }
-
-        .tch-feedback-form button:active {
-          transform: translateY(0);
-        }
-
-        /* 成功提示动画 */
-        .tch-feedback-success {
-          animation: slide-down 0.3s ease-out;
-          padding: 12px 16px;
-          background-color: #d4edda;
-          border: 1px solid #c3e6cb;
-          border-radius: 6px;
-          color: #155724;
-          margin-top: 12px;
-        }
-
-        /* 骨架屏加载 */
-        [style*="animation: skeleton-loading"] {
-          animation: skeleton-loading 1.5s ease-in-out infinite !important;
-        }
+          margin-top: 0; width: 100%; display: flex; justify-content: space-between;
+          align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid var(--border);
+          border-radius: 10px; padding: 14px 16px; cursor: pointer; color: var(--text-primary);
+          transition: all 0.2s; font-size: 13px;
+        }
+        .project-item:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+
+        .risk-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .risk-badge.high { background: var(--tch-danger-soft); color: var(--tch-danger); border: 1px solid rgba(224,112,112,0.3); }
+        .risk-badge.medium { background: var(--tch-warning-soft); color: var(--tch-warning); border: 1px solid rgba(224,168,76,0.3); }
+        .risk-badge.low { background: var(--tch-success-soft); color: var(--tch-success); border: 1px solid rgba(92,189,138,0.3); }
+
+        .tch-app input[type="text"],.tch-app input[type="email"],.tch-app textarea,.tch-app select {
+          background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-strong);
+          padding: 10px 14px; border-radius: 10px; font-size: 13px; transition: border-color 0.2s;
+        }
+        .tch-app input::placeholder,.tch-app textarea::placeholder { color: var(--text-muted); }
+        .tch-app input:focus,.tch-app textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--tch-accent-soft); }
+
+        .tch-feedback-form { background: var(--bg-card); padding: 24px; border-radius: 12px; border: 1px solid var(--border); }
+        .tch-feedback-form label { color: var(--text-primary); font-weight: 600; font-size: 13px; }
+        .tch-feedback-form button { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .tch-feedback-form button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px var(--tch-accent-soft); }
+        .tch-feedback-success { background: var(--tch-success-soft); border: 1px solid rgba(92,189,138,0.3); color: var(--tch-success); padding: 12px 16px; border-radius: 8px; margin-top: 12px; }
+
+        .evidence-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .evidence-item strong { color: var(--accent-text); font-size: 14px; }
+        .evidence-item p { color: var(--text-primary); margin: 8px 0; font-size: 13px; line-height: 1.6; }
+        .evidence-item em { color: var(--text-muted); font-size: 12px; }
+
+        .tch-evidence-actions { display: flex; gap: 10px; margin-bottom: 16px; }
+        .tch-evidence-actions input { flex: 1; }
+
+        .tch-submission-detail { background: var(--bg-card); border-left: 3px solid var(--accent); padding: 20px; margin-top: 12px; border-radius: 0 10px 10px 0; }
+        .tch-detail-section { margin-bottom: 16px; }
+        .tch-detail-section:last-child { margin-bottom: 0; }
+        .tch-detail-section h4 { color: var(--heading-color); margin: 0 0 8px; font-size: 14px; }
+        .tch-detail-section p { color: var(--text-primary); margin: 6px 0; font-size: 13px; line-height: 1.6; }
+
+        .tch-raw-text { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; border-radius: 8px; color: var(--text-primary); font-size: 12px; line-height: 1.6; max-height: 300px; overflow-y: auto; }
+
+        .right-hint { background: var(--tch-accent-soft); border-left: 3px solid var(--accent); color: var(--accent-text); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 13px; }
+        .right-tag { display: block; background: var(--tch-success-soft); border-left: 3px solid var(--tch-success); color: var(--tch-success); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 8px 0; font-size: 13px; }
+
+        .tch-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 200px; animation: fade-in 0.3s; }
+        .tch-loading p { color: var(--text-secondary); font-weight: 500; }
+
+        .tch-report-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; color: var(--text-primary); line-height: 1.8; white-space: pre-wrap; word-wrap: break-word; }
+
+        .debug-json summary { cursor: pointer; color: var(--accent-text); font-weight: 600; margin-bottom: 8px; }
+        .debug-json pre { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.5; }
+
+        .tch-back-btn {
+          padding: 7px 14px; font-size: 13px; background: var(--bg-card-hover);
+          color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px;
+          cursor: pointer; transition: all 0.2s; font-weight: 500;
+        }
+        .tch-back-btn:hover { background: var(--tch-accent-soft); color: var(--tch-accent-text); border-color: var(--accent); }
+
+        .tch-sub-tab-btn {
+          padding: 10px 16px; font-size: 13px; font-weight: 600; background: var(--bg-card);
+          color: var(--text-secondary); border: 1px solid var(--border); border-radius: 10px;
+          cursor: pointer; transition: all 0.2s;
+        }
+        .tch-sub-tab-btn:hover { background: var(--tch-accent-soft); color: var(--tch-accent-text); border-color: var(--accent); }
+
+        .tch-info-banner { padding: 14px 18px; background: var(--warm-soft); border: 1px solid rgba(232,168,76,0.2); border-radius: 10px; margin-bottom: 20px; color: var(--text-primary); }
+        .tch-info-banner strong { color: var(--warm-text); }
+
+        .tch-card-surface { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+        .tch-file-item { padding: 12px; margin-bottom: 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.15s; }
+        .tch-file-item:hover { background: var(--bg-card-hover); }
+        .tch-file-item.selected { background: var(--tch-accent-soft); border-color: var(--accent); }
+
+        .tch-primary-btn { width: 100%; padding: 9px 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .tch-primary-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px var(--tch-accent-soft); }
+        .tch-primary-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .tch-success-btn { background: linear-gradient(135deg, var(--tch-success), #4aad7a); }
+        .tch-warning-btn { background: linear-gradient(135deg, var(--tch-warning), #c89040); }
+        .tch-neutral-btn { background: var(--bg-card-hover); color: var(--text-primary); border: 1px solid var(--border); }
+
+        .tch-progress-bar {
+          position: fixed; top: 0; left: 0; right: 0; height: 3px;
+          background: linear-gradient(90deg, var(--accent), var(--tch-success));
+          animation: progress-line 1.5s ease-in-out infinite; z-index: 999;
+        }
+        .tch-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+        .tch-fix-list { padding-left: 20px; line-height: 2; background: var(--tch-accent-soft); padding: 16px; border-radius: 10px; border-left: 3px solid var(--accent); }
+        .tch-fix-list.neutral { background: var(--bg-card); border-left-color: var(--text-muted); }
+        .tch-risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; padding: 12px; background: var(--tch-danger-soft); border-radius: 10px; border-left: 3px solid var(--tch-danger); }
+        .tch-risk-chip { padding: 8px 12px; background: var(--bg-card); border: 1px solid rgba(224,112,112,0.25); border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .tch-risk-chip-badge { display: inline-block; background: var(--tch-danger); color: #fff; padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+
+        .tch-stat-summary { margin-bottom: 16px; padding: 12px 16px; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .tch-stat-summary strong { color: var(--text-primary); }
+        .tch-stat-value { font-size: 18px; font-weight: 700; margin-left: 6px; }
+        .tch-stat-value.danger { color: var(--tch-danger); }
+        .tch-stat-value.accent { color: var(--accent); }
+
+        .tch-weak-rank { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .tch-weak-rank.rank-0 { background: var(--tch-danger-soft); }
+        .tch-weak-rank.rank-1 { background: var(--tch-warning-soft); }
+        .tch-weak-rank.rank-2 { background: var(--tch-success-soft); }
+
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slide-down { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 2000px; } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes progress-line { 0% { width: 0%; } 50% { width: 80%; } 100% { width: 100%; } }
+        @keyframes toast-slide-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes number-scale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes skeleton-loading { 0% { background: var(--bg-card); } 50% { background: var(--bg-card-hover); } 100% { background: var(--bg-card); } }
+
+        button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .tch-main::-webkit-scrollbar, .tch-sidebar::-webkit-scrollbar { width: 6px; }
+        .tch-main::-webkit-scrollbar-track, .tch-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .tch-main::-webkit-scrollbar-thumb, .tch-sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+        .tch-main::-webkit-scrollbar-thumb:hover, .tch-sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        ::selection { background: var(--tch-accent-soft); color: var(--text-primary); }
 
-        /* ══════════════════════════════════════ */
-        /* 响应式设计 - 移动端优化 */
-        /* ══════════════════════════════════════ */
-        
         @media (max-width: 768px) {
-          .tch-main {
-            padding: 24px 16px;
-          }
-
-          .tch-body {
-            flex-direction: column;
-          }
-
-          .tch-sidebar {
-            min-width: 100%;
-            max-height: auto;
-            border-right: none;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            overflow-x: auto;
-            overflow-y: hidden;
-          }
-
-          .tch-nav-btn {
-            border-left: none;
-            border-bottom: 3px solid transparent;
-            padding: 12px 16px;
-            white-space: nowrap;
-          }
-
-          .tch-nav-btn.active {
-            border-left: none;
-            border-bottom-color: #4a90e2;
-          }
-
-          .tch-panel {
-            padding: 24px 16px;
-            margin-bottom: 16px;
-          }
-
-          .tch-panel h2 {
-            font-size: 20px;
-            margin: 0 0 16px 0;
-            padding-bottom: 12px;
-          }
-
-          .kpi-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-
-          .kpi {
-            padding: 20px 16px;
-            min-height: 120px;
-          }
-
-          .kpi strong {
-            font-size: 32px;
-          }
-
-          .viz-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
-          }
-
-          .tch-table-header,
-          .tch-table-row {
-            grid-template-columns: 1fr;
-            column-gap: 0;
-          }
-
-          .tch-table-header {
-            display: none;
-          }
-
-          .tch-table-row {
-            padding: 16px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            margin-bottom: 12px;
-          }
-
-          .tch-feedback-form {
-            padding: 16px;
-          }
-
-          input[type="text"],
-          input[type="email"],
-          textarea {
-            font-size: 16px;
-          }
-
-          .topbar-center {
-            display: none;
-          }
+          .tch-main { padding: 16px; }
+          .tch-body { flex-direction: column; }
+          .tch-sidebar { min-width: 100%; max-height: auto; border-right: none; border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; overflow-y: hidden; padding: 4px; }
+          .tch-nav-btn { border-left: none; border-bottom: 2px solid transparent; padding: 10px 14px; white-space: nowrap; border-radius: 8px; }
+          .tch-nav-btn.active { border-left: none; border-bottom-color: var(--accent); }
+          .tch-panel { padding: 20px 16px; }
+          .tch-panel h2 { font-size: 18px; }
+          .kpi-grid { grid-template-columns: 1fr; }
+          .viz-grid { grid-template-columns: 1fr; }
+          .tch-table-header { display: none; }
+          .tch-table-row { grid-template-columns: 1fr; padding: 14px 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+          .topbar-center { display: none; }
         }
-
-        /* 平板设备优化 */
         @media (min-width: 769px) and (max-width: 1024px) {
-          .tch-main {
-            padding: 32px 24px;
-          }
-
-          .kpi-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .viz-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .tch-table-header,
-          .tch-table-row {
-            grid-template-columns: repeat(4, 1fr);
-          }
+          .tch-main { padding: 24px; }
+          .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+          .viz-grid { grid-template-columns: 1fr; }
         }
-
-        /* 可访问性 - 禁用动画 */
         @media (prefers-reduced-motion: reduce) {
-          button,
-          input,
-          textarea,
-          a,
-          .tch-nav-btn,
-          .tch-sm-btn,
-          .kpi,
-          .project-item,
-          .tch-table-row,
-          .tch-panel,
-          .tch-feedback-form {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-
-          @keyframes fade-in,
-          @keyframes fade-up,
-          @keyframes slide-down,
-          @keyframes slide-up,
-          @keyframes spin,
-          @keyframes bounce,
-          @keyframes pulse-grow {
-            0% { clip-path: inset(0); }
-            100% { clip-path: inset(0); }
-          }
+          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
-
-        /* 焦点可见优化 - 增强可访问性 */
-        button:focus-visible,
-        input:focus-visible,
-        textarea:focus-visible,
-        a:focus-visible {
-          outline: 3px solid #4a90e2;
-          outline-offset: 2px;
-        }
-
-        /* 禁用状态 */
-        button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        /* 高对比度模式支持 */
-        @media (prefers-contrast: more) {
-          .tch-panel {
-            border-color: #000;
-            border-width: 2px;
-          }
-
-          .topbar-btn {
-            border: 2px solid #000;
-          }
-
-          input[type="text"],
-          input[type="email"],
-          textarea {
-            border-width: 2px;
-          }
-        }
-
-        /* ══════════════════════════════════════ */
-        /* 额外动画定义 */
-        /* ══════════════════════════════════════ */
-        
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: -1000px 0;
-          }
-          100% {
-            background-position: 1000px 0;
-          }
-        }
-
-        @keyframes pulse-grow {
-          0% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: scale(1.05);
-            opacity: 0;
-          }
-        }
-
-        @keyframes slide-left {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        /* 新增样式类 */
-        .bounce {
-          animation: bounce 0.6s ease-in-out;
-        }
-
-        .shimmer-bg {
-          background: linear-gradient(90deg, #f0f0f0, #e8e8e8, #f0f0f0);
-          background-size: 200% 100%;
-          animation: shimmer 2s infinite;
-        }
-
-        .pulse-ring {
-          animation: pulse-grow 1.5s ease-out;
-        }
-
-        /* ══════════════════════════════════════ */
-        /* 打印样式 */
-        /* ══════════════════════════════════════ */
-        
         @media print {
-          .tch-sidebar,
-          .chat-topbar,
-          .tch-nav-btn {
-            display: none;
-          }
-
-          .tch-body {
-            min-height: auto;
-          }
-
-          .tch-main {
-            padding: 0;
-            max-height: none;
-            overflow: visible;
-          }
-
-          .tch-panel {
-            page-break-inside: avoid;
-            box-shadow: none;
-            border: 1px solid #ccc;
-          }
-
-          a {
-            color: #0066cc;
-            text-decoration: underline;
-          }
-        }
-
-        /* 深色模式支持 - 纯黑底白字高对比度配色 */
-        [data-theme="dark"] {
-          color-scheme: dark;
-        }
-
-        [data-theme="dark"] .tch-app {
-          background-color: #000000;
-          color: #ffffff;
-          --skeleton-bg: #1a1a1a;
-        }
-
-        [data-theme="dark"] .tch-body {
-          background-color: #000000;
-        }
-
-        [data-theme="dark"] .tch-main {
-          background-color: #000000;
-        }
-
-        [data-theme="dark"] .tch-panel {
-          background-color: #0a0a0a;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .tch-panel h2,
-        [data-theme="dark"] .tch-panel h3,
-        [data-theme="dark"] .tch-app h1,
-        [data-theme="dark"] .tch-app h2,
-        [data-theme="dark"] .tch-app h3,
-        [data-theme="dark"] .tch-app h4 {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-app p,
-        [data-theme="dark"] .tch-app span,
-        [data-theme="dark"] .tch-app div {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-sidebar {
-          background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
-          border-right-color: #333333;
-        }
-
-        [data-theme="dark"] .tch-nav-btn {
-          background-color: transparent;
-          color: #ffffff;
-          border-left-color: transparent;
-        }
-
-        [data-theme="dark"] .tch-nav-btn:hover:not(.disabled) {
-          background-color: #1a1a1a;
-          color: #ffffff;
-          border-left-color: transparent;
-        }
-
-        [data-theme="dark"] .tch-nav-btn.active {
-          background-color: #1a3a5a;
-          color: #ffffff;
-          border-left-color: #4a90e2;
-          font-weight: 600;
-        }
-
-        [data-theme="dark"] .kpi {
-          background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%);
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .kpi strong {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .kpi span {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .kpi em {
-          color: #dddddd;
-        }
-
-        [data-theme="dark"] .kpi:hover {
-          background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%);
-          border-color: #4a90e2;
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
-        }
-
-        [data-theme="dark"] .chat-topbar {
-          background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%);
-          border-bottom-color: #333333;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-        }
-
-        [data-theme="dark"] .topbar-brand {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .topbar-label {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .topbar-sep {
-          border-left-color: #333333;
-        }
-
-        [data-theme="dark"] .topbar-btn {
-          background-color: #1a3a5a;
-          color: #ffffff;
-          border-color: #333333;
-          transition: all 0.2s ease;
-        }
-
-        [data-theme="dark"] .topbar-btn:hover {
-          background-color: #2a5a8a;
-          border-color: #4a90e2;
-          box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
-        }
-
-        [data-theme="dark"] .topbar-btn.theme-toggle {
-          background-color: #1a3a5a;
-          border: 1px solid #333333;
-        }
-
-        [data-theme="dark"] .topbar-btn.theme-toggle:hover {
-          background-color: #2a5a8a;
-          border-color: #4a90e2;
-          box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
-        }
-
-        [data-theme="dark"] .tch-filter-input {
-          background-color: #0a0a0a;
-          color: #ffffff;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .tch-filter-input::placeholder {
-          color: #888888;
-        }
-
-        [data-theme="dark"] .tch-filter-input:focus {
-          border-color: #4a90e2;
-          box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-          background-color: #000000;
-        }
-
-        [data-theme="dark"] input[type="text"],
-        [data-theme="dark"] input[type="email"],
-        [data-theme="dark"] textarea {
-          background-color: #0a0a0a;
-          color: #ffffff;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] input[type="text"]::placeholder,
-        [data-theme="dark"] input[type="email"]::placeholder,
-        [data-theme="dark"] textarea::placeholder {
-          color: #888888;
-        }
-
-        [data-theme="dark"] input[type="text"]:focus,
-        [data-theme="dark"] input[type="email"]:focus,
-        [data-theme="dark"] textarea:focus {
-          border-color: #4a90e2;
-          box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-          background-color: #000000;
-        }
-
-        [data-theme="dark"] .tch-table {
-          border-color: #333333;
-          background-color: #000000;
-        }
-
-        [data-theme="dark"] .tch-table-header {
-          background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%);
-          border-bottom-color: #333333;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-table-row {
-          border-bottom-color: #1a1a1a;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-table-row:hover {
-          background-color: #0a0a0a;
-          border-left-color: #4a90e2;
-        }
-
-        [data-theme="dark"] .project-item {
-          background-color: #0a0a0a;
-          border-color: #333333;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .project-item:hover {
-          background-color: #1a1a1a;
-          border-color: #4a90e2;
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
-        }
-
-        [data-theme="dark"] .risk-badge {
-          background-color: #3a2020;
-          border-color: #6a4040;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .risk-badge.high {
-          background-color: #4a2520;
-          color: #ffffff;
-          border-color: #8a5a4a;
-        }
-
-        [data-theme="dark"] .risk-badge.medium {
-          background-color: #4a4a20;
-          color: #ffffff;
-          border-color: #8a8a40;
-        }
-
-        [data-theme="dark"] .risk-badge.low {
-          background-color: #204a20;
-          color: #ffffff;
-          border-color: #408a40;
-        }
-
-        [data-theme="dark"] .tch-feedback-form {
-          background-color: #0a0a0a;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .tch-feedback-form label {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-feedback-form button {
-          background: linear-gradient(135deg, #1a3a5a, #2a5a8a);
-          border: 1px solid #4a90e2;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-feedback-form button:hover:not(:disabled) {
-          background: linear-gradient(135deg, #2a5a8a, #3a7aaa);
-          box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-        }
-
-        [data-theme="dark"] .viz-card {
-          background-color: #0a0a0a;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .viz-card h3 {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .viz-card p {
-          color: #dddddd;
-        }
-
-        [data-theme="dark"] .viz-card span {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .evidence-item {
-          background-color: #0a0a0a;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .evidence-item strong {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .evidence-item p {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .evidence-item em {
-          color: #dddddd;
-        }
-
-        [data-theme="dark"] .tch-submission-detail {
-          background-color: #000000;
-          border-left-color: #4a90e2;
-        }
-
-        [data-theme="dark"] .tch-detail-section h4 {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-detail-section p {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-raw-text {
-          background-color: #000000;
-          border-color: #333333;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-loading {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          min-height: 200px;
-        }
-
-        [data-theme="dark"] .tch-loading p {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-report-content {
-          background-color: #000000;
-          border-color: #333333;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-sm-btn {
-          background-color: #1a3a5a;
-          color: #ffffff;
-          border-color: #333333;
-        }
-
-        [data-theme="dark"] .tch-sm-btn:hover {
-          background-color: #2a5a8a;
-          border-color: #4a90e2;
-        }
-
-        [data-theme="dark"] .right-hint {
-          background-color: #1a3a5a;
-          border-left-color: #4a90e2;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .right-tag {
-          background-color: #1a4a2a;
-          border-left-color: #4fbb6a;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .bar-row span:first-child {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .bar-track {
-          background-color: #1a1a1a;
-        }
-
-        [data-theme="dark"] .bar-fill {
-          background: linear-gradient(90deg, #4a90e2, #4fbb6a);
-        }
-
-        [data-theme="dark"] .bar-fill.danger {
-          background: linear-gradient(90deg, #ff6b6b, #ff5252);
-        }
-
-        [data-theme="dark"] .bar-row em {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .debug-json summary {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .debug-json pre {
-          background-color: #000000;
-          border-color: #333333;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-desc {
-          color: #dddddd;
-        }
-
-        [data-theme="dark"] .tch-cell-time {
-          color: #dddddd;
-        }
-
-        [data-theme="dark"] .tch-cell-score {
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-feedback-success {
-          background-color: #1a4a1a;
-          border: 1px solid #5a9a5a;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] ::selection {
-          background-color: #1a4d7a;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] ::-moz-selection {
-          background-color: #1a4d7a;
-          color: #ffffff;
-        }
-
-        [data-theme="dark"] .tch-main::-webkit-scrollbar-track {
-          background: #000000;
-        }
-
-        [data-theme="dark"] .tch-main::-webkit-scrollbar-thumb {
-          background: #4a4a4a;
-        }
-
-        [data-theme="dark"] .tch-main::-webkit-scrollbar-thumb:hover {
-          background: #6a6a6a;
-        }
-
-        [data-theme="dark"] .tch-sidebar::-webkit-scrollbar-track {
-          background: #000000;
-        }
-
-        [data-theme="dark"] .tch-sidebar::-webkit-scrollbar-thumb {
-          background: #4a4a4a;
-        }
-
-        [data-theme="dark"] .tch-sidebar::-webkit-scrollbar-thumb:hover {
-          background: #6a6a6a;
-        }
-
-        [data-theme="dark"] .tch-raw-text::-webkit-scrollbar-track {
-          background: #000000;
-        }
-
-        [data-theme="dark"] .tch-raw-text::-webkit-scrollbar-thumb {
-          background: #4a4a4a;
-        }
-
-        [data-theme="dark"] .tch-raw-text::-webkit-scrollbar-thumb:hover {
-          background: #6a6a6a;
-        }
-
-        /* 可选: 系统偏好深色模式的后备方案 */
-        @media (prefers-color-scheme: dark) {
-          :not([data-theme]) {
-            color-scheme: dark;
-          }
-        }
-
-        /* 性能优化 */
-        
-        .tch-nav-btn,
-        .tch-sm-btn,
-        .project-item,
-        .kpi,
-        input,
-        textarea {
-          will-change: transform, background-color;
-        }
-
-        /* 加速 GPU 渲染 */
-        .tch-panel,
-        .viz-card,
-        .tch-table-row {
-          transform: translateZ(0);
-          backface-visibility: hidden;
-        }
-
-        /* 溢出内容处理 */
-        .tch-raw-text {
-          overflow-wrap: break-word;
-          word-break: break-word;
-        }
-
-        /* 文本选择样式 */
-        ::selection {
-          background-color: #4a90e2;
-          color: #ffffff;
-        }
-
-        ::-moz-selection {
-          background-color: #4a90e2;
-          color: #ffffff;
-        }
-
-        /* 滚动条美化 */
-        .tch-main::-webkit-scrollbar,
-        .tch-sidebar::-webkit-scrollbar,
-        .tch-raw-text::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-
-        .tch-main::-webkit-scrollbar-track,
-        .tch-sidebar::-webkit-scrollbar-track,
-        .tch-raw-text::-webkit-scrollbar-track {
-          background: #f0f0f0;
-        }
-
-        .tch-main::-webkit-scrollbar-thumb,
-        .tch-sidebar::-webkit-scrollbar-thumb,
-        .tch-raw-text::-webkit-scrollbar-thumb {
-          background: #ccc;
-          border-radius: 4px;
-        }
-
-        .tch-main::-webkit-scrollbar-thumb:hover,
-        .tch-sidebar::-webkit-scrollbar-thumb:hover,
-        .tch-raw-text::-webkit-scrollbar-thumb:hover {
-          background: #999;
-        }
-
-        /* iOS 及浏览器兼容性处理 */
-
-        /* Firefox 特定修复 */
-        @-moz-document url-prefix() {
-          input[type="text"],
-          input[type="email"],
-          textarea {
-            background-clip: padding-box;
-          }
-        }
-
-        /* Safari 特定修复 */
-        @supports (-webkit-appearance: none) {
-          input[type="text"],
-          input[type="email"],
-          textarea {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-          }
-        }
-
-        /* 确保一致的字体渲染 */
-        html {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
+          .tch-sidebar, .chat-topbar { display: none; }
+          .tch-body { min-height: auto; }
+          .tch-main { padding: 0; max-height: none; overflow: visible; }
+          .tch-panel { page-break-inside: avoid; box-shadow: none; }
         }
       `}
       </style>

@@ -98,80 +98,155 @@ function ErrorToast({ message, onClose }: { message: string; onClose: () => void
   );
 }
 
-// 饼状图组件
-function PieChart({
-  data,
-  colors,
-  hoverItem,
-  onHover,
-}: {
-  data: Array<{ label: string; value: number; key: string }>;
-  colors: string[];
-  hoverItem: string | null;
-  onHover: (key: string | null) => void;
-}) {
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  if (total === 0) return null;
+// 动画计数器组件
+function AnimatedNumber({ value, duration = 800, decimals = 0 }: { value: number; duration?: number; decimals?: number }) {
+  const [display, setDisplay] = useState(0);
+  const prevRef = useRef(0);
 
-  let currentAngle = 0;
-  const radius = 70;
-  const slices = data.map((item, idx) => {
-    const sliceAngle = (item.value / total) * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sliceAngle;
-    const isHovered = hoverItem === item.key;
-    const isLarge = sliceAngle > 180 ? 1 : 0;
+  useEffect(() => {
+    const start = prevRef.current;
+    const startTime = performance.now();
+    let frameId: number;
+    function tick(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(start + (value - start) * eased);
+      if (progress < 1) frameId = requestAnimationFrame(tick);
+      else prevRef.current = value;
+    }
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [value, duration]);
 
-    const startRad = (startAngle * Math.PI) / 180;
-    const endRad = (endAngle * Math.PI) / 180;
+  return <>{display.toFixed(decimals)}</>;
+}
 
-    const hoverRadius = isHovered ? 80 : radius;
-    const x1 = 100 + hoverRadius * Math.cos(startRad);
-    const y1 = 100 + hoverRadius * Math.sin(startRad);
-    const x2 = 100 + hoverRadius * Math.cos(endRad);
-    const y2 = 100 + hoverRadius * Math.sin(endRad);
-
-    const color = colors[idx % colors.length];
-
-    currentAngle = endAngle;
-
-    return (
-      <g key={item.key} onMouseEnter={() => onHover(item.key)} onMouseLeave={() => onHover(null)} style={{ userSelect: "none" }}>
-        <path
-          d={`M 100 100 L ${x1} ${y1} A ${hoverRadius} ${hoverRadius} 0 ${isLarge} 1 ${x2} ${y2} Z`}
-          fill={color}
-          opacity={isHovered ? 1 : 0.85}
-          style={{
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            filter: isHovered ? "saturate(1.3) brightness(1.1)" : "saturate(1) brightness(1)",
-          }}
-        />
-        {isHovered && (
-          <text
-            x="100"
-            y="110"
-            textAnchor="middle"
-            fill="var(--text-primary)"
-            fontSize="12"
-            fontWeight="600"
-            style={{ pointerEvents: "none" }}
-          >
-            {item.label} ({item.value})
-          </text>
-        )}
-      </g>
-    );
+// ── 雷达图组件 ──
+function RadarChart({ data, size = 230 }: { data: Array<{ label: string; value: number; max: number }>; size?: number }) {
+  const n = data.length;
+  if (n < 3) return null;
+  const cx = size / 2, cy = size / 2, r = size * 0.34;
+  const step = (2 * Math.PI) / n;
+  const pt = (i: number, ratio: number) => ({
+    x: cx + r * ratio * Math.cos(step * i - Math.PI / 2),
+    y: cy + r * ratio * Math.sin(step * i - Math.PI / 2),
   });
-
+  const gridLevels = [0.25, 0.5, 0.75, 1];
   return (
-    <svg
-      width="260"
-      height="220"
-      viewBox="0 0 200 200"
-      style={{ margin: "0 auto", display: "block", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.05))" }}
-    >
-      {slices}
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: "block", margin: "0 auto" }}>
+      {gridLevels.map(lv => (
+        <polygon key={lv} points={data.map((_, i) => { const p = pt(i, lv); return `${p.x},${p.y}`; }).join(" ")} fill="none" stroke="var(--border)" strokeWidth="1" opacity={0.45} />
+      ))}
+      {data.map((_, i) => { const p = pt(i, 1); return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="var(--border)" strokeWidth="1" opacity={0.3} />; })}
+      <polygon
+        points={data.map((d, i) => { const p = pt(i, d.max > 0 ? Math.min(d.value / d.max, 1) : 0); return `${p.x},${p.y}`; }).join(" ")}
+        fill="rgba(107,138,255,0.18)" stroke="var(--accent)" strokeWidth="2" strokeLinejoin="round"
+      />
+      {data.map((d, i) => { const p = pt(i, d.max > 0 ? Math.min(d.value / d.max, 1) : 0); return <circle key={`d${i}`} cx={p.x} cy={p.y} r="3.5" fill="var(--accent)" stroke="var(--bg-primary)" strokeWidth="1.5" />; })}
+      {data.map((d, i) => {
+        const p = pt(i, 1.22);
+        return <text key={`l${i}`} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fill="var(--text-secondary)" fontSize="10" fontWeight="500">{d.label}</text>;
+      })}
+    </svg>
+  );
+}
+
+// ── 环形图组件 ──
+function DonutChart({ data, size = 170 }: { data: Array<{ label: string; value: number; color: string }>; size?: number }) {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) return null;
+  const cx = size / 2, cy = size / 2, outerR = size * 0.42, innerR = outerR - 28;
+  let cum = -Math.PI / 2;
+  const arcs = data.map((d, idx) => {
+    const angle = (d.value / total) * 2 * Math.PI;
+    const s = cum; const e = cum + angle; cum = e;
+    const lg = angle > Math.PI ? 1 : 0;
+    const oR = hoverIdx === idx ? outerR + 4 : outerR;
+    const path = `M ${cx + oR * Math.cos(s)} ${cy + oR * Math.sin(s)} A ${oR} ${oR} 0 ${lg} 1 ${cx + oR * Math.cos(e)} ${cy + oR * Math.sin(e)} L ${cx + innerR * Math.cos(e)} ${cy + innerR * Math.sin(e)} A ${innerR} ${innerR} 0 ${lg} 0 ${cx + innerR * Math.cos(s)} ${cy + innerR * Math.sin(s)} Z`;
+    return <path key={idx} d={path} fill={d.color} opacity={hoverIdx === idx ? 1 : 0.82} style={{ transition: "all 0.2s", cursor: "pointer" }} onMouseEnter={() => setHoverIdx(idx)} onMouseLeave={() => setHoverIdx(null)} />;
+  });
+  return (
+    <div style={{ position: "relative", width: size, margin: "0 auto" }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: "block" }}>
+        {arcs}
+        <text x={cx} y={cy - 6} textAnchor="middle" fill="var(--text-primary)" fontSize="22" fontWeight="700">{total}</text>
+        <text x={cx} y={cy + 12} textAnchor="middle" fill="var(--text-muted)" fontSize="11">{hoverIdx !== null ? data[hoverIdx].label : "总计"}</text>
+      </svg>
+    </div>
+  );
+}
+
+// ── 面积图组件 ──
+function AreaChart({ data, width = 340, height = 110, color = "var(--accent)" }: { data: Array<{ label: string; value: number }>; width?: number; height?: number; color?: string }) {
+  if (data.length < 2) return <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center" }}>数据不足</p>;
+  const maxV = Math.max(1, ...data.map(d => d.value));
+  const pad = { t: 8, b: 22, l: 2, r: 2 };
+  const cW = width - pad.l - pad.r, cH = height - pad.t - pad.b;
+  const pts = data.map((d, i) => ({ x: pad.l + (i / (data.length - 1)) * cW, y: pad.t + cH - (d.value / maxV) * cH }));
+  const line = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const area = `${line} L ${pts[pts.length - 1].x} ${pad.t + cH} L ${pts[0].x} ${pad.t + cH} Z`;
+  const uid = `ag${Math.random().toString(36).slice(2, 8)}`;
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ display: "block" }}>
+      <defs><linearGradient id={uid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity="0.35" /><stop offset="100%" stopColor={color} stopOpacity="0.03" /></linearGradient></defs>
+      <path d={area} fill={`url(#${uid})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {pts.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="3" fill={color} stroke="var(--bg-primary)" strokeWidth="1.5" opacity={i === 0 || i === pts.length - 1 ? 1 : 0.5} />)}
+      {data.map((d, i) => { const show = data.length <= 7 || i % Math.ceil(data.length / 6) === 0 || i === data.length - 1; return show ? <text key={i} x={pts[i].x} y={height - 3} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{d.label.slice(5)}</text> : null; })}
+    </svg>
+  );
+}
+
+// ── 散点图组件 ──
+function ScatterPlot({ data, width = 300, height = 200 }: { data: Array<{ id: string; x: number; y: number }>; width?: number; height?: number }) {
+  const [hover, setHover] = useState<string | null>(null);
+  if (data.length === 0) return null;
+  const pad = { t: 14, b: 30, l: 38, r: 14 };
+  const cW = width - pad.l - pad.r, cH = height - pad.t - pad.b;
+  const maxX = Math.max(1, ...data.map(d => d.x)), maxY = Math.max(1, ...data.map(d => d.y));
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
+      {[0, 0.5, 1].map(r => <line key={r} x1={pad.l} y1={pad.t + cH * (1 - r)} x2={pad.l + cW} y2={pad.t + cH * (1 - r)} stroke="var(--border)" strokeWidth="1" opacity="0.35" />)}
+      {[0, 0.5, 1].map(r => <text key={`y${r}`} x={pad.l - 6} y={pad.t + cH * (1 - r) + 3} textAnchor="end" fill="var(--text-muted)" fontSize="9">{(maxY * r).toFixed(1)}</text>)}
+      {[0, 0.5, 1].map(r => <text key={`x${r}`} x={pad.l + cW * r} y={height - 8} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{Math.round(maxX * r)}</text>)}
+      <text x={pad.l + cW / 2} y={height} textAnchor="middle" fill="var(--text-muted)" fontSize="9">提交次数</text>
+      <text x={8} y={pad.t + cH / 2} textAnchor="middle" fill="var(--text-muted)" fontSize="9" transform={`rotate(-90,8,${pad.t + cH / 2})`}>均分</text>
+      {data.map(d => {
+        const px = pad.l + (d.x / maxX) * cW, py = pad.t + cH - (d.y / maxY) * cH;
+        const c = d.y >= 7 ? "rgba(92,189,138,0.85)" : d.y >= 5 ? "rgba(232,168,76,0.85)" : "rgba(224,112,112,0.85)";
+        const isH = hover === d.id;
+        return (
+          <g key={d.id} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} style={{ cursor: "pointer" }}>
+            <circle cx={px} cy={py} r={isH ? 8 : 5.5} fill={c} stroke="var(--bg-primary)" strokeWidth="2" style={{ transition: "r 0.2s" }} />
+            {isH && <text x={px} y={py - 12} textAnchor="middle" fill="var(--text-primary)" fontSize="10" fontWeight="600">{d.id.slice(0, 12)} ({d.y.toFixed(1)})</text>}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+// ── 箱型图组件 ──
+function BoxPlotChart({ data, width = 300, height = 70 }: { data: { min: number; q1: number; median: number; q3: number; max: number; avg: number }; width?: number; height?: number }) {
+  const maxV = 10;
+  const pad = { l: 30, r: 16, t: 14, b: 20 };
+  const cW = width - pad.l - pad.r, midY = pad.t + (height - pad.t - pad.b) / 2;
+  const sc = (v: number) => pad.l + (v / maxV) * cW;
+  return (
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
+      <line x1={pad.l} y1={height - pad.b} x2={pad.l + cW} y2={height - pad.b} stroke="var(--border)" strokeWidth="1" />
+      {[0, 2, 4, 6, 8, 10].map(v => (
+        <g key={v}><line x1={sc(v)} y1={height - pad.b} x2={sc(v)} y2={height - pad.b + 4} stroke="var(--border)" strokeWidth="1" /><text x={sc(v)} y={height - 3} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{v}</text></g>
+      ))}
+      <line x1={sc(data.min)} y1={midY} x2={sc(data.max)} y2={midY} stroke="var(--text-muted)" strokeWidth="1.5" strokeDasharray="3 2" />
+      <line x1={sc(data.min)} y1={midY - 10} x2={sc(data.min)} y2={midY + 10} stroke="var(--text-muted)" strokeWidth="1.5" />
+      <line x1={sc(data.max)} y1={midY - 10} x2={sc(data.max)} y2={midY + 10} stroke="var(--text-muted)" strokeWidth="1.5" />
+      <rect x={sc(data.q1)} y={midY - 16} width={Math.max(sc(data.q3) - sc(data.q1), 2)} height={32} rx="4" fill="rgba(107,138,255,0.18)" stroke="var(--accent)" strokeWidth="1.5" />
+      <line x1={sc(data.median)} y1={midY - 16} x2={sc(data.median)} y2={midY + 16} stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx={sc(data.avg)} cy={midY} r="4.5" fill="var(--tch-warning)" stroke="var(--bg-primary)" strokeWidth="2" />
+      <text x={sc(data.avg)} y={midY - 22} textAnchor="middle" fill="var(--tch-warning)" fontSize="9" fontWeight="600">均值 {data.avg.toFixed(1)}</text>
     </svg>
   );
 }
@@ -214,6 +289,8 @@ export default function TeacherPage() {
   // 饼状图悬浮状态
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [hoveredRisk, setHoveredRisk] = useState<string | null>(null);
+  const [overviewSubmissions, setOverviewSubmissions] = useState<any[]>([]);
+  const [hoveredKpi, setHoveredKpi] = useState<string | null>(null);
 
   // New state for enhanced features
   const [capabilityMap, setCapabilityMap] = useState<any>(null);
@@ -778,8 +855,14 @@ export default function TeacherPage() {
       setLoading(true);
       setErrorMessage("");
       const q = categoryFilter ? `?category=${encodeURIComponent(categoryFilter)}` : "";
-      const data = validateResponse(await api(`/api/teacher/dashboard${q}`), "加载总览数据失败");
-      setDashboard(data.data);
+      const [dashData, subsData] = await Promise.all([
+        api(`/api/teacher/dashboard${q}`).catch(() => null),
+        api("/api/teacher/submissions?limit=50").catch(() => ({ submissions: [] })),
+      ]);
+      if (dashData && !dashData.error) {
+        setDashboard(dashData.data);
+      }
+      setOverviewSubmissions(subsData?.submissions ?? []);
     } catch (error) {
       setErrorMessage(`${error instanceof Error ? error.message : "加载总览数据失败"}`);
       setDashboard(null);
@@ -1175,6 +1258,58 @@ export default function TeacherPage() {
   const maxCat = useMemo(() => Math.max(1, ...(dashboard?.category_distribution ?? []).map((r: any) => Number(r.projects || 0))), [dashboard]);
   const maxRule = useMemo(() => Math.max(1, ...(dashboard?.top_risk_rules ?? []).map((r: any) => Number(r.projects || 0))), [dashboard]);
 
+  const overviewStats = useMemo(() => {
+    const subs = overviewSubmissions;
+    if (!subs || subs.length === 0) return null;
+    const uniqueStudents = new Set(subs.map((s: any) => s.student_id).filter(Boolean)).size;
+    const scores = subs.map((s: any) => Number(s.overall_score || 0)).filter((s: number) => s > 0);
+    const avgScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+    const scoreBuckets = [0, 0, 0, 0, 0];
+    scores.forEach((s: number) => {
+      if (s <= 2) scoreBuckets[0]++;
+      else if (s <= 4) scoreBuckets[1]++;
+      else if (s <= 6) scoreBuckets[2]++;
+      else if (s <= 8) scoreBuckets[3]++;
+      else scoreBuckets[4]++;
+    });
+    const withRules = subs.filter((s: any) => (s.triggered_rules?.length || 0) > 0).length;
+    const riskRate = subs.length > 0 ? (withRules / subs.length * 100) : 0;
+    const sourceTypes: Record<string, number> = {};
+    subs.forEach((s: any) => { const t = s.source_type || "unknown"; sourceTypes[t] = (sourceTypes[t] || 0) + 1; });
+    const recent = subs.slice(0, 8);
+    const studentMap: Record<string, { count: number; totalScore: number; lastActive: string }> = {};
+    subs.forEach((s: any) => {
+      const sid = s.student_id || "unknown";
+      if (!studentMap[sid]) studentMap[sid] = { count: 0, totalScore: 0, lastActive: "" };
+      studentMap[sid].count++;
+      studentMap[sid].totalScore += Number(s.overall_score || 0);
+      if ((s.created_at || "") > studentMap[sid].lastActive) studentMap[sid].lastActive = s.created_at || "";
+    });
+    const studentSummary = Object.entries(studentMap).map(([id, data]) => ({
+      id, count: data.count, avgScore: data.count > 0 ? data.totalScore / data.count : 0, lastActive: data.lastActive,
+    })).sort((a, b) => b.count - a.count);
+
+    // 活动时间线（按日期分组）
+    const dateMap: Record<string, number> = {};
+    subs.forEach((s: any) => { const d = (s.created_at || "").slice(0, 10); if (d) dateMap[d] = (dateMap[d] || 0) + 1; });
+    const activityByDate = Object.entries(dateMap).sort(([a],[b]) => a.localeCompare(b)).map(([date, count]) => ({ label: date, value: count }));
+
+    // 规则雷达数据
+    const ruleFreq: Record<string, number> = {};
+    subs.forEach((s: any) => { (s.triggered_rules || []).forEach((r: string) => { ruleFreq[r] = (ruleFreq[r] || 0) + 1; }); });
+    const ruleRadar = Object.entries(ruleFreq).sort(([,a],[,b]) => (b as number) - (a as number)).slice(0, 6).map(([rule, count]) => ({ label: getRuleDisplayName(rule), value: count as number, max: Math.max(1, ...Object.values(ruleFreq) as number[]) }));
+
+    // 分位数（箱型图）
+    const sorted = [...scores].sort((a, b) => a - b);
+    const pct = (arr: number[], p: number) => { if (!arr.length) return 0; const idx = (p / 100) * (arr.length - 1); const lo = Math.floor(idx); return lo === Math.ceil(idx) ? arr[lo] : arr[lo] + (arr[Math.ceil(idx)] - arr[lo]) * (idx - lo); };
+    const scorePercentiles = { min: sorted[0] || 0, q1: pct(sorted, 25), median: pct(sorted, 50), q3: pct(sorted, 75), max: sorted[sorted.length - 1] || 0, avg: avgScore };
+
+    // 学生散点数据
+    const studentScatter = studentSummary.map(s => ({ id: s.id, x: s.count, y: s.avgScore }));
+
+    return { uniqueStudents, totalSubmissions: subs.length, avgScore, scoreBuckets, riskRate, withRules, sourceTypes, recent, studentSummary, activityByDate, ruleRadar, scorePercentiles, studentScatter };
+  }, [overviewSubmissions]);
+
   const TABS: { id: Tab; label: string }[] = [
     { id: "overview", label: "总览" },
     { id: "class", label: "班级" },
@@ -1312,171 +1447,254 @@ export default function TeacherPage() {
           {/* ── 总览 ── */}
           {tab === "overview" && !loading && (
             <div className="tch-panel fade-up">
-              <h2>总览</h2>
-              <p className="tch-desc">基于Neo4j图数据库中存储的全部项目数据实时计算。数据来源：学生每次提交或对话时自动入库。</p>
+              <h2>教学数据总览</h2>
+              <p className="tch-desc">基于学生提交数据和图数据库实时计算，鼠标悬浮数字可查看计算方式</p>
               {dashboard?.error && <p className="right-hint">图数据读取失败：{dashboard.error}</p>}
-              
-              {!dashboard ? (
-                <SkeletonLoader rows={3} type="card" />
+
+              {!dashboard && !overviewStats ? (
+                <SkeletonLoader rows={4} type="card" />
               ) : (
                 <>
-                  <div className="kpi-grid" style={{ animation: "fade-in 0.5s ease-out" }}>
-                    <div className="kpi" style={{ transition: "all 0.3s ease" }}>
-                      <span>项目总数</span>
-                      <strong style={{ fontSize: 28 }}>{dashboard?.overview?.total_projects ?? "-"}</strong>
-                      <em className="kpi-hint">图数据库中的项目节点数</em>
-                    </div>
-                    <div className="kpi" style={{ transition: "all 0.3s ease" }}>
-                      <span>证据总数</span>
-                      <strong style={{ fontSize: 28 }}>{dashboard?.overview?.total_evidence ?? "-"}</strong>
-                      <em className="kpi-hint">学生提交的证据条数</em>
-                    </div>
-                    <div className="kpi" style={{ transition: "all 0.3s ease" }}>
-                      <span>规则命中</span>
-                      <strong style={{ fontSize: 28 }}>{dashboard?.overview?.total_rule_hits ?? "-"}</strong>
-                      <em className="kpi-hint">触发风险规则的总次数</em>
-                    </div>
+                  {/* ── KPI 统计卡片 ── */}
+                  <div className="ov-kpi-grid">
+                    {[
+                      { key: "projects", icon: "📁", iconBg: "rgba(107,138,255,0.15)", iconColor: "var(--accent)", value: dashboard?.overview?.total_projects ?? 0, label: "项目总数", decimals: 0, tip: "Neo4j 图数据库中 Project 节点总数", formula: `COUNT(Project) = ${dashboard?.overview?.total_projects ?? 0}` },
+                      { key: "students", icon: "👥", iconBg: "rgba(115,204,255,0.15)", iconColor: "#73ccff", value: overviewStats?.uniqueStudents ?? 0, label: "活跃学生", decimals: 0, tip: "提交记录中去重后的 student_id 数量", formula: `DISTINCT(student_id) = ${overviewStats?.uniqueStudents ?? 0}` },
+                      { key: "submissions", icon: "📝", iconBg: "rgba(92,189,138,0.15)", iconColor: "var(--tch-success)", value: overviewStats?.totalSubmissions ?? 0, label: "总提交数", decimals: 0, tip: "所有项目的提交记录总数（含对话和文件）", formula: overviewStats?.sourceTypes ? Object.entries(overviewStats.sourceTypes).map(([k,v]) => `${k}: ${v}`).join(" + ") : "" },
+                      { key: "score", icon: "⭐", iconBg: "rgba(232,168,76,0.15)", iconColor: "var(--tch-warning)", value: overviewStats?.avgScore ?? 0, label: "平均评分", decimals: 1, tip: "所有提交的 overall_score 平均值（满分10）", formula: `SUM(score) / COUNT = ${(overviewStats?.avgScore ?? 0).toFixed(1)}`, valueColor: (overviewStats?.avgScore ?? 0) >= 7 ? "var(--tch-success)" : (overviewStats?.avgScore ?? 0) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" },
+                      { key: "evidence", icon: "🔗", iconBg: "rgba(189,147,249,0.15)", iconColor: "#bd93f9", value: dashboard?.overview?.total_evidence ?? 0, label: "证据链", decimals: 0, tip: "Neo4j 中 Evidence 节点总数", formula: `COUNT(Evidence) = ${dashboard?.overview?.total_evidence ?? 0}` },
+                      { key: "risk", icon: "⚠️", iconBg: "rgba(224,112,112,0.15)", iconColor: "var(--tch-danger)", value: overviewStats?.riskRate ?? 0, label: "风险触发率", decimals: 1, suffix: "%", tip: "触发至少一条风险规则的提交占总提交比", formula: `${overviewStats?.withRules ?? 0} / ${overviewStats?.totalSubmissions ?? 0} = ${(overviewStats?.riskRate ?? 0).toFixed(1)}%`, valueColor: (overviewStats?.riskRate ?? 0) > 50 ? "var(--tch-danger)" : (overviewStats?.riskRate ?? 0) > 30 ? "var(--tch-warning)" : "var(--tch-success)" },
+                    ].map((kpi: any) => (
+                      <div key={kpi.key} className="ov-kpi-card" onMouseEnter={() => setHoveredKpi(kpi.key)} onMouseLeave={() => setHoveredKpi(null)}>
+                        <div className="ov-kpi-icon" style={{ background: kpi.iconBg, color: kpi.iconColor }}>{kpi.icon}</div>
+                        <div className="ov-kpi-value" style={kpi.valueColor ? { color: kpi.valueColor } : undefined}>
+                          <AnimatedNumber value={kpi.value} decimals={kpi.decimals} />
+                          {kpi.suffix && <span style={{ fontSize: 16, fontWeight: 500 }}>{kpi.suffix}</span>}
+                        </div>
+                        <div className="ov-kpi-label">{kpi.label}</div>
+                        {hoveredKpi === kpi.key && (
+                          <div className="ov-kpi-tip">
+                            <strong>计算方式</strong>
+                            <p>{kpi.tip}</p>
+                            {kpi.formula && <div className="ov-kpi-formula">{kpi.formula}</div>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <div className="viz-grid">
-                    <div className="viz-card" style={{ animation: "fade-in 0.6s ease-out" }}>
-                      <h3>📊 类别分布</h3>
-                      <p className="tch-desc">学生项目的领域分类统计。点击类别可筛选。</p>
+
+                  {/* ── ROW 2: 类别分布 + 风险雷达 ── */}
+                  <div className="ov-chart-grid">
+                    <div className="ov-chart-card">
+                      <h3>类别分布</h3>
+                      <p className="tch-desc">学生项目的领域分类，点击可筛选</p>
                       {(dashboard?.category_distribution ?? []).length === 0 ? (
-                        <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无类别数据</p>
+                        <p style={{ color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: 20 }}>暂无类别数据</p>
                       ) : (
-                        <>
-                          <PieChart
-                            data={(dashboard?.category_distribution ?? []).map((row: any) => ({
-                              label: row.category,
-                              value: Number(row.projects || 0),
-                              key: row.category,
-                            }))}
-                            colors={["#4a90e2", "#2ecc71", "#f39c12", "#e74c3c", "#9b59b6", "#1abc9c", "#34495e", "#e67e22"]}
-                            hoverItem={hoveredCategory}
-                            onHover={setHoveredCategory}
-                          />
-                          <div style={{ marginTop: 20 }}>
-                            {(dashboard?.category_distribution ?? []).map((row: any, idx: number) => (
-                              <div
-                                key={row.category}
-                                className="bar-row"
-                                style={{
-                                  cursor: "pointer",
-                                  transition: "all 0.2s ease",
-                                  opacity: hoveredCategory === null || hoveredCategory === row.category ? 1 : 0.5,
-                                }}
-                                onMouseEnter={() => setHoveredCategory(row.category)}
-                                onMouseLeave={() => setHoveredCategory(null)}
-                                onClick={() => setCategoryFilter(row.category)}
-                              >
-                                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                  <span
-                                    style={{
-                                      width: 12,
-                                      height: 12,
-                                      borderRadius: "50%",
-                                      backgroundColor: ["#4a90e2", "#2ecc71", "#f39c12", "#e74c3c", "#9b59b6", "#1abc9c", "#34495e", "#e67e22"][idx % 8],
-                                    }}
-                                  />
-                                  {row.category}
-                                </span>
-                                <div className="bar-track">
-                                  <div
-                                    className="bar-fill"
-                                    style={{
-                                      width: `${(Number(row.projects || 0) / maxCat) * 100}%`,
-                                      transition: "width 0.4s ease",
-                                      backgroundColor: ["#4a90e2", "#2ecc71", "#f39c12", "#e74c3c", "#9b59b6", "#1abc9c", "#34495e", "#e67e22"][idx % 8],
-                                    }}
-                                  />
-                                </div>
-                                <em>{row.projects}</em>
+                        <div className="ov-bar-list">
+                          {(dashboard?.category_distribution ?? []).map((row: any, idx: number) => {
+                            const pct = maxCat > 0 ? (Number(row.projects || 0) / maxCat) * 100 : 0;
+                            const colors = ["rgba(107,138,255,0.65)","rgba(115,204,255,0.65)","rgba(92,189,138,0.65)","rgba(232,168,76,0.65)","rgba(189,147,249,0.65)","rgba(129,199,212,0.65)","rgba(255,183,197,0.65)","rgba(255,209,102,0.65)"];
+                            return (
+                              <div key={row.category} className="ov-bar-item" onClick={() => setCategoryFilter(row.category)} style={{ animationDelay: `${idx * 0.06}s` }}>
+                                <div className="ov-bar-label"><span className="ov-bar-dot" style={{ background: colors[idx % colors.length] }} /><span>{row.category}</span></div>
+                                <div className="ov-bar-track"><div className="ov-bar-fill" style={{ width: `${pct}%`, background: colors[idx % colors.length] }} /></div>
+                                <span className="ov-bar-val">{row.projects}</span>
                               </div>
-                            ))}
-                          </div>
-                        </>
+                            );
+                          })}
+                        </div>
                       )}
                     </div>
-                    <div className="viz-card" style={{ animation: "fade-in 0.7s ease-out" }}>
-                      <h3>⚠️ 最高风险规则</h3>
-                      <p className="tch-desc">被触发最多次的风险规则。高频风险=班级共性问题，适合课堂重点讲解。</p>
-                      {(dashboard?.top_risk_rules ?? []).length === 0 ? (
-                        <p style={{ color: "var(--text-muted)", fontSize: 12 }}>暂无风险规则数据</p>
-                      ) : (
-                        <>
-                          <PieChart
-                            data={(dashboard?.top_risk_rules ?? []).slice(0, 4).map((row: any) => ({
-                              label: getRuleDisplayName(row.rule),
-                              value: Number(row.projects || 0),
-                              key: row.rule,
-                            }))}
-                            colors={["#ff6b6b", "#ff8c42", "#ffa502", "#ff6b9d"]}
-                            hoverItem={hoveredRisk}
-                            onHover={setHoveredRisk}
-                          />
-                          <div style={{ marginTop: 20 }}>
-                            {(dashboard?.top_risk_rules ?? []).slice(0, 4).map((row: any, idx: number) => (
-                              <div
-                                key={row.rule}
-                                className="bar-row"
-                                style={{
-                                  cursor: "pointer",
-                                  transition: "all 0.2s ease",
-                                  opacity: hoveredRisk === null || hoveredRisk === row.rule ? 1 : 0.5,
-                                }}
-                                onMouseEnter={() => setHoveredRisk(row.rule)}
-                                onMouseLeave={() => setHoveredRisk(null)}
-                              >
-                                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                  <span
-                                    style={{
-                                      width: 12,
-                                      height: 12,
-                                      borderRadius: "50%",
-                                      backgroundColor: ["#ff6b6b", "#ff8c42", "#ffa502", "#ff6b9d"][idx % 4],
-                                    }}
-                                  />
-                                  {getRuleDisplayName(row.rule)}
-                                </span>
-                                <div className="bar-track danger">
-                                  <div
-                                    className="bar-fill danger"
-                                    style={{
-                                      width: `${(Number(row.projects || 0) / maxRule) * 100}%`,
-                                      transition: "width 0.4s ease",
-                                      backgroundColor: ["#ff6b6b", "#ff8c42", "#ffa502", "#ff6b9d"][idx % 4],
-                                    }}
-                                  />
-                                </div>
-                                <em>{row.projects}</em>
+
+                    <div className="ov-chart-card">
+                      <h3>风险规则雷达</h3>
+                      <p className="tch-desc">各规则触发频率的多维可视化</p>
+                      {overviewStats && overviewStats.ruleRadar.length >= 3 ? (
+                        <RadarChart data={overviewStats.ruleRadar} />
+                      ) : (dashboard?.top_risk_rules ?? []).length > 0 ? (
+                        <div className="ov-bar-list">
+                          {(dashboard?.top_risk_rules ?? []).slice(0, 6).map((row: any, idx: number) => {
+                            const pct = maxRule > 0 ? (Number(row.projects || 0) / maxRule) * 100 : 0;
+                            const colors = ["rgba(224,112,112,0.55)","rgba(224,168,76,0.55)","rgba(255,150,130,0.55)","rgba(189,147,249,0.55)","rgba(224,112,112,0.4)","rgba(224,168,76,0.4)"];
+                            return (
+                              <div key={row.rule} className="ov-bar-item" style={{ animationDelay: `${idx * 0.06}s` }}>
+                                <div className="ov-bar-label"><span className="ov-bar-dot" style={{ background: colors[idx % colors.length] }} /><span>{getRuleDisplayName(row.rule)}</span></div>
+                                <div className="ov-bar-track"><div className="ov-bar-fill" style={{ width: `${pct}%`, background: colors[idx % colors.length] }} /></div>
+                                <span className="ov-bar-val">{row.projects}</span>
                               </div>
-                            ))}
-                          </div>
-                        </>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p style={{ color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: 20 }}>暂无风险规则数据</p>
                       )}
                     </div>
                   </div>
-                  <h3 style={{ marginTop: 16 }}>🎯 高风险项目</h3>
-                  <p className="tch-desc">触发风险规则最多的项目，建议优先关注和干预。点击可查看详细证据链。</p>
-                  <div className="table-like">
+
+                  {/* ── ROW 3: 成绩箱型图 + 直方图 | 提交趋势面积图 ── */}
+                  {overviewStats && (
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>成绩分布总览</h3>
+                        <p className="tch-desc">箱型图：最小值 / Q1 / 中位数 / Q3 / 最大值，黄点为均值</p>
+                        {overviewStats.scorePercentiles.max > 0 ? (
+                          <BoxPlotChart data={overviewStats.scorePercentiles} />
+                        ) : (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center" }}>暂无成绩数据</p>
+                        )}
+                        <div style={{ marginTop: 12, fontSize: 11, color: "var(--text-muted)", display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                          <span>最低 <strong style={{ color: "var(--tch-danger)" }}>{overviewStats.scorePercentiles.min.toFixed(1)}</strong></span>
+                          <span>Q1 <strong>{overviewStats.scorePercentiles.q1.toFixed(1)}</strong></span>
+                          <span>中位数 <strong style={{ color: "var(--accent)" }}>{overviewStats.scorePercentiles.median.toFixed(1)}</strong></span>
+                          <span>Q3 <strong>{overviewStats.scorePercentiles.q3.toFixed(1)}</strong></span>
+                          <span>最高 <strong style={{ color: "var(--tch-success)" }}>{overviewStats.scorePercentiles.max.toFixed(1)}</strong></span>
+                        </div>
+                        <div style={{ marginTop: 16 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 8 }}>分段直方图</div>
+                          <div className="ov-histogram">
+                            {["0-2", "2-4", "4-6", "6-8", "8-10"].map((label, idx) => {
+                              const count = overviewStats.scoreBuckets[idx] || 0;
+                              const maxB = Math.max(1, ...overviewStats.scoreBuckets);
+                              const h = (count / maxB) * 100;
+                              const barColors = ["var(--tch-danger)","rgba(224,168,76,0.8)","rgba(232,168,76,0.65)","rgba(92,189,138,0.65)","var(--tch-success)"];
+                              return (
+                                <div key={label} className="ov-hist-col">
+                                  <div className="ov-hist-count">{count}</div>
+                                  <div className="ov-hist-bar" style={{ height: `${Math.max(h, 6)}%`, background: barColors[idx] }} />
+                                  <div className="ov-hist-label">{label}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="ov-chart-card">
+                        <h3>提交趋势</h3>
+                        <p className="tch-desc">按日期统计的提交量变化趋势</p>
+                        {overviewStats.activityByDate.length >= 2 ? (
+                          <AreaChart data={overviewStats.activityByDate} color="rgba(107,138,255,0.9)" />
+                        ) : (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>数据点不足，需至少 2 天提交记录</p>
+                        )}
+                        <div style={{ marginTop: 16, padding: "12px 14px", background: "var(--bg-secondary)", borderRadius: 10, border: "1px solid var(--border)" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>规则命中总次数</span>
+                            <strong style={{ fontSize: 20, color: "var(--tch-danger)" }}>{dashboard?.overview?.total_rule_hits ?? 0}</strong>
+                          </div>
+                          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>Project → HITS_RULE → RiskRule 关系总数</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── ROW 4: 提交来源环形图 + 学生分布散点图 ── */}
+                  {overviewStats && (
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>提交来源构成</h3>
+                        <p className="tch-desc">各提交方式的占比分布</p>
+                        {Object.keys(overviewStats.sourceTypes).length === 0 ? (
+                          <p style={{ color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: 20 }}>暂无数据</p>
+                        ) : (
+                          <>
+                            <DonutChart data={Object.entries(overviewStats.sourceTypes).map(([type, count], idx) => {
+                              const labels: Record<string,string> = { dialogue: "对话", file: "文件上传", file_in_chat: "聊天上传", text: "文本输入" };
+                              const colors = ["rgba(107,138,255,0.7)","rgba(92,189,138,0.7)","rgba(232,168,76,0.7)","rgba(189,147,249,0.7)","rgba(129,199,212,0.7)"];
+                              return { label: labels[type] || type, value: count as number, color: colors[idx % colors.length] };
+                            })} />
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 12 }}>
+                              {Object.entries(overviewStats.sourceTypes).map(([type, count], idx) => {
+                                const labels: Record<string,string> = { dialogue: "💬 对话", file: "📄 文件", file_in_chat: "📎 聊天上传", text: "📝 文本" };
+                                const colors = ["rgba(107,138,255,0.7)","rgba(92,189,138,0.7)","rgba(232,168,76,0.7)","rgba(189,147,249,0.7)","rgba(129,199,212,0.7)"];
+                                return (
+                                  <span key={type} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text-secondary)" }}>
+                                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: colors[idx % colors.length] }} />
+                                    {labels[type] || type} <strong style={{ marginLeft: 2 }}>{count as number}</strong>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="ov-chart-card">
+                        <h3>学生表现分布</h3>
+                        <p className="tch-desc">横轴=提交次数 纵轴=平均分，颜色=状态（绿/黄/红），悬浮查看详情</p>
+                        {overviewStats.studentScatter.length > 0 ? (
+                          <ScatterPlot data={overviewStats.studentScatter} />
+                        ) : (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无学生数据</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── 近期提交活动 ── */}
+                  {overviewStats && overviewStats.recent.length > 0 && (
+                    <div className="ov-section">
+                      <h3>近期提交活动</h3>
+                      <p className="tch-desc">最近的学生提交，点击可跳转查看证据链</p>
+                      <div className="ov-activity-list">
+                        {overviewStats.recent.map((s: any, i: number) => (
+                          <div key={i} className="ov-activity-item" style={{ animationDelay: `${i * 0.04}s` }} onClick={() => { setSelectedProject(s.project_id); loadEvidence(s.project_id); }}>
+                            <div className="ov-activity-avatar">{(s.student_id || "?")[0].toUpperCase()}</div>
+                            <div className="ov-activity-info">
+                              <div className="ov-activity-name">
+                                <span>{s.student_id || "未知学生"}</span>
+                                <span className="ov-activity-type">{s.source_type === "dialogue" ? "💬 对话" : s.source_type === "file" ? "📄 文件" : s.source_type || "提交"}</span>
+                              </div>
+                              <div className="ov-activity-detail">{s.project_id}{s.filename ? ` · ${s.filename}` : ""}{s.bottleneck ? ` · ${(s.bottleneck as string).slice(0, 50)}` : ""}</div>
+                            </div>
+                            <div className="ov-activity-score" style={{ color: Number(s.overall_score) >= 7 ? "var(--tch-success)" : Number(s.overall_score) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>
+                              {Number(s.overall_score).toFixed(1)}
+                            </div>
+                            <div className="ov-activity-time">{s.created_at ? (s.created_at as string).slice(5, 16) : ""}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── 学生概况 ── */}
+                  {overviewStats && overviewStats.studentSummary.length > 0 && (
+                    <div className="ov-section">
+                      <h3>学生概况</h3>
+                      <p className="tch-desc">按学生维度汇总，快速识别需要关注的学生</p>
+                      <div className="ov-stu-table">
+                        <div className="ov-stu-header"><span>学生</span><span>提交次数</span><span>平均分</span><span>状态</span></div>
+                        {overviewStats.studentSummary.map((stu: any, idx: number) => {
+                          const st = stu.avgScore >= 7 ? { l: "良好", c: "var(--tch-success)", bg: "var(--tch-success-soft)" } : stu.avgScore >= 5 ? { l: "一般", c: "var(--tch-warning)", bg: "var(--tch-warning-soft)" } : { l: "需关注", c: "var(--tch-danger)", bg: "var(--tch-danger-soft)" };
+                          return (
+                            <div key={stu.id} className="ov-stu-row" style={{ animationDelay: `${idx * 0.03}s` }}>
+                              <span className="ov-stu-name"><span className="ov-stu-av">{(stu.id as string)[0]?.toUpperCase()}</span>{stu.id}</span>
+                              <span><strong>{stu.count}</strong><span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 4 }}>次</span></span>
+                              <span style={{ fontWeight: 600, color: st.c }}>{stu.avgScore.toFixed(1)}</span>
+                              <span><span className="ov-status-badge" style={{ color: st.c, background: st.bg }}>{st.l}</span></span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── 高风险项目 ── */}
+                  <div className="ov-section">
+                    <h3>高风险项目</h3>
+                    <p className="tch-desc">触发风险规则最多的项目，建议优先关注</p>
                     {(dashboard?.high_risk_projects ?? []).length === 0 ? (
-                      <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 16 }}>暂无高风险项目数据</p>
+                      <p style={{ color: "var(--text-muted)", fontSize: 13, padding: 20, textAlign: "center" }}>暂无高风险项目</p>
                     ) : (
-                      (dashboard?.high_risk_projects ?? []).slice(0, 8).map((row: any, idx: number) => (
-                        <button 
-                          key={row.project_id} 
-                          className="project-item" 
-                          onClick={() => loadEvidence(row.project_id)}
-                          style={{ 
-                            animation: `fade-in 0.3s ease-out ${idx * 0.05}s both`,
-                            transition: "all 0.2s ease"
-                          }}
-                        >
-                          <span>{row.project_name || row.project_id}</span>
-                          <span>{row.category}</span>
-                          <span className="risk-badge high">风险{row.risk_count}</span>
-                        </button>
-                      ))
+                      <div className="ov-risk-grid">
+                        {(dashboard?.high_risk_projects ?? []).slice(0, 8).map((row: any, idx: number) => (
+                          <button key={row.project_id} className="ov-risk-card" onClick={() => loadEvidence(row.project_id)} style={{ animationDelay: `${idx * 0.05}s` }}>
+                            <div className="ov-risk-hd"><span className="ov-risk-name">{row.project_name || row.project_id}</span><span className="risk-badge high">风险 {row.risk_count}</span></div>
+                            <div className="ov-risk-meta"><span>{row.category}</span>{row.confidence !== undefined && <span>置信度 {row.confidence}</span>}</div>
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </>
@@ -2997,6 +3215,85 @@ export default function TeacherPage() {
         .tch-weak-rank.rank-0 { background: var(--tch-danger-soft); }
         .tch-weak-rank.rank-1 { background: var(--tch-warning-soft); }
         .tch-weak-rank.rank-2 { background: var(--tch-success-soft); }
+
+        /* ── 总览页新样式 ── */
+        .ov-kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
+        .ov-kpi-card {
+          position: relative; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 14px;
+          padding: 18px 14px; text-align: center; transition: all 0.25s; cursor: default;
+        }
+        .ov-kpi-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .ov-kpi-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 18px; }
+        .ov-kpi-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 4px; }
+        .ov-kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .ov-kpi-tip {
+          position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+          background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 10px;
+          padding: 12px 14px; font-size: 12px; line-height: 1.5; z-index: 50; width: 220px;
+          text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.18); animation: fade-in 0.15s ease-out;
+          backdrop-filter: blur(12px);
+        }
+        .ov-kpi-tip strong { display: block; margin-bottom: 4px; color: var(--accent-text); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ov-kpi-tip p { margin: 0 0 6px; color: var(--text-secondary); font-size: 12px; }
+        .ov-kpi-formula { background: var(--bg-secondary); padding: 6px 8px; border-radius: 6px; font-family: monospace; font-size: 11px; color: var(--accent); margin-top: 6px; word-break: break-all; }
+
+        .ov-chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+        .ov-chart-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+        .ov-chart-card h3 { margin: 0 0 4px; font-size: 15px; color: var(--heading-color); font-weight: 600; }
+
+        .ov-bar-list { display: flex; flex-direction: column; gap: 10px; }
+        .ov-bar-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; transition: all 0.2s; animation: fade-in 0.3s ease-out both; }
+        .ov-bar-item:hover { padding-left: 4px; }
+        .ov-bar-label { min-width: 110px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); font-weight: 500; }
+        .ov-bar-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .ov-bar-track { flex: 1; height: 20px; background: var(--bg-card-hover); border-radius: 6px; overflow: hidden; }
+        .ov-bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease-out; }
+        .ov-bar-val { min-width: 32px; text-align: right; font-weight: 600; font-size: 13px; color: var(--text-primary); }
+
+        .ov-histogram { display: flex; align-items: flex-end; gap: 8px; height: 140px; padding: 12px 0; }
+        .ov-hist-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+        .ov-hist-count { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+        .ov-hist-bar { width: 100%; border-radius: 6px 6px 2px 2px; transition: height 0.6s ease-out; min-height: 4px; }
+        .ov-hist-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+        .ov-section { margin-bottom: 24px; }
+        .ov-section h3 { margin: 0 0 4px; font-size: 16px; color: var(--heading-color); font-weight: 600; }
+
+        .ov-activity-list { display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .ov-activity-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; transition: all 0.15s; animation: fade-in 0.3s ease-out both; }
+        .ov-activity-item:hover { background: var(--bg-card-hover); }
+        .ov-activity-item:not(:last-child) { border-bottom: 1px solid var(--border); }
+        .ov-activity-avatar { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+        .ov-activity-info { flex: 1; min-width: 0; }
+        .ov-activity-name { font-size: 13px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .ov-activity-type { font-size: 11px; font-weight: 500; color: var(--text-muted); background: var(--bg-card-hover); padding: 2px 6px; border-radius: 4px; }
+        .ov-activity-detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ov-activity-score { font-size: 16px; font-weight: 700; flex-shrink: 0; }
+        .ov-activity-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; min-width: 80px; text-align: right; }
+
+        .ov-stu-table { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .ov-stu-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 16px; background: var(--bg-card-hover); font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+        .ov-stu-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 16px; align-items: center; font-size: 13px; border-top: 1px solid var(--border); transition: background 0.15s; animation: fade-in 0.3s ease-out both; }
+        .ov-stu-row:hover { background: var(--bg-card-hover); }
+        .ov-stu-name { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text-primary); }
+        .ov-stu-av { width: 24px; height: 24px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; }
+        .ov-status-badge { padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+
+        .ov-risk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+        .ov-risk-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; color: var(--text-primary); animation: fade-in 0.3s ease-out both; }
+        .ov-risk-card:hover { background: var(--bg-card-hover); border-color: var(--tch-danger); transform: translateY(-1px); }
+        .ov-risk-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .ov-risk-name { font-weight: 600; font-size: 13px; }
+        .ov-risk-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
+
+        @media (max-width: 1024px) { .ov-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) {
+          .ov-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+          .ov-chart-grid { grid-template-columns: 1fr; }
+          .ov-stu-header { display: none; }
+          .ov-stu-row { grid-template-columns: 1fr; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+          .ov-activity-item { flex-wrap: wrap; }
+        }
 
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }

@@ -144,7 +144,7 @@ def _extract_pptx_slide_ocr(prs, slide_idx: int) -> str:
                     ['tesseract', tmp.name, 'stdout', '-l', 'chi_sim+eng'],
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=60
                 )
                 ocr_text = result.stdout.strip()
                 return ocr_text if ocr_text else ""
@@ -230,7 +230,7 @@ def _extract_pdf_page_ocr(file_path: Path, page_idx: int) -> str:
                     ['tesseract', tmp.name, 'stdout', '-l', 'chi_sim+eng'],
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=60
                 )
                 ocr_text = result.stdout.strip()
                 return ocr_text if ocr_text else ""

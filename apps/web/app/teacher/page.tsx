@@ -281,6 +281,10 @@ export default function TeacherPage() {
   // 班级页面状态
   const [classTabInput, setClassTabInput] = useState("");
   const [classIdConfirmed, setClassIdConfirmed] = useState(false);
+  const [classView, setClassView] = useState<"overview" | "student" | "student-project">("overview");
+  const [classSubmissions, setClassSubmissions] = useState<any[]>([]);
+  const [selectedClassStudent, setSelectedClassStudent] = useState("");
+  const [selectedClassStudentProject, setSelectedClassStudentProject] = useState("");
 
   // 项目页面状态
   const [projectTabInput, setProjectTabInput] = useState("");
@@ -871,6 +875,33 @@ export default function TeacherPage() {
     }
   }
 
+  async function loadClassData(cid: string) {
+    setLoadingMessage("正在加载团队全量数据");
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const [subsData, capData, ruleData, intervData, compData] = await Promise.all([
+        api(`/api/teacher/submissions?class_id=${encodeURIComponent(cid)}&limit=300`).catch(() => ({ submissions: [] })),
+        api(`/api/teacher/capability-map/${encodeURIComponent(cid)}`).catch(() => null),
+        api(`/api/teacher/rule-coverage/${encodeURIComponent(cid)}`).catch(() => null),
+        api(`/api/teacher/teaching-interventions/${encodeURIComponent(cid)}`).catch(() => null),
+        api(`/api/teacher/compare?class_id=${encodeURIComponent(cid)}`).catch(() => null),
+      ]);
+      setClassSubmissions(subsData?.submissions ?? []);
+      if (capData) setCapabilityMap(capData);
+      if (ruleData) setRuleCoverage(ruleData);
+      if (intervData) setTeachingInterventions(intervData);
+      if (compData) setCompareData(compData);
+      setClassView("overview");
+      setSelectedClassStudent("");
+      setSelectedClassStudentProject("");
+    } catch {
+      setErrorMessage("加载团队数据失败");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function loadSubmissions() {
     setLoadingMessage("正在加载学生提交记录");
     setLoading(true);
@@ -1310,6 +1341,73 @@ export default function TeacherPage() {
     return { uniqueStudents, totalSubmissions: subs.length, avgScore, scoreBuckets, riskRate, withRules, sourceTypes, recent, studentSummary, activityByDate, ruleRadar, scorePercentiles, studentScatter };
   }, [overviewSubmissions]);
 
+  // ── 班级(团队)分析 ──
+  const classAnalytics = useMemo(() => {
+    const subs = classSubmissions;
+    if (!subs || subs.length === 0) return null;
+    const uniqueStudents = [...new Set(subs.map((s: any) => s.student_id).filter(Boolean))];
+    const uniqueProjects = [...new Set(subs.map((s: any) => s.project_id).filter(Boolean))];
+    const scores = subs.map((s: any) => Number(s.overall_score || 0)).filter((s: number) => s > 0);
+    const avgScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+    const withRules = subs.filter((s: any) => (s.triggered_rules?.length || 0) > 0).length;
+    const riskRate = subs.length > 0 ? (withRules / subs.length * 100) : 0;
+
+    const studentMap: Record<string, any[]> = {};
+    subs.forEach((s: any) => { const sid = s.student_id || "unknown"; if (!studentMap[sid]) studentMap[sid] = []; studentMap[sid].push(s); });
+    const students = Object.entries(studentMap).map(([id, items]) => {
+      const sc = items.map((s: any) => Number(s.overall_score || 0)).filter((s: number) => s > 0);
+      const sorted = [...items].sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || ""));
+      const avg = sc.length > 0 ? sc.reduce((a: number, b: number) => a + b, 0) / sc.length : 0;
+      const projects = [...new Set(items.map((s: any) => s.project_id).filter(Boolean))];
+      const riskC = items.filter((s: any) => (s.triggered_rules?.length || 0) > 0).length;
+      const trend = sc.length >= 4 ? (() => { const mid = Math.floor(sc.length / 2); const h1 = sc.slice(0, mid).reduce((a: number, b: number) => a + b, 0) / mid; const h2 = sc.slice(mid).reduce((a: number, b: number) => a + b, 0) / (sc.length - mid); return h2 - h1; })() : 0;
+      const latest = sorted.length > 0 ? Number(sorted[sorted.length - 1].overall_score || 0) : 0;
+      const fileCount = items.filter((s: any) => s.source_type === "file" || s.source_type === "file_in_chat").length;
+      return { id, count: items.length, avgScore: avg, latestScore: latest, projects, projectCount: projects.length, riskCount: riskC, trend, lastActive: sorted[sorted.length - 1]?.created_at || "", fileCount, submissions: sorted };
+    }).sort((a, b) => b.avgScore - a.avgScore);
+
+    const dateMap: Record<string, number> = {};
+    subs.forEach((s: any) => { const d = (s.created_at || "").slice(0, 10); if (d) dateMap[d] = (dateMap[d] || 0) + 1; });
+    const activityByDate = Object.entries(dateMap).sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ label: date, value: count }));
+
+    const scoreBuckets = [0, 0, 0, 0, 0];
+    scores.forEach((s: number) => { if (s <= 2) scoreBuckets[0]++; else if (s <= 4) scoreBuckets[1]++; else if (s <= 6) scoreBuckets[2]++; else if (s <= 8) scoreBuckets[3]++; else scoreBuckets[4]++; });
+    const sorted = [...scores].sort((a, b) => a - b);
+    const pctFn = (arr: number[], p: number) => { if (!arr.length) return 0; const idx = (p / 100) * (arr.length - 1); const lo = Math.floor(idx); return lo === Math.ceil(idx) ? arr[lo] : arr[lo] + (arr[Math.ceil(idx)] - arr[lo]) * (idx - lo); };
+    const scorePercentiles = { min: sorted[0] || 0, q1: pctFn(sorted, 25), median: pctFn(sorted, 50), q3: pctFn(sorted, 75), max: sorted[sorted.length - 1] || 0, avg: avgScore };
+
+    const ruleFreq: Record<string, number> = {};
+    subs.forEach((s: any) => { (s.triggered_rules || []).forEach((r: string) => { ruleFreq[r] = (ruleFreq[r] || 0) + 1; }); });
+    const ruleRadar = Object.entries(ruleFreq).sort(([, a], [, b]) => (b as number) - (a as number)).slice(0, 6).map(([rule, count]) => ({ label: getRuleDisplayName(rule), value: count as number, max: Math.max(1, ...Object.values(ruleFreq) as number[]) }));
+
+    return { totalSubmissions: subs.length, studentCount: uniqueStudents.length, projectCount: uniqueProjects.length, avgScore, riskRate, withRules, students, activityByDate, scoreBuckets, scorePercentiles, ruleRadar, studentScatter: students.map(s => ({ id: s.id, x: s.count, y: s.avgScore })) };
+  }, [classSubmissions]);
+
+  // ── 单个学生的项目分析 ──
+  const studentProjectAnalytics = useMemo(() => {
+    if (!selectedClassStudent || !classSubmissions.length) return null;
+    const subs = classSubmissions.filter((s: any) => s.student_id === selectedClassStudent);
+    if (subs.length === 0) return null;
+    const projectMap: Record<string, any[]> = {};
+    subs.forEach((s: any) => { const pid = s.project_id || "unknown"; if (!projectMap[pid]) projectMap[pid] = []; projectMap[pid].push(s); });
+    const projects = Object.entries(projectMap).map(([pid, items]) => {
+      const sorted = [...items].sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || ""));
+      const sc = sorted.map((s: any) => Number(s.overall_score || 0)).filter((v: number) => v > 0);
+      return {
+        id: pid, submissions: sorted, submissionCount: sorted.length,
+        scoreTimeline: sorted.map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: Number(s.overall_score || 0) })),
+        avgScore: sc.length > 0 ? sc.reduce((a: number, b: number) => a + b, 0) / sc.length : 0,
+        latestScore: sc.length > 0 ? sc[sc.length - 1] : 0,
+        firstScore: sc.length > 0 ? sc[0] : 0,
+        improvement: sc.length >= 2 ? sc[sc.length - 1] - sc[0] : 0,
+        fileSubmissions: sorted.filter((s: any) => s.filename),
+        lastActive: sorted[sorted.length - 1]?.created_at || "",
+      };
+    }).sort((a, b) => b.submissionCount - a.submissionCount);
+    const allScores = subs.map((s: any) => Number(s.overall_score || 0)).filter((v: number) => v > 0);
+    return { studentId: selectedClassStudent, totalSubmissions: subs.length, projectCount: projects.length, projects, avgScore: allScores.length > 0 ? allScores.reduce((a: number, b: number) => a + b, 0) / allScores.length : 0 };
+  }, [selectedClassStudent, classSubmissions]);
+
   const TABS: { id: Tab; label: string }[] = [
     { id: "overview", label: "总览" },
     { id: "class", label: "班级" },
@@ -1336,7 +1434,7 @@ export default function TeacherPage() {
     <div className="tch-app" suppressHydrationWarning>
       <header className="chat-topbar">
         <div className="topbar-left">
-          <Link href="/" className="topbar-brand">VentureAgent</Link>
+          <Link href="/" className="topbar-brand">VentureCheck</Link>
           <span className="topbar-sep" />
           <span className="topbar-label">教师控制台</span>
         </div>
@@ -2912,90 +3010,278 @@ export default function TeacherPage() {
 
           {tab === "class" && (
             <div className="tch-panel fade-up">
-              <h2>🏫 班级管理</h2>
-              <p className="tch-desc">输入班级ID以访问班级级别的数据分析和教学建议。</p>
-
               {!classIdConfirmed ? (
-                <div style={{ padding: "32px", textAlign: "center", animation: "fade-in 0.3s ease-out" }}>
-                  <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-                    <input
-                      type="text"
-                      placeholder="请输入班级 ID"
-                      value={classTabInput}
-                      onChange={(e) => setClassTabInput(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "12px 16px",
-                        fontSize: "16px",
-                        marginBottom: "16px",
-                        boxSizing: "border-box",
-                        border: "1px solid var(--border)",
-                        borderRadius: "10px",
-                      }}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" && classTabInput.trim()) {
-                          setClassId(classTabInput);
-                          setClassIdConfirmed(true);
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        if (classTabInput.trim()) {
-                          setClassId(classTabInput);
-                          setClassIdConfirmed(true);
-                        }
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "12px 16px",
-                        fontSize: "16px",
-                        background: classTabInput.trim() ? "var(--accent)" : "var(--bg-card-hover)",
-                        color: classTabInput.trim() ? "#fff" : "var(--text-muted)",
-                        border: "none",
-                        borderRadius: "10px",
-                        cursor: classTabInput.trim() ? "pointer" : "not-allowed",
-                        transition: "all 0.2s",
-                      }}
-                      disabled={!classTabInput.trim()}
-                    >
-                      确认班级ID
-                    </button>
+                <>
+                  <h2>🏫 团队管理</h2>
+                  <p className="tch-desc">输入团队（班级）ID，系统将加载全量学生提交数据并生成团队分析视图。</p>
+                  <div style={{ padding: "32px", textAlign: "center" }}>
+                    <div style={{ maxWidth: 400, margin: "0 auto" }}>
+                      <input type="text" placeholder="请输入团队 ID，例如：2026A" value={classTabInput} onChange={(e) => setClassTabInput(e.target.value)}
+                        style={{ width: "100%", padding: "12px 16px", fontSize: 16, marginBottom: 16, boxSizing: "border-box", border: "1px solid var(--border)", borderRadius: 10 }}
+                        onKeyPress={(e) => { if (e.key === "Enter" && classTabInput.trim()) { setClassId(classTabInput); setClassIdConfirmed(true); loadClassData(classTabInput); } }}
+                      />
+                      <button onClick={() => { if (classTabInput.trim()) { setClassId(classTabInput); setClassIdConfirmed(true); loadClassData(classTabInput); } }}
+                        style={{ width: "100%", padding: "12px 16px", fontSize: 16, background: classTabInput.trim() ? "var(--accent)" : "var(--bg-card-hover)", color: classTabInput.trim() ? "#fff" : "var(--text-muted)", border: "none", borderRadius: 10, cursor: classTabInput.trim() ? "pointer" : "not-allowed", transition: "all 0.2s" }}
+                        disabled={!classTabInput.trim()}>确认团队ID</button>
+                    </div>
                   </div>
-                </div>
+                </>
               ) : (
                 <>
-                  <div className="tch-info-banner">
-                    <p style={{ margin: "0" }}>
-                      <strong>当前班级 ID：</strong> {classId}
-                      <button
-                        onClick={() => setClassIdConfirmed(false)}
-                        className="tch-back-btn"
-                        style={{ marginLeft: 16, fontSize: 12 }}
-                      >
-                        切换班级
-                      </button>
-                    </p>
+                  {/* ── 面包屑导航 ── */}
+                  <div className="cls-breadcrumb">
+                    <span className="cls-crumb-item" onClick={() => { setClassIdConfirmed(false); setClassView("overview"); }}>全部团队</span>
+                    <span className="cls-crumb-sep">›</span>
+                    <span className={`cls-crumb-item ${classView === "overview" ? "active" : ""}`} onClick={() => setClassView("overview")}>{classId}</span>
+                    {(classView === "student" || classView === "student-project") && (<><span className="cls-crumb-sep">›</span><span className={`cls-crumb-item ${classView === "student" ? "active" : ""}`} onClick={() => setClassView("student")}>{selectedClassStudent}</span></>)}
+                    {classView === "student-project" && (<><span className="cls-crumb-sep">›</span><span className="cls-crumb-item active">{selectedClassStudentProject.slice(0, 20)}</span></>)}
+                    <button onClick={() => { loadClassData(classId); }} className="tch-sm-btn" style={{ marginLeft: "auto" }}>🔄 刷新</button>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "12px", marginBottom: "32px" }}>
-                    {CLASS_SUB_TABS.map((subTab) => (
-                      <button
-                        key={subTab.id}
-                        className="tch-sub-tab-btn"
-                        onClick={() => {
-                          setTab(subTab.id as Tab);
-                          if (subTab.id === "compare") loadCompare();
-                          if (subTab.id === "capability") loadCapabilityMap();
-                          if (subTab.id === "rule-coverage") loadRuleCoverage();
-                          if (subTab.id === "interventions") loadTeachingInterventions();
-                          if (subTab.id === "report") generateReport();
-                        }}
-                      >
-                        {subTab.label}
-                      </button>
-                    ))}
-                  </div>
+                  {/* ══════════════ Level 1: 团队总览 ══════════════ */}
+                  {classView === "overview" && !loading && classAnalytics && (
+                    <>
+                      <h2 style={{ marginTop: 0 }}>团队 {classId} · 数据看板</h2>
+                      <p className="tch-desc">全量学生提交数据实时聚合，点击学生行可钻取至个人详情</p>
+
+                      {/* KPI */}
+                      <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
+                        {[
+                          { icon: "👥", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: classAnalytics.studentCount, l: "学生人数", d: 0 },
+                          { icon: "📝", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: classAnalytics.totalSubmissions, l: "总提交数", d: 0 },
+                          { icon: "📁", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: classAnalytics.projectCount, l: "项目数", d: 0 },
+                          { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: classAnalytics.avgScore, l: "团队均分", d: 1 },
+                          { icon: "⚠️", bg: "rgba(224,112,112,0.15)", c: "var(--tch-danger)", v: classAnalytics.riskRate, l: "风险率%", d: 1 },
+                        ].map((k, i) => (
+                          <div key={i} className="ov-kpi-card">
+                            <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
+                            <div className="ov-kpi-value" style={{ color: k.c }}><AnimatedNumber value={k.v} decimals={k.d} />{k.l === "风险率%" && <span style={{ fontSize: 14 }}>%</span>}</div>
+                            <div className="ov-kpi-label">{k.l}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* ROW: 学生散点图 + 成绩箱型图 */}
+                      <div className="ov-chart-grid">
+                        <div className="ov-chart-card">
+                          <h3>学生表现分布</h3>
+                          <p className="tch-desc">横轴=提交次数 纵轴=均分，颜色反映状态，悬浮可看学生ID</p>
+                          <ScatterPlot data={classAnalytics.studentScatter} />
+                        </div>
+                        <div className="ov-chart-card">
+                          <h3>成绩分布</h3>
+                          <p className="tch-desc">箱型图概览 + 分段直方图</p>
+                          {classAnalytics.scorePercentiles.max > 0 && <BoxPlotChart data={classAnalytics.scorePercentiles} />}
+                          <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-muted)", display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                            <span>Min <strong style={{ color: "var(--tch-danger)" }}>{classAnalytics.scorePercentiles.min.toFixed(1)}</strong></span>
+                            <span>Q1 <strong>{classAnalytics.scorePercentiles.q1.toFixed(1)}</strong></span>
+                            <span>Med <strong style={{ color: "var(--accent)" }}>{classAnalytics.scorePercentiles.median.toFixed(1)}</strong></span>
+                            <span>Q3 <strong>{classAnalytics.scorePercentiles.q3.toFixed(1)}</strong></span>
+                            <span>Max <strong style={{ color: "var(--tch-success)" }}>{classAnalytics.scorePercentiles.max.toFixed(1)}</strong></span>
+                          </div>
+                          <div className="ov-histogram" style={{ height: 100, marginTop: 12 }}>
+                            {["0-2", "2-4", "4-6", "6-8", "8-10"].map((label, idx) => {
+                              const count = classAnalytics.scoreBuckets[idx] || 0;
+                              const maxB = Math.max(1, ...classAnalytics.scoreBuckets);
+                              const barColors = ["var(--tch-danger)","rgba(224,168,76,0.8)","rgba(232,168,76,0.65)","rgba(92,189,138,0.65)","var(--tch-success)"];
+                              return (<div key={label} className="ov-hist-col"><div className="ov-hist-count">{count}</div><div className="ov-hist-bar" style={{ height: `${Math.max((count / maxB) * 100, 6)}%`, background: barColors[idx] }} /><div className="ov-hist-label">{label}</div></div>);
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ROW: 风险雷达 + 活动趋势 */}
+                      <div className="ov-chart-grid">
+                        <div className="ov-chart-card">
+                          <h3>风险规则雷达</h3>
+                          <p className="tch-desc">团队触发的高频风险规则多维分布</p>
+                          {classAnalytics.ruleRadar.length >= 3 ? <RadarChart data={classAnalytics.ruleRadar} /> : (
+                            <div className="ov-bar-list">{classAnalytics.ruleRadar.map((r: any, i: number) => (
+                              <div key={i} className="ov-bar-item"><div className="ov-bar-label"><span className="ov-bar-dot" style={{ background: "rgba(224,112,112,0.6)" }} /><span>{r.label}</span></div><div className="ov-bar-track"><div className="ov-bar-fill" style={{ width: `${(r.value / r.max) * 100}%`, background: "rgba(224,112,112,0.5)" }} /></div><span className="ov-bar-val">{r.value}</span></div>
+                            ))}</div>
+                          )}
+                        </div>
+                        <div className="ov-chart-card">
+                          <h3>提交活动趋势</h3>
+                          <p className="tch-desc">按日期统计的提交量变化</p>
+                          {classAnalytics.activityByDate.length >= 2 ? <AreaChart data={classAnalytics.activityByDate} /> : <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>数据点不足</p>}
+                        </div>
+                      </div>
+
+                      {/* 学生排名表 */}
+                      <div className="ov-section">
+                        <h3>学生排名 ({classAnalytics.students.length})</h3>
+                        <p className="tch-desc">点击学生行可钻取查看个人项目演进详情</p>
+                        <div className="cls-stu-table">
+                          <div className="cls-stu-hdr"><span>#</span><span>学生</span><span>提交</span><span>项目</span><span>均分</span><span>最新分</span><span>趋势</span><span>风险</span><span>状态</span></div>
+                          {classAnalytics.students.map((stu: any, idx: number) => {
+                            const st = stu.avgScore >= 7 ? { l: "良好", c: "var(--tch-success)", bg: "var(--tch-success-soft)" } : stu.avgScore >= 5 ? { l: "一般", c: "var(--tch-warning)", bg: "var(--tch-warning-soft)" } : { l: "需关注", c: "var(--tch-danger)", bg: "var(--tch-danger-soft)" };
+                            return (
+                              <div key={stu.id} className="cls-stu-row" style={{ animationDelay: `${idx * 0.03}s` }} onClick={() => { setSelectedClassStudent(stu.id); setClassView("student"); }}>
+                                <span style={{ fontWeight: 700, color: idx < 3 ? "var(--accent)" : "var(--text-muted)" }}>{idx + 1}</span>
+                                <span className="ov-stu-name"><span className="ov-stu-av">{(stu.id as string)[0]?.toUpperCase()}</span>{stu.id}</span>
+                                <span><strong>{stu.count}</strong></span>
+                                <span>{stu.projectCount}</span>
+                                <span style={{ fontWeight: 600, color: st.c }}>{stu.avgScore.toFixed(1)}</span>
+                                <span style={{ color: stu.latestScore >= 7 ? "var(--tch-success)" : stu.latestScore >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>{stu.latestScore.toFixed(1)}</span>
+                                <span style={{ color: stu.trend > 0 ? "var(--tch-success)" : stu.trend < 0 ? "var(--tch-danger)" : "var(--text-muted)", fontWeight: 600 }}>{stu.trend > 0 ? `↑${stu.trend.toFixed(1)}` : stu.trend < 0 ? `↓${Math.abs(stu.trend).toFixed(1)}` : "—"}</span>
+                                <span>{stu.riskCount > 0 ? <span className="risk-badge high" style={{ fontSize: 11 }}>{stu.riskCount}</span> : <span style={{ color: "var(--text-muted)" }}>0</span>}</span>
+                                <span><span className="ov-status-badge" style={{ color: st.c, background: st.bg }}>{st.l}</span></span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 快捷子功能 */}
+                      <div className="ov-section">
+                        <h3>深度分析工具</h3>
+                        <p className="tch-desc">已自动加载本团队的能力映射、规则覆盖率和教学干预数据</p>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
+                          {CLASS_SUB_TABS.map(subTab => (
+                            <button key={subTab.id} className="tch-sub-tab-btn" onClick={() => { setTab(subTab.id as Tab); if (subTab.id === "compare") loadCompare(); if (subTab.id === "capability") loadCapabilityMap(); if (subTab.id === "rule-coverage") loadRuleCoverage(); if (subTab.id === "interventions") loadTeachingInterventions(); if (subTab.id === "report") generateReport(); }}>{subTab.label}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ══════════════ Level 2: 学生详情 ══════════════ */}
+                  {classView === "student" && !loading && studentProjectAnalytics && (
+                    <>
+                      <h2 style={{ marginTop: 0 }}>学生 {selectedClassStudent} · 项目演进</h2>
+                      <p className="tch-desc">该学生在与智能体交互过程中的项目改进轨迹，点击项目卡片可查看详细迭代过程</p>
+
+                      {/* 学生 KPI */}
+                      <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                        {[
+                          { icon: "📝", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: studentProjectAnalytics.totalSubmissions, l: "总提交", d: 0 },
+                          { icon: "📁", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: studentProjectAnalytics.projectCount, l: "项目数", d: 0 },
+                          { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: studentProjectAnalytics.avgScore, l: "综合均分", d: 1 },
+                          { icon: "📈", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: studentProjectAnalytics.projects[0]?.improvement || 0, l: "主项目进步", d: 1 },
+                        ].map((k, i) => (
+                          <div key={i} className="ov-kpi-card">
+                            <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
+                            <div className="ov-kpi-value" style={{ color: k.c }}><AnimatedNumber value={k.v} decimals={k.d} /></div>
+                            <div className="ov-kpi-label">{k.l}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* 综合分数趋势（所有项目合并） */}
+                      {(() => {
+                        const allTimeline = classSubmissions.filter((s: any) => s.student_id === selectedClassStudent)
+                          .sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || ""))
+                          .map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: Number(s.overall_score || 0) }));
+                        return allTimeline.length >= 2 ? (
+                          <div className="ov-chart-card" style={{ marginBottom: 24 }}>
+                            <h3>成绩变化曲线</h3>
+                            <p className="tch-desc">随每次提交（含对话和文件上传）的评分变化，体现与智能体交互后的改进过程</p>
+                            <AreaChart data={allTimeline} color="rgba(107,138,255,0.9)" height={130} />
+                          </div>
+                        ) : null;
+                      })()}
+
+                      {/* 项目卡片列表 */}
+                      <div className="ov-section">
+                        <h3>项目列表 ({studentProjectAnalytics.projects.length})</h3>
+                        <div className="cls-proj-grid">
+                          {studentProjectAnalytics.projects.map((proj: any, idx: number) => {
+                            const impColor = proj.improvement > 0 ? "var(--tch-success)" : proj.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)";
+                            return (
+                              <div key={proj.id} className="cls-proj-card" style={{ animationDelay: `${idx * 0.05}s` }} onClick={() => { setSelectedClassStudentProject(proj.id); setClassView("student-project"); }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                                  <strong style={{ fontSize: 14, color: "var(--text-primary)" }}>{proj.id}</strong>
+                                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{proj.submissionCount} 次提交</span>
+                                </div>
+                                {/* 迷你分数时间线 */}
+                                {proj.scoreTimeline.length >= 2 && (
+                                  <div style={{ height: 50, marginBottom: 8 }}><AreaChart data={proj.scoreTimeline} height={50} color={impColor === "var(--tch-success)" ? "rgba(92,189,138,0.8)" : "rgba(107,138,255,0.7)"} /></div>
+                                )}
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
+                                  <span style={{ color: "var(--text-secondary)" }}>首次 <strong>{proj.firstScore.toFixed(1)}</strong> → 最新 <strong style={{ color: proj.latestScore >= 7 ? "var(--tch-success)" : proj.latestScore >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>{proj.latestScore.toFixed(1)}</strong></span>
+                                  <span style={{ fontWeight: 700, color: impColor }}>{proj.improvement > 0 ? `+${proj.improvement.toFixed(1)}` : proj.improvement < 0 ? proj.improvement.toFixed(1) : "—"}</span>
+                                </div>
+                                {proj.fileSubmissions.length > 0 && <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)" }}>📄 {proj.fileSubmissions.length} 个文件提交</div>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ══════════════ Level 3: 学生项目迭代详情 ══════════════ */}
+                  {classView === "student-project" && !loading && (() => {
+                    const proj = studentProjectAnalytics?.projects.find((p: any) => p.id === selectedClassStudentProject);
+                    if (!proj) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>项目数据未找到</p>;
+                    return (
+                      <>
+                        <h2 style={{ marginTop: 0 }}>{selectedClassStudentProject}</h2>
+                        <p className="tch-desc">学生 {selectedClassStudent} 在该项目上与智能体交互的完整迭代记录（不含对话原文，仅展示每次分析结果和改进轨迹）</p>
+
+                        {/* 项目 KPI */}
+                        <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(107,138,255,0.15)", color: "var(--accent)" }}>📊</div><div className="ov-kpi-value"><AnimatedNumber value={proj.avgScore} decimals={1} /></div><div className="ov-kpi-label">均分</div></div>
+                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(92,189,138,0.15)", color: "var(--tch-success)" }}>📈</div><div className="ov-kpi-value" style={{ color: proj.improvement >= 0 ? "var(--tch-success)" : "var(--tch-danger)" }}>{proj.improvement >= 0 ? "+" : ""}<AnimatedNumber value={proj.improvement} decimals={1} /></div><div className="ov-kpi-label">进步幅度</div></div>
+                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(232,168,76,0.15)", color: "var(--tch-warning)" }}>🔄</div><div className="ov-kpi-value"><AnimatedNumber value={proj.submissionCount} /></div><div className="ov-kpi-label">迭代次数</div></div>
+                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(189,147,249,0.15)", color: "#bd93f9" }}>📄</div><div className="ov-kpi-value"><AnimatedNumber value={proj.fileSubmissions.length} /></div><div className="ov-kpi-label">文件数</div></div>
+                        </div>
+
+                        {/* 分数演进曲线 */}
+                        {proj.scoreTimeline.length >= 2 && (
+                          <div className="ov-chart-card" style={{ marginBottom: 24 }}>
+                            <h3>评分演进曲线</h3>
+                            <p className="tch-desc">每次提交后系统给出的综合评分变化</p>
+                            <AreaChart data={proj.scoreTimeline} color="rgba(107,138,255,0.9)" height={140} />
+                          </div>
+                        )}
+
+                        {/* 迭代时间线 */}
+                        <div className="ov-section">
+                          <h3>迭代记录时间线</h3>
+                          <p className="tch-desc">每次提交的分析结果，包括评分、瓶颈诊断和下一步建议</p>
+                          <div className="cls-timeline">
+                            {proj.submissions.map((sub: any, idx: number) => {
+                              const sc = Number(sub.overall_score || 0);
+                              const scColor = sc >= 7 ? "var(--tch-success)" : sc >= 5 ? "var(--tch-warning)" : "var(--tch-danger)";
+                              const prevSc = idx > 0 ? Number(proj.submissions[idx - 1].overall_score || 0) : 0;
+                              const delta = idx > 0 && sc > 0 && prevSc > 0 ? sc - prevSc : null;
+                              return (
+                                <div key={idx} className="cls-tl-item" style={{ animationDelay: `${idx * 0.04}s` }}>
+                                  <div className="cls-tl-dot" style={{ background: scColor }} />
+                                  <div className="cls-tl-content">
+                                    <div className="cls-tl-header">
+                                      <span className="cls-tl-time">{(sub.created_at || "").slice(0, 16)}</span>
+                                      <span className="cls-tl-type">{sub.source_type === "file" || sub.source_type === "file_in_chat" ? `📄 ${sub.filename || "文件"}` : sub.source_type === "dialogue" ? "💬 对话分析" : sub.source_type || "提交"}</span>
+                                      <span className="cls-tl-score" style={{ color: scColor }}>{sc.toFixed(1)}</span>
+                                      {delta !== null && <span style={{ fontSize: 11, fontWeight: 700, color: delta > 0 ? "var(--tch-success)" : delta < 0 ? "var(--tch-danger)" : "var(--text-muted)", marginLeft: 4 }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>}
+                                    </div>
+                                    {sub.bottleneck && <div className="cls-tl-bottleneck"><strong>🎯 瓶颈：</strong>{sub.bottleneck}</div>}
+                                    {sub.next_task && <div className="cls-tl-next"><strong>➡️ 建议：</strong>{sub.next_task}</div>}
+                                    {(sub.triggered_rules?.length || 0) > 0 && (
+                                      <div className="cls-tl-rules">{sub.triggered_rules.map((r: string) => <span key={r} className="cls-tl-rule-tag">{getRuleDisplayName(r)}</span>)}</div>
+                                    )}
+                                    {sub.filename && sub.full_text && (
+                                      <details className="cls-tl-file-detail">
+                                        <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--accent)", fontWeight: 500, marginTop: 6 }}>📄 查看文件内容摘要</summary>
+                                        <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.6, color: "var(--text-secondary)", background: "var(--bg-card-hover)", padding: "10px 12px", borderRadius: 8, maxHeight: 200, overflow: "auto", whiteSpace: "pre-wrap" }}>{(sub.full_text as string).slice(0, 1500)}{(sub.full_text as string).length > 1500 ? "\n..." : ""}</div>
+                                      </details>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+
+                  {/* loading placeholder */}
+                  {loading && <SkeletonLoader rows={4} type="card" />}
+                  {!loading && classView === "overview" && !classAnalytics && <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>📭 暂无该团队的提交数据</p>}
+                  {!loading && classView === "student" && !studentProjectAnalytics && <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>📭 该学生暂无提交数据</p>}
                 </>
               )}
             </div>
@@ -3285,6 +3571,43 @@ export default function TeacherPage() {
         .ov-risk-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .ov-risk-name { font-weight: 600; font-size: 13px; }
         .ov-risk-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
+
+        /* ── 班级(团队)页样式 ── */
+        .cls-breadcrumb { display: flex; align-items: center; gap: 6px; padding: 10px 14px; margin-bottom: 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; flex-wrap: wrap; }
+        .cls-crumb-item { color: var(--text-secondary); cursor: pointer; transition: color 0.15s; font-weight: 500; }
+        .cls-crumb-item:hover { color: var(--accent); }
+        .cls-crumb-item.active { color: var(--text-primary); font-weight: 600; cursor: default; }
+        .cls-crumb-sep { color: var(--text-muted); font-size: 12px; }
+
+        .cls-stu-table { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .cls-stu-hdr { display: grid; grid-template-columns: 40px 2fr repeat(7, 1fr); padding: 10px 16px; background: var(--bg-card-hover); font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+        .cls-stu-row { display: grid; grid-template-columns: 40px 2fr repeat(7, 1fr); padding: 11px 16px; align-items: center; font-size: 13px; border-top: 1px solid var(--border); cursor: pointer; transition: all 0.15s; animation: fade-in 0.3s ease-out both; }
+        .cls-stu-row:hover { background: var(--tch-accent-soft); }
+
+        .cls-proj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+        .cls-proj-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s; animation: fade-in 0.3s ease-out both; }
+        .cls-proj-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+        .cls-timeline { position: relative; padding-left: 24px; }
+        .cls-timeline::before { content: ""; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .cls-tl-item { position: relative; margin-bottom: 16px; animation: fade-in 0.3s ease-out both; }
+        .cls-tl-dot { position: absolute; left: -20px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg-primary); z-index: 1; }
+        .cls-tl-content { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; transition: border-color 0.15s; }
+        .cls-tl-content:hover { border-color: var(--border-strong); }
+        .cls-tl-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+        .cls-tl-time { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .cls-tl-type { font-size: 11px; color: var(--text-secondary); background: var(--bg-card-hover); padding: 2px 8px; border-radius: 4px; }
+        .cls-tl-score { font-size: 18px; font-weight: 700; margin-left: auto; }
+        .cls-tl-bottleneck { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 4px; padding: 6px 8px; background: var(--tch-warning-soft); border-radius: 6px; }
+        .cls-tl-next { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 4px; padding: 6px 8px; background: var(--tch-success-soft); border-radius: 6px; }
+        .cls-tl-rules { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+        .cls-tl-rule-tag { font-size: 11px; padding: 2px 8px; background: var(--tch-danger-soft); color: var(--tch-danger); border-radius: 4px; font-weight: 500; }
+
+        @media (max-width: 768px) {
+          .cls-stu-hdr { display: none; }
+          .cls-stu-row { grid-template-columns: 1fr; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+          .cls-proj-grid { grid-template-columns: 1fr; }
+        }
 
         @media (max-width: 1024px) { .ov-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 768px) {

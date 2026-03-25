@@ -13,6 +13,10 @@ from app.schemas import (
     AgentRunPayload,
     AgentRunResponse,
     AnalyzePayload,
+    AuthLoginPayload,
+    AuthPasswordChangePayload,
+    AuthRegisterPayload,
+    AuthUserResponse,
     DialogueTurnPayload,
     DialogueTurnResponse,
     HealthResponse,
@@ -29,7 +33,7 @@ from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
 from app.services.rag_engine import RagEngine
-from app.services.storage import ConversationStorage, JsonStorage
+from app.services.storage import ConversationStorage, JsonStorage, UserStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
 
@@ -48,6 +52,8 @@ app.mount("/uploads", StaticFiles(directory=str(settings.upload_root)), name="up
 
 json_store = JsonStorage(settings.data_root / "project_state")
 conv_store = ConversationStorage(settings.data_root / "conversations")
+user_store = UserStorage(settings.data_root / "users")
+user_store = UserStorage(settings.data_root / "users")
 graph_service = GraphService(
     uri=settings.neo4j_uri,
     username=settings.neo4j_username,
@@ -67,6 +73,35 @@ setup_teacher_file_feedback_routes(app, json_store, settings)
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(timestamp=datetime.utcnow())
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Auth APIs: register, login, change-password
+# ═══════════════════════════════════════════════════════════════════
+
+@app.post("/api/auth/register", response_model=AuthUserResponse)
+def auth_register(payload: AuthRegisterPayload) -> AuthUserResponse:
+    try:
+        user = user_store.create_user(payload.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return AuthUserResponse(status="ok", user=user)
+
+
+@app.post("/api/auth/login", response_model=AuthUserResponse)
+def auth_login(payload: AuthLoginPayload) -> AuthUserResponse:
+    user = user_store.authenticate(payload.email, payload.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="邮箱或密码错误")
+    return AuthUserResponse(status="ok", user=user)
+
+
+@app.post("/api/auth/change-password", response_model=AuthUserResponse)
+def auth_change_password(payload: AuthPasswordChangePayload) -> AuthUserResponse:
+    user = user_store.change_password(payload.email, payload.current_password, payload.new_password)
+    if not user:
+        raise HTTPException(status_code=400, detail="原密码错误或账号不存在")
+    return AuthUserResponse(status="ok", user=user)
 
 
 @app.post("/api/analyze-text")

@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").replace(/\/+$/, "");
+const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
 export default function StudentProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -19,12 +19,12 @@ export default function StudentProfilePage() {
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    const pid = `demo-project-001`;
+    const pid = `project-${user.user_id}`;
+    const sid = user.student_id || user.user_id || user.email;
     Promise.all([
       fetch(`${API}/api/teacher/submissions?limit=200`).then((r) => r.json()).catch(() => ({ submissions: [] })),
       fetch(`${API}/api/conversations?project_id=${encodeURIComponent(pid)}`).then((r) => r.json()).catch(() => ({ conversations: [] })),
     ]).then(([subData, convData]) => {
-      const sid = user.student_id || user.email;
       const mySubs = (subData.submissions ?? []).filter((s: any) => s.student_id === sid);
       setSubmissions(mySubs);
       setConversations(convData.conversations ?? []);

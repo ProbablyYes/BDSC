@@ -1,0 +1,30 @@
+[
+  {
+    "user_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "role": "student",
+    "display_name": "仙人掌",
+    "email": "3133103927@qq.com",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "24a789ba9e3c49d92f2d344dfbaad4c8",
+    "password_hash": "769a037d1e957e50ab7d4e052777a3c8897c2a7c6441c27ece7a893a179e642a",
+    "created_at": "2026-03-26T01:38:01.045169",
+    "updated_at": "2026-03-26T01:38:01.045169"
+  },
+  {
+    "user_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "role": "teacher",
+    "display_name": "贪吃蛇",
+    "email": "1120233470@bit.edu.cn",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "bc67925c77ec4b0128472e01e819991c",
+    "password_hash": "1857838b74f8475c7b959af2c332197bee7ffc35332b71f4d4e9d67ea2204198",
+    "created_at": "2026-03-26T01:40:21.284834",
+    "updated_at": "2026-03-26T01:40:21.284834"
+  }
+]

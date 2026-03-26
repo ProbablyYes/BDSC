@@ -119,85 +119,19 @@ class AuthUserResponse(BaseModel):
     user: dict = Field(default_factory=dict)
 
 
-class AuthRegisterPayload(BaseModel):
-    role: Literal["student", "teacher", "admin"] = "student"
-    display_name: str = Field(min_length=2, max_length=50)
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-    student_id: str | None = None
-    class_id: str | None = None
-    cohort_id: str | None = None
-    bio: str | None = ""
+class SmsSendPayload(BaseModel):
+    phone: str = Field(min_length=8, max_length=20)
 
 
-class AuthLoginPayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-
-
-class AuthPasswordChangePayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    current_password: str = Field(min_length=6, max_length=64)
-    new_password: str = Field(min_length=6, max_length=64)
-
-
-class AuthUserResponse(BaseModel):
+class SmsSendResponse(BaseModel):
     status: str = "ok"
-    user: dict = Field(default_factory=dict)
+    expires_in: int = 300
+    code_hint: str = ""
 
 
-class AuthRegisterPayload(BaseModel):
-    role: Literal["student", "teacher", "admin"] = "student"
-    display_name: str = Field(min_length=2, max_length=50)
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-    student_id: str | None = None
-    class_id: str | None = None
-    cohort_id: str | None = None
-    bio: str | None = ""
-
-
-class AuthLoginPayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-
-
-class AuthPasswordChangePayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    current_password: str = Field(min_length=6, max_length=64)
-    new_password: str = Field(min_length=6, max_length=64)
-
-
-class AuthUserResponse(BaseModel):
-    status: str = "ok"
-    user: dict = Field(default_factory=dict)
-
-
-class AuthRegisterPayload(BaseModel):
-    role: Literal["student", "teacher", "admin"] = "student"
-    display_name: str = Field(min_length=2, max_length=50)
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-    student_id: str | None = None
-    class_id: str | None = None
-    cohort_id: str | None = None
-    bio: str | None = ""
-
-
-class AuthLoginPayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-
-
-class AuthPasswordChangePayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    current_password: str = Field(min_length=6, max_length=64)
-    new_password: str = Field(min_length=6, max_length=64)
-
-
-class AuthUserResponse(BaseModel):
-    status: str = "ok"
-    user: dict = Field(default_factory=dict)
+class SmsLoginPayload(BaseModel):
+    phone: str = Field(min_length=8, max_length=20)
+    code: str = Field(min_length=4, max_length=8)
 
 
 class AuthRegisterPayload(BaseModel):

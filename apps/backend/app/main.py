@@ -1,5 +1,7 @@
 import json
 import math
+import random
+import time
 from datetime import datetime
 from typing import Any
 
@@ -21,6 +23,9 @@ from app.schemas import (
     DialogueTurnResponse,
     HealthResponse,
     ProjectSnapshotResponse,
+    SmsLoginPayload,
+    SmsSendPayload,
+    SmsSendResponse,
     TeacherFeedbackRequest,
     TeacherFeedbackResponse,
     UploadAnalysisResponse,
@@ -33,7 +38,7 @@ from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
 from app.services.rag_engine import RagEngine
-from app.services.storage import ConversationStorage, JsonStorage, UserStorage, UserStorage
+from app.services.storage import ConversationStorage, JsonStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
 
@@ -52,7 +57,6 @@ app.mount("/uploads", StaticFiles(directory=str(settings.upload_root)), name="up
 
 json_store = JsonStorage(settings.data_root / "project_state")
 conv_store = ConversationStorage(settings.data_root / "conversations")
-user_store = UserStorage(settings.data_root / "users")
 user_store = UserStorage(settings.data_root / "users")
 graph_service = GraphService(
     uri=settings.neo4j_uri,
@@ -101,6 +105,37 @@ def auth_change_password(payload: AuthPasswordChangePayload) -> AuthUserResponse
     user = user_store.change_password(payload.email, payload.current_password, payload.new_password)
     if not user:
         raise HTTPException(status_code=400, detail="原密码错误或账号不存在")
+    return AuthUserResponse(status="ok", user=user)
+
+
+# ── SMS verification (dev mode: code returned in response) ──
+
+_sms_codes: dict[str, tuple[str, float]] = {}
+
+SMS_CODE_TTL = 300  # 5 min
+
+@app.post("/api/auth/sms/send", response_model=SmsSendResponse)
+def sms_send(payload: SmsSendPayload) -> SmsSendResponse:
+    phone = payload.phone.strip()
+    code = f"{random.randint(0, 999999):06d}"
+    _sms_codes[phone] = (code, time.time())
+    return SmsSendResponse(status="ok", expires_in=SMS_CODE_TTL, code_hint=code)
+
+
+@app.post("/api/auth/sms/login", response_model=AuthUserResponse)
+def sms_login(payload: SmsLoginPayload) -> AuthUserResponse:
+    phone = payload.phone.strip()
+    record = _sms_codes.get(phone)
+    if not record:
+        raise HTTPException(status_code=400, detail="请先获取验证码")
+    stored_code, ts = record
+    if time.time() - ts > SMS_CODE_TTL:
+        _sms_codes.pop(phone, None)
+        raise HTTPException(status_code=400, detail="验证码已过期，请重新获取")
+    if payload.code.strip() != stored_code:
+        raise HTTPException(status_code=400, detail="验证码不正确")
+    _sms_codes.pop(phone, None)
+    user = user_store.get_or_create_by_phone(phone)
     return AuthUserResponse(status="ok", user=user)
 
 

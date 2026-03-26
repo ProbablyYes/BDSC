@@ -245,3 +245,32 @@ class UserStorage:
             self._save(users)
             return self._public_user(user)
         return None
+
+    def get_or_create_by_phone(self, phone: str) -> dict:
+        """Find user by phone or auto-create a student account."""
+        phone = phone.strip()
+        users = self._load()
+        for user in users:
+            if str(user.get("phone", "")).strip() == phone:
+                return self._public_user(user)
+        # auto-create
+        now = datetime.utcnow().isoformat()
+        salt, pw_hash = self._hash_password(secrets.token_hex(8))
+        user = {
+            "user_id": str(uuid4()),
+            "role": "student",
+            "display_name": f"用户{phone[-4:]}",
+            "email": f"{phone}@phone.local",
+            "phone": phone,
+            "student_id": None,
+            "class_id": None,
+            "cohort_id": None,
+            "bio": "",
+            "password_salt": salt,
+            "password_hash": pw_hash,
+            "created_at": now,
+            "updated_at": now,
+        }
+        users.append(user)
+        self._save(users)
+        return self._public_user(user)

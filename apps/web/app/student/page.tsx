@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "re
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAuth, logout } from "../hooks/useAuth";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
@@ -15,10 +16,11 @@ type ConvMeta = { conversation_id: string; title: string; created_at: string; me
 let _msgId = 0;
 
 export default function StudentPage() {
-  const [projectId, setProjectId] = useState("demo-project-001");
-  const [studentId, setStudentId] = useState("student-001");
-  const [classId, setClassId] = useState("2026A");
-  const [cohortId, setCohortId] = useState("2026-Spring");
+  const currentUser = useAuth("student");
+  const [projectId, setProjectId] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [classId, setClassId] = useState("");
+  const [cohortId, setCohortId] = useState("");
   const [mode, setMode] = useState("coursework");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -99,6 +101,7 @@ export default function StudentPage() {
   }, [messages, loading]);
 
   const loadConversations = useCallback(async () => {
+    if (!projectId) return;
     try {
       const r = await fetch(`${API_BASE}/api/conversations?project_id=${encodeURIComponent(projectId)}`);
       const d = await r.json();
@@ -482,6 +485,17 @@ export default function StudentPage() {
     return scores.length > 0 ? scores[scores.length - 1] : latestResult?.diagnosis?.overall_score ?? null;
   }, [resultHistory, latestResult]);
 
+  useEffect(() => {
+    if (currentUser) {
+      setProjectId(`project-${currentUser.user_id}`);
+      setStudentId(currentUser.student_id || currentUser.user_id || "");
+      setClassId(currentUser.class_id || "");
+      setCohortId(currentUser.cohort_id || "");
+    }
+  }, [currentUser]);
+
+  if (!currentUser) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "var(--text-muted)" }}>加载中...</div>;
+
   return (
     <div className={`chat-app ${theme}`}>
       {/* ── Top Bar ── */}
@@ -560,10 +574,10 @@ export default function StudentPage() {
           <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
             {rightOpen ? "收起面板" : "分析面板"}
           </button>
-          <Link href="/teacher" className="topbar-btn">教师端</Link>
           <Link href="/student/profile" className="topbar-avatar" title="个人中心">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {(currentUser.display_name ?? "S")[0].toUpperCase()}
           </Link>
+          <button type="button" className="topbar-btn" onClick={logout} title="退出登录">退出</button>
         </div>
       </header>
 

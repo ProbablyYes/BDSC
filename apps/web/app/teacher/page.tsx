@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
+import { useAuth, logout } from "../hooks/useAuth";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 type Tab = "overview" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition";
@@ -252,6 +253,7 @@ function BoxPlotChart({ data, width = 300, height = 70 }: { data: { min: number;
 }
 
 export default function TeacherPage() {
+  const currentUser = useAuth("teacher");
   const [tab, setTab] = useState<Tab>("overview");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [projectId, setProjectId] = useState("demo-project-001");
@@ -1430,6 +1432,8 @@ export default function TeacherPage() {
     { id: "evidence", label: "证据链" },
   ];
 
+  if (!currentUser) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "var(--text-muted)" }}>加载中...</div>;
+
   return (
     <div className="tch-app" suppressHydrationWarning>
       <header className="chat-topbar">
@@ -1458,7 +1462,7 @@ export default function TeacherPage() {
             )}
           </button>
           <button className="topbar-btn" onClick={generateReport} disabled={loading}>生成AI报告</button>
-          <Link href="/student" className="topbar-btn">学生端</Link>
+          <button type="button" className="topbar-btn" onClick={logout}>退出</button>
         </div>
       </header>
 

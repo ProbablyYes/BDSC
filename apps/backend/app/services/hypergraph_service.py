@@ -17,11 +17,12 @@ from __future__ import annotations
 import logging
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 import hypernetx as hnx
 
 from app.services.graph_service import GraphService
+from app.services.kg_ontology import ONTOLOGY_NODES
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,331 @@ class HyperedgeRecord:
 
 
 # ─────────────────────────────────────────────────────
+#  Hyperedge templates & diagnostic rules (declarative)
+# ─────────────────────────────────────────────────────
+
+# Each template describes an ideal or diagnostic hyperedge pattern
+# across dimensions (stakeholder, pain_point, solution, etc.).
+_HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
+    {
+        "id": "T1_user_pain_solution_bm",
+        "name": "痛点-人群-解决方案-商业模式闭环",
+        "dimensions": ["stakeholder", "pain_point", "solution", "business_model"],
+        "description": "用户→痛点→方案→商业模式形成完整闭环",
+    },
+    {
+        "id": "T2_user_pain_evidence",
+        "name": "痛点证据链",
+        "dimensions": ["stakeholder", "pain_point", "evidence"],
+        "description": "针对核心痛点提供用户证据",
+    },
+    {
+        "id": "T3_solution_tech_market",
+        "name": "方案-技术-市场匹配",
+        "dimensions": ["solution", "technology", "market"],
+        "description": "技术路线与目标市场匹配",
+    },
+    {
+        "id": "T4_market_competition_solution",
+        "name": "市场-竞品-方案定位",
+        "dimensions": ["market", "competitor", "solution"],
+        "description": "在既有竞争格局中清晰定位方案",
+    },
+    {
+        "id": "T5_business_model_finance",
+        "name": "商业模式-财务逻辑",
+        "dimensions": ["business_model", "resource", "team"],
+        "description": "商业模式与资源/团队可行性匹配",
+    },
+    {
+        "id": "T6_unit_economics",
+        "name": "单位经济模型闭环",
+        "dimensions": ["business_model", "market", "resource"],
+        "description": "单位经济与市场/资源约束一致",
+    },
+    {
+        "id": "T7_growth_path",
+        "name": "增长路径",
+        "dimensions": ["stakeholder", "channel", "market"],
+        "description": "获客渠道与目标用户/市场相匹配",
+    },
+    {
+        "id": "T8_team_execution",
+        "name": "团队-里程碑-资源",
+        "dimensions": ["team", "resource", "market"],
+        "description": "团队能力与关键资源支撑里程碑达成",
+    },
+    {
+        "id": "T9_risk_control",
+        "name": "风险与合规",
+        "dimensions": ["risk", "evidence", "market"],
+        "description": "涉及数据/合规场景时给出控制措施",
+    },
+    {
+        "id": "T10_user_pain_solution_evidence",
+        "name": "问题-方案-证据三角",
+        "dimensions": ["stakeholder", "pain_point", "solution", "evidence"],
+        "description": "核心方案有用户与实验双重证据支持",
+    },
+    # 占位模板用于覆盖更多变体，便于后续细化
+    {
+        "id": "T11_market_size_growth",
+        "name": "市场规模-增长假设",
+        "dimensions": ["market", "business_model"],
+        "description": "市场规模与增长路径假设一致",
+    },
+    {
+        "id": "T12_competition_moat",
+        "name": "竞品-护城河",
+        "dimensions": ["competitor", "resource", "business_model"],
+        "description": "在竞争格局中说明护城河与资源壁垒",
+    },
+    {
+        "id": "T13_tech_feasibility",
+        "name": "技术可行性",
+        "dimensions": ["technology", "team", "resource"],
+        "description": "技术方案与团队/资源能力匹配",
+    },
+    {
+        "id": "T14_evidence_financial",
+        "name": "证据-财务",
+        "dimensions": ["evidence", "business_model"],
+        "description": "财务模型关键参数有数据或实验支撑",
+    },
+    {
+        "id": "T15_evidence_market",
+        "name": "证据-市场规模",
+        "dimensions": ["evidence", "market"],
+        "description": "市场规模假设有公开数据或调研支撑",
+    },
+    {
+        "id": "T16_user_channel",
+        "name": "用户-渠道匹配",
+        "dimensions": ["stakeholder", "channel"],
+        "description": "获客渠道与用户行为习惯匹配",
+    },
+    {
+        "id": "T17_pain_solution_pricing",
+        "name": "痛点-方案-定价",
+        "dimensions": ["pain_point", "solution", "business_model"],
+        "description": "定价与痛点强度/替代方案价格一致",
+    },
+    {
+        "id": "T18_team_risk",
+        "name": "团队-风险",
+        "dimensions": ["team", "risk"],
+        "description": "关键风险有明确负责人与缓解计划",
+    },
+    {
+        "id": "T19_loop_full",
+        "name": "完整商业闭环",
+        "dimensions": [
+            "stakeholder", "pain_point", "solution",
+            "market", "competitor", "business_model",
+        ],
+        "description": "从用户到商业模式的完整闭环",
+    },
+    {
+        "id": "T20_growth_defensibility",
+        "name": "增长-护城河",
+        "dimensions": ["market", "business_model", "resource"],
+        "description": "增长路径与护城河相互支撑",
+    },
+]
+
+
+# Hypergraph-level consistency rules (>=20) operating on dimension
+# coverage and simple text signals. Each rule returns a warning and
+# optional pressure-test questions.
+_CONSISTENCY_RULES: list[dict[str, Any]] = [
+    {
+        "id": "G1_no_competitor",
+        "description": "未识别竞品或替代品时触发",
+        "predicate": lambda dims, ents: not dims.get("competitor"),
+        "message": "未给出任何直接或间接竞品，建议补充替代方案分析。",
+        "pressure": [
+            "请列出至少3个用户当前可能在用的替代方案（包括线下/手工方案）？",
+            "如果明天某个互联网巨头免费提供类似服务，你的差异化在哪里？",
+        ],
+    },
+    {
+        "id": "G2_user_without_evidence",
+        "description": "有目标用户与痛点，但缺少证据维度",
+        "predicate": lambda dims, ents: dims.get("stakeholder") and dims.get("pain_point") and not dims.get("evidence"),
+        "message": "已描述用户与痛点，但缺少任何访谈或问卷等证据。",
+        "pressure": [
+            "你是否进行过至少8次深度访谈？请给出1-2条用户原话。",
+            "如果评委质疑这是你想象出来的痛点，你会拿出哪份材料？",
+        ],
+    },
+    {
+        "id": "G3_solution_without_pain",
+        "description": "有方案与技术但没有清晰痛点",
+        "predicate": lambda dims, ents: dims.get("solution") and not dims.get("pain_point"),
+        "message": "描述了方案但缺少明确的用户痛点，可能是解无问题。",
+        "pressure": [
+            "请用一句话说清楚：哪一类用户，在什么具体场景下，被什么事情折磨？",
+        ],
+    },
+    {
+        "id": "G4_cac_without_channel",
+        "description": "提到 CAC/投放预算但缺少渠道与转化逻辑",
+        "predicate": lambda dims, ents: any("cac" in e.lower() for e in ents.get("text", [])) and not dims.get("channel"),
+        "message": "涉及 CAC/投放，却未说明具体渠道与转化率假设。",
+        "pressure": [
+            "你的获客渠道具体是什么？请给出每个渠道的转化率假设。",
+            "如果渠道成本上涨50%，你的 CAC 是否仍然可接受？",
+        ],
+    },
+    {
+        "id": "G5_growth_jump",
+        "description": "出现1%市场/指数增长等跳跃式假设",
+        "predicate": lambda dims, ents: any("1%" in e or "百分之一" in e for e in ents.get("text", [])),
+        "message": "包含自上而下的1%市场假设，缺少自下而上的增长路径。",
+        "pressure": [
+            "请从一个具体渠道开始，自下而上估算第一年你能获得多少付费用户？",
+        ],
+    },
+    {
+        "id": "G6_no_market",
+        "description": "缺少市场维度",
+        "predicate": lambda dims, ents: not dims.get("market"),
+        "message": "尚未说明市场规模或目标市场，无法评估商业空间。",
+        "pressure": [
+            "请给出目标市场的大致规模以及主要数据来源（行业报告/公开数据等）。",
+        ],
+    },
+    {
+        "id": "G7_no_business_model",
+        "description": "没有商业模式描述",
+        "predicate": lambda dims, ents: dims.get("solution") and not dims.get("business_model"),
+        "message": "已有方案，但尚未说明谁为此付费以及如何收钱。",
+        "pressure": [
+            "谁在什么场景下，为你的方案实际掏钱？一次多少钱？",
+        ],
+    },
+    {
+        "id": "G8_finance_without_evidence",
+        "description": "有财务/盈利表述但缺少数据来源",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])).lower() for k in ["营收", "利润", "盈利"]) and not dims.get("evidence"),
+        "message": "谈到营收/盈利，但缺少任何数据来源或测算过程。",
+        "pressure": [
+            "你的收入与成本假设分别来自哪些数据或实验？",
+        ],
+    },
+    {
+        "id": "G9_risk_without_control",
+        "description": "涉及隐私/数据/医疗等高风险场景但无控制措施",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])).lower() for k in ["隐私", "数据", "医疗", "未成年人"]) and not dims.get("risk"),
+        "message": "涉及高敏感场景但缺少合规与风险控制说明。",
+        "pressure": [
+            "请画出一张数据流图，并标出每一步采用的合规措施？",
+        ],
+    },
+    {
+        "id": "G10_team_mismatch",
+        "description": "技术/行业复杂而团队维度缺失",
+        "predicate": lambda dims, ents: dims.get("technology") and not dims.get("team"),
+        "message": "技术路线较重，但未说明团队能力与分工。",
+        "pressure": [
+            "谁来负责核心技术实现？他/她过往有哪些相关经验？",
+        ],
+    },
+    # 额外规则占位，保证数量充足且覆盖逻辑幻觉场景
+    {
+        "id": "G11_no_channel_detail",
+        "description": "只有模糊的线上推广/自媒体说法",
+        "predicate": lambda dims, ents: dims.get("stakeholder") and not dims.get("channel"),
+        "message": "获客方式仅停留在模糊的线上推广，缺少可执行渠道。",
+        "pressure": [
+            "请列出3个最有可能触达目标用户的具体渠道，并估算每个渠道的 CAC。",
+        ],
+    },
+    {
+        "id": "G12_solution_overengineered",
+        "description": "技术堆叠过多而痛点不明确",
+        "predicate": lambda dims, ents: dims.get("technology") and not dims.get("pain_point"),
+        "message": "技术方案复杂，但看不出是为了解决哪个具体痛点。",
+        "pressure": [
+            "请删除80%的技术描述，只保留与核心痛点直接相关的部分。",
+        ],
+    },
+    {
+        "id": "G13_no_evidence_for_competition",
+        "description": "声称有护城河但无竞品/替代品对比",
+        "predicate": lambda dims, ents: dims.get("business_model") and not dims.get("competitor"),
+        "message": "谈到优势/护城河，但缺少与竞品或替代方案的对比。",
+        "pressure": [
+            "请完成一张至少包含3个竞品/替代品的对比表，并标出你的2-3个关键差异。",
+        ],
+    },
+    {
+        "id": "G14_no_growth_logic",
+        "description": "没有给出从0到1的增长路径",
+        "predicate": lambda dims, ents: dims.get("business_model") and not dims.get("market"),
+        "message": "尚未说明从冷启动到规模化的增长路径。",
+        "pressure": [
+            "用3-5步描述你从第一个付费用户到前100个用户的获取路径。",
+        ],
+    },
+    {
+        "id": "G15_resource_gap",
+        "description": "依赖关键资源但未说明获取方式",
+        "predicate": lambda dims, ents: dims.get("resource") and not dims.get("evidence"),
+        "message": "提到重要资源，但没有说明如何获取与成本。",
+        "pressure": [
+            "这些关键资源目前掌握在谁手里？你如何以可接受的成本获得？",
+        ],
+    },
+    {
+        "id": "G16_team_no_roadmap",
+        "description": "团队存在但缺少里程碑规划",
+        "predicate": lambda dims, ents: dims.get("team") and not dims.get("resource"),
+        "message": "团队已介绍，但缺少阶段性里程碑与分工。",
+        "pressure": [
+            "未来3个月内你们各自要完成哪些可验收的里程碑？",
+        ],
+    },
+    {
+        "id": "G17_evidence_scattered",
+        "description": "有零散数据但未形成证据链",
+        "predicate": lambda dims, ents: dims.get("evidence") and not (dims.get("stakeholder") and dims.get("pain_point")),
+        "message": "存在零散数据，但未围绕核心用户与痛点形成闭环证据链。",
+        "pressure": [
+            "请将现有证据按“用户-痛点-方案效果”三个维度重新整理。",
+        ],
+    },
+    {
+        "id": "G18_overclaim_no_metric",
+        "description": "存在“颠覆/革命性”等强表述但无指标",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])).lower() for k in ["颠覆", "革命", "改变行业"]) and not dims.get("evidence"),
+        "message": "存在强烈主观判断，但缺少任何可量化指标。",
+        "pressure": [
+            "请给出3个可以量化的指标，用来证明你所谓的“颠覆性”。",
+        ],
+    },
+    {
+        "id": "G19_no_metric_focus",
+        "description": "没有明确单一北极星指标",
+        "predicate": lambda dims, ents: not any(k in " ".join(ents.get("text", [])).lower() for k in ["留存", "转化", "复购", "活跃"]),
+        "message": "缺少聚焦的核心业务指标，难以评估项目进展。",
+        "pressure": [
+            "如果只能选一个指标衡量项目成败，你会选什么？为什么？",
+        ],
+    },
+    {
+        "id": "G20_no_risk_section",
+        "description": "商业计划中完全没有风险章节",
+        "predicate": lambda dims, ents: not dims.get("risk"),
+        "message": "商业计划中缺少风险与对策章节，评委难以信任预期。",
+        "pressure": [
+            "请列出3个最可能让项目失败的风险，并给出各自的一条缓解措施。",
+        ],
+    },
+]
+
+
+# ─────────────────────────────────────────────────────
 #  Main service
 # ─────────────────────────────────────────────────────
 
@@ -59,6 +385,12 @@ class HypergraphService:
             "H8": ["unit_economics_not_proven", "unit_economics_unsound"],
             "H11": ["compliance_not_covered"],
         }
+        # Predefined hyperedge templates for logical loops.
+        # These are used when analysing student content and do not
+        # depend on Neo4j topology.
+        self._edge_templates: list[dict[str, Any]] = _HYPEREDGE_TEMPLATES
+        # Predefined hypergraph-level consistency rules.
+        self._consistency_rules: list[dict[str, Any]] = _CONSISTENCY_RULES
 
     # ═══════════════════════════════════════════════════
     #  1. Rebuild global teaching hypergraph from Neo4j
@@ -395,16 +727,23 @@ class HypergraphService:
             "resource": "资源优势",
             "business_model": "商业模式",
             "team": "团队能力",
+            # virtual dimensions derived from text/structure
+            "evidence": "证据与数据",
+            "risk": "风险与合规",
+            "channel": "获客渠道",
         }
 
         dim_entities: dict[str, list[str]] = defaultdict(list)
         entity_map: dict[str, str] = {}
+        raw_text_fragments: list[str] = []
         for e in entities:
             etype = str(e.get("type", "other")).lower()
             label = str(e.get("label", ""))
             eid = str(e.get("id", label))
             dim_entities[etype].append(label)
             entity_map[eid] = etype
+            if label:
+                raw_text_fragments.append(label)
 
         # Build student hypergraph edges
         student_edges: dict[str, set[str]] = {}
@@ -554,6 +893,41 @@ class HypergraphService:
             key=lambda x: {"极高": 0, "高": 1, "中": 2, "低": 3}.get(x["importance"], 4)
         )
 
+        # ── Template-based loop coverage (using declarative templates) ──
+        template_matches: list[dict[str, Any]] = []
+        dim_presence = {k: bool(v) for k, v in dim_entities.items()}
+        for tmpl in self._edge_templates:
+            dims = tmpl.get("dimensions", [])
+            missing_t = [d for d in dims if not dim_presence.get(d)]
+            status = "complete" if not missing_t else ("partial" if len(missing_t) < len(dims) else "missing")
+            template_matches.append({
+                "id": tmpl.get("id"),
+                "name": tmpl.get("name"),
+                "description": tmpl.get("description"),
+                "dimensions": dims,
+                "missing_dimensions": missing_t,
+                "status": status,
+            })
+
+        # ── Consistency rules over dimensions + raw text ──
+        consistency_issues: list[dict[str, Any]] = []
+        text_ctx = " ".join(raw_text_fragments)
+        rule_env = {
+            "text": [text_ctx],
+        }
+        for rule in self._consistency_rules:
+            pred: Callable[[dict, dict], bool] = rule.get("predicate")  # type: ignore[assignment]
+            try:
+                if callable(pred) and pred(dim_presence, rule_env):
+                    consistency_issues.append({
+                        "id": rule.get("id"),
+                        "description": rule.get("description"),
+                        "message": rule.get("message"),
+                        "pressure_questions": list(rule.get("pressure", [])),
+                    })
+            except Exception:
+                continue
+
         return {
             "ok": True,
             "coverage_score": coverage_score,
@@ -565,6 +939,8 @@ class HypergraphService:
             "pattern_warnings": pattern_warnings[:5],
             "pattern_strengths": pattern_strengths[:3],
             "missing_dimensions": missing_recommendations[:6],
+            "template_matches": template_matches,
+            "consistency_issues": consistency_issues,
             "student_graph_stats": {
                 "nodes": len(student_hg.nodes) if student_hg else 0,
                 "edges": len(student_hg.edges) if student_hg else 0,

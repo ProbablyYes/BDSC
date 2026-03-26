@@ -712,11 +712,21 @@ def gather_context_node(state: WorkflowState) -> dict:
     hyper_student: dict = {}
     if len(kg.get("entities", [])) > 0:
         try:
-            hyper_student = _standalone_hypergraph_analysis(
-                entities=kg.get("entities", []),
-                relationships=kg.get("relationships", []),
-                structural_gaps=kg.get("structural_gaps"),
-            )
+            # 优先使用基于 HyperNetX 的超图诊断引擎，
+            # 在不可用时退回到纯 KG 维度分析。
+            if _hypergraph_service is not None:
+                hyper_student = _hypergraph_service.analyze_student_content(
+                    entities=kg.get("entities", []),
+                    relationships=kg.get("relationships", []),
+                    structural_gaps=kg.get("structural_gaps"),
+                    category=cat,
+                )
+            else:
+                hyper_student = _standalone_hypergraph_analysis(
+                    entities=kg.get("entities", []),
+                    relationships=kg.get("relationships", []),
+                    structural_gaps=kg.get("structural_gaps"),
+                )
         except Exception as exc:
             logger.warning("Hypergraph student analysis failed: %s", exc)
 
@@ -764,12 +774,24 @@ def _fmt_hyper_student(hs: dict) -> str:
     hubs = hs.get("hub_entities", [])
     if hubs:
         parts.append(f"核心实体: {', '.join(h['entity'] for h in hubs[:3])}")
+    # Template-based loops
+    tm = hs.get("template_matches", [])
+    incomplete = [t for t in tm if t.get("status") != "complete"]
+    if incomplete:
+        first = incomplete[0]
+        parts.append(
+            f"未完成的逻辑闭环: {first.get('name','')} 缺少 {', '.join(first.get('missing_dimensions', [])[:3])}"
+        )
     warnings = hs.get("pattern_warnings", [])
     if warnings:
         parts.append(f"风险模式匹配: {warnings[0].get('warning','')}")
     strengths = hs.get("pattern_strengths", [])
     if strengths:
         parts.append(f"优势模式: {strengths[0].get('note','')}")
+    # Consistency issues provide explicit约束违背
+    issues = hs.get("consistency_issues", [])
+    if issues:
+        parts.append(f"一致性诊断: {issues[0].get('message','')}")
     return "\n".join(parts)
 
 

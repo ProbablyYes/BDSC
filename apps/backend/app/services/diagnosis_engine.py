@@ -1,5 +1,11 @@
 from dataclasses import dataclass
 
+from app.services.kg_ontology import (
+    get_rule_ontology_nodes,
+    get_rubric_error_pool,
+    get_rubric_evidence_chain,
+)
+
 
 RULES = [
     {"id": "H1", "name": "客户-价值主张错位", "severity": "high", "keywords": ["万能", "所有人", "任何人"],
@@ -273,6 +279,9 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
                     "status": "risk" if dim_score < 5.0 else "ok",
                     "weight": row["weight"],
                     "reason": llm_s.get("reason", ""),
+                    # 结构化证据链 & 常见错误池，保证每个评分维度可追溯
+                    "evidence_chain": get_rubric_evidence_chain(row["item"]),
+                    "common_mistakes": get_rubric_error_pool(row["item"]),
                 })
             else:
                 rubric.append({
@@ -295,6 +304,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
                 "score": round(dim_score, 2),
                 "status": "risk" if dim_score < 5.0 else "ok",
                 "weight": row["weight"],
+                "evidence_chain": get_rubric_evidence_chain(row["item"]),
+                "common_mistakes": get_rubric_error_pool(row["item"]),
             })
             weighted_total += dim_score * row["weight"]
             total_weight += row["weight"]
@@ -311,11 +322,20 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
         bottleneck = "未检测到高风险规则，建议进入下一轮压力测试和精细化验证。"
 
     next_task = _suggest_next_task(primary_rule)
+    # 将风险规则与 KG 本体节点关联，方便前端/教师追踪“依据从何而来”。
+    triggered_with_ontology: list[dict] = []
+    for r in triggered_rules:
+        nodes = get_rule_ontology_nodes(r.get("id", ""))
+        enriched = dict(r)
+        if nodes:
+            enriched["ontology_nodes"] = nodes
+        triggered_with_ontology.append(enriched)
+
     diagnosis = {
         "mode": mode,
         "overall_score": overall_score,
         "bottleneck": bottleneck,
-        "triggered_rules": triggered_rules,
+        "triggered_rules": triggered_with_ontology,
         "rubric": rubric,
         "capability_map": CAPABILITY_MAP,
         "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",

@@ -1,5 +1,6 @@
 import json
 import secrets
+import string
 from hashlib import pbkdf2_hmac
 from datetime import datetime
 from pathlib import Path
@@ -174,6 +175,12 @@ class UserStorage:
             "created_at": user.get("created_at"),
         }
 
+    def get_by_id(self, user_id: str) -> dict | None:
+        for user in self._load():
+            if user.get("user_id") == user_id:
+                return self._public_user(user)
+        return None
+
     def get_by_email(self, email: str) -> dict | None:
         email_key = email.strip().lower()
         for user in self._load():
@@ -274,3 +281,105 @@ class UserStorage:
         users.append(user)
         self._save(users)
         return self._public_user(user)
+
+
+class TeamStorage:
+    """Manages teams with JSON file persistence at data/teams/teams.json."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.target = self.root / "teams.json"
+        if not self.target.exists():
+            self.target.write_text("[]", encoding="utf-8")
+
+    def _load(self) -> list[dict]:
+        try:
+            return json.loads(self.target.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+
+    def _save(self, teams: list[dict]) -> None:
+        self.target.write_text(json.dumps(teams, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    @staticmethod
+    def _gen_invite_code() -> str:
+        chars = string.ascii_uppercase + string.digits
+        return "".join(secrets.choice(chars) for _ in range(6))
+
+    def create_team(self, teacher_id: str, teacher_name: str, team_name: str) -> dict:
+        teams = self._load()
+        code = self._gen_invite_code()
+        while any(t.get("invite_code") == code for t in teams):
+            code = self._gen_invite_code()
+        team = {
+            "team_id": str(uuid4()),
+            "team_name": team_name.strip(),
+            "invite_code": code,
+            "teacher_id": teacher_id,
+            "teacher_name": teacher_name,
+            "members": [],
+            "created_at": datetime.utcnow().isoformat(),
+        }
+        teams.append(team)
+        self._save(teams)
+        return team
+
+    def get_team(self, team_id: str) -> dict | None:
+        for t in self._load():
+            if t.get("team_id") == team_id:
+                return t
+        return None
+
+    def find_by_invite_code(self, code: str) -> dict | None:
+        code = code.strip().upper()
+        for t in self._load():
+            if t.get("invite_code") == code:
+                return t
+        return None
+
+    def list_by_teacher(self, teacher_id: str) -> list[dict]:
+        return [t for t in self._load() if t.get("teacher_id") == teacher_id]
+
+    def list_by_member(self, user_id: str) -> list[dict]:
+        result = []
+        for t in self._load():
+            if any(m.get("user_id") == user_id for m in t.get("members", [])):
+                result.append(t)
+        return result
+
+    def list_all(self) -> list[dict]:
+        return self._load()
+
+    def add_member(self, team_id: str, user_id: str) -> dict | None:
+        teams = self._load()
+        for t in teams:
+            if t.get("team_id") != team_id:
+                continue
+            if any(m.get("user_id") == user_id for m in t.get("members", [])):
+                return t
+            t.setdefault("members", []).append({
+                "user_id": user_id,
+                "joined_at": datetime.utcnow().isoformat(),
+            })
+            self._save(teams)
+            return t
+        return None
+
+    def remove_member(self, team_id: str, user_id: str) -> dict | None:
+        teams = self._load()
+        for t in teams:
+            if t.get("team_id") != team_id:
+                continue
+            t["members"] = [m for m in t.get("members", []) if m.get("user_id") != user_id]
+            self._save(teams)
+            return t
+        return None
+
+    def delete_team(self, team_id: str, teacher_id: str) -> bool:
+        teams = self._load()
+        new_teams = [t for t in teams if not (t.get("team_id") == team_id and t.get("teacher_id") == teacher_id)]
+        if len(new_teams) == len(teams):
+            return False
+        self._save(new_teams)
+        return True

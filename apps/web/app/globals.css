@@ -514,6 +514,66 @@ pre {
 }
 
 /* ── Settings Drawer ── */
+.stu-team-panel {
+  position: absolute;
+  top: 48px;
+  right: 12px;
+  width: 320px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  z-index: 200;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  animation: fadeUp 0.2s ease;
+}
+.stu-team-join {
+  display: flex;
+  gap: 6px;
+}
+.stu-team-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  outline: none;
+}
+.stu-team-input:focus {
+  border-color: var(--accent);
+}
+.stu-team-join-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.stu-team-join-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.stu-team-card {
+  padding: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+.stu-team-card:hover {
+  border-color: var(--accent);
+}
 .settings-drawer {
   padding: 12px 20px;
   border-bottom: 1px solid var(--border);

@@ -134,28 +134,17 @@ class SmsLoginPayload(BaseModel):
     code: str = Field(min_length=4, max_length=8)
 
 
-class AuthRegisterPayload(BaseModel):
-    role: Literal["student", "teacher", "admin"] = "student"
-    display_name: str = Field(min_length=2, max_length=50)
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
-    student_id: str | None = None
-    class_id: str | None = None
-    cohort_id: str | None = None
-    bio: str | None = ""
+class TeamCreatePayload(BaseModel):
+    teacher_id: str
+    teacher_name: str = ""
+    team_name: str = Field(min_length=1, max_length=100)
 
 
-class AuthLoginPayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=64)
+class TeamJoinPayload(BaseModel):
+    user_id: str
+    invite_code: str = Field(min_length=4, max_length=10)
 
 
-class AuthPasswordChangePayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
-    current_password: str = Field(min_length=6, max_length=64)
-    new_password: str = Field(min_length=6, max_length=64)
-
-
-class AuthUserResponse(BaseModel):
+class TeamResponse(BaseModel):
     status: str = "ok"
-    user: dict = Field(default_factory=dict)
+    team: dict = Field(default_factory=dict)

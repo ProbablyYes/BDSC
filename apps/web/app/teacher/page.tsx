@@ -6,6 +6,7 @@ import { useAuth, logout } from "../hooks/useAuth";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 type Tab = "overview" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition";
+type TeamView = "comparison" | "team-detail" | "student-detail" | "project-detail";
 
 // 风险规则名称映射
 const RISK_RULE_NAMES: Record<string, string> = {
@@ -288,6 +289,15 @@ export default function TeacherPage() {
   const [selectedClassStudent, setSelectedClassStudent] = useState("");
   const [selectedClassStudentProject, setSelectedClassStudentProject] = useState("");
 
+  const [teamData, setTeamData] = useState<{ my_teams: any[]; other_teams: any[] } | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [teamView, setTeamView] = useState<TeamView>("comparison");
+  const [selectedTeamStudentId, setSelectedTeamStudentId] = useState("");
+  const [selectedTeamProjectId, setSelectedTeamProjectId] = useState("");
+  const [showCreateTeam, setShowCreateTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
+  const [createdInviteCode, setCreatedInviteCode] = useState("");
+
   // 项目页面状态
   const [projectTabInput, setProjectTabInput] = useState("");
   const [projectIdConfirmed, setProjectIdConfirmed] = useState(false);
@@ -329,6 +339,11 @@ export default function TeacherPage() {
 
   async function api(path: string, opts?: RequestInit) {
     const r = await fetch(`${API}${path}`, opts);
+    if (!r.ok) {
+      let msg = `请求失败 (${r.status})`;
+      try { const j = await r.json(); msg = j.detail || j.message || msg; } catch {}
+      throw new Error(msg);
+    }
     return r.json();
   }
 
@@ -904,6 +919,67 @@ export default function TeacherPage() {
     }
   }
 
+  async function loadTeams() {
+    setLoadingMessage("正在加载团队数据");
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const tid = currentUser?.user_id || "";
+      const data = await api(`/api/teacher/teams?teacher_id=${encodeURIComponent(tid)}`);
+      if (!data || !Array.isArray(data.my_teams) || !Array.isArray(data.other_teams)) {
+        throw new Error("团队数据格式异常");
+      }
+      setTeamData(data);
+      setTeamView("comparison");
+      setSelectedTeamId("");
+      setSelectedTeamStudentId("");
+      setSelectedTeamProjectId("");
+    } catch (err: any) {
+      setErrorMessage(err?.message ?? "加载团队数据失败");
+      setTeamData(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreateTeam() {
+    if (!newTeamName.trim()) return;
+    try {
+      const res = await api("/api/teams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teacher_id: currentUser?.user_id || "",
+          teacher_name: currentUser?.display_name || "",
+          team_name: newTeamName.trim(),
+        }),
+      });
+      setCreatedInviteCode(res.team?.invite_code || "");
+      setNewTeamName("");
+      loadTeams();
+    } catch (err: any) {
+      setErrorMessage(err?.message ?? "创建团队失败");
+    }
+  }
+
+  async function handleDeleteTeam(teamId: string) {
+    try {
+      await api(`/api/teams/${teamId}?teacher_id=${encodeURIComponent(currentUser?.user_id || "")}`, { method: "DELETE" });
+      loadTeams();
+    } catch (err: any) {
+      setErrorMessage(err?.message ?? "删除团队失败");
+    }
+  }
+
+  async function handleRemoveMember(teamId: string, userId: string) {
+    try {
+      await api(`/api/teams/${teamId}/members/${userId}?teacher_id=${encodeURIComponent(currentUser?.user_id || "")}`, { method: "DELETE" });
+      loadTeams();
+    } catch (err: any) {
+      setErrorMessage(err?.message ?? "移除成员失败");
+    }
+  }
+
   async function loadSubmissions() {
     setLoadingMessage("正在加载学生提交记录");
     setLoading(true);
@@ -1412,7 +1488,7 @@ export default function TeacherPage() {
 
   const TABS: { id: Tab; label: string }[] = [
     { id: "overview", label: "总览" },
-    { id: "class", label: "班级" },
+    { id: "class", label: "团队" },
     { id: "project", label: "项目" },
     { id: "submissions", label: "学生提交" },
     { id: "feedback", label: "写回反馈" },
@@ -1488,8 +1564,7 @@ export default function TeacherPage() {
                 if (t.id === "competition") loadCompetitionScore();
                 if (t.id === "interventions") loadTeachingInterventions();
                 if (t.id === "class") {
-                  setClassIdConfirmed(false);
-                  setClassTabInput(classId);
+                  if (!teamData) loadTeams();
                 }
               }}>
               {t.label}
@@ -3014,279 +3089,470 @@ export default function TeacherPage() {
 
           {tab === "class" && (
             <div className="tch-panel fade-up">
-              {!classIdConfirmed ? (
-                <>
-                  <h2>🏫 团队管理</h2>
-                  <p className="tch-desc">输入团队（班级）ID，系统将加载全量学生提交数据并生成团队分析视图。</p>
-                  <div style={{ padding: "32px", textAlign: "center" }}>
-                    <div style={{ maxWidth: 400, margin: "0 auto" }}>
-                      <input type="text" placeholder="请输入团队 ID，例如：2026A" value={classTabInput} onChange={(e) => setClassTabInput(e.target.value)}
-                        style={{ width: "100%", padding: "12px 16px", fontSize: 16, marginBottom: 16, boxSizing: "border-box", border: "1px solid var(--border)", borderRadius: 10 }}
-                        onKeyPress={(e) => { if (e.key === "Enter" && classTabInput.trim()) { setClassId(classTabInput); setClassIdConfirmed(true); loadClassData(classTabInput); } }}
-                      />
-                      <button onClick={() => { if (classTabInput.trim()) { setClassId(classTabInput); setClassIdConfirmed(true); loadClassData(classTabInput); } }}
-                        style={{ width: "100%", padding: "12px 16px", fontSize: 16, background: classTabInput.trim() ? "var(--accent)" : "var(--bg-card-hover)", color: classTabInput.trim() ? "#fff" : "var(--text-muted)", border: "none", borderRadius: 10, cursor: classTabInput.trim() ? "pointer" : "not-allowed", transition: "all 0.2s" }}
-                        disabled={!classTabInput.trim()}>确认团队ID</button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* ── 面包屑导航 ── */}
-                  <div className="cls-breadcrumb">
-                    <span className="cls-crumb-item" onClick={() => { setClassIdConfirmed(false); setClassView("overview"); }}>全部团队</span>
-                    <span className="cls-crumb-sep">›</span>
-                    <span className={`cls-crumb-item ${classView === "overview" ? "active" : ""}`} onClick={() => setClassView("overview")}>{classId}</span>
-                    {(classView === "student" || classView === "student-project") && (<><span className="cls-crumb-sep">›</span><span className={`cls-crumb-item ${classView === "student" ? "active" : ""}`} onClick={() => setClassView("student")}>{selectedClassStudent}</span></>)}
-                    {classView === "student-project" && (<><span className="cls-crumb-sep">›</span><span className="cls-crumb-item active">{selectedClassStudentProject.slice(0, 20)}</span></>)}
-                    <button onClick={() => { loadClassData(classId); }} className="tch-sm-btn" style={{ marginLeft: "auto" }}>🔄 刷新</button>
-                  </div>
+              {loading && <SkeletonLoader rows={4} type="card" />}
 
-                  {/* ══════════════ Level 1: 团队总览 ══════════════ */}
-                  {classView === "overview" && !loading && classAnalytics && (
-                    <>
-                      <h2 style={{ marginTop: 0 }}>团队 {classId} · 数据看板</h2>
-                      <p className="tch-desc">全量学生提交数据实时聚合，点击学生行可钻取至个人详情</p>
-
-                      {/* KPI */}
-                      <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
-                        {[
-                          { icon: "👥", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: classAnalytics.studentCount, l: "学生人数", d: 0 },
-                          { icon: "📝", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: classAnalytics.totalSubmissions, l: "总提交数", d: 0 },
-                          { icon: "📁", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: classAnalytics.projectCount, l: "项目数", d: 0 },
-                          { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: classAnalytics.avgScore, l: "团队均分", d: 1 },
-                          { icon: "⚠️", bg: "rgba(224,112,112,0.15)", c: "var(--tch-danger)", v: classAnalytics.riskRate, l: "风险率%", d: 1 },
-                        ].map((k, i) => (
-                          <div key={i} className="ov-kpi-card">
-                            <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
-                            <div className="ov-kpi-value" style={{ color: k.c }}><AnimatedNumber value={k.v} decimals={k.d} />{k.l === "风险率%" && <span style={{ fontSize: 14 }}>%</span>}</div>
-                            <div className="ov-kpi-label">{k.l}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* ROW: 学生散点图 + 成绩箱型图 */}
-                      <div className="ov-chart-grid">
-                        <div className="ov-chart-card">
-                          <h3>学生表现分布</h3>
-                          <p className="tch-desc">横轴=提交次数 纵轴=均分，颜色反映状态，悬浮可看学生ID</p>
-                          <ScatterPlot data={classAnalytics.studentScatter} />
-                        </div>
-                        <div className="ov-chart-card">
-                          <h3>成绩分布</h3>
-                          <p className="tch-desc">箱型图概览 + 分段直方图</p>
-                          {classAnalytics.scorePercentiles.max > 0 && <BoxPlotChart data={classAnalytics.scorePercentiles} />}
-                          <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-muted)", display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                            <span>Min <strong style={{ color: "var(--tch-danger)" }}>{classAnalytics.scorePercentiles.min.toFixed(1)}</strong></span>
-                            <span>Q1 <strong>{classAnalytics.scorePercentiles.q1.toFixed(1)}</strong></span>
-                            <span>Med <strong style={{ color: "var(--accent)" }}>{classAnalytics.scorePercentiles.median.toFixed(1)}</strong></span>
-                            <span>Q3 <strong>{classAnalytics.scorePercentiles.q3.toFixed(1)}</strong></span>
-                            <span>Max <strong style={{ color: "var(--tch-success)" }}>{classAnalytics.scorePercentiles.max.toFixed(1)}</strong></span>
-                          </div>
-                          <div className="ov-histogram" style={{ height: 100, marginTop: 12 }}>
-                            {["0-2", "2-4", "4-6", "6-8", "8-10"].map((label, idx) => {
-                              const count = classAnalytics.scoreBuckets[idx] || 0;
-                              const maxB = Math.max(1, ...classAnalytics.scoreBuckets);
-                              const barColors = ["var(--tch-danger)","rgba(224,168,76,0.8)","rgba(232,168,76,0.65)","rgba(92,189,138,0.65)","var(--tch-success)"];
-                              return (<div key={label} className="ov-hist-col"><div className="ov-hist-count">{count}</div><div className="ov-hist-bar" style={{ height: `${Math.max((count / maxB) * 100, 6)}%`, background: barColors[idx] }} /><div className="ov-hist-label">{label}</div></div>);
-                            })}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ROW: 风险雷达 + 活动趋势 */}
-                      <div className="ov-chart-grid">
-                        <div className="ov-chart-card">
-                          <h3>风险规则雷达</h3>
-                          <p className="tch-desc">团队触发的高频风险规则多维分布</p>
-                          {classAnalytics.ruleRadar.length >= 3 ? <RadarChart data={classAnalytics.ruleRadar} /> : (
-                            <div className="ov-bar-list">{classAnalytics.ruleRadar.map((r: any, i: number) => (
-                              <div key={i} className="ov-bar-item"><div className="ov-bar-label"><span className="ov-bar-dot" style={{ background: "rgba(224,112,112,0.6)" }} /><span>{r.label}</span></div><div className="ov-bar-track"><div className="ov-bar-fill" style={{ width: `${(r.value / r.max) * 100}%`, background: "rgba(224,112,112,0.5)" }} /></div><span className="ov-bar-val">{r.value}</span></div>
-                            ))}</div>
-                          )}
-                        </div>
-                        <div className="ov-chart-card">
-                          <h3>提交活动趋势</h3>
-                          <p className="tch-desc">按日期统计的提交量变化</p>
-                          {classAnalytics.activityByDate.length >= 2 ? <AreaChart data={classAnalytics.activityByDate} /> : <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>数据点不足</p>}
-                        </div>
-                      </div>
-
-                      {/* 学生排名表 */}
-                      <div className="ov-section">
-                        <h3>学生排名 ({classAnalytics.students.length})</h3>
-                        <p className="tch-desc">点击学生行可钻取查看个人项目演进详情</p>
-                        <div className="cls-stu-table">
-                          <div className="cls-stu-hdr"><span>#</span><span>学生</span><span>提交</span><span>项目</span><span>均分</span><span>最新分</span><span>趋势</span><span>风险</span><span>状态</span></div>
-                          {classAnalytics.students.map((stu: any, idx: number) => {
-                            const st = stu.avgScore >= 7 ? { l: "良好", c: "var(--tch-success)", bg: "var(--tch-success-soft)" } : stu.avgScore >= 5 ? { l: "一般", c: "var(--tch-warning)", bg: "var(--tch-warning-soft)" } : { l: "需关注", c: "var(--tch-danger)", bg: "var(--tch-danger-soft)" };
-                            return (
-                              <div key={stu.id} className="cls-stu-row" style={{ animationDelay: `${idx * 0.03}s` }} onClick={() => { setSelectedClassStudent(stu.id); setClassView("student"); }}>
-                                <span style={{ fontWeight: 700, color: idx < 3 ? "var(--accent)" : "var(--text-muted)" }}>{idx + 1}</span>
-                                <span className="ov-stu-name"><span className="ov-stu-av">{(stu.id as string)[0]?.toUpperCase()}</span>{stu.id}</span>
-                                <span><strong>{stu.count}</strong></span>
-                                <span>{stu.projectCount}</span>
-                                <span style={{ fontWeight: 600, color: st.c }}>{stu.avgScore.toFixed(1)}</span>
-                                <span style={{ color: stu.latestScore >= 7 ? "var(--tch-success)" : stu.latestScore >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>{stu.latestScore.toFixed(1)}</span>
-                                <span style={{ color: stu.trend > 0 ? "var(--tch-success)" : stu.trend < 0 ? "var(--tch-danger)" : "var(--text-muted)", fontWeight: 600 }}>{stu.trend > 0 ? `↑${stu.trend.toFixed(1)}` : stu.trend < 0 ? `↓${Math.abs(stu.trend).toFixed(1)}` : "—"}</span>
-                                <span>{stu.riskCount > 0 ? <span className="risk-badge high" style={{ fontSize: 11 }}>{stu.riskCount}</span> : <span style={{ color: "var(--text-muted)" }}>0</span>}</span>
-                                <span><span className="ov-status-badge" style={{ color: st.c, background: st.bg }}>{st.l}</span></span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* 快捷子功能 */}
-                      <div className="ov-section">
-                        <h3>深度分析工具</h3>
-                        <p className="tch-desc">已自动加载本团队的能力映射、规则覆盖率和教学干预数据</p>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
-                          {CLASS_SUB_TABS.map(subTab => (
-                            <button key={subTab.id} className="tch-sub-tab-btn" onClick={() => { setTab(subTab.id as Tab); if (subTab.id === "compare") loadCompare(); if (subTab.id === "capability") loadCapabilityMap(); if (subTab.id === "rule-coverage") loadRuleCoverage(); if (subTab.id === "interventions") loadTeachingInterventions(); if (subTab.id === "report") generateReport(); }}>{subTab.label}</button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* ══════════════ Level 2: 学生详情 ══════════════ */}
-                  {classView === "student" && !loading && studentProjectAnalytics && (
-                    <>
-                      <h2 style={{ marginTop: 0 }}>学生 {selectedClassStudent} · 项目演进</h2>
-                      <p className="tch-desc">该学生在与智能体交互过程中的项目改进轨迹，点击项目卡片可查看详细迭代过程</p>
-
-                      {/* 学生 KPI */}
-                      <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-                        {[
-                          { icon: "📝", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: studentProjectAnalytics.totalSubmissions, l: "总提交", d: 0 },
-                          { icon: "📁", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: studentProjectAnalytics.projectCount, l: "项目数", d: 0 },
-                          { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: studentProjectAnalytics.avgScore, l: "综合均分", d: 1 },
-                          { icon: "📈", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: studentProjectAnalytics.projects[0]?.improvement || 0, l: "主项目进步", d: 1 },
-                        ].map((k, i) => (
-                          <div key={i} className="ov-kpi-card">
-                            <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
-                            <div className="ov-kpi-value" style={{ color: k.c }}><AnimatedNumber value={k.v} decimals={k.d} /></div>
-                            <div className="ov-kpi-label">{k.l}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* 综合分数趋势（所有项目合并） */}
-                      {(() => {
-                        const allTimeline = classSubmissions.filter((s: any) => s.student_id === selectedClassStudent)
-                          .sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || ""))
-                          .map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: Number(s.overall_score || 0) }));
-                        return allTimeline.length >= 2 ? (
-                          <div className="ov-chart-card" style={{ marginBottom: 24 }}>
-                            <h3>成绩变化曲线</h3>
-                            <p className="tch-desc">随每次提交（含对话和文件上传）的评分变化，体现与智能体交互后的改进过程</p>
-                            <AreaChart data={allTimeline} color="rgba(107,138,255,0.9)" height={130} />
-                          </div>
-                        ) : null;
-                      })()}
-
-                      {/* 项目卡片列表 */}
-                      <div className="ov-section">
-                        <h3>项目列表 ({studentProjectAnalytics.projects.length})</h3>
-                        <div className="cls-proj-grid">
-                          {studentProjectAnalytics.projects.map((proj: any, idx: number) => {
-                            const impColor = proj.improvement > 0 ? "var(--tch-success)" : proj.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)";
-                            return (
-                              <div key={proj.id} className="cls-proj-card" style={{ animationDelay: `${idx * 0.05}s` }} onClick={() => { setSelectedClassStudentProject(proj.id); setClassView("student-project"); }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                                  <strong style={{ fontSize: 14, color: "var(--text-primary)" }}>{proj.id}</strong>
-                                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{proj.submissionCount} 次提交</span>
-                                </div>
-                                {/* 迷你分数时间线 */}
-                                {proj.scoreTimeline.length >= 2 && (
-                                  <div style={{ height: 50, marginBottom: 8 }}><AreaChart data={proj.scoreTimeline} height={50} color={impColor === "var(--tch-success)" ? "rgba(92,189,138,0.8)" : "rgba(107,138,255,0.7)"} /></div>
-                                )}
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
-                                  <span style={{ color: "var(--text-secondary)" }}>首次 <strong>{proj.firstScore.toFixed(1)}</strong> → 最新 <strong style={{ color: proj.latestScore >= 7 ? "var(--tch-success)" : proj.latestScore >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>{proj.latestScore.toFixed(1)}</strong></span>
-                                  <span style={{ fontWeight: 700, color: impColor }}>{proj.improvement > 0 ? `+${proj.improvement.toFixed(1)}` : proj.improvement < 0 ? proj.improvement.toFixed(1) : "—"}</span>
-                                </div>
-                                {proj.fileSubmissions.length > 0 && <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)" }}>📄 {proj.fileSubmissions.length} 个文件提交</div>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* ══════════════ Level 3: 学生项目迭代详情 ══════════════ */}
-                  {classView === "student-project" && !loading && (() => {
-                    const proj = studentProjectAnalytics?.projects.find((p: any) => p.id === selectedClassStudentProject);
-                    if (!proj) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>项目数据未找到</p>;
-                    return (
+              {/* ── Create Team Modal ── */}
+              {showCreateTeam && (
+                <div className="tm-modal-overlay" onClick={() => { setShowCreateTeam(false); setCreatedInviteCode(""); }}>
+                  <div className="tm-modal" onClick={(e) => e.stopPropagation()}>
+                    {!createdInviteCode ? (
                       <>
-                        <h2 style={{ marginTop: 0 }}>{selectedClassStudentProject}</h2>
-                        <p className="tch-desc">学生 {selectedClassStudent} 在该项目上与智能体交互的完整迭代记录（不含对话原文，仅展示每次分析结果和改进轨迹）</p>
-
-                        {/* 项目 KPI */}
-                        <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(107,138,255,0.15)", color: "var(--accent)" }}>📊</div><div className="ov-kpi-value"><AnimatedNumber value={proj.avgScore} decimals={1} /></div><div className="ov-kpi-label">均分</div></div>
-                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(92,189,138,0.15)", color: "var(--tch-success)" }}>📈</div><div className="ov-kpi-value" style={{ color: proj.improvement >= 0 ? "var(--tch-success)" : "var(--tch-danger)" }}>{proj.improvement >= 0 ? "+" : ""}<AnimatedNumber value={proj.improvement} decimals={1} /></div><div className="ov-kpi-label">进步幅度</div></div>
-                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(232,168,76,0.15)", color: "var(--tch-warning)" }}>🔄</div><div className="ov-kpi-value"><AnimatedNumber value={proj.submissionCount} /></div><div className="ov-kpi-label">迭代次数</div></div>
-                          <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(189,147,249,0.15)", color: "#bd93f9" }}>📄</div><div className="ov-kpi-value"><AnimatedNumber value={proj.fileSubmissions.length} /></div><div className="ov-kpi-label">文件数</div></div>
-                        </div>
-
-                        {/* 分数演进曲线 */}
-                        {proj.scoreTimeline.length >= 2 && (
-                          <div className="ov-chart-card" style={{ marginBottom: 24 }}>
-                            <h3>评分演进曲线</h3>
-                            <p className="tch-desc">每次提交后系统给出的综合评分变化</p>
-                            <AreaChart data={proj.scoreTimeline} color="rgba(107,138,255,0.9)" height={140} />
-                          </div>
-                        )}
-
-                        {/* 迭代时间线 */}
-                        <div className="ov-section">
-                          <h3>迭代记录时间线</h3>
-                          <p className="tch-desc">每次提交的分析结果，包括评分、瓶颈诊断和下一步建议</p>
-                          <div className="cls-timeline">
-                            {proj.submissions.map((sub: any, idx: number) => {
-                              const sc = Number(sub.overall_score || 0);
-                              const scColor = sc >= 7 ? "var(--tch-success)" : sc >= 5 ? "var(--tch-warning)" : "var(--tch-danger)";
-                              const prevSc = idx > 0 ? Number(proj.submissions[idx - 1].overall_score || 0) : 0;
-                              const delta = idx > 0 && sc > 0 && prevSc > 0 ? sc - prevSc : null;
-                              return (
-                                <div key={idx} className="cls-tl-item" style={{ animationDelay: `${idx * 0.04}s` }}>
-                                  <div className="cls-tl-dot" style={{ background: scColor }} />
-                                  <div className="cls-tl-content">
-                                    <div className="cls-tl-header">
-                                      <span className="cls-tl-time">{(sub.created_at || "").slice(0, 16)}</span>
-                                      <span className="cls-tl-type">{sub.source_type === "file" || sub.source_type === "file_in_chat" ? `📄 ${sub.filename || "文件"}` : sub.source_type === "dialogue" ? "💬 对话分析" : sub.source_type || "提交"}</span>
-                                      <span className="cls-tl-score" style={{ color: scColor }}>{sc.toFixed(1)}</span>
-                                      {delta !== null && <span style={{ fontSize: 11, fontWeight: 700, color: delta > 0 ? "var(--tch-success)" : delta < 0 ? "var(--tch-danger)" : "var(--text-muted)", marginLeft: 4 }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>}
-                                    </div>
-                                    {sub.bottleneck && <div className="cls-tl-bottleneck"><strong>🎯 瓶颈：</strong>{sub.bottleneck}</div>}
-                                    {sub.next_task && <div className="cls-tl-next"><strong>➡️ 建议：</strong>{sub.next_task}</div>}
-                                    {(sub.triggered_rules?.length || 0) > 0 && (
-                                      <div className="cls-tl-rules">{sub.triggered_rules.map((r: string) => <span key={r} className="cls-tl-rule-tag">{getRuleDisplayName(r)}</span>)}</div>
-                                    )}
-                                    {sub.filename && sub.full_text && (
-                                      <details className="cls-tl-file-detail">
-                                        <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--accent)", fontWeight: 500, marginTop: 6 }}>📄 查看文件内容摘要</summary>
-                                        <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.6, color: "var(--text-secondary)", background: "var(--bg-card-hover)", padding: "10px 12px", borderRadius: 8, maxHeight: 200, overflow: "auto", whiteSpace: "pre-wrap" }}>{(sub.full_text as string).slice(0, 1500)}{(sub.full_text as string).length > 1500 ? "\n..." : ""}</div>
-                                      </details>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                        <h3 style={{ margin: "0 0 16px" }}>创建新团队</h3>
+                        <input className="tm-input" placeholder="输入团队名称" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()} autoFocus />
+                        <div style={{ display: "flex", gap: 8, marginTop: 16, justifyContent: "flex-end" }}>
+                          <button className="tch-sm-btn" onClick={() => { setShowCreateTeam(false); setCreatedInviteCode(""); }}>取消</button>
+                          <button className="tch-sm-btn" style={{ background: "var(--accent)", color: "#fff" }} onClick={handleCreateTeam} disabled={!newTeamName.trim()}>创建</button>
                         </div>
                       </>
-                    );
-                  })()}
+                    ) : (
+                      <>
+                        <h3 style={{ margin: "0 0 8px", color: "var(--tch-success)" }}>团队创建成功</h3>
+                        <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "0 0 16px" }}>将以下邀请码分享给学生，学生在个人中心输入即可加入团队</p>
+                        <div className="tm-invite-display">
+                          <span className="tm-invite-code">{createdInviteCode}</span>
+                          <button className="tch-sm-btn" onClick={() => { navigator.clipboard?.writeText(createdInviteCode); }}>复制</button>
+                        </div>
+                        <button className="tch-sm-btn" style={{ marginTop: 16, width: "100%" }} onClick={() => { setShowCreateTeam(false); setCreatedInviteCode(""); }}>完成</button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
 
-                  {/* loading placeholder */}
-                  {loading && <SkeletonLoader rows={4} type="card" />}
-                  {!loading && classView === "overview" && !classAnalytics && <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>📭 暂无该团队的提交数据</p>}
-                  {!loading && classView === "student" && !studentProjectAnalytics && <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>📭 该学生暂无提交数据</p>}
+              {/* ── Top: Team selector chips ── */}
+              {teamData && !loading && (
+                <>
+                  <div className="cls-breadcrumb" style={{ marginBottom: 12 }}>
+                    <span className={`cls-crumb-item ${teamView === "comparison" ? "active" : ""}`} onClick={() => { setTeamView("comparison"); setSelectedTeamId(""); setSelectedTeamStudentId(""); setSelectedTeamProjectId(""); }}>全部团队</span>
+                    {selectedTeamId && (() => { const t = [...(teamData.my_teams ?? []), ...(teamData.other_teams ?? [])].find((x: any) => x.team_id === selectedTeamId); return t ? (<><span className="cls-crumb-sep">›</span><span className={`cls-crumb-item ${teamView === "team-detail" ? "active" : ""}`} onClick={() => { setTeamView("team-detail"); setSelectedTeamStudentId(""); setSelectedTeamProjectId(""); }}>{t.team_name}</span></>) : null; })()}
+                    {selectedTeamStudentId && (() => { const t = (teamData.my_teams ?? []).find((x: any) => x.team_id === selectedTeamId); const s = t?.students?.find((x: any) => x.student_id === selectedTeamStudentId); return s ? (<><span className="cls-crumb-sep">›</span><span className={`cls-crumb-item ${teamView === "student-detail" ? "active" : ""}`} onClick={() => { setTeamView("student-detail"); setSelectedTeamProjectId(""); }}>{s.display_name}</span></>) : null; })()}
+                    {selectedTeamProjectId && (() => { const t = (teamData.my_teams ?? []).find((x: any) => x.team_id === selectedTeamId); const s = t?.students?.find((x: any) => x.student_id === selectedTeamStudentId); const p = s?.projects?.find((x: any) => x.project_id === selectedTeamProjectId); return p ? (<><span className="cls-crumb-sep">›</span><span className="cls-crumb-item active">{p.project_name}</span></>) : null; })()}
+                    <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+                      <button onClick={() => { setShowCreateTeam(true); setCreatedInviteCode(""); setNewTeamName(""); }} className="tch-sm-btn" style={{ background: "var(--accent)", color: "#fff" }}>+ 创建团队</button>
+                      <button onClick={loadTeams} className="tch-sm-btn">🔄 刷新</button>
+                    </div>
+                  </div>
+
+                  <div className="tm-chips">
+                    <button className={`tm-chip ${teamView === "comparison" && !selectedTeamId ? "tm-chip-active" : ""}`} onClick={() => { setTeamView("comparison"); setSelectedTeamId(""); }}>📊 全部对比</button>
+                    {(teamData.my_teams ?? []).map((t: any) => (
+                      <button key={t.team_id} className={`tm-chip tm-chip-mine ${selectedTeamId === t.team_id ? "tm-chip-active" : ""}`} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); setSelectedTeamStudentId(""); setSelectedTeamProjectId(""); }}>
+                        <span className="tm-chip-dot tm-dot-mine" />{t.team_name}
+                      </button>
+                    ))}
+                    {(teamData.other_teams ?? []).map((t: any) => (
+                      <button key={t.team_id} className={`tm-chip ${selectedTeamId === t.team_id ? "tm-chip-active" : ""}`} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); setSelectedTeamStudentId(""); setSelectedTeamProjectId(""); }}>
+                        <span className="tm-chip-dot tm-dot-other" />{t.team_name}
+                      </button>
+                    ))}
+                  </div>
                 </>
+              )}
+
+              {/* ══════ VIEW: Comparison ══════ */}
+              {teamView === "comparison" && !loading && teamData && (() => {
+                const all = [...(teamData.my_teams ?? []), ...(teamData.other_teams ?? [])];
+                if (!all.length) return (
+                  <div style={{ textAlign: "center", padding: "40px 20px" }}>
+                    <div style={{ fontSize: 40, marginBottom: 12 }}>🏫</div>
+                    <h3 style={{ color: "var(--text-primary)", margin: "0 0 8px" }}>还没有团队</h3>
+                    <p style={{ color: "var(--text-muted)", fontSize: 13 }}>点击上方「创建团队」按钮开始</p>
+                  </div>
+                );
+                const metrics = ["均分", "提交量", "风险率", "趋势"];
+                const maxV = [10, Math.max(1, ...all.map((t: any) => t.total_submissions)), Math.max(1, ...all.map((t: any) => t.risk_rate)), 6];
+                return (
+                  <>
+                    <h2 style={{ marginTop: 0 }}>团队横向对比</h2>
+                    <p className="tch-desc">从多维度审视所有团队表现差异，★ 标记的为我的团队</p>
+
+                    {/* KPI */}
+                    <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(107,138,255,0.15)", color: "var(--accent)" }}>🏫</div><div className="ov-kpi-value"><AnimatedNumber value={all.length} /></div><div className="ov-kpi-label">团队总数</div></div>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(115,204,255,0.15)", color: "#73ccff" }}>👥</div><div className="ov-kpi-value"><AnimatedNumber value={all.reduce((a: number, t: any) => a + t.student_count, 0)} /></div><div className="ov-kpi-label">学生总数</div></div>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(92,189,138,0.15)", color: "var(--tch-success)" }}>📝</div><div className="ov-kpi-value"><AnimatedNumber value={all.reduce((a: number, t: any) => a + t.total_submissions, 0)} /></div><div className="ov-kpi-label">提交总量</div></div>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(232,168,76,0.15)", color: "var(--tch-warning)" }}>⭐</div><div className="ov-kpi-value"><AnimatedNumber value={all.length > 0 ? all.reduce((a: number, t: any) => a + t.avg_score, 0) / all.length : 0} decimals={1} /></div><div className="ov-kpi-label">全局均分</div></div>
+                    </div>
+
+                    {/* ─ Heatmap Matrix: teams × metrics ─ */}
+                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                      <h3>多维热力矩阵</h3>
+                      <p className="tch-desc">颜色越深表现越好（风险率列反色），点击团队名可进入详情</p>
+                      <div style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 3, fontSize: 12 }}>
+                          <thead><tr><th style={{ textAlign: "left", color: "var(--text-muted)", padding: "6px 10px", fontWeight: 500 }}>团队</th>
+                            {metrics.map(m => <th key={m} style={{ textAlign: "center", color: "var(--text-muted)", padding: "6px 8px", fontWeight: 500 }}>{m}</th>)}
+                            <th style={{ textAlign: "center", color: "var(--text-muted)", padding: "6px 8px", fontWeight: 500 }}>教师</th>
+                          </tr></thead>
+                          <tbody>{all.map((t: any) => {
+                            const vals = [t.avg_score, t.total_submissions, t.risk_rate, t.trend + 3];
+                            return (
+                              <tr key={t.team_id} style={{ cursor: "pointer" }} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); }}>
+                                <td style={{ padding: "8px 10px", fontWeight: t.is_mine ? 700 : 400, color: t.is_mine ? "var(--accent)" : "var(--text-primary)", whiteSpace: "nowrap" }}>{t.is_mine ? "★ " : ""}{t.team_name}</td>
+                                {vals.map((v, mi) => {
+                                  const norm = Math.min(1, Math.max(0, v / maxV[mi]));
+                                  const inv = mi === 2;
+                                  const intensity = inv ? 1 - norm : norm;
+                                  const bg = intensity > 0.7 ? "rgba(92,189,138,0.35)" : intensity > 0.4 ? "rgba(232,168,76,0.25)" : "rgba(224,112,112,0.25)";
+                                  const display = mi === 0 ? v.toFixed(1) : mi === 2 ? `${v.toFixed(0)}%` : mi === 3 ? (t.trend > 0 ? `+${t.trend.toFixed(1)}` : t.trend.toFixed(1)) : v;
+                                  return <td key={mi} style={{ textAlign: "center", padding: "8px", borderRadius: 6, background: bg, fontWeight: 600, color: "var(--text-primary)", transition: "background 0.3s" }}>{display}</td>;
+                                })}
+                                <td style={{ textAlign: "center", padding: "8px", color: "var(--text-muted)", fontSize: 11 }}>{t.teacher_name}</td>
+                              </tr>
+                            );
+                          })}</tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* ─ Lollipop chart: score ranking ─ */}
+                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                      <h3>均分排名·棒棒糖图</h3>
+                      <p className="tch-desc">圆点位置表示均分，带线连接至零轴，蓝色为我的团队</p>
+                      <svg viewBox={`0 0 500 ${all.length * 36 + 20}`} style={{ width: "100%", overflow: "visible" }}>
+                        {[...all].sort((a: any, b: any) => b.avg_score - a.avg_score).map((t: any, i) => {
+                          const x = (t.avg_score / 10) * 380 + 110;
+                          const y = i * 36 + 20;
+                          const col = t.is_mine ? "#6b8aff" : "rgba(255,255,255,0.25)";
+                          return (
+                            <g key={t.team_id} style={{ cursor: "pointer" }} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); }}>
+                              <line x1="110" y1={y} x2={x} y2={y} stroke={col} strokeWidth="2" strokeLinecap="round" />
+                              <circle cx={x} cy={y} r="7" fill={col} stroke="var(--bg-primary)" strokeWidth="2" />
+                              <text x={x + 12} y={y + 4} fill="var(--text-secondary)" fontSize="11" fontWeight="600">{t.avg_score}</text>
+                              <text x="105" y={y + 4} fill={t.is_mine ? "#6b8aff" : "var(--text-muted)"} fontSize="11" textAnchor="end" fontWeight={t.is_mine ? 700 : 400}>{t.team_name.slice(0, 10)}</text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    </div>
+
+                    {/* ─ Ring gauges for my teams ─ */}
+                    <div className="ov-chart-card">
+                      <h3>我的团队·环形指标</h3>
+                      <p className="tch-desc">每个环表示一个团队的均分占满分比</p>
+                      <div style={{ display: "flex", justifyContent: "center", gap: 32, flexWrap: "wrap", padding: "12px 0" }}>
+                        {(teamData.my_teams ?? []).map((t: any) => {
+                          const pct = (t.avg_score / 10) * 100;
+                          const r = 38; const c = 2 * Math.PI * r;
+                          const col = t.avg_score >= 7 ? "#5cbd8a" : t.avg_score >= 5 ? "#e0a84c" : "#e07070";
+                          return (
+                            <div key={t.team_id} style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); }}>
+                              <svg width="92" height="92" viewBox="0 0 92 92">
+                                <circle cx="46" cy="46" r={r} fill="none" stroke="var(--bg-card-hover)" strokeWidth="7" />
+                                <circle cx="46" cy="46" r={r} fill="none" stroke={col} strokeWidth="7" strokeLinecap="round" strokeDasharray={`${c * pct / 100} ${c}`} transform="rotate(-90 46 46)" style={{ transition: "stroke-dasharray 1s ease" }} />
+                                <text x="46" y="44" textAnchor="middle" fill="var(--text-primary)" fontSize="18" fontWeight="700">{t.avg_score}</text>
+                                <text x="46" y="58" textAnchor="middle" fill="var(--text-muted)" fontSize="9">/10</text>
+                              </svg>
+                              <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4, fontWeight: 600 }}>{t.team_name.slice(0, 8)}</div>
+                              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{t.student_count}人 · {t.total_submissions}次</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* ══════ VIEW: Team Detail ══════ */}
+              {teamView === "team-detail" && !loading && teamData && (() => {
+                const team = [...(teamData.my_teams ?? []), ...(teamData.other_teams ?? [])].find((t: any) => t.team_id === selectedTeamId);
+                if (!team) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>未找到团队数据</p>;
+                const isMine = team.is_mine;
+                const stuList: any[] = team.students || team.students_summary || [];
+                const sortedStu = [...stuList].sort((a: any, b: any) => b.avg_score - a.avg_score);
+                const maxStuSubs = Math.max(1, ...stuList.map((s: any) => s.total_submissions));
+                const tiers = [0, 0, 0]; stuList.forEach((s: any) => { if (s.avg_score >= 7) tiers[0]++; else if (s.avg_score >= 5) tiers[1]++; else tiers[2]++; });
+                const tierTotal = Math.max(1, tiers[0] + tiers[1] + tiers[2]);
+                return (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <h2 style={{ marginTop: 0, marginBottom: 4 }}>{team.team_name} <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 400 }}>· {team.teacher_name}</span></h2>
+                        <p className="tch-desc" style={{ margin: 0 }}>{isMine ? "点击学生行可查看详细项目演进" : "其他教师的团队，可查看学生概览数据"}</p>
+                      </div>
+                      {isMine && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                          {team.invite_code && (
+                            <div className="tm-invite-badge">
+                              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>邀请码</span>
+                              <span style={{ fontWeight: 700, fontSize: 16, letterSpacing: 2, color: "var(--accent)" }}>{team.invite_code}</span>
+                              <button className="tch-sm-btn" style={{ fontSize: 10, padding: "2px 8px" }} onClick={() => navigator.clipboard?.writeText(team.invite_code)}>复制</button>
+                            </div>
+                          )}
+                          <button className="tch-sm-btn" style={{ color: "var(--tch-danger)", fontSize: 11 }} onClick={() => { if (confirm(`确定删除团队「${team.team_name}」？`)) handleDeleteTeam(team.team_id); }}>删除团队</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {isMine && stuList.length === 0 && (
+                      <div style={{ textAlign: "center", padding: "30px 20px", background: "var(--bg-card)", borderRadius: 12, margin: "16px 0" }}>
+                        <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>暂无学生加入此团队，请将邀请码 <strong style={{ color: "var(--accent)" }}>{team.invite_code}</strong> 分享给学生</p>
+                      </div>
+                    )}
+
+                    <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
+                      {[
+                        { icon: "👥", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: team.student_count, l: "学生", d: 0 },
+                        { icon: "📝", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: team.total_submissions, l: "提交", d: 0 },
+                        { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: team.avg_score, l: "均分", d: 1 },
+                        { icon: "⚠️", bg: "rgba(224,112,112,0.15)", c: "var(--tch-danger)", v: team.risk_rate, l: "风险%", d: 1 },
+                        { icon: "📈", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: team.trend, l: "趋势", d: 1 },
+                      ].map((k, i) => (
+                        <div key={i} className="ov-kpi-card">
+                          <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
+                          <div className="ov-kpi-value" style={{ color: k.c }}>{k.l === "趋势" && k.v > 0 ? "+" : ""}<AnimatedNumber value={k.v} decimals={k.d} />{k.l === "风险%" && <span style={{ fontSize: 14 }}>%</span>}</div>
+                          <div className="ov-kpi-label">{k.l}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="ov-chart-grid">
+                      {/* ─ Lollipop: student ranking ─ */}
+                      <div className="ov-chart-card">
+                        <h3>学生均分排名</h3>
+                        <p className="tch-desc">棒棒糖图：圆点 = 均分，线长 = 与零轴距离</p>
+                        <svg viewBox={`0 0 440 ${sortedStu.length * 30 + 10}`} style={{ width: "100%", overflow: "visible" }}>
+                          {sortedStu.map((s: any, i) => {
+                            const x = (s.avg_score / 10) * 300 + 130;
+                            const y = i * 30 + 14;
+                            const col = s.avg_score >= 7 ? "#5cbd8a" : s.avg_score >= 5 ? "#e0a84c" : "#e07070";
+                            return (
+                              <g key={s.student_id} style={{ cursor: isMine ? "pointer" : "default" }} onClick={() => { if (isMine) { setSelectedTeamStudentId(s.student_id); setTeamView("student-detail"); } }}>
+                                <line x1="130" y1={y} x2={x} y2={y} stroke={col} strokeWidth="2" opacity="0.7" strokeLinecap="round" />
+                                <circle cx={x} cy={y} r="5" fill={col} />
+                                <text x={x + 10} y={y + 4} fill="var(--text-secondary)" fontSize="10" fontWeight="600">{s.avg_score.toFixed(1)}</text>
+                                <text x="125" y={y + 4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{(s.display_name || s.student_id).slice(0, 6)}</text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+                      </div>
+
+                      {/* ─ Tier donut ─ */}
+                      <div className="ov-chart-card">
+                        <h3>成绩分层</h3>
+                        <p className="tch-desc">绿 = 良好(≥7)，黄 = 一般(5-7)，红 = 需关注(&lt;5)</p>
+                        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0" }}>
+                          <svg width="160" height="160" viewBox="0 0 160 160">
+                            {(() => {
+                              const R = 65; const C = 2 * Math.PI * R; const cx = 80; const cy = 80;
+                              const slices = [{ v: tiers[0], c: "#5cbd8a" }, { v: tiers[1], c: "#e0a84c" }, { v: tiers[2], c: "#e07070" }];
+                              let offset = 0;
+                              return slices.map((sl, si) => {
+                                const len = (sl.v / tierTotal) * C;
+                                const el = <circle key={si} cx={cx} cy={cy} r={R} fill="none" stroke={sl.c} strokeWidth="18" strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offset} transform={`rotate(-90 ${cx} ${cy})`} style={{ transition: "stroke-dasharray 0.8s, stroke-dashoffset 0.8s" }} />;
+                                offset += len;
+                                return el;
+                              });
+                            })()}
+                            <text x="80" y="76" textAnchor="middle" fill="var(--text-primary)" fontSize="22" fontWeight="700">{stuList.length}</text>
+                            <text x="80" y="92" textAnchor="middle" fill="var(--text-muted)" fontSize="10">学生</text>
+                          </svg>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "center", gap: 16, fontSize: 12 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: "#5cbd8a", display: "inline-block" }} />良好 {tiers[0]}</span>
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: "#e0a84c", display: "inline-block" }} />一般 {tiers[1]}</span>
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: "#e07070", display: "inline-block" }} />需关注 {tiers[2]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ─ Student activity bars ─ */}
+                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                      <h3>学生活跃度</h3>
+                      <p className="tch-desc">横条长度 = 提交次数，颜色反映成绩状态</p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+                        {sortedStu.map((s: any) => {
+                          const col = s.avg_score >= 7 ? "#5cbd8a" : s.avg_score >= 5 ? "#e0a84c" : "#e07070";
+                          return (
+                            <div key={s.student_id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: isMine ? "pointer" : "default" }} onClick={() => { if (isMine) { setSelectedTeamStudentId(s.student_id); setTeamView("student-detail"); } }}>
+                              <span style={{ minWidth: 60, fontSize: 11, color: "var(--text-muted)", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(s.display_name || "").slice(0, 4)}</span>
+                              <div style={{ flex: 1, height: 14, background: "var(--bg-card-hover)", borderRadius: 7, overflow: "hidden" }}>
+                                <div style={{ width: `${(s.total_submissions / maxStuSubs) * 100}%`, height: "100%", background: col, borderRadius: 7, transition: "width 0.8s ease" }} />
+                              </div>
+                              <span style={{ minWidth: 24, fontSize: 11, fontWeight: 600, color: col }}>{s.total_submissions}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Student table */}
+                    <div className="ov-section">
+                      <h3>学生明细 ({stuList.length})</h3>
+                      <div className="cls-stu-table">
+                        <div className="cls-stu-hdr"><span>#</span><span>学生</span><span>提交</span><span>均分</span><span>趋势</span><span>状态</span></div>
+                        {sortedStu.map((stu: any, idx: number) => {
+                          const st = stu.avg_score >= 7 ? { l: "良好", c: "var(--tch-success)", bg: "var(--tch-success-soft)" } : stu.avg_score >= 5 ? { l: "一般", c: "var(--tch-warning)", bg: "var(--tch-warning-soft)" } : { l: "需关注", c: "var(--tch-danger)", bg: "var(--tch-danger-soft)" };
+                          return (
+                            <div key={stu.student_id} className="cls-stu-row" style={{ animationDelay: `${idx * 0.03}s`, cursor: isMine ? "pointer" : "default", opacity: isMine ? 1 : 0.75 }}
+                              onClick={() => { if (isMine) { setSelectedTeamStudentId(stu.student_id); setTeamView("student-detail"); } }}>
+                              <span style={{ fontWeight: 700, color: idx < 3 ? "var(--accent)" : "var(--text-muted)" }}>{idx + 1}</span>
+                              <span className="ov-stu-name"><span className="ov-stu-av">{(stu.display_name || "?")[0]}</span>{stu.display_name || stu.student_id}</span>
+                              <span><strong>{stu.total_submissions}</strong></span>
+                              <span style={{ fontWeight: 600, color: st.c }}>{stu.avg_score.toFixed(1)}</span>
+                              <span style={{ color: stu.trend > 0 ? "var(--tch-success)" : stu.trend < 0 ? "var(--tch-danger)" : "var(--text-muted)", fontWeight: 600 }}>{stu.trend > 0 ? `↑${stu.trend.toFixed(1)}` : stu.trend < 0 ? `↓${Math.abs(stu.trend).toFixed(1)}` : "—"}</span>
+                              <span><span className="ov-status-badge" style={{ color: st.c, background: st.bg }}>{st.l}</span></span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* ══════ VIEW: Student Detail ══════ */}
+              {teamView === "student-detail" && !loading && teamData && (() => {
+                const team = (teamData.my_teams ?? []).find((t: any) => t.team_id === selectedTeamId);
+                const stu = team?.students?.find((s: any) => s.student_id === selectedTeamStudentId);
+                if (!stu) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>学生数据未找到</p>;
+                const projects: any[] = stu.projects || [];
+                const allSubs = projects.flatMap((p: any) => (p.submissions || []));
+                const timelineData = [...allSubs].sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || "")).map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: s.overall_score }));
+                return (
+                  <>
+                    <h2 style={{ marginTop: 0 }}>{stu.display_name} · 项目演进</h2>
+                    <p className="tch-desc">点击项目卡片可查看详细迭代过程</p>
+
+                    <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                      {[
+                        { icon: "📝", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: stu.total_submissions, l: "总提交", d: 0 },
+                        { icon: "📁", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: stu.project_count, l: "项目数", d: 0 },
+                        { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: stu.avg_score, l: "均分", d: 1 },
+                        { icon: "📈", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: stu.trend, l: "趋势", d: 1 },
+                      ].map((k, i) => (
+                        <div key={i} className="ov-kpi-card">
+                          <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
+                          <div className="ov-kpi-value" style={{ color: k.c }}>{k.l === "趋势" && k.v > 0 ? "+" : ""}<AnimatedNumber value={k.v} decimals={k.d} /></div>
+                          <div className="ov-kpi-label">{k.l}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {timelineData.length >= 2 && (
+                      <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                        <h3>成绩变化曲线</h3>
+                        <AreaChart data={timelineData} color="rgba(107,138,255,0.9)" height={130} />
+                      </div>
+                    )}
+
+                    {/* ─ Project progress bars ─ */}
+                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                      <h3>各项目得分进度</h3>
+                      <p className="tch-desc">每条表示一个项目的最新得分(满10分)和进步幅度</p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
+                        {projects.map((p: any) => {
+                          const col = p.latest_score >= 7 ? "#5cbd8a" : p.latest_score >= 5 ? "#e0a84c" : "#e07070";
+                          return (
+                            <div key={p.project_id} style={{ cursor: "pointer" }} onClick={() => { setSelectedTeamProjectId(p.project_id); setTeamView("project-detail"); }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
+                                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{p.project_name}</span>
+                                <span style={{ color: col, fontWeight: 700 }}>{p.latest_score} <span style={{ fontSize: 10, fontWeight: 400, color: p.improvement > 0 ? "var(--tch-success)" : p.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)" }}>{p.improvement > 0 ? `↑${p.improvement}` : p.improvement < 0 ? `↓${Math.abs(p.improvement)}` : ""}</span></span>
+                              </div>
+                              <div style={{ height: 8, background: "var(--bg-card-hover)", borderRadius: 4, overflow: "hidden" }}>
+                                <div style={{ width: `${(p.latest_score / 10) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${col}88, ${col})`, borderRadius: 4, transition: "width 0.8s ease" }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="ov-section">
+                      <h3>项目列表 ({projects.length})</h3>
+                      <div className="cls-proj-grid">
+                        {projects.map((proj: any, idx: number) => {
+                          const impColor = proj.improvement > 0 ? "var(--tch-success)" : proj.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)";
+                          const miniTimeline = (proj.submissions || []).map((s: any) => ({ label: (s.created_at || "").slice(5, 10), value: s.overall_score }));
+                          return (
+                            <div key={proj.project_id} className="cls-proj-card" style={{ animationDelay: `${idx * 0.05}s` }} onClick={() => { setSelectedTeamProjectId(proj.project_id); setTeamView("project-detail"); }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                <strong style={{ fontSize: 14, color: "var(--text-primary)" }}>{proj.project_name}</strong>
+                                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{proj.submission_count} 次</span>
+                              </div>
+                              {miniTimeline.length >= 2 && <div style={{ height: 50, marginBottom: 6 }}><AreaChart data={miniTimeline} height={50} color={impColor === "var(--tch-success)" ? "rgba(92,189,138,0.8)" : "rgba(107,138,255,0.7)"} /></div>}
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
+                                <span style={{ color: "var(--text-secondary)" }}>{proj.first_score} → <strong style={{ color: proj.latest_score >= 7 ? "var(--tch-success)" : proj.latest_score >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>{proj.latest_score}</strong></span>
+                                <span style={{ fontWeight: 700, color: impColor }}>{proj.improvement > 0 ? `+${proj.improvement}` : proj.improvement < 0 ? `${proj.improvement}` : "—"}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* ══════ VIEW: Project Detail ══════ */}
+              {teamView === "project-detail" && !loading && teamData && (() => {
+                const team = (teamData.my_teams ?? []).find((t: any) => t.team_id === selectedTeamId);
+                const stu = team?.students?.find((s: any) => s.student_id === selectedTeamStudentId);
+                const proj = stu?.projects?.find((p: any) => p.project_id === selectedTeamProjectId);
+                if (!proj) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>项目数据未找到</p>;
+                const subs: any[] = proj.submissions || [];
+                const scoreTimeline = subs.map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: s.overall_score }));
+                return (
+                  <>
+                    <h2 style={{ marginTop: 0 }}>{proj.project_name}</h2>
+                    <p className="tch-desc">学生 {stu.display_name} 的完整迭代记录</p>
+
+                    <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(107,138,255,0.15)", color: "var(--accent)" }}>📊</div><div className="ov-kpi-value"><AnimatedNumber value={proj.avg_score} decimals={1} /></div><div className="ov-kpi-label">均分</div></div>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(92,189,138,0.15)", color: "var(--tch-success)" }}>📈</div><div className="ov-kpi-value" style={{ color: proj.improvement >= 0 ? "var(--tch-success)" : "var(--tch-danger)" }}>{proj.improvement >= 0 ? "+" : ""}<AnimatedNumber value={proj.improvement} decimals={1} /></div><div className="ov-kpi-label">进步</div></div>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(232,168,76,0.15)", color: "var(--tch-warning)" }}>🔄</div><div className="ov-kpi-value"><AnimatedNumber value={proj.submission_count} /></div><div className="ov-kpi-label">迭代</div></div>
+                      <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(189,147,249,0.15)", color: "#bd93f9" }}>📄</div><div className="ov-kpi-value"><AnimatedNumber value={subs.filter((s: any) => s.filename).length} /></div><div className="ov-kpi-label">文件</div></div>
+                    </div>
+
+                    {scoreTimeline.length >= 2 && (
+                      <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                        <h3>评分演进</h3>
+                        <AreaChart data={scoreTimeline} color="rgba(107,138,255,0.9)" height={140} />
+                      </div>
+                    )}
+
+                    <div className="ov-section">
+                      <h3>迭代时间线</h3>
+                      <div className="cls-timeline">
+                        {subs.map((sub: any, idx: number) => {
+                          const sc = Number(sub.overall_score || 0);
+                          const scColor = sc >= 7 ? "var(--tch-success)" : sc >= 5 ? "var(--tch-warning)" : "var(--tch-danger)";
+                          const prevSc = idx > 0 ? Number(subs[idx - 1].overall_score || 0) : 0;
+                          const delta = idx > 0 && sc > 0 && prevSc > 0 ? sc - prevSc : null;
+                          return (
+                            <div key={idx} className="cls-tl-item" style={{ animationDelay: `${idx * 0.04}s` }}>
+                              <div className="cls-tl-dot" style={{ background: scColor }} />
+                              <div className="cls-tl-content">
+                                <div className="cls-tl-header">
+                                  <span className="cls-tl-time">{(sub.created_at || "").slice(0, 16)}</span>
+                                  <span className="cls-tl-type">{sub.source_type === "file" ? `📄 ${sub.filename || "文件"}` : "💬 文本"}</span>
+                                  <span className="cls-tl-score" style={{ color: scColor }}>{sc.toFixed(1)}</span>
+                                  {delta !== null && <span style={{ fontSize: 11, fontWeight: 700, color: delta > 0 ? "var(--tch-success)" : delta < 0 ? "var(--tch-danger)" : "var(--text-muted)", marginLeft: 4 }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>}
+                                </div>
+                                {sub.bottleneck && <div className="cls-tl-bottleneck"><strong>🎯 瓶颈：</strong>{sub.bottleneck}</div>}
+                                {sub.next_task && <div className="cls-tl-next"><strong>➡️ 建议：</strong>{sub.next_task}</div>}
+                                {(sub.triggered_rules?.length || 0) > 0 && (
+                                  <div className="cls-tl-rules">{sub.triggered_rules.map((r: string) => <span key={r} className="cls-tl-rule-tag">{getRuleDisplayName(r)}</span>)}</div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
+              {!loading && !teamData && (
+                <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
+                  <h3 style={{ color: "var(--text-primary)", margin: "0 0 8px" }}>暂无团队数据</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "0 0 20px" }}>创建您的第一个团队，然后将邀请码分享给学生</p>
+                  <button className="tch-sm-btn" style={{ background: "var(--accent)", color: "#fff", padding: "10px 24px", fontSize: 14 }} onClick={() => { setShowCreateTeam(true); setCreatedInviteCode(""); setNewTeamName(""); }}>+ 创建团队</button>
+                </div>
               )}
             </div>
           )}
@@ -3575,6 +3841,26 @@ export default function TeacherPage() {
         .ov-risk-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .ov-risk-name { font-weight: 600; font-size: 13px; }
         .ov-risk-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
+
+        /* ── 团队管理页：顶部标签 ── */
+        .tm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+        .tm-chip { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .tm-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+        .tm-chip-active { background: var(--tch-accent-soft); border-color: rgba(107,138,255,0.4); color: var(--accent); font-weight: 700; }
+        .tm-chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .tm-dot-mine { background: var(--accent); box-shadow: 0 0 4px rgba(107,138,255,0.5); }
+        .tm-dot-other { background: rgba(255,255,255,0.2); }
+
+        .tm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .tm-modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; min-width: 360px; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .tm-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .tm-input:focus { border-color: var(--accent); }
+        .tm-invite-display { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; justify-content: center; }
+        .tm-invite-code { font-size: 28px; font-weight: 800; letter-spacing: 4px; color: var(--accent); font-family: monospace; }
+        .tm-invite-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; }
+
+        .cls-stu-table .cls-stu-hdr { grid-template-columns: 40px 2fr repeat(4, 1fr); }
+        .cls-stu-table .cls-stu-row { grid-template-columns: 40px 2fr repeat(4, 1fr); }
 
         /* ── 班级(团队)页样式 ── */
         .cls-breadcrumb { display: flex; align-items: center; gap: 6px; padding: 10px 14px; margin-bottom: 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; flex-wrap: wrap; }

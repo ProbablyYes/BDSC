@@ -26,6 +26,9 @@ from app.schemas import (
     SmsLoginPayload,
     SmsSendPayload,
     SmsSendResponse,
+    TeamCreatePayload,
+    TeamJoinPayload,
+    TeamResponse,
     TeacherFeedbackRequest,
     TeacherFeedbackResponse,
     UploadAnalysisResponse,
@@ -38,7 +41,7 @@ from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
 from app.services.rag_engine import RagEngine
-from app.services.storage import ConversationStorage, JsonStorage, UserStorage
+from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
 
@@ -58,6 +61,7 @@ app.mount("/uploads", StaticFiles(directory=str(settings.upload_root)), name="up
 json_store = JsonStorage(settings.data_root / "project_state")
 conv_store = ConversationStorage(settings.data_root / "conversations")
 user_store = UserStorage(settings.data_root / "users")
+team_store = TeamStorage(settings.data_root / "teams")
 graph_service = GraphService(
     uri=settings.neo4j_uri,
     username=settings.neo4j_username,
@@ -137,6 +141,211 @@ def sms_login(payload: SmsLoginPayload) -> AuthUserResponse:
     _sms_codes.pop(phone, None)
     user = user_store.get_or_create_by_phone(phone)
     return AuthUserResponse(status="ok", user=user)
+
+
+# ── Team Management CRUD ──────────────────────────────────────────────
+
+@app.post("/api/teams")
+def create_team(payload: TeamCreatePayload) -> TeamResponse:
+    user = user_store.get_by_id(payload.teacher_id)
+    if not user or user.get("role") != "teacher":
+        raise HTTPException(status_code=403, detail="仅教师可创建团队")
+    team = team_store.create_team(
+        teacher_id=payload.teacher_id,
+        teacher_name=payload.teacher_name or user.get("display_name", ""),
+        team_name=payload.team_name,
+    )
+    return TeamResponse(team=team)
+
+
+@app.get("/api/teams")
+def list_teams(role: str = "", user_id: str = "") -> dict:
+    if role == "teacher" and user_id:
+        teams = team_store.list_by_teacher(user_id)
+    elif role == "student" and user_id:
+        teams = team_store.list_by_member(user_id)
+    else:
+        teams = team_store.list_all()
+    for t in teams:
+        t["member_count"] = len(t.get("members", []))
+    return {"teams": teams}
+
+
+@app.post("/api/teams/join")
+def join_team(payload: TeamJoinPayload) -> TeamResponse:
+    team = team_store.find_by_invite_code(payload.invite_code)
+    if not team:
+        raise HTTPException(status_code=404, detail="邀请码无效或团队不存在")
+    updated = team_store.add_member(team["team_id"], payload.user_id)
+    return TeamResponse(team=updated or team)
+
+
+@app.delete("/api/teams/{team_id}")
+def delete_team(team_id: str, teacher_id: str = "") -> dict:
+    if not teacher_id:
+        raise HTTPException(status_code=400, detail="需提供 teacher_id")
+    ok = team_store.delete_team(team_id, teacher_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="团队不存在或无权删除")
+    return {"status": "ok"}
+
+
+@app.delete("/api/teams/{team_id}/members/{user_id}")
+def remove_team_member(team_id: str, user_id: str, teacher_id: str = "") -> TeamResponse:
+    team = team_store.get_team(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="团队不存在")
+    if team.get("teacher_id") != teacher_id:
+        raise HTTPException(status_code=403, detail="仅团队创建教师可移除成员")
+    updated = team_store.remove_member(team_id, user_id)
+    return TeamResponse(team=updated or team)
+
+
+def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
+    """Read real submissions from JsonStorage and compute metrics for one student."""
+    project_id = f"project-{user_id}"
+    project = json_store.load_project(project_id)
+    subs = project.get("submissions", [])
+    scores = []
+    risk_count = 0
+    projects_map: dict[str, list] = {}
+    for s in subs:
+        sc = 0.0
+        diag = s.get("diagnosis", {})
+        if isinstance(diag, dict):
+            sc = float(diag.get("overall_score", 0) or 0)
+        if not sc:
+            sc = float(s.get("overall_score", 0) or 0)
+        if sc > 0:
+            scores.append(sc)
+        triggered = s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules") or []
+        if triggered:
+            risk_count += 1
+        pid = s.get("project_id", project_id)
+        projects_map.setdefault(pid, []).append({**s, "_score": sc})
+
+    avg_score = round(sum(scores) / len(scores), 1) if scores else 0.0
+    trend = 0.0
+    if len(scores) >= 4:
+        mid = len(scores) // 2
+        trend = round(sum(scores[mid:]) / (len(scores) - mid) - sum(scores[:mid]) / mid, 1)
+
+    result: dict = {
+        "total_submissions": len(subs),
+        "project_count": max(1, len(projects_map)),
+        "avg_score": avg_score,
+        "trend": trend,
+        "risk_count": risk_count,
+        "last_active": subs[-1].get("created_at", "") if subs else "",
+    }
+
+    if include_detail:
+        proj_list = []
+        for pid, psubs in projects_map.items():
+            p_scores = [s["_score"] for s in psubs if s["_score"] > 0]
+            proj_list.append({
+                "project_id": pid,
+                "project_name": pid.replace("project-", "项目·"),
+                "submission_count": len(psubs),
+                "avg_score": round(sum(p_scores) / len(p_scores), 1) if p_scores else 0,
+                "first_score": p_scores[0] if p_scores else 0,
+                "latest_score": p_scores[-1] if p_scores else 0,
+                "improvement": round(p_scores[-1] - p_scores[0], 1) if len(p_scores) >= 2 else 0,
+                "submissions": [
+                    {
+                        "created_at": s.get("created_at", ""),
+                        "overall_score": s["_score"],
+                        "source_type": s.get("source_type", "text"),
+                        "filename": s.get("filename"),
+                        "bottleneck": s.get("diagnosis", {}).get("bottleneck") or s.get("next_task", {}).get("bottleneck", ""),
+                        "next_task": s.get("next_task", {}).get("description", "") if isinstance(s.get("next_task"), dict) else str(s.get("next_task", "")),
+                        "triggered_rules": s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules", []),
+                        "text_preview": (s.get("raw_text") or "")[:80],
+                    }
+                    for s in psubs
+                ],
+            })
+        result["projects"] = proj_list
+
+    return result
+
+
+@app.get("/api/teacher/teams")
+def teacher_teams(teacher_id: str = "") -> dict:
+    """Aggregate real student data per team from TeamStorage + JsonStorage."""
+    all_teams_raw = team_store.list_all()
+    my_teams = []
+    other_teams = []
+
+    for t in all_teams_raw:
+        is_mine = t.get("teacher_id") == teacher_id if teacher_id else False
+        members = t.get("members", [])
+        team_scores: list[float] = []
+        team_sub_count = 0
+        team_risk = 0
+        students = []
+
+        for m in members:
+            uid = m.get("user_id", "")
+            user_info = user_store.get_by_id(uid)
+            display_name = (user_info or {}).get("display_name", uid[:8])
+            stats = _aggregate_student_data(uid, include_detail=is_mine)
+            stu = {
+                "student_id": uid,
+                "display_name": display_name,
+                "avg_score": stats["avg_score"],
+                "total_submissions": stats["total_submissions"],
+                "project_count": stats["project_count"],
+                "trend": stats["trend"],
+                "risk_count": stats["risk_count"],
+                "last_active": stats["last_active"],
+            }
+            if is_mine and "projects" in stats:
+                stu["projects"] = stats["projects"]
+            students.append(stu)
+            team_sub_count += stats["total_submissions"]
+            team_risk += stats["risk_count"]
+            if stats["avg_score"] > 0:
+                team_scores.append(stats["avg_score"])
+
+        team_avg = round(sum(team_scores) / len(team_scores), 1) if team_scores else 0.0
+        risk_rate = round(team_risk / max(team_sub_count, 1) * 100, 1)
+        team_trend = 0.0
+        if len(team_scores) >= 2:
+            mid = len(team_scores) // 2
+            team_trend = round(
+                sum(team_scores[mid:]) / max(1, len(team_scores) - mid)
+                - sum(team_scores[:mid]) / max(1, mid), 1
+            )
+
+        team_out = {
+            "team_id": t["team_id"],
+            "team_name": t["team_name"],
+            "teacher_name": t.get("teacher_name", ""),
+            "invite_code": t.get("invite_code", "") if is_mine else "",
+            "is_mine": is_mine,
+            "student_count": len(members),
+            "avg_score": team_avg,
+            "total_submissions": team_sub_count,
+            "risk_rate": risk_rate,
+            "trend": team_trend,
+        }
+        if is_mine:
+            team_out["students"] = students
+        else:
+            team_out["students_summary"] = [
+                {"student_id": s["student_id"], "display_name": s["display_name"],
+                 "avg_score": s["avg_score"], "total_submissions": s["total_submissions"],
+                 "trend": s["trend"]}
+                for s in students
+            ]
+
+        if is_mine:
+            my_teams.append(team_out)
+        else:
+            other_teams.append(team_out)
+
+    return {"my_teams": my_teams, "other_teams": other_teams}
 
 
 @app.post("/api/analyze-text")

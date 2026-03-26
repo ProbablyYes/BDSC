@@ -113,12 +113,22 @@ def _fuzzy_match(keyword: str, text: str) -> bool:
     return False
 
 
-def _is_hit_rule(rule: dict, text: str) -> bool:
-    has_keyword = bool(rule.get("keywords")) and any(_fuzzy_match(k, text) for k in rule.get("keywords", []))
+def _is_hit_rule(rule: dict, text: str, text_len: int = 0) -> bool:
+    keywords = rule.get("keywords", [])
     requires = rule.get("requires", [])
+    has_keyword = bool(keywords) and any(_fuzzy_match(k, text) for k in keywords)
     requires_missing = bool(requires) and not any(_fuzzy_match(k, text) for k in requires)
-    too_short = bool(rule.get("min_length")) and len(text) < int(rule["min_length"])
-    return has_keyword or requires_missing or too_short
+    too_short = bool(rule.get("min_length")) and text_len < int(rule["min_length"])
+
+    if has_keyword and requires_missing:
+        return True
+    if has_keyword and not requires:
+        return True
+    if requires_missing and not keywords:
+        return True
+    if too_short:
+        return True
+    return False
 
 
 def _rule_penalty(severity: str, is_file: bool = False) -> float:
@@ -232,7 +242,9 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
 
     triggered_rules: list[dict] = []
     for rule in RULES:
-        if _is_hit_rule(rule, normalized_text):
+        if rule["id"] == "H15":
+            continue
+        if _is_hit_rule(rule, normalized_text, text_len=text_len):
             matched_kws = [k for k in rule.get("keywords", []) if _fuzzy_match(k, normalized_text)]
             missing_reqs = [k for k in rule.get("requires", []) if not _fuzzy_match(k, normalized_text)]
             triggered_rules.append({
@@ -246,7 +258,7 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
             })
 
     evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑"] if _fuzzy_match(k, normalized_text))
-    if len(triggered_rules) >= 5 or (evidence_hits < 2 and not is_file):
+    if evidence_hits < 2 and not is_file and text_len > 150:
         h15 = next((r for r in RULES if r["id"] == "H15"), {})
         triggered_rules.append({
             "id": "H15", "name": "评分项证据覆盖不足", "severity": "medium",

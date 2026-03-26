@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "re
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAuth, logout } from "../hooks/useAuth";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
@@ -15,10 +16,11 @@ type ConvMeta = { conversation_id: string; title: string; created_at: string; me
 let _msgId = 0;
 
 export default function StudentPage() {
-  const [projectId, setProjectId] = useState("demo-project-001");
-  const [studentId, setStudentId] = useState("student-001");
-  const [classId, setClassId] = useState("2026A");
-  const [cohortId, setCohortId] = useState("2026-Spring");
+  const currentUser = useAuth("student");
+  const [projectId, setProjectId] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [classId, setClassId] = useState("");
+  const [cohortId, setCohortId] = useState("");
   const [mode, setMode] = useState("coursework");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -56,6 +58,11 @@ export default function StudentPage() {
   const [likedMsgs, setLikedMsgs] = useState<Set<number>>(new Set());
   const [dislikedMsgs, setDislikedMsgs] = useState<Set<number>>(new Set());
   const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  const [teamPanelOpen, setTeamPanelOpen] = useState(false);
+  const [myTeams, setMyTeams] = useState<any[]>([]);
+  const [joinCode, setJoinCode] = useState("");
+  const [teamMsg, setTeamMsg] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -99,6 +106,7 @@ export default function StudentPage() {
   }, [messages, loading]);
 
   const loadConversations = useCallback(async () => {
+    if (!projectId) return;
     try {
       const r = await fetch(`${API_BASE}/api/conversations?project_id=${encodeURIComponent(projectId)}`);
       const d = await r.json();
@@ -107,6 +115,35 @@ export default function StudentPage() {
   }, [projectId]);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
+
+  const loadMyTeams = useCallback(async () => {
+    if (!currentUser?.user_id) return;
+    try {
+      const r = await fetch(`${API_BASE}/api/teams?role=student&user_id=${encodeURIComponent(currentUser.user_id)}`);
+      if (!r.ok) return;
+      const d = await r.json();
+      setMyTeams(d.teams ?? []);
+    } catch { /* ignore */ }
+  }, [currentUser?.user_id]);
+
+  useEffect(() => { loadMyTeams(); }, [loadMyTeams]);
+
+  async function handleJoinTeam() {
+    if (!joinCode.trim() || !currentUser?.user_id) return;
+    setTeamMsg("");
+    try {
+      const r = await fetch(`${API_BASE}/api/teams/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: currentUser.user_id, invite_code: joinCode.trim() }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setTeamMsg(d.detail || "加入失败"); return; }
+      setTeamMsg("加入成功！");
+      setJoinCode("");
+      loadMyTeams();
+    } catch { setTeamMsg("网络错误"); }
+  }
 
   const autoLoaded = useRef(false);
   useEffect(() => {
@@ -482,6 +519,17 @@ export default function StudentPage() {
     return scores.length > 0 ? scores[scores.length - 1] : latestResult?.diagnosis?.overall_score ?? null;
   }, [resultHistory, latestResult]);
 
+  useEffect(() => {
+    if (currentUser) {
+      setProjectId(`project-${currentUser.user_id}`);
+      setStudentId(currentUser.student_id || currentUser.user_id || "");
+      setClassId(currentUser.class_id || "");
+      setCohortId(currentUser.cohort_id || "");
+    }
+  }, [currentUser]);
+
+  if (!currentUser) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "var(--text-muted)" }}>加载中...</div>;
+
   return (
     <div className={`chat-app ${theme}`}>
       {/* ── Top Bar ── */}
@@ -492,7 +540,7 @@ export default function StudentPage() {
           </button>
           <Link href="/" className="topbar-brand">
             <span className="brand-dot" />
-            VentureAgent
+            VentureCheck
           </Link>
           <span className="topbar-sep" />
           <span className="topbar-label">双创智能教练</span>
@@ -514,12 +562,23 @@ export default function StudentPage() {
           )}
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
           {pitchTimerRunning && (
-            <span className={`topbar-pitch-timer ${pitchTimer <= 30 ? "urgent" : ""}`}>
-              🎤 {formatTime(pitchTimer)}
-            </span>
+            <div className={`pitch-timer-display ${pitchTimer <= 30 ? "urgent" : pitchTimer <= 60 ? "warning" : ""}`}>
+              <svg className="pitch-timer-ring" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--border)" strokeWidth="2" />
+                <circle cx="18" cy="18" r="15.5" fill="none" strokeWidth="2.5" strokeLinecap="round"
+                  stroke={pitchTimer <= 30 ? "#e07070" : pitchTimer <= 60 ? "#e0a84c" : "#5cbd8a"}
+                  strokeDasharray={`${(pitchTimer / pitchDuration) * 97.4} 97.4`}
+                  transform="rotate(-90 18 18)" />
+              </svg>
+              <span className="pitch-timer-text">{formatTime(pitchTimer)}</span>
+            </div>
           )}
         </div>
         <div className="topbar-right">
+          <button type="button" className="topbar-icon-btn" onClick={() => { setTeamPanelOpen((v) => !v); if (!teamPanelOpen) loadMyTeams(); }} title="我的团队" style={{ position: "relative" }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            {myTeams.length > 0 && <span style={{ position: "absolute", top: 2, right: 2, width: 8, height: 8, borderRadius: "50%", background: "var(--accent)" }} />}
+          </button>
           <button type="button" className="topbar-icon-btn" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} title={theme === "dark" ? "切换日间模式" : "切换夜间模式"}>
             {theme === "dark" ? (
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -531,25 +590,68 @@ export default function StudentPage() {
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           </button>
           {mode === "competition" && !pitchTimerRunning && (
-            <div className="topbar-pitch-group">
-              <select className="topbar-pitch-dur" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
-                <option value={180}>3分钟</option>
-                <option value={300}>5分钟</option>
-                <option value={420}>7分钟</option>
-                <option value={600}>10分钟</option>
+            <div className="pitch-launcher">
+              <select className="pitch-dur-select" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
+                <option value={180}>3 min</option>
+                <option value={300}>5 min</option>
+                <option value={420}>7 min</option>
+                <option value={600}>10 min</option>
               </select>
-              <button type="button" className="topbar-btn pitch-start" onClick={startPitchTimer}>🎤 路演计时</button>
+              <button type="button" className="pitch-start-btn" onClick={startPitchTimer}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                路演模拟
+              </button>
             </div>
           )}
           {pitchTimerRunning && (
-            <button type="button" className="topbar-btn pitch-stop" onClick={stopPitchTimer}>停止计时</button>
+            <button type="button" className="pitch-stop-btn" onClick={stopPitchTimer}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              结束
+            </button>
           )}
           <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
             {rightOpen ? "收起面板" : "分析面板"}
           </button>
-          <Link href="/teacher" className="topbar-btn">教师端</Link>
+          <Link href="/student/profile" className="topbar-avatar" title="个人中心">
+            {(currentUser.display_name ?? "S")[0].toUpperCase()}
+          </Link>
+          <button type="button" className="topbar-btn" onClick={logout} title="退出登录">退出</button>
         </div>
       </header>
+
+      {/* ── Team Panel ── */}
+      {teamPanelOpen && (
+        <div className="stu-team-panel">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h3 style={{ margin: 0, fontSize: 15 }}>我的团队</h3>
+            <button type="button" className="topbar-icon-btn" onClick={() => setTeamPanelOpen(false)} style={{ fontSize: 18 }}>✕</button>
+          </div>
+
+          <div className="stu-team-join">
+            <input className="stu-team-input" placeholder="输入邀请码加入团队" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} onKeyDown={(e) => e.key === "Enter" && handleJoinTeam()} maxLength={10} />
+            <button className="stu-team-join-btn" onClick={handleJoinTeam} disabled={!joinCode.trim()}>加入</button>
+          </div>
+          {teamMsg && <p style={{ fontSize: 12, color: teamMsg.includes("成功") ? "#5cbd8a" : "#e07070", margin: "6px 0 0" }}>{teamMsg}</p>}
+
+          {myTeams.length === 0 ? (
+            <p style={{ color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: "20px 0" }}>还未加入任何团队，请向教师索取邀请码</p>
+          ) : (
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+              {myTeams.map((t: any) => (
+                <div key={t.team_id} className="stu-team-card">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <strong style={{ fontSize: 14, color: "var(--text-primary)" }}>{t.team_name}</strong>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--bg-card-hover)", padding: "2px 8px", borderRadius: 99 }}>{t.teacher_name}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 6 }}>
+                    {t.member_count ?? t.members?.length ?? 0} 位成员
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Settings Drawer ── */}
       {settingsOpen && (

@@ -1,8 +1,10 @@
 import json
 import math
 import random
+import re
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -201,11 +203,301 @@ def remove_team_member(team_id: str, user_id: str, teacher_id: str = "") -> Team
     return TeamResponse(team=updated or team)
 
 
+def _safe_str(v: Any) -> str:
+    if v is None:
+        return ""
+    if isinstance(v, dict):
+        return v.get("description") or v.get("title") or v.get("text") or str(v)
+    return str(v)
+
+
+def _normalize_rules(rules: Any) -> list[str]:
+    if not rules or not isinstance(rules, list):
+        return []
+    result = []
+    for r in rules:
+        if isinstance(r, str):
+            result.append(r)
+        elif isinstance(r, dict):
+            result.append(r.get("id") or r.get("name") or str(r))
+    return result
+
+
+def _safe_diagnosis(diag: Any) -> dict:
+    if not isinstance(diag, dict):
+        return {}
+    return {
+        "overall_score": float(diag.get("overall_score", 0) or 0),
+        "bottleneck": _safe_str(diag.get("bottleneck", "")),
+        "triggered_rules": _normalize_rules(diag.get("triggered_rules", [])),
+        "strengths": [_safe_str(s) for s in (diag.get("strengths") or [])[:5]],
+        "weaknesses": [_safe_str(w) for w in (diag.get("weaknesses") or [])[:5]],
+    }
+
+
+def _safe_kg_analysis(kg: Any) -> dict:
+    if not isinstance(kg, dict):
+        return {}
+    entities = []
+    for e in (kg.get("entities") or [])[:12]:
+        if not isinstance(e, dict):
+            continue
+        entities.append({
+            "id": _safe_str(e.get("id", "")),
+            "label": _safe_str(e.get("label", "")),
+            "type": _safe_str(e.get("type", "")),
+        })
+    relationships = []
+    for r in (kg.get("relationships") or [])[:16]:
+        if not isinstance(r, dict):
+            continue
+        relationships.append({
+            "source": _safe_str(r.get("source", "")),
+            "target": _safe_str(r.get("target", "")),
+            "relation": _safe_str(r.get("relation", "")),
+        })
+    return {
+        "entities": entities,
+        "relationships": relationships,
+        "structural_gaps": [_safe_str(x) for x in (kg.get("structural_gaps") or [])[:6]],
+        "content_strengths": [_safe_str(x) for x in (kg.get("content_strengths") or [])[:6]],
+        "insight": _safe_str(kg.get("insight", "")),
+        "completeness_score": float(kg.get("completeness_score", 0) or 0),
+        "section_scores": kg.get("section_scores", {}) if isinstance(kg.get("section_scores"), dict) else {},
+    }
+
+
+def _safe_hypergraph_insight(hg: Any) -> dict:
+    if not isinstance(hg, dict):
+        return {}
+    return {
+        "summary": _safe_str(hg.get("summary", "")),
+        "top_signals": [_safe_str(x) for x in (hg.get("top_signals") or [])[:5]],
+        "key_dimensions": [_safe_str(x) for x in (hg.get("key_dimensions") or [])[:5]],
+    }
+
+
+def _safe_hypergraph_student(hs: Any) -> dict:
+    if not isinstance(hs, dict):
+        return {}
+    hub_entities = []
+    for h in (hs.get("hub_entities") or [])[:6]:
+        if not isinstance(h, dict):
+            continue
+        hub_entities.append({
+            "entity": _safe_str(h.get("entity", "")),
+            "connections": int(h.get("connections", 0) or 0),
+            "note": _safe_str(h.get("note", "")),
+        })
+    cross_links = []
+    for c in (hs.get("cross_links") or [])[:8]:
+        if not isinstance(c, dict):
+            continue
+        cross_links.append({
+            "from_dim": _safe_str(c.get("from_dim", "")),
+            "to_dim": _safe_str(c.get("to_dim", "")),
+            "relation": _safe_str(c.get("relation", "")),
+        })
+    return {
+        "ok": bool(hs.get("ok")),
+        "coverage_score": float(hs.get("coverage_score", 0) or 0),
+        "hub_entities": hub_entities,
+        "cross_links": cross_links,
+        "pattern_warnings": [_safe_str(x) for x in (hs.get("pattern_warnings") or [])[:5]],
+    }
+
+
+def _normalize_intent(raw_intent: Any, message: str = "") -> str:
+    intent = _safe_str(raw_intent).strip().lower()
+    text = message.lower()
+    if not intent:
+        intent = text
+    if any(k in intent for k in ["learn", "学习", "原理", "概念", "不会", "理解", "怎么学"]):
+        return "学习理解"
+    if any(k in intent for k in ["business", "商业", "盈利", "市场", "竞品", "商业模式", "用户"]):
+        return "商业诊断"
+    if any(k in intent for k in ["方案", "设计", "技术", "功能", "架构", "实现", "产品"]):
+        return "方案设计"
+    if any(k in intent for k in ["材料", "文档", "润色", "修改", "优化表达", "计划书", "ppt"]):
+        return "材料润色"
+    if any(k in intent for k in ["路演", "答辩", "演讲", "展示", "pitch"]):
+        return "路演表达"
+    return "综合咨询"
+
+
+def _infer_project_phase(text: str, next_task: dict | None = None, kg_analysis: dict | None = None) -> str:
+    blob = " ".join([
+        _safe_str(text),
+        _safe_str((next_task or {}).get("title", "")),
+        _safe_str((next_task or {}).get("description", "")),
+        _safe_str((kg_analysis or {}).get("insight", "")),
+    ]).lower()
+    if any(k in blob for k in ["用户", "痛点", "访谈", "需求", "场景", "问题定义"]):
+        return "问题定义"
+    if any(k in blob for k in ["方案", "功能", "原型", "技术", "架构", "实现"]):
+        return "方案设计"
+    if any(k in blob for k in ["商业", "市场", "竞品", "盈利", "商业模式", "资源"]):
+        return "商业论证"
+    if any(k in blob for k in ["文档", "计划书", "材料", "润色", "修改", "补充"]):
+        return "材料打磨"
+    if any(k in blob for k in ["路演", "答辩", "演讲", "展示", "pitch"]):
+        return "路演准备"
+    return "持续迭代"
+
+
+def _derive_logical_project_id(project_state: dict, conversation_id: str | None, message: str, project_id: str) -> str:
+    subs = project_state.get("submissions", []) or []
+    if conversation_id:
+        for row in reversed(subs):
+            if row.get("conversation_id") == conversation_id and row.get("logical_project_id"):
+                return str(row.get("logical_project_id"))
+    terms = _topic_terms(message)
+    if conversation_id and terms:
+        for row in reversed(subs[-12:]):
+            row_terms = _topic_terms(" ".join([
+                _safe_str(row.get("raw_text", "")),
+                _safe_str((row.get("next_task") or {}).get("title", "")),
+                _safe_str((row.get("diagnosis") or {}).get("bottleneck", "")),
+            ]))
+            if len(terms.intersection(row_terms)) >= 3 and row.get("logical_project_id"):
+                return str(row.get("logical_project_id"))
+    return conversation_id or project_id
+
+
+def _extract_evidence_quotes(raw_text: str, diagnosis: dict | None = None, filename: str | None = None) -> list[dict]:
+    text = _safe_str(raw_text)
+    if not text:
+        return []
+    diag = diagnosis if isinstance(diagnosis, dict) else {}
+    rules = diag.get("triggered_rules", []) or []
+    quotes: list[dict] = []
+
+    def _snippet(keyword: str) -> str:
+        idx = text.lower().find(keyword.lower())
+        if idx < 0:
+            return ""
+        start = max(0, idx - 26)
+        end = min(len(text), idx + len(keyword) + 34)
+        return text[start:end].replace("\n", " ").strip()
+
+    for rule in rules[:5]:
+        if not isinstance(rule, dict):
+            continue
+        keywords = [str(k) for k in (rule.get("matched_keywords") or []) if str(k).strip()]
+        snippet = ""
+        for kw in keywords[:3]:
+            snippet = _snippet(kw)
+            if snippet:
+                break
+        if not snippet:
+            snippet = text[:90].replace("\n", " ").strip()
+        quotes.append({
+            "risk_id": _safe_str(rule.get("id", "")),
+            "risk_name": _safe_str(rule.get("name", "")),
+            "quote": snippet,
+            "source": "document" if filename else "text",
+            "filename": filename or "",
+        })
+
+    if not quotes:
+        quotes.append({
+            "risk_id": "",
+            "risk_name": "",
+            "quote": text[:90].replace("\n", " ").strip(),
+            "source": "document" if filename else "text",
+            "filename": filename or "",
+        })
+    return quotes[:5]
+
+
+def _safe_agent_summary(sub: dict) -> dict:
+    ao = sub.get("agent_outputs") or {}
+    if not isinstance(ao, dict):
+        return {}
+    summary: dict = {}
+    for agent_name, agent_data in ao.items():
+        if not isinstance(agent_data, dict):
+            continue
+        summary[agent_name] = _safe_str(agent_data.get("summary") or agent_data.get("description") or agent_data.get("text") or "")
+    nt = sub.get("next_task", {})
+    if isinstance(nt, dict):
+        summary["_next_task"] = {
+            "title": _safe_str(nt.get("title", "")),
+            "description": _safe_str(nt.get("description", "")),
+            "acceptance_criteria": [_safe_str(c) for c in (nt.get("acceptance_criteria") or [])[:5]],
+        }
+    orchestration = ao.get("orchestration", {}) if isinstance(ao.get("orchestration"), dict) else {}
+    meta = ao.get("meta", {}) if isinstance(ao.get("meta"), dict) else {}
+    summary["_meta"] = {
+        "category": _safe_str(ao.get("category", "") or meta.get("category", "")),
+        "strategy": _safe_str(meta.get("strategy", "") or orchestration.get("strategy", "")),
+        "agents_called": [_safe_str(x) for x in ((meta.get("agents_called") or orchestration.get("agents_called") or [])[:8])],
+        "pipeline": [_safe_str(x) for x in ((meta.get("pipeline") or orchestration.get("pipeline") or [])[:6])],
+        "intent": _normalize_intent(orchestration.get("intent", "") or ao.get("intent", ""), _safe_str(sub.get("raw_text", ""))),
+        "intent_confidence": float(orchestration.get("confidence", 0) or ao.get("intent_confidence", 0) or 0),
+    }
+    return summary
+
+
+def _safe_evidence_quotes(quotes: Any) -> list[dict]:
+    safe_quotes: list[dict] = []
+    if not isinstance(quotes, list):
+        return safe_quotes
+    for item in quotes[:8]:
+        if not isinstance(item, dict):
+            continue
+        quote = _safe_str(item.get("quote", ""))
+        if not quote:
+            continue
+        safe_quotes.append({
+            "risk_id": _safe_str(item.get("risk_id", "")),
+            "risk_name": _safe_str(item.get("risk_name", "")),
+            "quote": quote,
+            "source": _safe_str(item.get("source", "")),
+            "filename": _safe_str(item.get("filename", "")),
+        })
+    return safe_quotes
+
+
+def _project_label(pid: str, psubs: list[dict]) -> str:
+    latest = psubs[-1] if psubs else {}
+    filename = _safe_str(latest.get("filename", ""))
+    if filename:
+        stem = Path(filename).stem.strip()
+        if stem:
+            return stem[:24]
+    raw = _safe_str(latest.get("raw_text", "")).replace("\n", " ").strip()
+    if raw:
+        words = re.findall(r"[\u4e00-\u9fff]{2,}|[A-Za-z]{4,}", raw)
+        if words:
+            return "".join(words[:2])[:24]
+    return f"项目 {pid[-4:]}" if len(pid) >= 4 else "项目病例"
+
+
+def _teacher_intervention_hint(intent_mix: dict[str, int], latest_phase: str, risks: list[str]) -> str:
+    top_intent = max(intent_mix.items(), key=lambda kv: kv[1])[0] if intent_mix else ""
+    if top_intent == "学习理解":
+        return "适合补基础概念和方法论，先统一理解再推进任务。"
+    if top_intent == "商业诊断":
+        return "建议老师做一次市场/用户/商业模式的系统诊断。"
+    if top_intent == "方案设计":
+        return "更适合一对一讨论方案结构、功能边界和技术可行性。"
+    if top_intent == "材料润色":
+        return "可以集中辅导材料结构、表达逻辑和论证完整度。"
+    if top_intent == "路演表达":
+        return "建议做一次路演模拟，重点纠正表达与答辩节奏。"
+    if latest_phase == "问题定义":
+        return "目前仍在问题定义阶段，适合先补用户与场景分析。"
+    if risks:
+        return f"优先围绕“{risks[0]}”做针对性干预。"
+    return "建议先看最新任务与证据链，再决定是补课还是个别诊断。"
+
+
 def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
     """Read real submissions from JsonStorage and compute metrics for one student."""
     project_id = f"project-{user_id}"
     project = json_store.load_project(project_id)
-    subs = project.get("submissions", [])
+    subs = list(project.get("submissions", []) or [])
     scores = []
     risk_count = 0
     projects_map: dict[str, list] = {}
@@ -218,10 +510,10 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
             sc = float(s.get("overall_score", 0) or 0)
         if sc > 0:
             scores.append(sc)
-        triggered = s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules") or []
+        triggered = s.get("triggered_rules") or ((s.get("diagnosis") or {}).get("triggered_rules") if isinstance(s.get("diagnosis"), dict) else []) or []
         if triggered:
             risk_count += 1
-        pid = s.get("project_id", project_id)
+        pid = _safe_str(s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id") or project_id)
         projects_map.setdefault(pid, []).append({**s, "_score": sc})
 
     avg_score = round(sum(scores) / len(scores), 1) if scores else 0.0
@@ -241,33 +533,205 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
 
     if include_detail:
         proj_list = []
+        student_intent_mix: dict[str, int] = {}
+        latest_project_phase = ""
+        latest_summary = ""
+        project_snapshot_cards = []
         for pid, psubs in projects_map.items():
+            psubs.sort(key=lambda row: row.get("created_at", ""))
             p_scores = [s["_score"] for s in psubs if s["_score"] > 0]
-            proj_list.append({
+            latest = psubs[-1] if psubs else {}
+            latest_diag = _safe_diagnosis(latest.get("diagnosis", {}))
+            latest_kg = _safe_kg_analysis(latest.get("kg_analysis", {}))
+            latest_hyper = _safe_hypergraph_insight(latest.get("hypergraph_insight", {}))
+            latest_hyper_student = _safe_hypergraph_student(
+                latest.get("hypergraph_student")
+                or (latest.get("agent_outputs", {}) if isinstance(latest.get("agent_outputs"), dict) else {}).get("hypergraph_student", {})
+            )
+            latest_task = latest.get("next_task", {}) if isinstance(latest.get("next_task"), dict) else {}
+            latest_phase = _safe_str(latest.get("project_phase", "")) or "持续迭代"
+            intent_mix: dict[str, int] = {}
+            phase_history: list[dict] = []
+            risk_evidence: list[dict] = []
+            latest_quotes: list[dict] = []
+            for s in psubs:
+                intent = _normalize_intent(
+                    s.get("intent")
+                    or ((s.get("agent_outputs", {}) if isinstance(s.get("agent_outputs"), dict) else {}).get("orchestration", {}) or {}).get("intent", ""),
+                    _safe_str(s.get("raw_text", "")),
+                )
+                intent_mix[intent] = intent_mix.get(intent, 0) + 1
+                student_intent_mix[intent] = student_intent_mix.get(intent, 0) + 1
+                phase_history.append({
+                    "created_at": s.get("created_at", ""),
+                    "phase": _safe_str(s.get("project_phase", "")) or latest_phase,
+                    "intent": intent,
+                    "score": s["_score"],
+                })
+                for q in _safe_evidence_quotes(s.get("evidence_quotes", [])):
+                    risk_evidence.append({
+                        **q,
+                        "created_at": s.get("created_at", ""),
+                    })
+                if s is latest:
+                    latest_quotes = _safe_evidence_quotes(s.get("evidence_quotes", []))
+            top_risks = []
+            for rid in (latest_diag.get("triggered_rules") or [])[:4]:
+                if rid:
+                    top_risks.append(rid)
+            project_name = _project_label(pid, psubs)
+            project_summary = (
+                latest_hyper.get("summary")
+                or latest_kg.get("insight")
+                or latest_diag.get("bottleneck")
+                or _safe_str(latest_task.get("description", ""))
+                or "该项目还在持续迭代中。"
+            )
+            card = {
                 "project_id": pid,
-                "project_name": pid.replace("project-", "项目·"),
+                "project_name": project_name,
+                "project_phase": latest_phase,
                 "submission_count": len(psubs),
                 "avg_score": round(sum(p_scores) / len(p_scores), 1) if p_scores else 0,
                 "first_score": p_scores[0] if p_scores else 0,
                 "latest_score": p_scores[-1] if p_scores else 0,
                 "improvement": round(p_scores[-1] - p_scores[0], 1) if len(p_scores) >= 2 else 0,
+                "current_summary": project_summary,
+                "intent_distribution": intent_mix,
+                "top_risks": top_risks,
+                "latest_task": {
+                    "title": _safe_str(latest_task.get("title", "")),
+                    "description": _safe_str(latest_task.get("description", "")),
+                    "acceptance_criteria": [_safe_str(x) for x in (latest_task.get("acceptance_criteria") or [])[:4]],
+                },
+                "teacher_intervention": _teacher_intervention_hint(intent_mix, latest_phase, top_risks),
+                "latest_diagnosis": latest_diag,
+                "latest_kg": latest_kg,
+                "latest_hypergraph": latest_hyper,
+                "latest_hypergraph_student": latest_hyper_student,
+                "risk_evidence": risk_evidence[-10:],
+                "evidence_quotes": latest_quotes,
+                "phase_history": phase_history,
                 "submissions": [
                     {
+                        "submission_id": s.get("submission_id", ""),
                         "created_at": s.get("created_at", ""),
+                        "project_phase": _safe_str(s.get("project_phase", "")) or latest_phase,
+                        "logical_project_id": pid,
                         "overall_score": s["_score"],
+                        "intent": _normalize_intent(
+                            s.get("intent")
+                            or ((s.get("agent_outputs", {}) if isinstance(s.get("agent_outputs"), dict) else {}).get("orchestration", {}) or {}).get("intent", ""),
+                            _safe_str(s.get("raw_text", "")),
+                        ),
+                        "intent_confidence": float(s.get("intent_confidence", 0) or 0),
                         "source_type": s.get("source_type", "text"),
                         "filename": s.get("filename"),
-                        "bottleneck": s.get("diagnosis", {}).get("bottleneck") or s.get("next_task", {}).get("bottleneck", ""),
-                        "next_task": s.get("next_task", {}).get("description", "") if isinstance(s.get("next_task"), dict) else str(s.get("next_task", "")),
-                        "triggered_rules": s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules", []),
+                        "bottleneck": _safe_str(s.get("diagnosis", {}).get("bottleneck") or s.get("next_task", {}).get("bottleneck", "")),
+                        "next_task": _safe_str(s.get("next_task", {}).get("description", "") if isinstance(s.get("next_task"), dict) else s.get("next_task", "")),
+                        "triggered_rules": _normalize_rules(s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules", [])),
                         "text_preview": (s.get("raw_text") or "")[:80],
+                        "evidence_quotes": _safe_evidence_quotes(s.get("evidence_quotes", [])),
+                        "diagnosis": _safe_diagnosis(s.get("diagnosis", {})),
+                        "agent_outputs": _safe_agent_summary(s),
+                        "kg_analysis": _safe_kg_analysis(s.get("kg_analysis", {})),
+                        "hypergraph_insight": _safe_hypergraph_insight(s.get("hypergraph_insight", {})),
+                        "hypergraph_student": _safe_hypergraph_student(
+                            s.get("hypergraph_student")
+                            or (s.get("agent_outputs", {}) if isinstance(s.get("agent_outputs"), dict) else {}).get("hypergraph_student", {})
+                        ),
                     }
                     for s in psubs
                 ],
+            }
+            proj_list.append(card)
+            project_snapshot_cards.append({
+                "project_id": pid,
+                "project_name": project_name,
+                "project_phase": latest_phase,
+                "latest_score": card["latest_score"],
+                "top_risks": top_risks,
+                "intent_distribution": intent_mix,
+                "current_summary": project_summary,
             })
+            latest_project_phase = latest_phase or latest_project_phase
+            if not latest_summary:
+                latest_summary = project_summary
         result["projects"] = proj_list
+        result["intent_distribution"] = student_intent_mix
+        result["latest_phase"] = latest_project_phase or "持续迭代"
+        result["student_case_summary"] = latest_summary or "该学生已有可追踪的多轮项目记录。"
+        result["teacher_intervention"] = _teacher_intervention_hint(student_intent_mix, result["latest_phase"], [])
+        result["project_snapshots"] = project_snapshot_cards
 
     return result
+
+
+def _topic_terms(text: str) -> set[str]:
+    if not text:
+        return set()
+    parts = re.findall(r"[\u4e00-\u9fff]{2,}|[A-Za-z]{3,}", text.lower())
+    return {p.strip() for p in parts if len(p.strip()) >= 2}
+
+
+def _build_scoped_project_state(project_state: dict, conversation_id: str, message: str) -> tuple[dict, str]:
+    submissions = list(project_state.get("submissions", []) or [])
+    if not submissions:
+        return project_state, ""
+
+    msg_terms = _topic_terms(message)
+    recent = submissions[-10:]
+    same_conv = [row for row in recent if conversation_id and row.get("conversation_id") == conversation_id]
+
+    def _row_score(row: dict) -> int:
+        score = 0
+        if conversation_id and row.get("conversation_id") == conversation_id:
+            score += 100
+        hay = " ".join([
+            str(row.get("raw_text", "") or ""),
+            str((row.get("next_task") or {}).get("title", "") if isinstance(row.get("next_task"), dict) else ""),
+            str((row.get("diagnosis") or {}).get("bottleneck", "") if isinstance(row.get("diagnosis"), dict) else ""),
+            str((row.get("kg_analysis") or {}).get("insight", "") if isinstance(row.get("kg_analysis"), dict) else ""),
+        ])
+        row_terms = _topic_terms(hay)
+        score += len(msg_terms.intersection(row_terms)) * 8
+        if row.get("created_at"):
+            score += 1
+        return score
+
+    relevant_other = [row for row in recent if row not in same_conv]
+    relevant_other.sort(key=_row_score, reverse=True)
+
+    selected: list[dict] = []
+    selected.extend(same_conv[-6:])
+    selected.extend([row for row in relevant_other[:2] if _row_score(row) > 0])
+    if not selected:
+        selected = recent[-2:]
+
+    seen_ids = set()
+    normalized = []
+    for row in selected:
+        sid = row.get("submission_id") or id(row)
+        if sid in seen_ids:
+            continue
+        seen_ids.add(sid)
+        normalized.append(row)
+
+    history_context = ""
+    for row in normalized[-4:]:
+        snippet = (row.get("raw_text") or "")[:180]
+        task = (row.get("next_task") or {}).get("title", "") if isinstance(row.get("next_task"), dict) else ""
+        insight = (row.get("kg_analysis") or {}).get("insight", "") if isinstance(row.get("kg_analysis"), dict) else ""
+        if snippet:
+            history_context += f"- 历史相关内容：{snippet}…"
+            if task:
+                history_context += f" → 任务：{task}"
+            if insight:
+                history_context += f" → 洞察：{insight[:40]}"
+            history_context += "\n"
+
+    scoped = {**project_state, "submissions": normalized}
+    return scoped, history_context
 
 
 @app.get("/api/teacher/teams")
@@ -284,6 +748,10 @@ def teacher_teams(teacher_id: str = "") -> dict:
         team_sub_count = 0
         team_risk = 0
         students = []
+        team_intent_mix: dict[str, int] = {}
+        team_phase_mix: dict[str, int] = {}
+        team_risk_mix: dict[str, int] = {}
+        project_cards: list[dict] = []
 
         for m in members:
             uid = m.get("user_id", "")
@@ -299,6 +767,11 @@ def teacher_teams(teacher_id: str = "") -> dict:
                 "trend": stats["trend"],
                 "risk_count": stats["risk_count"],
                 "last_active": stats["last_active"],
+                "latest_phase": stats.get("latest_phase", ""),
+                "intent_distribution": stats.get("intent_distribution", {}),
+                "student_case_summary": stats.get("student_case_summary", ""),
+                "teacher_intervention": stats.get("teacher_intervention", ""),
+                "project_snapshots": stats.get("project_snapshots", []),
             }
             if is_mine and "projects" in stats:
                 stu["projects"] = stats["projects"]
@@ -307,6 +780,22 @@ def teacher_teams(teacher_id: str = "") -> dict:
             team_risk += stats["risk_count"]
             if stats["avg_score"] > 0:
                 team_scores.append(stats["avg_score"])
+            phase = _safe_str(stats.get("latest_phase", ""))
+            if phase:
+                team_phase_mix[phase] = team_phase_mix.get(phase, 0) + 1
+            for intent, count in (stats.get("intent_distribution", {}) or {}).items():
+                team_intent_mix[intent] = team_intent_mix.get(intent, 0) + int(count or 0)
+            for snap in (stats.get("project_snapshots", []) or [])[:6]:
+                if isinstance(snap, dict):
+                    project_cards.append({
+                        **snap,
+                        "student_id": uid,
+                        "display_name": display_name,
+                    })
+                    for risk in (snap.get("top_risks") or [])[:4]:
+                        r = _safe_str(risk)
+                        if r:
+                            team_risk_mix[r] = team_risk_mix.get(r, 0) + 1
 
         team_avg = round(sum(team_scores) / len(team_scores), 1) if team_scores else 0.0
         risk_rate = round(team_risk / max(team_sub_count, 1) * 100, 1)
@@ -317,6 +806,18 @@ def teacher_teams(teacher_id: str = "") -> dict:
                 sum(team_scores[mid:]) / max(1, len(team_scores) - mid)
                 - sum(team_scores[:mid]) / max(1, mid), 1
             )
+        active_students = len([s for s in students if s.get("total_submissions", 0) > 0])
+        submission_density = round(team_sub_count / max(len(members), 1), 1)
+        project_cards.sort(key=lambda p: float(p.get("latest_score", 0) or 0), reverse=True)
+        dominant_intent = max(team_intent_mix.items(), key=lambda kv: kv[1])[0] if team_intent_mix else ""
+        top_risks = [k for k, _ in sorted(team_risk_mix.items(), key=lambda kv: kv[1], reverse=True)[:4]]
+        care_points = []
+        if dominant_intent:
+            care_points.append(f"团队当前求助最多的是“{dominant_intent}”。")
+        if top_risks:
+            care_points.append(f"高频风险集中在 {', '.join(top_risks[:2])}。")
+        if submission_density:
+            care_points.append(f"人均提交 {submission_density} 次，可用于判断迭代活跃度。")
 
         team_out = {
             "team_id": t["team_id"],
@@ -325,10 +826,17 @@ def teacher_teams(teacher_id: str = "") -> dict:
             "invite_code": t.get("invite_code", "") if is_mine else "",
             "is_mine": is_mine,
             "student_count": len(members),
+            "active_students": active_students,
+            "submission_density": submission_density,
             "avg_score": team_avg,
             "total_submissions": team_sub_count,
             "risk_rate": risk_rate,
             "trend": team_trend,
+            "intent_distribution": team_intent_mix,
+            "phase_distribution": team_phase_mix,
+            "top_risks": top_risks,
+            "care_points": care_points,
+            "project_highlights": project_cards[:8],
         }
         if is_mine:
             team_out["students"] = students
@@ -336,7 +844,9 @@ def teacher_teams(teacher_id: str = "") -> dict:
             team_out["students_summary"] = [
                 {"student_id": s["student_id"], "display_name": s["display_name"],
                  "avg_score": s["avg_score"], "total_submissions": s["total_submissions"],
-                 "trend": s["trend"]}
+                 "trend": s["trend"], "latest_phase": s.get("latest_phase", ""),
+                 "intent_distribution": s.get("intent_distribution", {}),
+                 "student_case_summary": s.get("student_case_summary", "")}
                 for s in students
             ]
 
@@ -361,18 +871,26 @@ def analyze_text(payload: AnalyzePayload) -> dict:
     inferred_category = infer_category(payload.input_text)
     rule_ids = [str(x.get("id")) for x in (coach.get("diagnosis", {}).get("triggered_rules", []) or []) if isinstance(x, dict)]
     hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
+    logical_project_id = _derive_logical_project_id(project_state, None, payload.input_text, payload.project_id)
+    project_phase = _infer_project_phase(payload.input_text, coach.get("next_task", {}), {})
+    intent = _normalize_intent(inferred_category, payload.input_text)
     json_store.append_submission(
         payload.project_id,
         {
             "student_id": payload.student_id,
             "class_id": payload.class_id,
             "cohort_id": payload.cohort_id,
+            "logical_project_id": logical_project_id,
+            "project_phase": project_phase,
+            "intent": intent,
+            "intent_confidence": 0.45,
             "source_type": "text",
             "mode": payload.mode,
             "raw_text": payload.input_text[:6000],
             "diagnosis": coach["diagnosis"],
             "next_task": coach["next_task"],
             "hypergraph_insight": hyper_insight,
+            "evidence_quotes": _extract_evidence_quotes(payload.input_text, coach.get("diagnosis", {})),
             "agent_outputs": multi_agent_result,
         },
     )
@@ -417,12 +935,19 @@ async def upload_and_analyze(
     inferred_category = infer_category(extracted_text)
     rule_ids = [str(x.get("id")) for x in (coach.get("diagnosis", {}).get("triggered_rules", []) or []) if isinstance(x, dict)]
     hyper_insight = hypergraph_service.insight(category=inferred_category, rule_ids=rule_ids, limit=3)
+    logical_project_id = _derive_logical_project_id(project_state, None, extracted_text[:800], project_id)
+    project_phase = _infer_project_phase(extracted_text, coach.get("next_task", {}), {})
+    intent = _normalize_intent(inferred_category, extracted_text)
     json_store.append_submission(
         project_id,
         {
             "student_id": student_id,
             "class_id": class_id or None,
             "cohort_id": cohort_id or None,
+            "logical_project_id": logical_project_id,
+            "project_phase": project_phase,
+            "intent": intent,
+            "intent_confidence": 0.45,
             "source_type": "file",
             "mode": mode,
             "filename": file.filename,
@@ -430,6 +955,7 @@ async def upload_and_analyze(
             "diagnosis": coach["diagnosis"],
             "next_task": coach["next_task"],
             "hypergraph_insight": hyper_insight,
+            "evidence_quotes": _extract_evidence_quotes(extracted_text, coach.get("diagnosis", {}), file.filename),
             "agent_outputs": multi_agent_result,
         },
     )
@@ -526,14 +1052,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         new_conv = conv_store.create(payload.project_id, payload.student_id)
         conv_id = new_conv["conversation_id"]
 
-    # ── history from past submissions ──
-    submissions = project_state.get("submissions", []) or []
-    history_context = ""
-    for row in submissions[-4:]:
-        snippet = (row.get("raw_text") or "")[:200]
-        task = (row.get("next_task") or {}).get("title", "")
-        if snippet:
-            history_context += f"- 学生曾说：{snippet}… → 建议任务：{task}\n"
+    scoped_project_state, history_context = _build_scoped_project_state(project_state, conv_id, payload.message)
 
     # ── teacher feedback context ──
     teacher_fb = project_state.get("teacher_feedback", [])
@@ -546,7 +1065,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     result = run_workflow(
         message=payload.message,
         mode=payload.mode,
-        project_state=project_state,
+        project_state=scoped_project_state,
         history_context=history_context,
         conversation_messages=conv_messages,
         teacher_feedback_context=tfb_ctx,
@@ -564,6 +1083,11 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     hyper_student = result.get("hypergraph_student", {})
     rag_cases = result.get("rag_cases", [])
     web_search = result.get("web_search_result", {})
+    logical_project_id = _derive_logical_project_id(project_state, conv_id, payload.message, payload.project_id)
+    project_phase = _infer_project_phase(payload.message, next_task, kg_analysis)
+    intent = _normalize_intent(result.get("intent", ""), payload.message)
+    intent_confidence = float(result.get("intent_confidence", 0) or 0)
+    evidence_quotes = _extract_evidence_quotes(payload.message, diagnosis)
     import logging as _log
     _log.getLogger("main").info("API response: hyper_student.ok=%s, kg_entities=%d", hyper_student.get("ok"), len(kg_analysis.get("entities", [])))
 
@@ -603,8 +1127,13 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         payload.project_id,
         {
             "student_id": payload.student_id,
+            "conversation_id": conv_id,
             "class_id": payload.class_id,
             "cohort_id": payload.cohort_id,
+            "logical_project_id": logical_project_id,
+            "project_phase": project_phase,
+            "intent": intent,
+            "intent_confidence": intent_confidence,
             "source_type": "dialogue_turn",
             "mode": payload.mode,
             "raw_text": payload.message[:6000],
@@ -612,6 +1141,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "next_task": next_task,
             "kg_analysis": kg_analysis,
             "hypergraph_insight": hyper_insight,
+            "hypergraph_student": hyper_student,
+            "evidence_quotes": evidence_quotes,
             "agent_outputs": agent_trace,
         },
     )
@@ -668,12 +1199,7 @@ async def dialogue_turn_stream(request: Request):
         conv_id = new_conv["conversation_id"]
 
     project_state = json_store.load_project(project_id)
-    history_context = ""
-    for row in (project_state.get("submissions", []) or [])[-4:]:
-        snippet = (row.get("raw_text") or "")[:200]
-        task = (row.get("next_task") or {}).get("title", "")
-        if snippet:
-            history_context += f"- {snippet}… → {task}\n"
+    scoped_project_state, history_context = _build_scoped_project_state(project_state, conv_id, msg)
 
     teacher_fb = project_state.get("teacher_feedback", [])
     tfb_ctx = ""
@@ -683,14 +1209,21 @@ async def dialogue_turn_stream(request: Request):
 
     pre = run_workflow_pre_orchestrate(
         message=msg, mode=mode_val,
-        project_state=project_state,
+        project_state=scoped_project_state,
         history_context=history_context,
         conversation_messages=conv_messages,
         teacher_feedback_context=tfb_ctx,
     )
+    logical_project_id = _derive_logical_project_id(project_state, conv_id, msg, project_id)
+    project_phase = _infer_project_phase(msg, pre.get("next_task", {}), pre.get("kg_analysis", {}))
+    intent = _normalize_intent(pre.get("intent", ""), msg)
+    intent_confidence = float(pre.get("intent_confidence", 0) or 0)
+    evidence_quotes = _extract_evidence_quotes(msg, pre.get("diagnosis", {}))
 
     side_data = {
         "conversation_id": conv_id,
+        "logical_project_id": logical_project_id,
+        "project_phase": project_phase,
         "diagnosis": pre.get("diagnosis", {}),
         "next_task": pre.get("next_task", {}),
         "kg_analysis": pre.get("kg_analysis", {}),
@@ -722,6 +1255,26 @@ async def dialogue_turn_stream(request: Request):
 
         yield f"data: {json.dumps({'type': 'done', 'data': full_text}, ensure_ascii=False)}\n\n"
 
+        json_store.append_submission(project_id, {
+            "student_id": student_id,
+            "conversation_id": conv_id,
+            "logical_project_id": logical_project_id,
+            "project_phase": project_phase,
+            "intent": intent,
+            "intent_confidence": intent_confidence,
+            "class_id": payload.get("class_id"),
+            "cohort_id": payload.get("cohort_id"),
+            "source_type": "dialogue_turn_stream",
+            "mode": mode_val,
+            "raw_text": msg[:6000],
+            "diagnosis": pre.get("diagnosis", {}),
+            "next_task": pre.get("next_task", {}),
+            "kg_analysis": pre.get("kg_analysis", {}),
+            "hypergraph_insight": pre.get("hypergraph_insight", {}),
+            "hypergraph_student": pre.get("hypergraph_student", {}),
+            "evidence_quotes": evidence_quotes,
+            "agent_outputs": side_data.get("agent_trace", {}),
+        })
         conv_store.append_message(project_id, conv_id, {"role": "user", "content": msg})
         conv_store.append_message(project_id, conv_id, {
             "role": "assistant", "content": full_text,
@@ -809,10 +1362,13 @@ async def dialogue_turn_upload(
     if not cohort_id and project_state.get("submissions"):
         cohort_id = project_state["submissions"][-1].get("cohort_id", "")
     
+    scoped_project_state, history_context = _build_scoped_project_state(project_state, conv_id, combined_msg)
+
     result = run_workflow(
         message=combined_msg,
         mode=mode,
-        project_state=project_state,
+        project_state=scoped_project_state,
+        history_context=history_context,
         conversation_messages=conv_messages,
     )
 
@@ -823,6 +1379,11 @@ async def dialogue_turn_upload(
     hyper_insight = result.get("hypergraph_insight", {})
     hyper_student = result.get("hypergraph_student", {})
     agents_called = result.get("agents_called", [])
+    logical_project_id = _derive_logical_project_id(project_state, conv_id, combined_msg, project_id)
+    project_phase = _infer_project_phase(combined_msg, next_task, kg_analysis)
+    intent = _normalize_intent(result.get("intent", ""), combined_msg)
+    intent_confidence = float(result.get("intent_confidence", 0) or 0)
+    evidence_quotes = _extract_evidence_quotes(extracted, diagnosis, file.filename)
 
     agent_trace = {
         "orchestration": {
@@ -855,8 +1416,13 @@ async def dialogue_turn_upload(
 
     json_store.append_submission(project_id, {
         "student_id": student_id,
+        "conversation_id": conv_id,
         "class_id": class_id or None,
         "cohort_id": cohort_id or None,
+        "logical_project_id": logical_project_id,
+        "project_phase": project_phase,
+        "intent": intent,
+        "intent_confidence": intent_confidence,
         "source_type": "file_in_chat",
         "mode": mode,
         "filename": file.filename,
@@ -865,6 +1431,8 @@ async def dialogue_turn_upload(
         "next_task": next_task,
         "kg_analysis": kg_analysis,
         "hypergraph_insight": hyper_insight,
+        "hypergraph_student": hyper_student,
+        "evidence_quotes": evidence_quotes,
         "agent_outputs": agent_trace,
     })
 
@@ -998,6 +1566,32 @@ def project_snapshot(project_id: str) -> ProjectSnapshotResponse:
     )
 
 
+@app.get("/api/project/{project_id}/submissions")
+def get_project_submissions(project_id: str) -> dict:
+    data = json_store.load_project(project_id)
+    submissions = list(data.get("submissions", []) or [])
+    normalized = []
+    for s in reversed(submissions):
+        diag = s.get("diagnosis", {}) if isinstance(s.get("diagnosis"), dict) else {}
+        normalized.append({
+            "submission_id": s.get("submission_id", ""),
+            "created_at": s.get("created_at", ""),
+            "logical_project_id": s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id") or project_id,
+            "project_phase": s.get("project_phase", ""),
+            "intent": _normalize_intent(
+                s.get("intent")
+                or ((s.get("agent_outputs", {}) if isinstance(s.get("agent_outputs"), dict) else {}).get("orchestration", {}) or {}).get("intent", ""),
+                _safe_str(s.get("raw_text", "")),
+            ),
+            "source_type": s.get("source_type", ""),
+            "filename": s.get("filename"),
+            "text_preview": (s.get("raw_text") or "")[:120],
+            "overall_score": diag.get("overall_score", s.get("overall_score", 0)),
+            "triggered_rules": diag.get("triggered_rules", s.get("triggered_rules", [])),
+        })
+    return {"project_id": project_id, "submissions": normalized}
+
+
 @app.get("/api/project/{project_id}/feedback")
 def get_project_feedback(project_id: str) -> dict:
     data = json_store.load_project(project_id)
@@ -1089,6 +1683,14 @@ def get_conversation(project_id: str, conversation_id: str) -> dict:
         _save_conv(project_id, conversation_id, conv)
 
     return conv
+
+
+@app.delete("/api/conversations/{conversation_id}")
+def delete_conversation(project_id: str, conversation_id: str) -> dict:
+    ok = conv_store.delete(project_id, conversation_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"status": "ok", "conversation_id": conversation_id}
 
 
 def _enrich_docs_in_conversation(conv: dict, project_id: str) -> bool:

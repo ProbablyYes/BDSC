@@ -26,5 +26,19 @@
     "password_hash": "1857838b74f8475c7b959af2c332197bee7ffc35332b71f4d4e9d67ea2204198",
     "created_at": "2026-03-26T01:40:21.284834",
     "updated_at": "2026-03-26T01:40:21.284834"
+  },
+  {
+    "user_id": "34dfb3d0-f976-42cc-a96f-16c32c79a7ad",
+    "role": "student",
+    "display_name": "路人甲",
+    "email": "test@qq.com",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "5828ca7dc6b0965521a3a7b45407fb41",
+    "password_hash": "c5e876efdf601fc38f63b2d5d2b602bd5e19aa25c21e0afc60c8d902559ce268",
+    "created_at": "2026-03-26T17:05:48.894410",
+    "updated_at": "2026-03-26T17:05:48.894410"
   }
 ]

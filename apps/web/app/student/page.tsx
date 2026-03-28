@@ -15,6 +15,21 @@ type ConvMeta = { conversation_id: string; title: string; created_at: string; me
 
 let _msgId = 0;
 
+function parseServerTime(value?: string) {
+  if (!value) return null;
+  const normalized = /Z$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`;
+  const d = new Date(normalized);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatBjTime(value?: string | Date, withDate = false) {
+  const d = value instanceof Date ? value : parseServerTime(value);
+  if (!d) return "";
+  return new Intl.DateTimeFormat("zh-CN", withDate
+    ? { timeZone: "Asia/Shanghai", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }
+    : { timeZone: "Asia/Shanghai", hour: "2-digit", minute: "2-digit" }).format(d);
+}
+
 export default function StudentPage() {
   const currentUser = useAuth("student");
   const [projectId, setProjectId] = useState("");
@@ -58,6 +73,7 @@ export default function StudentPage() {
   const [likedMsgs, setLikedMsgs] = useState<Set<number>>(new Set());
   const [dislikedMsgs, setDislikedMsgs] = useState<Set<number>>(new Set());
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [kgViewport, setKgViewport] = useState({ scale: 1, x: 0, y: 0 });
 
   const [teamPanelOpen, setTeamPanelOpen] = useState(false);
   const [myTeams, setMyTeams] = useState<any[]>([]);
@@ -69,6 +85,7 @@ export default function StudentPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dragRef = useRef<{ active: boolean; startX: number; startW: number }>({ active: false, startX: 0, startW: 360 });
   const abortRef = useRef<AbortController | null>(null);
+  const kgPanRef = useRef<{ active: boolean; startX: number; startY: number; x: number; y: number }>({ active: false, startX: 0, startY: 0, x: 0, y: 0 });
   // canvas ref removed — now using SVG
 
   // pitch timer
@@ -145,6 +162,27 @@ export default function StudentPage() {
     } catch { setTeamMsg("网络错误"); }
   }
 
+  function handleKgWheel(e: any) {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.12 : 0.12;
+    setKgViewport((v) => ({ ...v, scale: Math.max(0.7, Math.min(2.4, Number((v.scale + delta).toFixed(2)))) }));
+  }
+
+  function handleKgMouseDown(e: any) {
+    kgPanRef.current = { active: true, startX: e.clientX, startY: e.clientY, x: kgViewport.x, y: kgViewport.y };
+  }
+
+  function handleKgMouseMove(e: any) {
+    if (!kgPanRef.current.active) return;
+    const dx = e.clientX - kgPanRef.current.startX;
+    const dy = e.clientY - kgPanRef.current.startY;
+    setKgViewport((v) => ({ ...v, x: kgPanRef.current.x + dx, y: kgPanRef.current.y + dy }));
+  }
+
+  function handleKgMouseUp() {
+    kgPanRef.current.active = false;
+  }
+
   const autoLoaded = useRef(false);
   useEffect(() => {
     if (!autoLoaded.current && conversations.length > 0 && !conversationId) {
@@ -190,6 +228,25 @@ export default function StudentPage() {
     setPdfViewerOpen(false);
   }
 
+  async function deleteConversation(cid: string) {
+    try {
+      const r = await fetch(`${API_BASE}/api/conversations/${encodeURIComponent(cid)}?project_id=${encodeURIComponent(projectId)}`, {
+        method: "DELETE",
+      });
+      if (!r.ok) return;
+      if (conversationId === cid) {
+        setConversationId(null);
+        setMessages([]);
+        setLatestResult(null);
+        setResultHistory([]);
+        setDocReview(null);
+      }
+      loadConversations();
+    } catch {
+      /* ignore */
+    }
+  }
+
   async function loadConversation(cid: string) {
     try {
       const r = await fetch(`${API_BASE}/api/conversations/${encodeURIComponent(cid)}?project_id=${encodeURIComponent(projectId)}`);
@@ -198,7 +255,7 @@ export default function StudentPage() {
       const msgs: ChatMessage[] = rawMsgs.map((m: any) => ({
         role: m.role as "user" | "assistant",
         text: m.content ?? "",
-        ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : undefined,
+        ts: m.timestamp ? formatBjTime(m.timestamp) : undefined,
         id: ++_msgId,
       }));
       setMessages(msgs);
@@ -274,7 +331,7 @@ export default function StudentPage() {
         return [...p.slice(0, -1), { ...last, text: "（已中断回答）" }];
       }
       if (last && last.role === "user") {
-        return [...p, { role: "assistant" as const, text: "（已中断回答）", ts: new Date().toLocaleTimeString(), id: ++_msgId }];
+        return [...p, { role: "assistant" as const, text: "（已中断回答）", ts: formatBjTime(new Date()), id: ++_msgId }];
       }
       return p;
     });
@@ -290,7 +347,7 @@ export default function StudentPage() {
     abortRef.current = controller;
 
     const displayText = attachedFile ? `${text ? text + " " : ""}📎 ${attachedFile.name}` : text;
-    const userMsg: ChatMessage = { role: "user", text: displayText, ts: new Date().toLocaleTimeString(), id: ++_msgId };
+    const userMsg: ChatMessage = { role: "user", text: displayText, ts: formatBjTime(new Date()), id: ++_msgId };
     setMessages((p) => [...p, userMsg]);
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
@@ -352,7 +409,7 @@ export default function StudentPage() {
 
       // Typewriter effect: reveal the reply character by character
       const typeMsgId = ++_msgId;
-      setMessages((p) => [...p, { role: "assistant", text: "", ts: new Date().toLocaleTimeString(), id: typeMsgId }]);
+      setMessages((p) => [...p, { role: "assistant", text: "", ts: formatBjTime(new Date()), id: typeMsgId }]);
 
       const CHUNK = 3;
       for (let i = 0; i < reply.length; i += CHUNK) {
@@ -657,10 +714,18 @@ export default function StudentPage() {
       {settingsOpen && (
         <div className="settings-drawer">
           <div className="settings-grid">
-            <label>项目ID <input value={projectId} onChange={(e) => setProjectId(e.target.value)} /></label>
-            <label>学生ID <input value={studentId} onChange={(e) => setStudentId(e.target.value)} /></label>
-            <label>班级 <input value={classId} onChange={(e) => setClassId(e.target.value)} /></label>
-            <label>学期 <input value={cohortId} onChange={(e) => setCohortId(e.target.value)} /></label>
+            <label>当前项目
+              <input value={projectId} readOnly />
+            </label>
+            <label>当前账号
+              <input value={currentUser?.display_name || studentId} readOnly />
+            </label>
+            <label>团队状态
+              <input value={myTeams.length > 0 ? `已加入 ${myTeams.length} 个团队` : "未加入团队"} readOnly />
+            </label>
+            <label>北京时间
+              <input value={formatBjTime(new Date(), true)} readOnly />
+            </label>
             <label>目标赛事
               <select value={competitionType} onChange={(e) => setCompetitionType(e.target.value as CompetitionType)} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg-secondary)",color:"var(--text-primary)"}}>
                 <option value="">不指定</option>
@@ -688,14 +753,25 @@ export default function StudentPage() {
             </div>
             <div className="conv-list">
               {filteredConvs.map((c) => (
-                <button
+                <div
                   key={c.conversation_id}
                   className={`conv-item ${c.conversation_id === conversationId ? "active" : ""}`}
                   onClick={() => loadConversation(c.conversation_id)}
                 >
-                  <span className="conv-title">{c.title || "新对话"}</span>
-                  <span className="conv-meta">{c.message_count}条 · {(c.created_at ?? "").slice(5, 16)}</span>
-                </button>
+                  <div className="conv-item-row">
+                    <span className="conv-title">{c.title || "新对话"}</span>
+                    <button
+                      type="button"
+                      className="conv-delete-btn"
+                      onClick={(e) => { e.stopPropagation(); deleteConversation(c.conversation_id); }}
+                      title="删除对话"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <span className="conv-preview">{c.last_message || "等待 AI 归纳..."}</span>
+                  <span className="conv-meta">{c.message_count}条 · {formatBjTime(c.created_at, true)}</span>
+                </div>
               ))}
               {filteredConvs.length === 0 && <p className="conv-empty">{searchQuery ? "未找到匹配的对话" : "暂无历史对话"}</p>}
             </div>
@@ -1177,34 +1253,45 @@ export default function StudentPage() {
 
                     return (
                       <div className="kg-full">
-                        {/* SVG Radial Graph */}
-                        <svg viewBox="0 0 320 320" className="kg-svg-graph">
-                          <circle cx={cx} cy={cy} r={R + 20} fill="none" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.4" />
-                          {rels.map((r: any, ri: number) => {
-                            const si = entities.findIndex((e: any) => e.id === r.source);
-                            const ti = entities.findIndex((e: any) => e.id === r.target);
-                            if (si < 0 || ti < 0) return null;
-                            const a1 = (2 * Math.PI * si) / entities.length - Math.PI / 2;
-                            const a2 = (2 * Math.PI * ti) / entities.length - Math.PI / 2;
-                            return <line key={ri} x1={cx + R * Math.cos(a1)} y1={cy + R * Math.sin(a1)} x2={cx + R * Math.cos(a2)} y2={cy + R * Math.sin(a2)} stroke="var(--text-secondary)" strokeWidth="0.6" opacity="0.25" />;
-                          })}
-                          <circle cx={cx} cy={cy} r="20" fill="var(--accent)" opacity="0.15" />
-                          <text x={cx} y={cy - 4} textAnchor="middle" fontSize="8" fill="var(--accent)" fontWeight="700">{kgAnalysis.completeness_score ?? "?"}/10</text>
-                          <text x={cx} y={cy + 7} textAnchor="middle" fontSize="6" fill="var(--text-secondary)">完整度</text>
-                          {entities.map((e: any, i: number) => {
-                            const angle = (2 * Math.PI * i) / entities.length - Math.PI / 2;
-                            const nx = cx + R * Math.cos(angle), ny = cy + R * Math.sin(angle);
-                            const color = typeColors[e.type] ?? "#6ba3d6";
-                            return (
-                              <g key={e.id} className="kg-node-g">
-                                <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={color} strokeWidth="0.5" opacity="0.2" />
-                                <circle cx={nx} cy={ny} r="14" fill={color + "20"} stroke={color} strokeWidth="1.2" />
-                                <text x={nx} y={ny - 2} textAnchor="middle" fontSize="6.5" fill="var(--text-primary)" fontWeight="600">{e.label.length > 5 ? e.label.slice(0, 4) + ".." : e.label}</text>
-                                <text x={nx} y={ny + 6} textAnchor="middle" fontSize="5" fill={color}>{typeNames[e.type] ?? e.type}</text>
-                              </g>
-                            );
-                          })}
-                        </svg>
+                        <div className="kg-toolbar">
+                          <span className="kg-toolbar-hint">滚轮缩放，拖拽平移</span>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button className="kg-tool-btn" onClick={() => setKgViewport((v) => ({ ...v, scale: Math.max(0.7, Number((v.scale - 0.12).toFixed(2))) }))}>-</button>
+                            <button className="kg-tool-btn" onClick={() => setKgViewport({ scale: 1, x: 0, y: 0 })}>重置</button>
+                            <button className="kg-tool-btn" onClick={() => setKgViewport((v) => ({ ...v, scale: Math.min(2.4, Number((v.scale + 0.12).toFixed(2))) }))}>+</button>
+                          </div>
+                        </div>
+                        <div className="kg-zoom-shell" onWheel={handleKgWheel} onMouseDown={handleKgMouseDown} onMouseMove={handleKgMouseMove} onMouseUp={handleKgMouseUp} onMouseLeave={handleKgMouseUp}>
+                          <svg viewBox="0 0 320 320" className="kg-svg-graph">
+                            <g transform={`translate(${kgViewport.x} ${kgViewport.y}) scale(${kgViewport.scale})`}>
+                              <circle cx={cx} cy={cy} r={R + 20} fill="none" stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.4" />
+                              {rels.map((r: any, ri: number) => {
+                                const si = entities.findIndex((e: any) => e.id === r.source);
+                                const ti = entities.findIndex((e: any) => e.id === r.target);
+                                if (si < 0 || ti < 0) return null;
+                                const a1 = (2 * Math.PI * si) / entities.length - Math.PI / 2;
+                                const a2 = (2 * Math.PI * ti) / entities.length - Math.PI / 2;
+                                return <line key={ri} x1={cx + R * Math.cos(a1)} y1={cy + R * Math.sin(a1)} x2={cx + R * Math.cos(a2)} y2={cy + R * Math.sin(a2)} stroke="var(--text-secondary)" strokeWidth="0.6" opacity="0.25" />;
+                              })}
+                              <circle cx={cx} cy={cy} r="20" fill="var(--accent)" opacity="0.15" />
+                              <text x={cx} y={cy - 4} textAnchor="middle" fontSize="8" fill="var(--accent)" fontWeight="700">{kgAnalysis.completeness_score ?? "?"}/10</text>
+                              <text x={cx} y={cy + 7} textAnchor="middle" fontSize="6" fill="var(--text-secondary)">完整度</text>
+                              {entities.map((e: any, i: number) => {
+                                const angle = (2 * Math.PI * i) / entities.length - Math.PI / 2;
+                                const nx = cx + R * Math.cos(angle), ny = cy + R * Math.sin(angle);
+                                const color = typeColors[e.type] ?? "#6ba3d6";
+                                return (
+                                  <g key={e.id} className="kg-node-g">
+                                    <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={color} strokeWidth="0.5" opacity="0.2" />
+                                    <circle cx={nx} cy={ny} r="14" fill={color + "20"} stroke={color} strokeWidth="1.2" />
+                                    <text x={nx} y={ny - 2} textAnchor="middle" fontSize="6.5" fill="var(--text-primary)" fontWeight="600">{e.label.length > 5 ? e.label.slice(0, 4) + ".." : e.label}</text>
+                                    <text x={nx} y={ny + 6} textAnchor="middle" fontSize="5" fill={color}>{typeNames[e.type] ?? e.type}</text>
+                                  </g>
+                                );
+                              })}
+                            </g>
+                          </svg>
+                        </div>
 
                         {/* Dimension scores */}
                         {Object.keys(secScores).length > 0 && (
@@ -1484,7 +1571,7 @@ export default function StudentPage() {
                   {teacherFeedback.length > 0 ? teacherFeedback.map((fb, fi) => (
                     <div key={fi} className="right-card">
                       <p>{fb.comment}</p>
-                      <span className="msg-time">{fb.teacher_id} · {(fb.created_at ?? "").slice(0, 16)}</span>
+                      <span className="msg-time">{fb.teacher_id} · {formatBjTime(fb.created_at, true)}</span>
                       {(fb.focus_tags ?? []).length > 0 && <div className="tch-tag-row">{fb.focus_tags.map((t: string) => <span key={t} className="tch-tag">{t}</span>)}</div>}
                     </div>
                   )) : <p className="right-hint">暂无教师批注。导师批注后会显示在这里。</p>}

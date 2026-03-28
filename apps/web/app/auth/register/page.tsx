@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,6 +30,10 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (password !== confirmPassword) {
+      setError("两次输入的密码不一致");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch(`${API}/api/auth/register`, {
@@ -80,7 +85,7 @@ export default function RegisterPage() {
 
           <div className="auth-header">
             <h1>创建账号</h1>
-            <p>选择你的角色，填写昵称、邮箱与密码即可</p>
+            <p>选择你的角色，填写昵称、账号与密码即可</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit}>
@@ -106,10 +111,10 @@ export default function RegisterPage() {
             </label>
 
             <label className="auth-label">
-              <span>邮箱</span>
+              <span>账号 / 手机号</span>
               <div className="auth-input-wrap">
                 <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="auth-input auth-input-icon-pad" autoComplete="email" />
+                <input type="text" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="可输入邮箱、手机号或任意测试账号" className="auth-input auth-input-icon-pad" autoComplete="username" />
               </div>
             </label>
 
@@ -125,6 +130,14 @@ export default function RegisterPage() {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   )}
                 </button>
+              </div>
+            </label>
+
+            <label className="auth-label">
+              <span>确认密码</span>
+              <div className="auth-input-wrap">
+                <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="3"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                <input type={showPwd ? "text" : "password"} required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="再次输入密码" className="auth-input auth-input-icon-pad" autoComplete="new-password" />
               </div>
             </label>
 

@@ -21,5 +21,28 @@
     "teacher_name": "贪吃蛇",
     "members": [],
     "created_at": "2026-03-26T03:27:57.253641"
+  },
+  {
+    "team_id": "fe71a1cb-e878-4add-ab42-3e888a03375e",
+    "team_name": "测试组-1",
+    "invite_code": "DWZM74",
+    "teacher_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "teacher_name": "贪吃蛇",
+    "members": [
+      {
+        "user_id": "34dfb3d0-f976-42cc-a96f-16c32c79a7ad",
+        "joined_at": "2026-03-26T17:06:05.698682"
+      }
+    ],
+    "created_at": "2026-03-26T16:45:35.262657"
+  },
+  {
+    "team_id": "e51f6330-0116-41e1-8776-41a11ea62f68",
+    "team_name": "测试组-2",
+    "invite_code": "4XPLFK",
+    "teacher_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "teacher_name": "贪吃蛇",
+    "members": [],
+    "created_at": "2026-03-26T16:45:49.502933"
   }
 ]

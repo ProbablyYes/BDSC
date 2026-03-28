@@ -4,6 +4,25 @@ import Link from "next/link";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
+function parseServerTime(value?: string) {
+  if (!value) return null;
+  const normalized = /Z$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`;
+  const d = new Date(normalized);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatBjTime(value?: string) {
+  const d = parseServerTime(value);
+  if (!d) return "";
+  return new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}
+
 export default function StudentProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -20,13 +39,11 @@ export default function StudentProfilePage() {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     const pid = `project-${user.user_id}`;
-    const sid = user.student_id || user.user_id || user.email;
     Promise.all([
-      fetch(`${API}/api/teacher/submissions?limit=200`).then((r) => r.json()).catch(() => ({ submissions: [] })),
+      fetch(`${API}/api/project/${encodeURIComponent(pid)}/submissions`).then((r) => r.json()).catch(() => ({ submissions: [] })),
       fetch(`${API}/api/conversations?project_id=${encodeURIComponent(pid)}`).then((r) => r.json()).catch(() => ({ conversations: [] })),
     ]).then(([subData, convData]) => {
-      const mySubs = (subData.submissions ?? []).filter((s: any) => s.student_id === sid);
-      setSubmissions(mySubs);
+      setSubmissions(subData.submissions ?? []);
       setConversations(convData.conversations ?? []);
       setLoading(false);
     });
@@ -113,7 +130,7 @@ export default function StudentProfilePage() {
                     </div>
                     <div className="profile-sub-right">
                       <span className="profile-sub-score">{s.overall_score ?? "-"}<small>/10</small></span>
-                      <span className="profile-sub-date">{(s.created_at ?? "").slice(0, 16)}</span>
+                      <span className="profile-sub-date">{formatBjTime(s.created_at)}</span>
                     </div>
                   </div>
                 ))}
@@ -128,7 +145,7 @@ export default function StudentProfilePage() {
                 {conversations.slice(0, 8).map((c: any) => (
                   <Link key={c.conversation_id} href="/student" className="profile-conv-item">
                     <span className="profile-conv-title">{c.title || "新对话"}</span>
-                    <span className="profile-conv-meta">{c.message_count}条 / {(c.created_at ?? "").slice(5, 16)}</span>
+                    <span className="profile-conv-meta">{c.message_count}条 / {formatBjTime(c.created_at)}</span>
                   </Link>
                 ))}
               </div>
@@ -143,7 +160,7 @@ export default function StudentProfilePage() {
               {user.student_id && <div><span>学号</span><strong>{user.student_id}</strong></div>}
               {user.class_id && <div><span>班级</span><strong>{user.class_id}</strong></div>}
               {user.cohort_id && <div><span>学期</span><strong>{user.cohort_id}</strong></div>}
-              <div><span>注册时间</span><strong>{(user.created_at ?? "").slice(0, 16)}</strong></div>
+              <div><span>注册时间</span><strong>{formatBjTime(user.created_at)}</strong></div>
             </div>
           </section>
         </>

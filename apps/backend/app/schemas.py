@@ -95,7 +95,7 @@ class DialogueTurnResponse(BaseModel):
 class AuthRegisterPayload(BaseModel):
     role: Literal["student", "teacher", "admin"] = "student"
     display_name: str = Field(min_length=2, max_length=50)
-    email: str = Field(min_length=5, max_length=100)
+    email: str = Field(min_length=1, max_length=100)
     password: str = Field(min_length=6, max_length=64)
     student_id: str | None = None
     class_id: str | None = None
@@ -104,12 +104,12 @@ class AuthRegisterPayload(BaseModel):
 
 
 class AuthLoginPayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
+    email: str = Field(min_length=1, max_length=100)
     password: str = Field(min_length=6, max_length=64)
 
 
 class AuthPasswordChangePayload(BaseModel):
-    email: str = Field(min_length=5, max_length=100)
+    email: str = Field(min_length=1, max_length=100)
     current_password: str = Field(min_length=6, max_length=64)
     new_password: str = Field(min_length=6, max_length=64)
 
@@ -120,7 +120,7 @@ class AuthUserResponse(BaseModel):
 
 
 class SmsSendPayload(BaseModel):
-    phone: str = Field(min_length=8, max_length=20)
+    phone: str = Field(min_length=1, max_length=100)
 
 
 class SmsSendResponse(BaseModel):
@@ -130,7 +130,7 @@ class SmsSendResponse(BaseModel):
 
 
 class SmsLoginPayload(BaseModel):
-    phone: str = Field(min_length=8, max_length=20)
+    phone: str = Field(min_length=1, max_length=100)
     code: str = Field(min_length=4, max_length=8)
 
 

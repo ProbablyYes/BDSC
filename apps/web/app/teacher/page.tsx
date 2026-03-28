@@ -20,6 +20,53 @@ function getRuleDisplayName(ruleName: string): string {
   return RISK_RULE_NAMES[ruleName] || ruleName;
 }
 
+function parseServerTime(value?: string) {
+  if (!value) return null;
+  const normalized = /Z$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`;
+  const d = new Date(normalized);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatBJTime(value?: string, withDate = true) {
+  const d = parseServerTime(value);
+  if (!d) return "";
+  return new Intl.DateTimeFormat("zh-CN", withDate
+    ? { timeZone: "Asia/Shanghai", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }
+    : { timeZone: "Asia/Shanghai", hour: "2-digit", minute: "2-digit" }).format(d);
+}
+
+const INTENT_ORDER = ["学习理解", "商业诊断", "方案设计", "材料润色", "路演表达", "综合咨询"];
+const INTENT_COLORS: Record<string, string> = {
+  "学习理解": "#73ccff",
+  "商业诊断": "#6b8aff",
+  "方案设计": "#5cbd8a",
+  "材料润色": "#e0a84c",
+  "路演表达": "#bd93f9",
+  "综合咨询": "#9aa4bf",
+};
+
+function intentEntries(input: any): Array<{ label: string; value: number; color: string }> {
+  const source = input && typeof input === "object" ? input : {};
+  return INTENT_ORDER
+    .map((label) => ({ label, value: Number(source[label] || 0), color: INTENT_COLORS[label] || "var(--accent)" }))
+    .filter((item) => item.value > 0);
+}
+
+function dominantIntent(input: any) {
+  const entries = intentEntries(input);
+  return entries.sort((a, b) => b.value - a.value)[0]?.label || "综合咨询";
+}
+
+function sparklinePoints(values: number[], width = 180, height = 56) {
+  if (!values.length) return "";
+  const max = Math.max(1, ...values);
+  return values.map((value, idx) => {
+    const x = values.length === 1 ? width / 2 : (idx / (values.length - 1)) * width;
+    const y = height - (value / max) * (height - 8) - 4;
+    return `${x},${y}`;
+  }).join(" ");
+}
+
 // 骨架屏加载器组件
 function SkeletonLoader({ rows = 3, type = "bar" }: { rows?: number; type?: "bar" | "card" | "table" }) {
   return (
@@ -1473,7 +1520,7 @@ export default function TeacherPage() {
       const sc = sorted.map((s: any) => Number(s.overall_score || 0)).filter((v: number) => v > 0);
       return {
         id: pid, submissions: sorted, submissionCount: sorted.length,
-        scoreTimeline: sorted.map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: Number(s.overall_score || 0) })),
+        scoreTimeline: sorted.map((s: any) => ({ label: formatBJTime(s.created_at), value: Number(s.overall_score || 0) })),
         avgScore: sc.length > 0 ? sc.reduce((a: number, b: number) => a + b, 0) / sc.length : 0,
         latestScore: sc.length > 0 ? sc[sc.length - 1] : 0,
         firstScore: sc.length > 0 ? sc[0] : 0,
@@ -1519,9 +1566,10 @@ export default function TeacherPage() {
           <span className="topbar-label">教师控制台</span>
         </div>
         <div className="topbar-center">
-          <input className="tch-filter-input" value={classId} onChange={(e) => setClassId(e.target.value)} placeholder="班级ID" />
-          <input className="tch-filter-input" value={cohortId} onChange={(e) => setCohortId(e.target.value)} placeholder="学期" />
-          <input className="tch-filter-input" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} placeholder="类别筛选" />
+          <div className="tch-topbar-status">
+            <span className="tch-topbar-status-dot" />
+            <span>{tab === "class" ? "团队视图基于学生真实项目记录自动汇总" : "教师端分析视图"}</span>
+          </div>
         </div>
         <div className="topbar-right">
           <button 
@@ -1828,7 +1876,7 @@ export default function TeacherPage() {
                             <div className="ov-activity-score" style={{ color: Number(s.overall_score) >= 7 ? "var(--tch-success)" : Number(s.overall_score) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>
                               {Number(s.overall_score).toFixed(1)}
                             </div>
-                            <div className="ov-activity-time">{s.created_at ? (s.created_at as string).slice(5, 16) : ""}</div>
+                            <div className="ov-activity-time">{formatBJTime(s.created_at)}</div>
                           </div>
                         ))}
                       </div>
@@ -1901,7 +1949,7 @@ export default function TeacherPage() {
                       }}
                     >
                       <div className="tch-table-row">
-                        <span className="tch-cell-time">{(s.created_at ?? "").slice(0, 16)}</span>
+                        <span className="tch-cell-time">{formatBJTime(s.created_at)}</span>
                         <span>{s.project_id}</span>
                         <span>{s.student_id}</span>
                         <span>{s.source_type}{s.filename ? ` (${s.filename})` : ""}</span>
@@ -3159,14 +3207,16 @@ export default function TeacherPage() {
                     <p style={{ color: "var(--text-muted)", fontSize: 13 }}>点击上方「创建团队」按钮开始</p>
                   </div>
                 );
-                const metrics = ["均分", "提交量", "风险率", "趋势"];
-                const maxV = [10, Math.max(1, ...all.map((t: any) => t.total_submissions)), Math.max(1, ...all.map((t: any) => t.risk_rate)), 6];
+                const sortedAll = [...all].sort((a: any, b: any) => b.avg_score - a.avg_score);
+                const myTeams = teamData.my_teams ?? [];
+                const maxScore = Math.max(1, ...all.map((t: any) => Number(t.avg_score || 0)));
+                const maxSubs = Math.max(1, ...all.map((t: any) => Number(t.total_submissions || 0)));
+                const maxDensity = Math.max(1, ...all.map((t: any) => Number(t.submission_density || 0)));
                 return (
                   <>
                     <h2 style={{ marginTop: 0 }}>团队横向对比</h2>
-                    <p className="tch-desc">从多维度审视所有团队表现差异，★ 标记的为我的团队</p>
+                    <p className="tch-desc">把团队对比做成可点击的病例入口。悬停看摘要，点击直接进入团队层级。</p>
 
-                    {/* KPI */}
                     <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(107,138,255,0.15)", color: "var(--accent)" }}>🏫</div><div className="ov-kpi-value"><AnimatedNumber value={all.length} /></div><div className="ov-kpi-label">团队总数</div></div>
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(115,204,255,0.15)", color: "#73ccff" }}>👥</div><div className="ov-kpi-value"><AnimatedNumber value={all.reduce((a: number, t: any) => a + t.student_count, 0)} /></div><div className="ov-kpi-label">学生总数</div></div>
@@ -3174,78 +3224,110 @@ export default function TeacherPage() {
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(232,168,76,0.15)", color: "var(--tch-warning)" }}>⭐</div><div className="ov-kpi-value"><AnimatedNumber value={all.length > 0 ? all.reduce((a: number, t: any) => a + t.avg_score, 0) / all.length : 0} decimals={1} /></div><div className="ov-kpi-label">全局均分</div></div>
                     </div>
 
-                    {/* ─ Heatmap Matrix: teams × metrics ─ */}
                     <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                      <h3>多维热力矩阵</h3>
-                      <p className="tch-desc">颜色越深表现越好（风险率列反色），点击团队名可进入详情</p>
-                      <div style={{ overflowX: "auto" }}>
-                        <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 3, fontSize: 12 }}>
-                          <thead><tr><th style={{ textAlign: "left", color: "var(--text-muted)", padding: "6px 10px", fontWeight: 500 }}>团队</th>
-                            {metrics.map(m => <th key={m} style={{ textAlign: "center", color: "var(--text-muted)", padding: "6px 8px", fontWeight: 500 }}>{m}</th>)}
-                            <th style={{ textAlign: "center", color: "var(--text-muted)", padding: "6px 8px", fontWeight: 500 }}>教师</th>
-                          </tr></thead>
-                          <tbody>{all.map((t: any) => {
-                            const vals = [t.avg_score, t.total_submissions, t.risk_rate, t.trend + 3];
-                            return (
-                              <tr key={t.team_id} style={{ cursor: "pointer" }} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); }}>
-                                <td style={{ padding: "8px 10px", fontWeight: t.is_mine ? 700 : 400, color: t.is_mine ? "var(--accent)" : "var(--text-primary)", whiteSpace: "nowrap" }}>{t.is_mine ? "★ " : ""}{t.team_name}</td>
-                                {vals.map((v, mi) => {
-                                  const norm = Math.min(1, Math.max(0, v / maxV[mi]));
-                                  const inv = mi === 2;
-                                  const intensity = inv ? 1 - norm : norm;
-                                  const bg = intensity > 0.7 ? "rgba(92,189,138,0.35)" : intensity > 0.4 ? "rgba(232,168,76,0.25)" : "rgba(224,112,112,0.25)";
-                                  const display = mi === 0 ? v.toFixed(1) : mi === 2 ? `${v.toFixed(0)}%` : mi === 3 ? (t.trend > 0 ? `+${t.trend.toFixed(1)}` : t.trend.toFixed(1)) : v;
-                                  return <td key={mi} style={{ textAlign: "center", padding: "8px", borderRadius: 6, background: bg, fontWeight: 600, color: "var(--text-primary)", transition: "background 0.3s" }}>{display}</td>;
-                                })}
-                                <td style={{ textAlign: "center", padding: "8px", color: "var(--text-muted)", fontSize: 11 }}>{t.teacher_name}</td>
-                              </tr>
-                            );
-                          })}</tbody>
-                        </table>
+                      <h3>团队病例廊道</h3>
+                      <p className="tch-desc">每个团队卡都包含均分、提交密度、风险率、当前高频求助方向。点击即可进入。</p>
+                      <div className="tm-corridor">
+                        {sortedAll.map((t: any, idx: number) => {
+                          const intents = intentEntries(t.intent_distribution);
+                          const dominant = dominantIntent(t.intent_distribution);
+                          const scorePct = Math.max(8, Math.min(100, (Number(t.avg_score || 0) / maxScore) * 100));
+                          const subPct = Math.max(8, Math.min(100, (Number(t.total_submissions || 0) / maxSubs) * 100));
+                          const densityPct = Math.max(8, Math.min(100, (Number(t.submission_density || 0) / maxDensity) * 100));
+                          return (
+                            <button
+                              key={t.team_id}
+                              className={`tm-corridor-card ${t.is_mine ? "mine" : ""}`}
+                              onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); setSelectedTeamStudentId(""); setSelectedTeamProjectId(""); }}
+                            >
+                              <div className="tm-corridor-top">
+                                <div>
+                                  <div className="tm-corridor-rank">#{idx + 1} {t.is_mine ? "我的团队" : "其他团队"}</div>
+                                  <div className="tm-corridor-name">{t.team_name}</div>
+                                </div>
+                                <div className="tm-corridor-arrow">查看病例 →</div>
+                              </div>
+                              <div className="tm-corridor-meta">
+                                <span>{t.student_count} 人</span>
+                                <span>{t.active_students || 0} 人活跃</span>
+                                <span>{t.teacher_name || "未绑定教师"}</span>
+                              </div>
+                              <div className="tm-corridor-bars">
+                                <div className="tm-corridor-barline">
+                                  <span>均分</span>
+                                  <div><i style={{ width: `${scorePct}%` }} /></div>
+                                  <b>{Number(t.avg_score || 0).toFixed(1)}</b>
+                                </div>
+                                <div className="tm-corridor-barline">
+                                  <span>提交量</span>
+                                  <div><i style={{ width: `${subPct}%`, background: "linear-gradient(90deg, rgba(115,204,255,0.28), #73ccff)" }} /></div>
+                                  <b>{t.total_submissions}</b>
+                                </div>
+                                <div className="tm-corridor-barline">
+                                  <span>密度</span>
+                                  <div><i style={{ width: `${densityPct}%`, background: "linear-gradient(90deg, rgba(92,189,138,0.28), #5cbd8a)" }} /></div>
+                                  <b>{Number(t.submission_density || 0).toFixed(1)}</b>
+                                </div>
+                              </div>
+                              <div className="tm-corridor-tags">
+                                <span className="tm-smart-chip" style={{ background: "rgba(224,112,112,0.12)", color: "var(--tch-danger)" }}>风险率 {Number(t.risk_rate || 0).toFixed(0)}%</span>
+                                <span className="tm-smart-chip">{dominant}</span>
+                                {(t.top_risks || []).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                              </div>
+                              <div className="tm-corridor-tooltip">
+                                <strong>团队摘要</strong>
+                                {(t.care_points || []).slice(0, 3).map((point: string, i: number) => <span key={i}>{point}</span>)}
+                                {!t.care_points?.length && <span>点击进入查看团队病例。</span>}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* ─ Lollipop chart: score ranking ─ */}
                     <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                      <h3>均分排名·棒棒糖图</h3>
-                      <p className="tch-desc">圆点位置表示均分，带线连接至零轴，蓝色为我的团队</p>
-                      <svg viewBox={`0 0 500 ${all.length * 36 + 20}`} style={{ width: "100%", overflow: "visible" }}>
-                        {[...all].sort((a: any, b: any) => b.avg_score - a.avg_score).map((t: any, i) => {
-                          const x = (t.avg_score / 10) * 380 + 110;
-                          const y = i * 36 + 20;
-                          const col = t.is_mine ? "#6b8aff" : "rgba(255,255,255,0.25)";
+                      <h3>我的团队脉冲状态卡</h3>
+                      <p className="tch-desc">用项目病例趋势线替代静止圆环，卡片边缘会提示可点击。</p>
+                      <div className="tm-pulse-grid">
+                        {myTeams.map((t: any) => {
+                          const trendValues = (t.project_highlights || []).slice(0, 6).map((p: any) => Number(p.latest_score || 0));
+                          const points = sparklinePoints(trendValues);
                           return (
-                            <g key={t.team_id} style={{ cursor: "pointer" }} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); }}>
-                              <line x1="110" y1={y} x2={x} y2={y} stroke={col} strokeWidth="2" strokeLinecap="round" />
-                              <circle cx={x} cy={y} r="7" fill={col} stroke="var(--bg-primary)" strokeWidth="2" />
-                              <text x={x + 12} y={y + 4} fill="var(--text-secondary)" fontSize="11" fontWeight="600">{t.avg_score}</text>
-                              <text x="105" y={y + 4} fill={t.is_mine ? "#6b8aff" : "var(--text-muted)"} fontSize="11" textAnchor="end" fontWeight={t.is_mine ? 700 : 400}>{t.team_name.slice(0, 10)}</text>
-                            </g>
-                          );
-                        })}
-                      </svg>
-                    </div>
-
-                    {/* ─ Ring gauges for my teams ─ */}
-                    <div className="ov-chart-card">
-                      <h3>我的团队·环形指标</h3>
-                      <p className="tch-desc">每个环表示一个团队的均分占满分比</p>
-                      <div style={{ display: "flex", justifyContent: "center", gap: 32, flexWrap: "wrap", padding: "12px 0" }}>
-                        {(teamData.my_teams ?? []).map((t: any) => {
-                          const pct = (t.avg_score / 10) * 100;
-                          const r = 38; const c = 2 * Math.PI * r;
-                          const col = t.avg_score >= 7 ? "#5cbd8a" : t.avg_score >= 5 ? "#e0a84c" : "#e07070";
-                          return (
-                            <div key={t.team_id} style={{ textAlign: "center", cursor: "pointer" }} onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); }}>
-                              <svg width="92" height="92" viewBox="0 0 92 92">
-                                <circle cx="46" cy="46" r={r} fill="none" stroke="var(--bg-card-hover)" strokeWidth="7" />
-                                <circle cx="46" cy="46" r={r} fill="none" stroke={col} strokeWidth="7" strokeLinecap="round" strokeDasharray={`${c * pct / 100} ${c}`} transform="rotate(-90 46 46)" style={{ transition: "stroke-dasharray 1s ease" }} />
-                                <text x="46" y="44" textAnchor="middle" fill="var(--text-primary)" fontSize="18" fontWeight="700">{t.avg_score}</text>
-                                <text x="46" y="58" textAnchor="middle" fill="var(--text-muted)" fontSize="9">/10</text>
-                              </svg>
-                              <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4, fontWeight: 600 }}>{t.team_name.slice(0, 8)}</div>
-                              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{t.student_count}人 · {t.total_submissions}次</div>
-                            </div>
+                            <button
+                              key={t.team_id}
+                              className="tm-pulse-card"
+                              onClick={() => { setSelectedTeamId(t.team_id); setTeamView("team-detail"); setSelectedTeamStudentId(""); setSelectedTeamProjectId(""); }}
+                            >
+                              <div className="tm-pulse-card-head">
+                                <div>
+                                  <div className="tm-pulse-label">团队状态</div>
+                                  <div className="tm-pulse-title">{t.team_name}</div>
+                                </div>
+                                <div className="tm-pulse-link">点击查看团队病例 →</div>
+                              </div>
+                              <div className="tm-pulse-stats">
+                                <div><strong>{Number(t.avg_score || 0).toFixed(1)}</strong><span>均分</span></div>
+                                <div><strong>{t.total_submissions}</strong><span>提交</span></div>
+                                <div><strong>{Number(t.risk_rate || 0).toFixed(0)}%</strong><span>风险率</span></div>
+                              </div>
+                              <div className="tm-pulse-spark">
+                                {points ? (
+                                  <svg viewBox="0 0 180 56" preserveAspectRatio="none">
+                                    <polyline points={points} fill="none" stroke="url(#pulse-grad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                    <defs>
+                                      <linearGradient id="pulse-grad" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#73ccff" />
+                                        <stop offset="100%" stopColor="#6b8aff" />
+                                      </linearGradient>
+                                    </defs>
+                                  </svg>
+                                ) : <div className="tm-pulse-empty">等待更多项目迭代数据</div>}
+                              </div>
+                              <div className="tm-pulse-foot">
+                                <span>{dominantIntent(t.intent_distribution)}</span>
+                                <span>{(t.top_risks || []).slice(0, 1).map((r: string) => getRuleDisplayName(r)).join(" / ") || "暂无高频风险"}</span>
+                              </div>
+                            </button>
                           );
                         })}
                       </div>
@@ -3403,84 +3485,282 @@ export default function TeacherPage() {
                 );
               })()}
 
-              {/* ══════ VIEW: Student Detail ══════ */}
+              {/* ══════ VIEW: Student Detail — Systematic Dashboard ══════ */}
               {teamView === "student-detail" && !loading && teamData && (() => {
                 const team = (teamData.my_teams ?? []).find((t: any) => t.team_id === selectedTeamId);
                 const stu = team?.students?.find((s: any) => s.student_id === selectedTeamStudentId);
                 if (!stu) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>学生数据未找到</p>;
                 const projects: any[] = stu.projects || [];
-                const allSubs = projects.flatMap((p: any) => (p.submissions || []));
-                const timelineData = [...allSubs].sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || "")).map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: s.overall_score }));
+                const activeProject = projects.find((p: any) => p.project_id === selectedTeamProjectId) || projects[0];
+                const allSubs = [...projects.flatMap((p: any) => (p.submissions || []))].sort((a: any, b: any) => (a.created_at || "").localeCompare(b.created_at || ""));
+                const projectTimeline = (activeProject?.submissions || []).map((s: any) => ({ label: formatBJTime(s.created_at), value: Number(s.overall_score || 0) }));
+                const studentIntentMix = intentEntries(stu.intent_distribution);
+                const activeIntentMix = intentEntries(activeProject?.intent_distribution);
+                const latestDiag = activeProject?.latest_diagnosis || {};
+                const latestTask = activeProject?.latest_task || {};
+                const latestKg = activeProject?.latest_kg || {};
+                const latestHyper = activeProject?.latest_hypergraph || {};
+                const latestHyperStudent = activeProject?.latest_hypergraph_student || {};
+                const latestQuotes: any[] = activeProject?.evidence_quotes || [];
+                const latestKgEntities: any[] = latestKg.entities || [];
+                const latestKgGaps: string[] = latestKg.structural_gaps || [];
+                const latestKgStrengths: string[] = latestKg.content_strengths || [];
+                const latestHubs: any[] = latestHyperStudent.hub_entities || [];
+                const latestCrossLinks: any[] = latestHyperStudent.cross_links || [];
+                const latestWarnings: string[] = latestHyperStudent.pattern_warnings || [];
+                const localDate = (v: string) => formatBJTime(v) || "—";
+                const studentNarrative = stu.student_case_summary || activeProject?.current_summary || "暂无可用的项目理解摘要";
+                const statusColor = stu.avg_score >= 7 ? "var(--tch-success)" : stu.avg_score >= 5 ? "var(--tch-warning)" : "var(--tch-danger)";
+                const statusLabel = stu.avg_score >= 7 ? "良好" : stu.avg_score >= 5 ? "一般" : "需关注";
+                const riskScore = allSubs.length > 0 ? Math.round(allSubs.filter((s: any) => (s.triggered_rules || []).length > 0).length / allSubs.length * 100) : 0;
+
                 return (
                   <>
-                    <h2 style={{ marginTop: 0 }}>{stu.display_name} · 项目演进</h2>
-                    <p className="tch-desc">点击项目卡片可查看详细迭代过程</p>
+                    <div className="tm-case-hero">
+                      <div className="tm-case-avatar">{(stu.display_name || "?")[0]}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                          <h2 style={{ margin: 0, fontSize: 20 }}>{stu.display_name}</h2>
+                          <span className="tm-case-badge" style={{ background: statusColor + "1f", color: statusColor }}>{statusLabel}</span>
+                          <span className="tm-case-badge">{stu.latest_phase || "持续迭代"}</span>
+                          <span className="tm-case-badge">{dominantIntent(stu.intent_distribution)}</span>
+                          {activeProject?.project_name && <span className="tm-case-badge">当前聚焦：{activeProject.project_name}</span>}
+                        </div>
+                        <div className="tm-case-meta">
+                          <span>最后活跃 {localDate(stu.last_active || "")}</span>
+                          <span>{stu.project_count} 个项目</span>
+                          <span>{stu.total_submissions} 次提交</span>
+                        </div>
+                        <div className="tm-case-summary">
+                          <div className="tm-case-summary-title">AI 项目病历摘要</div>
+                          <div className="tm-case-summary-body">{studentNarrative}</div>
+                        </div>
+                        {stu.teacher_intervention && <div className="tm-case-inline-summary" style={{ marginTop: 10 }}>教师建议介入：{stu.teacher_intervention}</div>}
+                      </div>
+                    </div>
 
-                    <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                    <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
                       {[
-                        { icon: "📝", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: stu.total_submissions, l: "总提交", d: 0 },
-                        { icon: "📁", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: stu.project_count, l: "项目数", d: 0 },
+                        { icon: "📝", bg: "rgba(107,138,255,0.15)", c: "var(--accent)", v: stu.total_submissions, l: "提交", d: 0 },
+                        { icon: "📁", bg: "rgba(92,189,138,0.15)", c: "var(--tch-success)", v: stu.project_count, l: "项目", d: 0 },
                         { icon: "⭐", bg: "rgba(232,168,76,0.15)", c: "var(--tch-warning)", v: stu.avg_score, l: "均分", d: 1 },
                         { icon: "📈", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: stu.trend, l: "趋势", d: 1 },
+                        { icon: "⚠️", bg: "rgba(224,112,112,0.15)", c: "var(--tch-danger)", v: riskScore, l: "风险%", d: 0 },
                       ].map((k, i) => (
                         <div key={i} className="ov-kpi-card">
                           <div className="ov-kpi-icon" style={{ background: k.bg, color: k.c }}>{k.icon}</div>
-                          <div className="ov-kpi-value" style={{ color: k.c }}>{k.l === "趋势" && k.v > 0 ? "+" : ""}<AnimatedNumber value={k.v} decimals={k.d} /></div>
+                          <div className="ov-kpi-value" style={{ color: k.c }}>{k.l === "趋势" && k.v > 0 ? "+" : ""}<AnimatedNumber value={k.v} decimals={k.d} />{k.l === "风险%" && <span style={{ fontSize: 14 }}>%</span>}</div>
                           <div className="ov-kpi-label">{k.l}</div>
                         </div>
                       ))}
                     </div>
 
-                    {timelineData.length >= 2 && (
-                      <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                        <h3>成绩变化曲线</h3>
-                        <AreaChart data={timelineData} color="rgba(107,138,255,0.9)" height={130} />
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>项目病例切换</h3>
+                        <p className="tch-desc">一个学生多个项目时，下面每张病例卡都代表一个独立项目，不会再共用同一张图谱卡。</p>
+                        <div className="tm-project-switch-list">
+                          {projects.map((p: any) => {
+                            const active = activeProject?.project_id === p.project_id;
+                            const impColor = p.improvement > 0 ? "var(--tch-success)" : p.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)";
+                            return (
+                              <div
+                                key={p.project_id}
+                                className={`tm-project-switch-card ${active ? "active" : ""}`}
+                                onClick={() => setSelectedTeamProjectId(p.project_id)}
+                              >
+                                <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                                  <strong style={{ color: "var(--text-primary)" }}>{p.project_name}</strong>
+                                  <span style={{ color: impColor, fontWeight: 700 }}>{p.improvement > 0 ? `+${p.improvement}` : p.improvement || "0"}</span>
+                                </div>
+                                <div className="tm-case-meta" style={{ marginTop: 6 }}>
+                                  <span>{p.project_phase || "持续迭代"}</span>
+                                  <span>{p.submission_count} 次迭代</span>
+                                  <span>{p.latest_score}/10</span>
+                                </div>
+                                <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>{p.current_summary || "暂无项目摘要"}</div>
+                                <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
+                                  {(p.top_risks || []).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                  <span className="tm-smart-chip">{dominantIntent(p.intent_distribution)}</span>
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+                                  <button
+                                    className="tch-sm-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedTeamProjectId(p.project_id);
+                                      setTeamView("project-detail");
+                                    }}
+                                  >
+                                    查看证据链
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    )}
-
-                    {/* ─ Project progress bars ─ */}
-                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                      <h3>各项目得分进度</h3>
-                      <p className="tch-desc">每条表示一个项目的最新得分(满10分)和进步幅度</p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
-                        {projects.map((p: any) => {
-                          const col = p.latest_score >= 7 ? "#5cbd8a" : p.latest_score >= 5 ? "#e0a84c" : "#e07070";
-                          return (
-                            <div key={p.project_id} style={{ cursor: "pointer" }} onClick={() => { setSelectedTeamProjectId(p.project_id); setTeamView("project-detail"); }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
-                                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{p.project_name}</span>
-                                <span style={{ color: col, fontWeight: 700 }}>{p.latest_score} <span style={{ fontSize: 10, fontWeight: 400, color: p.improvement > 0 ? "var(--tch-success)" : p.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)" }}>{p.improvement > 0 ? `↑${p.improvement}` : p.improvement < 0 ? `↓${Math.abs(p.improvement)}` : ""}</span></span>
+                      <div className="ov-chart-card">
+                        <h3>求助意图分布</h3>
+                        <p className="tch-desc">老师可以判断学生更需要补基础、做商业诊断，还是打磨表达材料。</p>
+                        <div className="tm-intent-panel">
+                          {(studentIntentMix.length ? studentIntentMix : [{ label: "综合咨询", value: 1, color: "var(--accent)" }]).map((item) => {
+                            const total = Math.max(1, studentIntentMix.reduce((sum, cur) => sum + cur.value, 0));
+                            return (
+                              <div key={item.label} className="tm-intent-row">
+                                <span>{item.label}</span>
+                                <div><i style={{ width: `${(item.value / total) * 100}%`, background: `linear-gradient(90deg, ${item.color}33, ${item.color})` }} /></div>
+                                <b>{item.value}</b>
                               </div>
-                              <div style={{ height: 8, background: "var(--bg-card-hover)", borderRadius: 4, overflow: "hidden" }}>
-                                <div style={{ width: `${(p.latest_score / 10) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${col}88, ${col})`, borderRadius: 4, transition: "width 0.8s ease" }} />
-                              </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                        <div className="tm-case-summary" style={{ marginTop: 14 }}>
+                          <div className="tm-case-summary-title">教学介入提示</div>
+                          <div className="tm-case-summary-body">{stu.teacher_intervention || "建议结合下方项目病例判断该学生当前最需要哪类帮助。"}</div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="ov-section">
-                      <h3>项目列表 ({projects.length})</h3>
-                      <div className="cls-proj-grid">
-                        {projects.map((proj: any, idx: number) => {
-                          const impColor = proj.improvement > 0 ? "var(--tch-success)" : proj.improvement < 0 ? "var(--tch-danger)" : "var(--text-muted)";
-                          const miniTimeline = (proj.submissions || []).map((s: any) => ({ label: (s.created_at || "").slice(5, 10), value: s.overall_score }));
-                          return (
-                            <div key={proj.project_id} className="cls-proj-card" style={{ animationDelay: `${idx * 0.05}s` }} onClick={() => { setSelectedTeamProjectId(proj.project_id); setTeamView("project-detail"); }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                                <strong style={{ fontSize: 14, color: "var(--text-primary)" }}>{proj.project_name}</strong>
-                                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{proj.submission_count} 次</span>
-                              </div>
-                              {miniTimeline.length >= 2 && <div style={{ height: 50, marginBottom: 6 }}><AreaChart data={miniTimeline} height={50} color={impColor === "var(--tch-success)" ? "rgba(92,189,138,0.8)" : "rgba(107,138,255,0.7)"} /></div>}
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
-                                <span style={{ color: "var(--text-secondary)" }}>{proj.first_score} → <strong style={{ color: proj.latest_score >= 7 ? "var(--tch-success)" : proj.latest_score >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>{proj.latest_score}</strong></span>
-                                <span style={{ fontWeight: 700, color: impColor }}>{proj.improvement > 0 ? `+${proj.improvement}` : proj.improvement < 0 ? `${proj.improvement}` : "—"}</span>
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>当前聚焦项目病程</h3>
+                        <p className="tch-desc">{activeProject ? `${activeProject.project_name} 的阶段与得分如何变化` : "暂无项目"}</p>
+                        {projectTimeline.length >= 2 ? <AreaChart data={projectTimeline} color="rgba(107,138,255,0.9)" height={130} /> : <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>提交次数不足，暂无曲线</p>}
+                        {activeIntentMix.length > 0 && (
+                          <div className="tm-corridor-tags" style={{ marginTop: 12 }}>
+                            {activeIntentMix.map((item) => <span key={item.label} className="tm-smart-chip" style={{ background: `${item.color}22`, color: item.color }}>{item.label} {item.value}</span>)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>当前病情快照</h3>
+                        <p className="tch-desc">只针对当前选中项目展示，不再把多个项目混到一起。</p>
+                        {activeProject ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                              <div style={{ width: 56, height: 56, borderRadius: 14, background: statusColor + "18", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, color: statusColor }}>{latestDiag.overall_score || activeProject.latest_score || 0}</div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 12, color: "var(--text-primary)", fontWeight: 700 }}>{activeProject.project_phase || "持续迭代"}</div>
+                                {latestDiag.bottleneck && <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 4 }}>🎯 {latestDiag.bottleneck}</div>}
+                                {latestTask.title && <div style={{ fontSize: 11, color: "var(--accent)", marginTop: 3 }}>➡️ {latestTask.title}</div>}
                               </div>
                             </div>
-                          );
-                        })}
+                            <div className="tm-case-inline-summary">{activeProject.current_summary || "暂无项目摘要"}</div>
+                            {latestDiag.weaknesses?.length > 0 && <div style={{ fontSize: 11 }}><strong style={{ color: "var(--tch-danger)" }}>当前差什么：</strong><span style={{ color: "var(--text-secondary)" }}>{latestDiag.weaknesses.slice(0, 3).join("；")}</span></div>}
+                            {latestDiag.strengths?.length > 0 && <div style={{ fontSize: 11 }}><strong style={{ color: "var(--tch-success)" }}>已有优势：</strong><span style={{ color: "var(--text-secondary)" }}>{latestDiag.strengths.slice(0, 3).join("；")}</span></div>}
+                          </div>
+                        ) : <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无诊断数据</p>}
                       </div>
+                    </div>
+
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>知识图谱病灶</h3>
+                        <p className="tch-desc">帮助老师理解学生项目“缺哪块、强哪块”</p>
+                        <div className="tm-signal-grid">
+                          <div className="tm-signal-box">
+                            <div className="tm-signal-value">{latestKgEntities.length}</div>
+                            <div className="tm-signal-label">识别实体</div>
+                          </div>
+                          <div className="tm-signal-box">
+                            <div className="tm-signal-value">{(latestKg.relationships || []).length}</div>
+                            <div className="tm-signal-label">关键关系</div>
+                          </div>
+                          <div className="tm-signal-box">
+                            <div className="tm-signal-value">{latestKg.completeness_score || 0}</div>
+                            <div className="tm-signal-label">完整度</div>
+                          </div>
+                        </div>
+                        {activeProject && <div className="tm-case-inline-summary" style={{ marginTop: 10 }}>{latestKg.insight || "暂无图谱洞察"}</div>}
+                        {latestKgEntities.length > 0 && (
+                          <div className="tm-chip-cloud">
+                            {latestKgEntities.slice(0, 10).map((e: any, i: number) => <span key={i} className="tm-smart-chip">{e.label || e.id}</span>)}
+                          </div>
+                        )}
+                        {latestKgGaps.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>结构缺口</div>
+                            {latestKgGaps.slice(0, 4).map((g: string, i: number) => <div key={i} className="tm-note-row bad">{g}</div>)}
+                          </div>
+                        )}
+                        {latestKgStrengths.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>已有亮点</div>
+                            {latestKgStrengths.slice(0, 4).map((g: string, i: number) => <div key={i} className="tm-note-row good">{g}</div>)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>超图联动诊断</h3>
+                        <p className="tch-desc">看项目是否形成跨维度联动，而不是单点堆砌</p>
+                        <div className="tm-signal-grid">
+                          <div className="tm-signal-box">
+                            <div className="tm-signal-value">{latestHyperStudent.coverage_score || 0}</div>
+                            <div className="tm-signal-label">覆盖分</div>
+                          </div>
+                          <div className="tm-signal-box">
+                            <div className="tm-signal-value">{latestHubs.length}</div>
+                            <div className="tm-signal-label">核心支撑点</div>
+                          </div>
+                          <div className="tm-signal-box">
+                            <div className="tm-signal-value">{latestCrossLinks.length}</div>
+                            <div className="tm-signal-label">跨维链接</div>
+                          </div>
+                        </div>
+                        {latestHyper.summary && <div className="tm-case-inline-summary">{latestHyper.summary}</div>}
+                        {latestHubs.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            {latestHubs.slice(0, 4).map((h: any, i: number) => (
+                              <div key={i} className="tm-linked-row">
+                                <span className="tm-linked-main">{h.entity}</span>
+                                <span className="tm-linked-side">{h.connections} 维连接</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {latestWarnings.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            {latestWarnings.slice(0, 3).map((w: string, i: number) => <div key={i} className="tm-note-row warn">{w}</div>)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {activeProject?.teacher_intervention && (
+                      <div className="ov-chart-card" style={{ marginBottom: 20, borderLeft: "3px solid var(--accent)" }}>
+                        <h3 style={{ display: "flex", alignItems: "center", gap: 6 }}>🎯 当前项目建议介入</h3>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", marginTop: 4 }}>{activeProject.teacher_intervention}</div>
+                        {latestTask.description && <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 6, lineHeight: 1.6 }}>{latestTask.description}</div>}
+                        {latestTask.acceptance_criteria?.length > 0 && (
+                          <div style={{ marginTop: 8 }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>验收标准</div>
+                            {latestTask.acceptance_criteria.map((c: string, ci: number) => (
+                              <div key={ci} style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 12, color: "var(--text-secondary)", marginBottom: 3 }}>
+                                <span style={{ color: "var(--accent)", flexShrink: 0 }}>✓</span>{c}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                      <h3>风险证据预览</h3>
+                      <p className="tch-desc">这里直接展示 AI 做判断时引用到的学生原话/文档片段，老师无需只看结论。</p>
+                      {latestQuotes.length > 0 ? (
+                        <div className="tm-evidence-grid">
+                          {latestQuotes.map((quote: any, idx: number) => (
+                            <div key={idx} className="tm-evidence-card">
+                              <div className="tm-evidence-top">
+                                <span>{getRuleDisplayName(quote.risk_name || quote.risk_id || "未归类风险")}</span>
+                                <span>{quote.filename || (quote.source === "document" ? "文档证据" : "对话证据")}</span>
+                              </div>
+                              <div className="tm-evidence-quote">“{quote.quote}”</div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>当前项目还没有可展示的证据片段</p>}
                     </div>
                   </>
                 );
@@ -3493,17 +3773,125 @@ export default function TeacherPage() {
                 const proj = stu?.projects?.find((p: any) => p.project_id === selectedTeamProjectId);
                 if (!proj) return <p style={{ color: "var(--text-muted)", padding: 40, textAlign: "center" }}>项目数据未找到</p>;
                 const subs: any[] = proj.submissions || [];
-                const scoreTimeline = subs.map((s: any) => ({ label: (s.created_at || "").slice(5, 16), value: s.overall_score }));
+                const scoreTimeline = subs.map((s: any) => ({ label: formatBJTime(s.created_at), value: s.overall_score }));
+                const latestDiag = proj.latest_diagnosis || {};
+                const latestKg = proj.latest_kg || {};
+                const latestHyper = proj.latest_hypergraph || {};
+                const latestHyperStudent = proj.latest_hypergraph_student || {};
+                const latestTask = proj.latest_task || {};
+                const intentMix = intentEntries(proj.intent_distribution);
+                const evidenceGroups = Object.entries((proj.risk_evidence || []).reduce((acc: Record<string, any[]>, item: any) => {
+                  const key = item.risk_name || item.risk_id || "未归类风险";
+                  acc[key] = acc[key] || [];
+                  acc[key].push(item);
+                  return acc;
+                }, {}));
                 return (
                   <>
-                    <h2 style={{ marginTop: 0 }}>{proj.project_name}</h2>
-                    <p className="tch-desc">学生 {stu.display_name} 的完整迭代记录</p>
+                    <div className="tm-project-cover">
+                      <div>
+                        <div className="tm-project-cover-label">项目诊断封面</div>
+                        <h2 style={{ marginTop: 6, marginBottom: 6 }}>{proj.project_name}</h2>
+                        <div className="tm-case-meta">
+                          <span>{stu.display_name}</span>
+                          <span>{proj.project_phase || "持续迭代"}</span>
+                          <span>{proj.submission_count} 次迭代</span>
+                        </div>
+                        <div className="tm-case-summary" style={{ marginTop: 14 }}>
+                          <div className="tm-case-summary-title">一句话理解项目</div>
+                          <div className="tm-case-summary-body">{proj.current_summary || latestKg.insight || latestHyper.summary || "暂无摘要"}</div>
+                        </div>
+                      </div>
+                      <div className="tm-project-cover-score">
+                        <div>{proj.latest_score || 0}</div>
+                        <span>当前分数</span>
+                      </div>
+                    </div>
 
                     <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(107,138,255,0.15)", color: "var(--accent)" }}>📊</div><div className="ov-kpi-value"><AnimatedNumber value={proj.avg_score} decimals={1} /></div><div className="ov-kpi-label">均分</div></div>
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(92,189,138,0.15)", color: "var(--tch-success)" }}>📈</div><div className="ov-kpi-value" style={{ color: proj.improvement >= 0 ? "var(--tch-success)" : "var(--tch-danger)" }}>{proj.improvement >= 0 ? "+" : ""}<AnimatedNumber value={proj.improvement} decimals={1} /></div><div className="ov-kpi-label">进步</div></div>
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(232,168,76,0.15)", color: "var(--tch-warning)" }}>🔄</div><div className="ov-kpi-value"><AnimatedNumber value={proj.submission_count} /></div><div className="ov-kpi-label">迭代</div></div>
                       <div className="ov-kpi-card"><div className="ov-kpi-icon" style={{ background: "rgba(189,147,249,0.15)", color: "#bd93f9" }}>📄</div><div className="ov-kpi-value"><AnimatedNumber value={subs.filter((s: any) => s.filename).length} /></div><div className="ov-kpi-label">文件</div></div>
+                    </div>
+
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>老师最关心的第一个问题</h3>
+                        <p className="tch-desc">这个项目现在差什么</p>
+                        <div className="tm-threeq-card">
+                          <strong>当前瓶颈</strong>
+                          <div>{latestDiag.bottleneck || "暂无明确瓶颈"}</div>
+                        </div>
+                        {latestDiag.weaknesses?.length > 0 && (
+                          <div className="tm-chip-cloud" style={{ marginTop: 12 }}>
+                            {latestDiag.weaknesses.slice(0, 4).map((item: string, idx: number) => <span key={idx} className="tm-smart-chip">{item}</span>)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>老师最关心的第二个问题</h3>
+                        <p className="tch-desc">学生最近主要向 AI 寻求什么帮助</p>
+                        <div className="tm-intent-panel">
+                          {(intentMix.length ? intentMix : [{ label: "综合咨询", value: 1, color: "var(--accent)" }]).map((item) => {
+                            const total = Math.max(1, intentMix.reduce((sum, cur) => sum + cur.value, 0));
+                            return (
+                              <div key={item.label} className="tm-intent-row">
+                                <span>{item.label}</span>
+                                <div><i style={{ width: `${(item.value / total) * 100}%`, background: `linear-gradient(90deg, ${item.color}33, ${item.color})` }} /></div>
+                                <b>{item.value}</b>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="tm-case-inline-summary" style={{ marginTop: 12 }}>当前主导求助方向：{dominantIntent(proj.intent_distribution)}</div>
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>老师最关心的第三个问题</h3>
+                        <p className="tch-desc">老师该介入什么</p>
+                        <div className="tm-threeq-card accent">
+                          <strong>教学建议</strong>
+                          <div>{proj.teacher_intervention || "建议先检查风险证据链，再决定是补基础还是做专项诊断。"}</div>
+                        </div>
+                        {latestTask.title && <div className="tm-case-inline-summary" style={{ marginTop: 12 }}>下一步任务：{latestTask.title}</div>}
+                      </div>
+                    </div>
+
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>项目结构状态</h3>
+                        <p className="tch-desc">当前项目在图谱和超图上的结构信号</p>
+                        <div className="tm-signal-grid">
+                          <div className="tm-signal-box"><div className="tm-signal-value">{latestKg.completeness_score || 0}</div><div className="tm-signal-label">图谱完整度</div></div>
+                          <div className="tm-signal-box"><div className="tm-signal-value">{(latestKg.entities || []).length}</div><div className="tm-signal-label">关键实体</div></div>
+                          <div className="tm-signal-box"><div className="tm-signal-value">{latestHyperStudent.coverage_score || 0}</div><div className="tm-signal-label">超图覆盖</div></div>
+                        </div>
+                        {(latestKg.entities || []).length > 0 && (
+                          <div className="tm-chip-cloud">
+                            {(latestKg.entities || []).slice(0, 8).map((e: any, idx: number) => <span key={idx} className="tm-smart-chip">{e.label || e.id}</span>)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>意图时间轴</h3>
+                        <p className="tch-desc">除了得分变化，也看学生提问方向如何变化。</p>
+                        <div className="tm-intent-timeline">
+                          {subs.map((sub: any, idx: number) => (
+                            <div key={sub.submission_id || idx} className="tm-intent-timeline-item">
+                              <div className="tm-intent-timeline-dot" />
+                              <div>
+                                <div className="tm-case-meta">
+                                  <span>{formatBJTime(sub.created_at)}</span>
+                                  <span>{sub.project_phase || "持续迭代"}</span>
+                                  <span>{sub.intent || "综合咨询"}</span>
+                                  <span>{Number(sub.overall_score || 0).toFixed(1)}</span>
+                                </div>
+                                <div className="tm-case-inline-summary" style={{ marginTop: 6 }}>{sub.bottleneck || sub.next_task || sub.text_preview || "暂无记录"}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     {scoreTimeline.length >= 2 && (
@@ -3514,32 +3902,32 @@ export default function TeacherPage() {
                     )}
 
                     <div className="ov-section">
-                      <h3>迭代时间线</h3>
-                      <div className="cls-timeline">
-                        {subs.map((sub: any, idx: number) => {
-                          const sc = Number(sub.overall_score || 0);
-                          const scColor = sc >= 7 ? "var(--tch-success)" : sc >= 5 ? "var(--tch-warning)" : "var(--tch-danger)";
-                          const prevSc = idx > 0 ? Number(subs[idx - 1].overall_score || 0) : 0;
-                          const delta = idx > 0 && sc > 0 && prevSc > 0 ? sc - prevSc : null;
-                          return (
-                            <div key={idx} className="cls-tl-item" style={{ animationDelay: `${idx * 0.04}s` }}>
-                              <div className="cls-tl-dot" style={{ background: scColor }} />
-                              <div className="cls-tl-content">
-                                <div className="cls-tl-header">
-                                  <span className="cls-tl-time">{(sub.created_at || "").slice(0, 16)}</span>
-                                  <span className="cls-tl-type">{sub.source_type === "file" ? `📄 ${sub.filename || "文件"}` : "💬 文本"}</span>
-                                  <span className="cls-tl-score" style={{ color: scColor }}>{sc.toFixed(1)}</span>
-                                  {delta !== null && <span style={{ fontSize: 11, fontWeight: 700, color: delta > 0 ? "var(--tch-success)" : delta < 0 ? "var(--tch-danger)" : "var(--text-muted)", marginLeft: 4 }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>}
-                                </div>
-                                {sub.bottleneck && <div className="cls-tl-bottleneck"><strong>🎯 瓶颈：</strong>{sub.bottleneck}</div>}
-                                {sub.next_task && <div className="cls-tl-next"><strong>➡️ 建议：</strong>{sub.next_task}</div>}
-                                {(sub.triggered_rules?.length || 0) > 0 && (
-                                  <div className="cls-tl-rules">{sub.triggered_rules.map((r: string) => <span key={r} className="cls-tl-rule-tag">{getRuleDisplayName(r)}</span>)}</div>
-                                )}
-                              </div>
+                      <h3>风险证据链</h3>
+                      <div className="tm-risk-chain">
+                        {evidenceGroups.length > 0 ? evidenceGroups.map(([riskName, items]: any) => (
+                          <div key={riskName} className="tm-risk-chain-card">
+                            <div className="tm-risk-chain-head">
+                              <strong>{getRuleDisplayName(riskName)}</strong>
+                              <span>{items.length} 条证据</span>
                             </div>
-                          );
-                        })}
+                            <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>
+                              {latestDiag.bottleneck || "AI 认为该风险需要老师优先介入。"}
+                            </div>
+                            <div className="tm-risk-chain-list">
+                              {items.slice(0, 4).map((item: any, idx: number) => (
+                                <div key={idx} className="tm-evidence-card">
+                                  <div className="tm-evidence-top">
+                                    <span>{item.filename || (item.source === "document" ? "文档片段" : "学生原话")}</span>
+                                    <span>{formatBJTime(item.created_at)}</span>
+                                  </div>
+                                  <div className="tm-evidence-quote">“{item.quote}”</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )) : (
+                          <p style={{ color: "var(--text-muted)", padding: 20, textAlign: "center" }}>当前项目还没有可用的风险证据链。</p>
+                        )}
                       </div>
                     </div>
                   </>
@@ -3858,6 +4246,105 @@ export default function TeacherPage() {
         .tm-invite-display { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; justify-content: center; }
         .tm-invite-code { font-size: 28px; font-weight: 800; letter-spacing: 4px; color: var(--accent); font-family: monospace; }
         .tm-invite-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; }
+        .tm-proj-row { cursor: pointer; padding: 8px 12px; border-radius: 10px; transition: background 0.2s; }
+        .tm-proj-row:hover { background: var(--bg-card-hover); }
+        .tm-case-hero { display: flex; align-items: flex-start; gap: 16px; padding: 18px 20px; margin-bottom: 20px; border-radius: 18px; border: 1px solid var(--border); background:
+          radial-gradient(circle at top right, rgba(107,138,255,0.18), transparent 34%),
+          linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+          var(--bg-secondary); }
+        .tm-case-avatar { width: 56px; height: 56px; border-radius: 18px; background: var(--tch-accent-soft); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: var(--accent); flex-shrink: 0; }
+        .tm-case-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; color: var(--text-muted); }
+        .tm-case-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: var(--bg-card); border: 1px solid var(--border); font-size: 11px; color: var(--text-secondary); }
+        .tm-case-summary { margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(107,138,255,0.08); border: 1px solid rgba(107,138,255,0.15); }
+        .tm-case-summary-title { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.3px; margin-bottom: 6px; }
+        .tm-case-summary-body { font-size: 13px; color: var(--text-primary); line-height: 1.7; }
+        .tm-signal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+        .tm-signal-box { padding: 10px 8px; border-radius: 12px; background: var(--bg-card-hover); text-align: center; }
+        .tm-signal-value { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+        .tm-signal-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+        .tm-chip-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .tm-smart-chip { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; background: var(--bg-card-hover); color: var(--text-secondary); font-size: 11px; border: 1px solid var(--border); }
+        .tm-note-row { padding: 8px 10px; border-radius: 10px; font-size: 12px; line-height: 1.5; margin-bottom: 6px; }
+        .tm-note-row.good { background: rgba(92,189,138,0.10); color: var(--text-secondary); }
+        .tm-note-row.bad { background: rgba(224,112,112,0.10); color: var(--text-secondary); }
+        .tm-note-row.warn { background: rgba(232,168,76,0.12); color: var(--text-secondary); }
+        .tm-linked-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: var(--bg-card-hover); margin-bottom: 6px; }
+        .tm-linked-main { font-size: 12px; color: var(--text-primary); font-weight: 600; }
+        .tm-linked-side { font-size: 11px; color: var(--text-muted); }
+        .tm-case-inline-summary { padding: 8px 10px; border-radius: 10px; background: rgba(107,138,255,0.08); color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+        .tm-mini-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 10px; color: var(--text-muted); }
+        .tm-corridor { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 12px; }
+        .tm-corridor-card { position: relative; text-align: left; padding: 16px; border-radius: 18px; border: 1px solid var(--border); background:
+          radial-gradient(circle at top right, rgba(107,138,255,0.12), transparent 32%),
+          linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+          var(--bg-secondary); cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+        .tm-corridor-card:hover { transform: translateY(-2px); border-color: rgba(107,138,255,0.42); box-shadow: 0 14px 30px rgba(8, 19, 49, 0.22); }
+        .tm-corridor-card.mine { border-color: rgba(107,138,255,0.34); }
+        .tm-corridor-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+        .tm-corridor-rank { font-size: 11px; color: var(--accent); font-weight: 700; }
+        .tm-corridor-name { margin-top: 4px; font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .tm-corridor-arrow { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+        .tm-corridor-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+        .tm-corridor-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+        .tm-corridor-barline { display: grid; grid-template-columns: 40px 1fr 42px; gap: 8px; align-items: center; font-size: 11px; color: var(--text-secondary); }
+        .tm-corridor-barline div { height: 8px; border-radius: 999px; background: var(--bg-card-hover); overflow: hidden; }
+        .tm-corridor-barline i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(107,138,255,0.25), #6b8aff); }
+        .tm-corridor-barline b { text-align: right; color: var(--text-primary); font-size: 11px; }
+        .tm-corridor-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .tm-corridor-tooltip { position: absolute; inset: auto 14px 14px 14px; display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; border-radius: 12px; background: rgba(8, 16, 38, 0.92); border: 1px solid rgba(115,204,255,0.18); color: #dfe7ff; font-size: 11px; line-height: 1.55; opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+        .tm-corridor-card:hover .tm-corridor-tooltip { opacity: 1; transform: translateY(0); }
+        .tm-pulse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 12px; }
+        .tm-pulse-card { text-align: left; padding: 16px; border-radius: 18px; border: 1px solid rgba(107,138,255,0.18); background:
+          radial-gradient(circle at left top, rgba(115,204,255,0.10), transparent 30%),
+          linear-gradient(180deg, rgba(107,138,255,0.08), rgba(107,138,255,0.02)),
+          var(--bg-secondary); cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+        .tm-pulse-card:hover { transform: translateY(-2px); border-color: rgba(107,138,255,0.42); box-shadow: 0 12px 26px rgba(13, 21, 43, 0.18); }
+        .tm-pulse-card-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+        .tm-pulse-label { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: 0.2px; }
+        .tm-pulse-title { margin-top: 4px; font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .tm-pulse-link { font-size: 11px; color: var(--text-muted); }
+        .tm-pulse-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+        .tm-pulse-stats div { padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); }
+        .tm-pulse-stats strong { display: block; font-size: 18px; color: var(--text-primary); }
+        .tm-pulse-stats span { display: block; margin-top: 4px; font-size: 10px; color: var(--text-muted); }
+        .tm-pulse-spark { height: 66px; margin-top: 12px; padding: 8px; border-radius: 14px; background: rgba(107,138,255,0.06); border: 1px solid rgba(107,138,255,0.1); }
+        .tm-pulse-spark svg { width: 100%; height: 100%; }
+        .tm-pulse-empty { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 11px; color: var(--text-muted); }
+        .tm-pulse-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; font-size: 11px; color: var(--text-muted); }
+        .tm-project-switch-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; max-height: 500px; overflow-y: auto; padding-right: 4px; }
+        .tm-project-switch-card { padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-secondary); transition: transform 0.15s, border-color 0.15s, background 0.15s; cursor: pointer; }
+        .tm-project-switch-card:hover { transform: translateX(2px); border-color: rgba(107,138,255,0.3); background: rgba(107,138,255,0.04); }
+        .tm-project-switch-card.active { border-color: var(--accent); background: rgba(107,138,255,0.08); box-shadow: inset 0 0 0 1px rgba(107,138,255,0.12); }
+        .tm-intent-panel { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .tm-intent-row { display: grid; grid-template-columns: 72px 1fr 24px; gap: 8px; align-items: center; font-size: 12px; color: var(--text-secondary); }
+        .tm-intent-row div { height: 10px; background: var(--bg-card-hover); border-radius: 999px; overflow: hidden; }
+        .tm-intent-row i { display: block; height: 100%; border-radius: 999px; }
+        .tm-intent-row b { text-align: right; color: var(--text-primary); font-size: 11px; }
+        .tm-evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 10px; }
+        .tm-evidence-card { padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-secondary); }
+        .tm-evidence-top { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--text-muted); }
+        .tm-evidence-quote { margin-top: 8px; font-size: 12px; line-height: 1.7; color: var(--text-primary); }
+        .tm-project-cover { display: flex; justify-content: space-between; gap: 16px; padding: 18px 20px; margin-bottom: 20px; border-radius: 18px; border: 1px solid rgba(107,138,255,0.2); background:
+          radial-gradient(circle at top right, rgba(107,138,255,0.18), transparent 34%),
+          linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+          var(--bg-secondary); }
+        .tm-project-cover-label { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: 0.2px; }
+        .tm-project-cover-score { width: 118px; min-width: 118px; border-radius: 18px; background: rgba(107,138,255,0.08); border: 1px solid rgba(107,138,255,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .tm-project-cover-score div { font-size: 34px; font-weight: 800; color: var(--text-primary); }
+        .tm-project-cover-score span { margin-top: 4px; font-size: 11px; color: var(--text-muted); }
+        .tm-threeq-card { padding: 12px 14px; border-radius: 14px; background: var(--bg-secondary); border: 1px solid var(--border); font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+        .tm-threeq-card strong { display: block; margin-bottom: 6px; color: var(--text-primary); }
+        .tm-threeq-card.accent { border-color: rgba(107,138,255,0.24); background: rgba(107,138,255,0.06); }
+        .tm-intent-timeline { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .tm-intent-timeline-item { display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: flex-start; }
+        .tm-intent-timeline-dot { width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(107,138,255,0.1); }
+        .tm-risk-chain { display: flex; flex-direction: column; gap: 14px; }
+        .tm-risk-chain-card { padding: 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-secondary); }
+        .tm-risk-chain-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; color: var(--text-primary); }
+        .tm-risk-chain-head span { font-size: 11px; color: var(--text-muted); }
+        .tm-risk-chain-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; }
+        .tch-topbar-status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); font-size: 12px; }
+        .tch-topbar-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px rgba(107,138,255,0.45); }
 
         .cls-stu-table .cls-stu-hdr { grid-template-columns: 40px 2fr repeat(4, 1fr); }
         .cls-stu-table .cls-stu-row { grid-template-columns: 40px 2fr repeat(4, 1fr); }
@@ -3897,6 +4384,10 @@ export default function TeacherPage() {
           .cls-stu-hdr { display: none; }
           .cls-stu-row { grid-template-columns: 1fr; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
           .cls-proj-grid { grid-template-columns: 1fr; }
+          .tm-project-cover { flex-direction: column; }
+          .tm-project-cover-score { width: 100%; min-width: 0; padding: 18px 0; }
+          .tm-pulse-stats { grid-template-columns: 1fr; }
+          .tm-intent-row { grid-template-columns: 66px 1fr 24px; }
         }
 
         @media (max-width: 1024px) { .ov-kpi-grid { grid-template-columns: repeat(3, 1fr); } }

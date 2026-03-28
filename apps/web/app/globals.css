@@ -1582,6 +1582,29 @@ pre {
   flex-direction: column;
   gap: 2px;
 }
+.conv-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.conv-delete-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+.conv-delete-btn:hover {
+  background: rgba(224,112,112,0.12);
+  color: #e07070;
+  border-color: rgba(224,112,112,0.2);
+}
 .conv-item:hover {
   background: var(--bg-card);
   color: var(--text-primary);
@@ -1596,6 +1619,14 @@ pre {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.conv-preview {
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.92;
 }
 .conv-meta {
   font-size: 11px;
@@ -4133,14 +4164,48 @@ pre {
 .kg-full { display: flex; flex-direction: column; gap: 14px; }
 .kg-svg-graph {
   width: 100%;
-  max-height: 320px;
+  height: 360px;
   border-radius: 10px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
+  user-select: none;
 }
-.kg-node-g { transition: transform 0.2s; }
-.kg-node-g:hover { transform: scale(1.15); }
-.kg-node-g:hover circle { stroke-width: 2.5; }
+.kg-zoom-shell {
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+.kg-zoom-shell:active { cursor: grabbing; }
+.kg-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.kg-toolbar-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.kg-tool-btn {
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.kg-tool-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.kg-node-g circle,
+.kg-node-g text,
+.kg-node-g line {
+  transition: stroke-width 0.16s ease, opacity 0.16s ease;
+}
+.kg-node-g:hover circle { stroke-width: 2; }
 
 .kg-dim-scores { display: flex; flex-direction: column; gap: 5px; }
 .kg-dim-scores h5, .kg-list-section h5, .kg-tasks-section h5, .kg-rels-section h5 {

@@ -78,10 +78,10 @@ export default function ResetPasswordPage() {
           ) : (
             <form className="auth-form" onSubmit={handleSubmit}>
               <label className="auth-label">
-                <span>邮箱</span>
+                <span>账号 / 手机号</span>
                 <div className="auth-input-wrap">
                   <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="auth-input auth-input-icon-pad" />
+                  <input type="text" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="输入注册时使用的账号" className="auth-input auth-input-icon-pad" />
                 </div>
               </label>
               <label className="auth-label">

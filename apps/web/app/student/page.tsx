@@ -9,7 +9,7 @@ import { useAuth, logout } from "../hooks/useAuth";
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
-type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "debug";
+type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "interventions" | "debug";
 type CompetitionType = "" | "internet_plus" | "challenge_cup" | "innovation" | "math_modeling";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
@@ -30,6 +30,40 @@ function formatBjTime(value?: string | Date, withDate = false) {
     : { timeZone: "Asia/Shanghai", hour: "2-digit", minute: "2-digit" }).format(d);
 }
 
+function annotationStyle(type: string) {
+  const map: Record<string, { label: string; cls: string }> = {
+    praise: { label: "亮点", cls: "praise" },
+    issue: { label: "问题", cls: "issue" },
+    suggest: { label: "建议", cls: "suggest" },
+    question: { label: "追问", cls: "question" },
+  };
+  return map[type] || map.issue;
+}
+
+function renderAnnotatedStudentText(text: string, annotations: any[]) {
+  const source = String(text || "").trim();
+  if (!source) return null;
+  const sorted = [...(annotations || [])]
+    .filter((item: any) => item.quote || item.length > 0)
+    .sort((a: any, b: any) => Number(a.position || 0) - Number(b.position || 0));
+  if (!sorted.length) return <div className="student-annotated-text">{source}</div>;
+  const nodes: JSX.Element[] = [];
+  let cursor = 0;
+  sorted.forEach((item: any, idx: number) => {
+    const start = Math.max(cursor, Number(item.position || 0));
+    const end = item.quote ? start + String(item.quote).length : start + Math.max(0, Number(item.length || 0));
+    if (start > cursor) nodes.push(<span key={`plain-${idx}`}>{source.slice(cursor, start)}</span>);
+    nodes.push(
+      <mark key={`mark-${idx}`} className={`student-inline-mark ${annotationStyle(item.annotation_type).cls}`} title={item.content || item.overall_feedback || ""}>
+        {source.slice(start, end) || item.quote}
+      </mark>
+    );
+    cursor = Math.max(cursor, end);
+  });
+  if (cursor < source.length) nodes.push(<span key="tail">{source.slice(cursor)}</span>);
+  return <div className="student-annotated-text">{nodes}</div>;
+}
+
 export default function StudentPage() {
   const currentUser = useAuth("student");
   const [projectId, setProjectId] = useState("");
@@ -45,6 +79,9 @@ export default function StudentPage() {
   const [rightOpen, setRightOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [teacherFeedback, setTeacherFeedback] = useState<any[]>([]);
+  const [teacherAnnotationBoards, setTeacherAnnotationBoards] = useState<any[]>([]);
+  const [selectedAnnotationBoardId, setSelectedAnnotationBoardId] = useState("");
+  const [teacherInterventions, setTeacherInterventions] = useState<any[]>([]);
   const [convSidebarOpen, setConvSidebarOpen] = useState(true);
   const [conversations, setConversations] = useState<ConvMeta[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -456,9 +493,35 @@ export default function StudentPage() {
 
   async function loadFeedback() {
     try {
-      const resp = await fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}/feedback`);
+      const [feedbackResp, annotationResp] = await Promise.all([
+        fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}/feedback`),
+        fetch(`${API_BASE}/api/student/project/${encodeURIComponent(projectId)}/annotation-boards`),
+      ]);
+      const feedbackData = await feedbackResp.json();
+      const annotationData = await annotationResp.json();
+      setTeacherFeedback(feedbackData.feedback ?? annotationData.project_feedback ?? []);
+      const boards = annotationData.boards ?? [];
+      setTeacherAnnotationBoards(boards);
+      setSelectedAnnotationBoardId((prev) => prev && boards.some((item: any) => item.submission_id === prev) ? prev : (boards[0]?.submission_id ?? ""));
+    } catch { /* ignore */ }
+  }
+
+  async function loadInterventions() {
+    try {
+      const resp = await fetch(`${API_BASE}/api/student/interventions?project_id=${encodeURIComponent(projectId)}`);
       const data = await resp.json();
-      setTeacherFeedback(data.feedback ?? []);
+      setTeacherInterventions(data.interventions ?? []);
+    } catch { /* ignore */ }
+  }
+
+  async function markInterventionViewed(interventionId: string) {
+    try {
+      await fetch(`${API_BASE}/api/student/interventions/${encodeURIComponent(interventionId)}/view`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project_id: projectId, student_id: studentId }),
+      });
+      loadInterventions();
     } catch { /* ignore */ }
   }
 
@@ -986,9 +1049,10 @@ export default function StudentPage() {
                 { id: "hyper",  label: "超图" },
                 { id: "cases",  label: "案例" },
                 { id: "feedback", label: "批注" },
+                { id: "interventions", label: "教师任务" },
                 { id: "debug",  label: "调试" },
               ] as { id: RightTab; label: string }[]).map((t) => (
-                <button key={t.id} className={`rtab-pill ${rightTab === t.id ? "active" : ""}`} onClick={() => { setRightTab(t.id); if (t.id === "feedback") loadFeedback(); }}>
+                <button key={t.id} className={`rtab-pill ${rightTab === t.id ? "active" : ""}`} onClick={() => { setRightTab(t.id); if (t.id === "feedback") loadFeedback(); if (t.id === "interventions") loadInterventions(); }}>
                   {t.label}
                 </button>
               ))}
@@ -1567,14 +1631,97 @@ export default function StudentPage() {
               {rightTab === "feedback" && (
                 <div className="right-section">
                   <h4>教师批注</h4>
-                  <div className="panel-desc">你的导师对项目的反馈意见。这些批注会影响AI后续给你的建议方向。</div>
+                  <div className="panel-desc">这里会显示老师给你的带划线批注版本、阶段性反馈，以及你被批注后又进行了哪些后续修改。</div>
+                  {teacherAnnotationBoards.length > 0 && (
+                    <div className="student-feedback-board-list">
+                      {teacherAnnotationBoards.map((board: any) => (
+                        <button
+                          key={board.submission_id}
+                          className={`student-feedback-board-chip ${selectedAnnotationBoardId === board.submission_id ? "active" : ""}`}
+                          onClick={() => setSelectedAnnotationBoardId(board.submission_id)}
+                        >
+                          <strong>{board.project_display_name || "项目批注"}</strong>
+                          <span>{board.material_display_name || "材料"} · {board.annotation_count} 条批注</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {(() => {
+                    const activeBoard = teacherAnnotationBoards.find((item: any) => item.submission_id === selectedAnnotationBoardId) || teacherAnnotationBoards[0];
+                    return activeBoard ? (
+                      <div className="student-feedback-reader">
+                        <div className="student-feedback-reader-head">
+                          <div>
+                            <strong>{activeBoard.project_display_name}</strong>
+                            <div className="msg-time">{activeBoard.material_display_name} · {formatBjTime(activeBoard.created_at, true)}</div>
+                          </div>
+                          {activeBoard.download_url && (
+                            <a href={`${API_BASE}${activeBoard.download_url}`} target="_blank" rel="noreferrer" className="tch-sm-btn">下载原文件</a>
+                          )}
+                        </div>
+                        {renderAnnotatedStudentText(activeBoard.raw_text, activeBoard.latest_annotations)}
+                        <div className="student-annotation-list">
+                          {(activeBoard.latest_annotations || []).map((item: any) => {
+                            const tone = annotationStyle(item.annotation_type);
+                            return (
+                              <div key={item.annotation_item_id} className={`student-annotation-item ${tone.cls}`}>
+                                <strong>{tone.label}</strong>
+                                {item.quote && <blockquote>“{item.quote}”</blockquote>}
+                                <p>{item.content || item.overall_feedback}</p>
+                                <span className="msg-time">{formatBjTime(item.created_at, true)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {activeBoard.followup_submissions?.length > 0 && (
+                          <div className="student-followup-strip">
+                            {activeBoard.followup_submissions.map((item: any) => (
+                              <div key={item.submission_id} className="right-card">
+                                <strong>你后续又提交了一版</strong>
+                                <p>{item.text_preview}</p>
+                                <span className="msg-time">{formatBjTime(item.created_at, true)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
                   {teacherFeedback.length > 0 ? teacherFeedback.map((fb, fi) => (
                     <div key={fi} className="right-card">
                       <p>{fb.comment}</p>
                       <span className="msg-time">{fb.teacher_id} · {formatBjTime(fb.created_at, true)}</span>
                       {(fb.focus_tags ?? []).length > 0 && <div className="tch-tag-row">{fb.focus_tags.map((t: string) => <span key={t} className="tch-tag">{t}</span>)}</div>}
                     </div>
-                  )) : <p className="right-hint">暂无教师批注。导师批注后会显示在这里。</p>}
+                  )) : (!teacherAnnotationBoards.length && <p className="right-hint">暂无教师批注。导师批注后会显示在这里。</p>)}
+                </div>
+              )}
+
+              {rightTab === "interventions" && (
+                <div className="right-section">
+                  <h4>教师干预 / 任务</h4>
+                  <div className="panel-desc">这是老师审核后正式下发给你的行动任务。优先看这里，再和 AI 继续迭代。</div>
+                  {teacherInterventions.length > 0 ? teacherInterventions.map((item: any, idx: number) => (
+                    <div key={item.intervention_id || idx} className="right-card">
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
+                        <strong>{item.title}</strong>
+                        <span className={`risk-badge ${item.priority === "high" ? "high" : item.priority === "low" ? "low" : ""}`}>{item.priority === "high" ? "高优先" : item.priority === "low" ? "低优先" : "中优先"}</span>
+                      </div>
+                      <p style={{ marginTop: 10 }}>{item.reason_summary}</p>
+                      {(item.action_items ?? []).length > 0 && (
+                        <div className="rag-case-field"><strong>老师希望你先做：</strong>{item.action_items.join("；")}</div>
+                      )}
+                      {(item.acceptance_criteria ?? []).length > 0 && (
+                        <div className="rag-case-field"><strong>验收标准：</strong>{item.acceptance_criteria.join("；")}</div>
+                      )}
+                      <div className="msg-time" style={{ marginTop: 8 }}>
+                        {item.scope_type === "project" ? "项目任务" : item.scope_type === "team" ? "团队任务" : "个人任务"} · {item.status} · {formatBjTime(item.sent_at || item.created_at, true)}
+                      </div>
+                      {item.status === "sent" && (
+                        <button className="tch-sm-btn" style={{ marginTop: 10 }} onClick={() => markInterventionViewed(item.intervention_id)}>标记已查看</button>
+                      )}
+                    </div>
+                  )) : <p className="right-hint">暂无教师下发任务。老师审核并发送后会显示在这里。</p>}
                 </div>
               )}
 

@@ -27,6 +27,7 @@ export default function StudentProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [conversations, setConversations] = useState<any[]>([]);
+  const [interventions, setInterventions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,9 +43,11 @@ export default function StudentProfilePage() {
     Promise.all([
       fetch(`${API}/api/project/${encodeURIComponent(pid)}/submissions`).then((r) => r.json()).catch(() => ({ submissions: [] })),
       fetch(`${API}/api/conversations?project_id=${encodeURIComponent(pid)}`).then((r) => r.json()).catch(() => ({ conversations: [] })),
-    ]).then(([subData, convData]) => {
+      fetch(`${API}/api/student/interventions?project_id=${encodeURIComponent(pid)}`).then((r) => r.json()).catch(() => ({ interventions: [] })),
+    ]).then(([subData, convData, interventionData]) => {
       setSubmissions(subData.submissions ?? []);
       setConversations(convData.conversations ?? []);
+      setInterventions(interventionData.interventions ?? []);
       setLoading(false);
     });
   }, [user]);
@@ -137,6 +140,26 @@ export default function StudentProfilePage() {
               </div>
             </section>
           )}
+
+          <section className="profile-section fade-up">
+            <h3>教师干预 / 任务</h3>
+            {interventions.length > 0 ? (
+              <div className="profile-sub-list">
+                {interventions.slice(0, 6).map((item: any, i: number) => (
+                  <div key={item.intervention_id || i} className="profile-sub-item">
+                    <div className="profile-sub-left">
+                      <span className="profile-sub-type">{item.scope_type === "project" ? "项目任务" : item.scope_type === "team" ? "团队任务" : "个人任务"}</span>
+                      <span className="profile-sub-preview">{item.title || item.reason_summary}</span>
+                    </div>
+                    <div className="profile-sub-right">
+                      <span className="profile-sub-score" style={{ fontSize: 12 }}>{item.status || "-"}</span>
+                      <span className="profile-sub-date">{formatBjTime(item.sent_at || item.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="profile-empty-hint">暂无教师下发的干预任务</p>}
+          </section>
 
           <section className="profile-section fade-up">
             <h3>我的对话</h3>

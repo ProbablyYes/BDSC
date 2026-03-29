@@ -29,12 +29,18 @@ class JsonStorage:
                 "project_id": project_id,
                 "submissions": [],
                 "teacher_feedback": [],
+                "teacher_assistant_reviews": [],
+                "teacher_interventions": [],
                 "teacher_annotations": [],
                 "teacher_feedback_files": [],
                 "teacher_document_edits": [],
             }
         data = json.loads(target.read_text(encoding="utf-8"))
         # new确保新增字段存在
+        if "teacher_assistant_reviews" not in data:
+            data["teacher_assistant_reviews"] = []
+        if "teacher_interventions" not in data:
+            data["teacher_interventions"] = []
         if "teacher_annotations" not in data:
             data["teacher_annotations"] = []
         if "teacher_feedback_files" not in data:
@@ -73,6 +79,87 @@ class JsonStorage:
         )
         self.save_project(project_id, data)
         return feedback_id
+
+    def upsert_teacher_assistant_review(self, project_id: str, review: dict) -> dict:
+        data = self.load_project(project_id)
+        reviews = data.setdefault("teacher_assistant_reviews", [])
+        review_id = str(review.get("review_id") or uuid4())
+        logical_project_id = str(review.get("logical_project_id", "")).strip()
+        target_idx = -1
+        for idx, item in enumerate(reviews):
+            if item.get("review_id") == review_id:
+                target_idx = idx
+                break
+            if logical_project_id and item.get("logical_project_id") == logical_project_id and item.get("teacher_id") == review.get("teacher_id"):
+                target_idx = idx
+                break
+        base = {
+            "review_id": review_id,
+            "created_at": _now_iso(),
+        }
+        if target_idx >= 0:
+            base = reviews[target_idx]
+            reviews[target_idx] = {
+                **base,
+                **review,
+                "review_id": base.get("review_id", review_id),
+                "updated_at": _now_iso(),
+            }
+            saved = reviews[target_idx]
+        else:
+            saved = {
+                **base,
+                **review,
+                "updated_at": _now_iso(),
+            }
+            reviews.append(saved)
+        self.save_project(project_id, data)
+        return saved
+
+    def upsert_teacher_intervention(self, project_id: str, intervention: dict, intervention_id: str | None = None) -> dict:
+        data = self.load_project(project_id)
+        items = data.setdefault("teacher_interventions", [])
+        real_id = intervention_id or str(intervention.get("intervention_id") or uuid4())
+        target_idx = -1
+        for idx, item in enumerate(items):
+            if item.get("intervention_id") == real_id:
+                target_idx = idx
+                break
+        if target_idx >= 0:
+            existing = items[target_idx]
+            items[target_idx] = {
+                **existing,
+                **intervention,
+                "intervention_id": real_id,
+                "updated_at": _now_iso(),
+            }
+            saved = items[target_idx]
+        else:
+            saved = {
+                **intervention,
+                "intervention_id": real_id,
+                "created_at": _now_iso(),
+                "updated_at": _now_iso(),
+            }
+            items.append(saved)
+        self.save_project(project_id, data)
+        return saved
+
+    def update_teacher_intervention(self, project_id: str, intervention_id: str, patch: dict) -> dict | None:
+        data = self.load_project(project_id)
+        items = data.setdefault("teacher_interventions", [])
+        for idx, item in enumerate(items):
+            if item.get("intervention_id") != intervention_id:
+                continue
+            items[idx] = {
+                **item,
+                **patch,
+                "intervention_id": intervention_id,
+                "updated_at": _now_iso(),
+            }
+            self.save_project(project_id, data)
+            return items[idx]
+        return None
 
     def list_projects(self) -> list[dict]:
         projects: list[dict] = []

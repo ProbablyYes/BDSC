@@ -32,6 +32,44 @@ class TeacherFeedbackResponse(BaseModel):
     feedback_id: str
 
 
+class TeacherAssistantAssessmentReviewPayload(BaseModel):
+    teacher_id: str
+    logical_project_id: str | None = None
+    title: str = Field(min_length=1, max_length=120)
+    summary: str = Field(min_length=5)
+    strengths: list[str] = Field(default_factory=list)
+    weaknesses: list[str] = Field(default_factory=list)
+    action_items: list[str] = Field(default_factory=list)
+    focus_tags: list[str] = Field(default_factory=list)
+    score_band: str = ""
+    send_to_student: bool = False
+
+
+class TeacherAssistantInterventionPayload(BaseModel):
+    teacher_id: str
+    scope_type: Literal["team", "student", "project"] = "student"
+    scope_id: str = Field(min_length=1)
+    source_type: Literal["class_plan", "student_profile", "project_case"] = "student_profile"
+    target_student_id: str | None = None
+    project_id: str | None = None
+    logical_project_id: str | None = None
+    title: str = Field(min_length=1, max_length=120)
+    reason_summary: str = Field(min_length=5)
+    action_items: list[str] = Field(default_factory=list)
+    acceptance_criteria: list[str] = Field(default_factory=list)
+    priority: Literal["high", "medium", "low"] = "medium"
+    status: Literal["draft", "approved", "sent", "viewed", "completed", "archived"] = "approved"
+
+
+class TeacherAssistantInterventionSendPayload(BaseModel):
+    teacher_id: str
+
+
+class StudentInterventionViewPayload(BaseModel):
+    project_id: str
+    student_id: str | None = None
+
+
 class ProjectSnapshotResponse(BaseModel):
     project_id: str
     latest_student_submission: dict | None = None

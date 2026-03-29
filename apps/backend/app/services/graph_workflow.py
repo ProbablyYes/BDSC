@@ -685,7 +685,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     with ThreadPoolExecutor(max_workers=max(1, len(tasks))) as pool:
         future_map = {pool.submit(fn): fn.__name__ for fn in tasks}
         try:
-            for future in as_completed(future_map, timeout=130):
+            for future in as_completed(future_map, timeout=200):
                 name = future_map[future]
                 try:
                     collected.update(future.result())

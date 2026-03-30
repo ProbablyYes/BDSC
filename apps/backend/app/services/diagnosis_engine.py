@@ -1,7 +1,11 @@
 from dataclasses import dataclass
+import json
+from pathlib import Path
 
+from app.config import settings
 from app.services.kg_ontology import (
     get_rule_ontology_nodes,
+    get_rule_tasks,
     get_rubric_error_pool,
     get_rubric_evidence_chain,
 )
@@ -74,6 +78,59 @@ CAPABILITY_MAP = [
     {"stage": "团队与资源", "dimension": "协作与执行力", "focus": "分工、里程碑与交付能力"},
     {"stage": "路演表达", "dimension": "叙事与抗压", "focus": "结构完整、数据可信、问答稳定"},
 ]
+
+
+def _load_teacher_overrides() -> dict:
+    """Load optional teacher override configuration from JSON.
+
+    The JSON file is expected at ``workspace_root/config/teacher_overrides.json``
+    and may override or extend RULES/RUBRICS without breaking defaults.
+    """
+    try:
+        cfg_dir = settings.workspace_root / "config"
+        overrides_path = cfg_dir / "teacher_overrides.json"
+        if not overrides_path.exists():
+            return {}
+        data = json.loads(overrides_path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _apply_rule_overrides(rules: list[dict], overrides: list[dict] | None) -> list[dict]:
+    if not overrides:
+        return rules
+    by_id: dict[str, dict] = {str(r.get("id")): r for r in rules if r.get("id")}
+    for ov in overrides:
+        rid = str(ov.get("id") or "").strip()
+        if not rid:
+            continue
+        base = by_id.get(rid, {"id": rid})
+        # Do not allow overriding the id itself.
+        patch = {k: v for k, v in ov.items() if k != "id"}
+        base.update(patch)
+        by_id[rid] = base
+    return list(by_id.values())
+
+
+def _apply_rubric_overrides(rubrics: list[dict], overrides: list[dict] | None) -> list[dict]:
+    if not overrides:
+        return rubrics
+    by_item: dict[str, dict] = {str(r.get("item")): r for r in rubrics if r.get("item")}
+    for ov in overrides:
+        item = str(ov.get("item") or "").strip()
+        if not item:
+            continue
+        base = by_item.get(item, {"item": item})
+        patch = {k: v for k, v in ov.items() if k != "item"}
+        base.update(patch)
+        by_item[item] = base
+    return list(by_item.values())
+
+
+_OVERRIDES = _load_teacher_overrides()
+RULES = _apply_rule_overrides(RULES, _OVERRIDES.get("rules"))
+RUBRICS = _apply_rubric_overrides(RUBRICS, _OVERRIDES.get("rubrics"))
 
 
 @dataclass
@@ -341,6 +398,9 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
         enriched = dict(r)
         if nodes:
             enriched["ontology_nodes"] = nodes
+        tasks = get_rule_tasks(r.get("id", ""))
+        if tasks:
+            enriched["ontology_tasks"] = tasks
         triggered_with_ontology.append(enriched)
 
     diagnosis = {

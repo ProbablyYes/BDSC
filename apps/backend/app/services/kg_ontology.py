@@ -22,7 +22,8 @@ from typing import Any, Iterable
 @dataclass(frozen=True)
 class OntologyNode:
     id: str
-    kind: str  # concept | method | deliverable | metric
+    # concept | method | deliverable | metric | task | pitfall | evidence
+    kind: str
     label: str
     description: str
 
@@ -150,6 +151,87 @@ _add_nodes([
 ])
 
 
+# Tasks: learning actions that students can execute to close specific gaps.
+_add_nodes([
+    (
+        "T_task_user_evidence_loop",
+        "task",
+        "完成用户证据闭环",
+        "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。",
+    ),
+    (
+        "T_task_value_proposition_consistency",
+        "task",
+        "重做价值主张一致性表",
+        "聚焦一个核心客群，重写价值主张，并校验渠道/收入与之逐项对应。",
+    ),
+    (
+        "T_task_unit_economics",
+        "task",
+        "补齐单位经济模型",
+        "搭建 CAC/LTV/BEP 三表，给出关键假设来源，并检查 LTV>CAC。",
+    ),
+    (
+        "T_task_risk_checklist",
+        "task",
+        "完成合规与伦理检查清单",
+        "梳理数据采集→存储→使用→销毁链路，补齐隐私与合规控制点。",
+    ),
+])
+
+
+# Pitfalls: common failure patterns captured as ontology nodes for traceability.
+_add_nodes([
+    (
+        "P_no_competitor_claim",
+        "pitfall",
+        "声称没有竞争对手",
+        "典型误区：认为市场中没有任何竞品或替代方案，忽视隐形替代品与机会成本。",
+    ),
+    (
+        "P_market_size_fallacy",
+        "pitfall",
+        "1% 市场规模幻觉",
+        "典型误区：用 TAM×1% 直接推算营收，自上而下估算缺乏自下而上的可达路径。",
+    ),
+    (
+        "P_weak_user_evidence",
+        "pitfall",
+        "需求证据不足",
+        "典型误区：只凭主观感觉或少量非目标用户反馈，就下结论认为需求强烈。",
+    ),
+    (
+        "P_compliance_not_covered",
+        "pitfall",
+        "合规与伦理缺口",
+        "典型误区：在涉及隐私/医疗/未成年人等场景时，未给出任何合规与伦理控制说明。",
+    ),
+])
+
+
+# Evidence atoms: frequently referenced evidence artifacts.
+_add_nodes([
+    (
+        "E_user_interview_raw",
+        "evidence",
+        "用户访谈原始记录",
+        "包含时间、对象、场景与用户原话的访谈记录，用于支撑痛点与需求分析。",
+    ),
+    (
+        "E_survey_dataset",
+        "evidence",
+        "问卷数据集",
+        "包含样本量、问卷设计与关键统计结果的原始数据，用于验证需求与支付意愿。",
+    ),
+    (
+        "E_financial_assumption_sheet",
+        "evidence",
+        "财务假设说明表",
+        "列出营收、成本、转化率等关键假设及其数据来源，支撑财务模型合理性。",
+    ),
+])
+
+
 # ────────────────────────────────────────────────────────────────
 # Rubric wiring
 # ────────────────────────────────────────────────────────────────
@@ -263,6 +345,15 @@ RULE_ONTOLOGY_MAP: dict[str, list[str]] = {
 }
 
 
+# Map risk rule id → recommended task nodes (learning actions).
+RULE_TASK_MAP: dict[str, list[str]] = {
+    "H1": ["T_task_value_proposition_consistency"],
+    "H5": ["T_task_user_evidence_loop"],
+    "H8": ["T_task_unit_economics"],
+    "H11": ["T_task_risk_checklist"],
+}
+
+
 def get_rubric_evidence_chain(item: str) -> list[dict[str, Any]]:
     """Return ontology-backed evidence chain for a rubric dimension.
 
@@ -301,4 +392,27 @@ def get_rule_ontology_nodes(rule_id: str) -> list[dict[str, Any]]:
             "label": node.label,
             "description": node.description,
         })
+    return out
+
+
+def get_rule_tasks(rule_id: str) -> list[dict[str, Any]]:
+    """Return ontology-backed task nodes associated with a risk rule.
+
+    This allows the diagnosis engine to surface not only what is wrong
+    (rule hit), but also which learning tasks可以帮助学生补齐短板。
+    """
+    node_ids = RULE_TASK_MAP.get(rule_id, [])
+    out: list[dict[str, Any]] = []
+    for nid in node_ids:
+        node = ONTOLOGY_NODES.get(nid)
+        if not node:
+            continue
+        out.append(
+            {
+                "id": node.id,
+                "kind": node.kind,
+                "label": node.label,
+                "description": node.description,
+            }
+        )
     return out

@@ -1,26 +1,34 @@
-"""
-HyperNetX-based hypergraph service for teaching & student analysis.
+"""HyperNetX-based hypergraph service for teaching & student analysis.
 
-Three hyperedge types (per requirements):
-  - Risk_Pattern_Edge:      Project × Market × Outcome × Mistake (risk co-occurrence)
-  - Value_Loop_Edge:         Market × Technology × Project        (healthy project clusters)
-  - Resource_Leverage_Edge:  Project × Resource × Participant     (resource leverage patterns)
+This service focuses on **logical consistency diagnosis** rather than
+storage. It exposes three layers that correspond directly to the
+requirements:
 
-Additionally provides **student-content dynamic analysis**:
-  - Builds a temporary hypergraph from KG entities extracted from the student's text
-  - Performs cross-dimensional pattern discovery using HyperNetX topology
-  - Returns structured insights for agents and frontend
-"""
+1. Hyperedge templates (>=20 types)
+     - Declarative patterns over KG dimensions, e.g.
+         "痛点-人群-解决方案-商业模式闭环"、"问题-方案-证据三角" 等。
+2. Consistency rules (>=20 rules)
+     - G1–G20 operate on dimension coverage + text signals to检测
+         “无竞争对手”、“1% 市场份额”、“CAC 与渠道不匹配”等逻辑幻觉。
+3. Student dynamic analysis
+     - Builds a temporary HyperNetX hypergraph from extracted entities
+         and applies the above templates/rules to produce可追溯的诊断结果。
+
+It does **not** parse raw files itself; all文件解析与分段由
+``HypergraphDocument`` 完成，本服务只消费结构化后的 KG 实体。"""
 
 from __future__ import annotations
 
+import json
 import logging
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable
 
 import hypernetx as hnx
 
+from app.config import settings
 from app.services.graph_service import GraphService
 from app.services.kg_ontology import ONTOLOGY_NODES
 
@@ -54,12 +62,16 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "name": "痛点-人群-解决方案-商业模式闭环",
         "dimensions": ["stakeholder", "pain_point", "solution", "business_model"],
         "description": "用户→痛点→方案→商业模式形成完整闭环",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H2", "H3"],
     },
     {
         "id": "T2_user_pain_evidence",
         "name": "痛点证据链",
         "dimensions": ["stakeholder", "pain_point", "evidence"],
         "description": "针对核心痛点提供用户证据",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5"],
     },
     {
         "id": "T3_solution_tech_market",
@@ -84,6 +96,8 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "name": "单位经济模型闭环",
         "dimensions": ["business_model", "market", "resource"],
         "description": "单位经济与市场/资源约束一致",
+        "pattern_type": "ideal",
+        "linked_rules": ["H8", "H9"],
     },
     {
         "id": "T7_growth_path",
@@ -102,12 +116,16 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "name": "风险与合规",
         "dimensions": ["risk", "evidence", "market"],
         "description": "涉及数据/合规场景时给出控制措施",
+        "pattern_type": "ideal",
+        "linked_rules": ["H11"],
     },
     {
         "id": "T10_user_pain_solution_evidence",
         "name": "问题-方案-证据三角",
         "dimensions": ["stakeholder", "pain_point", "solution", "evidence"],
         "description": "核心方案有用户与实验双重证据支持",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H7"],
     },
     # 占位模板用于覆盖更多变体，便于后续细化
     {
@@ -115,12 +133,16 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "name": "市场规模-增长假设",
         "dimensions": ["market", "business_model"],
         "description": "市场规模与增长路径假设一致",
+        "pattern_type": "risk",
+        "linked_rules": ["H4", "H9"],
     },
     {
         "id": "T12_competition_moat",
         "name": "竞品-护城河",
         "dimensions": ["competitor", "resource", "business_model"],
         "description": "在竞争格局中说明护城河与资源壁垒",
+        "pattern_type": "ideal",
+        "linked_rules": ["H6", "H7"],
     },
     {
         "id": "T13_tech_feasibility",
@@ -133,30 +155,40 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "name": "证据-财务",
         "dimensions": ["evidence", "business_model"],
         "description": "财务模型关键参数有数据或实验支撑",
+        "pattern_type": "risk",
+        "linked_rules": ["H8"],
     },
     {
         "id": "T15_evidence_market",
         "name": "证据-市场规模",
         "dimensions": ["evidence", "market"],
         "description": "市场规模假设有公开数据或调研支撑",
+        "pattern_type": "risk",
+        "linked_rules": ["H4"],
     },
     {
         "id": "T16_user_channel",
         "name": "用户-渠道匹配",
         "dimensions": ["stakeholder", "channel"],
         "description": "获客渠道与用户行为习惯匹配",
+        "pattern_type": "ideal",
+        "linked_rules": ["H2"],
     },
     {
         "id": "T17_pain_solution_pricing",
         "name": "痛点-方案-定价",
         "dimensions": ["pain_point", "solution", "business_model"],
         "description": "定价与痛点强度/替代方案价格一致",
+        "pattern_type": "risk",
+        "linked_rules": ["H3"],
     },
     {
         "id": "T18_team_risk",
         "name": "团队-风险",
         "dimensions": ["team", "risk"],
         "description": "关键风险有明确负责人与缓解计划",
+        "pattern_type": "ideal",
+        "linked_rules": ["H10", "H11"],
     },
     {
         "id": "T19_loop_full",
@@ -166,14 +198,46 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
             "market", "competitor", "business_model",
         ],
         "description": "从用户到商业模式的完整闭环",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H2", "H3", "H4", "H6", "H8"],
     },
     {
         "id": "T20_growth_defensibility",
         "name": "增长-护城河",
         "dimensions": ["market", "business_model", "resource"],
         "description": "增长路径与护城河相互支撑",
+        "pattern_type": "ideal",
+        "linked_rules": ["H6", "H9", "H12"],
     },
 ]
+
+
+def _load_teacher_overrides() -> dict:
+    """Load optional teacher override configuration for hypergraph layer."""
+    try:
+        cfg_dir = settings.workspace_root / "config"
+        overrides_path = cfg_dir / "teacher_overrides.json"
+        if not overrides_path.exists():
+            return {}
+        data = json.loads(overrides_path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _apply_template_overrides(templates: list[dict[str, Any]], overrides: list[dict] | None) -> list[dict[str, Any]]:
+    if not overrides:
+        return templates
+    by_id: dict[str, dict[str, Any]] = {str(t.get("id")): t for t in templates if t.get("id")}
+    for ov in overrides:
+        tid = str(ov.get("id") or "").strip()
+        if not tid:
+            continue
+        base = by_id.get(tid, {"id": tid})
+        patch = {k: v for k, v in ov.items() if k != "id"}
+        base.update(patch)
+        by_id[tid] = base
+    return list(by_id.values())
 
 
 # Hypergraph-level consistency rules (>=20) operating on dimension
@@ -365,6 +429,10 @@ _CONSISTENCY_RULES: list[dict[str, Any]] = [
         ],
     },
 ]
+
+
+_OVERRIDES = _load_teacher_overrides()
+_HYPEREDGE_TEMPLATES = _apply_template_overrides(_HYPEREDGE_TEMPLATES, _OVERRIDES.get("hyperedge_templates"))
 
 
 # ─────────────────────────────────────────────────────
@@ -907,6 +975,8 @@ class HypergraphService:
                 "dimensions": dims,
                 "missing_dimensions": missing_t,
                 "status": status,
+                "pattern_type": tmpl.get("pattern_type", "neutral"),
+                "linked_rules": list(tmpl.get("linked_rules", [])),
             })
 
         # ── Consistency rules over dimensions + raw text ──

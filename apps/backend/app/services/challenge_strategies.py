@@ -9,7 +9,11 @@ Based on the requirements doc's "追问策略库" specification.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
+from pathlib import Path
 from typing import Any
+
+from app.config import settings
 
 
 @dataclass
@@ -155,7 +159,133 @@ STRATEGIES: list[ChallengeStrategy] = [
         expected_evidence=["TAM/SAM/SOM三层估算", "自下而上的市场测算", "增长路径规划"],
         counterfactual="一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
     ),
+    ChallengeStrategy(
+        id="CS11",
+        name="免费模式盈利幻觉",
+        trigger_keywords=["免费", "不收钱", "先免费", "免费用户"],
+        trigger_rules=["H3", "H8"],
+        probing_layers=[
+            "免费阶段的目标是什么？是为了获取数据、用户还是口碑？对应的量化指标是什么？",
+            "当你开始收费时，用户为什么不会流失到仍然免费的替代方案？",
+            "如果永远无法向当前用户群收费，你的商业模式还有哪些备选路径？",
+        ],
+        expected_evidence=["免费转付费路径图", "竞品收费/免费对比", "不同定价方案的敏感性测试结果"],
+        counterfactual="如果所有核心功能都长期免费且没有清晰的变现路径，这更像是一个公益项目而非可持续的创业项目。",
+    ),
+    ChallengeStrategy(
+        id="CS12",
+        name="平台化过度扩张",
+        trigger_keywords=["生态", "平台", "闭环生态", "全链路"],
+        trigger_rules=["H1", "H9"],
+        probing_layers=[
+            "你当前阶段的最小可行产品（MVP）只解决哪一个最具体的场景？请避免一次性覆盖整条价值链。",
+            "从单点工具到平台生态，中间至少要经历哪3个可验证的阶段？每个阶段的核心指标是什么？",
+            "如果你只允许做一件事做到极致（而不是做平台），你会选哪件事？为什么？",
+        ],
+        expected_evidence=["单点MVP定义", "阶段性产品路线图", "每阶段的北极星指标设计"],
+        counterfactual="过早谈平台和生态，往往意味着对单点价值和执行路径还没有想清楚。",
+    ),
+    ChallengeStrategy(
+        id="CS13",
+        name="数据驱动口号化",
+        trigger_keywords=["数据驱动", "AI决策", "智能推荐", "算法优化"],
+        trigger_rules=["H7", "H13"],
+        probing_layers=[
+            "目前你真正可用的数据有哪些？规模、多样性和更新频率分别如何？",
+            "如果暂时不用任何复杂算法，只用简单规则或人工判断，效果会差多少？有没有做过对比？",
+            "哪些关键业务决策必须依赖算法，哪些其实只要有基本统计分析就足够？",
+        ],
+        expected_evidence=["现有数据清单", "算法vs规则的效果对比", "关键决策点与所需数据/算法映射"],
+        counterfactual="如果暂时无法获取大规模高质量数据，你现在的方案是否还能正常运转？",
+    ),
+    ChallengeStrategy(
+        id="CS14",
+        name="团队结构关键角色缺失",
+        trigger_keywords=["我们会找", "外包", "有很多同学", "学校会支持"],
+        trigger_rules=["H10", "H12"],
+        probing_layers=[
+            "项目的3个关键岗位分别是什么？目前这些岗位对应的是哪几位具体同学或导师？",
+            "如果外部合作方/外包团队退出，你们内部是否有人可以暂时接手关键工作？",
+            "未来6个月最难招到的关键人才是谁？如果始终招不到，这个项目还能怎么调整？",
+        ],
+        expected_evidence=["关键岗位清单及责任人", "内部与外部资源的备份方案", "未来人才需求与风险评估"],
+        counterfactual="如果现在的团队在未来半年内无法扩张，你们是否仍然有办法达成既定里程碑？",
+    ),
+    ChallengeStrategy(
+        id="CS15",
+        name="增长黑客万能药幻觉",
+        trigger_keywords=["增长黑客", "裂变海报", "私域流量", "投放一点广告"],
+        trigger_rules=["H2", "H9"],
+        probing_layers=[
+            "你具体设计过哪一个完整的增长实验？从假设、实验设计到评价指标分别是什么？",
+            "如果第一次投放/裂变效果远低于预期，你的迭代策略是什么？会调整哪3个变量？",
+            "请给出一个你认为最有潜力的增长杠杆，并估算它在现实约束下的上限效果。",
+        ],
+        expected_evidence=["至少1个完整增长实验闭环", "增长实验数据记录", "主要增长杠杆及其上限估算"],
+        counterfactual="没有经过严谨设计和验证的'增长黑客'，通常只是换了一种说法的'多发几条朋友圈'。",
+    ),
 ]
+
+
+def _load_teacher_overrides() -> dict:
+    """Load optional teacher override configuration for challenge strategies."""
+    try:
+        cfg_dir = settings.workspace_root / "config"
+        overrides_path = cfg_dir / "teacher_overrides.json"
+        if not overrides_path.exists():
+            return {}
+        data = json.loads(overrides_path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _apply_strategy_overrides(
+    strategies: list[ChallengeStrategy], overrides: list[dict] | None
+) -> list[ChallengeStrategy]:
+    if not overrides:
+        return strategies
+    by_id: dict[str, ChallengeStrategy] = {s.id: s for s in strategies}
+    for ov in overrides:
+        sid = str(ov.get("id") or "").strip()
+        if not sid:
+            continue
+        base = by_id.get(sid)
+        if base is None:
+            # New strategy provided entirely by configuration.
+            try:
+                by_id[sid] = ChallengeStrategy(
+                    id=sid,
+                    name=str(ov.get("name", sid)),
+                    trigger_keywords=list(ov.get("trigger_keywords", [])),
+                    trigger_rules=list(ov.get("trigger_rules", [])),
+                    probing_layers=list(ov.get("probing_layers", [])),
+                    expected_evidence=list(ov.get("expected_evidence", [])),
+                    counterfactual=str(ov.get("counterfactual", "")),
+                    severity=str(ov.get("severity", "high")),
+                )
+            except Exception:  # noqa: BLE001
+                continue
+        else:
+            # Patch existing strategy fields; unspecified fields保持原值。
+            try:
+                by_id[sid] = ChallengeStrategy(
+                    id=sid,
+                    name=str(ov.get("name", base.name)),
+                    trigger_keywords=list(ov.get("trigger_keywords", base.trigger_keywords)),
+                    trigger_rules=list(ov.get("trigger_rules", base.trigger_rules)),
+                    probing_layers=list(ov.get("probing_layers", base.probing_layers)),
+                    expected_evidence=list(ov.get("expected_evidence", base.expected_evidence)),
+                    counterfactual=str(ov.get("counterfactual", base.counterfactual)),
+                    severity=str(ov.get("severity", base.severity)),
+                )
+            except Exception:  # noqa: BLE001
+                continue
+    return list(by_id.values())
+
+
+_OVERRIDES = _load_teacher_overrides()
+STRATEGIES = _apply_strategy_overrides(STRATEGIES, _OVERRIDES.get("challenge_strategies"))
 
 _STRATEGY_BY_ID: dict[str, ChallengeStrategy] = {s.id: s for s in STRATEGIES}
 _STRATEGY_BY_RULE: dict[str, list[ChallengeStrategy]] = {}

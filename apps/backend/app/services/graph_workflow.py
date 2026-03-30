@@ -601,7 +601,15 @@ def gather_context_node(state: WorkflowState) -> dict:
     def _task_rag():
         if _rag is None or _rag.case_count == 0:
             return {"rag_cases": [], "rag_context": ""}
-        cases = _rag.retrieve(msg[:1000], top_k=3, category_filter=cat or None)
+        tag_filter: list[str] = []
+        if cat:
+            tag_filter.append(f"category:{cat}")
+        cases = _rag.retrieve(
+            msg[:1000],
+            top_k=3,
+            category_filter=cat or None,
+            tags=tag_filter or None,
+        )
         ctx = _rag.format_for_llm(cases)
         return {"rag_cases": cases, "rag_context": ctx}
 

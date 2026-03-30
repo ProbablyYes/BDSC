@@ -40,6 +40,7 @@ class CaseChunk:
     risk_flags: list[str]
     rubric_coverage: list[dict]
     confidence: float
+    tags: list[str] = field(default_factory=list)
     text_for_search: str = ""
     embedding: np.ndarray | None = field(default=None, repr=False)
 
@@ -191,6 +192,9 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
 
         profile = data.get("project_profile", {})
         evidence = data.get("evidence", [])
+        tags = data.get("tags", []) or []
+        if not isinstance(tags, list):
+            tags = [str(tags)]
         chunk = CaseChunk(
             case_id=data.get("case_id", fp.stem),
             category=data.get("source", {}).get("category", "未分类"),
@@ -205,6 +209,7 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
             risk_flags=data.get("risk_flags", []),
             rubric_coverage=data.get("rubric_coverage", []),
             confidence=float(data.get("confidence", 0)),
+            tags=[_fix_garbled(str(t)) for t in tags if str(t).strip()],
             text_for_search=_build_search_text(data),
         )
         raw_chunks.append((quality, chunk))
@@ -302,12 +307,28 @@ class RagEngine:
         except Exception:
             return None
 
-    def retrieve(self, query: str, top_k: int = 3, category_filter: str | None = None) -> list[dict[str, Any]]:
+    def retrieve(
+        self,
+        query: str,
+        top_k: int = 3,
+        category_filter: str | None = None,
+        tags: list[str] | None = None,
+        mode: str = "auto",  # "auto" | "keyword" | "vector" | "hybrid"
+    ) -> list[dict[str, Any]]:
+        """Retrieve most relevant cases with multi-route检索和标签过滤.
+
+        - keyword: 只用 TF-IDF 关键字匹配
+        - vector: 只用向量相似度（若向量不可用则回退到 keyword）
+        - hybrid: 关键字 + 向量归一化后加权融合
+        - auto: 默认策略，优先向量，否则 keyword（与旧版行为兼容）
+        """
         if not self._chunks:
             return []
 
         working_chunks = self._chunks
         working_indices = list(range(len(self._chunks)))
+
+        # 1) 先按类别做 coarse 过滤
         if category_filter:
             pairs = [(i, c) for i, c in enumerate(self._chunks) if c.category == category_filter]
             if not pairs:
@@ -315,42 +336,105 @@ class RagEngine:
             working_indices = [p[0] for p in pairs]
             working_chunks = [p[1] for p in pairs]
 
-        scores: np.ndarray
-        if self._embed_ready and self._embeddings is not None:
+        # 2) 再按标签做精细过滤（必须全部命中要求的标签）
+        tag_filter = set(tags or [])
+        if tag_filter:
+            tagged_pairs: list[tuple[int, CaseChunk]] = []
+            for idx, chunk in zip(working_indices, working_chunks):
+                chunk_tags = set(chunk.tags or [])
+                if tag_filter.issubset(chunk_tags):
+                    tagged_pairs.append((idx, chunk))
+            if tagged_pairs:
+                working_indices = [p[0] for p in tagged_pairs]
+                working_chunks = [p[1] for p in tagged_pairs]
+
+        if not working_chunks:
+            return []
+
+        texts = [c.text_for_search for c in working_chunks]
+        keyword_scores: np.ndarray = _tfidf_similarity(query, texts)
+
+        vector_scores: np.ndarray | None = None
+        if self._embed_ready and self._embeddings is not None and working_indices:
             q_vec = self._embed_query(query)
             if q_vec is not None:
                 subset_embs = self._embeddings[working_indices]
-                scores = subset_embs @ q_vec
+                vector_scores = subset_embs @ q_vec
+
+        # 选择检索模式
+        effective_mode = (mode or settings.rag_retrieval_mode).lower()
+        if effective_mode not in {"auto", "keyword", "vector", "hybrid"}:
+            effective_mode = "auto"
+
+        def _norm(arr: np.ndarray | None) -> np.ndarray | None:
+            if arr is None or arr.size == 0:
+                return None
+            arr = arr.astype(float)
+            max_v = float(arr.max())
+            min_v = float(arr.min())
+            if max_v - min_v < 1e-8:
+                return np.ones_like(arr) * 0.5
+            return (arr - min_v) / (max_v - min_v)
+
+        scores: np.ndarray
+        if effective_mode == "keyword":
+            scores = keyword_scores
+        elif effective_mode == "vector":
+            if vector_scores is not None:
+                scores = vector_scores
             else:
-                texts = [c.text_for_search for c in working_chunks]
-                scores = _tfidf_similarity(query, texts)
-        else:
-            texts = [c.text_for_search for c in working_chunks]
-            scores = _tfidf_similarity(query, texts)
+                scores = keyword_scores
+        elif effective_mode == "hybrid":
+            if vector_scores is not None:
+                k_norm = _norm(keyword_scores) or keyword_scores
+                v_norm = _norm(vector_scores) or vector_scores
+                alpha = float(getattr(settings, "rag_hybrid_alpha", 0.6) or 0.6)
+                alpha = max(0.0, min(1.0, alpha))
+                scores = (1.0 - alpha) * k_norm + alpha * v_norm
+            else:
+                scores = keyword_scores
+        else:  # auto
+            if vector_scores is not None:
+                scores = vector_scores
+                effective_mode = "vector"
+            else:
+                scores = keyword_scores
+                effective_mode = "keyword"
 
         ranked = np.argsort(scores)[::-1]
         results: list[dict[str, Any]] = []
         seen_names: set[str] = set()
-        for idx in ranked:
+        for local_idx in ranked:
             if len(results) >= top_k:
                 break
-            c = working_chunks[idx]
+            c = working_chunks[local_idx]
             if c.project_name in seen_names:
                 continue
             seen_names.add(c.project_name)
-            results.append({
-                "case_id": c.case_id,
-                "category": c.category,
-                "project_name": c.project_name,
-                "similarity": round(float(scores[idx]), 4),
-                "pain_points": c.pain_points[:3],
-                "solution": c.solution[:3],
-                "innovation_points": c.innovation_points[:2],
-                "evidence_quotes": c.evidence_quotes[:2],
-                "risk_flags": c.risk_flags,
-                "rubric_coverage": c.rubric_coverage,
-                "summary": c.summary[:300],
-            })
+
+            kw_score = float(keyword_scores[local_idx]) if keyword_scores.size else 0.0
+            vec_score = float(vector_scores[local_idx]) if vector_scores is not None else 0.0
+            combined = float(scores[local_idx])
+
+            results.append(
+                {
+                    "case_id": c.case_id,
+                    "category": c.category,
+                    "project_name": c.project_name,
+                    "similarity": round(combined, 4),
+                    "score_keyword": round(kw_score, 4),
+                    "score_vector": round(vec_score, 4),
+                    "retrieval_mode": effective_mode,
+                    "tags": c.tags,
+                    "pain_points": c.pain_points[:3],
+                    "solution": c.solution[:3],
+                    "innovation_points": c.innovation_points[:2],
+                    "evidence_quotes": c.evidence_quotes[:2],
+                    "risk_flags": c.risk_flags,
+                    "rubric_coverage": c.rubric_coverage,
+                    "summary": c.summary[:300],
+                }
+            )
         return results
 
     def format_for_llm(self, results: list[dict[str, Any]], max_chars: int = 1500) -> str:

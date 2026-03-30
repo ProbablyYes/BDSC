@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+"""Offline helper script: quick category pattern query in Neo4j.
+
+用于在已导入的 Neo4j 最小图谱上做简单类别模式浏览，
+方便教师或管理员做离线分析。在线 KG/超图诊断并不依赖
+本脚本，核心链路只使用 HyperNetX + JSON。
+"""
+
 from neo4j import GraphDatabase
 
 from app.config import settings

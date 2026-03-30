@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     llm_fast_model: str = "Qwen/Qwen2.5-14B-Instruct"
     llm_reason_model: str = "Qwen/Qwen2.5-72B-Instruct"
 
+    # RAG 检索配置：多路检索与混合权重
+    rag_retrieval_mode: str = "auto"  # "auto" | "keyword" | "vector" | "hybrid"
+    rag_hybrid_alpha: float = 0.6      # hybrid 模式下向量相似度的权重
+
     max_parse_file_mb: float = 30.0  # modify default file size limit in MB
 
     # config.py -> app -> backend -> apps -> BDSC (workspace root)

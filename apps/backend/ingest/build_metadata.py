@@ -3,9 +3,8 @@ import argparse
 import csv
 from pathlib import Path
 from app.config import settings
-from app.services.document_parser import ParsedDocument, parse_document
+from app.services.document_parser import ParsedDocument
 from app.services.hypergraph_document import HypergraphDocument
-from app.services.ocr import process_with_ocr  # OCR integration
 from ingest.common import (
     SUPPORTED_DOC_SUFFIXES,
     bool_from_csv,
@@ -94,43 +93,45 @@ def build_row(
     rel_path = normalize_rel_path(path, root)
     rel_obj = Path(rel_path)
     file_size_mb = path.stat().st_size / (1024 * 1024)
-    parsed = None
-    hypergraph_doc = None
-    appendix_start = None
+    parsed: ParsedDocument | None = None
+    hypergraph_doc: HypergraphDocument | None = None
+    appendix_start: int | None = None
 
     suffix = path.suffix.lower()
-    if not parse_pdf_deep and suffix == ".pdf":
-        quality, note = ("C", "快速模式：PDF 未做深度文本提取，默认不进入结构化抽取。")
-        parsed = ParsedDocument(file_path=path, doc_type="pdf", segments=[])
-    elif file_size_mb > max_parse_file_mb:
-        # Handle large files with OCR processing
-        if suffix in {".pdf", ".pptx", ".ppt"}:
-            parsed = process_with_ocr(path)  # OCR processing for large files
-            quality, note = parse_quality(parsed)
-            note = f"文件({file_size_mb:.2f}MB)，通过OCR生成摘要。"
-            appendix_start = detect_appendix_start(parsed)
+
+    # Use HypergraphDocument as the single source of truth for all
+    # content-derived metadata. For large/fast PDF modes we only
+    # limit pages,不再走 OCR 分支。
+    pages_limit = 80
+    if suffix == ".pdf":
+        if not parse_pdf_deep:
+            pages_limit = 20
+        if file_size_mb > max_parse_file_mb:
+            pages_limit = 100
+
+    try:
+        if suffix == ".pdf":
+            hypergraph_doc = HypergraphDocument.from_file(path, max_pdf_pages=pages_limit)
         else:
-            note = f"文件过大({file_size_mb:.2f}MB)，已跳过自动解析，可人工补充摘要后入库。"
-            quality = "C"
-            parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
-    else:
-        try:
-            parsed = parse_document(path)
-            # Convert to HypergraphDocument for unified processing
-            hypergraph_doc = HypergraphDocument.from_parsed_document(parsed)
-            quality, note = parse_quality(parsed)
-            appendix_start = detect_appendix_start(parsed)
-        except Exception as e:
-            quality, note = ("F", f"解析失败: {str(e)}")
-            parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
+            hypergraph_doc = HypergraphDocument.from_file(path)
 
-    # Ensure we have a parsed document to work with
-    if parsed is None:
+        parsed = ParsedDocument(
+            file_path=path,
+            doc_type=hypergraph_doc.doc_type,
+            segments=hypergraph_doc.get_segments(),
+        )
+        quality, note = parse_quality(parsed)
+        appendix_start = detect_appendix_start(parsed)
+
+        # Annotate notes for partial PDF parsing scenarios.
+        if suffix == ".pdf" and file_size_mb > max_parse_file_mb:
+            note = f"{note}（大文件，仅抽取前{pages_limit}页）"
+        elif suffix == ".pdf" and not parse_pdf_deep:
+            note = f"{note}（快速模式，仅抽取前{pages_limit}页）"
+    except Exception as e:  # noqa: BLE001
+        quality, note = ("F", f"解析失败: {str(e)}")
         parsed = ParsedDocument(file_path=path, doc_type=suffix.lstrip("."), segments=[])
-
-    # Create HypergraphDocument if not already created
-    if hypergraph_doc is None and parsed.segments:
-        hypergraph_doc = HypergraphDocument.from_parsed_document(parsed)
+        hypergraph_doc = None
 
     previous = existing.get(rel_path, {})
     # KG inclusion logic:
@@ -164,10 +165,12 @@ def build_row(
         "file_path": rel_path,
         "file_name": path.name,
         "category": detect_category(rel_obj),
-        "doc_type": parsed.doc_type,
+        # Prefer doc_type from HyperNetX stats when available
+        "doc_type": hypergraph_stats.get("doc_type", parsed.doc_type),
         "file_size_mb": f"{file_size_mb:.2f}",
-        "text_chars": str(parsed.text_chars),
-        "segment_count": str(parsed.segment_count),
+        # Content-derived fields come from HyperNetX statistics when possible
+        "text_chars": str(hypergraph_stats.get("text_chars", parsed.text_chars)),
+        "segment_count": str(hypergraph_stats.get("segment_count", parsed.segment_count)),
         "parse_quality": quality,
         "parse_note": note,
         "has_appendix_evidence": "true" if appendix_start is not None else "false",
@@ -176,8 +179,13 @@ def build_row(
         "include_in_kg": "true" if include_in_kg else "false",
         # Hypergraph metadata
         "document_id": hypergraph_stats.get("document_id", ""),
-        "hypergraph_nodes": str(hypergraph_stats.get("node_count", 0)),
-        "hypergraph_edges": str(hypergraph_stats.get("edge_count", 0)),
+        # Prefer dedicated hypergraph_* counters when present
+        "hypergraph_nodes": str(
+            hypergraph_stats.get("hypergraph_nodes", hypergraph_stats.get("node_count", 0))
+        ),
+        "hypergraph_edges": str(
+            hypergraph_stats.get("hypergraph_edges", hypergraph_stats.get("edge_count", 0))
+        ),
         # Manual columns
         "education_level": previous.get("education_level", "unknown"),
         "year": previous.get("year", ""),
@@ -193,7 +201,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--fast",
         action="store_true",
-        help="Skip deep PDF parsing for speed; use metadata-only estimation.",
+        help="Use limited-page PDF parsing via HyperNetX for speed.",
     )
     parser.add_argument(
         "--max-files",
@@ -205,7 +213,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--max-parse-mb",
         type=float,
         default=MAX_PARSE_FILE_MB,
-        help="Skip deep parsing when file size exceeds this limit.",
+        help="When file size exceeds this limit, only parse a subset of pages (still via HyperNetX).",
     )
     parser.add_argument(
         "--category",
@@ -250,7 +258,7 @@ def main(argv: list[str] | None = None) -> None:
         if row["parse_quality"] != "C":
             continue
         if "扫描" in row["parse_note"] or "未提取" in row["parse_note"]:
-            suggestion = "建议补充可编辑版源文件（pptx/docx）或走OCR。"
+            suggestion = "建议补充可编辑版源文件（pptx/docx），或提供文字版摘要以便重新抽取。"
         elif "过大" in row["parse_note"]:
             suggestion = "建议先做摘要版或拆分后再深度抽取。"
         elif "解析失败" in row["parse_note"]:

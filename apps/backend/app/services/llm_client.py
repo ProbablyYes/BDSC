@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from typing import Any
 
 from openai import OpenAI
@@ -142,20 +143,35 @@ class LlmClient:
 
         model_name = model or settings.llm_fast_model or settings.llm_model
         safe_temp = max(0.0, min(float(temperature), 1.2))
-        try:
-            resp = self._client.chat.completions.create(
-                model=model_name,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=safe_temp,
-                stream=False,
-            )
-            if resp.choices and resp.choices[0].message:
-                raw = resp.choices[0].message.content or ""
-                return _strip_think_tags(raw)
-        except Exception as exc:
-            logger.warning("LLM call failed (model=%s): %s", model_name, exc)
-            return ""
+        max_attempts = 3
+        last_error: Exception | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = self._client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=safe_temp,
+                    stream=False,
+                )
+                if resp.choices and resp.choices[0].message:
+                    raw = resp.choices[0].message.content or ""
+                    return _strip_think_tags(raw)
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+                # 仅在最终失败时打印一次错误，避免“attempt 1/3”误导用户
+                if attempt < max_attempts:
+                    try:
+                        time.sleep(2 * attempt)
+                    except Exception:  # noqa: BLE001
+                        pass
+                    continue
+                logger.warning(
+                    "LLM call failed after %d attempts (model=%s): %s",
+                    max_attempts,
+                    model_name,
+                    last_error,
+                )
         return ""

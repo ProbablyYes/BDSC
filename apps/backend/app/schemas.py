@@ -83,7 +83,7 @@ class AnalyzePayload(BaseModel):
     class_id: str | None = None
     cohort_id: str | None = None
     input_text: str = Field(min_length=20)
-    mode: Literal["coursework", "competition"] = "coursework"
+    mode: Literal["coursework", "competition", "learning"] = "coursework"
 
 
 class AgentRunPayload(BaseModel):
@@ -97,7 +97,7 @@ class AgentRunPayload(BaseModel):
     ] = "all"
     student_id: str | None = None
     prompt: str | None = None
-    mode: Literal["coursework", "competition"] = "coursework"
+    mode: Literal["coursework", "competition", "learning"] = "coursework"
 
 
 class AgentRunResponse(BaseModel):
@@ -113,7 +113,8 @@ class DialogueTurnPayload(BaseModel):
     conversation_id: str | None = None
     class_id: str | None = None
     cohort_id: str | None = None
-    mode: Literal["coursework", "competition"] = "coursework"
+    mode: Literal["coursework", "competition", "learning"] = "coursework"
+    competition_type: Literal["internet_plus", "challenge_cup", "innovation", "math_modeling"] | None = None
 
 
 class DialogueTurnResponse(BaseModel):
@@ -127,6 +128,7 @@ class DialogueTurnResponse(BaseModel):
     hypergraph_insight: dict = Field(default_factory=dict)
     hypergraph_student: dict = Field(default_factory=dict)
     rag_cases: list = Field(default_factory=list)
+    pressure_test_trace: dict = Field(default_factory=dict)
     agent_trace: dict = Field(default_factory=dict)
 
 

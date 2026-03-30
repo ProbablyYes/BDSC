@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 import random
 import re
@@ -50,6 +51,8 @@ from app.services.rag_engine import RagEngine
 from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title=settings.app_name)
 app.add_middleware(
@@ -274,10 +277,30 @@ def _safe_kg_analysis(kg: Any) -> dict:
 def _safe_hypergraph_insight(hg: Any) -> dict:
     if not isinstance(hg, dict):
         return {}
+    edges = []
+    for e in (hg.get("edges") or [])[:8]:
+        if not isinstance(e, dict):
+            continue
+        edges.append({
+            "hyperedge_id": _safe_str(e.get("hyperedge_id", "")),
+            "type": _safe_str(e.get("type", "")),
+            "support": int(e.get("support", 0) or 0),
+            "teaching_note": _safe_str(e.get("teaching_note", "")),
+            "rules": [_safe_str(x) for x in (e.get("rules") or [])[:6]],
+            "rubrics": [_safe_str(x) for x in (e.get("rubrics") or [])[:6]],
+            "nodes": [_safe_str(x) for x in (e.get("nodes") or [])[:12]],
+            "evidence_quotes": [_safe_str(x) for x in (e.get("evidence_quotes") or [])[:3]],
+            "retrieval_reason": _safe_str(e.get("retrieval_reason", "")),
+            "match_score": float(e.get("match_score", 0) or 0),
+        })
     return {
         "summary": _safe_str(hg.get("summary", "")),
         "top_signals": [_safe_str(x) for x in (hg.get("top_signals") or [])[:5]],
         "key_dimensions": [_safe_str(x) for x in (hg.get("key_dimensions") or [])[:5]],
+        "edges": edges,
+        "matched_by": hg.get("matched_by", {}) if isinstance(hg.get("matched_by"), dict) else {},
+        "meta": hg.get("meta", {}) if isinstance(hg.get("meta"), dict) else {},
+        "topology": hg.get("topology", {}) if isinstance(hg.get("topology"), dict) else {},
     }
 
 
@@ -302,12 +325,25 @@ def _safe_hypergraph_student(hs: Any) -> dict:
             "to_dim": _safe_str(c.get("to_dim", "")),
             "relation": _safe_str(c.get("relation", "")),
         })
+    pattern_warnings = []
+    for item in (hs.get("pattern_warnings") or [])[:5]:
+        if isinstance(item, dict):
+            pattern_warnings.append({
+                "pattern_id": _safe_str(item.get("pattern_id", "")),
+                "warning": _safe_str(item.get("warning", "")),
+                "matched_rules": [_safe_str(x) for x in (item.get("matched_rules") or [])[:5]],
+                "support": int(item.get("support", 0) or 0),
+                "edge_type": _safe_str(item.get("edge_type", "")),
+            })
+        else:
+            pattern_warnings.append({"warning": _safe_str(item)})
     return {
         "ok": bool(hs.get("ok")),
         "coverage_score": float(hs.get("coverage_score", 0) or 0),
         "hub_entities": hub_entities,
         "cross_links": cross_links,
-        "pattern_warnings": [_safe_str(x) for x in (hs.get("pattern_warnings") or [])[:5]],
+        "pattern_warnings": pattern_warnings,
+        "projected_edge_types": [_safe_str(x) for x in (hs.get("projected_edge_types") or [])[:8]],
     }
 
 
@@ -414,6 +450,52 @@ def _extract_evidence_quotes(raw_text: str, diagnosis: dict | None = None, filen
     return quotes[:5]
 
 
+def _build_agent_trace(
+    result: dict,
+    *,
+    mode: str,
+    llm_enabled: bool,
+    matched_interventions: list[dict] | None = None,
+) -> dict:
+    return {
+        "orchestration": {
+            "mode": mode,
+            "llm_enabled": llm_enabled,
+            "intent": result.get("intent", ""),
+            "intent_shape": _safe_str(result.get("intent_shape", "")) or "single",
+            "intent_reason": _safe_str(result.get("intent_reason", "")),
+            "confidence": result.get("intent_confidence", 0),
+            "engine": result.get("intent_engine", ""),
+            "pipeline": result.get("intent_pipeline", []),
+            "nodes_visited": result.get("nodes_visited", []),
+            "agents_called": result.get("agents_called", []),
+            "resolved_agents": result.get("resolved_agents", []),
+            "agent_reasoning": _safe_str(result.get("agent_reasoning", "")),
+            "strategy": "langgraph_v4_parallel",
+        },
+        "role_agents": {
+            "coach": result.get("coach_output", {}),
+            "analyst": result.get("analyst_output", {}),
+            "advisor": result.get("advisor_output", {}),
+            "tutor": result.get("tutor_output", {}),
+            "grader": result.get("grader_output", {}),
+            "planner": result.get("planner_output", {}),
+        },
+        "kg_analysis": result.get("kg_analysis", {}),
+        "hypergraph_insight": result.get("hypergraph_insight", {}),
+        "rag_cases": result.get("rag_cases", []),
+        "web_search": result.get("web_search_result", {}),
+        "hypergraph_student": result.get("hypergraph_student", {}),
+        "critic": result.get("critic"),
+        "challenge_strategies": result.get("challenge_strategies"),
+        "pressure_test_trace": result.get("pressure_test_trace"),
+        "competition": result.get("competition"),
+        "learning": result.get("learning"),
+        "category": result.get("category", ""),
+        "matched_teacher_interventions": matched_interventions or [],
+    }
+
+
 def _safe_agent_summary(sub: dict) -> dict:
     ao = sub.get("agent_outputs") or {}
     if not isinstance(ao, dict):
@@ -436,9 +518,13 @@ def _safe_agent_summary(sub: dict) -> dict:
         "category": _safe_str(ao.get("category", "") or meta.get("category", "")),
         "strategy": _safe_str(meta.get("strategy", "") or orchestration.get("strategy", "")),
         "agents_called": [_safe_str(x) for x in ((meta.get("agents_called") or orchestration.get("agents_called") or [])[:8])],
+        "resolved_agents": [_safe_str(x) for x in ((meta.get("resolved_agents") or orchestration.get("resolved_agents") or [])[:8])],
         "pipeline": [_safe_str(x) for x in ((meta.get("pipeline") or orchestration.get("pipeline") or [])[:6])],
         "intent": _normalize_intent(orchestration.get("intent", "") or ao.get("intent", ""), _safe_str(sub.get("raw_text", ""))),
+        "intent_shape": _safe_str(orchestration.get("intent_shape", "") or ao.get("intent_shape", "")) or "single",
+        "intent_reason": _safe_str(orchestration.get("intent_reason", "") or ao.get("intent_reason", "")),
         "intent_confidence": float(orchestration.get("confidence", 0) or ao.get("intent_confidence", 0) or 0),
+        "agent_reasoning": _safe_str(orchestration.get("agent_reasoning", "") or ao.get("agent_reasoning", "")),
     }
     return summary
 
@@ -1092,36 +1178,12 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     import logging as _log
     _log.getLogger("main").info("API response: hyper_student.ok=%s, kg_entities=%d", hyper_student.get("ok"), len(kg_analysis.get("entities", [])))
 
-    agent_trace = {
-        "orchestration": {
-            "mode": payload.mode,
-            "llm_enabled": composer_llm.enabled,
-            "intent": result.get("intent", ""),
-            "confidence": result.get("intent_confidence", 0),
-            "engine": result.get("intent_engine", ""),
-            "pipeline": result.get("intent_pipeline", []),
-            "nodes_visited": nodes_visited,
-            "agents_called": agents_called,
-            "strategy": "langgraph_v4_parallel",
-        },
-        "role_agents": {
-            "coach": result.get("coach_output", {}),
-            "analyst": result.get("analyst_output", {}),
-            "advisor": result.get("advisor_output", {}),
-            "tutor": result.get("tutor_output", {}),
-            "grader": result.get("grader_output", {}),
-            "planner": result.get("planner_output", {}),
-        },
-        "kg_analysis": kg_analysis,
-        "rag_cases": rag_cases,
-        "web_search": web_search,
-        "hypergraph_student": hyper_student,
-        "critic": result.get("critic"),
-        "challenge_strategies": result.get("challenge_strategies"),
-        "competition": result.get("competition"),
-        "learning": result.get("learning"),
-        "category": category,
-    }
+    agent_trace = _build_agent_trace(
+        result,
+        mode=payload.mode,
+        llm_enabled=composer_llm.enabled,
+        matched_interventions=matched_interventions,
+    )
 
     # ── persist to project state ──
     json_store.append_submission(
@@ -1161,6 +1223,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "next_task": next_task,
             "kg_analysis": kg_analysis,
             "hypergraph_insight": hyper_insight,
+            "pressure_test_trace": result.get("pressure_test_trace"),
             "matched_teacher_interventions": matched_interventions,
         },
     })
@@ -1176,6 +1239,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         hypergraph_insight=hyper_insight,
         hypergraph_student=hyper_student,
         rag_cases=rag_cases,
+        pressure_test_trace=result.get("pressure_test_trace", {}),
         agent_trace=agent_trace,
     )
 
@@ -1189,98 +1253,105 @@ async def dialogue_turn_stream(request: Request):
     msg = payload.get("message", "")
     project_id = payload.get("project_id", "demo")
     student_id = payload.get("student_id", "student")
-    conv_id = payload.get("conversation_id", "")
+    initial_conv_id = payload.get("conversation_id", "")
     mode_val = payload.get("mode", "coursework")
 
-    conv_messages: list[dict] = []
-    if conv_id:
-        conv = conv_store.get(project_id, conv_id)
-        if conv:
-            conv_messages = conv.get("messages", [])
-    else:
-        new_conv = conv_store.create(project_id, student_id)
-        conv_id = new_conv["conversation_id"]
-
-    project_state = json_store.load_project(project_id)
-    scoped_project_state, history_context = _build_scoped_project_state(project_state, conv_id, msg)
-
-    tfb_ctx, matched_interventions = _build_teacher_runtime_context(project_state, msg)
-
-    pre = run_workflow_pre_orchestrate(
-        message=msg, mode=mode_val,
-        project_state=scoped_project_state,
-        history_context=history_context,
-        conversation_messages=conv_messages,
-        teacher_feedback_context=tfb_ctx,
-    )
-    logical_project_id = _derive_logical_project_id(project_state, conv_id, msg, project_id)
-    project_phase = _infer_project_phase(msg, pre.get("next_task", {}), pre.get("kg_analysis", {}))
-    intent = _normalize_intent(pre.get("intent", ""), msg)
-    intent_confidence = float(pre.get("intent_confidence", 0) or 0)
-    evidence_quotes = _extract_evidence_quotes(msg, pre.get("diagnosis", {}))
-
-    side_data = {
-        "conversation_id": conv_id,
-        "logical_project_id": logical_project_id,
-        "project_phase": project_phase,
-        "diagnosis": pre.get("diagnosis", {}),
-        "next_task": pre.get("next_task", {}),
-        "kg_analysis": pre.get("kg_analysis", {}),
-        "hypergraph_student": pre.get("hypergraph_student", {}),
-        "hypergraph_insight": pre.get("hypergraph_insight", {}),
-        "rag_cases": pre.get("rag_cases", []),
-        "agent_trace": {
-            "orchestration": {
-                "mode": mode_val,
-                "intent": pre.get("intent", ""),
-                "confidence": pre.get("intent_confidence", 0),
-                "engine": pre.get("intent_engine", ""),
-                "agents_called": pre.get("agents_called", []),
-            },
-            "kg_analysis": pre.get("kg_analysis", {}),
-            "rag_cases": pre.get("rag_cases", []),
-            "web_search": pre.get("web_search_result", {}),
-            "hypergraph_student": pre.get("hypergraph_student", {}),
-            "matched_teacher_interventions": matched_interventions,
-        },
-    }
-
     def event_stream():
-        yield f"data: {json.dumps({'type': 'meta', 'data': side_data}, ensure_ascii=False)}\n\n"
+        conv_id = initial_conv_id
+        try:
+            if conv_id:
+                conv = conv_store.get(project_id, conv_id)
+                conv_messages = conv.get("messages", []) if conv else []
+            else:
+                new_conv = conv_store.create(project_id, student_id)
+                conv_id = new_conv["conversation_id"]
+                conv_messages = []
 
-        full_text = ""
-        for chunk in stream_orchestrator(pre):
-            full_text += chunk
-            yield f"data: {json.dumps({'type': 'token', 'data': chunk}, ensure_ascii=False)}\n\n"
+            yield f"data: {json.dumps({'type': 'preparing', 'data': {'conversation_id': conv_id, 'status': 'preparing'}}, ensure_ascii=False)}\n\n"
 
-        yield f"data: {json.dumps({'type': 'done', 'data': full_text}, ensure_ascii=False)}\n\n"
+            project_state = json_store.load_project(project_id)
+            scoped_project_state, history_context = _build_scoped_project_state(project_state, conv_id, msg)
+            tfb_ctx, matched_interventions = _build_teacher_runtime_context(project_state, msg)
 
-        json_store.append_submission(project_id, {
-            "student_id": student_id,
-            "conversation_id": conv_id,
-            "logical_project_id": logical_project_id,
-            "project_phase": project_phase,
-            "intent": intent,
-            "intent_confidence": intent_confidence,
-            "class_id": payload.get("class_id"),
-            "cohort_id": payload.get("cohort_id"),
-            "source_type": "dialogue_turn_stream",
-            "mode": mode_val,
-            "raw_text": msg[:6000],
-            "diagnosis": pre.get("diagnosis", {}),
-            "next_task": pre.get("next_task", {}),
-            "kg_analysis": pre.get("kg_analysis", {}),
-            "hypergraph_insight": pre.get("hypergraph_insight", {}),
-            "hypergraph_student": pre.get("hypergraph_student", {}),
-            "evidence_quotes": evidence_quotes,
-            "matched_teacher_interventions": matched_interventions,
-            "agent_outputs": side_data.get("agent_trace", {}),
-        })
-        conv_store.append_message(project_id, conv_id, {"role": "user", "content": msg})
-        conv_store.append_message(project_id, conv_id, {
-            "role": "assistant", "content": full_text,
-            "agent_trace": side_data.get("agent_trace", {}),
-        })
+            pre = run_workflow_pre_orchestrate(
+                message=msg,
+                mode=mode_val,
+                project_state=scoped_project_state,
+                history_context=history_context,
+                conversation_messages=conv_messages,
+                teacher_feedback_context=tfb_ctx,
+            )
+            logical_project_id = _derive_logical_project_id(project_state, conv_id, msg, project_id)
+            project_phase = _infer_project_phase(msg, pre.get("next_task", {}), pre.get("kg_analysis", {}))
+            intent = _normalize_intent(pre.get("intent", ""), msg)
+            intent_confidence = float(pre.get("intent_confidence", 0) or 0)
+            evidence_quotes = _extract_evidence_quotes(msg, pre.get("diagnosis", {}))
+            agent_trace = _build_agent_trace(
+                pre,
+                mode=mode_val,
+                llm_enabled=composer_llm.enabled,
+                matched_interventions=matched_interventions,
+            )
+
+            side_data = {
+                "conversation_id": conv_id,
+                "logical_project_id": logical_project_id,
+                "project_phase": project_phase,
+                "diagnosis": pre.get("diagnosis", {}),
+                "next_task": pre.get("next_task", {}),
+                "kg_analysis": pre.get("kg_analysis", {}),
+                "hypergraph_student": pre.get("hypergraph_student", {}),
+                "hypergraph_insight": pre.get("hypergraph_insight", {}),
+                "rag_cases": pre.get("rag_cases", []),
+                "agent_trace": agent_trace,
+            }
+            yield f"data: {json.dumps({'type': 'meta', 'data': side_data}, ensure_ascii=False)}\n\n"
+
+            full_text = ""
+            for chunk in stream_orchestrator(pre):
+                full_text += chunk
+                yield f"data: {json.dumps({'type': 'token', 'data': chunk}, ensure_ascii=False)}\n\n"
+
+            yield f"data: {json.dumps({'type': 'done', 'data': full_text}, ensure_ascii=False)}\n\n"
+
+            json_store.append_submission(project_id, {
+                "student_id": student_id,
+                "conversation_id": conv_id,
+                "logical_project_id": logical_project_id,
+                "project_phase": project_phase,
+                "intent": intent,
+                "intent_confidence": intent_confidence,
+                "class_id": payload.get("class_id"),
+                "cohort_id": payload.get("cohort_id"),
+                "source_type": "dialogue_turn_stream",
+                "mode": mode_val,
+                "raw_text": msg[:6000],
+                "diagnosis": pre.get("diagnosis", {}),
+                "next_task": pre.get("next_task", {}),
+                "kg_analysis": pre.get("kg_analysis", {}),
+                "hypergraph_insight": pre.get("hypergraph_insight", {}),
+                "hypergraph_student": pre.get("hypergraph_student", {}),
+                "evidence_quotes": evidence_quotes,
+                "matched_teacher_interventions": matched_interventions,
+                "agent_outputs": agent_trace,
+            })
+            conv_store.append_message(project_id, conv_id, {"role": "user", "content": msg})
+            conv_store.append_message(project_id, conv_id, {
+                "role": "assistant",
+                "content": full_text,
+                "agent_trace": {
+                    **agent_trace,
+                    "diagnosis": pre.get("diagnosis", {}),
+                    "next_task": pre.get("next_task", {}),
+                    "kg_analysis": pre.get("kg_analysis", {}),
+                    "hypergraph_insight": pre.get("hypergraph_insight", {}),
+                    "pressure_test_trace": pre.get("pressure_test_trace"),
+                    "matched_teacher_interventions": matched_interventions,
+                },
+            })
+        except Exception as exc:
+            logger.warning("dialogue_turn_stream failed: %s", exc)
+            yield f"data: {json.dumps({'type': 'error', 'data': {'conversation_id': conv_id, 'message': '流式生成失败，请稍后重试。', 'detail': str(exc)[:200]}}, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
@@ -1386,34 +1457,12 @@ async def dialogue_turn_upload(
     intent_confidence = float(result.get("intent_confidence", 0) or 0)
     evidence_quotes = _extract_evidence_quotes(extracted, diagnosis, file.filename)
 
-    agent_trace = {
-        "orchestration": {
-            "mode": mode,
-            "intent": result.get("intent", ""),
-            "confidence": result.get("intent_confidence", 0),
-            "engine": result.get("intent_engine", "file_detect"),
-            "pipeline": result.get("intent_pipeline", []),
-            "nodes_visited": result.get("nodes_visited", []),
-            "agents_called": agents_called,
-            "strategy": "langgraph_v4_parallel",
-        },
-        "role_agents": {
-            "coach": result.get("coach_output", {}),
-            "analyst": result.get("analyst_output", {}),
-            "advisor": result.get("advisor_output", {}),
-            "tutor": result.get("tutor_output", {}),
-            "grader": result.get("grader_output", {}),
-            "planner": result.get("planner_output", {}),
-        },
-        "kg_analysis": kg_analysis,
-        "rag_cases": result.get("rag_cases", []),
-        "web_search": result.get("web_search_result", {}),
-        "hypergraph_student": hyper_student,
-        "critic": result.get("critic"),
-        "competition": result.get("competition"),
-        "learning": result.get("learning"),
-        "category": result.get("category", ""),
-    }
+    agent_trace = _build_agent_trace(
+        result,
+        mode=mode,
+        llm_enabled=composer_llm.enabled,
+        matched_interventions=[],
+    )
 
     json_store.append_submission(project_id, {
         "student_id": student_id,
@@ -2578,21 +2627,47 @@ def _assessment_rubric(latest_sub: dict) -> list[dict]:
         {"id": "R8", "name": "执行与里程碑", "weight": 0.1, "good": ["团队", "执行", "里程碑"]},
         {"id": "R9", "name": "表达与材料", "weight": 0.1, "good": ["路演", "表达", "材料", "文档"]},
     ]
+    diagnosis_rubric = diagnosis.get("rubric", []) if isinstance(diagnosis.get("rubric"), list) else []
+    diagnosis_map = {str(item.get("item", "")): item for item in diagnosis_rubric if isinstance(item, dict)}
+    diag_name_map = {
+        "R1": "Problem Definition",
+        "R2": "User Evidence Strength",
+        "R3": "Solution Feasibility",
+        "R4": "Business Model Consistency",
+        "R5": "Market & Competition",
+        "R6": "Financial Logic",
+        "R7": "Innovation & Differentiation",
+        "R8": "Team & Execution",
+        "R9": "Presentation Quality",
+    }
     results: list[dict] = []
+    project_stage = _safe_str(diagnosis.get("project_stage", ""))
     for item in rubric_items:
+        diag_item = diagnosis_map.get(diag_name_map[item["id"]], {})
         keyword_hits = sum(1 for kw in item["good"] if kw in raw_text)
-        penalty = 0.3 if len(triggered_rules) >= 3 else 0
-        score = max(1.0, min(5.0, round(2.2 + keyword_hits * 0.6 - penalty, 1)))
+        if diag_item:
+            score = max(1.0, min(5.0, round(_safe_float(diag_item.get("score", 0)) / 2, 1)))
+        else:
+            penalty = 0.3 if len(triggered_rules) >= 3 else 0
+            score = max(1.0, min(5.0, round(2.4 + keyword_hits * 0.5 - penalty, 1)))
         reason_bits = []
-        if keyword_hits > 0:
+        if diag_item.get("reason"):
+            reason_bits.append(_safe_str(diag_item.get("reason")))
+        elif keyword_hits > 0:
             reason_bits.append(f"命中 {keyword_hits} 个与“{item['name']}”相关的关键词")
         else:
-            reason_bits.append(f"该维度的直接表述偏少")
+            reason_bits.append("该维度的直接表述偏少")
         if triggered_rules:
             reason_bits.append(f"当前提交触发 {len(triggered_rules)} 项风险规则")
         if evidence:
             reason_bits.append(f"可回溯证据 {min(len(evidence), 2)} 处")
-        revision_suggestion = f"优先补强“{item['name']}”的具体论证，并补上可引用的学生原文或材料证据。"
+        if project_stage:
+            reason_bits.append(f"当前阶段：{project_stage}")
+        revision_suggestion = (
+            f"优先补强“{item['name']}”的具体论证，并补上可引用的学生原文或材料证据。"
+            if not diag_item.get("status") == "ok"
+            else f"该维度已初步成立，下一步应把“{item['name']}”从可讲清提升到可证明。"
+        )
         results.append({
             "item_id": item["id"],
             "item_name": item["name"],
@@ -2949,8 +3024,12 @@ def _build_assessment_payload(project_id: str, logical_project_id: str = "") -> 
         "workflow_trace": {
             "strategy": _safe_str(agent_meta.get("strategy", "")),
             "intent": _safe_str(agent_meta.get("intent", "")),
+            "intent_shape": _safe_str(agent_meta.get("intent_shape", "")) or "single",
+            "intent_reason": _safe_str(agent_meta.get("intent_reason", "")),
             "intent_confidence": float(agent_meta.get("intent_confidence", 0) or 0),
             "agents_called": [_safe_str(x) for x in (agent_meta.get("agents_called") or [])[:8]],
+            "resolved_agents": [_safe_str(x) for x in (agent_meta.get("resolved_agents") or [])[:8]],
+            "agent_reasoning": _safe_str(agent_meta.get("agent_reasoning", "")),
             "pipeline": [_safe_str(x) for x in (agent_meta.get("pipeline") or [])[:6]],
             "matched_teacher_interventions": matched_teacher_interventions,
         },
@@ -3467,77 +3546,8 @@ def teacher_rubric_assessment(project_id: str) -> dict:
     
     latest_sub = submissions[-1]
     diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
-    raw_text = str(latest_sub.get("raw_text", "") or "")
-    
-    # Rubric定义
-    rubric_items = [
-        {"id": "R1", "name": "问题定义", "description": "问题清晰、具体，基于真实用户痛点", "weight": 0.1},
-        {"id": "R2", "name": "用户证据强度", "description": "声明由充分且相关的证据支持", "weight": 0.15},
-        {"id": "R3", "name": "方案可行性", "description": "方案在技术和运营上都可行", "weight": 0.1},
-        {"id": "R4", "name": "商业模式一致性", "description": "客户、价值、渠道、收入、成本之间逻辑一致", "weight": 0.15},
-        {"id": "R5", "name": "市场与竞争", "description": "市场规模估算和竞争分析合理", "weight": 0.1},
-        {"id": "R6", "name": "财务逻辑", "description": "单位经济和财务假设合理", "weight": 0.1},
-        {"id": "R7", "name": "创新与差异化", "description": "有清晰的差异化优势和可验证的优点", "weight": 0.1},
-        {"id": "R8", "name": "团队与执行", "description": "团队能力与项目雄心相匹配", "weight": 0.05},
-        {"id": "R9", "name": "展示与材料质量", "description": "材料清晰、逻辑连贯、有说服力", "weight": 0.05},
-    ]
-    
-    # 根据诊断数据估算评分（0-5分制）
-    rubric_scores = []
-    overall_weighted_score = 0
-    
-    for item in rubric_items:
-        item_id = item["id"]
-        
-        # 基于历史数据和规则触发情况进行评分
-        score = 3  # 默认中等
-        
-        # 根据关键词和规则调整
-        if item_id == "R1":
-            score = 3 if "痛点" in raw_text or "需求" in raw_text else 2
-        elif item_id == "R2":
-            score = 4 if len(diagnosis.get("triggered_rules", [])) < 3 else 2
-        elif item_id == "R3":
-            score = 3 if "技术" in raw_text else 2
-        elif item_id == "R4":
-            score = 2 if "H1" in str(diagnosis.get("triggered_rules", [])) else 4
-        elif item_id == "R5":
-            score = 3 if "市场" in raw_text or "竞争" in raw_text else 2
-        elif item_id == "R6":
-            score = 2 if "H8" in str(diagnosis.get("triggered_rules", [])) else 3
-        elif item_id == "R7":
-            score = 3 if "创新" in raw_text else 2
-        elif item_id == "R8":
-            score = 3 if "团队" in raw_text else 2
-        elif item_id == "R9":
-            score = _safe_float(diagnosis.get("overall_score", 3)) / 2
-        
-        score = max(0, min(5, round(score, 1)))
-        overall_weighted_score += score * item["weight"]
-        
-        # 生成修改建议
-        revision_suggestions = {
-            "R1": "补充至少2名真实用户的访谈记录，说明他们的具体痛点和频率",
-            "R2": "提供量化的用户验证数据（如调查样本数、转化率）",
-            "R3": "明确技术实现路线，细化MVP设计与资源需求",
-            "R4": "绘制商业模式画布，确保5个要素相互支持",
-            "R5": "用TAM/SAM/SOM三层法估算市场规模，列出主要竞品表",
-            "R6": "详细计算CAC、LTV、毛利率等核心单位经济指标",
-            "R7": "准备竞品对比表，说明该方案相比竞品的3个核心优势",
-            "R8": "列出团队成员背景，说明各自在项目中的关键角色",
-            "R9": "重新组织Pitch大纲，确保有明确的开头、3个主体论点、结尾",
-        }
-        
-        rubric_scores.append({
-            "item_id": item_id,
-            "item_name": item["name"],
-            "description": item["description"],
-            "score": score,
-            "max_score": 5,
-            "weight": item["weight"],
-            "revision_suggestion": revision_suggestions.get(item_id, ""),
-            "evidence_quotes": raw_text[:100],  # 简化的证据引用
-        })
+    rubric_scores = _assessment_rubric(latest_sub)
+    overall_weighted_score = round(sum(_safe_float(item.get("score")) * _safe_float(item.get("weight")) for item in rubric_scores), 2)
     
     return {
         "project_id": project_id,
@@ -3546,6 +3556,9 @@ def teacher_rubric_assessment(project_id: str) -> dict:
         "rubric_items": rubric_scores,
         "overall_weighted_score": round(overall_weighted_score, 2),
         "max_weighted_score": 5.0,
+        "score_band": diagnosis.get("score_band", ""),
+        "project_stage": diagnosis.get("project_stage", ""),
+        "grading_principles": diagnosis.get("grading_principles", []),
         "missing_evidence": ["用户验证数据", "竞品对比", "财务模型"],
     }
 
@@ -3566,9 +3579,16 @@ def teacher_competition_score_predict(project_id: str) -> dict:
     diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
     overall_score = _safe_float(diagnosis.get("overall_score", 0))
     triggered_rules = diagnosis.get("triggered_rules", []) or []
-    
-    # 竞赛预测评分（模拟）
-    competition_score = min(100, max(0, overall_score * 10 + 20 - len(triggered_rules) * 5))
+    high_risk = sum(1 for r in triggered_rules if isinstance(r, dict) and r.get("severity") == "high")
+    medium_risk = sum(1 for r in triggered_rules if isinstance(r, dict) and r.get("severity") == "medium")
+    project_stage = _safe_str(diagnosis.get("project_stage", ""))
+    stage_bonus = {"idea": -6, "structured": 0, "validated": 5, "document": 8}.get(project_stage, 0)
+
+    # 竞赛预测评分：强调证据链和成熟度，避免过高或过低
+    competition_score = overall_score * 8.0 + 20 + stage_bonus - high_risk * 4.0 - medium_risk * 1.5
+    if overall_score > 0:
+        competition_score = max(35, competition_score)
+    competition_score = min(95, max(0, competition_score))
     
     # 计算评分范围，并进行精确的四舍五入
     score_lower = max(0, competition_score - 10)

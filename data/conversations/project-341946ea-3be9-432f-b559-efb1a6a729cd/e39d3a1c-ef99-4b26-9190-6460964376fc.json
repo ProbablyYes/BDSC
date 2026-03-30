@@ -1,0 +1,676 @@
+{
+  "conversation_id": "e39d3a1c-ef99-4b26-9190-6460964376fc",
+  "project_id": "project-341946ea-3be9-432f-b559-efb1a6a729cd",
+  "student_id": "None",
+  "title": "你好呀路人乙！很高兴认识你！😊  作为你的创新创",
+  "summary": "请提供更详细描述",
+  "created_at": "2026-03-30T00:24:47.753531+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你好，我是路人乙",
+      "timestamp": "2026-03-30T00:25:01.833257+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你好呀路人乙！很高兴认识你！😊\n\n作为你的创新创业导师，我特别期待能和你一起探索那些藏在脑海里的创意火花。每个人都是从“路人”开始的，但往往最棒的想法就诞生于看似普通的日常观察中。\n\n**你现在有没有特别想解决的问题？或者最近有没有注意到生活中有什么可以改进的地方？**\n\n比如：\n> 也许是食堂排队太长，也许是校园二手交易不方便，又或者是你发现身边朋友都在为某个共同的小烦恼发愁……\n\n不用追求完美，任何小小的想法都值得被认真对待。我们可以一起把它变成一个有趣的项目！你愿意和我聊聊你的初步想法吗？",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 1.0,
+          "engine": "llm",
+          "pipeline": [
+            "tutor",
+            "coach",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "diagnosis": {},
+        "next_task": {},
+        "hypergraph_insight": {},
+        "matched_teacher_interventions": []
+      },
+      "timestamp": "2026-03-30T00:25:01.834243+08:00"
+    },
+    {
+      "role": "user",
+      "content": "你好，我是路人乙",
+      "timestamp": "2026-03-30T00:25:32.879868+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你好呀路人乙！又见面了！😊\n\n上次我们聊到要从日常观察中发现创意。这就像侦探一样，在生活中寻找那些小小的“不对劲”或“不方便”。\n\n**这几天，你有没有在生活中扮演一次“侦探”，捕捉到任何有趣的线索呢？**\n\n比如：\n> 在图书馆看到有人为找座位来回走动？\n> 发现同学们在抱怨小组作业沟通效率低？\n> 或者你自己在点外卖、出行时遇到了什么小麻烦？\n\n哪怕只是一个模糊的感觉或瞬间的念头，都值得拿出来聊聊。创业的起点，往往就藏在这些最真实的感受里。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.8,
+          "engine": "llm",
+          "pipeline": [
+            "tutor",
+            "coach",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "diagnosis": {},
+        "next_task": {},
+        "hypergraph_insight": {},
+        "matched_teacher_interventions": []
+      },
+      "timestamp": "2026-03-30T00:25:32.879868+08:00"
+    },
+    {
+      "role": "user",
+      "content": "你好，我是路人乙",
+      "timestamp": "2026-03-30T00:26:14.919123+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你好呀路人乙！又见面了，真高兴能继续我们的探索之旅！😊\n\n上次我们聊到要像侦探一样在生活中寻找“线索”，这其实是在培养你最重要的创业肌肉——**洞察力**。很多伟大的项目，最初都源于一个“诶，这里好像可以更好”的瞬间。\n\n**这几天，你捕捉到的任何“小麻烦”或“小灵感”，就是我们今天最好的起点。**\n\n它可以是：\n> “我发现取快递时，总要在好几个柜子前试密码，有点麻烦。”\n> “宿舍楼下的垃圾分类，大家好像总是分不太清。”\n> “我和朋友想约着打球，但总找不到合适的场地和时间。”\n\n**别担心想法是否“够大”或“成熟”，我们先把它放在桌上看看。** 你最近有类似的发现吗？哪怕只是一个模糊的感觉，我们也可以一起把它变成一张清晰的地图。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.95,
+          "engine": "llm",
+          "pipeline": [
+            "tutor",
+            "coach",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "diagnosis": {},
+        "next_task": {},
+        "hypergraph_insight": {},
+        "matched_teacher_interventions": []
+      },
+      "timestamp": "2026-03-30T00:26:14.919123+08:00"
+    },
+    {
+      "role": "user",
+      "content": "你好，我是路人乙",
+      "timestamp": "2026-03-30T00:27:00.575389+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你好呀路人乙！看到你回来，我特别开心！😊\n\n看来我们上次聊的“生活侦探”游戏，你已经很有感觉了！培养这种敏锐的观察力，是找到好项目的第一步。\n\n上次我们说到“宿舍楼下的垃圾分类”，这其实是一个非常棒、非常接地气的切入点！很多同学可能都有过类似困扰：分不清类别、赶时间随手一扔，或者觉得分类桶的设置不够方便。\n\n**我们可以顺着这个思路，一起往下挖一挖：**\n\n> 你观察到的具体“麻烦”是什么？是垃圾桶标识不清、位置不合理，还是大家缺乏简便的指引？\n> 你和身边的同学，对于这件事最真实的感受和吐槽是什么？\n\n别担心想法不成熟，我们一步步来。就从你看到的这个“小麻烦”开始，我们一起把它变成一个值得研究的项目方向，你觉得怎么样？",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.95,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "diagnosis": {},
+        "next_task": {},
+        "hypergraph_insight": {},
+        "matched_teacher_interventions": []
+      },
+      "timestamp": "2026-03-30T00:27:00.575389+08:00"
+    },
+    {
+      "role": "user",
+      "content": "老师您好，我们是计算机研一的团队，做了个AI论文伴读工具PaperMate，想请您指导一下创业课的项目方案。我们功能基本跑通了，但总觉得商业逻辑不太踏实，您帮我们看看？",
+      "timestamp": "2026-03-30T00:30:33.330106+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "## 先别急着做复杂诊断\n\n当前信息还不足以做高质量复杂诊断，先把几个核心信息补齐会更有帮助。\n\n我现在最缺的是：**目标用户、核心痛点、解决方案**。\n\n## 你先补这几项\n\n1. 你现在最想服务的是哪一类具体人群？最好具体到年龄、身份、场景，而不是“所有人”。\n\n2. 这类人在什么场景下会遇到什么具体痛点？这个问题现在通常怎么被凑合解决？\n\n3. 你的产品或服务到底准备怎么解决这个问题？用户第一次使用时会经历什么流程？\n\n4. 你为什么觉得这个方向值得做？是看到过真实现象、身边案例，还是你自己遇到过这个问题？\n\n## 为什么我先追问\n\n如果现在直接做完整诊断，很容易出现分析很多、但因为信息不够而不够准。你把上面这几项补上后，我再进入更完整的多智能体分析，会明显更稳。\n\n你不一定一次全答完，先答你最清楚的 2-3 项也可以。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "confidence": 0.95,
+          "engine": "llm",
+          "pipeline": [
+            "coach",
+            "analyst",
+            "grader",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。"
+          }
+        ],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 3.2,
+          "score_band": "想法探索期",
+          "project_stage": "idea",
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+              "fix_hint": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研"
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": []
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 1.82,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 1.82,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.12,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 2.47,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        },
+        "hypergraph_insight": {},
+        "matched_teacher_interventions": []
+      },
+      "timestamp": "2026-03-30T00:30:33.330106+08:00"
+    },
+    {
+      "role": "user",
+      "content": "老师您好，我们是计算机研一的团队，做了个AI论文伴读工具PaperMate，想请您指导一下创业课的项目方案。我们功能基本跑通了，但总觉得商业逻辑不太踏实，您帮我们看看？",
+      "timestamp": "2026-03-30T01:10:19.451138+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "看到你们是计算机研一的团队，已经做出了功能基本跑通的AI论文伴读工具，这第一步的技术实现非常了不起，说明团队执行力很强。\n\n从“PaperMate”这个名字和“伴读”这个定位来看，你们瞄准的应该是需要大量阅读文献的学术群体，比如硕士、博士生，甚至是年轻的研究人员。这个方向的市场需求是真实存在的，尤其在当前AI工具爆发的背景下，如果能切中一个未被很好满足的痛点，机会很大。\n\n不过，你提到“商业逻辑不太踏实”，这确实是这类工具从“项目”走向“产品”的关键门槛。我初步想到几个常见的挑战点：一是**功能价值的独特性**，市面上已有不少AI阅读助手，你们的“伴读”具体差异化和深度在哪里？二是**用户付费意愿**，学术工具往往用户期待免费或低价，如何构建可持续的商业模式？三是**用户获取与留存**，如何让忙碌的研究者发现你们并形成使用习惯？\n\n这些都是后续可以深入探讨的。但眼下，我们得先回到最根本的问题上，这直接决定了PaperMate的立足点：\n\n**你们做这个工具，最想解决用户在读论文时哪一个具体、高频且令人头疼的“时刻”？** 比如，是快速抓取几十篇文献的核心结论却总抓不准？是读到自己专业外的数学公式完全无法理解？还是读完后难以梳理出清晰的逻辑脉络用于组会汇报？\n\n请先和我聊聊这个最核心的场景和痛点。这能帮助我理解你们产品的“刀刃”究竟有多锋利。\n\n另外，如果方便，也可以简单提一下：\n1.  你们目前有让目标用户（比如实验室的同学）试用过吗？他们最认可或最吐槽的点是什么？\n2.  团队在技术实现上，最核心的自信是来自于哪方面（比如对某类模型有特别优化）？\n\n我们先从痛点这个根上理起。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "confidence": 0.95,
+          "engine": "llm",
+          "pipeline": [
+            "coach",
+            "analyst",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。"
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "需求证据不足",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "需求证据缺失",
+          "generated_question": "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？"
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "diagnosis": {
+          "mode": "learning",
+          "overall_score": 3.2,
+          "score_band": "想法探索期",
+          "project_stage": "idea",
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+              "fix_hint": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研"
+              ],
+              "quote": "老师您好，我们是计算机研一的团队，做了个AI论文伴读工具PaperMate，想请您指导一下创业课的项目方案。我们功能基本跑通了，但总觉得商业逻辑不太踏实，您帮我们看看？",
+              "trigger_message": "原文片段：“老师您好，我们是计算机研一的团队，做了个AI论文伴读工具PaperMate，想请您指导一下创业课的项目方案。我们功能基本跑通了，但总觉得商业逻辑不太踏实，您帮我们看看？” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。"
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "quote": "老师您好，我们是计算机研一的团队，做了个AI论文伴读工具PaperMate，想请您指导一下创业课的项目方案。我们功能基本跑通了，但总觉得商业逻辑不太踏实，您帮我们看看？",
+              "trigger_message": "原文片段：“老师您好，我们是计算机研一的团队，做了个AI论文伴读工具PaperMate，想请您指导一下创业课的项目方案。我们功能基本跑通了，但总觉得商业逻辑不太踏实，您帮我们看看？” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 1.82,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 1.82,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 2.72,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.12,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 2.47,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "template_guideline": [
+            "先选1类最核心用户，不要同时访谈很多类人",
+            "每份访谈至少记录场景、痛点原话、当前替代方案",
+            "整理成痛点频次表，并保留至少1条反证样本"
+          ],
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        },
+        "hypergraph_insight": {},
+        "matched_teacher_interventions": []
+      },
+      "timestamp": "2026-03-30T01:10:19.456179+08:00"
+    }
+  ]
+}

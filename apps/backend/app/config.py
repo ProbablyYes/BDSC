@@ -10,12 +10,17 @@ class Settings(BaseSettings):
     neo4j_username: str = "neo4j"
     neo4j_password: str = "neo4j"
     neo4j_database: str = ""
+    aura_instanceid: str = ""
+    aura_instancename: str = ""
     llm_provider: str = "mock"
     llm_model: str = "qwen-plus"
     llm_api_key: str = ""
     llm_base_url: str = "https://api.siliconflow.cn/v1"
     llm_fast_model: str = "Qwen/Qwen2.5-14B-Instruct"
     llm_reason_model: str = "Qwen/Qwen2.5-72B-Instruct"
+    llm_qwen_api_key: str = ""
+    llm_qwen_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    llm_qwen_model: str = "qwen-plus"
 
     max_parse_file_mb: float = 30.0  # modify default file size limit in MB
 
@@ -25,7 +30,11 @@ class Settings(BaseSettings):
     upload_root: Path = data_root / "uploads" / "student_submissions"
     teacher_examples_root: Path = data_root / "corpus" / "teacher_examples"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()

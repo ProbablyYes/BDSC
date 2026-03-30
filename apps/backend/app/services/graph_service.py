@@ -259,6 +259,50 @@ class GraphService:
         except Exception:
             return []
 
+    def search_nodes(self, keywords: list[str], limit_per_keyword: int = 3) -> list[dict[str, Any]]:
+        """Best-effort generic node retrieval for tutor grounding/debug logs."""
+        if not keywords:
+            return []
+        try:
+            def _query(session):
+                results: list[dict[str, Any]] = []
+                seen: set[str] = set()
+                for keyword in keywords[:4]:
+                    rows = list(
+                        session.run(
+                            """
+                            MATCH (n)
+                            WITH n, [k IN keys(n) WHERE toLower(toString(n[k])) CONTAINS toLower($keyword)] AS matched_keys
+                            WHERE size(matched_keys) > 0
+                            RETURN labels(n) AS labels, properties(n) AS props, matched_keys
+                            LIMIT $limit
+                            """,
+                            keyword=keyword,
+                            limit=limit_per_keyword,
+                        )
+                    )
+                    for row in rows:
+                        labels = list(row.get("labels") or [])
+                        props = dict(row.get("props") or {})
+                        node_key = f"{labels}|{props}"
+                        if node_key in seen:
+                            continue
+                        seen.add(node_key)
+                        trimmed_props = {}
+                        for k, v in list(props.items())[:6]:
+                            text = str(v)
+                            trimmed_props[k] = text[:160]
+                        results.append({
+                            "labels": labels,
+                            "matched_keys": list(row.get("matched_keys") or []),
+                            "props": trimmed_props,
+                        })
+                return results
+
+            return self._query_with_fallback(_query)
+        except Exception:
+            return []
+
     def baseline_snapshot(self, limit: int = 8) -> dict[str, Any]:
         try:
             def _query(session):

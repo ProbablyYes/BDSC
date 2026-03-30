@@ -4,7 +4,7 @@ import { CSSProperties, FormEvent, useEffect, useMemo, useState, useRef } from "
 import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
 
-const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
+const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 type Tab = "overview" | "assistant" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition";
 type TeamView = "comparison" | "team-detail" | "student-detail" | "project-detail";
 
@@ -2987,8 +2987,15 @@ export default function TeacherPage() {
                                   <div className="tm-note-row good">逻辑项目：{highlighted.logical_project_id || "当前项目"}</div>
                                   <div className="tm-note-row good">阶段：{highlighted.project_phase || "持续迭代"}</div>
                                   <div className="tm-note-row good">运行策略：{highlighted.agent_trace_meta?.strategy || "submission_flow"}</div>
+                                  <div className="tm-note-row good">意图形态：{highlighted.agent_trace_meta?.intent_shape || "single"}</div>
                                   {(highlighted.agent_trace_meta?.agents_called || []).length > 0 && (
                                     <div className="tm-note-row warn">参与 Agent：{highlighted.agent_trace_meta.agents_called.join(" / ")}</div>
+                                  )}
+                                  {highlighted.agent_trace_meta?.agent_reasoning && (
+                                    <div className="tm-note-row good">编排理由：{highlighted.agent_trace_meta.agent_reasoning}</div>
+                                  )}
+                                  {highlighted.agent_trace_meta?.intent_reason && (
+                                    <div className="tm-note-row good">识别理由：{highlighted.agent_trace_meta.intent_reason}</div>
                                   )}
                                   {(highlighted.matched_teacher_interventions || []).length > 0 && (
                                     <div className="tm-note-row warn">命中教师干预：{highlighted.matched_teacher_interventions.map((item: any) => item.title).join(" / ")}</div>
@@ -3606,168 +3613,174 @@ export default function TeacherPage() {
                                   </div>
                                 )}
 
-                                {isEditMode ? (
-                                  <textarea
-                                    value={editedContent}
-                                    onChange={(e) => setEditedContent(e.target.value)}
-                                    className="feedback-editor-textarea"
-                                  />
-                                ) : (
-                                  <div className="feedback-reading-stage">
-                                    <div className="feedback-reading-canvas">
-                                      {renderAnnotatedDocument(fileContent, feedbackAnnotations, feedbackAiSuggestions)}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {documentEdits.length > 0 && !isEditMode && (
-                                  <div className="assistant-note-list" style={{ marginTop: 14 }}>
-                                    {documentEdits.slice(0, 5).map((edit, idx) => (
-                                      <div key={idx} className="tm-note-row good">
-                                        {edit.edit_summary || "文档编辑"} · {edit.edited_length || 0} 字符 · {formatBJTime(edit.created_at)}
+                                <div className="feedback-reader-layout">
+                                  <div className="feedback-reader-main-column">
+                                    {isEditMode ? (
+                                      <textarea
+                                        value={editedContent}
+                                        onChange={(e) => setEditedContent(e.target.value)}
+                                        className="feedback-editor-textarea"
+                                      />
+                                    ) : (
+                                      <div className="feedback-reading-stage">
+                                        <div className="feedback-reading-canvas">
+                                          {renderAnnotatedDocument(fileContent, feedbackAnnotations, feedbackAiSuggestions)}
+                                        </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                )}
+                                    )}
 
-                                <div className="feedback-workbench-card">
-                                  <div className="feedback-workbench-head">
-                                    <div className="assistant-section-title" style={{ marginBottom: 0 }}>批注与反馈工作台</div>
-                                    <div className="tch-desc" style={{ margin: 0 }}>先在上方原文中看 AI 划线，再在这里继续写反馈、保存批注或上传老师反馈文件。</div>
-                                  </div>
-                                  <div className="feedback-action-tabs">
-                                    <button className={`feedback-action-tab ${feedbackActionView === "write" ? "active" : ""}`} onClick={() => setFeedbackActionView("write")}>写反馈</button>
-                                    <button className={`feedback-action-tab ${feedbackActionView === "annotate" ? "active" : ""}`} onClick={() => setFeedbackActionView("annotate")}>划线批注</button>
-                                    <button className={`feedback-action-tab ${feedbackActionView === "upload" ? "active" : ""}`} onClick={() => setFeedbackActionView("upload")}>上传文件</button>
-                                  </div>
-                                  {feedbackActionView === "write" && (
-                                    <div className="feedback-action-panel">
-                                      <label className="assistant-label">快速反馈模板</label>
-                                      <div className="feedback-template-row">
-                                        {["先补充关键证据链。", "把方案和用户场景一一对应。", "把结论改成可验证的数据表达。"] .map((item) => (
-                                          <button key={item} className="tm-chip" onClick={() => setFeedbackText((value) => `${value}${value ? "\n" : ""}${item}`)}>{item}</button>
+                                    {documentEdits.length > 0 && !isEditMode && (
+                                      <div className="assistant-note-list" style={{ marginTop: 14 }}>
+                                        {documentEdits.slice(0, 5).map((edit, idx) => (
+                                          <div key={idx} className="tm-note-row good">
+                                            {edit.edit_summary || "文档编辑"} · {edit.edited_length || 0} 字符 · {formatBJTime(edit.created_at)}
+                                          </div>
                                         ))}
                                       </div>
-                                      <label className="assistant-label">总体反馈</label>
-                                      <textarea
-                                        className="tm-input assistant-textarea"
-                                        value={feedbackText}
-                                        onChange={(e) => setFeedbackText(e.target.value)}
-                                        placeholder="这里写老师真正要发给学生的总体反馈，例如：先肯定亮点，再指出关键问题，最后给出下一轮修改要求。"
-                                      />
-                                      <label className="assistant-label">关注标签</label>
-                                      <input
-                                        className="tm-input"
-                                        value={feedbackTags}
-                                        onChange={(e) => setFeedbackTags(e.target.value)}
-                                        placeholder="evidence,business_model,expression"
-                                      />
-                                      <div className="feedback-preview-card">
-                                        <div className="assistant-section-title">发送预览</div>
-                                        <p>{feedbackText.trim() || "你写的总体反馈会显示在这里，方便确认语气和结构。"}</p>
-                                      </div>
-                                      <button className="tch-primary-btn tch-success-btn" onClick={submitFeedback}>提交文本反馈</button>
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
 
-                                  {feedbackActionView === "annotate" && (
-                                    <div className="feedback-action-panel">
-                                      <label className="assistant-label">AI 精读候选批注</label>
-                                      <div className="assistant-note-list" style={{ marginTop: 8 }}>
-                                        {feedbackAiLoading ? (
-                                          <div className="tm-note-row good">AI 正在精读正文并生成批注候选...</div>
-                                        ) : feedbackAiSuggestions.length > 0 ? feedbackAiSuggestions.map((item: any, idx: number) => (
-                                          <button
-                                            key={item.annotation_id || `${item.quote}-${idx}`}
-                                            className="tm-note-row good"
-                                            style={{ textAlign: "left", width: "100%" }}
-                                            onClick={() => {
-                                              setAnnotationType(item.annotation_type || "issue");
-                                              setAnnotationText(item.content || "");
-                                              setAnnotationAnchorText(item.quote || "");
-                                              const source = extractValidContent(editedContent || fileContent || "");
-                                              const index = item.quote ? source.indexOf(item.quote) : Number(item.position || 0);
-                                              setAnnotationAnchorPosition(index >= 0 ? index : Number(item.position || 0));
-                                            }}
-                                          >
-                                            <strong>{annotationTone(item.annotation_type || "issue").label}</strong>
-                                            <div style={{ marginTop: 6, color: "var(--text-primary)" }}>{item.content || "AI 认为这里值得老师重点查看。"}</div>
-                                            <div style={{ marginTop: 8, opacity: 0.82 }}>“{item.quote}”</div>
-                                          </button>
-                                        )) : aiQuoteCandidates.length > 0 ? aiQuoteCandidates.map((quote: string, idx: number) => (
-                                          <button
-                                            key={`${quote}-${idx}`}
-                                            className="tm-note-row good"
-                                            style={{ textAlign: "left", width: "100%" }}
-                                            onClick={() => {
-                                              setAnnotationAnchorText(quote);
-                                              const source = extractValidContent(editedContent || fileContent || "");
-                                              const index = source.indexOf(quote);
-                                              setAnnotationAnchorPosition(index >= 0 ? index : 0);
-                                            }}
-                                          >
-                                            “{quote}”
-                                          </button>
-                                        )) : <div className="tm-note-row good">暂无 AI 批注候选，可在左侧正文中选中一句话后再回来。</div>}
+                                  <aside className="feedback-reader-side-column">
+                                    <div className="feedback-workbench-card">
+                                      <div className="feedback-workbench-head">
+                                        <div className="assistant-section-title" style={{ marginBottom: 0 }}>批注与反馈工作台</div>
+                                        <div className="tch-desc" style={{ margin: 0 }}>左侧看原文与 AI 划线，右侧继续写反馈、保存批注或上传老师反馈文件。</div>
                                       </div>
-                                      <div className="assistant-toolbar" style={{ marginTop: 10 }}>
-                                        <button className="tch-sm-btn" onClick={captureAnnotationAnchor}>使用当前选中文本</button>
-                                        {annotationAnchorText && <button className="tch-sm-btn" onClick={() => { setAnnotationAnchorText(""); setAnnotationAnchorPosition(0); }}>清除锚点</button>}
+                                      <div className="feedback-action-tabs">
+                                        <button className={`feedback-action-tab ${feedbackActionView === "write" ? "active" : ""}`} onClick={() => setFeedbackActionView("write")}>写反馈</button>
+                                        <button className={`feedback-action-tab ${feedbackActionView === "annotate" ? "active" : ""}`} onClick={() => setFeedbackActionView("annotate")}>划线批注</button>
+                                        <button className={`feedback-action-tab ${feedbackActionView === "upload" ? "active" : ""}`} onClick={() => setFeedbackActionView("upload")}>上传文件</button>
                                       </div>
-                                      <div className="feedback-preview-card">
-                                        <div className="assistant-section-title">划线预览</div>
-                                        {renderHighlightPreview(editedContent || fileContent, annotationAnchorText)}
-                                      </div>
-                                      <div className="feedback-tag-picker">
-                                        {[
-                                          { id: "praise", label: "亮点" },
-                                          { id: "issue", label: "问题" },
-                                          { id: "suggest", label: "建议" },
-                                          { id: "question", label: "追问" },
-                                        ].map((item) => (
-                                          <button
-                                            key={item.id}
-                                            className={`feedback-tag-pill ${annotationType === item.id ? "active" : ""}`}
-                                            onClick={() => setAnnotationType(item.id)}
-                                          >
-                                            {item.label}
-                                          </button>
-                                        ))}
-                                      </div>
-                                      <select className="tm-input" value={annotationType} onChange={(e) => setAnnotationType(e.target.value)} style={{ marginBottom: 8 }}>
-                                        <option value="praise">亮点</option>
-                                        <option value="issue">问题</option>
-                                        <option value="suggest">建议</option>
-                                        <option value="question">追问</option>
-                                      </select>
-                                      <textarea
-                                        className="tm-input assistant-textarea small"
-                                        value={annotationText}
-                                        onChange={(e) => setAnnotationText(e.target.value)}
-                                        placeholder="解释这段为什么要改、改什么、下一轮应补什么。"
-                                      />
-                                      <button className="tch-primary-btn tch-warning-btn" onClick={saveAnnotation}>保存批注</button>
-                                    </div>
-                                  )}
+                                      {feedbackActionView === "write" && (
+                                        <div className="feedback-action-panel">
+                                          <label className="assistant-label">快速反馈模板</label>
+                                          <div className="feedback-template-row">
+                                            {["先补充关键证据链。", "把方案和用户场景一一对应。", "把结论改成可验证的数据表达。"] .map((item) => (
+                                              <button key={item} className="tm-chip" onClick={() => setFeedbackText((value) => `${value}${value ? "\n" : ""}${item}`)}>{item}</button>
+                                            ))}
+                                          </div>
+                                          <label className="assistant-label">总体反馈</label>
+                                          <textarea
+                                            className="tm-input assistant-textarea"
+                                            value={feedbackText}
+                                            onChange={(e) => setFeedbackText(e.target.value)}
+                                            placeholder="这里写老师真正要发给学生的总体反馈，例如：先肯定亮点，再指出关键问题，最后给出下一轮修改要求。"
+                                          />
+                                          <label className="assistant-label">关注标签</label>
+                                          <input
+                                            className="tm-input"
+                                            value={feedbackTags}
+                                            onChange={(e) => setFeedbackTags(e.target.value)}
+                                            placeholder="evidence,business_model,expression"
+                                          />
+                                          <div className="feedback-preview-card">
+                                            <div className="assistant-section-title">发送预览</div>
+                                            <p>{feedbackText.trim() || "你写的总体反馈会显示在这里，方便确认语气和结构。"}</p>
+                                          </div>
+                                          <button className="tch-primary-btn tch-success-btn" onClick={submitFeedback}>提交文本反馈</button>
+                                        </div>
+                                      )}
 
-                                  {feedbackActionView === "upload" && (
-                                    <div className="feedback-action-panel">
-                                      <label className="assistant-label">上传反馈文件</label>
-                                      <input
-                                        ref={feedbackFileInputRef}
-                                        type="file"
-                                        accept=".pdf,.docx,.pptx,.txt"
-                                        onChange={(e) => setFeedbackFileToUpload(e.target.files?.[0] || null)}
-                                        style={{ width: "100%", marginBottom: 8 }}
-                                      />
-                                      {feedbackFileToUpload && <div className="tm-note-row good" style={{ marginBottom: 10 }}>已选择：{feedbackFileToUpload.name}</div>}
-                                      <div className="feedback-preview-card">
-                                        <div className="assistant-section-title">上传说明</div>
-                                        <p>适合上传老师改好的版本、批注稿或要求学生下载回看的反馈附件。</p>
-                                      </div>
-                                      <button className="tch-primary-btn" onClick={uploadFeedbackFile} disabled={!feedbackFileToUpload}>上传反馈文件</button>
+                                      {feedbackActionView === "annotate" && (
+                                        <div className="feedback-action-panel">
+                                          <label className="assistant-label">AI 精读候选批注</label>
+                                          <div className="assistant-note-list" style={{ marginTop: 8 }}>
+                                            {feedbackAiLoading ? (
+                                              <div className="tm-note-row good">AI 正在精读正文并生成批注候选...</div>
+                                            ) : feedbackAiSuggestions.length > 0 ? feedbackAiSuggestions.map((item: any, idx: number) => (
+                                              <button
+                                                key={item.annotation_id || `${item.quote}-${idx}`}
+                                                className="tm-note-row good"
+                                                style={{ textAlign: "left", width: "100%" }}
+                                                onClick={() => {
+                                                  setAnnotationType(item.annotation_type || "issue");
+                                                  setAnnotationText(item.content || "");
+                                                  setAnnotationAnchorText(item.quote || "");
+                                                  const source = extractValidContent(editedContent || fileContent || "");
+                                                  const index = item.quote ? source.indexOf(item.quote) : Number(item.position || 0);
+                                                  setAnnotationAnchorPosition(index >= 0 ? index : Number(item.position || 0));
+                                                }}
+                                              >
+                                                <strong>{annotationTone(item.annotation_type || "issue").label}</strong>
+                                                <div style={{ marginTop: 6, color: "var(--text-primary)" }}>{item.content || "AI 认为这里值得老师重点查看。"}</div>
+                                                <div style={{ marginTop: 8, opacity: 0.82 }}>“{item.quote}”</div>
+                                              </button>
+                                            )) : aiQuoteCandidates.length > 0 ? aiQuoteCandidates.map((quote: string, idx: number) => (
+                                              <button
+                                                key={`${quote}-${idx}`}
+                                                className="tm-note-row good"
+                                                style={{ textAlign: "left", width: "100%" }}
+                                                onClick={() => {
+                                                  setAnnotationAnchorText(quote);
+                                                  const source = extractValidContent(editedContent || fileContent || "");
+                                                  const index = source.indexOf(quote);
+                                                  setAnnotationAnchorPosition(index >= 0 ? index : 0);
+                                                }}
+                                              >
+                                                “{quote}”
+                                              </button>
+                                            )) : <div className="tm-note-row good">暂无 AI 批注候选，可在左侧正文中选中一句话后再回来。</div>}
+                                          </div>
+                                          <div className="assistant-toolbar" style={{ marginTop: 10 }}>
+                                            <button className="tch-sm-btn" onClick={captureAnnotationAnchor}>使用当前选中文本</button>
+                                            {annotationAnchorText && <button className="tch-sm-btn" onClick={() => { setAnnotationAnchorText(""); setAnnotationAnchorPosition(0); }}>清除锚点</button>}
+                                          </div>
+                                          <div className="feedback-preview-card">
+                                            <div className="assistant-section-title">划线预览</div>
+                                            {renderHighlightPreview(editedContent || fileContent, annotationAnchorText)}
+                                          </div>
+                                          <div className="feedback-tag-picker">
+                                            {[
+                                              { id: "praise", label: "亮点" },
+                                              { id: "issue", label: "问题" },
+                                              { id: "suggest", label: "建议" },
+                                              { id: "question", label: "追问" },
+                                            ].map((item) => (
+                                              <button
+                                                key={item.id}
+                                                className={`feedback-tag-pill ${annotationType === item.id ? "active" : ""}`}
+                                                onClick={() => setAnnotationType(item.id)}
+                                              >
+                                                {item.label}
+                                              </button>
+                                            ))}
+                                          </div>
+                                          <select className="tm-input" value={annotationType} onChange={(e) => setAnnotationType(e.target.value)} style={{ marginBottom: 8 }}>
+                                            <option value="praise">亮点</option>
+                                            <option value="issue">问题</option>
+                                            <option value="suggest">建议</option>
+                                            <option value="question">追问</option>
+                                          </select>
+                                          <textarea
+                                            className="tm-input assistant-textarea small"
+                                            value={annotationText}
+                                            onChange={(e) => setAnnotationText(e.target.value)}
+                                            placeholder="解释这段为什么要改、改什么、下一轮应补什么。"
+                                          />
+                                          <button className="tch-primary-btn" onClick={saveAnnotation}>保存批注</button>
+                                        </div>
+                                      )}
+
+                                      {feedbackActionView === "upload" && (
+                                        <div className="feedback-action-panel">
+                                          <label className="assistant-label">上传反馈文件</label>
+                                          <input
+                                            ref={feedbackFileInputRef}
+                                            type="file"
+                                            accept=".pdf,.docx,.pptx,.txt"
+                                            onChange={(e) => setFeedbackFileToUpload(e.target.files?.[0] || null)}
+                                            style={{ width: "100%", marginBottom: 8 }}
+                                          />
+                                          {feedbackFileToUpload && <div className="tm-note-row good" style={{ marginBottom: 10 }}>已选择：{feedbackFileToUpload.name}</div>}
+                                          <div className="feedback-preview-card">
+                                            <div className="assistant-section-title">上传说明</div>
+                                            <p>适合上传老师改好的版本、批注稿或要求学生下载回看的反馈附件。</p>
+                                          </div>
+                                          <button className="tch-primary-btn" onClick={uploadFeedbackFile} disabled={!feedbackFileToUpload}>上传反馈文件</button>
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
+                                  </aside>
                                 </div>
                               </div>
                             )}
@@ -5179,7 +5192,10 @@ export default function TeacherPage() {
                                   <div className="assistant-note-list">
                                     <div className="tm-note-row good">策略：{assistantAssessment?.workflow_trace?.strategy || "assessment_pipeline"}</div>
                                     <div className="tm-note-row good">意图：{assistantAssessment?.workflow_trace?.intent || "综合咨询"}</div>
+                                    <div className="tm-note-row good">意图形态：{assistantAssessment?.workflow_trace?.intent_shape || "single"}</div>
                                     <div className="tm-note-row warn">Agent：{(assistantAssessment?.workflow_trace?.agents_called || []).join(" / ") || "Assessment Agent"}</div>
+                                    {assistantAssessment?.workflow_trace?.intent_reason && <div className="tm-note-row good">识别理由：{assistantAssessment.workflow_trace.intent_reason}</div>}
+                                    {assistantAssessment?.workflow_trace?.agent_reasoning && <div className="tm-note-row good">编排理由：{assistantAssessment.workflow_trace.agent_reasoning}</div>}
                                   </div>
                                 </div>
                               </div>
@@ -6348,6 +6364,7 @@ export default function TeacherPage() {
                                   <span>{formatBJTime(sub.created_at)}</span>
                                   <span>{sub.project_phase || "持续迭代"}</span>
                                   <span>{sub.intent || "综合咨询"}</span>
+                                  <span>{sub.agent_trace_meta?.intent_shape || "single"}</span>
                                   <span>{Number(sub.overall_score || 0).toFixed(1)}</span>
                                 </div>
                                 <div className="tm-case-inline-summary" style={{ marginTop: 6 }}>{sub.bottleneck || sub.next_task || sub.text_preview || "暂无记录"}</div>
@@ -6946,8 +6963,8 @@ export default function TeacherPage() {
         .project-rank-name { font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .project-rank-track { height: 8px; border-radius: 999px; background: var(--bg-card-hover); overflow: hidden; }
         .project-rank-track i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, rgba(107,138,255,0.28), #6b8aff); }
-        .feedback-shell { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr); gap: 18px; align-items: start; }
-        .feedback-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+        .feedback-shell { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; width: 100%; }
+        .feedback-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; width: 100%; }
         .feedback-side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
         .feedback-project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 10px; }
         .feedback-project-card { text-align: left; width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--border); background:

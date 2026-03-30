@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth, logout } from "../hooks/useAuth";
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
 type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "interventions" | "debug";
@@ -582,7 +582,12 @@ export default function StudentPage() {
   // taskHistory removed — task tab now uses planner output directly
 
   const nextTask = latestResult?.next_task ?? null;
-  const hyperEdges = useMemo(() => latestResult?.hypergraph_insight?.edges ?? [], [latestResult]);
+  const hyperInsight = useMemo(() => {
+    const pick = (r: any) => r?.hypergraph_insight ?? r?.agent_trace?.hypergraph_insight ?? null;
+    const all = [...resultHistory.map(pick), pick(latestResult)].filter((h) => (h?.edges?.length ?? 0) > 0 || h?.summary);
+    return all.length > 0 ? all[all.length - 1] : (pick(latestResult) ?? null);
+  }, [resultHistory, latestResult]);
+  const hyperEdges = useMemo(() => hyperInsight?.edges ?? [], [hyperInsight]);
 
   // Cumulative KG & HyperStudent: merge across turns so data is never lost
   const kgAnalysis = useMemo(() => {
@@ -612,14 +617,21 @@ export default function StudentPage() {
   }, [resultHistory, latestResult]);
 
   const ragCases = useMemo(() => {
-    const all = resultHistory.map((r) => r?.rag_cases ?? r?.agent_trace?.rag_cases ?? []).flat();
     const latest = latestResult?.rag_cases ?? latestResult?.agent_trace?.rag_cases ?? [];
     const seen = new Set<string>();
-    return [...all, ...latest].filter((c) => { const k = c?.title ?? JSON.stringify(c); if (seen.has(k)) return false; seen.add(k); return true; });
-  }, [resultHistory, latestResult]);
+    return latest
+      .filter((c: any) => {
+        const k = c?.project_name ?? c?.case_id ?? JSON.stringify(c);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .slice(0, 5);
+  }, [latestResult]);
   const webSearch = latestResult?.agent_trace?.web_search ?? latestResult?.web_search ?? null;
   const orchestration = latestResult?.agent_trace?.orchestration ?? {};
   const roleAgents = latestResult?.agent_trace?.role_agents ?? {};
+  const pressureTrace = latestResult?.agent_trace?.pressure_test_trace ?? latestResult?.pressure_test_trace ?? null;
   const agentsCalled = orchestration?.agents_called ?? [];
 
   // Cumulative planner tasks — kept across turns
@@ -638,6 +650,25 @@ export default function StudentPage() {
     const scores = resultHistory.map((r) => r?.diagnosis?.overall_score).filter((s) => s != null);
     return scores.length > 0 ? scores[scores.length - 1] : latestResult?.diagnosis?.overall_score ?? null;
   }, [resultHistory, latestResult]);
+  const scoreBand = latestResult?.diagnosis?.score_band ?? "";
+  const projectStage = latestResult?.diagnosis?.project_stage ?? "";
+  const gradingPrinciples: string[] = latestResult?.diagnosis?.grading_principles ?? [];
+  const projectStageLabel = ({
+    idea: "想法探索期",
+    structured: "基本成形期",
+    validated: "已验证推进期",
+    document: "计划书完善期",
+  } as Record<string, string>)[projectStage] ?? projectStage;
+  const modeGuide = useMemo(() => ({
+    coursework: "学怎么把项目想清楚，适合拆方法、补概念、看案例。",
+    competition: "按评委视角提分，适合路演、答辩、证据链和 rubric 优化。",
+    learning: "盯当前瓶颈和推进顺序，适合收敛下一步最关键动作。",
+  } as Record<string, string>)[mode] ?? "", [mode]);
+  const inputPlaceholder = useMemo(() => ({
+    coursework: "把你的项目想法、课程作业困惑或一个概念问题发给我，我会结合项目讲方法…",
+    competition: "把项目材料、答辩担忧或你想冲高分的部分发给我，我按评委视角帮你拆…",
+    learning: "告诉我你项目现在卡在哪，我会优先帮你判断真正瓶颈和下一步…",
+  } as Record<string, string>)[mode] ?? "描述你的项目想法、困惑或问题…", [mode]);
 
   useEffect(() => {
     if (currentUser) {
@@ -669,8 +700,9 @@ export default function StudentPage() {
           <div className="topbar-mode-toggle">
             <button type="button" className={`topbar-mode-opt${mode === "coursework" ? " active" : ""}`} onClick={() => setMode("coursework")}>课程辅导</button>
             <button type="button" className={`topbar-mode-opt${mode === "competition" ? " active" : ""}`} onClick={() => setMode("competition")}>竞赛冲刺</button>
-            <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>个人学习</button>
+            <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>项目教练</button>
           </div>
+          <div className="topbar-mode-hint">{modeGuide}</div>
           {mode === "competition" && (
             <select className="topbar-competition-select" value={competitionType} onChange={(e) => setCompetitionType(e.target.value as CompetitionType)}>
               <option value="">通用评分</option>
@@ -975,7 +1007,7 @@ export default function StudentPage() {
                 value={input}
                 onChange={(e) => { setInput(e.target.value); autoResize(); }}
                 onKeyDown={handleKeyDown}
-                placeholder="描述你的项目想法、困惑或问题…  (Shift+Enter 换行)"
+                placeholder={`${inputPlaceholder}  (Shift+Enter 换行)`}
                 rows={1}
               />
               {loading ? (
@@ -1070,8 +1102,12 @@ export default function StudentPage() {
                         <div className="agent-intent-badge">
                           <span className="intent-label">意图识别</span>
                           <span className="intent-value">{{ project_diagnosis: "项目诊断", evidence_check: "证据检查", business_model: "商业模式", competition_prep: "竞赛准备", pressure_test: "压力测试", learning_concept: "概念学习", idea_brainstorm: "头脑风暴", general_chat: "日常对话" }[latestResult.agent_trace.orchestration.intent as string] ?? latestResult.agent_trace.orchestration.intent}</span>
+                          <span className="intent-engine">{latestResult.agent_trace.orchestration.intent_shape === "mixed" ? "混合" : "单一"}</span>
                           <span className="intent-engine">({latestResult.agent_trace.orchestration.engine})</span>
                         </div>
+                      )}
+                      {latestResult?.agent_trace?.orchestration?.intent_reason && (
+                        <div className="panel-desc" style={{ marginBottom: 10 }}>识别理由：{latestResult.agent_trace.orchestration.intent_reason}</div>
                       )}
                       <div className="agent-flow">
                         {agentsCalled.map((a: string, i: number) => (
@@ -1096,8 +1132,8 @@ export default function StudentPage() {
                       )}
                       {Object.entries(roleAgents).map(([key, val]: [string, any]) => {
                         if (!val || !val.analysis) return null;
-                        const nameMap: Record<string, string> = { coach: "🎯 项目教练", analyst: "⚠️ 风险分析师", advisor: "🏆 竞赛顾问", tutor: "📚 学习导师", grader: "📊 评分官", planner: "📋 行动规划师" };
-                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "项目分析", web_search: "联网搜索", hypergraph: "多维分析", hypergraph_student: "维度覆盖", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "维度评分", next_task: "任务建议", critic: "批判分析" };
+                        const nameMap: Record<string, string> = { coach: "🎯 项目教练", analyst: "⚠️ 风险分析师", advisor: "🏆 竞赛顾问", tutor: "📚 课程导师", grader: "📊 评分官", planner: "📋 行动规划师" };
+                        const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "项目分析", web_search: "联网搜索", hypergraph: "多维分析", hypergraph_student: "维度覆盖", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", kg_baseline: "本地KG检索", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "维度评分", next_task: "任务建议", critic: "批判分析" };
                         return (
                           <details key={key} className="agent-card" open>
                             <summary className="agent-card-header">
@@ -1228,6 +1264,21 @@ export default function StudentPage() {
                   <div className="panel-desc">9维度量化评分，对标创业竞赛评审标准。评分取历史最高值，箭头显示本轮变化趋势。</div>
                   {rubric.length > 0 ? (
                     <div className="right-section">
+                      {(scoreBand || projectStageLabel || gradingPrinciples.length > 0) && (
+                        <div className="score-meta-card" style={{ marginBottom: 14, padding: 12, borderRadius: 12, border: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: gradingPrinciples.length > 0 ? 10 : 0 }}>
+                            {projectStageLabel && <span className="mini-chip">阶段：{projectStageLabel}</span>}
+                            {scoreBand && <span className="mini-chip">分档：{scoreBand}</span>}
+                          </div>
+                          {gradingPrinciples.length > 0 && (
+                            <div style={{ display: "grid", gap: 6 }}>
+                              {gradingPrinciples.map((item: string, idx: number) => (
+                                <div key={idx} className="panel-desc" style={{ margin: 0 }}>- {item}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {/* ── Radar Chart ── */}
                       {(() => {
                         const cx = 130, cy = 130, R = 100;
@@ -1566,13 +1617,38 @@ export default function StudentPage() {
                           <div className="panel-desc">从历史案例库中发现的跨维度关联模式。</div>
                           {hyperEdges.map((e: any) => (
                             <div key={e.hyperedge_id} className="hyper-edge-card">
-                              <span className={`hyper-edge-type ${e.type}`}>{{ Risk_Pattern_Edge: "风险", Value_Loop_Edge: "价值", Resource_Leverage_Edge: "资源" }[e.type as string] ?? e.type}</span>
+                              <span className={`hyper-edge-type ${e.type}`}>{{ Risk_Pattern_Edge: "风险模式", Value_Loop_Edge: "价值闭环", User_Pain_Fit_Edge: "用户痛点", Evidence_Grounding_Edge: "证据锚定", Market_Competition_Edge: "市场竞争", Execution_Gap_Edge: "执行断裂", Compliance_Safety_Edge: "合规安全", Ontology_Grounded_Edge: "本体落地", Innovation_Validation_Edge: "创新验证" }[e.type as string] ?? e.type}</span>
                               <span className="hyper-edge-note">{e.teaching_note}</span>
+                              {e.retrieval_reason && <div className="panel-desc" style={{marginTop: 6}}>命中原因：{e.retrieval_reason}</div>}
                               {(e.nodes ?? []).length > 0 && (
                                 <div className="hyper-edge-nodes">{e.nodes.map((n: string, ni: number) => <span key={ni} className="hyper-node-chip">{n.split("::").pop()}</span>)}</div>
                               )}
+                              {(e.evidence_quotes ?? []).length > 0 && (
+                                <div style={{display:"grid",gap:6,marginTop:8}}>
+                                  {(e.evidence_quotes ?? []).map((q: string, qi: number) => (
+                                    <div key={qi} className="panel-desc" style={{margin:0}}>证据：{q}</div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           ))}
+                        </div>
+                      )}
+                      {pressureTrace?.generated_question && (
+                        <div className="hyper-teaching" style={{marginTop: 12}}>
+                          <h5>本轮压力测试追问</h5>
+                          <div className="panel-desc">这条追问基于命中谬误、超边和策略自动生成。</div>
+                          <div className="hyper-edge-card">
+                            <span className="hyper-edge-type">启发式追问</span>
+                            <span className="hyper-edge-note">{pressureTrace.generated_question}</span>
+                            {pressureTrace?.evidence_quotes?.length > 0 && (
+                              <div style={{display:"grid",gap:6,marginTop:8}}>
+                                {pressureTrace.evidence_quotes.map((q: string, qi: number) => (
+                                  <div key={qi} className="panel-desc" style={{margin:0}}>依据：{q}</div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </>
@@ -1729,16 +1805,25 @@ export default function StudentPage() {
                 <div className="right-section">
                   <div className="panel-desc">系统内部运行状态，开发调试用。</div>
                   <div className="debug-row"><span>识别意图</span><span>{orchestration?.intent ?? "-"}</span></div>
+                  <div className="debug-row"><span>意图形态</span><span>{orchestration?.intent_shape ?? "-"}</span></div>
                   <div className="debug-row"><span>置信度</span><span>{orchestration?.confidence ?? "-"}</span></div>
                   <div className="debug-row"><span>识别引擎</span><span>{{ rule: "关键词匹配", llm: "LLM分类", follow_up: "追问继承", file_detect: "文件检测", heuristic_long: "长文启发", heuristic_short: "短文启发" }[orchestration?.engine as string] ?? orchestration?.engine ?? "-"}</span></div>
                   <div className="debug-row"><span>调用Agent</span><span>{(orchestration?.agents_called ?? []).join(" → ") || "-"}</span></div>
+                  <div className="debug-row"><span>最终Agent</span><span>{(orchestration?.resolved_agents ?? []).join(" → ") || "-"}</span></div>
                   <div className="debug-row"><span>执行管线</span><span>{(orchestration?.pipeline ?? []).join(" → ") || "-"}</span></div>
                   <div className="debug-row"><span>编排策略</span><span>{orchestration?.strategy ?? "-"}</span></div>
                   <div className="debug-row"><span>LLM启用</span><span>{String(orchestration?.llm_enabled ?? false)}</span></div>
+                  <div className="debug-row"><span>识别理由</span><span>{orchestration?.intent_reason ?? "-"}</span></div>
+                  <div className="debug-row"><span>编排理由</span><span>{orchestration?.agent_reasoning ?? "-"}</span></div>
                   <div className="debug-row"><span>会话ID</span><span className="debug-conv-id">{conversationId ?? "无"}</span></div>
-                  <div className="debug-row"><span>超图(顶层)</span><span>{latestResult?.hypergraph_student?.ok ? `覆盖${latestResult.hypergraph_student.coverage_score}/10` : "无"}</span></div>
-                  <div className="debug-row"><span>超图(trace)</span><span>{latestResult?.agent_trace?.hypergraph_student?.ok ? `覆盖${latestResult.agent_trace.hypergraph_student.coverage_score}/10` : "无"}</span></div>
+                  <div className="debug-row"><span>超图(顶层)</span><span>{hyperStudent?.ok ? `覆盖${hyperStudent.coverage_score}/10` : "无"}</span></div>
+                  <div className="debug-row"><span>教学超边</span><span>{hyperEdges.length > 0 ? `${hyperEdges.length}条` : "无"}</span></div>
                   <div className="debug-row"><span>超图(累积)</span><span>{hyperStudent?.ok ? `覆盖${hyperStudent.coverage_score}/10` : "无"}</span></div>
+                  <div className="debug-row"><span>谬误识别</span><span>{pressureTrace?.fallacy_label ?? "-"}</span></div>
+                  <div className="debug-row"><span>追问策略</span><span>{pressureTrace?.selected_strategy ?? "-"}</span></div>
+                  <div className="debug-row"><span>超边类型</span><span>{((pressureTrace?.retrieved_heterogeneous_subgraph ?? []).map((x: any) => x?.edge_type).filter(Boolean).join(" / ")) || "-"}</span></div>
+                  <div className="debug-row"><span>超边ID</span><span>{((pressureTrace?.retrieved_heterogeneous_subgraph ?? []).map((x: any) => x?.hyperedge_id).filter(Boolean).join(" / ")) || "-"}</span></div>
+                  <div className="debug-row"><span>生成追问</span><span>{pressureTrace?.generated_question ?? "-"}</span></div>
                   <div className="debug-row"><span>KG实体(累积)</span><span>{kgAnalysis?.entities?.length ?? 0}</span></div>
                   <div className="debug-row"><span>历史轮次</span><span>{resultHistory.length}</span></div>
                   <details className="debug-json"><summary>原始 JSON</summary><pre>{JSON.stringify(latestResult, null, 2) ?? "暂无"}</pre></details>

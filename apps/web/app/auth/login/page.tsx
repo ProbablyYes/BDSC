@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8787").trim().replace(/\/+$/, "");
+const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 type Mode = "email" | "phone";
 
 export default function LoginPage() {
@@ -163,7 +163,7 @@ export default function LoginPage() {
           <div className="auth-mode-tabs">
             <button type="button" className={`auth-mode-tab ${mode === "email" ? "active" : ""}`} onClick={() => setMode("email")}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
-              邮箱登录
+              账号登录
             </button>
             <button type="button" className={`auth-mode-tab ${mode === "phone" ? "active" : ""}`} onClick={() => setMode("phone")}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="18" r="1"/></svg>
@@ -175,10 +175,10 @@ export default function LoginPage() {
             {mode === "email" ? (
               <>
                 <label className="auth-label">
-                  <span>邮箱</span>
+                  <span>账号 / 手机号</span>
                   <div className="auth-input-wrap">
                     <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
-                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="auth-input auth-input-icon-pad" autoComplete="email" />
+                    <input type="text" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="输入邮箱、手机号或测试账号" className="auth-input auth-input-icon-pad" autoComplete="username" />
                   </div>
                 </label>
                 <label className="auth-label">
@@ -199,10 +199,10 @@ export default function LoginPage() {
             ) : (
               <>
                 <label className="auth-label">
-                  <span>手机号</span>
+                  <span>手机号 / 任意测试串</span>
                   <div className="auth-input-wrap">
                     <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="18" r="1"/></svg>
-                    <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="13800138000" className="auth-input auth-input-icon-pad" />
+                    <input type="text" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="可输入任意内容用于测试" className="auth-input auth-input-icon-pad" />
                   </div>
                 </label>
                 <label className="auth-label">

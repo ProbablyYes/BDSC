@@ -10,6 +10,10 @@ from app.services.llm_client import LlmClient
 
 llm = LlmClient()
 
+_GHOSTWRITE_PATTERNS = [
+    "直接帮我写", "帮我写完整", "直接写完", "可直接提交", "直接提交的文本", "代写", "你替我写",
+]
+
 
 def _json_list(value: Any) -> list[str]:
     if not isinstance(value, list):
@@ -22,11 +26,31 @@ def student_learning_agent(prompt: str, mode: str = "coursework") -> dict[str, A
     if not text:
         text = "请解释什么是创新创业项目中的问题定义，并给出一个可执行练习。"
 
+    if any(p in text for p in _GHOSTWRITE_PATTERNS):
+        return {
+            "agent": "student_learning",
+            "mode": mode,
+            "definition": "我不能直接替你代写可直接提交的课程内容，因为学习辅导的目标是帮你学会推理和表达。",
+            "example": "如果你在写商业计划书，我可以帮你拆结构、补逻辑、改表达，但不会直接生成整段可提交正文。",
+            "common_mistakes": ["把学习辅导当代写工具", "直接要成稿而不先想核心判断", "没有先整理已有证据和要点"],
+            "practice_task": "先用3句话写出你这一段最想表达的核心判断、支撑证据和你最没把握的地方。",
+            "expected_artifact": "3句话的段落提纲 + 你已有的2条证据或例子",
+            "evaluation_criteria": ["能看出你的核心判断", "能指出证据是否足够", "能据此继续进行苏格拉底式追问"],
+            "socratic_questions": [
+                "这一段你最想说服老师接受的核心判断到底是什么？",
+                "你现在手里已经有哪些数据、案例或用户原话能支持这个判断？",
+                "如果只能保留两个小标题，你觉得应该保留哪两个，为什么？",
+            ],
+            "engine": "guardrail",
+        }
+
     if llm.enabled:
         llm_resp = llm.chat_json(
             system_prompt=(
                 "你是创新创业课程学习导师。请输出JSON，字段为"
                 "definition, example, common_mistakes(list), practice_task, expected_artifact, evaluation_criteria(list)。"
+                "要求：practice_task 只能有一个，而且必须可执行、可验收；"
+                "如果学生问如何写，优先解释思路和结构，不要替他直接代写成稿。"
             ),
             user_prompt=f"模式:{mode}\n学生问题:\n{text}",
             temperature=0.3,

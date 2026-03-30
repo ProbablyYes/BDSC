@@ -46,7 +46,10 @@ class HyperedgeRecord:
     support: int
     teaching_note: str
     category: str | None
-    rules: list[str]
+    rules: list[str] = field(default_factory=list)
+    rubrics: list[str] = field(default_factory=list)
+    evidence_quotes: list[str] = field(default_factory=list)
+    retrieval_reason: str = ""
     node_set: set[str] | None = None
 
 
@@ -446,8 +449,9 @@ class HypergraphService:
         self.graph_service = graph_service
         self._hypergraph: hnx.Hypergraph | None = None
         self._records: list[HyperedgeRecord] = []
+        self._family_counts: dict[str, int] = {}
         self._rule_alias: dict[str, list[str]] = {
-            "H4": ["market_size_fallacy"],
+            "H4": ["market_size_fallacy", "H9", "H19"],
             "H5": ["weak_user_evidence"],
             "H6": ["no_competitor_claim"],
             "H8": ["unit_economics_not_proven", "unit_economics_unsound"],
@@ -474,22 +478,20 @@ class HypergraphService:
                     session.run(
                         """
                         MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
-                        OPTIONAL MATCH (p)-[:HITS_RULE]->(r:RiskRule)
-                        OPTIONAL MATCH (p)-[:USES_TECH]->(t:Technology)
-                        OPTIONAL MATCH (p)-[:TARGETS]->(m:Market)
-                        OPTIONAL MATCH (p)-[:HAS_RESOURCE]->(res:Resource)
-                        WITH p, c,
-                             collect(DISTINCT r.id) AS rule_ids,
-                             collect(DISTINCT t.name) AS techs,
-                             collect(DISTINCT m.name) AS markets,
-                             collect(DISTINCT res.name) AS resources,
-                             count(DISTINCT r) AS risk_count,
-                             coalesce(p.confidence, 0.0) AS confidence
                         RETURN p.id AS project_id,
                                c.name AS category,
-                               [x IN rule_ids WHERE x IS NOT NULL] AS rule_ids,
-                               techs, markets, resources,
-                               risk_count, confidence
+                               coalesce(p.confidence, 0.0) AS confidence,
+                               [(p)-[:HAS_TARGET_USER]->(u:Stakeholder) | u.name] AS stakeholders,
+                               [(p)-[:HAS_PAIN]->(pain:PainPoint) | pain.name] AS pains,
+                               [(p)-[:HAS_SOLUTION]->(sol:Solution) | sol.name] AS solutions,
+                               [(p)-[:HAS_INNOVATION]->(inv:InnovationPoint) | inv.name] AS innovations,
+                               [(p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect) | bm.name] AS business_models,
+                               [(p)-[:HAS_MARKET_ANALYSIS]->(m:Market) | m.name] AS markets,
+                               [(p)-[:HAS_EXECUTION_STEP]->(ex:ExecutionStep) | ex.name] AS execution_steps,
+                               [(p)-[:HAS_RISK_CONTROL]->(rc:RiskControlPoint) | rc.name] AS risk_controls,
+                               [(p)-[:HAS_EVIDENCE]->(e:Evidence) | {quote: coalesce(e.quote, ''), type: coalesce(e.type, ''), source_unit: coalesce(e.source_unit, '')}] AS evidence_rows,
+                               [(p)-[ev:EVALUATED_BY]->(ri:RubricItem) | {name: ri.name, covered: coalesce(ev.covered, false)}] AS rubric_rows,
+                               [(p)-[:HITS_RULE]->(r:RiskRule) | r.id] AS rule_ids
                         """
                     )
                 )
@@ -498,151 +500,404 @@ class HypergraphService:
             logger.warning("Hypergraph source query failed: %s", exc)
             rows = []
 
-        if not rows:
-            rows = self._fallback_query()
-
-        edge_to_nodes: dict[str, set[str]] = {}
-        records: list[HyperedgeRecord] = []
-
-        risk_counter: Counter[tuple[str, tuple[str, ...]]] = Counter()
-        value_buckets: dict[str, list[dict]] = defaultdict(list)
-        resource_counter: Counter[tuple[str, tuple[str, ...]]] = Counter()
-
+        normalized_rows: list[dict[str, Any]] = []
         for row in rows:
-            category = str(row.get("category") or "未分类")
-            rule_ids = sorted(str(x) for x in (row.get("rule_ids") or []) if x)
-            techs = [str(x) for x in (row.get("techs") or []) if x]
-            markets = [str(x) for x in (row.get("markets") or []) if x]
-            resources = [str(x) for x in (row.get("resources") or []) if x]
-            risk_count = int(row.get("risk_count") or 0)
-            confidence = float(row.get("confidence") or 0.0)
-            project_id = str(row.get("project_id") or "unknown")
-
-            if len(rule_ids) >= 1:
-                risk_counter[(category, tuple(rule_ids))] += 1
-
-            if confidence >= 0.6 and risk_count <= 1:
-                value_buckets[category].append({
-                    "project_id": project_id, "techs": techs, "markets": markets,
+            evidence_rows = []
+            for item in row.get("evidence_rows") or []:
+                if not isinstance(item, dict):
+                    continue
+                quote = str(item.get("quote", "")).strip()
+                evidence_rows.append({
+                    "quote": quote[:160],
+                    "type": str(item.get("type", "")).strip(),
+                    "source_unit": str(item.get("source_unit", "")).strip(),
                 })
+            rubric_rows = []
+            for item in row.get("rubric_rows") or []:
+                if not isinstance(item, dict):
+                    continue
+                name = str(item.get("name", "")).strip()
+                if not name:
+                    continue
+                rubric_rows.append({
+                    "name": name,
+                    "covered": bool(item.get("covered", False)),
+                })
+            normalized_rows.append({
+                "project_id": str(row.get("project_id") or ""),
+                "category": str(row.get("category") or "未分类"),
+                "confidence": float(row.get("confidence") or 0.0),
+                "stakeholders": self._unique_texts(list(row.get("stakeholders") or [])),
+                "pains": self._unique_texts(list(row.get("pains") or [])),
+                "solutions": self._unique_texts(list(row.get("solutions") or [])),
+                "innovations": self._unique_texts(list(row.get("innovations") or [])),
+                "business_models": self._unique_texts(list(row.get("business_models") or [])),
+                "markets": self._unique_texts(list(row.get("markets") or [])),
+                "execution_steps": self._unique_texts(list(row.get("execution_steps") or [])),
+                "risk_controls": self._unique_texts(list(row.get("risk_controls") or [])),
+                "evidence_rows": evidence_rows[:8],
+                "rubric_rows": rubric_rows[:12],
+                "rule_ids": self._unique_texts(list(row.get("rule_ids") or []), max_items=8),
+            })
+        return normalized_rows
 
-            if resources:
-                resource_counter[(category, tuple(sorted(resources[:3])))] += 1
-
-        # ── Risk_Pattern_Edge ──
-        created_risk = 0
-        for idx, ((category, rules), support) in enumerate(
-            risk_counter.most_common(max_edges), start=1
-        ):
-            if support < min_pattern_support:
-                continue
-            edge_id = f"he_risk_{idx:03d}"
-            node_set = {f"Category::{category}"} | {f"RiskRule::{rid}" for rid in rules}
-            edge_to_nodes[edge_id] = node_set
-
-            rule_names = "、".join(rules[:4])
-            if len(rules) > 4:
-                rule_names += f" 等{len(rules)}项"
-            records.append(HyperedgeRecord(
-                hyperedge_id=edge_id, type="Risk_Pattern_Edge",
-                support=support,
-                teaching_note=f"{category}类项目常见风险组合：{rule_names}（{support}个项目出现此模式）",
-                category=category, rules=list(rules), node_set=node_set,
-            ))
-            created_risk += 1
-
-        # ── Value_Loop_Edge ──
-        created_value = 0
-        for idx, (category, projects) in enumerate(
-            sorted(value_buckets.items(), key=lambda x: -len(x[1])), start=1
-        ):
-            if idx > max_edges:
-                break
-            edge_id = f"he_value_{idx:03d}"
-            all_techs = set()
-            all_markets = set()
-            for p in projects:
-                all_techs.update(p.get("techs", []))
-                all_markets.update(p.get("markets", []))
-
-            node_set = {f"Category::{category}"}
-            node_set |= {f"Technology::{t}" for t in list(all_techs)[:3]}
-            node_set |= {f"Market::{m}" for m in list(all_markets)[:3]}
-            edge_to_nodes[edge_id] = node_set
-
-            tech_str = "、".join(list(all_techs)[:3]) if all_techs else "多种技术"
-            market_str = "、".join(list(all_markets)[:3]) if all_markets else "多个市场"
-            records.append(HyperedgeRecord(
-                hyperedge_id=edge_id, type="Value_Loop_Edge",
-                support=len(projects),
-                teaching_note=(
-                    f"{category}类有{len(projects)}个低风险高质量项目，"
-                    f"技术路线集中在{tech_str}，目标市场为{market_str}——可作为价值闭环参考"
-                ),
-                category=category, rules=[], node_set=node_set,
-            ))
-            created_value += 1
-
-        # ── Resource_Leverage_Edge ──
-        created_resource = 0
-        for idx, ((category, res_tuple), support) in enumerate(
-            resource_counter.most_common(max_edges), start=1
-        ):
-            if support < min_pattern_support:
-                continue
-            edge_id = f"he_resource_{idx:03d}"
-            node_set = {f"Category::{category}"} | {f"Resource::{r}" for r in res_tuple}
-            edge_to_nodes[edge_id] = node_set
-
-            res_names = "、".join(res_tuple)
-            records.append(HyperedgeRecord(
-                hyperedge_id=edge_id, type="Resource_Leverage_Edge",
-                support=support,
-                teaching_note=f"{category}类项目常利用{res_names}等资源（{support}个项目），建议检查资源获取可行性",
-                category=category, rules=[], node_set=node_set,
-            ))
-            created_resource += 1
-
-        self._hypergraph = hnx.Hypergraph(edge_to_nodes) if edge_to_nodes else hnx.Hypergraph({})
-        self._records = records
-
-        return {
-            "ok": True,
-            "created": {
-                "risk_pattern_edges": created_risk,
-                "value_loop_edges": created_value,
-                "resource_leverage_edges": created_resource,
-            },
-            "total_nodes": len(self._hypergraph.nodes) if self._hypergraph else 0,
-            "total_edges": len(self._hypergraph.edges) if self._hypergraph else 0,
-            "notes": "HyperNetX 超图已重建（含三种超边类型）。",
-        }
-
-    def _fallback_query(self) -> list[dict]:
-        """Fallback: simpler query if USES_TECH/TARGETS/HAS_RESOURCE relations don't exist."""
+    def _load_ontology_rows(self) -> list[dict[str, Any]]:
         try:
-            rows = self.graph_service._query_with_fallback(
+            return self.graph_service._query_with_fallback(
                 lambda session: list(
                     session.run(
                         """
-                        MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
-                        OPTIONAL MATCH (p)-[:HITS_RULE]->(r:RiskRule)
-                        WITH p, c,
-                             collect(DISTINCT r.id) AS rule_ids,
-                             count(DISTINCT r) AS risk_count,
-                             coalesce(p.confidence, 0.0) AS confidence
-                        RETURN p.id AS project_id,
-                               c.name AS category,
-                               rule_ids, risk_count, confidence,
-                               [] AS techs, [] AS markets, [] AS resources
+                        MATCH (n)-[:INSTANCE_OF]->(o:OntologyNode)
+                        OPTIONAL MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
+                        WHERE EXISTS { MATCH (p)-[:HAS_TARGET_USER]->(n) }
+                           OR EXISTS { MATCH (p)-[:HAS_PAIN]->(n) }
+                           OR EXISTS { MATCH (p)-[:HAS_SOLUTION]->(n) }
+                           OR EXISTS { MATCH (p)-[:HAS_BUSINESS_MODEL]->(n) }
+                           OR EXISTS { MATCH (p)-[:HAS_MARKET_ANALYSIS]->(n) }
+                           OR EXISTS { MATCH (p)-[:HAS_EXECUTION_STEP]->(n) }
+                           OR EXISTS { MATCH (p)-[:HAS_RISK_CONTROL]->(n) }
+                        RETURN coalesce(o.id, o.name, 'unknown') AS ontology_id,
+                               coalesce(o.name, o.id, 'unknown') AS ontology_name,
+                               coalesce(n.name, n.id, '') AS instance_name,
+                               head(labels(n)) AS instance_label,
+                               collect(DISTINCT c.name)[0..5] AS categories,
+                               count(DISTINCT p) AS support
+                        ORDER BY support DESC
+                        LIMIT 40
                         """
                     )
                 )
             )
-            return rows
-        except Exception as exc:
-            logger.warning("Hypergraph fallback query also failed: %s", exc)
+        except Exception:
             return []
+
+    def _register_pattern(self, bucket: dict[tuple, dict[str, Any]], key: tuple, payload: dict[str, Any]) -> None:
+        slot = bucket.setdefault(
+            key,
+            {
+                "support": 0,
+                "category": payload.get("category"),
+                "node_set": set(),
+                "rules": set(),
+                "rubrics": set(),
+                "evidence_quotes": [],
+                "teaching_note": payload.get("teaching_note", ""),
+                "retrieval_reason": payload.get("retrieval_reason", ""),
+            },
+        )
+        slot["support"] += 1
+        slot["node_set"].update(payload.get("node_set", set()))
+        slot["rules"].update(payload.get("rules", []))
+        slot["rubrics"].update(payload.get("rubrics", []))
+        for quote in payload.get("evidence_quotes", []):
+            q = str(quote or "").strip()
+            if q and q not in slot["evidence_quotes"]:
+                slot["evidence_quotes"].append(q[:160])
+        if not slot["teaching_note"]:
+            slot["teaching_note"] = payload.get("teaching_note", "")
+        if not slot["retrieval_reason"]:
+            slot["retrieval_reason"] = payload.get("retrieval_reason", "")
+
+    def _add_record(
+        self,
+        edge_to_nodes: dict[str, set[str]],
+        records: list[HyperedgeRecord],
+        edge_type: str,
+        payload: dict[str, Any],
+    ) -> None:
+        node_set = {str(x) for x in payload.get("node_set", set()) if str(x)}
+        if len(node_set) < 3:
+            return
+        idx = self._family_counts.get(edge_type, 0) + 1
+        self._family_counts[edge_type] = idx
+        edge_id = f"{EDGE_PREFIX.get(edge_type, 'he_misc_')}{idx:03d}"
+        edge_to_nodes[edge_id] = node_set
+        records.append(
+            HyperedgeRecord(
+                hyperedge_id=edge_id,
+                type=edge_type,
+                support=int(payload.get("support", 1) or 1),
+                teaching_note=str(payload.get("teaching_note", "") or EDGE_FAMILY_LABELS.get(edge_type, edge_type)),
+                category=str(payload.get("category") or "") or None,
+                rules=sorted({str(x) for x in payload.get("rules", []) if x}),
+                rubrics=sorted({str(x) for x in payload.get("rubrics", []) if x}),
+                evidence_quotes=[str(x)[:160] for x in (payload.get("evidence_quotes", []) or [])[:3] if x],
+                retrieval_reason=str(payload.get("retrieval_reason", "")),
+                node_set=node_set,
+            )
+        )
+
+    # ═══════════════════════════════════════════════════
+    #  1. Rebuild global teaching hypergraph from Neo4j
+    # ═══════════════════════════════════════════════════
+
+    def rebuild(self, min_pattern_support: int = 1, max_edges: int = 50) -> dict[str, Any]:
+        min_pattern_support = max(1, min(min_pattern_support, 10))
+        max_edges = max(5, min(max_edges, 100))
+        rows = self._load_project_rows()
+        ontology_rows = self._load_ontology_rows()
+        edge_to_nodes: dict[str, set[str]] = {}
+        records: list[HyperedgeRecord] = []
+        self._family_counts = {}
+        families: dict[str, dict[tuple, dict[str, Any]]] = {k: {} for k in EDGE_TARGET_COUNTS}
+
+        for row in rows:
+            category = str(row.get("category") or "未分类")
+            stakeholders = list(row.get("stakeholders") or [])
+            pains = list(row.get("pains") or [])
+            solutions = list(row.get("solutions") or [])
+            innovations = list(row.get("innovations") or [])
+            business_models = list(row.get("business_models") or [])
+            markets = list(row.get("markets") or [])
+            execution_steps = list(row.get("execution_steps") or [])
+            risk_controls = list(row.get("risk_controls") or [])
+            evidence_rows = list(row.get("evidence_rows") or [])
+            rubric_rows = list(row.get("rubric_rows") or [])
+            rule_ids = list(row.get("rule_ids") or [])
+            evidence_quotes = [str(e.get("quote", "")).strip() for e in evidence_rows if isinstance(e, dict) and e.get("quote")]
+            evidence_types = self._unique_texts([e.get("type", "") for e in evidence_rows if isinstance(e, dict)])
+            covered_rubrics = self._unique_texts([r.get("name", "") for r in rubric_rows if isinstance(r, dict) and r.get("covered")])
+            uncovered_rubrics = self._unique_texts([r.get("name", "") for r in rubric_rows if isinstance(r, dict) and not r.get("covered")])
+
+            if pains and solutions:
+                stakeholder = stakeholders[0] if stakeholders else "未细分用户"
+                business_model = business_models[0] if business_models else "商业模式待补强"
+                market = markets[0] if markets else "市场分析待补强"
+                pain = pains[0]
+                solution = solutions[0]
+                key = (category, stakeholder, pain, solution, business_model, market)
+                self._register_pattern(
+                    families["Value_Loop_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {
+                            f"Category::{category}",
+                            f"Stakeholder::{stakeholder}",
+                            f"PainPoint::{pain}",
+                            f"Solution::{solution}",
+                            f"BusinessModelAspect::{business_model}",
+                            f"Market::{market}",
+                        },
+                        "rules": rule_ids,
+                        "rubrics": covered_rubrics,
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目常围绕“{stakeholder}—{pain}—{solution}”形成价值闭环，并需要通过{business_model}完成变现。",
+                        "retrieval_reason": "目标用户、痛点、方案与商业模式同时出现，适合做价值闭环检索。",
+                    },
+                )
+
+            if stakeholders and pains:
+                stakeholder = stakeholders[0]
+                pain = pains[0]
+                solution = solutions[0] if solutions else "解决方案待补强"
+                key = (category, stakeholder, pain, solution)
+                self._register_pattern(
+                    families["User_Pain_Fit_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {
+                            f"Category::{category}",
+                            f"Stakeholder::{stakeholder}",
+                            f"PainPoint::{pain}",
+                            f"Solution::{solution}",
+                        },
+                        "rules": rule_ids,
+                        "rubrics": covered_rubrics,
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目中，面向“{stakeholder}”的项目经常围绕“{pain}”来设计方案匹配。",
+                        "retrieval_reason": "用户与痛点同时明确，适合用于用户痛点匹配追问。",
+                    },
+                )
+
+            if rule_ids:
+                rule_tuple = tuple(sorted(rule_ids[:3]))
+                rubric_tuple = tuple(sorted((uncovered_rubrics or covered_rubrics)[:2]))
+                key = (category, rule_tuple, rubric_tuple)
+                self._register_pattern(
+                    families["Risk_Pattern_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {f"Category::{category}"} | {f"RiskRule::{rid}" for rid in rule_tuple} | {f"RubricItem::{rb}" for rb in rubric_tuple},
+                        "rules": list(rule_tuple),
+                        "rubrics": list(rubric_tuple),
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目常见风险模式为“{'、'.join(rule_tuple)}”，通常会拖累{'、'.join(rubric_tuple) if rubric_tuple else '多个评分维度'}。",
+                        "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+                    },
+                )
+
+            if evidence_types and (covered_rubrics or uncovered_rubrics or rule_ids):
+                rubric_anchor = tuple(sorted((uncovered_rubrics or covered_rubrics)[:2]))
+                evidence_anchor = tuple(sorted(evidence_types[:2]))
+                rule_anchor = tuple(sorted(rule_ids[:2]))
+                key = (category, evidence_anchor, rubric_anchor, rule_anchor)
+                self._register_pattern(
+                    families["Evidence_Grounding_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {f"Category::{category}"} | {f"EvidenceType::{x}" for x in evidence_anchor} | {f"RubricItem::{x}" for x in rubric_anchor} | {f"RiskRule::{x}" for x in rule_anchor},
+                        "rules": list(rule_anchor),
+                        "rubrics": list(rubric_anchor),
+                        "evidence_quotes": evidence_quotes[:3],
+                        "teaching_note": f"{category}类项目常用“{'、'.join(evidence_anchor)}”类证据支撑{'、'.join(rubric_anchor) if rubric_anchor else '核心判断'}。",
+                        "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+                    },
+                )
+
+            market_rule_hit = any(rid in {"H4", "H6", "H9", "H16", "H17", "H19"} for rid in rule_ids)
+            if markets or market_rule_hit:
+                market = markets[0] if markets else "市场口径待校准"
+                stakeholder = stakeholders[0] if stakeholders else "目标用户待细化"
+                innovation = innovations[0] if innovations else (solutions[0] if solutions else "差异化待说明")
+                key = (category, market, stakeholder, innovation)
+                self._register_pattern(
+                    families["Market_Competition_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {
+                            f"Category::{category}",
+                            f"Market::{market}",
+                            f"Stakeholder::{stakeholder}",
+                            f"InnovationPoint::{innovation}",
+                        },
+                        "rules": [rid for rid in rule_ids if rid in {"H4", "H6", "H9", "H16", "H17", "H19"}],
+                        "rubrics": uncovered_rubrics or covered_rubrics,
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目的竞争与市场判断，通常要同时回答市场口径、替代方案和差异化价值三个问题。",
+                        "retrieval_reason": "市场/竞争相关节点或规则被命中，适合做竞争与替代方案追问。",
+                    },
+                )
+
+            execution_rule_hit = any(rid in {"H10", "H12", "H21", "H22"} for rid in rule_ids)
+            if execution_steps or execution_rule_hit:
+                step = execution_steps[0] if execution_steps else "执行路径待拆解"
+                business_model = business_models[0] if business_models else "商业闭环待补强"
+                risk_control = risk_controls[0] if risk_controls else "风控机制待细化"
+                key = (category, step, business_model, risk_control)
+                self._register_pattern(
+                    families["Execution_Gap_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {
+                            f"Category::{category}",
+                            f"ExecutionStep::{step}",
+                            f"BusinessModelAspect::{business_model}",
+                            f"RiskControlPoint::{risk_control}",
+                        },
+                        "rules": [rid for rid in rule_ids if rid in {"H10", "H12", "H21", "H22"}],
+                        "rubrics": [rb for rb in (covered_rubrics + uncovered_rubrics) if rb in {"Team & Execution", "Business Model Consistency"}],
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目在执行层面最常见的问题，是步骤、商业闭环和风控机制没有一起落地。",
+                        "retrieval_reason": "执行节点或执行类风险被命中，适合做执行断裂追问。",
+                    },
+                )
+
+            compliance_rule_hit = any(rid in {"H11", "H22"} for rid in rule_ids)
+            if risk_controls or compliance_rule_hit:
+                risk_control = risk_controls[0] if risk_controls else "合规措施待细化"
+                evidence_type = evidence_types[0] if evidence_types else "制度证据待补充"
+                key = (category, risk_control, evidence_type)
+                self._register_pattern(
+                    families["Compliance_Safety_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {
+                            f"Category::{category}",
+                            f"RiskControlPoint::{risk_control}",
+                            f"EvidenceType::{evidence_type}",
+                            "RubricItem:合规与风险",
+                        },
+                        "rules": [rid for rid in rule_ids if rid in {"H11", "H22"}],
+                        "rubrics": [rb for rb in (covered_rubrics + uncovered_rubrics) if "risk" in rb.lower() or "presentation" in rb.lower()],
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目一旦涉及数据、伦理或合规，就必须把措施写成可执行流程，而不是停留在原则层面。",
+                        "retrieval_reason": "合规/风控节点或规则被命中，适合做安全边界追问。",
+                    },
+                )
+
+            innovation_rule_hit = any(rid in {"H7", "H13", "H23"} for rid in rule_ids)
+            if innovations or innovation_rule_hit:
+                innovation = innovations[0] if innovations else "创新主张待验证"
+                evidence_type = evidence_types[0] if evidence_types else "验证证据待补充"
+                market = markets[0] if markets else "应用场景待限定"
+                key = (category, innovation, evidence_type, market)
+                self._register_pattern(
+                    families["Innovation_Validation_Edge"],
+                    key,
+                    {
+                        "category": category,
+                        "node_set": {
+                            f"Category::{category}",
+                            f"InnovationPoint::{innovation}",
+                            f"EvidenceType::{evidence_type}",
+                            f"Market::{market}",
+                        },
+                        "rules": [rid for rid in rule_ids if rid in {"H7", "H13", "H23"}],
+                        "rubrics": [rb for rb in (covered_rubrics + uncovered_rubrics) if rb in {"Innovation & Differentiation", "Solution Feasibility"}],
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目的创新点必须能落到具体场景和可验证证据上，否则只是口号。",
+                        "retrieval_reason": "创新主张或验证类规则被命中，适合做创新验证追问。",
+                    },
+                )
+
+        for row in ontology_rows:
+            ontology_name = str(row.get("ontology_name") or "未知本体")
+            ontology_id = str(row.get("ontology_id") or ontology_name)
+            instance_name = str(row.get("instance_name") or "").strip()
+            instance_label = str(row.get("instance_label") or "实例")
+            categories = self._unique_texts(list(row.get("categories") or []), max_items=3)
+            support = int(row.get("support") or 0)
+            if not instance_name or support < min_pattern_support:
+                continue
+            category = categories[0] if categories else "跨类别"
+            key = (ontology_id, instance_name, tuple(categories))
+            self._register_pattern(
+                families["Ontology_Grounded_Edge"],
+                key,
+                {
+                    "category": category,
+                    "node_set": {f"OntologyNode::{ontology_name}", f"{instance_label}::{instance_name}"} | {f"Category::{c}" for c in categories},
+                    "rules": [],
+                    "rubrics": [],
+                    "evidence_quotes": [],
+                    "teaching_note": f"本体概念“{ontology_name}”在真实案例中常落地为“{instance_name}”等表述。",
+                    "retrieval_reason": "教学本体与实例表达被打通，适合做概念落地解释。",
+                },
+            )
+            families["Ontology_Grounded_Edge"][key]["support"] = support
+
+        total_budget = max_edges
+        created_counts: Counter[str] = Counter()
+        for edge_type, target_count in EDGE_TARGET_COUNTS.items():
+            patterns = list(families[edge_type].values())
+            patterns.sort(key=lambda item: (int(item.get("support", 0)), len(item.get("node_set", []))), reverse=True)
+            count = 0
+            for payload in patterns:
+                if total_budget <= 0 or count >= target_count:
+                    break
+                if int(payload.get("support", 0)) < min_pattern_support:
+                    continue
+                self._add_record(edge_to_nodes, records, edge_type, payload)
+                count += 1
+                total_budget -= 1
+            created_counts[edge_type] = count
+
+        self._hypergraph = hnx.Hypergraph(edge_to_nodes) if edge_to_nodes else hnx.Hypergraph({})
+        self._records = records
+        return {
+            "ok": True,
+            "created": dict(created_counts),
+            "total_nodes": len(self._hypergraph.nodes) if self._hypergraph else 0,
+            "total_edges": len(self._hypergraph.edges) if self._hypergraph else 0,
+            "notes": "HyperNetX 超图已重建（按现有 KG schema 构建 6-8 个超边族）。",
+        }
 
     # ═══════════════════════════════════════════════════
     #  2. Query existing hypergraph for teaching insights
@@ -652,6 +907,7 @@ class HypergraphService:
         self,
         category: str | None = None,
         rule_ids: list[str] | None = None,
+        preferred_edge_types: list[str] | None = None,
         limit: int = 5,
     ) -> dict[str, Any]:
         if not self._records:
@@ -660,43 +916,59 @@ class HypergraphService:
                 return {"ok": False, "edges": [], "error": rebuilt.get("error", "rebuild failed")}
 
         safe_rules = [str(x) for x in (rule_ids or []) if x]
+        safe_edge_types = [str(x) for x in (preferred_edge_types or []) if x]
         expanded_rules: set[str] = set(safe_rules)
         for rid in safe_rules:
             for alias in self._rule_alias.get(rid, []):
                 expanded_rules.add(alias)
 
-        matched: list[dict[str, Any]] = []
+        matched: list[tuple[float, dict[str, Any]]] = []
         for rec in self._records:
             cat_hit = bool(category and rec.category and rec.category == category)
             rule_hit = any(r in rec.rules for r in expanded_rules) if expanded_rules else False
-            if (not category and not safe_rules) or cat_hit or rule_hit:
-                matched.append({
+            type_hit = rec.type in safe_edge_types if safe_edge_types else False
+            if (not category and not safe_rules and not safe_edge_types) or cat_hit or rule_hit or type_hit:
+                score = 0.0
+                if cat_hit:
+                    score += 2.0
+                if rule_hit:
+                    score += 3.0
+                if type_hit:
+                    score += 1.8
+                score += min(2.0, rec.support / 5)
+                matched.append((score, {
                     "hyperedge_id": rec.hyperedge_id,
                     "type": rec.type,
                     "support": rec.support,
                     "teaching_note": rec.teaching_note,
                     "categories": [rec.category] if rec.category else [],
                     "rules": rec.rules,
+                    "rubrics": rec.rubrics,
+                    "evidence_quotes": rec.evidence_quotes,
+                    "retrieval_reason": rec.retrieval_reason,
                     "nodes": sorted(rec.node_set) if rec.node_set else [],
-                })
+                    "match_score": round(score, 2),
+                }))
 
-        matched.sort(key=lambda x: int(x.get("support") or 0), reverse=True)
+        matched.sort(key=lambda item: item[0], reverse=True)
 
         topology = self._get_topology_stats()
 
         return {
             "ok": True,
-            "edges": matched[:max(1, min(limit, 20))],
+            "edges": [item for _, item in matched[:max(1, min(limit, 20))]],
             "matched_by": {
                 "category": category,
                 "rule_ids": safe_rules,
                 "expanded_rule_ids": sorted(expanded_rules),
+                "preferred_edge_types": safe_edge_types,
             },
             "topology": topology,
             "meta": {
                 "engine": "hypernetx",
                 "edge_count": len(self._records),
                 "node_count": len(self._hypergraph.nodes) if self._hypergraph else 0,
+                "family_counts": dict(self._family_counts),
             },
         }
 
@@ -744,12 +1016,14 @@ class HypergraphService:
             return f"风险规则「{name}」关联{degree}种模式，是最普遍的问题"
         elif ntype == "Category":
             return f"「{name}」类别出现在{degree}种超边中，是最活跃的赛道"
-        elif ntype == "Technology":
-            return f"技术「{name}」被{degree}个模式共享，是核心技术路线"
+        elif ntype == "Stakeholder":
+            return f"目标用户「{name}」被{degree}种模式共享，是高频用户群"
+        elif ntype == "PainPoint":
+            return f"痛点「{name}」连接了{degree}种模式，是高频真实问题"
         elif ntype == "Market":
             return f"市场「{name}」涉及{degree}种模式，是热门目标市场"
-        elif ntype == "Resource":
-            return f"资源「{name}」在{degree}种组合中出现，是关键杠杆资源"
+        elif ntype == "RubricItem":
+            return f"评分维度「{name}」被{degree}种模式反复命中，是重要教学检查点"
         return f"节点「{name}」关联{degree}种模式"
 
     # ═══════════════════════════════════════════════════
@@ -781,6 +1055,7 @@ class HypergraphService:
                 "coverage_score": 0,
                 "pattern_warnings": [],
                 "pattern_strengths": [],
+                "projected_edge_types": [],
                 "missing_dimensions": ["无法分析：未提取到实体"],
             }
 
@@ -788,12 +1063,15 @@ class HypergraphService:
             "stakeholder": "目标用户",
             "pain_point": "痛点问题",
             "solution": "解决方案",
-            "product": "产品形态",
-            "technology": "技术路线",
+            "innovation": "创新点",
             "market": "目标市场",
             "competitor": "竞争格局",
-            "resource": "资源优势",
             "business_model": "商业模式",
+            "execution_step": "执行步骤",
+            "risk_control": "风控合规",
+            "evidence": "证据支撑",
+            "technology": "技术路线",
+            "resource": "资源优势",
             "team": "团队能力",
             # virtual dimensions derived from text/structure
             "evidence": "证据与数据",
@@ -821,10 +1099,25 @@ class HypergraphService:
                 edge_id = f"dim_{dim}"
                 student_edges[edge_id] = {f"{dim}::{e}" for e in ents}
 
+        projected_edge_types: list[str] = []
+        if dim_entities.get("stakeholder") and dim_entities.get("pain_point") and dim_entities.get("solution"):
+            projected_edge_types.append("User_Pain_Fit_Edge")
+        if dim_entities.get("pain_point") and dim_entities.get("solution") and dim_entities.get("business_model"):
+            projected_edge_types.append("Value_Loop_Edge")
+        if dim_entities.get("market") or dim_entities.get("competitor"):
+            projected_edge_types.append("Market_Competition_Edge")
+        if dim_entities.get("evidence"):
+            projected_edge_types.append("Evidence_Grounding_Edge")
+        if dim_entities.get("execution_step") or dim_entities.get("team"):
+            projected_edge_types.append("Execution_Gap_Edge")
+        if dim_entities.get("risk_control"):
+            projected_edge_types.append("Compliance_Safety_Edge")
+        if dim_entities.get("innovation"):
+            projected_edge_types.append("Innovation_Validation_Edge")
+
         for rel in relationships:
             src = str(rel.get("source", ""))
             tgt = str(rel.get("target", ""))
-            relation = str(rel.get("relation", "related"))
             src_type = entity_map.get(src, "other")
             tgt_type = entity_map.get(tgt, "other")
             if src_type != tgt_type:
@@ -903,6 +1196,8 @@ class HypergraphService:
                 student_rule_like.add("no_competitor_claim")
             if not dim_entities.get("market"):
                 student_rule_like.add("market_size_fallacy")
+            if not dim_entities.get("evidence"):
+                student_rule_like.add("evidence_weak")
 
             for rec in self._records:
                 if rec.type == "Risk_Pattern_Edge":
@@ -913,20 +1208,23 @@ class HypergraphService:
                             "warning": rec.teaching_note,
                             "matched_rules": sorted(overlap),
                             "support": rec.support,
+                            "edge_type": rec.type,
                         })
-                elif rec.type == "Value_Loop_Edge":
+                elif rec.type in {"Value_Loop_Edge", "User_Pain_Fit_Edge", "Evidence_Grounding_Edge"}:
                     if category and rec.category == category and coverage_score >= 6:
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
                             "support": rec.support,
+                            "edge_type": rec.type,
                         })
-                elif rec.type == "Resource_Leverage_Edge":
-                    if dim_entities.get("resource") and (not category or rec.category == category):
+                elif rec.type in {"Market_Competition_Edge", "Execution_Gap_Edge", "Compliance_Safety_Edge", "Innovation_Validation_Edge"}:
+                    if (not category or rec.category == category):
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
                             "support": rec.support,
+                            "edge_type": rec.type,
                         })
 
         # ── Missing dimension recommendations ──
@@ -1008,6 +1306,7 @@ class HypergraphService:
             "hub_entities": hub_entities[:5],
             "pattern_warnings": pattern_warnings[:5],
             "pattern_strengths": pattern_strengths[:3],
+            "projected_edge_types": projected_edge_types,
             "missing_dimensions": missing_recommendations[:6],
             "template_matches": template_matches,
             "consistency_issues": consistency_issues,

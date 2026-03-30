@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import time
+import time
 from typing import Any
 
 from openai import OpenAI
@@ -61,13 +62,66 @@ class LlmClient:
     def __init__(self) -> None:
         self.enabled = bool(settings.llm_api_key and settings.llm_base_url)
         self._client: OpenAI | None = None
+        self._qwen_client: OpenAI | None = None
         if self.enabled:
             self._client = OpenAI(
                 api_key=settings.llm_api_key,
                 base_url=settings.llm_base_url,
-                timeout=120.0,
+                timeout=180.0,
                 max_retries=1,
             )
+        if settings.llm_qwen_api_key and settings.llm_qwen_base_url:
+            self._qwen_client = OpenAI(
+                api_key=settings.llm_qwen_api_key,
+                base_url=settings.llm_qwen_base_url,
+                timeout=180.0,
+                max_retries=1,
+            )
+
+    @staticmethod
+    def _is_qwen_model(model_name: str) -> bool:
+        lowered = (model_name or "").lower()
+        return "qwen" in lowered or "tongyi" in lowered
+
+    def _resolve_client_and_model(self, model: str | None = None) -> tuple[OpenAI | None, str]:
+        model_name = model or settings.llm_fast_model or settings.llm_model
+        if self._qwen_client is not None and self._is_qwen_model(model_name):
+            return self._qwen_client, (settings.llm_qwen_model or model_name)
+        return self._client, model_name
+
+    def _provider_name(self, client: OpenAI | None) -> str:
+        if client is None:
+            return "disabled"
+        if client is self._qwen_client:
+            return "dashscope"
+        return "default"
+
+    @staticmethod
+    def _error_kind(exc: Exception) -> str:
+        text = f"{type(exc).__name__}: {exc}".lower()
+        if "connection" in text or "connect" in text or "dns" in text:
+            return "connect_error"
+        if "timeout" in text or "timed out" in text:
+            return "timeout"
+        if "rate limit" in text or "429" in text:
+            return "rate_limit"
+        return "other"
+
+    @staticmethod
+    def _should_retry(error_kind: str) -> bool:
+        return error_kind in {"connect_error", "timeout", "rate_limit"}
+
+    def _fallback_target(self, client: OpenAI | None, model_name: str) -> tuple[OpenAI | None, str] | None:
+        if client is self._qwen_client and self._client is not None:
+            candidates = [
+                settings.llm_reason_model,
+                settings.llm_fast_model,
+                settings.llm_model,
+            ]
+            for candidate in candidates:
+                if candidate and not self._is_qwen_model(candidate):
+                    return self._client, candidate
+        return None
 
     def chat_text_stream(
         self,
@@ -77,14 +131,16 @@ class LlmClient:
         temperature: float = 0.2,
     ):
         """Yield text chunks as a generator (for SSE streaming)."""
-        if not self.enabled or self._client is None:
+        client, model_name = self._resolve_client_and_model(model)
+        if client is None:
             yield ""
             return
-        model_name = model or settings.llm_fast_model or settings.llm_model
         safe_temp = max(0.0, min(float(temperature), 1.2))
-        try:
-            stream = self._client.chat.completions.create(
-                model=model_name,
+        provider = self._provider_name(client)
+
+        def _stream_once(stream_client: OpenAI, stream_model: str):
+            return stream_client.chat.completions.create(
+                model=stream_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
@@ -92,7 +148,46 @@ class LlmClient:
                 temperature=safe_temp,
                 stream=True,
             )
-            in_think = False
+
+        stream = None
+        last_exc: Exception | None = None
+        max_attempts = 3 if client is self._qwen_client else 2
+        for attempt in range(1, max_attempts + 1):
+            try:
+                stream = _stream_once(client, model_name)
+                break
+            except Exception as exc:
+                last_exc = exc
+                error_kind = self._error_kind(exc)
+                logger.warning(
+                    "LLM stream failed (model=%s provider=%s attempt=%d kind=%s): %s",
+                    model_name, provider, attempt, error_kind, exc,
+                )
+                if attempt >= max_attempts or not self._should_retry(error_kind):
+                    break
+                time.sleep(min(1.5, 0.4 * attempt))
+
+        if stream is None:
+            fallback = self._fallback_target(client, model_name)
+            if fallback:
+                fb_client, fb_model = fallback
+                try:
+                    logger.warning("LLM stream fallback: %s/%s -> %s/%s", provider, model_name, self._provider_name(fb_client), fb_model)
+                    stream = _stream_once(fb_client, fb_model)
+                    client = fb_client
+                    model_name = fb_model
+                    provider = self._provider_name(fb_client)
+                except Exception as exc:
+                    last_exc = exc
+                    logger.warning("LLM stream fallback failed (model=%s provider=%s): %s", fb_model, provider, exc)
+            if stream is None:
+                if last_exc:
+                    logger.warning("LLM stream exhausted retries (model=%s provider=%s): %s", model_name, provider, last_exc)
+                yield ""
+                return
+
+        in_think = False
+        try:
             for chunk in stream:
                 delta = chunk.choices[0].delta if chunk.choices else None
                 if delta and delta.content:
@@ -107,7 +202,7 @@ class LlmClient:
                         continue
                     yield text
         except Exception as exc:
-            logger.warning("LLM stream failed (model=%s): %s", model_name, exc)
+            logger.warning("LLM stream interrupted (model=%s provider=%s kind=%s): %s", model_name, provider, self._error_kind(exc), exc)
             yield ""
 
     def chat_json(
@@ -138,40 +233,24 @@ class LlmClient:
         model: str | None = None,
         temperature: float = 0.2,
     ) -> str:
-        if not self.enabled or self._client is None:
+        client, model_name = self._resolve_client_and_model(model)
+        if client is None:
             return ""
-
-        model_name = model or settings.llm_fast_model or settings.llm_model
         safe_temp = max(0.0, min(float(temperature), 1.2))
-        max_attempts = 3
-        last_error: Exception | None = None
-        for attempt in range(1, max_attempts + 1):
-            try:
-                resp = self._client.chat.completions.create(
-                    model=model_name,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    temperature=safe_temp,
-                    stream=False,
-                )
-                if resp.choices and resp.choices[0].message:
-                    raw = resp.choices[0].message.content or ""
-                    return _strip_think_tags(raw)
-            except Exception as exc:  # noqa: BLE001
-                last_error = exc
-                # 仅在最终失败时打印一次错误，避免“attempt 1/3”误导用户
-                if attempt < max_attempts:
-                    try:
-                        time.sleep(2 * attempt)
-                    except Exception:  # noqa: BLE001
-                        pass
-                    continue
-                logger.warning(
-                    "LLM call failed after %d attempts (model=%s): %s",
-                    max_attempts,
-                    model_name,
-                    last_error,
-                )
+        try:
+            resp = self._client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=safe_temp,
+                stream=False,
+            )
+            if resp.choices and resp.choices[0].message:
+                raw = resp.choices[0].message.content or ""
+                return _strip_think_tags(raw)
+        except Exception as exc:
+            logger.warning("LLM call failed (model=%s): %s", model_name, exc)
+            return ""
         return ""

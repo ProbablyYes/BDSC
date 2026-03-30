@@ -7,6 +7,7 @@
 """
 
 from fastapi import FastAPI, Form, File, UploadFile, HTTPException
+from fastapi.responses import FileResponse
 from pathlib import Path
 from datetime import datetime
 from uuid import uuid4
@@ -21,6 +22,84 @@ from app.services.llm_client import LlmClient
 
 def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
     """配置所有教师文件反馈相关的路由"""
+
+    def _logical_project_key(submission: dict, project_id: str) -> str:
+        return str(
+            submission.get("logical_project_id")
+            or submission.get("project_id")
+            or submission.get("conversation_id")
+            or project_id
+        )
+
+    def _project_display_name(submission: dict, order_num: int) -> str:
+        filename = str(submission.get("filename", "") or "").strip()
+        if filename:
+            stem = Path(filename).stem.strip()
+            if stem:
+                return f"项目 {order_num:02d} · {stem[:24]}"
+        return f"项目 {order_num:02d}"
+
+    def _build_project_meta(submissions: list[dict], project_id: str) -> tuple[dict[str, dict], dict[str, int]]:
+        grouped: dict[str, list[dict]] = {}
+        for submission in submissions:
+            logical_id = _logical_project_key(submission, project_id)
+            grouped.setdefault(logical_id, []).append(submission)
+        ordered_groups = sorted(
+            grouped.items(),
+            key=lambda item: max(str(row.get("created_at", "") or "") for row in item[1]),
+            reverse=True,
+        )
+        project_meta: dict[str, dict] = {}
+        material_order: dict[str, int] = {}
+        for project_index, (logical_id, rows) in enumerate(ordered_groups, start=1):
+            rows_sorted = sorted(rows, key=lambda row: str(row.get("created_at", "") or ""), reverse=True)
+            latest = rows_sorted[0] if rows_sorted else {}
+            display_name = _project_display_name(latest, project_index)
+            project_meta[logical_id] = {
+                "project_order": project_index,
+                "project_display_name": display_name,
+                "project_phase": latest.get("project_phase", "") or "",
+            }
+            for material_index, row in enumerate(rows_sorted, start=1):
+                submission_id = str(row.get("submission_id", "") or "")
+                if submission_id:
+                    material_order[submission_id] = material_index
+        return project_meta, material_order
+
+    def _find_uploaded_file(project_id: str, filename: str) -> Path | None:
+        if not filename:
+            return None
+        uploaded_files = settings.upload_root / project_id
+        if not uploaded_files.exists():
+            return None
+        for file_path in uploaded_files.iterdir():
+            if filename in file_path.name:
+                return file_path
+        return None
+
+    def _flatten_annotation_records(records: list[dict]) -> list[dict]:
+        flattened: list[dict] = []
+        for record in records:
+            annotations = record.get("annotations", []) or []
+            for idx, ann in enumerate(annotations):
+                if not isinstance(ann, dict):
+                    continue
+                flattened.append({
+                    "annotation_id": str(record.get("annotation_id", "") or ""),
+                    "annotation_item_id": f"{record.get('annotation_id', '')}:{idx}",
+                    "created_at": str(record.get("created_at", "") or ""),
+                    "teacher_id": str(record.get("teacher_id", "") or ""),
+                    "overall_feedback": str(record.get("overall_feedback", "") or ""),
+                    "focus_areas": [str(x) for x in (record.get("focus_areas", []) or []) if str(x).strip()],
+                    "type": str(ann.get("type", "") or "comment"),
+                    "position": int(ann.get("position", 0) or 0),
+                    "length": int(ann.get("length", 0) or 0),
+                    "quote": str(ann.get("quote", "") or ""),
+                    "content": str(ann.get("content", "") or ""),
+                    "annotation_type": str(ann.get("annotation_type", "") or "issue"),
+                })
+        flattened.sort(key=lambda item: item.get("created_at", ""), reverse=True)
+        return flattened
     
     # ═══════════════════════════════════════════════════════════════════
     #  学生提交文件管理 APIs
@@ -36,21 +115,34 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
         project_state = json_store.load_project(project_id)
         submissions = project_state.get("submissions", []) or []
         
-        files = []
+        file_submissions = []
         for submission in submissions:
             source_type = submission.get("source_type", "")
             # 只返回文件提交（排除纯文本对话）
             if source_type not in ["file", "file_in_chat"]:
                 continue
-            
+            file_submissions.append(submission)
+
+        project_meta, material_order = _build_project_meta(file_submissions, project_id)
+        files = []
+        for submission in file_submissions:
             filename = submission.get("filename", "unknown")
             diagnosis = submission.get("diagnosis", {}) or {}
+            logical_project_id = _logical_project_key(submission, project_id)
+            meta = project_meta.get(logical_project_id, {})
+            material_index = material_order.get(str(submission.get("submission_id", "") or ""), 0)
             
             files.append({
                 "submission_id": submission.get("submission_id", ""),
+                "logical_project_id": logical_project_id,
                 "filename": filename,
                 "student_id": submission.get("student_id", ""),
                 "created_at": submission.get("created_at", ""),
+                "project_phase": submission.get("project_phase", "") or "",
+                "project_order": meta.get("project_order", 0),
+                "project_display_name": meta.get("project_display_name", logical_project_id),
+                "material_order": material_index,
+                "material_display_name": f"材料 {material_index:02d}" if material_index else "材料",
                 "raw_text_length": len(submission.get("raw_text", "")),
                 "overall_score": diagnosis.get("overall_score", 0),
                 "bottleneck": diagnosis.get("bottleneck", ""),
@@ -83,6 +175,13 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
         project_state = json_store.load_project(project_id)
         submissions = project_state.get("submissions", []) or []
         
+        file_submissions = [
+            submission
+            for submission in submissions
+            if submission.get("source_type", "") in ["file", "file_in_chat"]
+        ]
+        project_meta, material_order = _build_project_meta(file_submissions, project_id)
+
         # 查找相应的提交
         target_submission = None
         for submission in submissions:
@@ -192,9 +291,19 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
                 "total_chars": len(raw_text),
             }
         
+        logical_project_id = _logical_project_key(target_submission, project_id)
+        meta = project_meta.get(logical_project_id, {})
+        material_index = material_order.get(submission_id, 0)
+
+        target_file = _find_uploaded_file(project_id, filename)
         return {
             "project_id": project_id,
             "submission_id": submission_id,
+            "logical_project_id": logical_project_id,
+            "project_order": meta.get("project_order", 0),
+            "project_display_name": meta.get("project_display_name", logical_project_id),
+            "material_order": material_index,
+            "material_display_name": f"材料 {material_index:02d}" if material_index else "材料",
             "filename": filename,
             "file_type": file_ext,
             "student_id": target_submission.get("student_id", ""),
@@ -203,6 +312,106 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
             "preview_data": preview_data,
             "diagnosis": target_submission.get("diagnosis", {}),
             "next_task": target_submission.get("next_task", {}),
+            "evidence_quotes": target_submission.get("evidence_quotes", []) or [],
+            "kg_analysis": target_submission.get("kg_analysis", {}) or {},
+            "matched_teacher_interventions": target_submission.get("matched_teacher_interventions", []) or [],
+            "download_url": f"/api/teacher/student-file-download/{project_id}/{submission_id}" if target_file else "",
+        }
+
+    @app.get("/api/teacher/student-file-download/{project_id}/{submission_id}")
+    def download_student_file(project_id: str, submission_id: str):
+        project_state = json_store.load_project(project_id)
+        submissions = project_state.get("submissions", []) or []
+        target_submission = next((submission for submission in submissions if submission.get("submission_id") == submission_id), None)
+        if not target_submission:
+            raise HTTPException(status_code=404, detail="File submission not found")
+        filename = str(target_submission.get("filename", "") or "")
+        target_file = _find_uploaded_file(project_id, filename)
+        if not target_file or not target_file.exists():
+            raise HTTPException(status_code=404, detail="Original file not found")
+        media_type = "application/octet-stream"
+        return FileResponse(path=target_file, filename=filename or target_file.name, media_type=media_type)
+
+    @app.get("/api/student/project/{project_id}/annotation-boards")
+    def get_student_annotation_boards(project_id: str):
+        project_state = json_store.load_project(project_id)
+        submissions = project_state.get("submissions", []) or []
+        teacher_annotations = project_state.get("teacher_annotations", []) or []
+        feedback_files = project_state.get("teacher_feedback_files", []) or []
+        project_feedback = project_state.get("teacher_feedback", []) or []
+
+        project_meta, material_order = _build_project_meta(submissions, project_id)
+        submission_map = {
+            str(submission.get("submission_id", "") or ""): submission
+            for submission in submissions
+            if str(submission.get("submission_id", "") or "")
+        }
+
+        records_by_submission: dict[str, list[dict]] = {}
+        for record in teacher_annotations:
+            sid = str(record.get("submission_id", "") or "")
+            if not sid:
+                continue
+            records_by_submission.setdefault(sid, []).append(record)
+
+        files_by_submission: dict[str, list[dict]] = {}
+        for record in feedback_files:
+            sid = str(record.get("submission_id", "") or "")
+            if not sid:
+                continue
+            files_by_submission.setdefault(sid, []).append({
+                **record,
+                "file_url": str(record.get("file_url", "") or ""),
+            })
+
+        boards: list[dict] = []
+        for submission_id, records in records_by_submission.items():
+            submission = submission_map.get(submission_id)
+            if not submission:
+                continue
+            logical_project_id = _logical_project_key(submission, project_id)
+            meta = project_meta.get(logical_project_id, {})
+            flat_annotations = _flatten_annotation_records(records)
+            followups = [
+                row for row in submissions
+                if _logical_project_key(row, project_id) == logical_project_id
+                and str(row.get("created_at", "") or "") > str(submission.get("created_at", "") or "")
+            ]
+            boards.append({
+                "submission_id": submission_id,
+                "logical_project_id": logical_project_id,
+                "project_display_name": meta.get("project_display_name", logical_project_id),
+                "project_order": meta.get("project_order", 0),
+                "material_order": material_order.get(submission_id, 0),
+                "material_display_name": f"材料 {material_order.get(submission_id, 0):02d}" if material_order.get(submission_id, 0) else "材料",
+                "filename": str(submission.get("filename", "") or ""),
+                "source_type": str(submission.get("source_type", "") or "text"),
+                "project_phase": str(submission.get("project_phase", "") or ""),
+                "created_at": str(submission.get("created_at", "") or ""),
+                "raw_text": str(submission.get("raw_text", "") or ""),
+                "download_url": f"/api/teacher/student-file-download/{project_id}/{submission_id}" if _find_uploaded_file(project_id, str(submission.get('filename', '') or '')) else "",
+                "annotation_versions": sorted(records, key=lambda item: str(item.get("created_at", "") or ""), reverse=True),
+                "latest_annotations": flat_annotations,
+                "annotation_count": len(flat_annotations),
+                "feedback_files": sorted(files_by_submission.get(submission_id, []), key=lambda item: str(item.get("created_at", "") or ""), reverse=True),
+                "followup_count": len(followups),
+                "followup_submissions": [
+                    {
+                        "submission_id": str(item.get("submission_id", "") or ""),
+                        "created_at": str(item.get("created_at", "") or ""),
+                        "project_phase": str(item.get("project_phase", "") or ""),
+                        "text_preview": str(item.get("raw_text", "") or "")[:140],
+                    }
+                    for item in sorted(followups, key=lambda row: str(row.get("created_at", "") or ""), reverse=True)[:3]
+                ],
+            })
+
+        boards.sort(key=lambda item: item.get("created_at", ""), reverse=True)
+        return {
+            "project_id": project_id,
+            "board_count": len(boards),
+            "boards": boards,
+            "project_feedback": sorted(project_feedback, key=lambda item: str(item.get("created_at", "") or ""), reverse=True),
         }
     
     
@@ -251,16 +460,7 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
             file_ext = filename.split(".")[-1].lower() if "." in filename else ""
         
         # 获取原始上传的文件路径
-        uploaded_files = settings.upload_root / project_id
-        
-        # 尝试找到与该提交对应的文件
-        # 文件名可能包含原始文件名，我们需要检查是否存在
-        target_file = None
-        if uploaded_files.exists():
-            for f in uploaded_files.iterdir():
-                if filename in f.name:
-                    target_file = f
-                    break
+        target_file = _find_uploaded_file(project_id, filename)
         
         # 如果找不到原始文件，使用raw_text构建预览
         if not target_file or not target_file.exists():
@@ -327,15 +527,7 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
             raise HTTPException(status_code=400, detail="仅支持PDF文件分析")
         
         # 获取原始上传的文件路径
-        uploaded_files = settings.upload_root / project_id
-        
-        # 尝试找到与该提交对应的文件
-        target_file = None
-        if uploaded_files.exists():
-            for f in uploaded_files.iterdir():
-                if filename in f.name:
-                    target_file = f
-                    break
+        target_file = _find_uploaded_file(project_id, filename)
         
         # 如果找不到原始文件，返回错误
         if not target_file or not target_file.exists():
@@ -518,7 +710,7 @@ def setup_teacher_file_feedback_routes(app: FastAPI, json_store, settings):
             "teacher_id": teacher_id,
             "original_filename": file.filename,
             "saved_filename": safe_filename,
-            "file_url": f"/feedback/{project_id}/{safe_filename}",
+            "file_url": f"/uploads/feedback/{project_id}/{safe_filename}",
             "file_size": len(content),
             "feedback_comment": feedback_comment,
             "created_at": datetime.utcnow().isoformat(),

@@ -2,9 +2,16 @@ import json
 import secrets
 import string
 from hashlib import pbkdf2_hmac
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
+
+
+BJ_TZ = timezone(timedelta(hours=8))
+
+
+def _now_iso() -> str:
+    return datetime.now(BJ_TZ).isoformat()
 
 
 class JsonStorage:
@@ -22,12 +29,18 @@ class JsonStorage:
                 "project_id": project_id,
                 "submissions": [],
                 "teacher_feedback": [],
+                "teacher_assistant_reviews": [],
+                "teacher_interventions": [],
                 "teacher_annotations": [],
                 "teacher_feedback_files": [],
                 "teacher_document_edits": [],
             }
         data = json.loads(target.read_text(encoding="utf-8"))
         # new确保新增字段存在
+        if "teacher_assistant_reviews" not in data:
+            data["teacher_assistant_reviews"] = []
+        if "teacher_interventions" not in data:
+            data["teacher_interventions"] = []
         if "teacher_annotations" not in data:
             data["teacher_annotations"] = []
         if "teacher_feedback_files" not in data:
@@ -48,7 +61,7 @@ class JsonStorage:
         saved_submission = {
             **submission,
             "submission_id": str(uuid4()),
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": _now_iso(),
         }
         data["submissions"].append(saved_submission)
         self.save_project(project_id, data)
@@ -61,11 +74,92 @@ class JsonStorage:
             {
                 **teacher_feedback,
                 "feedback_id": feedback_id,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": _now_iso(),
             }
         )
         self.save_project(project_id, data)
         return feedback_id
+
+    def upsert_teacher_assistant_review(self, project_id: str, review: dict) -> dict:
+        data = self.load_project(project_id)
+        reviews = data.setdefault("teacher_assistant_reviews", [])
+        review_id = str(review.get("review_id") or uuid4())
+        logical_project_id = str(review.get("logical_project_id", "")).strip()
+        target_idx = -1
+        for idx, item in enumerate(reviews):
+            if item.get("review_id") == review_id:
+                target_idx = idx
+                break
+            if logical_project_id and item.get("logical_project_id") == logical_project_id and item.get("teacher_id") == review.get("teacher_id"):
+                target_idx = idx
+                break
+        base = {
+            "review_id": review_id,
+            "created_at": _now_iso(),
+        }
+        if target_idx >= 0:
+            base = reviews[target_idx]
+            reviews[target_idx] = {
+                **base,
+                **review,
+                "review_id": base.get("review_id", review_id),
+                "updated_at": _now_iso(),
+            }
+            saved = reviews[target_idx]
+        else:
+            saved = {
+                **base,
+                **review,
+                "updated_at": _now_iso(),
+            }
+            reviews.append(saved)
+        self.save_project(project_id, data)
+        return saved
+
+    def upsert_teacher_intervention(self, project_id: str, intervention: dict, intervention_id: str | None = None) -> dict:
+        data = self.load_project(project_id)
+        items = data.setdefault("teacher_interventions", [])
+        real_id = intervention_id or str(intervention.get("intervention_id") or uuid4())
+        target_idx = -1
+        for idx, item in enumerate(items):
+            if item.get("intervention_id") == real_id:
+                target_idx = idx
+                break
+        if target_idx >= 0:
+            existing = items[target_idx]
+            items[target_idx] = {
+                **existing,
+                **intervention,
+                "intervention_id": real_id,
+                "updated_at": _now_iso(),
+            }
+            saved = items[target_idx]
+        else:
+            saved = {
+                **intervention,
+                "intervention_id": real_id,
+                "created_at": _now_iso(),
+                "updated_at": _now_iso(),
+            }
+            items.append(saved)
+        self.save_project(project_id, data)
+        return saved
+
+    def update_teacher_intervention(self, project_id: str, intervention_id: str, patch: dict) -> dict | None:
+        data = self.load_project(project_id)
+        items = data.setdefault("teacher_interventions", [])
+        for idx, item in enumerate(items):
+            if item.get("intervention_id") != intervention_id:
+                continue
+            items[idx] = {
+                **item,
+                **patch,
+                "intervention_id": intervention_id,
+                "updated_at": _now_iso(),
+            }
+            self.save_project(project_id, data)
+            return items[idx]
+        return None
 
     def list_projects(self) -> list[dict]:
         projects: list[dict] = []
@@ -96,7 +190,8 @@ class ConversationStorage:
             "project_id": project_id,
             "student_id": student_id,
             "title": title or "新对话",
-            "created_at": datetime.utcnow().isoformat(),
+            "summary": "",
+            "created_at": _now_iso(),
             "messages": [],
         }
         path = self._conv_dir(project_id) / f"{conv_id}.json"
@@ -114,7 +209,7 @@ class ConversationStorage:
                     "title": data.get("title", ""),
                     "created_at": data.get("created_at", ""),
                     "message_count": len(data.get("messages", [])),
-                    "last_message": (data.get("messages") or [{}])[-1].get("content", "")[:60] if data.get("messages") else "",
+                    "last_message": data.get("summary", "") or (data.get("messages") or [{}])[-1].get("content", "")[:60] if data.get("messages") else "",
                 })
             except Exception:  # noqa: BLE001
                 continue
@@ -126,6 +221,13 @@ class ConversationStorage:
             return None
         return json.loads(path.read_text(encoding="utf-8"))
 
+    def delete(self, project_id: str, conversation_id: str) -> bool:
+        path = self._conv_dir(project_id) / f"{conversation_id}.json"
+        if not path.exists():
+            return False
+        path.unlink()
+        return True
+
     def append_message(self, project_id: str, conversation_id: str, message: dict) -> None:
         path = self._conv_dir(project_id) / f"{conversation_id}.json"
         if not path.exists():
@@ -133,10 +235,35 @@ class ConversationStorage:
         data = json.loads(path.read_text(encoding="utf-8"))
         data["messages"].append({
             **message,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": _now_iso(),
         })
-        if len(data["messages"]) == 1 and data.get("title") == "新对话":
-            data["title"] = str(message.get("content", ""))[:30] or "新对话"
+        if message.get("role") == "assistant":
+            trace = message.get("agent_trace", {}) or {}
+            diagnosis = trace.get("diagnosis", {}) if isinstance(trace, dict) else {}
+            next_task = trace.get("next_task", {}) if isinstance(trace, dict) else {}
+            kg = trace.get("kg_analysis", {}) if isinstance(trace, dict) else {}
+            category = trace.get("category", "") if isinstance(trace, dict) else ""
+            title = (
+                (next_task.get("title", "") if isinstance(next_task, dict) else "")
+                or (diagnosis.get("bottleneck", "") if isinstance(diagnosis, dict) else "")
+                or (kg.get("insight", "") if isinstance(kg, dict) else "")
+                or str(message.get("content", ""))
+            )
+            summary = (
+                (kg.get("insight", "") if isinstance(kg, dict) else "")
+                or (diagnosis.get("bottleneck", "") if isinstance(diagnosis, dict) else "")
+                or (next_task.get("description", "") if isinstance(next_task, dict) else "")
+                or str(message.get("content", ""))
+            )
+            if category:
+                title = f"{category} · {title}" if title else category
+            title = str(title).replace("\n", " ").strip()[:24] or "新对话"
+            summary = str(summary).replace("\n", " ").strip()[:60]
+            if data.get("title") == "新对话":
+                data["title"] = title
+            data["summary"] = summary
+        elif len(data["messages"]) == 1 and data.get("title") == "新对话":
+            data["summary"] = str(message.get("content", "")).strip()[:60]
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
@@ -206,7 +333,7 @@ class UserStorage:
             raise ValueError("该邮箱已注册")
 
         salt, password_hash = self._hash_password(str(payload.get("password", "")))
-        now = datetime.utcnow().isoformat()
+        now = _now_iso()
         user = {
             "user_id": str(uuid4()),
             "role": payload.get("role", "student"),
@@ -248,7 +375,7 @@ class UserStorage:
             new_salt, new_hash = self._hash_password(new_password)
             user["password_salt"] = new_salt
             user["password_hash"] = new_hash
-            user["updated_at"] = datetime.utcnow().isoformat()
+            user["updated_at"] = _now_iso()
             self._save(users)
             return self._public_user(user)
         return None
@@ -261,7 +388,7 @@ class UserStorage:
             if str(user.get("phone", "")).strip() == phone:
                 return self._public_user(user)
         # auto-create
-        now = datetime.utcnow().isoformat()
+        now = _now_iso()
         salt, pw_hash = self._hash_password(secrets.token_hex(8))
         user = {
             "user_id": str(uuid4()),
@@ -319,7 +446,7 @@ class TeamStorage:
             "teacher_id": teacher_id,
             "teacher_name": teacher_name,
             "members": [],
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": _now_iso(),
         }
         teams.append(team)
         self._save(teams)
@@ -360,7 +487,7 @@ class TeamStorage:
                 return t
             t.setdefault("members", []).append({
                 "user_id": user_id,
-                "joined_at": datetime.utcnow().isoformat(),
+                "joined_at": _now_iso(),
             })
             self._save(teams)
             return t

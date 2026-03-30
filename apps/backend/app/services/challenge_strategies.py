@@ -293,15 +293,57 @@ for _s in STRATEGIES:
     for _r in _s.trigger_rules:
         _STRATEGY_BY_RULE.setdefault(_r, []).append(_s)
 
+_STRATEGY_EDGE_PREFS: dict[str, list[str]] = {
+    "CS01": ["Market_Competition_Edge", "Risk_Pattern_Edge", "Value_Loop_Edge"],
+    "CS02": ["Market_Competition_Edge", "Risk_Pattern_Edge", "Evidence_Grounding_Edge"],
+    "CS03": ["Innovation_Validation_Edge", "Execution_Gap_Edge", "Value_Loop_Edge"],
+    "CS04": ["User_Pain_Fit_Edge", "Evidence_Grounding_Edge", "Value_Loop_Edge"],
+    "CS05": ["Value_Loop_Edge", "Execution_Gap_Edge", "Evidence_Grounding_Edge"],
+    "CS06": ["Execution_Gap_Edge", "Risk_Pattern_Edge"],
+    "CS07": ["Compliance_Safety_Edge", "Risk_Pattern_Edge", "Evidence_Grounding_Edge"],
+    "CS08": ["Evidence_Grounding_Edge", "Market_Competition_Edge", "Value_Loop_Edge"],
+    "CS09": ["Innovation_Validation_Edge", "Evidence_Grounding_Edge"],
+    "CS10": ["Market_Competition_Edge", "Risk_Pattern_Edge", "Evidence_Grounding_Edge"],
+}
+
+_STRATEGY_FALLACY_PREFS: dict[str, list[str]] = {
+    "CS01": ["无竞争对手谬误", "替代方案盲区", "迁移成本盲区"],
+    "CS02": ["大数幻觉谬误", "市场规模口径谬误", "可触达市场缺失"],
+    "CS03": ["资源错配风险", "技术门槛幻觉", "创新点不可验证"],
+    "CS04": ["需求证据不足", "证据覆盖不足", "证据与结论错配"],
+    "CS05": ["单位经济未证成", "客群与价值错位", "用户价值与收入混淆"],
+    "CS06": ["执行过度乐观", "执行责任不清"],
+    "CS07": ["合规伦理缺口", "风险控制空泛"],
+    "CS08": ["定价无支撑"],
+    "CS09": ["创新点不可验证", "实验设计失真", "创新价值脱节"],
+    "CS10": ["市场规模口径谬误", "大数幻觉谬误", "可触达市场缺失"],
+}
+
+_STRATEGY_LOGIC: dict[str, str] = {
+    "CS01": "广义竞争逻辑 + 隐形替代方案 + 迁移成本逻辑",
+    "CS02": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+    "CS03": "技术可复制性逻辑 + 资源匹配逻辑",
+    "CS04": "需求证据逻辑 + 支付意愿检验",
+    "CS05": "价值闭环逻辑 + 现金流生存逻辑",
+    "CS06": "执行拆解逻辑 + 负责人校验",
+    "CS07": "合规边界逻辑 + 最坏情境预判",
+    "CS08": "价格敏感度逻辑 + 免费替代品比较",
+    "CS09": "实验验证逻辑 + 对照组意识",
+    "CS10": "TAM/SAM/SOM 口径校验 + 增长合理性",
+}
+
 
 def match_strategies(
     text: str,
     triggered_rule_ids: list[str] | None = None,
     max_results: int = 3,
+    fallacy_label: str = "",
+    edge_types: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Find matching challenge strategies based on text keywords and/or triggered rules."""
     scored: list[tuple[float, ChallengeStrategy]] = []
     text_lower = text.lower()
+    safe_edge_types = [str(x) for x in (edge_types or []) if x]
 
     for strategy in STRATEGIES:
         score = 0.0
@@ -309,9 +351,17 @@ def match_strategies(
         if kw_hits:
             score += len(kw_hits) * 2.0
 
-        if triggered_rule_ids:
-            rule_hits = [r for r in strategy.trigger_rules if r in triggered_rule_ids]
+        rule_hits = [r for r in strategy.trigger_rules if r in (triggered_rule_ids or [])]
+        if rule_hits:
             score += len(rule_hits) * 3.0
+
+        fallacy_hits = [f for f in _STRATEGY_FALLACY_PREFS.get(strategy.id, []) if f and f in fallacy_label]
+        if fallacy_hits:
+            score += len(fallacy_hits) * 2.5
+
+        edge_hits = [e for e in _STRATEGY_EDGE_PREFS.get(strategy.id, []) if e in safe_edge_types]
+        if edge_hits:
+            score += len(edge_hits) * 1.8
 
         if score > 0:
             scored.append((score, strategy))
@@ -326,6 +376,10 @@ def match_strategies(
             "probing_layers": s.probing_layers,
             "expected_evidence": s.expected_evidence,
             "counterfactual": s.counterfactual,
+            "preferred_edge_types": _STRATEGY_EDGE_PREFS.get(s.id, []),
+            "supported_fallacies": _STRATEGY_FALLACY_PREFS.get(s.id, []),
+            "strategy_logic": _STRATEGY_LOGIC.get(s.id, ""),
+            "matched_edge_types": [e for e in _STRATEGY_EDGE_PREFS.get(s.id, []) if e in safe_edge_types],
         })
     return results
 

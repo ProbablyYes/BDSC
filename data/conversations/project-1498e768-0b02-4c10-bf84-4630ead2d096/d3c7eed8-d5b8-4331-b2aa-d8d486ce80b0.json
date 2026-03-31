@@ -1,0 +1,69 @@
+{
+  "conversation_id": "d3c7eed8-d5b8-4331-b2aa-d8d486ce80b0",
+  "project_id": "project-1498e768-0b02-4c10-bf84-4630ead2d096",
+  "student_id": "None",
+  "title": "你好！有什么想聊的或者需要帮助的吗？比如关于项目",
+  "summary": "你好！有什么想聊的或者需要帮助的吗？比如关于项目、竞赛准备，或者其他任何问题。⚠ AI生成，仅供参考",
+  "created_at": "2026-03-31T11:56:51.503805+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你好",
+      "timestamp": "2026-03-31T11:56:54.204349+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！有什么想聊的或者需要帮助的吗？比如关于项目、竞赛准备，或者其他任何问题。⚠ AI生成，仅供参考",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "intent_shape": "single",
+          "intent_reason": "问候消息；判定为单一主问题；主意图归类为 general_chat",
+          "confidence": 1.0,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前问题足够聚焦，由编排器直接生成回答，不额外拆分角色智能体。",
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "pressure_test_trace": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "matched_teacher_interventions": [],
+        "diagnosis": {},
+        "next_task": {}
+      },
+      "timestamp": "2026-03-31T11:56:54.211780+08:00"
+    }
+  ]
+}

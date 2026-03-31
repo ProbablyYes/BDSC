@@ -1,0 +1,3538 @@
+{
+  "conversation_id": "fa6a7737-dd8e-4b4e-aa91-a1531a56b09f",
+  "project_id": "project-1498e768-0b02-4c10-bf84-4630ead2d096",
+  "student_id": "None",
+  "title": "科技创新 · 用一种最低成本的方法验证真实需求",
+  "summary": "项目具备明确的市场定位和可行的商业模式，但需要补充技术实现细节和风险控制方案以增强说服力",
+  "created_at": "2026-03-31T10:36:34.709531+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。",
+      "timestamp": "2026-03-31T10:36:38.846989+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你提到的项目方向很有潜力，特别是在当前大学生技能变现渠道有限的情况下。平台类项目如果能够成功连接供需双方，确实可以创造较大的价值。不过，目前你的描述还比较宽泛，为了更好地理解你的项目设想，我们需要进一步明确一些关键点。比如，大学生具体有哪些技能？他们希望通过平台实现怎样的变现？这些问题的答案将帮助我们更准确地定位项目的核心价值和目标用户群体。\n\n接下来，我建议你从具体的用户痛点出发，深入探讨。例如，大学生在哪些场景下会遇到技能变现的难题？他们现在是如何解决这些问题的？这将帮助我们更好地理解市场现状，以及你的项目如何能够提供更有效的解决方案。\n\n为了进一步明确你的项目方向，请你详细描述一下大学生在技能变现过程中遇到的具体痛点，以及这些痛点在现有市场中的解决方式。这将有助于我们更好地评估项目的可行性和潜在价值。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "business_model",
+          "intent_shape": "single",
+          "intent_reason": "关键词命中 渠道, 变现；判定为单一主问题；主意图归类为 business_model",
+          "confidence": 0.5,
+          "engine": "rule",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前进入信息补全阶段，先不调用角色智能体。",
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 9.1,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 1.8,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS05",
+            "name": "商业模式闭环断裂",
+            "match_score": 1.8,
+            "probing_layers": [
+              "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+              "渠道可达性: 你说通过XX渠道获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+              "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。"
+            ],
+            "expected_evidence": [
+              "价值主张画布",
+              "渠道成本数据",
+              "变现路径和时间表"
+            ],
+            "counterfactual": "如果你的免费用户永远不转化为付费用户，公司的现金流能撑多久？",
+            "preferred_edge_types": [
+              "Value_Loop_Edge",
+              "Execution_Gap_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "单位经济未证成",
+              "客群与价值错位",
+              "用户价值与收入混淆"
+            ],
+            "strategy_logic": "价值闭环逻辑 + 现金流生存逻辑",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "需求证据不足",
+          "fallacy_rule_id": "H5",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "需求证据缺失",
+          "selected_strategy_id": "CS04",
+          "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+          "generated_question": "你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+          "evidence_quotes": [
+            "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "learning",
+          "overall_score": 5.0,
+          "score_band": "早期可塑",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "User_Pain_Fit_Edge",
+                "Evidence_Grounding_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS04"
+              ],
+              "quote": "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。",
+              "trigger_message": "原文片段：“我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。"
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事结构断裂",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Ontology_Grounded_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS06"
+              ],
+              "quote": "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。",
+              "trigger_message": "原文片段：“我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.06,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.06,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 6.49,
+              "status": "ok",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.49,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "用一种最低成本的方法验证真实需求",
+          "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+          "template_guideline": [
+            "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+            "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+            "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点"
+          ],
+          "acceptance_criteria": [
+            "明确1个待验证判断",
+            "完成1种验证动作",
+            "拿到可复述的行为证据或反证"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T10:36:38.855678+08:00"
+    },
+    {
+      "role": "user",
+      "content": "Round 1（学生）\n\n我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。\n\n🗣️ Round 2（学生：完整项目草案）\n\n学生画像 UserProfile_Skill\n 年级：大三\n 专业：信息管理\n 兴趣：互联网产品 + 副业 + 平台经济\n\n项目草案 Project Draft\n 项目名：SkillBridge（校园技能撮合平台）\n\n 目标用户：\n\n供给侧：有设计、编程、剪辑等技能的大学生\n需求侧：中小商家、自媒体、小型创业团队\n\n 价值主张：\n帮助学生将技能变现，同时为小型需求方提供低成本服务\n\n 核心功能：\n\n学生发布技能标签（如“PPT设计”“剪辑”）\n需求方发布任务\n平台进行撮合\n支持评价体系\n\n 获客渠道：\n\n在高校社群推广\n在小红书/抖音发布“副业”内容\n与校园创业社团合作\n\n 定价模式：\n\n平台抽成10%\n可购买“优先曝光”服务\n\n 竞争分析：\n\n替代产品：猪八戒网、BOSS直聘（兼职）\n差异点：聚焦“学生群体+低成本需求”\n\n 市场规模：\n\n单校约2万学生\n假设10%学生有技能变现需求\n\n 财务假设：\n\n初期月交易额约5万元\n平台抽成约5000元\n\n 团队与资源：\n\n2名经管 + 2名计算机\n有校园推广资源\n\n 里程碑计划：\n\n第1个月上线MVP\n第3个月完成100单交易\n第6个月扩展到3所高校\n\n 路演叙事：\n强调“学生技能闲置+商家低成本需求”",
+      "timestamp": "2026-03-31T10:44:02.774401+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你提到的项目SkillBridge（校园技能撮合平台）确实抓住了一个潜在的市场机会，特别是在学生技能变现方面。从你的描述来看，项目旨在为有技能的学生和需要低成本服务的小型企业搭建桥梁，这样的定位具有一定的创新性和市场价值。不过，项目初期的市场推广和用户粘性构建将是关键挑战，尤其是如何在众多类似的平台上脱颖而出。\n\n你的草案中提到了一些核心功能和初步的获客渠道，这些都为项目的可行性打下了基础。不过，项目的成功不仅取决于功能的完善，更重要的是能否快速吸引到足够的用户，并建立起稳定的交易量。目前，你已经规划了具体的财务假设和里程碑计划，这显示了你对项目有较为清晰的规划思路。\n\n接下来，我想更深入地了解你对这个项目的初衷和背后的原因。你为什么觉得这个方向值得做？是基于个人经历、身边案例，还是观察到的某种普遍现象？这将帮助我们更好地理解项目的背景和动机，进一步完善项目设想。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "intent_shape": "mixed",
+          "intent_reason": "关键词命中 竞赛/评委；主意图归类为 competition_prep",
+          "confidence": 0.86,
+          "engine": "rule",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前进入信息补全阶段，先不调用角色智能体。",
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "有设计、编程、剪辑等技能的大学生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e2",
+              "label": "中小商家、自媒体、小型创业团队",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e3",
+              "label": "大学生技能变现渠道少",
+              "type": "pain_point"
+            },
+            {
+              "id": "e4",
+              "label": "SkillBridge（校园技能撮合平台）",
+              "type": "solution"
+            },
+            {
+              "id": "e5",
+              "label": "猪八戒网、BOSS直聘（兼职）",
+              "type": "competitor"
+            },
+            {
+              "id": "e6",
+              "label": "单校约2万学生",
+              "type": "market"
+            },
+            {
+              "id": "e7",
+              "label": "2名经管 + 2名计算机",
+              "type": "team"
+            },
+            {
+              "id": "e8",
+              "label": "校园推广资源",
+              "type": "resource"
+            },
+            {
+              "id": "e9",
+              "label": "平台抽成10%",
+              "type": "business_model"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "面临"
+            },
+            {
+              "source": "e4",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e4",
+              "target": "e2",
+              "relation": "服务"
+            },
+            {
+              "source": "e5",
+              "target": "e4",
+              "relation": "被替代"
+            },
+            {
+              "source": "e7",
+              "target": "e4",
+              "relation": "开发"
+            },
+            {
+              "source": "e8",
+              "target": "e4",
+              "relation": "支持"
+            },
+            {
+              "source": "e9",
+              "target": "e4",
+              "relation": "构成"
+            }
+          ],
+          "structural_gaps": [
+            "缺少技术实现细节",
+            "缺少风险控制措施",
+            "缺少用户验证数据"
+          ],
+          "content_strengths": [
+            "明确的双侧用户定位",
+            "清晰的差异化定位",
+            "可量化的市场假设"
+          ],
+          "completeness_score": 6,
+          "section_scores": {
+            "problem_definition": 5,
+            "user_evidence": 1,
+            "solution_feasibility": 4,
+            "business_model": 3,
+            "competitive_advantage": 4
+          },
+          "insight": "项目具备清晰的市场定位和团队基础，但需要补充技术实现细节和验证数据"
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "summary": "本轮超图主要命中了风险模式超边、风险模式超边、风险模式超边，说明当前问题更集中在Category、RiskRule、RubricItem。",
+          "top_signals": [
+            "优先命中的超边类型：风险模式超边、风险模式超边、风险模式超边",
+            "当前高连接节点：交通运输、H15、User Evidence Strength",
+            "当前偏好的超边族：Market_Competition_Edge、Risk_Pattern_Edge"
+          ],
+          "key_dimensions": [
+            "Category",
+            "RiskRule",
+            "RubricItem"
+          ],
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_002",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 4,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_106839a62240",
+                "case_1135e29de95e",
+                "case_1512b0f26aa4",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.825,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 7.6
+            },
+            {
+              "hyperedge_id": "he_risk_001",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 4,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "未来将应用在医院、养老院、社区、家庭等场景中，实现健康评估、脉象体质分析和中医调养建议。",
+                "由于脉诊主要依赖医者的主观感受和经验判断，限制了脉诊现代化的发展，研发脉诊仪对脉搏信号量化采集和处理十分必要。",
+                "项目成果已部署医院原型系统支持基层筛查与远程诊疗"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::医疗健康",
+                  "type": "Category",
+                  "name": "医疗健康",
+                  "display": "医疗健康"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_15e831df090d",
+                "case_2ec8ca03bca5",
+                "case_4f02070b3113",
+                "case_c661aa0d29b3"
+              ],
+              "confidence": 0.862,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.6
+            },
+            {
+              "hyperedge_id": "he_risk_003",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Financial Logic、User Evidence Strength。",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Financial Logic",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "我国青光眼患病人群已超 7000 万，作为全球第二大致盲性眼病，其致盲率达 10%，且病程不可逆。",
+                "当前传统眼压监测设备存在显著局限，Goldmann 压平眼压计等单点测量设备受角膜厚度、患者配合度影响，误差达±5 mmHg，24 小时监测需在医院完成，不仅占用医疗资源，更难捕捉夜间眼压峰值。",
+                "神经放射科医生需要处理大量的医学影像数据，尤其是在大型医疗机构或医学中心，医生每天可能面对上百甚至上千个病例的影像检查。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Financial Logic",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::医疗健康",
+                  "type": "Category",
+                  "name": "医疗健康",
+                  "display": "医疗健康"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Financial Logic",
+                  "type": "RubricItem",
+                  "name": "Financial Logic",
+                  "display": "Financial Logic"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_9484dd40cb89",
+                "case_c1e2597b715d",
+                "case_d30326ae244e"
+              ],
+              "confidence": 0.783,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.4
+            },
+            {
+              "hyperedge_id": "he_risk_004",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 3,
+              "teaching_note": "工业制造类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Financial Logic、User Evidence Strength。",
+              "categories": [
+                "工业制造"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Financial Logic",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "传统人工与智能探测手段在效率、 安全性、 成本与精度等方面存在显著局限。",
+                "通过构建视觉传感器-激光雷达多源融合智能算法， 攻克超轻量级多源融合感知、基于地质特征库在线查询匹配的厘米级定位算法 及基于强化模仿学习策略的动态避障等关键技术。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::工业制造",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Financial Logic",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::工业制造",
+                  "type": "Category",
+                  "name": "工业制造",
+                  "display": "工业制造"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Financial Logic",
+                  "type": "RubricItem",
+                  "name": "Financial Logic",
+                  "display": "Financial Logic"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_5c7fb9130e91",
+                "case_661a943e267c",
+                "case_b30dfb691947"
+              ],
+              "confidence": 0.8,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "原型期",
+              "match_score": 5.4
+            },
+            {
+              "hyperedge_id": "he_risk_005",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 3,
+              "teaching_note": "教育服务类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "教育服务"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "针对传统思想政治教育存在的单向知识传输、情感共鸣不足、数字化资源交互性弱等痛点，本项目构建了 AI 驱动的情境化思政实践育人系统。",
+                "一是构建 “徐特立大模型” 智能体，融合生成式大模型与检索增强生成 （RAG） 技术，整合马克思主义经典文献、党史国史等资源形成动态知识图谱，实现理论阐释的精准化与对话化；二是打造可交互的“徐特立数字人”，通过语音识别、情感语音合成、音频驱动技术，结合扩散模型与神经辐射场 （NeRF），实现数字人面部微表情与语音的自然",
+                "项目围绕教育任务“风格多样性强、个性化要求高、上下文依赖重”等特点，提出了融合个性识别与生成控制的一体化生成机制，结合注意力稀疏性建模与任务感知缓存共享技术，实现了在超长上下文（>100K tokens）下的个性化信息精准定位与调用，保障了生成内容的上下文连贯性与个体适应性。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::教育服务",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::教育服务",
+                  "type": "Category",
+                  "name": "教育服务",
+                  "display": "教育服务"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_5b8111094417",
+                "case_8639ecc88e95",
+                "case_eb4e2938e451"
+              ],
+              "confidence": 0.9,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "原型期",
+              "match_score": 5.4
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [
+              "H3",
+              "H4",
+              "H5",
+              "H21"
+            ],
+            "expanded_rule_ids": [
+              "H19",
+              "H21",
+              "H3",
+              "H4",
+              "H5",
+              "H9",
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "Category::交通运输",
+                "degree": 35,
+                "interpretation": "「交通运输」类别出现在35种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "RiskRule::H15",
+                "degree": 17,
+                "interpretation": "风险规则「H15」关联17种模式，是最普遍的问题"
+              },
+              {
+                "node": "RubricItem::User Evidence Strength",
+                "degree": 16,
+                "interpretation": "评分维度「User Evidence Strength」被16种模式反复命中，是重要教学检查点"
+              },
+              {
+                "node": "RiskRule::H10",
+                "degree": 14,
+                "interpretation": "风险规则「H10」关联14种模式，是最普遍的问题"
+              },
+              {
+                "node": "RubricItem::Business Model Consistency",
+                "degree": 12,
+                "interpretation": "评分维度「Business Model Consistency」被12种模式反复命中，是重要教学检查点"
+              }
+            ],
+            "avg_edge_size": 6.2,
+            "max_edge_size": 7,
+            "family_leaderboard": [
+              {
+                "type": "Risk_Pattern_Edge",
+                "label": "风险模式超边",
+                "count": 10
+              },
+              {
+                "type": "Value_Loop_Edge",
+                "label": "价值闭环超边",
+                "count": 8
+              },
+              {
+                "type": "Evidence_Grounding_Edge",
+                "label": "证据锚定超边",
+                "count": 6
+              },
+              {
+                "type": "User_Pain_Fit_Edge",
+                "label": "用户痛点匹配超边",
+                "count": 6
+              },
+              {
+                "type": "Execution_Gap_Edge",
+                "label": "执行断裂超边",
+                "count": 5
+              },
+              {
+                "type": "Market_Competition_Edge",
+                "label": "市场竞争超边",
+                "count": 5
+              }
+            ]
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 50,
+            "node_count": 54,
+            "family_counts": {
+              "Risk_Pattern_Edge": 10,
+              "Value_Loop_Edge": 8,
+              "User_Pain_Fit_Edge": 6,
+              "Evidence_Grounding_Edge": 6,
+              "Execution_Gap_Edge": 5,
+              "Market_Competition_Edge": 5,
+              "Compliance_Safety_Edge": 4,
+              "Innovation_Validation_Edge": 4,
+              "Pricing_Unit_Economics_Edge": 2
+            }
+          }
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.6353,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.6287,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5928,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_b719c62bb6ba",
+            "category": "科技创新",
+            "project_name": "云游灵境-云交互空间实时生成技术引领者",
+            "similarity": 0.5498,
+            "pain_points": [
+              "博物馆数字场景交互方式单一",
+              "内容传播方式固定单向",
+              "观众难以沉浸参与到内容中"
+            ],
+            "solution": [
+              "数字空间快速搭建技术",
+              "多智能体交互技术",
+              "云实施*在线实时渲染推流技术"
+            ],
+            "innovation_points": [
+              "云实施*在线实时推流技术",
+              "云原生架构"
+            ],
+            "evidence_quotes": [
+              "小型娱乐活动、贸易消费类会展、博物馆趣味化"
+            ],
+            "risk_flags": [
+              "no_competitor_claim|market_size_fallacy|weak_user_evidence|compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "文化创意和区域合作组 云交互空间实时生成技术引领者 云游灵境 习近平总书记指出， 发展数字经济是把握新一轮科技革命和产业变革新机遇的战略选择 2020年，我国数字经济市场规模增长至40万亿元， 2022年，中国数字文化产业规模已达7841.6亿元。 文化传播重地，深耕千亿市场 数字博 物空间 城市应 急仿真 空间 虚拟农 资交互 空间 智慧城 市交互 空间 虚拟文 化交流 空间 虚拟教 育空间 上亿6000 博物馆数字 化建设需求 800+ 场 每年亿元级活动展演 数字展区 会展活动 数千 百万人级城市数字 化及应急仿真需求 自2019年起，团队深耕数字文化产业 广泛开展市场调研: 数万 扶农"
+          },
+          {
+            "case_id": "case_45b1ac814edb",
+            "category": "科技创新",
+            "project_name": "医联农村，e路助农—化路径研究",
+            "similarity": 0.5384,
+            "pain_points": [
+              "就医远、难、贵",
+              "技术适配性不足",
+              "资源分配不均"
+            ],
+            "solution": [
+              "优化供需两端利益分配机制",
+              "构建可持续的价值共享模式",
+              "推进服务模式创新"
+            ],
+            "innovation_points": [
+              "采用线下调研为主，线上数据收集为辅的方式",
+              "运用大语言模型对访谈文本进行结构化处理"
+            ],
+            "evidence_quotes": [
+              "尽管近年来国家出台了多项政策推动农村互联网医疗发展，但互联网医疗在农村的实际推广过程中仍面临诸多困难，如技术适配性不足、资源分配不均、居民接受度低等。",
+              "调研团队特别选取了革命老区江西吉安县（江镇中马洲村和公塘村）和井冈山市（马源村和古田村）、山西方山县（麻地会乡胡堡村）作为重点调研对象，深入剖析智慧医疗在革命老区基层实践中的痛点难点。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "医联农村 e路助农 农村互联网医疗应用调查和优化路径研究 摘 要 在数字技术高速发展的背景 下，我国互联网医疗得到了广泛应用，开辟 了 医疗服务新模式，为缓解我国医疗资源不足、分布不均衡提供了有效手段。 近 年来，农村互联网医疗加速发展， 但现有农村互联网医疗模式还存在普适性不 足、普及率较低 等问题，农村居民仍然需要 面对就医远、难、贵等难题 ，这也 凸显了农村医疗当下的困境。本项目聚焦农村互联网医疗发展现状 、存在问题 及优化路径，通过问卷调查、 居民访谈、实地走访等方法，客观分析发展障 碍，并提出解决方案，为提升农村互联网医疗普及度提供理论与实践支持。 项目研究团队历时近2年的时间，采用"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业大赛 评委 评分 路演 高校 校园 Round",
+          "results": [
+            {
+              "title": "湖南工学院第二届金种子杯大学生创业大赛校赛路演实施方案-湖南工学院创新创业教育中心",
+              "snippet": "为做好湖南工学院第二届金种子杯大学生创业大赛校赛路演组织工作，特制定以下实施方案。 一、赛事组织形式 校级决赛路演将采用线下路演的方式进行。各参赛团队成员和指导老师要求参加线下路演。 二、参赛项目 二级学院所有推荐项目按网评总分由高到低排序取前26的项目进入决赛路演。 三 ...",
+              "url": "https://www.hnit.edu.cn/cxcyxy/info/1031/4621.htm"
+            },
+            {
+              "title": "学术报告：\"互联网＋\"大学生创新创业大赛的项目路演要点和评审规则",
+              "snippet": "发布者：魏义凡发布时间：2023-03-02浏览次数：1730 报告主题：\"互联网＋\"大学生创新创业大赛的项目路演要点和评审规则 报告人：钱春芸、刘海 报告时间：2023年3月6日下午14:00 报告地点：新能源大楼102会议室 参训人员：苏州大学第九届\"互联网+\"校赛培育项目的指导老师、负责人及团队成员",
+              "url": "https://energy.suda.edu.cn/ff/0e/c9472a524046/page.htm"
+            },
+            {
+              "title": "附件3：第九届中国国际\"互联网 +\"大学生创新创业大赛评审规则.docx-管理科学与工程学院",
+              "snippet": "附件第九届中国国际\"互联网+\"大学生创新创业大赛评审规则一、高教主赛道项目评审要点：创意组评审要点评审内容分值教育维度1.项目应弘扬正确的价值观，厚植家国情怀，恪守伦理规范，有助于培育创新创业精神。2.项目符合将专业知识与商业知识有效结合并转化为商业价值或社会价值的创新 ...",
+              "url": "https://mse.ctbu.edu.cn/info/1059/15722.htm"
+            }
+          ],
+          "summary": "- 为做好湖南工学院第二届金种子杯大学生创业大赛校赛路演组织工作，特制定以下实施方案。 一、赛事组织形式 校级决赛路演将采用线下路演的方式进行。各参赛团队成员和指导老师要求参加线下路演。 二、参赛项目 二级学院所有推荐项目按网评总分由高到低排序取前26的项目进入决赛路演。 三 ...\n- 发布者：魏义凡发布时间：2023-03-02浏览次数：1730 报告主题：\"互联网＋\"大学生创新创业大赛的项目路演要点和评审规则 报告人：钱春芸、刘海 报告时间：2023年3月6日下午14:00 报告地点：新能源大楼102会议室 参训人员：苏州大学第九届\"互联网+\"校赛培育项目的指导老师、负责人及团队成员\n- 附件第九届中国国际\"互联网+\"大学生创新创业大赛评审规则一、高教主赛道项目评审要点：创意组评审要点评审内容分值教育维度1.项目应弘扬正确的价值观，厚植家国情怀，恪守伦理规范，有助于培育创新创业精神。2.项目符合将专业知识与商业知识有效结合并转化为商业价值或社会价值的创新 ..."
+        },
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 6.2,
+          "covered_count": 8,
+          "total_dimensions": 13,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": true,
+              "entities": [
+                "有设计、编程、剪辑等技能的大学生",
+                "中小商家、自媒体、小型创业团队"
+              ],
+              "count": 2
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": true,
+              "entities": [
+                "大学生技能变现渠道少"
+              ],
+              "count": 1
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": true,
+              "entities": [
+                "SkillBridge（校园技能撮合平台）"
+              ],
+              "count": 1
+            },
+            "innovation": {
+              "name": "创新点",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "market": {
+              "name": "目标市场",
+              "covered": true,
+              "entities": [
+                "单校约2万学生"
+              ],
+              "count": 1
+            },
+            "competitor": {
+              "name": "竞争格局",
+              "covered": true,
+              "entities": [
+                "猪八戒网、BOSS直聘（兼职）"
+              ],
+              "count": 1
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": true,
+              "entities": [
+                "平台抽成10%"
+              ],
+              "count": 1
+            },
+            "execution_step": {
+              "name": "执行步骤",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "risk_control": {
+              "name": "风控合规",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "evidence": {
+              "name": "证据支撑",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "resource": {
+              "name": "资源优势",
+              "covered": true,
+              "entities": [
+                "校园推广资源"
+              ],
+              "count": 1
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": true,
+              "entities": [
+                "2名经管 + 2名计算机"
+              ],
+              "count": 1
+            }
+          },
+          "cross_links": [
+            {
+              "from_dim": "目标用户",
+              "to_dim": "痛点问题",
+              "from_entity": "e1",
+              "to_entity": "e3",
+              "relation": "面临"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "痛点问题",
+              "from_entity": "e4",
+              "to_entity": "e3",
+              "relation": "解决"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "目标用户",
+              "from_entity": "e4",
+              "to_entity": "e2",
+              "relation": "服务"
+            },
+            {
+              "from_dim": "竞争格局",
+              "to_dim": "解决方案",
+              "from_entity": "e5",
+              "to_entity": "e4",
+              "relation": "被替代"
+            },
+            {
+              "from_dim": "团队能力",
+              "to_dim": "解决方案",
+              "from_entity": "e7",
+              "to_entity": "e4",
+              "relation": "开发"
+            },
+            {
+              "from_dim": "资源优势",
+              "to_dim": "解决方案",
+              "from_entity": "e8",
+              "to_entity": "e4",
+              "relation": "支持"
+            },
+            {
+              "from_dim": "商业模式",
+              "to_dim": "解决方案",
+              "from_entity": "e9",
+              "to_entity": "e4",
+              "relation": "构成"
+            }
+          ],
+          "hub_entities": [
+            {
+              "entity": "e4",
+              "type": "solution",
+              "connections": 6,
+              "note": "「e4」连接6个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e3",
+              "type": "pain_point",
+              "connections": 2,
+              "note": "「e3」连接2个维度，是项目的核心支撑点"
+            }
+          ],
+          "pattern_warnings": [],
+          "pattern_strengths": [
+            {
+              "pattern_id": "he_evidence_001",
+              "note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "support": 3,
+              "edge_type": "Evidence_Grounding_Edge"
+            }
+          ],
+          "projected_edge_types": [
+            "User_Pain_Fit_Edge",
+            "Value_Loop_Edge",
+            "Market_Competition_Edge",
+            "Execution_Gap_Edge"
+          ],
+          "missing_dimensions": [
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少技术实现细节"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少风险控制措施"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少用户验证数据"
+            },
+            {
+              "dimension": "技术路线",
+              "importance": "中",
+              "recommendation": "技术路线未说明，可行性存疑"
+            }
+          ],
+          "student_graph_stats": {
+            "nodes": 17,
+            "edges": 15
+          }
+        },
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 9.1,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS10",
+            "name": "TAM/SAM/SOM混乱",
+            "match_score": 9.1,
+            "probing_layers": [
+              "口径检验: 你说的市场规模是TAM还是SAM？你实际能触达的市场(SOM)有多大？",
+              "自下而上估算: 请用'单价×目标用户数×复购频次'来估算你第一年的实际可获得市场。",
+              "增长合理性: 从SOM到SAM，你的增长路径是什么？每一步需要什么资源？"
+            ],
+            "expected_evidence": [
+              "TAM/SAM/SOM三层估算",
+              "自下而上的市场测算",
+              "增长路径规划"
+            ],
+            "counterfactual": "一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "市场规模口径谬误",
+              "大数幻觉谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "TAM/SAM/SOM 口径校验 + 增长合理性",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 8.6,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "定价无支撑"
+            ],
+            "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "市场规模口径谬误",
+          "fallacy_rule_id": "H4",
+          "retrieved_heterogeneous_subgraph": [
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_002",
+              "support": 4,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ]
+            },
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_001",
+              "support": 4,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "未来将应用在医院、养老院、社区、家庭等场景中，实现健康评估、脉象体质分析和中医调养建议。",
+                "由于脉诊主要依赖医者的主观感受和经验判断，限制了脉诊现代化的发展，研发脉诊仪对脉搏信号量化采集和处理十分必要。",
+                "项目成果已部署医院原型系统支持基层筛查与远程诊疗"
+              ]
+            },
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_003",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Financial Logic、User Evidence Strength。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Financial Logic",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "我国青光眼患病人群已超 7000 万，作为全球第二大致盲性眼病，其致盲率达 10%，且病程不可逆。",
+                "当前传统眼压监测设备存在显著局限，Goldmann 压平眼压计等单点测量设备受角膜厚度、患者配合度影响，误差达±5 mmHg，24 小时监测需在医院完成，不仅占用医疗资源，更难捕捉夜间眼压峰值。",
+                "神经放射科医生需要处理大量的医学影像数据，尤其是在大型医疗机构或医学中心，医生每天可能面对上百甚至上千个病例的影像检查。"
+              ]
+            }
+          ],
+          "selected_strategy": "1%市场份额幻觉",
+          "selected_strategy_id": "CS02",
+          "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+          "generated_question": "你提到“聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财”。这批人具体散落在哪些渠道里？你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。",
+          "evidence_quotes": [
+            "聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财",
+            "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+            "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "learning",
+          "overall_score": 6.13,
+          "score_band": "基本成形",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "fallacy_label": "定价无支撑",
+              "severity": "medium",
+              "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+              "matched_keywords": [
+                "定价"
+              ],
+              "missing_requires": [
+                "支付意愿",
+                "愿意付费"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Grounding_Edge",
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS08",
+                "CS05"
+              ],
+              "quote": "业”内容 与校园创业社团合作  定价模式： 平台抽成10% 可购买“优先曝光”服务  竞争",
+              "trigger_message": "原文片段：“业”内容 与校园创业社团合作  定价模式： 平台抽成10% 可购买“优先曝光”服务  竞争” → 触发「定价无支付意愿证据」，因为提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "impact": "没有支付意愿证据，收费设计容易被认为拍脑袋，影响商业模式可信度。",
+              "fix_task": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。"
+            },
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "fallacy_label": "市场规模口径谬误",
+              "severity": "high",
+              "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "matched_keywords": [
+                "市场规模"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Market_Competition_Edge",
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS10",
+                "CS02"
+              ],
+              "quote": "聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财",
+              "trigger_message": "原文片段：“聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财” → 触发「TAM/SAM/SOM口径混乱」，因为提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "impact": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。",
+              "fix_task": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。"
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "User_Pain_Fit_Edge",
+                "Evidence_Grounding_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS04"
+              ],
+              "quote": "Round 1（学生） 我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。 🗣️ Round 2（学生：完整项目草案） 学生画像 UserProfile_Sk",
+              "trigger_message": "原文片段：“Round 1（学生） 我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。 🗣️ Round 2（学生：完整项目草案） 学生画像 UserProfile_Sk” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。"
+            },
+            {
+              "id": "H21",
+              "name": "执行步骤缺少负责人",
+              "fallacy_label": "执行责任不清",
+              "severity": "medium",
+              "explanation": "写了执行计划但没有负责人，计划容易停留在纸面，难以证明执行能力。",
+              "fix_hint": "为每个关键里程碑补充负责人、时间节点和交付物。",
+              "matched_keywords": [
+                "计划",
+                "里程碑"
+              ],
+              "missing_requires": [
+                "负责人",
+                "分工",
+                "谁负责"
+              ],
+              "preferred_edge_types": [
+                "Execution_Gap_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS06"
+              ],
+              "quote": "计算机 有校园推广资源  里程碑计划： 第1个月上线MVP 第3个月完成100单交易 第6个月",
+              "trigger_message": "原文片段：“计算机 有校园推广资源  里程碑计划： 第1个月上线MVP 第3个月完成100单交易 第6个月” → 触发「执行步骤缺少负责人」，因为写了执行计划但没有负责人，计划容易停留在纸面，难以证明执行能力。",
+              "impact": "没有负责人会让执行计划变成口号，难以落地。",
+              "fix_task": "为每个关键里程碑补充负责人、时间节点和交付物。"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.57,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.57,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 7.47,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 8.39,
+              "status": "ok",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 6.14,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 7.47,
+              "status": "ok",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 7.0,
+              "status": "ok",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "template_guideline": [
+            "先明确当前最高风险点是什么",
+            "补至少3条能直接支撑该点的证据",
+            "用评委视角做一轮反问并更新答案"
+          ],
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T10:44:02.779644+08:00"
+    },
+    {
+      "role": "user",
+      "content": "Round 1（学生）\n\n我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。\n\n🗣️ Round 2（学生：完整项目草案）\n\n学生画像 UserProfile_Skill\n 年级：大三\n 专业：信息管理\n 兴趣：互联网产品 + 副业 + 平台经济\n\n项目草案 Project Draft\n 项目名：SkillBridge（校园技能撮合平台）\n\n 目标用户：\n\n供给侧：有设计、编程、剪辑等技能的大学生\n需求侧：中小商家、自媒体、小型创业团队\n\n 价值主张：\n帮助学生将技能变现，同时为小型需求方提供低成本服务\n\n 核心功能：\n\n学生发布技能标签（如“PPT设计”“剪辑”）\n需求方发布任务\n平台进行撮合\n支持评价体系\n\n 获客渠道：\n\n在高校社群推广\n在小红书/抖音发布“副业”内容\n与校园创业社团合作\n\n 定价模式：\n\n平台抽成10%\n可购买“优先曝光”服务\n\n 竞争分析：\n\n替代产品：猪八戒网、BOSS直聘（兼职）\n差异点：聚焦“学生群体+低成本需求”\n\n 市场规模：\n\n单校约2万学生\n假设10%学生有技能变现需求\n\n 财务假设：\n\n初期月交易额约5万元\n平台抽成约5000元\n\n 团队与资源：\n\n2名经管 + 2名计算机\n有校园推广资源\n\n 里程碑计划：\n\n第1个月上线MVP\n第3个月完成100单交易\n第6个月扩展到3所高校\n\n 路演叙事：\n强调“学生技能闲置+商家低成本需求”",
+      "timestamp": "2026-03-31T11:05:13.105235+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "看到你的SkillBridge项目草案，我能感受到你对这个方向的热情和思考。从一个模糊的想法，到能画出用户画像、列出核心功能、甚至做出财务假设，这已经是很好的进展，说明项目正在从“点子”走向“原型”。现在，我们来到了最关键也最危险的一步：**从“基于想象的蓝图”走向“基于证据的验证”**。\n\n你现在的状态，就像一个建筑师画出了一栋大楼的漂亮效果图，但还没有去实地勘测地基的承重和土壤的成分。你的草案里充满了“假设”——假设10%的学生有需求，假设月交易额5万，假设商家愿意为“学生+低成本”买单。这些假设构成了你项目的骨架，但如果它们不成立，整个大厦会瞬间倾覆。评委或投资人最犀利的追问，往往就藏在这些未经检验的假设背后。\n\n### 一、你的逻辑链路：哪里通，哪里断？\n\n我们先快速梳理一下你构建的商业逻辑：\n*   **用户（通）**：供给侧（有技能的大学生）和需求侧（中小商家），这两类群体确实存在，你的定位是清晰的。\n*   **痛点（存疑）**：“学生技能闲置”和“商家低成本需求”。痛点存在，但**强度**和**未被满足的原因**需要深挖。为什么现有的渠道（猪八戒、闲鱼、社群接单）没解决好？这是关键。\n*   **方案（初步）**：搭建一个撮合平台。方案本身是直接的，但**有效性**存疑。平台只是工具，核心价值在于它能否比现有方式更高效、更可靠地解决痛点。\n*   **变现（高风险）**：10%抽成和优先曝光。这是整个链条中最脆弱的一环，因为你没有任何证据表明双方愿意为这个平台服务付费。\n*   **壁垒（几乎断裂）**：“聚焦学生+低成本”更像是自我设限，而非护城河。它没有回答“为什么别人做不了或做不好”。\n\n所以，你的项目卡在了**痛点验证**、**方案有效性**和**变现可行性**这三个核心环节上，它们共同指向一个更深层的结构性问题。\n\n### 二、结构层原因：为什么你会卡在这里？\n\n表面上看，是数据缺失、竞争分析不够深入。但往下一层挖，是三个交织在一起的**结构性断点**，让项目难以启动：\n\n**1. 市场定义过于宽泛，导致价值主张失焦。**\n你把“设计、编程、剪辑”等技能和“中小商家、自媒体、创业团队”的需求打包在一起。这就像开一家“万能商店”，看似什么都能卖，但顾客不知道你到底擅长什么。一个需要小程序开发的创业团队，和一个只需要简单海报设计的奶茶店，他们的预算、沟通成本、质量要求天差地别。用一个平台去覆盖所有，会导致：\n*   **匹配效率极低**：学生和商家都需要花大量时间筛选，体验还不如垂直社群。\n*   **品控标准无法统一**：无法建立适用于所有技能的服务标准。\n*   **获客信息无法精准**：你的推广内容很难同时打动所有类型的供需双方。\n\n**2. 双边网络冷启动的“鸡生蛋蛋生鸡”恶性循环。**\n这是所有平台型项目的生死关。你的获客计划（校园社群、小红书内容）明显偏重吸引学生（供给侧）。但如果没有足够多、足够好的任务，学生来了接不到单，会立刻流失。同理，商家发布任务后，如果响应慢或交付差，也会离开。你的里程碑计划“第3个月完成100单交易”，但没有回答**最初的那10单、甚至第1单从哪里来**。这个冷启动的破局点（俗称“楔子”）在你的草案中是缺失的。\n\n**3. 竞争定位建立在脆弱的差异点上。**\n你认为“聚焦学生群体”是你的差异点，但这很可能是一个陷阱：\n*   **并非真壁垒**：猪八戒网上有大量标注“学生团队”的服务商和低价专区；BOSS直聘兼职频道直接连接企业与学生；小红书、闲鱼上充斥着非正式的技能交易。你的“聚焦”并没有创造出它们无法提供的独特价值。\n*   **带来天然劣势**：学生群体意味着服务时间不稳定（考试、放假）、经验有限、交付质量波动大，且用户生命周期短（毕业即流失）。对于追求“可靠、省心”的商家来说，这些是巨大的风险。如果你的平台不能提供比现有渠道更强的**信任保障**（比如严格审核、作品集展示、资金托管、售后仲裁），那么“低成本”的优势会被“高风险”完全抵消。\n\n### 三、策略空间：你并非只有“做全技能平台”这一条路\n\n看清了结构性问题，你会发现路其实更宽了。你不一定非要立刻搭建那个大而全的平台，可以从以下几个更务实、风险更低的策略切入：\n\n| 策略方向 | 核心思路 | 优点 | 挑战 |\n| :--- | :--- | :--- | :--- |\n| **策略一：垂直深耕** | 放弃“全技能”，选一个最熟悉、最高频的垂直领域切入，如**高校活动海报设计**或**短视频口播稿撰写**。 | 需求明确、易标准化、便于建立口碑和信任、冷启动相对简单。 | 市场规模天花板较低，需要后续考虑横向扩展。 |\n| **策略二：工具赋能** | 先不做撮合，做一个帮助大学生**制作并展示动态作品集、管理接单流程**的SaaS工具或小程序。 | 从解决供给侧真实痛点（展示难、管理乱）入手，能快速积累精准用户（学生），建立信任后自然延伸出需求对接。 | 离最终的交易闭环较远，变现路径更长。 |\n| **策略三：需求聚合** | 不从学生端开始，而是深入挖掘**某一类特定商家的批量需求**（如本地新开奶茶店的菜单设计）。手动为学生匹配，扮演“精品工作室”的角色。 | 能最直接地验证需求侧支付意愿和服务流程，规避了平台冷启动风险。 | 重运营，模式较“重”，规模化速度慢。 |\n| **策略四（激进）：转向服务** | 直接评估团队自身技能，以“工作室”名义承接外部项目，再将部分非核心任务分包给招募的学生。 | 立即产生现金流，最深入地理解供需两端的真实运作和痛点。 | 完全脱离了平台模式，变成了一个服务公司。 |\n\n这些策略都不是最终答案，而是不同的“实验切口”。它们共同的原则是：**缩小范围，亲手验证，用事实代替想象。**\n\n### 四、逐一展开：你草案中几个必须面对的核心问题\n\n现在，我们回到你的草案，把几个关键问题掰开揉碎看看：\n\n**1. 关于市场规模与财务假设：“单校2万学生，10%有需求”是怎么来的？**\n这个数字是典型的“自上而下”的猜测。更可靠的方法是“自下而上”的验证：\n*   **需求密度**：不要猜比例。去找到你身边**最有可能**有技能变现需求的10个同学（比如设计专业、计算机协会的），一对一问他们：过去半年是否通过技能赚过钱？渠道是什么？赚了多少？为什么没继续？这10个人的数据，远比2万人的10%假设更有价值。\n*   **交易规模**：“月交易额5万元”意味着每月要完成几十到上百个任务。你需要验证：在你选定的垂直领域里，一个任务的**平均客单价**是多少？学生愿意接的单和商家愿意发的单，在价格上有多大**重合区间**？这个重合区间里的交易频率能支撑起5万吗？\n\n**2. 关于定价与支付意愿：10%抽成，谁愿意付？**\n这是一个需要双向测试的问题：\n*   **对学生**：在闲鱼或社群接私活，几乎没有平台成本。你的平台如果能带来更多、更优质的订单，学生可能愿意付10%。但如果订单又少又差，他们一分钱都不会付。你需要测试：为了获得“经过筛选的、付款有保障的”订单，他们最多愿意被抽成多少？\n*   **对商家**：他们为“平台服务”付费的意愿，完全取决于平台能否降低他们的**综合成本**（包括寻找成本、沟通成本、试错风险）。如果平台只是提供了一个学生名单，那价值几乎为零。如果平台能提供“资金托管、不满意退款、质量初筛”等保障，商家才可能接受抽成或会员费。**“优先曝光”在平台初期流量为零时，是一个伪需求。**\n\n**3. 关于竞争：你真的了解你的“对手”吗？**\n你说差异点是“聚焦学生+低成本”。但请具体回答：\n*   一个急需海报设计的小商家，在猪八戒网发布一个500元的任务，和在你的平台发布一个400元的任务，他会选哪个？为什么？（考虑响应速度、服务商数量、平台保障）\n*   一个会剪辑的同学，在抖音上挂出“接剪辑”的签名并直接与客户沟通，和在你的平台上完善资料等待派单，哪个对他来说更高效、成本更低？\n你的差异化必须建立在**比现有方案提供更确定的利益**之上，而不是简单地贴一个“学生”标签。\n\n### 五、下一步行动：从“想”全面转向“验”\n\n基于以上所有分析，本周乃至近期的核心，必须全部聚焦在**验证**上。行动规划师给出的建议非常具体且正确：\n\n**本周核心行动：彻底抛弃宏观假设，用手动方式验证最小交易单元**\n不要开发，不要写长篇BP。你需要做的是扮演一次“人肉版SkillBridge”。\n\n1.  **找到最具体的供需双方**：在你的人际网络里，找一个**最有把握能提供某项服务**的同学（例如，特别擅长做PPT的A同学），再找一个**最可能有对应需求**的人（例如，需要做竞赛答辩PPT的B同学，或者学校旁边新开的咖啡馆需要设计菜单的老板C）。\n2.  **手动模拟一次交易**：在不提及你平台构想的情况下，了解他们现在是如何完成这类交易的（微信沟通、熟人介绍、闲鱼？）。然后，你作为中间人，撮合他们完成这次交易。关键步骤来了：**尝试向他们收取一笔“中介费”**（比如交易金额的10%）。\n3.  **进行深度访谈**：交易完成后（无论是否成功），分别与A、B（或C）深入聊聊：\n    *   对**服务方（A）**：这次合作过程顺利吗？最大的麻烦是什么？（沟通？需求不明确？改稿？）如果我有一个平台，能经常给你带来类似的、付款有保障的订单，但需要你认真填写技能标签、上传作品集，你愿意花时间吗？你希望平台为你提供什么功能或保障？\n    *   对**需求方（B/C）**：你对这次找到的服务/服务方满意吗？最大的担忧是什么？（质量？能否按时交付？）如果有一个平台，能提供比市场价稍低的服务，但服务方都是经过一定审核的学生，你需要平台提供什么保证（比如押金、分期付款、不满意重做）才敢用？\n\n请务必记录下这些对话，它们就是你项目最宝贵的“实证数据”。完成5-10组这样的手动验证，你对市场规模、支付意愿、真实痛点的理解，会彻底超越现在所有基于假设的推算。\n\n### 六、几个需要你继续深思的问题\n\n在验证的过程中，请带着这些问题思考：\n1.  在“设计、编程、剪辑”这几类技能中，哪一类在你们学校的**供需错配最严重**？即，很多学生会，但本地商家很难找到便宜靠谱的渠道？（这可能是你的最佳切入点）。\n2.  如果必须放弃“平台抽成”作为初期收入，还有什么方式可以验证项目的价值并维持运营？（例如，向商家收取固定会员费提供打包服务，或者向学生收取极少的认证费提供作品集工具？）\n3.  你的团队拥有“校园推广资源”，这个资源具体是什么？它能如何用于解决最棘手的**冷启动**问题？比如，能否直接与某个大型校园活动主办方合作，成为其官方设计服务提供方，从而一次性获得一批高质量任务和案例？\n\n### 七、外部视角参考\n\n最后，分享几个来自平台经济实践的视角，或许能给你启发：\n*   **所有成功的双边平台，初期都是“脏活累活”干出来的**：淘宝早期团队手动检查商品，滴滴早期需要地推司机和乘客。你的第一步也应该是“手动连接”，验证单次交易能否跑通、能否赚到钱（单元经济模型）。\n*   **在技能交易领域，信任比信息更重要**：58同城等信息平台的问题不是没有信息，而是信息质量差、缺乏信任。你的平台如果不能在建立信任机制（如身份认证、作品审核、交易保障）上做出实质性创新，很难有存在价值。\n\n希望这份详细的分析能帮你拨开迷雾，看清脚下最该走的那一步。期待听到你手动验证后的发现。\n\n⚠ AI生成，仅供参考",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "intent_shape": "mixed",
+          "intent_reason": "关键词命中 竞赛/评委；主意图归类为 competition_prep",
+          "confidence": 0.86,
+          "engine": "rule",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "行动规划师"
+          ],
+          "resolved_agents": [
+            "coach",
+            "analyst",
+            "planner"
+          ],
+          "agent_reasoning": "路由阶段先给出主 agent：coach；竞赛模式或竞赛意图优先引入竞赛顾问；混合问题允许多 agent 协同，但保持主线清晰；项目教练模式收敛为教练主导；学生明确在问下一步/行动方案，因此补行动规划师",
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "你这个项目现在处在**原型期**。你现在处于项目从‘点子’向‘可验证原型’过渡的关键阶段。想法有骨架，但最核心的卡点在于：你的市场规模和财务假设，完全是基于‘假设’而非‘证据’推导出来的。这导致整个项目的可行性像空中楼阁，经不起推敲。你卡在了‘用想象代替验证’这一步。\n\n你声称‘学生技能闲置+商家低成本需求’是痛点，但没回答：为什么这个痛点现在没被猪八戒网、BOSS直聘兼职或闲鱼解决？你的‘聚焦学生+低成本’差异点，很可能不是壁垒，而是陷阱。学生技能质量参差不齐，商家追求低成本的同时，对交付质量和稳定性要求并不低。你的平台如何保证比现有渠道更可靠？你的定价（抽成10%）和‘优先曝光’服务，完全没有经过任何支付意愿测试。对于学生，10%抽成是否比在闲鱼接单、在社群接私活成本更高？对于商家，他们是否愿意为‘学生服务’支付平台费用，还是更倾向于直接找熟人介绍？你计划通过校园社群和内容获客，但获客成本、用户生命周期价值（LTV）完全没有计算，这会让你的增长模型在评委面前瞬间崩塌。\n\n## 我主要是根据这些信息做这个判断\n- 原文片段：“市场规模：单校约2万学生 假设10%学生有技能变现需求” → 这直接暴露了市场规模计算完全基于未经证实的假设。\n- 原文片段：“定价模式：平台抽成10% 可购买‘优先曝光’服务” → 这表明定价设计没有支付意愿证据支撑，是拍脑袋决策。\n- 原文片段：“竞争分析：替代产品：猪八戒网、BOSS直聘（兼职）差异点：聚焦‘学生群体+低成本需求’” → 这表明对现有竞争格局的理解过于表面，未深入分析对方是否已覆盖此场景及自身差异点的脆弱性。\n\n## 如果这一点继续不处理\n如果这个‘用假设代替验证’的瓶颈不解决，项目将永远停留在PPT阶段。你无法获得真实的用户反馈来迭代产品，无法计算真实的单位经济效益（Unit Economics），也无法在路演中应对评委关于‘你怎么知道这个市场存在’、‘你的第一个用户从哪里来’、‘你凭什么认为他们会付费’等致命追问。最终，项目会因为缺乏根基而无法落地，或是在投入开发资源后迅速失败。\n\n## 再往下看，真正卡住你的结构层原因\n- 市场定义模糊与证据缺失：你将‘有技能的大学生’和‘中小商家’定义为用户，但这两类群体内部差异巨大。一个需要PPT设计的自媒体博主，和一个需要小程序开发的创业团队，需求复杂度天差地别。你用一个宽泛的‘技能撮合’平台去覆盖，导致价值主张无法精准传递，获客和匹配效率会极低。这共同指向一个底层断点：你没有从‘一个具体的、可验证的、高频率的交易场景’切入。\n- 双边网络冷启动的恶性循环：平台类项目的核心是启动初期如何同时吸引足够的供给（学生）和需求（商家）。你的计划（校园推广、内容获客）都偏重供给侧。如果没有足够多且高质量的需求任务，学生发布技能后接不到单，会迅速流失。需求方发布任务后得不到及时响应，也会离开。这个‘鸡生蛋蛋生鸡’的问题，在你的草案中仅用‘里程碑计划’一笔带过，没有具体的冷启动策略和资源投入分析。\n- 竞争定位的脆弱性：你识别了猪八戒网、BOSS直聘作为替代品，但认为‘聚焦学生+低成本’是差异点。这忽略了几个关键事实：1）猪八戒网本身就有大量学生服务商和低价区；2）BOSS直聘的兼职频道直接连接企业和个人；3）小红书、闲鱼等平台存在大量非正式的技能交易。你的‘差异化’很可能无法构成护城河，反而因为聚焦学生，面临服务标准化难、客单价低、用户生命周期短（学生毕业即流失）的天然劣势。\n\n## 从策略空间看，你并不只有一种走法\n- 策略一（垂直深耕）：放弃做‘全技能’平台，选择一个你团队最熟悉、供需最明确的垂直技能切入（例如：高校活动海报设计、短视频剪辑）。先在这个小闭环里跑通交易流程、验证付费意愿、建立口碑，再考虑横向扩展。\n- 策略二（工具赋能）：不急于做撮合平台，先做一个帮助大学生展示技能、制作作品集、管理接单流程的SaaS工具。从解决供给侧（学生）的‘展示难、管理乱’痛点入手，积累用户和信任，再自然延伸出需求对接功能。\n- 策略三（需求聚合）：不从学生端开始，而是从深入挖掘一个特定需求方群体（如本地小型餐饮店的外卖图设计需求）开始。先手动为他们匹配学生资源，验证服务流程和付费模型，再反向吸引学生入驻。\n- 策略四（放弃平台，转向服务）：评估团队自身技能，直接以工作室形式承接外部项目，将项目分包给招募的学生。这样你从平台方变为服务方，规避了冷启动风险，能更直接地理解供需两端的真实情况。\n\n## 如果继续往下拆，我还会重点看这些地方\n- 你假设‘10%学生有技能变现需求’，这个比例如何得出？是哪些专业、哪些年级的学生更可能有此需求？他们的技能水平如何分级？\n- ‘中小商家、自媒体、小型创业团队’这三类需求方，谁对‘学生服务’的支付意愿最强？谁的需求最频繁、最标准化？\n- 你的‘优先曝光’服务，是向学生收费还是向商家收费？定价多少？这个功能是否会破坏平台的公平性，导致劣币驱逐良币？\n- 评价体系如何设计才能真实反映服务质量，并防止刷单和恶意评价？这涉及到复杂的平台治理问题。\n\n## 可以顺手借用的外部视角\n- （来自平台经济案例）几乎所有成功的双边平台（如早期的淘宝、滴滴）都不是从‘搭建平台’开始，而是从‘手动连接供需’的脏活累活开始，先验证单元经济模型（即一单交易是否能赚钱），再逐步产品化。\n- （来自行业事实）在兼职/技能撮合领域，58同城、赶集网等分类信息网站曾占据大量市场，但其核心痛点是信息质量和信任问题，而非信息数量。你的平台如果不能在建立信任机制上做出实质性创新，很难突围。\n- （来自监管常识）涉及学生劳务报酬，平台需要关注《关于贯彻执行〈中华人民共和国劳动法〉若干问题的意见》中关于在校生利用业余时间勤工助学不视为就业的规定，但若形成稳定合作关系，可能涉及劳动关系认定风险。\n\n## 你下一步最该先盯住的一点\n现在最该先攻的一点，不是去开发APP，也不是去写更详细的商业计划书，而是彻底抛弃那些宏观假设，亲自去验证一个最小单元的、真实的交易是否能在你设想的模式下发生。\n\n## 我建议你先追问自己这几个问题\n- 在你身边（学校或朋友圈），你能立刻找到的、最有把握能提供某项技能服务（比如PPT设计）的同学是谁？同时，你能立刻找到的、最可能有相应需求（比如需要做课堂汇报PPT）的另一个同学或小商家是谁？\n- 如果不通过你的平台，他们现在是如何完成这项交易的？（比如微信直接沟通、发红包）这个过程里，双方最大的不爽是什么？是价格谈不拢、沟通效率低，还是对成果质量没保障？\n- 如果你作为中间人，手动帮助他们完成一次交易，并尝试收取10%的中介费，他们双方是否都愿意接受？如果不愿意，他们能接受的价格或条件是什么？\n- 完成这次手动匹配后，分别问他们：如果有一个平台能经常提供类似的匹配机会，但他们需要完善个人资料、上传作品，他们愿意花多少时间来做这件事？\n\n## 这次主要依据\n本轮分析结合了你的项目草案、联网搜索到的创业大赛评审关注点（如市场规模口径、支付意愿证据），并引用了平台经济中关于冷启动和单元经济验证的常见教训。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "作为投资人，我首先肯定你对市场痛点的初步洞察。项目逻辑基本通顺，连接学生技能与小微企业低成本需求的定位清晰，团队构成和初期推广渠道也具备校园项目的基础可行性。然而，正如教练分析所指出的，你目前最大的风险在于**用未经检验的假设替代了关键的可行性论证**，这会让整个项目在落地时迅速暴露短板。\n\n**1. 市场规模与财务假设的“空中楼阁”问题最为致命。**\n你提到“单校约2万学生，假设10%有需求”，这直接触发了H4风险（TAM/SAM/SOM口径混乱）。这个数字是如何得出的？更重要的是，你假设“初期月交易额约5万元”，这相当于每月要完成约50-100个中等价位的任务。在没有验证需求密度和交易意愿的情况下，这个数字是纯猜测。一个具体的反事实是：如果实际有变现意愿的学生比例只有1%，且平均客单价远低于预期（例如，学生只能接到几十元的PPT美化单），你的月交易额可能连5000元都达不到，平台抽成无法覆盖最基本的运营成本，项目会在3个月内因缺乏现金流而停滞。\n\n**2. “聚焦学生+低成本”的定位可能不是壁垒，而是陷阱。**\n你指出了与猪八戒网、BOSS直聘的差异，但未解释这个差异为何能构成竞争优势。这触发了H5风险（需求证据不足）。对于需求侧（中小商家）而言，核心诉求是**可靠、省心地获得达标的服务**，而不仅仅是低成本。学生群体天然存在时间不稳定、经验不足、交付质量波动大的风险。如果你的平台不能解决“信任与品控”问题，那么对商家来说，选择你的平台反而增加了风险和管理成本，他们宁愿多花点钱去成熟平台找更稳定的服务者。你需要具体验证：商家是否真的愿意为了“可能”更低的成本，去承担与学生合作的不确定性？\n\n**3. 获客与冷启动策略存在结构性矛盾。**\n你的获客渠道（高校社群、小红书、校园社团）主要针对供给侧（学生）。但对于一个双边平台，**冷启动的关键在于先聚集哪一端，以及如何确保另一端有足够的吸引力**。如果你先吸引了大量有技能的学生，但平台上没有足够多、足够优质的任务，学生会迅速流失。反之亦然。你目前的计划没有明确这个“先有鸡还是先有蛋”的破局策略，以及初期如何用非平台手段（例如，团队自己充当需求方或服务方）来制造最初的交易和口碑。\n\n**基于以上结构，你需要深入追问以下几个问题，并按重要性排序进行验证：**\n\n*   **（首要验证）需求侧的真实支付意愿与核心痛点：** 不要泛泛地问商家“是否需要低成本服务”。你应该找到10-20个小商家或自媒体主，具体询问他们：“你最近一次外包设计/剪辑任务花了多少钱？在合作中遇到的最大麻烦是什么？（是沟通成本高、交付延期，还是质量不达标？）” 并直接测试你的价值主张：“如果有一个平台，能提供比市场价低20%-30%的服务，但服务提供者是在校学生，你需要平台提供什么保障（如资金托管、不满意退款、平台审核作品集）才愿意尝试？” **这个验证直接决定你的模式是否成立。**\n*   **（关键比较）学生技能的质量与定价基准：** 你需要具体比较。收集几位目标专业学生的作品（如设计的海报、编写的简单代码），匿名后拿到猪八戒网或闲鱼上询价，看同类服务的市场报价是多少。同时，调研学生对自己服务的心理价位。这能验证你“低成本”优势的具体空间，以及10%抽成后学生是否仍有利润空间。\n*   **（策略选择）冷启动的“楔子”是什么？** 是先从某个垂直技能切入（如“高校活动海报设计”），利用团队资源搞定第一批种子商家和任务？还是先成为某个校园社团的官方服务提供商，积累初始案例和评价？你必须选择一个极其具体、可控的细分场景作为突破口，而不是泛泛地做“技能撮合”。\n\n**次级疑点：**\n*   “优先曝光”服务的定价逻辑是什么？学生愿意为多少曝光支付多少费用？这需要基于平台已有流量的数据，在初期是伪命题。\n*   评价体系如何防止刷单和恶意评价？这属于结构性缺失的“风险控制措施”。\n*   技术实现上，最简单的MVP是否只是一个信息发布的微信群或问卷？如果是，它与现有渠道的差异化和效率提升体现在哪里？\n\n**总结：** 你的项目构想有社会价值，但商业上的可行性完全建立在未经测试的沙地上。当前的核心任务不是急着开发MVP，而是**用最低成本的方式（如定向访谈、作品比价、模拟接单）去验证供需两侧最核心的假设**，尤其是需求侧的支付意愿与信任构建机制。只有把这些基础数据夯实，你的财务模型和扩展计划才有意义。",
+            "tools_used": [
+              "diagnosis",
+              "kg_analysis",
+              "hypergraph_student",
+              "hypergraph",
+              "web_search"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {
+            "agent": "行动规划师",
+            "analysis": "本周建议行动:\n- **验证单校市场规模与用户需求**: 筛选3所目标高校的10名技能型学生（设计/编程/剪辑），记录他们近期接单行为与渠道；访谈5家中小商家/自媒体，确认他们是否因学生渠道不稳定而放弃合作；整理20个真实交易案例，标注服务类型、价格区间、交付周期\n  验收标准: 输出10份学生访谈记录+5份商家访谈结论+3所高校的技能服务需求热力图\n\n本周先不要做：\n- 开发完整平台功能模块\n- 启动多校同步推广\n\n阶段目标: 用实证数据确认单校真实可触达市场规模",
+            "tools_used": [
+              "diagnosis",
+              "next_task",
+              "critic"
+            ],
+            "plan_data": {
+              "this_week": [
+                {
+                  "task": "验证单校市场规模与用户需求",
+                  "why": "当前TAM/SAM/SOM缺乏实证基础，需用真实数据替代假设",
+                  "how": [
+                    "筛选3所目标高校的10名技能型学生（设计/编程/剪辑），记录他们近期接单行为与渠道",
+                    "访谈5家中小商家/自媒体，确认他们是否因学生渠道不稳定而放弃合作",
+                    "整理20个真实交易案例，标注服务类型、价格区间、交付周期"
+                  ],
+                  "acceptance": "输出10份学生访谈记录+5份商家访谈结论+3所高校的技能服务需求热力图"
+                }
+              ],
+              "not_now": [
+                "开发完整平台功能模块",
+                "启动多校同步推广"
+              ],
+              "milestone": "用实证数据确认单校真实可触达市场规模"
+            }
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "有设计、编程、剪辑等技能的大学生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e2",
+              "label": "中小商家、自媒体、小型创业团队",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e3",
+              "label": "变现渠道少",
+              "type": "pain_point"
+            },
+            {
+              "id": "e4",
+              "label": "SkillBridge（校园技能撮合平台）",
+              "type": "solution"
+            },
+            {
+              "id": "e5",
+              "label": "猪八戒网",
+              "type": "competitor"
+            },
+            {
+              "id": "e6",
+              "label": "BOSS直聘（兼职）",
+              "type": "competitor"
+            },
+            {
+              "id": "e7",
+              "label": "单校约2万学生，10%有技能变现需求",
+              "type": "market"
+            },
+            {
+              "id": "e8",
+              "label": "平台抽成10% + 优先曝光服务",
+              "type": "business_model"
+            },
+            {
+              "id": "e9",
+              "label": "2名经管 + 2名计算机",
+              "type": "team"
+            },
+            {
+              "id": "e10",
+              "label": "校园推广资源",
+              "type": "resource"
+            },
+            {
+              "id": "e11",
+              "label": "第1个月上线MVP，第3个月完成100单交易，第6个月扩展到3所高校",
+              "type": "execution_step"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "面临"
+            },
+            {
+              "source": "e4",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e4",
+              "target": "e5",
+              "relation": "竞争"
+            },
+            {
+              "source": "e4",
+              "target": "e6",
+              "relation": "竞争"
+            },
+            {
+              "source": "e4",
+              "target": "e7",
+              "relation": "面向"
+            },
+            {
+              "source": "e4",
+              "target": "e8",
+              "relation": "采用"
+            },
+            {
+              "source": "e4",
+              "target": "e9",
+              "relation": "拥有"
+            },
+            {
+              "source": "e4",
+              "target": "e10",
+              "relation": "拥有"
+            },
+            {
+              "source": "e4",
+              "target": "e11",
+              "relation": "包含"
+            }
+          ],
+          "structural_gaps": [
+            "缺少技术实现细节",
+            "缺少风险控制措施",
+            "缺少用户需求验证数据"
+          ],
+          "content_strengths": [
+            "目标用户画像清晰",
+            "商业模式具备可扩展性",
+            "团队专业背景匹配项目需求"
+          ],
+          "completeness_score": 7,
+          "section_scores": {
+            "problem_definition": 8,
+            "user_evidence": 3,
+            "solution_feasibility": 6,
+            "business_model": 7,
+            "competitive_advantage": 7
+          },
+          "insight": "项目具备明确的市场定位和可行的商业模式，但需要补充技术实现细节和风险控制方案以增强说服力"
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "summary": "本轮超图主要命中了风险模式超边、风险模式超边、风险模式超边，说明当前问题更集中在Category、RiskRule、RubricItem。",
+          "top_signals": [
+            "优先命中的超边类型：风险模式超边、风险模式超边、风险模式超边",
+            "当前高连接节点：交通运输、H15、User Evidence Strength",
+            "当前偏好的超边族：Market_Competition_Edge、Risk_Pattern_Edge"
+          ],
+          "key_dimensions": [
+            "Category",
+            "RiskRule",
+            "RubricItem"
+          ],
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_002",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 4,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_106839a62240",
+                "case_1135e29de95e",
+                "case_1512b0f26aa4",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.825,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 7.6
+            },
+            {
+              "hyperedge_id": "he_risk_001",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 4,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "未来将应用在医院、养老院、社区、家庭等场景中，实现健康评估、脉象体质分析和中医调养建议。",
+                "由于脉诊主要依赖医者的主观感受和经验判断，限制了脉诊现代化的发展，研发脉诊仪对脉搏信号量化采集和处理十分必要。",
+                "项目成果已部署医院原型系统支持基层筛查与远程诊疗"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::医疗健康",
+                  "type": "Category",
+                  "name": "医疗健康",
+                  "display": "医疗健康"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_15e831df090d",
+                "case_2ec8ca03bca5",
+                "case_4f02070b3113",
+                "case_c661aa0d29b3"
+              ],
+              "confidence": 0.862,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.6
+            },
+            {
+              "hyperedge_id": "he_risk_003",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Financial Logic、User Evidence Strength。",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Financial Logic",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "我国青光眼患病人群已超 7000 万，作为全球第二大致盲性眼病，其致盲率达 10%，且病程不可逆。",
+                "当前传统眼压监测设备存在显著局限，Goldmann 压平眼压计等单点测量设备受角膜厚度、患者配合度影响，误差达±5 mmHg，24 小时监测需在医院完成，不仅占用医疗资源，更难捕捉夜间眼压峰值。",
+                "神经放射科医生需要处理大量的医学影像数据，尤其是在大型医疗机构或医学中心，医生每天可能面对上百甚至上千个病例的影像检查。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Financial Logic",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::医疗健康",
+                  "type": "Category",
+                  "name": "医疗健康",
+                  "display": "医疗健康"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Financial Logic",
+                  "type": "RubricItem",
+                  "name": "Financial Logic",
+                  "display": "Financial Logic"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_9484dd40cb89",
+                "case_c1e2597b715d",
+                "case_d30326ae244e"
+              ],
+              "confidence": 0.783,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.4
+            },
+            {
+              "hyperedge_id": "he_risk_004",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 3,
+              "teaching_note": "工业制造类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Financial Logic、User Evidence Strength。",
+              "categories": [
+                "工业制造"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Financial Logic",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "传统人工与智能探测手段在效率、 安全性、 成本与精度等方面存在显著局限。",
+                "通过构建视觉传感器-激光雷达多源融合智能算法， 攻克超轻量级多源融合感知、基于地质特征库在线查询匹配的厘米级定位算法 及基于强化模仿学习策略的动态避障等关键技术。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::工业制造",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Financial Logic",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::工业制造",
+                  "type": "Category",
+                  "name": "工业制造",
+                  "display": "工业制造"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Financial Logic",
+                  "type": "RubricItem",
+                  "name": "Financial Logic",
+                  "display": "Financial Logic"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_5c7fb9130e91",
+                "case_661a943e267c",
+                "case_b30dfb691947"
+              ],
+              "confidence": 0.8,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "原型期",
+              "match_score": 5.4
+            },
+            {
+              "hyperedge_id": "he_risk_005",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 3,
+              "teaching_note": "教育服务类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "教育服务"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "针对传统思想政治教育存在的单向知识传输、情感共鸣不足、数字化资源交互性弱等痛点，本项目构建了 AI 驱动的情境化思政实践育人系统。",
+                "一是构建 “徐特立大模型” 智能体，融合生成式大模型与检索增强生成 （RAG） 技术，整合马克思主义经典文献、党史国史等资源形成动态知识图谱，实现理论阐释的精准化与对话化；二是打造可交互的“徐特立数字人”，通过语音识别、情感语音合成、音频驱动技术，结合扩散模型与神经辐射场 （NeRF），实现数字人面部微表情与语音的自然",
+                "项目围绕教育任务“风格多样性强、个性化要求高、上下文依赖重”等特点，提出了融合个性识别与生成控制的一体化生成机制，结合注意力稀疏性建模与任务感知缓存共享技术，实现了在超长上下文（>100K tokens）下的个性化信息精准定位与调用，保障了生成内容的上下文连贯性与个体适应性。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::教育服务",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::教育服务",
+                  "type": "Category",
+                  "name": "教育服务",
+                  "display": "教育服务"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_5b8111094417",
+                "case_8639ecc88e95",
+                "case_eb4e2938e451"
+              ],
+              "confidence": 0.9,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "原型期",
+              "match_score": 5.4
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [
+              "H3",
+              "H4",
+              "H5",
+              "H21"
+            ],
+            "expanded_rule_ids": [
+              "H19",
+              "H21",
+              "H3",
+              "H4",
+              "H5",
+              "H9",
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "Category::交通运输",
+                "degree": 35,
+                "interpretation": "「交通运输」类别出现在35种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "RiskRule::H15",
+                "degree": 17,
+                "interpretation": "风险规则「H15」关联17种模式，是最普遍的问题"
+              },
+              {
+                "node": "RubricItem::User Evidence Strength",
+                "degree": 16,
+                "interpretation": "评分维度「User Evidence Strength」被16种模式反复命中，是重要教学检查点"
+              },
+              {
+                "node": "RiskRule::H10",
+                "degree": 14,
+                "interpretation": "风险规则「H10」关联14种模式，是最普遍的问题"
+              },
+              {
+                "node": "RubricItem::Business Model Consistency",
+                "degree": 12,
+                "interpretation": "评分维度「Business Model Consistency」被12种模式反复命中，是重要教学检查点"
+              }
+            ],
+            "avg_edge_size": 6.2,
+            "max_edge_size": 7,
+            "family_leaderboard": [
+              {
+                "type": "Risk_Pattern_Edge",
+                "label": "风险模式超边",
+                "count": 10
+              },
+              {
+                "type": "Value_Loop_Edge",
+                "label": "价值闭环超边",
+                "count": 8
+              },
+              {
+                "type": "Evidence_Grounding_Edge",
+                "label": "证据锚定超边",
+                "count": 6
+              },
+              {
+                "type": "User_Pain_Fit_Edge",
+                "label": "用户痛点匹配超边",
+                "count": 6
+              },
+              {
+                "type": "Execution_Gap_Edge",
+                "label": "执行断裂超边",
+                "count": 5
+              },
+              {
+                "type": "Market_Competition_Edge",
+                "label": "市场竞争超边",
+                "count": 5
+              }
+            ]
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 50,
+            "node_count": 54,
+            "family_counts": {
+              "Risk_Pattern_Edge": 10,
+              "Value_Loop_Edge": 8,
+              "User_Pain_Fit_Edge": 6,
+              "Evidence_Grounding_Edge": 6,
+              "Execution_Gap_Edge": 5,
+              "Market_Competition_Edge": 5,
+              "Compliance_Safety_Edge": 4,
+              "Innovation_Validation_Edge": 4,
+              "Pricing_Unit_Economics_Edge": 2
+            }
+          }
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.6353,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.6287,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5928,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_b719c62bb6ba",
+            "category": "科技创新",
+            "project_name": "云游灵境-云交互空间实时生成技术引领者",
+            "similarity": 0.5498,
+            "pain_points": [
+              "博物馆数字场景交互方式单一",
+              "内容传播方式固定单向",
+              "观众难以沉浸参与到内容中"
+            ],
+            "solution": [
+              "数字空间快速搭建技术",
+              "多智能体交互技术",
+              "云实施*在线实时渲染推流技术"
+            ],
+            "innovation_points": [
+              "云实施*在线实时推流技术",
+              "云原生架构"
+            ],
+            "evidence_quotes": [
+              "小型娱乐活动、贸易消费类会展、博物馆趣味化"
+            ],
+            "risk_flags": [
+              "no_competitor_claim|market_size_fallacy|weak_user_evidence|compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "文化创意和区域合作组 云交互空间实时生成技术引领者 云游灵境 习近平总书记指出， 发展数字经济是把握新一轮科技革命和产业变革新机遇的战略选择 2020年，我国数字经济市场规模增长至40万亿元， 2022年，中国数字文化产业规模已达7841.6亿元。 文化传播重地，深耕千亿市场 数字博 物空间 城市应 急仿真 空间 虚拟农 资交互 空间 智慧城 市交互 空间 虚拟文 化交流 空间 虚拟教 育空间 上亿6000 博物馆数字 化建设需求 800+ 场 每年亿元级活动展演 数字展区 会展活动 数千 百万人级城市数字 化及应急仿真需求 自2019年起，团队深耕数字文化产业 广泛开展市场调研: 数万 扶农"
+          },
+          {
+            "case_id": "case_45b1ac814edb",
+            "category": "科技创新",
+            "project_name": "医联农村，e路助农—化路径研究",
+            "similarity": 0.5384,
+            "pain_points": [
+              "就医远、难、贵",
+              "技术适配性不足",
+              "资源分配不均"
+            ],
+            "solution": [
+              "优化供需两端利益分配机制",
+              "构建可持续的价值共享模式",
+              "推进服务模式创新"
+            ],
+            "innovation_points": [
+              "采用线下调研为主，线上数据收集为辅的方式",
+              "运用大语言模型对访谈文本进行结构化处理"
+            ],
+            "evidence_quotes": [
+              "尽管近年来国家出台了多项政策推动农村互联网医疗发展，但互联网医疗在农村的实际推广过程中仍面临诸多困难，如技术适配性不足、资源分配不均、居民接受度低等。",
+              "调研团队特别选取了革命老区江西吉安县（江镇中马洲村和公塘村）和井冈山市（马源村和古田村）、山西方山县（麻地会乡胡堡村）作为重点调研对象，深入剖析智慧医疗在革命老区基层实践中的痛点难点。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "医联农村 e路助农 农村互联网医疗应用调查和优化路径研究 摘 要 在数字技术高速发展的背景 下，我国互联网医疗得到了广泛应用，开辟 了 医疗服务新模式，为缓解我国医疗资源不足、分布不均衡提供了有效手段。 近 年来，农村互联网医疗加速发展， 但现有农村互联网医疗模式还存在普适性不 足、普及率较低 等问题，农村居民仍然需要 面对就医远、难、贵等难题 ，这也 凸显了农村医疗当下的困境。本项目聚焦农村互联网医疗发展现状 、存在问题 及优化路径，通过问卷调查、 居民访谈、实地走访等方法，客观分析发展障 碍，并提出解决方案，为提升农村互联网医疗普及度提供理论与实践支持。 项目研究团队历时近2年的时间，采用"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业大赛 评委 评分 路演 高校 校园 Round",
+          "results": [
+            {
+              "title": "湖南工学院第二届金种子杯大学生创业大赛校赛路演实施方案-湖南工学院创新创业教育中心",
+              "snippet": "为做好湖南工学院第二届金种子杯大学生创业大赛校赛路演组织工作，特制定以下实施方案。 一、赛事组织形式 校级决赛路演将采用线下路演的方式进行。各参赛团队成员和指导老师要求参加线下路演。 二、参赛项目 二级学院所有推荐项目按网评总分由高到低排序取前26的项目进入决赛路演。 三 ...",
+              "url": "https://www.hnit.edu.cn/cxcyxy/info/1031/4621.htm"
+            },
+            {
+              "title": "学术报告：\"互联网＋\"大学生创新创业大赛的项目路演要点和评审规则",
+              "snippet": "发布者：魏义凡发布时间：2023-03-02浏览次数：1730 报告主题：\"互联网＋\"大学生创新创业大赛的项目路演要点和评审规则 报告人：钱春芸、刘海 报告时间：2023年3月6日下午14:00 报告地点：新能源大楼102会议室 参训人员：苏州大学第九届\"互联网+\"校赛培育项目的指导老师、负责人及团队成员",
+              "url": "https://energy.suda.edu.cn/ff/0e/c9472a524046/page.htm"
+            },
+            {
+              "title": "附件3：第九届中国国际\"互联网 +\"大学生创新创业大赛评审规则.docx-管理科学与工程学院",
+              "snippet": "附件第九届中国国际\"互联网+\"大学生创新创业大赛评审规则一、高教主赛道项目评审要点：创意组评审要点评审内容分值教育维度1.项目应弘扬正确的价值观，厚植家国情怀，恪守伦理规范，有助于培育创新创业精神。2.项目符合将专业知识与商业知识有效结合并转化为商业价值或社会价值的创新 ...",
+              "url": "https://mse.ctbu.edu.cn/info/1059/15722.htm"
+            }
+          ],
+          "summary": "- 为做好湖南工学院第二届金种子杯大学生创业大赛校赛路演组织工作，特制定以下实施方案。 一、赛事组织形式 校级决赛路演将采用线下路演的方式进行。各参赛团队成员和指导老师要求参加线下路演。 二、参赛项目 二级学院所有推荐项目按网评总分由高到低排序取前26的项目进入决赛路演。 三 ...\n- 发布者：魏义凡发布时间：2023-03-02浏览次数：1730 报告主题：\"互联网＋\"大学生创新创业大赛的项目路演要点和评审规则 报告人：钱春芸、刘海 报告时间：2023年3月6日下午14:00 报告地点：新能源大楼102会议室 参训人员：苏州大学第九届\"互联网+\"校赛培育项目的指导老师、负责人及团队成员\n- 附件第九届中国国际\"互联网+\"大学生创新创业大赛评审规则一、高教主赛道项目评审要点：创意组评审要点评审内容分值教育维度1.项目应弘扬正确的价值观，厚植家国情怀，恪守伦理规范，有助于培育创新创业精神。2.项目符合将专业知识与商业知识有效结合并转化为商业价值或社会价值的创新 ..."
+        },
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 6.9,
+          "covered_count": 9,
+          "total_dimensions": 13,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": true,
+              "entities": [
+                "有设计、编程、剪辑等技能的大学生",
+                "中小商家、自媒体、小型创业团队"
+              ],
+              "count": 2
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": true,
+              "entities": [
+                "变现渠道少"
+              ],
+              "count": 1
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": true,
+              "entities": [
+                "SkillBridge（校园技能撮合平台）"
+              ],
+              "count": 1
+            },
+            "innovation": {
+              "name": "创新点",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "market": {
+              "name": "目标市场",
+              "covered": true,
+              "entities": [
+                "单校约2万学生，10%有技能变现需求"
+              ],
+              "count": 1
+            },
+            "competitor": {
+              "name": "竞争格局",
+              "covered": true,
+              "entities": [
+                "猪八戒网",
+                "BOSS直聘（兼职）"
+              ],
+              "count": 2
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": true,
+              "entities": [
+                "平台抽成10% + 优先曝光服务"
+              ],
+              "count": 1
+            },
+            "execution_step": {
+              "name": "执行步骤",
+              "covered": true,
+              "entities": [
+                "第1个月上线MVP，第3个月完成100单交易，第6个月扩展到3所高校"
+              ],
+              "count": 1
+            },
+            "risk_control": {
+              "name": "风控合规",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "evidence": {
+              "name": "证据支撑",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "resource": {
+              "name": "资源优势",
+              "covered": true,
+              "entities": [
+                "校园推广资源"
+              ],
+              "count": 1
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": true,
+              "entities": [
+                "2名经管 + 2名计算机"
+              ],
+              "count": 1
+            }
+          },
+          "cross_links": [
+            {
+              "from_dim": "目标用户",
+              "to_dim": "痛点问题",
+              "from_entity": "e1",
+              "to_entity": "e3",
+              "relation": "面临"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "痛点问题",
+              "from_entity": "e4",
+              "to_entity": "e3",
+              "relation": "解决"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "竞争格局",
+              "from_entity": "e4",
+              "to_entity": "e5",
+              "relation": "竞争"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "竞争格局",
+              "from_entity": "e4",
+              "to_entity": "e6",
+              "relation": "竞争"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "目标市场",
+              "from_entity": "e4",
+              "to_entity": "e7",
+              "relation": "面向"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "商业模式",
+              "from_entity": "e4",
+              "to_entity": "e8",
+              "relation": "采用"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "团队能力",
+              "from_entity": "e4",
+              "to_entity": "e9",
+              "relation": "拥有"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "资源优势",
+              "from_entity": "e4",
+              "to_entity": "e10",
+              "relation": "拥有"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "执行步骤",
+              "from_entity": "e4",
+              "to_entity": "e11",
+              "relation": "包含"
+            }
+          ],
+          "hub_entities": [
+            {
+              "entity": "e4",
+              "type": "solution",
+              "connections": 8,
+              "note": "「e4」连接8个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e3",
+              "type": "pain_point",
+              "connections": 2,
+              "note": "「e3」连接2个维度，是项目的核心支撑点"
+            }
+          ],
+          "pattern_warnings": [],
+          "pattern_strengths": [
+            {
+              "pattern_id": "he_evidence_001",
+              "note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "support": 3,
+              "edge_type": "Evidence_Grounding_Edge"
+            }
+          ],
+          "projected_edge_types": [
+            "User_Pain_Fit_Edge",
+            "Value_Loop_Edge",
+            "Market_Competition_Edge",
+            "Execution_Gap_Edge"
+          ],
+          "missing_dimensions": [
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少技术实现细节"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少风险控制措施"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少用户需求验证数据"
+            },
+            {
+              "dimension": "技术路线",
+              "importance": "中",
+              "recommendation": "技术路线未说明，可行性存疑"
+            }
+          ],
+          "student_graph_stats": {
+            "nodes": 21,
+            "edges": 18
+          }
+        },
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 9.1,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS10",
+            "name": "TAM/SAM/SOM混乱",
+            "match_score": 9.1,
+            "probing_layers": [
+              "口径检验: 你说的市场规模是TAM还是SAM？你实际能触达的市场(SOM)有多大？",
+              "自下而上估算: 请用'单价×目标用户数×复购频次'来估算你第一年的实际可获得市场。",
+              "增长合理性: 从SOM到SAM，你的增长路径是什么？每一步需要什么资源？"
+            ],
+            "expected_evidence": [
+              "TAM/SAM/SOM三层估算",
+              "自下而上的市场测算",
+              "增长路径规划"
+            ],
+            "counterfactual": "一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "市场规模口径谬误",
+              "大数幻觉谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "TAM/SAM/SOM 口径校验 + 增长合理性",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 8.6,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "定价无支撑"
+            ],
+            "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "市场规模口径谬误",
+          "fallacy_rule_id": "H4",
+          "retrieved_heterogeneous_subgraph": [
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_002",
+              "support": 4,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ]
+            },
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_001",
+              "support": 4,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "未来将应用在医院、养老院、社区、家庭等场景中，实现健康评估、脉象体质分析和中医调养建议。",
+                "由于脉诊主要依赖医者的主观感受和经验判断，限制了脉诊现代化的发展，研发脉诊仪对脉搏信号量化采集和处理十分必要。",
+                "项目成果已部署医院原型系统支持基层筛查与远程诊疗"
+              ]
+            },
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_003",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Financial Logic、User Evidence Strength。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Financial Logic",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "我国青光眼患病人群已超 7000 万，作为全球第二大致盲性眼病，其致盲率达 10%，且病程不可逆。",
+                "当前传统眼压监测设备存在显著局限，Goldmann 压平眼压计等单点测量设备受角膜厚度、患者配合度影响，误差达±5 mmHg，24 小时监测需在医院完成，不仅占用医疗资源，更难捕捉夜间眼压峰值。",
+                "神经放射科医生需要处理大量的医学影像数据，尤其是在大型医疗机构或医学中心，医生每天可能面对上百甚至上千个病例的影像检查。"
+              ]
+            }
+          ],
+          "selected_strategy": "1%市场份额幻觉",
+          "selected_strategy_id": "CS02",
+          "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+          "generated_question": "你提到“聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财”。这批人具体散落在哪些渠道里？你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。",
+          "evidence_quotes": [
+            "聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财",
+            "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+            "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "learning",
+          "overall_score": 6.13,
+          "score_band": "基本成形",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "fallacy_label": "定价无支撑",
+              "severity": "medium",
+              "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+              "matched_keywords": [
+                "定价"
+              ],
+              "missing_requires": [
+                "支付意愿",
+                "愿意付费"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Grounding_Edge",
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS08",
+                "CS05"
+              ],
+              "quote": "业”内容 与校园创业社团合作  定价模式： 平台抽成10% 可购买“优先曝光”服务  竞争",
+              "trigger_message": "原文片段：“业”内容 与校园创业社团合作  定价模式： 平台抽成10% 可购买“优先曝光”服务  竞争” → 触发「定价无支付意愿证据」，因为提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "impact": "没有支付意愿证据，收费设计容易被认为拍脑袋，影响商业模式可信度。",
+              "fix_task": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。"
+            },
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "fallacy_label": "市场规模口径谬误",
+              "severity": "high",
+              "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "matched_keywords": [
+                "市场规模"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Market_Competition_Edge",
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS10",
+                "CS02"
+              ],
+              "quote": "聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财",
+              "trigger_message": "原文片段：“聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财” → 触发「TAM/SAM/SOM口径混乱」，因为提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "impact": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。",
+              "fix_task": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。"
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "User_Pain_Fit_Edge",
+                "Evidence_Grounding_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS04"
+              ],
+              "quote": "Round 1（学生） 我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。 🗣️ Round 2（学生：完整项目草案） 学生画像 UserProfile_Sk",
+              "trigger_message": "原文片段：“Round 1（学生） 我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。 🗣️ Round 2（学生：完整项目草案） 学生画像 UserProfile_Sk” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。"
+            },
+            {
+              "id": "H21",
+              "name": "执行步骤缺少负责人",
+              "fallacy_label": "执行责任不清",
+              "severity": "medium",
+              "explanation": "写了执行计划但没有负责人，计划容易停留在纸面，难以证明执行能力。",
+              "fix_hint": "为每个关键里程碑补充负责人、时间节点和交付物。",
+              "matched_keywords": [
+                "计划",
+                "里程碑"
+              ],
+              "missing_requires": [
+                "负责人",
+                "分工",
+                "谁负责"
+              ],
+              "preferred_edge_types": [
+                "Execution_Gap_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS06"
+              ],
+              "quote": "计算机 有校园推广资源  里程碑计划： 第1个月上线MVP 第3个月完成100单交易 第6个月",
+              "trigger_message": "原文片段：“计算机 有校园推广资源  里程碑计划： 第1个月上线MVP 第3个月完成100单交易 第6个月” → 触发「执行步骤缺少负责人」，因为写了执行计划但没有负责人，计划容易停留在纸面，难以证明执行能力。",
+              "impact": "没有负责人会让执行计划变成口号，难以落地。",
+              "fix_task": "为每个关键里程碑补充负责人、时间节点和交付物。"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.57,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.57,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 7.47,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 8.39,
+              "status": "ok",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 6.14,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 7.47,
+              "status": "ok",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 7.0,
+              "status": "ok",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "template_guideline": [
+            "先明确当前最高风险点是什么",
+            "补至少3条能直接支撑该点的证据",
+            "用评委视角做一轮反问并更新答案"
+          ],
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T11:05:13.115419+08:00"
+    }
+  ]
+}

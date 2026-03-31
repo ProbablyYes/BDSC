@@ -367,6 +367,7 @@ export default function TeacherPage() {
   const [competitionScore, setCompetitionScore] = useState<any>(null);
   const [projectWorkbenchSummary, setProjectWorkbenchSummary] = useState<any>(null);
   const [projectStructuredReport, setProjectStructuredReport] = useState<any>(null);
+  const [hyperLibrary, setHyperLibrary] = useState<any>(null);
   const [projectStructuredReportLoading, setProjectStructuredReportLoading] = useState(false);
   const [teachingInterventions, setTeachingInterventions] = useState<any>(null);
   const [assistantDashboard, setAssistantDashboard] = useState<any>(null);
@@ -2134,6 +2135,16 @@ export default function TeacherPage() {
   }, [currentUser?.user_id]);
 
   useEffect(() => { loadDashboard(); }, []);
+
+  useEffect(() => {
+    if (teamView !== "project-detail") return;
+    let cancelled = false;
+    fetch(`${API}/api/hypergraph/library?limit=16`)
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setHyperLibrary(data?.data ?? null); })
+      .catch(() => { if (!cancelled) setHyperLibrary(null); });
+    return () => { cancelled = true; };
+  }, [teamView, selectedTeamProjectId]);
 
   const maxCat = useMemo(() => Math.max(1, ...(dashboard?.category_distribution ?? []).map((r: any) => Number(r.projects || 0))), [dashboard]);
   const maxRule = useMemo(() => Math.max(1, ...(dashboard?.top_risk_rules ?? []).map((r: any) => Number(r.projects || 0))), [dashboard]);
@@ -6346,9 +6357,33 @@ export default function TeacherPage() {
                           <div className="tm-signal-box"><div className="tm-signal-value">{(latestKg.entities || []).length}</div><div className="tm-signal-label">关键实体</div></div>
                           <div className="tm-signal-box"><div className="tm-signal-value">{latestHyperStudent.coverage_score || 0}</div><div className="tm-signal-label">超图覆盖</div></div>
                         </div>
+                        {latestHyper.summary && (
+                          <div className="tm-case-inline-summary" style={{ marginTop: 12 }}>
+                            超图摘要：{latestHyper.summary}
+                          </div>
+                        )}
+                        {(latestHyper.top_signals || []).length > 0 && (
+                          <div className="tm-chip-cloud" style={{ marginTop: 10 }}>
+                            {(latestHyper.top_signals || []).slice(0, 4).map((item: string, idx: number) => (
+                              <span key={idx} className="tm-smart-chip">{item}</span>
+                            ))}
+                          </div>
+                        )}
                         {(latestKg.entities || []).length > 0 && (
                           <div className="tm-chip-cloud">
                             {(latestKg.entities || []).slice(0, 8).map((e: any, idx: number) => <span key={idx} className="tm-smart-chip">{e.label || e.id}</span>)}
+                          </div>
+                        )}
+                        {hyperLibrary?.overview && (
+                          <div className="tm-case-inline-summary" style={{ marginTop: 12 }}>
+                            超图库规模：{hyperLibrary.overview.edge_count || 0} 条超边 / {hyperLibrary.overview.node_count || 0} 个超节点 / 平均 {hyperLibrary.overview.avg_member_count || 0} 个成员
+                          </div>
+                        )}
+                        {(hyperLibrary?.families || []).length > 0 && (
+                          <div className="tm-chip-cloud" style={{ marginTop: 10 }}>
+                            {(hyperLibrary.families || []).slice(0, 6).map((item: any, idx: number) => (
+                              <span key={idx} className="tm-smart-chip">{item.label || item.family} {item.count}</span>
+                            ))}
                           </div>
                         )}
                       </div>

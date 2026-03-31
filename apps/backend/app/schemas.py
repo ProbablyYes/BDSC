@@ -114,7 +114,6 @@ class DialogueTurnPayload(BaseModel):
     class_id: str | None = None
     cohort_id: str | None = None
     mode: Literal["coursework", "competition", "learning"] = "coursework"
-    competition_type: Literal["internet_plus", "challenge_cup", "innovation", "math_modeling"] | None = None
 
 
 class DialogueTurnResponse(BaseModel):

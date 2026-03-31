@@ -303,6 +303,186 @@ class GraphService:
         except Exception:
             return []
 
+    def persist_hypergraph_records(self, records: list[dict[str, Any]], version: str = "v2") -> dict[str, Any]:
+        if not records:
+            return {"ok": True, "saved": 0, "members": 0, "projects": 0}
+        try:
+            def _write(session):
+                session.run(
+                    """
+                    MATCH (h:Hyperedge)
+                    DETACH DELETE h
+                    """
+                )
+                session.run(
+                    """
+                    MATCH (n:HyperNode)
+                    DETACH DELETE n
+                    """
+                )
+                saved = 0
+                members = 0
+                project_links = 0
+                for rec in records:
+                    session.run(
+                        """
+                        MERGE (h:Hyperedge {id: $id})
+                        SET h.family = $family,
+                            h.label = $label,
+                            h.category = $category,
+                            h.support = $support,
+                            h.confidence = $confidence,
+                            h.severity = $severity,
+                            h.score_impact = $score_impact,
+                            h.stage_scope = $stage_scope,
+                            h.teaching_note = $teaching_note,
+                            h.retrieval_reason = $retrieval_reason,
+                            h.rule_count = $rule_count,
+                            h.rubric_count = $rubric_count,
+                            h.version = $version
+                        """,
+                        id=rec.get("hyperedge_id", ""),
+                        family=rec.get("type", ""),
+                        label=rec.get("family_label", ""),
+                        category=rec.get("category"),
+                        support=int(rec.get("support", 0) or 0),
+                        confidence=float(rec.get("confidence", 0) or 0),
+                        severity=str(rec.get("severity", "") or ""),
+                        score_impact=float(rec.get("score_impact", 0) or 0),
+                        stage_scope=str(rec.get("stage_scope", "") or ""),
+                        teaching_note=str(rec.get("teaching_note", "") or ""),
+                        retrieval_reason=str(rec.get("retrieval_reason", "") or ""),
+                        rule_count=len(rec.get("rules") or []),
+                        rubric_count=len(rec.get("rubrics") or []),
+                        version=version,
+                    )
+                    saved += 1
+
+                    for member in rec.get("member_nodes") or []:
+                        key = str(member.get("key", "")).strip()
+                        if not key:
+                            continue
+                        session.run(
+                            """
+                            MERGE (n:HyperNode {key: $key})
+                            SET n.type = $type,
+                                n.name = $name,
+                                n.display = $display
+                            WITH n
+                            MATCH (h:Hyperedge {id: $edge_id})
+                            MERGE (h)-[:HAS_MEMBER {role: $role}]->(n)
+                            """,
+                            key=key,
+                            type=str(member.get("type", "") or ""),
+                            name=str(member.get("name", "") or ""),
+                            display=str(member.get("display", "") or ""),
+                            role=str(member.get("type", "") or ""),
+                            edge_id=rec.get("hyperedge_id", ""),
+                        )
+                        members += 1
+
+                    for rule_id in rec.get("rules") or []:
+                        session.run(
+                            """
+                            MATCH (h:Hyperedge {id: $edge_id})
+                            MATCH (r:RiskRule {id: $rule_id})
+                            MERGE (h)-[:TRIGGERS_RULE]->(r)
+                            """,
+                            edge_id=rec.get("hyperedge_id", ""),
+                            rule_id=str(rule_id),
+                        )
+
+                    for rubric in rec.get("rubrics") or []:
+                        session.run(
+                            """
+                            MATCH (h:Hyperedge {id: $edge_id})
+                            MATCH (ri:RubricItem {name: $rubric})
+                            MERGE (h)-[:ALIGNS_WITH]->(ri)
+                            """,
+                            edge_id=rec.get("hyperedge_id", ""),
+                            rubric=str(rubric),
+                        )
+
+                    for project_id in rec.get("source_project_ids") or []:
+                        session.run(
+                            """
+                            MATCH (h:Hyperedge {id: $edge_id})
+                            MATCH (p:Project {id: $project_id})
+                            MERGE (h)-[:SUPPORTED_BY]->(p)
+                            """,
+                            edge_id=rec.get("hyperedge_id", ""),
+                            project_id=str(project_id),
+                        )
+                        project_links += 1
+
+                return {"saved": saved, "members": members, "projects": project_links}
+
+            out = self._query_with_fallback(_write)
+            return {"ok": True, **out}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def hypergraph_library_snapshot(self, limit: int = 24) -> dict[str, Any]:
+        try:
+            def _query(session):
+                overview = session.run(
+                    """
+                    MATCH (h:Hyperedge)
+                    OPTIONAL MATCH (h)-[:HAS_MEMBER]->(n:HyperNode)
+                    RETURN count(DISTINCT h) AS edge_count,
+                           count(DISTINCT n) AS node_count,
+                           avg(size([(h)-[:HAS_MEMBER]->(:HyperNode) | 1])) AS avg_member_count
+                    """
+                ).single()
+                family_rows = list(
+                    session.run(
+                        """
+                        MATCH (h:Hyperedge)
+                        RETURN h.family AS family,
+                               coalesce(h.label, h.family) AS label,
+                               count(*) AS count,
+                               avg(coalesce(h.support, 0)) AS avg_support
+                        ORDER BY count DESC, avg_support DESC
+                        """
+                    )
+                )
+                edge_rows = list(
+                    session.run(
+                        """
+                        MATCH (h:Hyperedge)
+                        OPTIONAL MATCH (h)-[:HAS_MEMBER]->(n:HyperNode)
+                        OPTIONAL MATCH (h)-[:SUPPORTED_BY]->(p:Project)
+                        RETURN h.id AS hyperedge_id,
+                               h.family AS family,
+                               coalesce(h.label, h.family) AS label,
+                               h.category AS category,
+                               h.support AS support,
+                               h.stage_scope AS stage_scope,
+                               h.severity AS severity,
+                               h.score_impact AS score_impact,
+                               h.teaching_note AS teaching_note,
+                               collect(DISTINCT n.display)[0..8] AS members,
+                               collect(DISTINCT p.id)[0..6] AS source_projects
+                        ORDER BY h.support DESC, h.family ASC
+                        LIMIT $limit
+                        """,
+                        limit=limit,
+                    )
+                )
+                return {
+                    "overview": {
+                        "edge_count": int((overview or {}).get("edge_count") or 0),
+                        "node_count": int((overview or {}).get("node_count") or 0),
+                        "avg_member_count": round(float((overview or {}).get("avg_member_count") or 0.0), 2),
+                    },
+                    "families": [dict(r) for r in family_rows],
+                    "edges": [dict(r) for r in edge_rows],
+                }
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"hypergraph library query failed: {exc}"}
+
     def baseline_snapshot(self, limit: int = 8) -> dict[str, Any]:
         try:
             def _query(session):

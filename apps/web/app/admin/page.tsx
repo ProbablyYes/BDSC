@@ -5,28 +5,42 @@ import Link from "next/link";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
-type AdminTab = "dashboard" | "users" | "projects" | "vulnerabilities" | "logs";
+type AdminTab = "dashboard" | "teachers" | "users" | "projects" | "vulnerabilities" | "logs";
 type UserRole = "student" | "teacher" | "admin";
 type UserRecord = {
   id: string;
   name: string;
   role: UserRole;
   email: string;
-  class_id: string;
+  teams: string[];
   status: "active" | "disabled";
   last_login: string;
   project_count: number;
 };
 
-const MOCK_USERS: UserRecord[] = [
-  { id: "student-001", name: "张三", role: "student", email: "zhangsan@edu.cn", class_id: "2026A", status: "active", last_login: "2026-03-22 14:30", project_count: 2 },
-  { id: "student-002", name: "李四", role: "student", email: "lisi@edu.cn", class_id: "2026A", status: "active", last_login: "2026-03-21 09:15", project_count: 1 },
-  { id: "student-003", name: "王五", role: "student", email: "wangwu@edu.cn", class_id: "2026B", status: "active", last_login: "2026-03-20 16:42", project_count: 3 },
-  { id: "student-004", name: "赵六", role: "student", email: "zhaoliu@edu.cn", class_id: "2026B", status: "disabled", last_login: "2026-03-10 11:00", project_count: 0 },
-  { id: "teacher-001", name: "陈老师", role: "teacher", email: "chen@edu.cn", class_id: "2026A", status: "active", last_login: "2026-03-22 08:00", project_count: 0 },
-  { id: "teacher-002", name: "刘老师", role: "teacher", email: "liu@edu.cn", class_id: "2026B", status: "active", last_login: "2026-03-22 10:30", project_count: 0 },
-  { id: "admin-001", name: "系统管理员", role: "admin", email: "admin@edu.cn", class_id: "", status: "active", last_login: "2026-03-22 22:00", project_count: 0 },
-];
+type TeamInfo = {
+  team_id: string;
+  team_name: string;
+  teacher_id: string;
+  teacher_name: string;
+  members: { user_id: string; joined_at: string }[];
+};
+
+type TeacherStat = {
+  teacher_id: string;
+  name: string;
+  email: string;
+  team_count: number;
+  student_count: number;
+  active_students: number;
+  avg_score: number;
+  risk_rate: number;
+  intervention_coverage: number;
+  last_active: string;
+  rank: number;
+};
+
+type TeacherSortKey = "rank" | "avg_score" | "risk_rate" | "active_students" | "team_count" | "intervention_coverage";
 
 export default function AdminPage() {
   const [tab, setTab] = useState<AdminTab>("dashboard");
@@ -38,13 +52,19 @@ export default function AdminPage() {
   const [allProjects, setAllProjects] = useState<any[]>([]);
 
   // User management
-  const [users, setUsers] = useState<UserRecord[]>(MOCK_USERS);
+  const [users, setUsers] = useState<UserRecord[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<"" | UserRole>("");
+  const [teamFilter, setTeamFilter] = useState<string>("");
+  const [groupByTeam, setGroupByTeam] = useState(false);
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editRole, setEditRole] = useState<UserRole>("student");
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUser, setNewUser] = useState({ id: "", name: "", role: "student" as UserRole, email: "", class_id: "" });
+  const [newUser, setNewUser] = useState({ id: "", name: "", role: "student" as UserRole, email: "", password: "" });
+
+  // Teacher performance
+  const [teachers, setTeachers] = useState<TeacherStat[]>([]);
+  const [teacherSortKey, setTeacherSortKey] = useState<TeacherSortKey>("rank");
 
   // Logs
   const [accessLogs, setAccessLogs] = useState<any[]>([
@@ -63,7 +83,19 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadDashboard();
+    loadUsers();
+    loadTeams();
+    loadTeachers();
   }, []);
+
+  useEffect(() => {
+    if (tab === "users") {
+      loadUsers();
+      loadTeams();
+    } else if (tab === "teachers") {
+      loadTeachers();
+    }
+  }, [tab]);
 
   async function loadDashboard() {
     setLoading(true);
@@ -89,7 +121,71 @@ export default function AdminPage() {
     setLoading(false);
   }
 
-  const filteredUsers = useMemo(() => {
+  async function loadTeams() {
+    try {
+      const r = await fetch(`${API}/api/teams`);
+      const d = await r.json();
+      const rows: TeamInfo[] = (d.teams ?? []).map((t: any) => ({
+        team_id: t.team_id,
+        team_name: t.team_name,
+        teacher_id: t.teacher_id,
+        teacher_name: t.teacher_name ?? "",
+        members: Array.isArray(t.members)
+          ? t.members.map((m: any) => ({ user_id: m.user_id, joined_at: m.joined_at ?? "" }))
+          : [],
+      }));
+      setTeams(rows);
+    } catch {
+      setTeams([]);
+    }
+  }
+
+  async function loadUsers() {
+    try {
+      const r = await fetch(`${API}/api/admin/users`);
+      const d = await r.json();
+      const rows = (d.users ?? []).map((u: any): UserRecord => ({
+        id: u.user_id,
+        name: u.display_name ?? u.email ?? u.user_id,
+        role: u.role as UserRole,
+        email: u.email,
+        teams: Array.isArray(u.team_names) ? (u.team_names as string[]).filter(Boolean) : [],
+        status: (u.status as "active" | "disabled") ?? "active",
+        last_login: u.last_login || "",
+        project_count: typeof u.project_count === "number" ? u.project_count : 0,
+      }));
+      setUsers(rows);
+    } catch {
+      setUsers([]);
+    }
+  }
+
+  async function loadTeachers() {
+    try {
+      const r = await fetch(`${API}/api/admin/teachers`);
+      const d = await r.json();
+      const rows: TeacherStat[] = (d.teachers ?? []).map((t: any) => ({
+        teacher_id: t.teacher_id,
+        name: t.display_name ?? t.email ?? t.teacher_id,
+        email: t.email ?? "",
+        team_count: typeof t.team_count === "number" ? t.team_count : 0,
+        student_count: typeof t.student_count === "number" ? t.student_count : 0,
+        active_students: typeof t.active_students === "number" ? t.active_students : 0,
+        avg_score: typeof t.avg_score === "number" ? t.avg_score : 0,
+        risk_rate: typeof t.risk_rate === "number" ? t.risk_rate : 0,
+        intervention_coverage: typeof t.intervention_coverage === "number" ? t.intervention_coverage : 0,
+        last_active: t.last_active ?? "",
+        rank: typeof t.rank === "number" ? t.rank : 0,
+      }));
+      setTeachers(rows);
+    } catch {
+      setTeachers([]);
+    }
+  }
+
+  const [teams, setTeams] = useState<TeamInfo[]>([]);
+
+  const baseUsers = useMemo(() => {
     let list = users;
     if (userRoleFilter) list = list.filter((u) => u.role === userRoleFilter);
     if (userSearch.trim()) {
@@ -98,6 +194,31 @@ export default function AdminPage() {
     }
     return list;
   }, [users, userSearch, userRoleFilter]);
+
+  const filteredUsers = useMemo(() => {
+    let list = baseUsers;
+    if (teamFilter) {
+      const allMemberIds = new Set<string>();
+      for (const t of teams) {
+        if (t.teacher_id) allMemberIds.add(t.teacher_id);
+        for (const m of t.members) allMemberIds.add(m.user_id);
+      }
+      if (teamFilter === "__no_team__") {
+        list = list.filter((u) => !allMemberIds.has(u.id));
+      } else {
+        const target = teams.find((t) => t.team_id === teamFilter);
+        if (!target) {
+          list = [];
+        } else {
+          const ids = new Set<string>();
+          if (target.teacher_id) ids.add(target.teacher_id);
+          for (const m of target.members) ids.add(m.user_id);
+          list = list.filter((u) => ids.has(u.id));
+        }
+      }
+    }
+    return list;
+  }, [baseUsers, teamFilter, teams]);
 
   const stats = useMemo(() => {
     const total = allProjects.length;
@@ -132,34 +253,251 @@ export default function AdminPage() {
     return Math.max(0, Math.round((avgNorm * 80 - riskPenalty * 5 + 20) * 10) / 10);
   }, [stats]);
 
-  function changeUserRole(userId: string, newRole: UserRole) {
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
-    setEditingUser(null);
+  const sortedTeachers = useMemo(() => {
+    const list = [...teachers];
+    list.sort((a, b) => {
+      const aVal = a[teacherSortKey];
+      const bVal = b[teacherSortKey];
+      if (teacherSortKey === "rank") {
+        return aVal - bVal;
+      }
+      return bVal - aVal;
+    });
+    return list;
+  }, [teachers, teacherSortKey]);
+
+  function renderUserRow(u: UserRecord, team?: TeamInfo) {
+    const inThisTeam = team && (team.teacher_id === u.id || team.members.some((m) => m.user_id === u.id));
+    const canKick = !!(team && inThisTeam && team.teacher_id !== u.id);
+    return (
+      <div key={u.id} className={`admin-table-row ${u.status === "disabled" ? "disabled" : ""}`}>
+        <span className="admin-cell-primary">{u.id}</span>
+        <span>{u.name}</span>
+        <span>
+          {editingUser === u.id ? (
+            <select
+              value={editRole}
+              onChange={(e) => {
+                setEditRole(e.target.value as UserRole);
+                changeUserRole(u.id, e.target.value as UserRole);
+              }}
+            >
+              <option value="student">学生</option>
+              <option value="teacher">教师</option>
+              <option value="admin">管理员</option>
+            </select>
+          ) : (
+            <span className={`admin-role-tag ${u.role}`}>
+              {{ student: "学生", teacher: "教师", admin: "管理员" }[u.role]}
+            </span>
+          )}
+        </span>
+        <span className="admin-cell-muted">{u.email}</span>
+        <span>{u.teams.length ? u.teams.join("、") : "未加入团队"}</span>
+        <span>
+          <span className={`admin-status-dot ${u.status === "active" ? "good" : "danger"}`} />
+          {u.status === "active" ? "正常" : "已禁用"}
+        </span>
+        <span className="admin-cell-muted">{u.last_login}</span>
+        <span className="admin-action-group">
+          <button
+            className="admin-sm-btn"
+            onClick={() => {
+              setEditingUser(u.id);
+              setEditRole(u.role);
+            }}
+            title="修改角色"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
+          <button
+            className="admin-sm-btn"
+            onClick={() => toggleUserStatus(u.id)}
+            title={u.status === "active" ? "禁用" : "启用"}
+          >
+            {u.status === "active" ? (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+              </svg>
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5cbd8a" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            )}
+          </button>
+          {u.id !== "admin-001" && (
+            <>
+              <button
+                className="admin-sm-btn"
+                onClick={() => resetPassword(u.id)}
+                title="重置密码"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 4v6h6" />
+                  <path d="M20 20v-6h-6" />
+                  <path d="M5 19A9 9 0 0119 5" />
+                </svg>
+              </button>
+              <button
+                className="admin-sm-btn danger"
+                onClick={() => deleteUser(u.id)}
+                title="删除"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+              </button>
+            </>
+          )}
+          {canKick && team && (
+            <button
+              className="admin-sm-btn"
+              onClick={() => removeMemberFromTeam(team.team_id, team.teacher_id, u.id)}
+              title="移出该团队"
+            >
+              ✕
+            </button>
+          )}
+        </span>
+      </div>
+    );
   }
 
-  function toggleUserStatus(userId: string) {
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, status: u.status === "active" ? "disabled" : "active" } : u));
+  async function changeUserRole(userId: string, newRole: UserRole) {
+    setEditingUser(userId);
+    try {
+      const r = await fetch(`${API}/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+      const d = await r.json();
+      const u = d.user ?? d;
+      setUsers((prev) => prev.map((row) => row.id === userId ? {
+        id: u.user_id,
+        name: u.display_name ?? u.email ?? u.user_id,
+        role: u.role as UserRole,
+        email: u.email,
+        teams: Array.isArray(u.team_names) ? (u.team_names as string[]).filter(Boolean) : row.teams,
+        status: (u.status as "active" | "disabled") ?? "active",
+        last_login: u.last_login || "",
+        project_count: typeof u.project_count === "number" ? u.project_count : row.project_count,
+      } : row));
+    } finally {
+      setEditingUser(null);
+    }
   }
 
-  function addUser() {
+  async function toggleUserStatus(userId: string) {
+    const target = users.find((u) => u.id === userId);
+    const nextStatus: "active" | "disabled" = target?.status === "active" ? "disabled" : "active";
+    try {
+      await fetch(`${API}/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, status: nextStatus } : u));
+    } catch {
+      /* noop */
+    }
+  }
+
+  async function addUser() {
     if (!newUser.id.trim() || !newUser.name.trim()) return;
-    setUsers((prev) => [...prev, {
-      ...newUser,
-      status: "active" as const,
-      last_login: "从未登录",
-      project_count: 0,
-    }]);
-    setNewUser({ id: "", name: "", role: "student", email: "", class_id: "" });
-    setShowAddUser(false);
+    const payload = {
+      role: newUser.role,
+      display_name: newUser.name,
+      email: newUser.email || `${newUser.id}@local`,
+      student_id: newUser.id,
+      password: newUser.password || undefined,
+    };
+    try {
+      const r = await fetch(`${API}/api/admin/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const d = await r.json();
+      const u = d.user ?? d;
+      const record: UserRecord = {
+        id: u.user_id,
+        name: u.display_name ?? u.email ?? u.user_id,
+        role: u.role as UserRole,
+        email: u.email,
+        teams: Array.isArray(u.team_names) ? (u.team_names as string[]).filter(Boolean) : [],
+        status: (u.status as "active" | "disabled") ?? "active",
+        last_login: u.last_login || "从未登录",
+        project_count: typeof u.project_count === "number" ? u.project_count : 0,
+      };
+      setUsers((prev) => [...prev, record]);
+      setNewUser({ id: "", name: "", role: "student", email: "", password: "" });
+      setShowAddUser(false);
+    } catch {
+      /* noop */
+    }
   }
 
-  function deleteUser(userId: string) {
-    if (userId === "admin-001") return;
-    setUsers((prev) => prev.filter((u) => u.id !== userId));
+  async function deleteUser(userId: string) {
+    try {
+      await fetch(`${API}/api/admin/users/${userId}`, { method: "DELETE" });
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch {
+      /* noop */
+    }
+  }
+
+  async function renameTeam(teamId: string, currentName: string, teacherId: string) {
+    const name = window.prompt("请输入新的团队名称", currentName || "");
+    if (!name || name.trim() === currentName.trim()) return;
+    try {
+      await fetch(`${API}/api/teams/${teamId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teacher_id: teacherId, team_name: name.trim() }),
+      });
+      await Promise.all([loadTeams(), loadUsers()]);
+    } catch {
+      /* noop */
+    }
+  }
+
+  async function removeMemberFromTeam(teamId: string, teacherId: string, userId: string) {
+    if (!window.confirm("确定将该成员移出团队吗？")) return;
+    try {
+      await fetch(`${API}/api/teams/${teamId}/members/${userId}?teacher_id=${encodeURIComponent(teacherId)}`, {
+        method: "DELETE",
+      });
+      await Promise.all([loadTeams(), loadUsers()]);
+    } catch {
+      /* noop */
+    }
+  }
+
+  async function resetPassword(userId: string) {
+    const pwd = window.prompt("请输入新密码（至少6位）", "");
+    if (!pwd || pwd.length < 6) return;
+    try {
+      await fetch(`${API}/api/admin/users/${userId}/password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_password: pwd }),
+      });
+      window.alert("密码已更新");
+    } catch {
+      /* noop */
+    }
   }
 
   const TABS: { id: AdminTab; label: string; icon: string }[] = [
     { id: "dashboard", label: "全局大盘", icon: "📊" },
+    { id: "teachers", label: "教师表现", icon: "🏅" },
     { id: "users", label: "用户管理", icon: "👥" },
     { id: "projects", label: "项目总览", icon: "📋" },
     { id: "vulnerabilities", label: "漏洞看板", icon: "🔍" },
@@ -291,6 +629,29 @@ export default function AdminPage() {
                 </div>
               )}
 
+              {/* Team quick navigation */}
+              {teams.length > 0 && (
+                <div className="admin-section">
+                  <h3>团队一览（点击跳转到用户列表）</h3>
+                  <div className="admin-filter-group">
+                    {teams.map((t) => (
+                      <button
+                        key={t.team_id}
+                        type="button"
+                        className="admin-filter-btn"
+                        onClick={() => {
+                          setTeamFilter(t.team_id);
+                          setGroupByTeam(true);
+                          setTab("users");
+                        }}
+                      >
+                        {t.team_name} ({t.members.length})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Category distribution */}
               {(dashboard?.category_distribution ?? []).length > 0 && (
                 <div className="admin-section">
@@ -333,6 +694,24 @@ export default function AdminPage() {
                   <button className={`admin-filter-btn ${userRoleFilter === "teacher" ? "active" : ""}`} onClick={() => setUserRoleFilter("teacher")}>教师</button>
                   <button className={`admin-filter-btn ${userRoleFilter === "admin" ? "active" : ""}`} onClick={() => setUserRoleFilter("admin")}>管理员</button>
                 </div>
+                <div className="admin-filter-group">
+                  <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
+                    <option value="">全部团队</option>
+                    <option value="__no_team__">未加入团队</option>
+                    {teams.map((t) => (
+                      <option key={t.team_id} value={t.team_id}>{t.team_name}</option>
+                    ))}
+                  </select>
+                  <label style={{ marginLeft: 8, fontSize: 12 }}>
+                    <input
+                      type="checkbox"
+                      checked={groupByTeam}
+                      onChange={(e) => setGroupByTeam(e.target.checked)}
+                      style={{ marginRight: 4 }}
+                    />
+                    按团队分组
+                  </label>
+                </div>
                 <button className="admin-add-btn" onClick={() => setShowAddUser(true)}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
                   添加用户
@@ -347,7 +726,7 @@ export default function AdminPage() {
                     <label>用户ID <input value={newUser.id} onChange={(e) => setNewUser({ ...newUser, id: e.target.value })} placeholder="如 student-005" /></label>
                     <label>姓名 <input value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} placeholder="真实姓名" /></label>
                     <label>邮箱 <input value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="xxx@edu.cn" /></label>
-                    <label>班级 <input value={newUser.class_id} onChange={(e) => setNewUser({ ...newUser, class_id: e.target.value })} placeholder="如 2026A" /></label>
+                    <label>初始密码 <input type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} placeholder="留空则自动生成" /></label>
                     <label>角色
                       <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value as UserRole })}>
                         <option value="student">学生</option>
@@ -363,54 +742,75 @@ export default function AdminPage() {
                 </div>
               )}
 
-              <div className="admin-table">
-                <div className="admin-table-header">
-                  <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>班级</span><span>状态</span><span>最后登录</span><span>操作</span>
-                </div>
-                {filteredUsers.map((u) => (
-                  <div key={u.id} className={`admin-table-row ${u.status === "disabled" ? "disabled" : ""}`}>
-                    <span className="admin-cell-primary">{u.id}</span>
-                    <span>{u.name}</span>
-                    <span>
-                      {editingUser === u.id ? (
-                        <select value={editRole} onChange={(e) => { setEditRole(e.target.value as UserRole); changeUserRole(u.id, e.target.value as UserRole); }}>
-                          <option value="student">学生</option>
-                          <option value="teacher">教师</option>
-                          <option value="admin">管理员</option>
-                        </select>
-                      ) : (
-                        <span className={`admin-role-tag ${u.role}`}>
-                          {{ student: "学生", teacher: "教师", admin: "管理员" }[u.role]}
-                        </span>
-                      )}
-                    </span>
-                    <span className="admin-cell-muted">{u.email}</span>
-                    <span>{u.class_id || "—"}</span>
-                    <span>
-                      <span className={`admin-status-dot ${u.status === "active" ? "good" : "danger"}`} />
-                      {u.status === "active" ? "正常" : "已禁用"}
-                    </span>
-                    <span className="admin-cell-muted">{u.last_login}</span>
-                    <span className="admin-action-group">
-                      <button className="admin-sm-btn" onClick={() => { setEditingUser(u.id); setEditRole(u.role); }} title="修改角色">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                      </button>
-                      <button className="admin-sm-btn" onClick={() => toggleUserStatus(u.id)} title={u.status === "active" ? "禁用" : "启用"}>
-                        {u.status === "active" ? (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                        ) : (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5cbd8a" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              {groupByTeam ? (
+                <div className="admin-team-groups">
+                  {(() => {
+                    const teamsForView = teamFilter && teamFilter !== "__no_team__"
+                      ? teams.filter((t) => t.team_id === teamFilter)
+                      : teams;
+                    const memberIdsAll = new Set<string>();
+                    for (const t of teams) {
+                      if (t.teacher_id) memberIdsAll.add(t.teacher_id);
+                      for (const m of t.members) memberIdsAll.add(m.user_id);
+                    }
+                    const unassignedUsers = (!teamFilter || teamFilter === "__no_team__")
+                      ? baseUsers.filter((u) => !memberIdsAll.has(u.id))
+                      : [];
+                    return (
+                      <>
+                        {teamsForView.map((t) => {
+                          const ids = new Set<string>();
+                          if (t.teacher_id) ids.add(t.teacher_id);
+                          for (const m of t.members) ids.add(m.user_id);
+                          const teamUsers = baseUsers.filter((u) => ids.has(u.id));
+                          if (teamUsers.length === 0) return null;
+                          return (
+                            <div key={t.team_id} className="admin-section">
+                              <div className="admin-panel-header" style={{ marginBottom: 8 }}>
+                                <h3>团队：{t.team_name}</h3>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                  <span style={{ fontSize: 12, color: "var(--muted, #888)" }}>负责人：{t.teacher_name || t.teacher_id || "-"}</span>
+                                  <button
+                                    type="button"
+                                    className="admin-sm-btn"
+                                    onClick={() => renameTeam(t.team_id, t.team_name, t.teacher_id)}
+                                  >
+                                    重命名
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="admin-table">
+                                <div className="admin-table-header">
+                                  <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
+                                </div>
+                                {teamUsers.map((u) => renderUserRow(u, t))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {unassignedUsers.length > 0 && (
+                          <div className="admin-section">
+                            <h3>未加入任何团队</h3>
+                            <div className="admin-table">
+                              <div className="admin-table-header">
+                                <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
+                              </div>
+                              {unassignedUsers.map((u) => renderUserRow(u))}
+                            </div>
+                          </div>
                         )}
-                      </button>
-                      {u.id !== "admin-001" && (
-                        <button className="admin-sm-btn danger" onClick={() => deleteUser(u.id)} title="删除">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                        </button>
-                      )}
-                    </span>
+                      </>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="admin-table">
+                  <div className="admin-table-header">
+                    <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
                   </div>
-                ))}
-              </div>
+                  {filteredUsers.map((u) => renderUserRow(u))}
+                </div>
+              )}
 
               <div className="admin-user-stats">
                 <span>共 {users.length} 个用户</span>
@@ -418,6 +818,151 @@ export default function AdminPage() {
                 <span>教师 {users.filter((u) => u.role === "teacher").length}</span>
                 <span>管理员 {users.filter((u) => u.role === "admin").length}</span>
               </div>
+            </div>
+          )}
+
+          {/* ── Teacher Performance ── */}
+          {tab === "teachers" && (
+            <div className="admin-panel fade-up">
+              <div className="admin-panel-header">
+                <h2>教师表现大盘</h2>
+                <span className="admin-panel-desc">按教师维度聚合团队、学生与项目质量指标</span>
+              </div>
+
+              <div className="admin-kpi-grid">
+                <div className="admin-kpi">
+                  <div className="admin-kpi-icon">👩‍🏫</div>
+                  <div className="admin-kpi-content">
+                    <span className="admin-kpi-label">教师人数</span>
+                    <strong className="admin-kpi-value">{teachers.length}</strong>
+                  </div>
+                </div>
+                <div className="admin-kpi">
+                  <div className="admin-kpi-icon">👥</div>
+                  <div className="admin-kpi-content">
+                    <span className="admin-kpi-label">覆盖学生</span>
+                    <strong className="admin-kpi-value">{teachers.reduce((s, t) => s + t.student_count, 0)}</strong>
+                  </div>
+                </div>
+                <div className="admin-kpi">
+                  <div className="admin-kpi-icon">📈</div>
+                  <div className="admin-kpi-content">
+                    <span className="admin-kpi-label">平均得分（Top 3）</span>
+                    <strong className="admin-kpi-value">
+                      {teachers.length > 0
+                        ? (Math.round((sortedTeachers.slice(0, 3).reduce((s, t) => s + t.avg_score, 0) / Math.max(1, Math.min(3, sortedTeachers.length))) * 10) / 10)
+                        : "—"}
+                    </strong>
+                  </div>
+                </div>
+                <div className="admin-kpi">
+                  <div className="admin-kpi-icon">🛡️</div>
+                  <div className="admin-kpi-content">
+                    <span className="admin-kpi-label">干预覆盖率中位数</span>
+                    <strong className="admin-kpi-value">
+                      {teachers.length > 0
+                        ? (() => {
+                            const vals = [...teachers.map((t) => t.intervention_coverage)].sort((a, b) => a - b);
+                            const mid = Math.floor(vals.length / 2);
+                            return vals.length % 2 === 0 ? ((vals[mid - 1] + vals[mid]) / 2).toFixed(1) : vals[mid].toFixed(1);
+                          })()
+                        : "—"}
+                      %
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-user-toolbar" style={{ marginTop: 16 }}>
+                <div className="admin-filter-group">
+                  <span style={{ fontSize: 12, marginRight: 8 }}>排序：</span>
+                  <button
+                    className={`admin-filter-btn ${teacherSortKey === "rank" ? "active" : ""}`}
+                    onClick={() => setTeacherSortKey("rank")}
+                  >
+                    综合排名
+                  </button>
+                  <button
+                    className={`admin-filter-btn ${teacherSortKey === "avg_score" ? "active" : ""}`}
+                    onClick={() => setTeacherSortKey("avg_score")}
+                  >
+                    平均分
+                  </button>
+                  <button
+                    className={`admin-filter-btn ${teacherSortKey === "risk_rate" ? "active" : ""}`}
+                    onClick={() => setTeacherSortKey("risk_rate")}
+                  >
+                    风险率
+                  </button>
+                  <button
+                    className={`admin-filter-btn ${teacherSortKey === "active_students" ? "active" : ""}`}
+                    onClick={() => setTeacherSortKey("active_students")}
+                  >
+                    活跃学生数
+                  </button>
+                  <button
+                    className={`admin-filter-btn ${teacherSortKey === "intervention_coverage" ? "active" : ""}`}
+                    onClick={() => setTeacherSortKey("intervention_coverage")}
+                  >
+                    干预覆盖率
+                  </button>
+                </div>
+              </div>
+
+              {sortedTeachers.length > 0 ? (
+                <>
+                  <div className="admin-vuln-cards" style={{ marginTop: 16 }}>
+                    {sortedTeachers.slice(0, 3).map((t, i) => (
+                      <div key={t.teacher_id} className={`admin-vuln-card rank-${i + 1}`}>
+                        <div className="admin-vuln-rank">Top {i + 1}</div>
+                        <div className="admin-vuln-name">{t.name}</div>
+                        <div className="admin-vuln-count">团队 {t.team_count} 个 · 学生 {t.student_count} 人</div>
+                        <div className="admin-vuln-bar">
+                          <div
+                            className="admin-vuln-fill"
+                            style={{ width: `${Math.min(100, (t.avg_score / 10) * 100)}%` }}
+                          />
+                        </div>
+                        <div className="admin-vuln-pct">平均分 {t.avg_score} · 风险率 {t.risk_rate}%</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="admin-section">
+                    <h3>教师表现明细</h3>
+                    <div className="admin-table">
+                      <div className="admin-table-header">
+                        <span>排名</span><span>教师</span><span>团队数</span><span>覆盖学生</span><span>活跃学生</span><span>平均分</span><span>风险率</span><span>干预覆盖率</span><span>最近活跃</span>
+                      </div>
+                      {sortedTeachers.map((t) => (
+                        <div key={t.teacher_id} className="admin-table-row">
+                          <span className="admin-cell-primary">#{t.rank}</span>
+                          <span>
+                            <div>{t.name}</div>
+                            <div className="admin-cell-muted" style={{ fontSize: 11 }}>{t.email}</div>
+                          </span>
+                          <span>{t.team_count}</span>
+                          <span>{t.student_count}</span>
+                          <span>{t.active_students}</span>
+                          <span>
+                            <span className={`admin-score ${t.avg_score >= 7 ? "good" : t.avg_score >= 4 ? "warn" : "danger"}`}>
+                              {t.avg_score}
+                            </span>
+                          </span>
+                          <span>{t.risk_rate}%</span>
+                          <span>{t.intervention_coverage}%</span>
+                          <span className="admin-cell-muted">{t.last_active || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="admin-empty">
+                  <div className="admin-empty-icon">👩‍🏫</div>
+                  <p>暂无教师聚合数据。待有学生项目与团队数据后，将自动生成教师表现大盘。</p>
+                </div>
+              )}
             </div>
           )}
 

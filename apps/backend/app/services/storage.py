@@ -300,6 +300,8 @@ class UserStorage:
             "cohort_id": user.get("cohort_id"),
             "bio": user.get("bio", ""),
             "created_at": user.get("created_at"),
+            "status": user.get("status", "active"),
+            "last_login": user.get("last_login", ""),
         }
 
     def get_by_id(self, user_id: str) -> dict | None:
@@ -345,6 +347,8 @@ class UserStorage:
             "bio": str(payload.get("bio", "")).strip(),
             "password_salt": salt,
             "password_hash": password_hash,
+            "status": "active",
+            "last_login": "",
             "created_at": now,
             "updated_at": now,
         }
@@ -353,14 +357,20 @@ class UserStorage:
         return self._public_user(user)
 
     def authenticate(self, email: str, password: str) -> dict | None:
-        user = self.get_by_email(email)
-        if not user:
-            return None
-        salt = str(user.get("password_salt", ""))
-        _, password_hash = self._hash_password(password, salt)
-        if password_hash != user.get("password_hash"):
-            return None
-        return self._public_user(user)
+        users = self._load()
+        email_key = email.strip().lower()
+        for user in users:
+            if str(user.get("email", "")).strip().lower() != email_key:
+                continue
+            salt = str(user.get("password_salt", ""))
+            _, password_hash = self._hash_password(password, salt)
+            if password_hash != user.get("password_hash"):
+                return None
+            user["last_login"] = _now_iso()
+            user["updated_at"] = _now_iso()
+            self._save(users)
+            return self._public_user(user)
+        return None
 
     def change_password(self, email: str, current_password: str, new_password: str) -> dict | None:
         users = self._load()
@@ -379,6 +389,122 @@ class UserStorage:
             self._save(users)
             return self._public_user(user)
         return None
+
+    def list_users(self, role: str | None = None, class_id: str | None = None, keyword: str | None = None) -> list[dict]:
+        users = self._load()
+        result: list[dict] = []
+        role_key = (role or "").strip().lower()
+        class_key = (class_id or "").strip()
+        kw = (keyword or "").strip().lower()
+        for user in users:
+            if role_key and str(user.get("role", "")).strip().lower() != role_key:
+                continue
+            if class_key and str(user.get("class_id", "")) != class_key:
+                continue
+            if kw:
+                blob = " ".join(
+                    [
+                        str(user.get("display_name", "")),
+                        str(user.get("email", "")),
+                        str(user.get("student_id", "")),
+                        str(user.get("user_id", "")),
+                    ]
+                ).lower()
+                if kw not in blob:
+                    continue
+            result.append(self._public_user(user))
+        return result
+
+    def update_user(self, user_id: str, payload: dict) -> dict | None:
+        users = self._load()
+        email_new = str(payload.get("email", "")).strip().lower() if payload.get("email") is not None else None
+        for idx, user in enumerate(users):
+            if user.get("user_id") != user_id:
+                continue
+            if email_new:
+                for other in users:
+                    if other is user:
+                        continue
+                    if str(other.get("email", "")).strip().lower() == email_new:
+                        raise ValueError("该邮箱已被其他账号使用")
+                user["email"] = email_new
+            if "role" in payload and payload["role"]:
+                user["role"] = payload["role"]
+            if "display_name" in payload and payload["display_name"] is not None:
+                user["display_name"] = str(payload["display_name"]).strip()
+            if "student_id" in payload:
+                v = str(payload["student_id"] or "").strip()
+                user["student_id"] = v or None
+            if "class_id" in payload:
+                v = str(payload["class_id"] or "").strip()
+                user["class_id"] = v or None
+            if "cohort_id" in payload:
+                v = str(payload["cohort_id"] or "").strip()
+                user["cohort_id"] = v or None
+            if "bio" in payload and payload["bio"] is not None:
+                user["bio"] = str(payload["bio"]).strip()
+            if "status" in payload and payload["status"] in {"active", "disabled"}:
+                user["status"] = payload["status"]
+            user["updated_at"] = _now_iso()
+            users[idx] = user
+            self._save(users)
+            return self._public_user(user)
+        return None
+
+    def delete_user(self, user_id: str) -> bool:
+        users = self._load()
+        new_users = [u for u in users if u.get("user_id") != user_id]
+        if len(new_users) == len(users):
+            return False
+        self._save(new_users)
+        return True
+
+    def admin_change_password(self, user_id: str, new_password: str) -> dict | None:
+        users = self._load()
+        for idx, user in enumerate(users):
+            if user.get("user_id") != user_id:
+                continue
+            salt, password_hash = self._hash_password(new_password)
+            user["password_salt"] = salt
+            user["password_hash"] = password_hash
+            user["updated_at"] = _now_iso()
+            users[idx] = user
+            self._save(users)
+            return self._public_user(user)
+        return None
+
+    def admin_create_user(self, payload: dict) -> tuple[dict, str | None]:
+        users = self._load()
+        email = str(payload.get("email", "")).strip().lower()
+        if not email:
+            raise ValueError("邮箱不能为空")
+        if any(str(user.get("email", "")).strip().lower() == email for user in users):
+            raise ValueError("该邮箱已注册")
+        raw_password = str(payload.get("password") or "").strip()
+        if not raw_password:
+            alphabet = string.ascii_letters + string.digits
+            raw_password = "".join(secrets.choice(alphabet) for _ in range(10))
+        salt, password_hash = self._hash_password(raw_password)
+        now = _now_iso()
+        user = {
+            "user_id": str(uuid4()),
+            "role": payload.get("role", "student"),
+            "display_name": str(payload.get("display_name", "")).strip() or email.split("@")[0],
+            "email": email,
+            "student_id": str(payload.get("student_id", "")).strip() or None,
+            "class_id": str(payload.get("class_id", "")).strip() or None,
+            "cohort_id": str(payload.get("cohort_id", "")).strip() or None,
+            "bio": str(payload.get("bio", "")).strip(),
+            "password_salt": salt,
+            "password_hash": password_hash,
+            "status": payload.get("status", "active"),
+            "last_login": "",
+            "created_at": now,
+            "updated_at": now,
+        }
+        users.append(user)
+        self._save(users)
+        return self._public_user(user), raw_password
 
     def get_or_create_by_phone(self, phone: str) -> dict:
         """Find user by phone or auto-create a student account."""
@@ -499,6 +625,19 @@ class TeamStorage:
             if t.get("team_id") != team_id:
                 continue
             t["members"] = [m for m in t.get("members", []) if m.get("user_id") != user_id]
+            self._save(teams)
+            return t
+        return None
+
+    def rename_team(self, team_id: str, teacher_id: str, team_name: str) -> dict | None:
+        teams = self._load()
+        name = team_name.strip()
+        if not name:
+            return None
+        for t in teams:
+            if t.get("team_id") != team_id or t.get("teacher_id") != teacher_id:
+                continue
+            t["team_name"] = name
             self._save(teams)
             return t
         return None

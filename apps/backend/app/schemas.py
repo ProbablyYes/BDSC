@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -159,6 +159,32 @@ class AuthUserResponse(BaseModel):
     user: dict = Field(default_factory=dict)
 
 
+class AdminUserCreatePayload(BaseModel):
+    role: Literal["student", "teacher", "admin"] = "student"
+    display_name: str = Field(min_length=1, max_length=50)
+    email: str = Field(min_length=1, max_length=100)
+    password: Optional[str] = Field(default=None, max_length=64)
+    student_id: Optional[str] = None
+    class_id: Optional[str] = None
+    cohort_id: Optional[str] = None
+    bio: Optional[str] = ""
+
+
+class AdminUserUpdatePayload(BaseModel):
+    role: Optional[Literal["student", "teacher", "admin"]] = None
+    display_name: Optional[str] = None
+    email: Optional[str] = None
+    student_id: Optional[str] = None
+    class_id: Optional[str] = None
+    cohort_id: Optional[str] = None
+    bio: Optional[str] = None
+    status: Optional[Literal["active", "disabled"]] = None
+
+
+class AdminChangePasswordPayload(BaseModel):
+    new_password: str = Field(min_length=6, max_length=64)
+
+
 class SmsSendPayload(BaseModel):
     phone: str = Field(min_length=1, max_length=100)
 
@@ -183,6 +209,11 @@ class TeamCreatePayload(BaseModel):
 class TeamJoinPayload(BaseModel):
     user_id: str
     invite_code: str = Field(min_length=4, max_length=10)
+
+
+class TeamUpdatePayload(BaseModel):
+    teacher_id: str
+    team_name: str = Field(min_length=1, max_length=100)
 
 
 class TeamResponse(BaseModel):

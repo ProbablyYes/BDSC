@@ -15,6 +15,9 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.schemas import (
+    AdminChangePasswordPayload,
+    AdminUserCreatePayload,
+    AdminUserUpdatePayload,
     AgentRunPayload,
     AgentRunResponse,
     AnalyzePayload,
@@ -38,6 +41,7 @@ from app.schemas import (
     TeacherAssistantInterventionSendPayload,
     TeacherFeedbackRequest,
     TeacherFeedbackResponse,
+    TeamUpdatePayload,
     UploadAnalysisResponse,
 )
 from app.services.agent_router import run_agents
@@ -121,6 +125,205 @@ def auth_change_password(payload: AuthPasswordChangePayload) -> AuthUserResponse
     return AuthUserResponse(status="ok", user=user)
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  Admin user management APIs (CRUD, password, class binding)
+# ═══════════════════════════════════════════════════════════════════
+
+@app.get("/api/admin/users")
+def admin_list_users(role: str = "", class_id: str = "", keyword: str = "") -> dict:
+    users = user_store.list_users(role=role or None, class_id=class_id or None, keyword=keyword or None)
+
+    # Build a mapping from user_id -> team names based on TeamStorage/teams.json
+    all_teams = team_store.list_all()
+    user_team_names: dict[str, list[str]] = {}
+    for team in all_teams:
+        team_name = _safe_str(team.get("team_name", ""))
+        if not team_name:
+            continue
+        # teacher as team owner
+        teacher_uid = _safe_str(team.get("teacher_id", ""))
+        if teacher_uid:
+            user_team_names.setdefault(teacher_uid, []).append(team_name)
+        # student members
+        for member in team.get("members", []) or []:
+            uid = _safe_str(member.get("user_id", ""))
+            if not uid:
+                continue
+            user_team_names.setdefault(uid, []).append(team_name)
+
+    enriched: list[dict[str, Any]] = []
+    for u in users:
+        uid = str(u.get("user_id", ""))
+        stats = _aggregate_student_data(uid, include_detail=False) if uid else {
+            "project_count": 0,
+            "last_active": "",
+        }
+        team_names = user_team_names.get(uid, [])
+        enriched.append(
+            {
+                **u,
+                "status": u.get("status", "active"),
+                "last_login": u.get("last_login") or stats.get("last_active", ""),
+                "project_count": stats.get("project_count", 0),
+                "team_names": team_names,
+            }
+        )
+    return {"count": len(enriched), "users": enriched}
+
+
+@app.post("/api/admin/users")
+def admin_create_user(payload: AdminUserCreatePayload) -> dict:
+    try:
+        user, temp_password = user_store.admin_create_user(payload.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    uid = str(user.get("user_id", ""))
+    stats = _aggregate_student_data(uid, include_detail=False) if uid else {
+        "project_count": 0,
+        "last_active": "",
+    }
+    teams = []
+    if uid:
+        teams.extend(team_store.list_by_member(uid))
+        teams.extend(team_store.list_by_teacher(uid))
+    team_names = [_safe_str(t.get("team_name", "")) for t in teams if _safe_str(t.get("team_name", ""))]
+    user_out = {
+        **user,
+        "project_count": stats.get("project_count", 0),
+        "last_login": stats.get("last_active", ""),
+        "team_names": team_names,
+    }
+    return {"user": user_out, "temp_password": temp_password}
+
+
+@app.patch("/api/admin/users/{user_id}")
+def admin_update_user(user_id: str, payload: AdminUserUpdatePayload) -> dict:
+    try:
+        user = user_store.update_user(user_id, payload.model_dump(exclude_unset=True))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    uid = str(user.get("user_id", ""))
+    stats = _aggregate_student_data(uid, include_detail=False) if uid else {
+        "project_count": 0,
+        "last_active": "",
+    }
+    teams = []
+    if uid:
+        teams.extend(team_store.list_by_member(uid))
+        teams.extend(team_store.list_by_teacher(uid))
+    team_names = [_safe_str(t.get("team_name", "")) for t in teams if _safe_str(t.get("team_name", ""))]
+    user_out = {
+        **user,
+        "project_count": stats.get("project_count", 0),
+        "last_login": user.get("last_login") or stats.get("last_active", ""),
+        "team_names": team_names,
+    }
+    return {"user": user_out}
+
+
+@app.delete("/api/admin/users/{user_id}")
+def admin_delete_user(user_id: str) -> dict:
+    ok = user_store.delete_user(user_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return {"status": "ok"}
+
+
+@app.post("/api/admin/users/{user_id}/password")
+def admin_change_user_password(user_id: str, payload: AdminChangePasswordPayload) -> dict:
+    user = user_store.admin_change_password(user_id, payload.new_password)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return {"status": "ok", "user_id": user_id}
+
+
+@app.get("/api/admin/teachers")
+def admin_list_teachers() -> dict:
+    """Aggregate per-teacher performance metrics for admin ranking view."""
+    teachers = user_store.list_users(role="teacher")
+
+    # Map teacher_id -> owned teams
+    all_teams = team_store.list_all()
+    teacher_teams: dict[str, list[dict]] = {}
+    for team in all_teams:
+        tid = _safe_str(team.get("teacher_id", ""))
+        if not tid:
+            continue
+        teacher_teams.setdefault(tid, []).append(team)
+
+    rows: list[dict[str, Any]] = []
+    for t in teachers:
+        teacher_id = _safe_str(t.get("user_id", ""))
+        if not teacher_id:
+            continue
+        teams = teacher_teams.get(teacher_id, [])
+        student_ids: set[str] = set()
+        for team in teams:
+            for m in team.get("members", []) or []:
+                sid = _safe_str(m.get("user_id", ""))
+                if sid:
+                    student_ids.add(sid)
+
+        team_count = len(teams)
+        student_count = len(student_ids)
+        total_submissions = 0
+        total_risks = 0
+        active_students = 0
+        students_with_interventions = 0
+        student_scores: list[float] = []
+        last_active_overall = ""
+
+        for sid in student_ids:
+            stats = _aggregate_student_data(sid, include_detail=False)
+            subs = int(stats.get("total_submissions", 0) or 0)
+            risks = int(stats.get("risk_count", 0) or 0)
+            avg_sc = float(stats.get("avg_score", 0) or 0)
+            last_act = _safe_str(stats.get("last_active", ""))
+            total_submissions += subs
+            total_risks += risks
+            if subs > 0:
+                active_students += 1
+            if avg_sc > 0:
+                student_scores.append(avg_sc)
+            if last_act and last_act > last_active_overall:
+                last_active_overall = last_act
+
+            # Check if this teacher has ever created an intervention for this student
+            project_id = f"project-{sid}"
+            project_state = json_store.load_project(project_id)
+            interventions = project_state.get("teacher_interventions", []) or []
+            for item in interventions:
+                if isinstance(item, dict) and _safe_str(item.get("teacher_id", "")) == teacher_id:
+                    students_with_interventions += 1
+                    break
+
+        avg_score = round(sum(student_scores) / len(student_scores), 1) if student_scores else 0.0
+        risk_rate = round((total_risks / max(1, total_submissions)) * 100, 1) if total_submissions else 0.0
+        intervention_coverage = round((students_with_interventions / max(1, active_students)) * 100, 1) if active_students else 0.0
+
+        rows.append({
+            "teacher_id": teacher_id,
+            "display_name": t.get("display_name") or t.get("email") or teacher_id,
+            "email": t.get("email", ""),
+            "team_count": team_count,
+            "student_count": student_count,
+            "active_students": active_students,
+            "avg_score": avg_score,
+            "risk_rate": risk_rate,
+            "intervention_coverage": intervention_coverage,
+            "last_active": last_active_overall,
+        })
+
+    # Sort by avg_score then active_students for a simple ranking
+    rows.sort(key=lambda r: (r["avg_score"], r["active_students"]), reverse=True)
+    for idx, row in enumerate(rows, start=1):
+        row["rank"] = idx
+
+    return {"count": len(rows), "teachers": rows}
+
+
 # ── SMS verification (dev mode: code returned in response) ──
 
 _sms_codes: dict[str, tuple[str, float]] = {}
@@ -178,6 +381,16 @@ def list_teams(role: str = "", user_id: str = "") -> dict:
     for t in teams:
         t["member_count"] = len(t.get("members", []))
     return {"teams": teams}
+
+
+@app.patch("/api/teams/{team_id}")
+def update_team(team_id: str, payload: TeamUpdatePayload) -> TeamResponse:
+    if not payload.teacher_id:
+        raise HTTPException(status_code=400, detail="需提供 teacher_id")
+    team = team_store.rename_team(team_id, payload.teacher_id, payload.team_name)
+    if not team:
+        raise HTTPException(status_code=404, detail="团队不存在或无权修改")
+    return TeamResponse(team=team)
 
 
 @app.post("/api/teams/join")

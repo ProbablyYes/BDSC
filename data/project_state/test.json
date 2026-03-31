@@ -1,0 +1,317 @@
+{
+  "project_id": "test",
+  "submissions": [
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "?????????????????,?????6?12?????,????????????",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": null,
+        "bottleneck": "",
+        "triggered_rules": [],
+        "rubric": [],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+        "info_sufficient": false
+      },
+      "next_task": {
+        "title": "描述你的项目",
+        "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+        "acceptance_criteria": [
+          "项目一句话描述",
+          "目标用户是谁",
+          "解决什么问题"
+        ]
+      },
+      "kg_analysis": {
+        "entities": [],
+        "relationships": [],
+        "structural_gaps": [
+          "文本过短"
+        ],
+        "content_strengths": [],
+        "completeness_score": 0,
+        "section_scores": {},
+        "insight": "请提供更详细描述"
+      },
+      "hypergraph_insight": {},
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.4,
+          "engine": "heuristic_short",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "总体判断：当前项目描述存在严重信息缺失（如核心问题、用户画像、技术路径等），但参考案例显示你们可能聚焦于科技创新领域，需优先补全基础逻辑框架，建议以\"技术痛点-政策导向-解决方案-验证闭环\"为结构强化表达。\n\n逻辑链路梳理：\n1. 用户定位：参考案例1显示公共安全领域监管机构是潜在目标用户，案例3则指向应急管理部门（如军事科学院、林业公司等）\n2. 痛点呈现：需区分技术痛点（如光辐射安全隐患）与政策痛点（如国家对低功耗通信的要求），案例3通过\"五分之一领土监测空白\"量化了需求\n3. 解决方案：案例1通过技术标准制定解决行业乱象，案例3通过静默模式创新突破环境限制，建议明确技术突破点与行业标准的关联性\n4. 变现路径：案例1指向设备采购与运维服务，案例3包含定制化解决方案，需说明产品定价策略与客户采购决策链\n5. 竞争壁垒：案例1强调政策合规性壁垒，案例3突出环境适应性验证，建议补充技术专利布局或生态合作数据\n\n关键问题分析：\n关于用户证据，案例3通过\"军事科学院等实地应用\"建立了可信度，而案例2仅停留在\"潜在客户\"阶段。建议补充类似实证数据，如：\"我们已完成与XX市交通管理局的试点合作，监测设备在连续72小时测试中将光辐射值降低至国标限值的30%\"（可参照案例3的证据引用方式）\n\n商业模式验证：\n案例1通过\"禁止企业盲目提高补光灯功率\"形成监管驱动的市场，案例3通过\"陆地/密林/远洋场景验证\"建立技术可信度。建议采用\"政策-技术-场景\"三维验证法：①梳理目标领域最新政策文件（如工信部2023年智能监控规范）②量化技术指标提升（如对比现有方案降低50%功耗）③获取至少2个场景的应用证明（如实验室数据+1个政府/企业试点）\n\n下一步行动：\n1. 补充技术验证数据：参照案例3的\"实地应用\"结构，收集第三方测试报告或试点单位证明\n2. 构建政策关联性：在方案中加入具体政策条文（如《XX行业技术规范》第X条）与解决方案的对应关系\n3. 完善用户画像：明确区分直接客户（设备采购方）与最终受益方（如案例1中的公众安全），建议用\"客户决策树\"展示采购流程\n4. 增加风险控制维度：参考案例2的缺失项，补充技术替代风险应对策略（如申请XX项专利）、政策变动应对预案（如建立政企沟通机制）\n\n延伸建议：\n可借鉴案例1的\"社会急需\"表述方式，将技术价值与社会价值结合。例如：\"通过降低光辐射强度，每年可减少XX起光污染相关投诉，符合十四五规划中'智慧安全城市'建设要求\"。同时建议增加技术对比表格，横向对比现有方案（如传统补光设备）在能耗、安全性、成本等维度的差异，强化创新说服力。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_9a9e8b6d0c2f",
+            "category": "科技创新",
+            "project_name": "项目计划书-影豹-当前版本-挑战杯网评-23-0315",
+            "similarity": 0.3735,
+            "pain_points": [
+              "zzzzzzzzzzzzzzzzzzzz",
+              "增强图像",
+              "与其他夜视设备相比，图像增强类夜视产品具有生产成本低、轻量化、视场大、图像清晰、探测距离远等优势*"
+            ],
+            "solution": [
+              "1.2 社会急需：国家支持，政策引导，亟待技术变革",
+              "公共视频监控领域中，需要禁止部分企业为达到较高的夜间拍摄清晰度，盲目提高补光灯发射功率的现象，防止光辐射给公众带来的潜在安全隐患，减少光辐射伤害",
+              "—— GA/T 1202-2022《交通技术监控成像补光装置通用技术条件》"
+            ],
+            "innovation_points": [
+              "极暗光图像增强引擎",
+              "科技创新和未来产业组"
+            ],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [],
+            "summary": "影豹 极暗光图像增强引擎 科技创新和未来产业组 1.1 项目背景：在夜间看不见的角落中安全隐患和犯罪滋生 油气管道现有夜间监控探测距离和清晰度不足，近年以来我国被盗抢原油40多万吨、天然气1120多万立方米，经济损失达13亿元 国家许多重大工程项目现有摄像头和镜头成像色彩和清晰度较差，导致安全隐患无法及时发现，财产和生命威胁随时随地发生 给国家生产制造业带来重大潜在危害，严重威胁人民群众的生命财产安全 2022年全国较大和重大夜间安全事故有677起，死亡3626人，造成财产损失高达81.7亿元人民币。 我国拥有数以万计的工厂，据粗略统计，每年有记录的失窃损失就达到了上亿元，其中还不包括很多没有"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.362,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_c547ce8cc3f2",
+            "category": "科技创新",
+            "project_name": "新一代卫星互联网应用系统",
+            "similarity": 0.3505,
+            "pain_points": [
+              "五分之一领土面积难以监测",
+              "互联网覆盖率低的地区占国土面积的20%",
+              "前往防灾第一线，实地探索卫星互联网地面终端升级需求"
+            ],
+            "solution": [
+              "开发终端超低功耗静默模式",
+              "创新终端功耗智能管理策略",
+              "独立设计全国产低功耗卫星互联网终端"
+            ],
+            "innovation_points": [
+              "创新终端功耗智能管理策略",
+              "独立设计全国产低功耗卫星互联网终端"
+            ],
+            "evidence_quotes": [
+              "产品已在军事科学院 、山河屯林业公司以及中国水产科学院开展实地应用 ，充分验证了产品在陆地遮挡环境 、密林环境以及远洋海面环境下的通信能力",
+              "美国卫星产业协会数据：2023年全球航天产业的总收入为3840亿美元 ，其中卫星联网通信行业收入约占8%，当前市场规模突破两千亿人民币"
+            ],
+            "risk_flags": [
+              "market_size_fallacy",
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "星哨科技 新一代卫星互联网应用系统， 开启全域全时快响预警新时代 项 目 类 别 学历组别 项 目 负 责 人 : 科技创新和未来产业 : 研究生创意组 : 杨硕 菲律宾非法拦截我国渔船 中印加勒万河谷边境冲突 五分之一领土面积难以监测，事关国土安全 项目背景 – 国家重大需求 甘肃积石山地震 大兴安岭特大火灾 ⚫ 边境接壤约8,745,142平方公里 ⚫ 无人山区约2,385,000平方公里 ⚫ 大型林区约1,668,000平方公里 ⚫ 领海面积约3,000,000平方公里 我国互联网覆盖率低的地区约 占国土面积的20% 各类突发性自然灾害、人为事 件频发 地理位置敏感，是我国国土安 全重点"
+          }
+        ],
+        "web_search": {
+          "searched": false,
+          "query": null,
+          "results": [],
+          "summary": ""
+        },
+        "hypergraph_student": {},
+        "critic": {},
+        "challenge_strategies": [],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "5ce1af2a-3f76-497d-b196-d4c7d326e82d",
+      "created_at": "2026-03-21T12:51:59.825089"
+    },
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "??????????????",
+      "diagnosis": {},
+      "next_task": {},
+      "kg_analysis": {},
+      "hypergraph_insight": {},
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.4,
+          "engine": "heuristic_short",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "总体判断：项目方向存在显著模糊性，核心逻辑链断裂，需优先明确用户需求与解决方案的匹配关系。\n\n逻辑链路梳理：\n1. 用户是谁→\"可能是一些需要帮助的人\"（原话未明确）\n2. 痛点→\"他们遇到了问题\"（缺乏具体场景描述）\n3. 方案→\"我们准备提供某种服务\"（功能描述缺失）\n4. 变现→\"应该可以赚钱\"（未说明商业模型）\n5. 壁垒→\"别人做不了这个\"（未量化竞争优势）\n\n关键问题分析：\n【用户画像缺失】学生提到\"目标用户可能是年轻人\"（原话），但未说明具体细分群体。参考Keep的案例，其通过\"25-35岁都市健身人群\"的精准定位，才实现从1000万用户到年营收15亿的突破。建议用\"3W1H\"框架重构：Who（职业/年龄/地域）、What（具体行为特征）、When（使用场景）、How（现有解决方案的缺陷）。\n\n【价值主张不清晰】学生方案描述\"提供一个平台\"（原话），但未说明差异化价值。对比小红书的\"种草社区+电商闭环\"模式，其核心竞争力在于\"真实用户生成内容+精准兴趣推荐\"。建议用\"价值主张画布\"工具，将用户痛点（如时间成本/信息不对称）与方案功能（如AI匹配/即时响应）进行双向验证。\n\n下一步行动：\n1. 完成用户调研报告（需包含5个真实访谈记录）\n2. 绘制商业模型画布（重点标注关键合作伙伴与成本结构）\n3. 制作MVP原型验证核心功能（建议用Figma完成基础版）\n4. 撰写竞争分析矩阵（横向对比3个直接竞品的SWOT）\n\n延伸建议：注意避免\"解决方案驱动\"的误区，先通过用户旅程地图（User Journey Map）确认痛点是否真实存在。例如某校园二手交易平台曾假设\"学生需要更便捷的交易方式\"，但调研发现真实痛点是\"交易信任缺失\"，最终迭代出\"线下验货+担保交易\"模式，三个月内用户增长300%。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": ""
+      },
+      "submission_id": "bbe74aa1-50aa-4a55-8587-43a57e5fb471",
+      "created_at": "2026-03-21T12:54:50.947215"
+    }
+  ],
+  "teacher_feedback": []
+}

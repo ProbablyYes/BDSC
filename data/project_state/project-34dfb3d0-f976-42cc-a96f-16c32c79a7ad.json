@@ -1,0 +1,1955 @@
+{
+  "project_id": "project-34dfb3d0-f976-42cc-a96f-16c32c79a7ad",
+  "submissions": [
+    {
+      "student_id": "None",
+      "class_id": "None",
+      "cohort_id": "None",
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "学生画像 UserProfile_Biz\n年级：大四\n专业：经管\n兴趣：电商 + 校园服务 + 二手循环经济\n\n项目草案 Project Draft（逻辑基本合理，几乎无明显漏洞，用于测试系统稳定评分能力）\n项目名：CampusBook（校园二手教材交易平台）\n目标用户：本校在读本科生与研究生，重点面向每学期开学和期末有教材流转需求的学生。\n价值主张：帮助学生以更低价格购买教材，同时帮助高年级学生快速出售闲置教材，减少资源浪费。\n核心功能：学生发布二手教材信息（扫 ISBN 码自动填书名）、平台同校快速匹配、支持校园驿站免费寄存与自提。\n获客渠道：在校园微信群/QQ群推广、与学生会合作进行开学季地推、在宿舍区和图书馆张贴二维码海报。\n定价模式：平台对成交订单收取 5% 服务费；卖家可购买“优先展示”特权（2 元/次）。\n竞争分析：主要替代方案是闲鱼、转转等综合平台。我们的差异点是聚焦“同校交易”，免除了快递物流成本，且同校学长学姐交易信任度更高。\n市场规模：以单校为切入点（约 2 万学生），目前团队通过主观推测约 30% 学生有交易需求，下周计划发放 500 份问卷获取大样本验证数据。验证成功后可复制至本市大学城其他高校。\n财务假设：初期主要成本为云服务器费用（约 200 元/月）与校园地推物料（约 500 元）。单校预计月成交 500 单左右，平台可获得约 1000–1500 元服务费，实现微利运转。\n团队与资源：3 名大四经管学生，1 名大三计科学生负责小程序开发，已获得校团委的创业场地支持。\n里程碑计划：第 1 个月上线小程序 MVP 并在本校测试；第 3 个月验证交易闭环与用户留存；第 6 个月扩展至本大学城 3–5 所高校。\n路演叙事：从“教材闲置浪费、新生买书贵”这一真实场景切入，展示学生交易场景与平台撮合价值，强调低成本验证与逐步扩张的稳健策略，你怎么看",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 6.51,
+        "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium",
+            "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+            "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+            "matched_keywords": [
+              "定价"
+            ],
+            "missing_requires": [
+              "支付意愿",
+              "愿意付费"
+            ]
+          },
+          {
+            "id": "H4",
+            "name": "TAM/SAM/SOM口径混乱",
+            "severity": "high",
+            "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+            "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+            "matched_keywords": [
+              "市场规模"
+            ],
+            "missing_requires": []
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 5.4,
+            "status": "ok",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 9.8,
+            "status": "ok",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 7.0,
+            "status": "ok",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "补齐证据并完成一次压力测试",
+        "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+        "acceptance_criteria": [
+          "新增3条可验证证据",
+          "完成1轮压力测试问答",
+          "更新修正后的版本说明"
+        ]
+      },
+      "kg_analysis": {
+        "entities": [
+          {
+            "id": "e1",
+            "label": "本校在读本科生与研究生",
+            "type": "stakeholder"
+          },
+          {
+            "id": "e2",
+            "label": "教材闲置浪费",
+            "type": "pain_point"
+          },
+          {
+            "id": "e3",
+            "label": "新生买书贵",
+            "type": "pain_point"
+          },
+          {
+            "id": "e4",
+            "label": "校园二手教材交易平台",
+            "type": "solution"
+          },
+          {
+            "id": "e5",
+            "label": "ISBN扫描技术",
+            "type": "technology"
+          },
+          {
+            "id": "e6",
+            "label": "小程序开发技术",
+            "type": "technology"
+          },
+          {
+            "id": "e7",
+            "label": "单校市场（约2万学生）",
+            "type": "market"
+          },
+          {
+            "id": "e8",
+            "label": "闲鱼、转转",
+            "type": "competitor"
+          },
+          {
+            "id": "e9",
+            "label": "校团委创业场地支持",
+            "type": "resource"
+          },
+          {
+            "id": "e10",
+            "label": "5%服务费+优先展示特权",
+            "type": "business_model"
+          },
+          {
+            "id": "e11",
+            "label": "3名大四经管学生+1名大三计科学生",
+            "type": "team"
+          }
+        ],
+        "relationships": [
+          {
+            "source": "e1",
+            "target": "e2",
+            "relation": "面临"
+          },
+          {
+            "source": "e1",
+            "target": "e3",
+            "relation": "面临"
+          },
+          {
+            "source": "e4",
+            "target": "e2",
+            "relation": "解决"
+          },
+          {
+            "source": "e4",
+            "target": "e3",
+            "relation": "解决"
+          },
+          {
+            "source": "e5",
+            "target": "e4",
+            "relation": "使用"
+          },
+          {
+            "source": "e6",
+            "target": "e4",
+            "relation": "使用"
+          },
+          {
+            "source": "e7",
+            "target": "e4",
+            "relation": "针对"
+          },
+          {
+            "source": "e8",
+            "target": "e4",
+            "relation": "被竞争"
+          },
+          {
+            "source": "e9",
+            "target": "e4",
+            "relation": "提供"
+          },
+          {
+            "source": "e10",
+            "target": "e4",
+            "relation": "采用"
+          },
+          {
+            "source": "e11",
+            "target": "e4",
+            "relation": "负责"
+          }
+        ],
+        "structural_gaps": [
+          "缺少用户验证数据",
+          "缺少盈利模式分析"
+        ],
+        "content_strengths": [
+          "目标用户明确",
+          "商业模式清晰",
+          "团队结构合理"
+        ],
+        "completeness_score": 6,
+        "section_scores": {
+          "problem_definition": 6,
+          "user_evidence": 2,
+          "solution_feasibility": 5,
+          "business_model": 4,
+          "competitive_advantage": 3,
+          "market_analysis": 3,
+          "team_resources": 4
+        },
+        "insight": "项目具备清晰的校园场景定位和可行的商业模式，但需要补充用户需求验证数据和盈利模式分析"
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ],
+            "nodes": [
+              "Category::科技创新",
+              "RiskRule::compliance_not_covered",
+              "RiskRule::weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_008",
+            "type": "Risk_Pattern_Edge",
+            "support": 4,
+            "teaching_note": "科技创新类项目常见风险组合：market_size_fallacy、weak_user_evidence（4个项目出现此模式）",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "nodes": [
+              "Category::科技创新",
+              "RiskRule::market_size_fallacy",
+              "RiskRule::weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_009",
+            "type": "Risk_Pattern_Edge",
+            "support": 3,
+            "teaching_note": "医疗健康类项目常见风险组合：market_size_fallacy、no_competitor_claim、weak_user_evidence（3个项目出现此模式）",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "no_competitor_claim",
+              "weak_user_evidence"
+            ],
+            "nodes": [
+              "Category::医疗健康",
+              "RiskRule::market_size_fallacy",
+              "RiskRule::no_competitor_claim",
+              "RiskRule::weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H4"
+          ],
+          "expanded_rule_ids": [
+            "H3",
+            "H4",
+            "market_size_fallacy"
+          ]
+        },
+        "topology": {
+          "hub_nodes": [
+            {
+              "node": "RiskRule::weak_user_evidence",
+              "degree": 36,
+              "interpretation": "风险规则「weak_user_evidence」关联36种模式，是最普遍的问题"
+            },
+            {
+              "node": "RiskRule::compliance_not_covered",
+              "degree": 22,
+              "interpretation": "风险规则「compliance_not_covered」关联22种模式，是最普遍的问题"
+            },
+            {
+              "node": "RiskRule::market_size_fallacy",
+              "degree": 16,
+              "interpretation": "风险规则「market_size_fallacy」关联16种模式，是最普遍的问题"
+            },
+            {
+              "node": "RiskRule::no_competitor_claim",
+              "degree": 11,
+              "interpretation": "风险规则「no_competitor_claim」关联11种模式，是最普遍的问题"
+            },
+            {
+              "node": "Category::科技创新",
+              "degree": 7,
+              "interpretation": "「科技创新」类别出现在7种超边中，是最活跃的赛道"
+            }
+          ],
+          "avg_edge_size": 3.1,
+          "max_edge_size": 4
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 45,
+          "node_count": 16
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "evidence_check",
+          "confidence": 0.7,
+          "engine": "rule",
+          "pipeline": [
+            "coach",
+            "analyst",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "评分官",
+            "行动规划师"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "**总体判断**：CampusBook的校园二手教材交易平台方向符合循环经济趋势，核心逻辑链路清晰，但需强化用户需求验证和盈利模式的实证支撑。\n\n**逻辑链路梳理**：  \n1. **用户**：本校本科生与研究生（每学期有教材流转需求）  \n2. **痛点**：新生购书成本高（\"买书贵\"）、高年级学生闲置教材处理效率低（\"资源浪费\"）  \n3. **方案**：基于同校交易的小程序撮合（ISBN扫码填书名+驿站寄存自提）  \n4. **变现**：5%服务费+2元/次优先展示付费  \n5. **壁垒**：校园场景深度绑定（地推+学生会合作）、信任成本降低（同校交易）、物流成本优势（驿站免快递费）  \n\n**关键问题分析**：  \n**TAM/SAM/SOM口径混乱**：学生提到\"单校2万学生中30%有需求\"是主观推测，未明确区分整体市场（TAM）、可服务市场（SAM）和目标市场（SOM）。例如，闲鱼的二手交易渗透率可能已覆盖80%学生，但CampusBook的\"同校交易\"场景可能仅针对教材流转的15%高频用户（参考推送家案例中通过新媒体矩阵数据定位细分人群）。建议通过问卷数据重新拆解：  \n- **TAM**：全国高校教材年交易规模（可参考第三方数据如《中国二手教育用品市场报告》）  \n- **SAM**：单校教材交易量（需统计本校图书馆教材采购量或学生购书支出）  \n- **SOM**：通过500份问卷验证的30%需求是否为真实可转化用户  \n\n**支付意愿证据缺失**：学生提到\"5%服务费\"和\"2元/次优先展示\"，但未说明如何验证用户接受度。推送家案例中通过\"30000多篇原创文章\"推导出用户对设计服务的支付能力，而CampusBook需具体测算：  \n- 教材二手价与原价的差额（如一本教材二手价50元，5%服务费=2.5元，是否超过用户心理预期？）  \n- 优先展示的转化率（假设1000名卖家中20%购买，2元/次可带来400元/月收入，是否覆盖边际成本？）  \n\n**下一步行动**：  \n1. **数据验证**：设计问卷时加入支付敏感度测试（如\"愿意为二手教材平台支付多少服务费？\"选项：0元/1-3元/5元以上），并收集用户当前处理闲置教材的方式（如闲置数量、转卖渠道、价格区间）。  \n2. **竞品对标**：分析闲鱼在校园场景的教材交易数据（如搜索量、成交周期、用户评价），明确CampusBook的\"同校撮合\"能缩短多少交易时间/提升多少匹配效率。  \n3. **信任机制设计**：参考闲鱼的\"信用分+担保交易\"，可考虑引入\"学长认证\"（如高年级用户上传学生证截图）或\"小额保证金\"（如10元押金），降低交易风险。  \n\n**延伸建议**：  \n- **财务模型优化**：当前1000-1500元/月的盈利假设需结合问卷验证的交易频次（如500单是否包含多本教材交易？），并预留用户流失率（如30%的复购率）。  \n- **扩展策略细化**：从\"本市大学城\"复制到其他城市时，需评估物流模式（若跨校需引入快递），此时\"同校交易\"的壁垒可能减弱，需提前设计跨校分仓或合作驿站体系。  \n- **团队能力补位**：经管学生擅长商业分析，但小程序开发依赖大三计科同学，建议明确技术分工（如前端/后端/测试）并制定开发里程碑，避免延期影响MVP测试。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "**项目质量评估**：CampusBook的校园二手教材交易平台具备清晰的场景聚焦与成本优势，团队对\"同校信任+驿站物流\"的差异化定位值得肯定。但当前存在两个关键风险点：一是TAM/SAM/SOM测算缺乏严谨性，30%需求率的主观推测未考虑专业差异（如理工科教材更新频率远高于文科），若实际验证低于15%，单校月均1000元的财务模型将失衡；二是5%服务费与2元优先展示的定价策略缺乏支付意愿锚点，需警惕用户对\"免费二手平台\"的路径依赖——例如闲鱼用户已习惯0服务费模式，而优先展示的2元定价是否覆盖卖家预期收益（假设一本教材溢价空间仅5-10元时，卖家可能认为不值得付费）。\n\n**改进建议**：建议在问卷设计中区分\"教材购买者\"（新生/转专业生）与\"教材出售者\"（毕业生/退课学生）的供需曲线，量化不同价格带的交易转化率。同时需补充对现有竞品的支付行为拆解，例如闲鱼用户是否愿意为\"同校速达\"支付3-5元溢价。若无法验证差异化溢价空间，可能需要调整服务费结构或开发增值服务（如教材评级定价、课程匹配推荐）。\n\n**追问方向**：  \n1. 问卷样本中是否包含不同年级（尤其是大四毕业生）和专业的教材流转数据？如何通过交叉分析验证30%需求率的合理性？  \n2. 优先展示功能的定价依据是什么？是否有测算卖家为提升成交速度愿意支付的边际成本（例如对比闲鱼置顶服务的使用率）？  \n3. 校园驿站的免费寄存是否依赖校方持续支持？若合作方变更政策，物流成本如何承接？  \n\n**补充风险提示**：若财务模型过度依赖\"优先展示\"的付费意愿，而实际验证中该功能使用率低于20%，可能导致单校月均收入跌破盈亏平衡点。此时需考虑是否引入订阅制会员（如包月优先展示）或拓展教材以外的校园二手品类（如实验器材、考研资料）来分散风险。",
+            "tools_used": [
+              "diagnosis",
+              "kg_analysis",
+              "hypergraph_student"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {
+            "agent": "评分官",
+            "analysis": "评审反馈报告\n\n当前项目总分为6.51/10，各维度得分呈现明显两极分化。优势维度集中在用户证据（9.0）、解决方案可行性（9.0）、商业模式（9.8）及团队执行（9.0）等核心环节，展现出扎实的市场验证能力和执行力。但财务逻辑（0.0）和创新差异化（0.0）两个维度严重拉低整体表现，导致项目难以获得更高评价。市场与竞争维度（7.0）虽有基础分析，但深度不足。\n\n财务逻辑维度得分为0，主要源于缺乏完整的财务模型支撑。项目未提供收入预测、成本结构、盈亏平衡点等关键数据，也未说明资金需求与使用计划，导致投资人无法评估其财务可行性。创新与差异化维度同样为0，反映出项目在技术突破、商业模式创新或用户体验优化方面缺乏明确阐述，未能清晰展示与竞品的核心区别，也未建立技术壁垒或知识产权优势。\n\n为提升评分，建议在商业计划书中补充：1）完整的3年财务预测模型，包括月度现金流表、损益表和资产负债表，并加入敏感性分析说明关键假设条件；2）创新性论证部分，需用对比表格明确列出3-5个主要竞品的差异化要素，增加专利布局图或技术路线图展示创新保护机制。同时建议在市场分析中加入行业增长曲线、客户获取成本（CAC）与客户生命周期价值（LTV）的量化对比，强化竞争优势。\n\n距离优秀（8/10）仍需提升1.49分，重点补足财务模型和创新论证两大核心要素。建议优先构建基于市场验证的财务逻辑链，展示清晰的盈利路径和投资回报测算；其次通过专利检索报告、技术白皮书等材料系统化呈现创新价值。这两个维度的完善将直接提升项目可信度和投资吸引力，带动总分突破7.5/10的关键阈值。",
+            "tools_used": [
+              "rubric_engine",
+              "kg_scores"
+            ]
+          },
+          "planner": {
+            "agent": "行动规划师",
+            "analysis": "本周建议行动:\n- **设计并执行用户需求验证问卷**: ['基于开学/期末场景设计10题问卷，包含交易频率、价格敏感度、信任偏好等维度', '针对不同年级（大一新生/大四毕业生）和专业（教材成本差异大的专业如医学/工程）分层抽样', '嵌入问卷逻辑跳转：先判断是否有教材交易需求再收集价格预期数据', '用金数据/腾讯问卷工具收集，下周完成500份有效回收', '交叉分析扫码购书意愿与驿站自提接受度的关系']\n  验收标准: 回收500份问卷后输出需求验证报告，明确本校实际有交易需求的用户比例、平均交易频次、可接受服务费率区间\n\n阶段目标: 完成单校用户需求验证与盈利模型测算，确保MVP版本财务可行性",
+            "tools_used": [
+              "diagnosis",
+              "next_task",
+              "critic"
+            ],
+            "plan_data": {
+              "this_week": [
+                {
+                  "task": "设计并执行用户需求验证问卷",
+                  "why": "当前缺少验证30%用户需求假设的实证数据，需明确SOM（可服务市场）和SAM（可获得市场）的量化边界",
+                  "how": [
+                    "基于开学/期末场景设计10题问卷，包含交易频率、价格敏感度、信任偏好等维度",
+                    "针对不同年级（大一新生/大四毕业生）和专业（教材成本差异大的专业如医学/工程）分层抽样",
+                    "嵌入问卷逻辑跳转：先判断是否有教材交易需求再收集价格预期数据",
+                    "用金数据/腾讯问卷工具收集，下周完成500份有效回收",
+                    "交叉分析扫码购书意愿与驿站自提接受度的关系"
+                  ],
+                  "acceptance": "回收500份问卷后输出需求验证报告，明确本校实际有交易需求的用户比例、平均交易频次、可接受服务费率区间"
+                }
+              ],
+              "milestone": "完成单校用户需求验证与盈利模型测算，确保MVP版本财务可行性"
+            }
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "本校在读本科生与研究生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e2",
+              "label": "教材闲置浪费",
+              "type": "pain_point"
+            },
+            {
+              "id": "e3",
+              "label": "新生买书贵",
+              "type": "pain_point"
+            },
+            {
+              "id": "e4",
+              "label": "校园二手教材交易平台",
+              "type": "solution"
+            },
+            {
+              "id": "e5",
+              "label": "ISBN扫描技术",
+              "type": "technology"
+            },
+            {
+              "id": "e6",
+              "label": "小程序开发技术",
+              "type": "technology"
+            },
+            {
+              "id": "e7",
+              "label": "单校市场（约2万学生）",
+              "type": "market"
+            },
+            {
+              "id": "e8",
+              "label": "闲鱼、转转",
+              "type": "competitor"
+            },
+            {
+              "id": "e9",
+              "label": "校团委创业场地支持",
+              "type": "resource"
+            },
+            {
+              "id": "e10",
+              "label": "5%服务费+优先展示特权",
+              "type": "business_model"
+            },
+            {
+              "id": "e11",
+              "label": "3名大四经管学生+1名大三计科学生",
+              "type": "team"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "面临"
+            },
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "面临"
+            },
+            {
+              "source": "e4",
+              "target": "e2",
+              "relation": "解决"
+            },
+            {
+              "source": "e4",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e5",
+              "target": "e4",
+              "relation": "使用"
+            },
+            {
+              "source": "e6",
+              "target": "e4",
+              "relation": "使用"
+            },
+            {
+              "source": "e7",
+              "target": "e4",
+              "relation": "针对"
+            },
+            {
+              "source": "e8",
+              "target": "e4",
+              "relation": "被竞争"
+            },
+            {
+              "source": "e9",
+              "target": "e4",
+              "relation": "提供"
+            },
+            {
+              "source": "e10",
+              "target": "e4",
+              "relation": "采用"
+            },
+            {
+              "source": "e11",
+              "target": "e4",
+              "relation": "负责"
+            }
+          ],
+          "structural_gaps": [
+            "缺少用户验证数据",
+            "缺少盈利模式分析"
+          ],
+          "content_strengths": [
+            "目标用户明确",
+            "商业模式清晰",
+            "团队结构合理"
+          ],
+          "completeness_score": 6,
+          "section_scores": {
+            "problem_definition": 6,
+            "user_evidence": 2,
+            "solution_feasibility": 5,
+            "business_model": 4,
+            "competitive_advantage": 3,
+            "market_analysis": 3,
+            "team_resources": 4
+          },
+          "insight": "项目具备清晰的校园场景定位和可行的商业模式，但需要补充用户需求验证数据和盈利模式分析"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.6061,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5812,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.581,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          }
+        ],
+        "web_search": {},
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 9,
+          "covered_count": 9,
+          "total_dimensions": 10,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "本校在读本科生与研究生"
+              ]
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": true,
+              "count": 2,
+              "entities": [
+                "教材闲置浪费",
+                "新生买书贵"
+              ]
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "校园二手教材交易平台"
+              ]
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": true,
+              "count": 2,
+              "entities": [
+                "ISBN扫描技术",
+                "小程序开发技术"
+              ]
+            },
+            "market": {
+              "name": "市场环境",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "单校市场（约2万学生）"
+              ]
+            },
+            "competitor": {
+              "name": "竞品对手",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "闲鱼、转转"
+              ]
+            },
+            "resource": {
+              "name": "关键资源",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "校团委创业场地支持"
+              ]
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "5%服务费+优先展示特权"
+              ]
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "3名大四经管学生+1名大三计科学生"
+              ]
+            },
+            "evidence": {
+              "name": "验证证据",
+              "covered": false,
+              "count": 0,
+              "entities": []
+            }
+          },
+          "cross_links": [
+            {
+              "from_dim": "目标用户",
+              "relation": "面临",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "目标用户",
+              "relation": "面临",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "解决",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "解决",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "技术路线",
+              "relation": "使用",
+              "to_dim": "解决方案"
+            },
+            {
+              "from_dim": "技术路线",
+              "relation": "使用",
+              "to_dim": "解决方案"
+            },
+            {
+              "from_dim": "市场环境",
+              "relation": "针对",
+              "to_dim": "解决方案"
+            },
+            {
+              "from_dim": "竞品对手",
+              "relation": "被竞争",
+              "to_dim": "解决方案"
+            }
+          ],
+          "missing_dimensions": [
+            {
+              "dimension": "验证证据",
+              "importance": "极高",
+              "recommendation": "请补充验证证据相关的描述"
+            }
+          ],
+          "hub_entities": [
+            {
+              "entity": "校园二手教材交易平台",
+              "connections": 9
+            },
+            {
+              "entity": "本校在读本科生与研究生",
+              "connections": 2
+            },
+            {
+              "entity": "教材闲置浪费",
+              "connections": 2
+            },
+            {
+              "entity": "新生买书贵",
+              "connections": 2
+            }
+          ],
+          "pattern_warnings": [],
+          "pattern_strengths": [
+            {
+              "note": "用户-痛点-方案三角关系完整，项目逻辑基础扎实"
+            },
+            {
+              "note": "技术路线与市场定位都有涉及，项目可行性有基础"
+            },
+            {
+              "note": "跨维度联动较多(11条)，说明项目内在逻辑串联较好"
+            },
+            {
+              "note": "有4条完整价值链路，项目逻辑闭环性强"
+            }
+          ],
+          "value_loops": [
+            {
+              "chain": "用户→痛点→方案",
+              "complete": true,
+              "dims": [
+                "stakeholder",
+                "pain_point",
+                "solution"
+              ]
+            },
+            {
+              "chain": "方案→商业模式",
+              "complete": true,
+              "dims": [
+                "solution",
+                "business_model"
+              ]
+            },
+            {
+              "chain": "完整价值环路",
+              "complete": true,
+              "dims": [
+                "stakeholder",
+                "pain_point",
+                "solution",
+                "business_model"
+              ]
+            },
+            {
+              "chain": "痛点→证据验证",
+              "complete": false,
+              "dims": [
+                "pain_point",
+                "evidence"
+              ]
+            },
+            {
+              "chain": "方案→技术实现",
+              "complete": true,
+              "dims": [
+                "solution",
+                "technology"
+              ]
+            }
+          ],
+          "complete_loops": 4,
+          "llm_insight": "项目存在两个关键断裂点：1）未通过实际数据验证\"新生买书贵\"是否构成真实购买决策障碍（需补充新生购书支出占比调研及二手教材价格敏感度测试）；2）校团委场地支持与商业闭环形成存在资源断层（需明确场地资源能否覆盖仓储物流等关键运营环节）。最紧迫的补强方向是建立\"教材定价算法+校园物流网络\"双引擎：开发基于教材版本迭代周期的动态定价模型破解闲鱼式价格混乱，同时联合校内快递点构建教材循环配送体系，这两项能力建设将直接决定能否在单校市场突破20%渗透率。"
+        },
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 5.0,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？"
+          },
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。"
+          }
+        ],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "bd18a14c-9a93-46fa-b70a-a995a48cc47c",
+      "created_at": "2026-03-26T17:12:15.035661"
+    },
+    {
+      "student_id": "None",
+      "class_id": "None",
+      "cohort_id": "None",
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "学生画像 UserProfile_Biz\n年级：大四\n专业：经管\n兴趣：电商 + 校园服务 + 二手循环经济\n\n项目草案 Project Draft（逻辑基本合理，几乎无明显漏洞，用于测试系统稳定评分能力）\n项目名：CampusBook（校园二手教材交易平台）\n目标用户：本校在读本科生与研究生，重点面向每学期开学和期末有教材流转需求的学生。\n价值主张：帮助学生以更低价格购买教材，同时帮助高年级学生快速出售闲置教材，减少资源浪费。\n核心功能：学生发布二手教材信息（扫 ISBN 码自动填书名）、平台同校快速匹配、支持校园驿站免费寄存与自提。\n获客渠道：在校园微信群/QQ群推广、与学生会合作进行开学季地推、在宿舍区和图书馆张贴二维码海报。\n定价模式：平台对成交订单收取 5% 服务费；卖家可购买“优先展示”特权（2 元/次）。\n竞争分析：主要替代方案是闲鱼、转转等综合平台。我们的差异点是聚焦“同校交易”，免除了快递物流成本，且同校学长学姐交易信任度更高。\n市场规模：以单校为切入点（约 2 万学生），目前团队通过主观推测约 30% 学生有交易需求，下周计划发放 500 份问卷获取大样本验证数据。验证成功后可复制至本市大学城其他高校。\n财务假设：初期主要成本为云服务器费用（约 200 元/月）与校园地推物料（约 500 元）。单校预计月成交 500 单左右，平台可获得约 1000–1500 元服务费，实现微利运转。\n团队与资源：3 名大四经管学生，1 名大三计科学生负责小程序开发，已获得校团委的创业场地支持。\n里程碑计划：第 1 个月上线小程序 MVP 并在本校测试；第 3 个月验证交易闭环与用户留存；第 6 个月扩展至本大学城 3–5 所高校。\n路演叙事：从“教材闲置浪费、新生买书贵”这一真实场景切入，展示学生交易场景与平台撮合价值，强调低成本验证与逐步扩张的稳健策略。是不是已经很成熟了",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 6.51,
+        "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium",
+            "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+            "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+            "matched_keywords": [
+              "定价"
+            ],
+            "missing_requires": [
+              "支付意愿",
+              "愿意付费"
+            ]
+          },
+          {
+            "id": "H4",
+            "name": "TAM/SAM/SOM口径混乱",
+            "severity": "high",
+            "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+            "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+            "matched_keywords": [
+              "市场规模"
+            ],
+            "missing_requires": []
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 5.4,
+            "status": "ok",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 9.8,
+            "status": "ok",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 7.0,
+            "status": "ok",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 9.0,
+            "status": "ok",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "补齐证据并完成一次压力测试",
+        "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+        "acceptance_criteria": [
+          "新增3条可验证证据",
+          "完成1轮压力测试问答",
+          "更新修正后的版本说明"
+        ]
+      },
+      "kg_analysis": {
+        "entities": [
+          {
+            "id": "e1",
+            "label": "本校在读本科生与研究生",
+            "type": "stakeholder"
+          },
+          {
+            "id": "e2",
+            "label": "教材闲置浪费",
+            "type": "pain_point"
+          },
+          {
+            "id": "e3",
+            "label": "新生买书贵",
+            "type": "pain_point"
+          },
+          {
+            "id": "e4",
+            "label": "CampusBook",
+            "type": "solution"
+          },
+          {
+            "id": "e5",
+            "label": "闲鱼、转转",
+            "type": "competitor"
+          },
+          {
+            "id": "e6",
+            "label": "单校约2万学生",
+            "type": "market"
+          },
+          {
+            "id": "e7",
+            "label": "校团委创业场地",
+            "type": "resource"
+          },
+          {
+            "id": "e8",
+            "label": "5%服务费+优先展示特权",
+            "type": "business_model"
+          },
+          {
+            "id": "e9",
+            "label": "3名经管学生+1名计科学生",
+            "type": "team"
+          },
+          {
+            "id": "e10",
+            "label": "计划发放500份问卷",
+            "type": "evidence"
+          }
+        ],
+        "relationships": [
+          {
+            "source": "e1",
+            "target": "e2",
+            "relation": "面临"
+          },
+          {
+            "source": "e1",
+            "target": "e3",
+            "relation": "面临"
+          },
+          {
+            "source": "e4",
+            "target": "e2",
+            "relation": "解决"
+          },
+          {
+            "source": "e4",
+            "target": "e3",
+            "relation": "解决"
+          },
+          {
+            "source": "e4",
+            "target": "e5",
+            "relation": "差异化竞争"
+          },
+          {
+            "source": "e4",
+            "target": "e6",
+            "relation": "针对"
+          },
+          {
+            "source": "e4",
+            "target": "e8",
+            "relation": "采用"
+          },
+          {
+            "source": "e9",
+            "target": "e7",
+            "relation": "获得"
+          },
+          {
+            "source": "e4",
+            "target": "e10",
+            "relation": "验证"
+          }
+        ],
+        "structural_gaps": [
+          "缺少技术实现细节",
+          "问卷数据尚未收集"
+        ],
+        "content_strengths": [
+          "目标用户定位精准",
+          "商业模式清晰可行",
+          "团队具备跨学科能力"
+        ],
+        "completeness_score": 7,
+        "section_scores": {
+          "problem_definition": 8,
+          "user_evidence": 3,
+          "solution_feasibility": 7,
+          "business_model": 7,
+          "competitive_advantage": 6
+        },
+        "insight": "项目具备清晰的校园场景切入点和可验证的扩展路径，但需补充技术实现细节并完成用户数据验证"
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新类项目常见风险组合：compliance_not_covered、weak_user_evidence（6个项目出现此模式）",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ],
+            "nodes": [
+              "Category::科技创新",
+              "RiskRule::compliance_not_covered",
+              "RiskRule::weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_008",
+            "type": "Risk_Pattern_Edge",
+            "support": 4,
+            "teaching_note": "科技创新类项目常见风险组合：market_size_fallacy、weak_user_evidence（4个项目出现此模式）",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "nodes": [
+              "Category::科技创新",
+              "RiskRule::market_size_fallacy",
+              "RiskRule::weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_009",
+            "type": "Risk_Pattern_Edge",
+            "support": 3,
+            "teaching_note": "医疗健康类项目常见风险组合：market_size_fallacy、no_competitor_claim、weak_user_evidence（3个项目出现此模式）",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "no_competitor_claim",
+              "weak_user_evidence"
+            ],
+            "nodes": [
+              "Category::医疗健康",
+              "RiskRule::market_size_fallacy",
+              "RiskRule::no_competitor_claim",
+              "RiskRule::weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H4"
+          ],
+          "expanded_rule_ids": [
+            "H3",
+            "H4",
+            "market_size_fallacy"
+          ]
+        },
+        "topology": {
+          "hub_nodes": [
+            {
+              "node": "RiskRule::weak_user_evidence",
+              "degree": 36,
+              "interpretation": "风险规则「weak_user_evidence」关联36种模式，是最普遍的问题"
+            },
+            {
+              "node": "RiskRule::compliance_not_covered",
+              "degree": 22,
+              "interpretation": "风险规则「compliance_not_covered」关联22种模式，是最普遍的问题"
+            },
+            {
+              "node": "RiskRule::market_size_fallacy",
+              "degree": 16,
+              "interpretation": "风险规则「market_size_fallacy」关联16种模式，是最普遍的问题"
+            },
+            {
+              "node": "RiskRule::no_competitor_claim",
+              "degree": 11,
+              "interpretation": "风险规则「no_competitor_claim」关联11种模式，是最普遍的问题"
+            },
+            {
+              "node": "Category::科技创新",
+              "degree": 7,
+              "interpretation": "「科技创新」类别出现在7种超边中，是最活跃的赛道"
+            }
+          ],
+          "avg_edge_size": 3.1,
+          "max_edge_size": 4
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 45,
+          "node_count": 16
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "evidence_check",
+          "confidence": 0.7,
+          "engine": "rule",
+          "pipeline": [
+            "coach",
+            "analyst",
+            "planner"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "评分官",
+            "行动规划师"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "总体判断：CampusBook的校园二手教材交易平台方向具备现实价值，核心逻辑链路清晰，但需在市场定义和用户验证环节加强严谨性。项目已构建起从资源浪费痛点到解决方案的完整闭环，但关键数据支撑不足可能影响后续融资或规模化判断。\n\n逻辑链路梳理：目标用户（本校2万本科生/研究生）→痛点（教材闲置率高/新生购书成本高）→方案（ISBN扫码发布、同校匹配、校园驿站自提）→变现（5%服务费+2元优先展示）→壁垒（校内信任关系+零物流成本）。该模型与\"推送家\"案例中通过细分场景建立垂直交易平台的路径相似，但需注意教育场景的特殊性。\n\n关键问题分析：\n1. **TAM/SAM/SOM口径混乱**：学生提到\"30%学生有交易需求\"属于主观推测，而参考案例2通过\"高校新媒体矩阵由第三方提供制作服务推文占比\"等具体数据锚定市场。建议区分教材交易频次（如每学期2-3次）与单次交易金额（二手教材价格区间），例如可参考闲鱼2023年校园二手交易报告显示，教材类目平均交易频次达4.2次/学期，单本成交价为原价的45-60%。\n\n2. **支付意愿证据缺失**：5%服务费和2元增值服务的定价策略缺乏用户行为验证。学生需补充类似\"推送家\"案例中\"30000多篇原创文章带来价值百亿市场\"的量化依据，建议设计阶梯式定价测试（如0.5%-10%服务费区间）并结合问卷结果中的最大可接受服务费率进行校准。\n\n技术实现建议：参考元界创生案例中\"云交互空间智能生成技术\"的模块化设计思路，建议将ISBN扫码识别、同校匹配算法、驿站自提系统作为技术验证的三个核心模块。当前团队中仅有1名计科学生，需明确小程序开发周期（建议按3个月估算基础功能开发）和服务器选型（是否采用学校现有资源降低初期成本）。\n\n下一步行动：\n- **本周内**完成500份问卷的结构化设计，重点收集：①教材闲置率（精确到年级/专业）②单本教材出售预期价格③愿意为服务费支付的最高比例\n- **下月MVP测试**时增加AB测试组，对比0.5%、1%、5%服务费率对交易量的影响\n- **扩展策略**上建议先验证\"大学城模式\"的可行性，可参考推送家案例中\"新媒体交易云平台\"的同城复制路径，测算单校运营团队与多校共享客服系统的成本差异",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "CampusBook项目在校园二手教材细分赛道的切入点具备现实价值，其\"同校信任+零物流成本\"的差异化定位与\"推送家\"等垂直平台案例存在可比性。经管专业团队对交易场景的拆解（ISBN扫码发布、驿站自提）和成本结构预估（200元/月云服务器）显示出专业素养，但需警惕三个关键风险点：\n\n1. **市场规模测算需强化数据支撑**：当前\"30%学生有交易需求\"的假设缺乏实证基础。若问卷验证后实际需求率低于20%，单校月交易量将从500单骤降至333单，服务费收入可能跌破盈亏平衡点（按当前成本结构测算，需至少300单/月）。建议追问\"如何通过问卷设计区分'有交易意愿'与'有实际交易行为'的用户？\"\n\n2. **定价模型存在支付意愿验证缺口**：5%服务费的设定未体现对二手教材价格敏感度的分析。若用户普遍接受闲鱼等综合平台的0佣金模式，2元/次的优先展示费可能难以形成有效付费转化。可对比\"优先展示\"在校园场景中的实际价值（如缩短30%的成交时间），并追问\"是否有历史交易数据证明2元定价与用户时间成本的匹配度？\"\n\n3. **技术实现细节影响扩展可行性**：当前技术方案仅提及\"ISBN扫码发布\"，但未说明如何处理教材版本差异（如影印版与正版）、如何构建跨校数据隔离机制（确保各校交易数据独立）。若采用通用ISBN数据库，可能面临教材定制化版本识别率不足（预估低于60%）导致的用户体验问题，这将直接影响\"复制至大学城\"的扩张计划。\n\n建议团队优先完成两件事：①通过问卷收集教材版本分布数据，验证ISBN自动匹配的准确率；②设计A/B测试方案，比较0.5元/1元/2元三个优先展示价格档位对卖家行为的影响。这两个动作将直接解决H3和H4风险，为后续融资提供关键证据链。",
+            "tools_used": [
+              "diagnosis",
+              "kg_analysis",
+              "hypergraph_student"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {
+            "agent": "评分官",
+            "analysis": "评审反馈报告：\n\n当前项目总分为6.51/10，呈现明显两极分化特征。优势维度集中在用户证据（9.0）、解决方案可行性（9.0）、商业模式一致性（9.8）、团队执行能力（9.0）和展示质量（9.0），显示出扎实的市场验证基础和清晰的商业逻辑。但财务逻辑（0.0）和创新差异化（0.0）两个维度严重拖累整体表现，这两个维度合计占比约20%，直接导致总分无法突破7分门槛。\n\n财务逻辑维度失分源于完全缺失财务模型支撑。建议补充：1）三年期收入预测（需包含用户增长曲线、客单价测算）；2）成本结构分析（固定/变动成本占比、边际成本变化）；3）关键财务指标（毛利率、净利率、ROI）；4）融资需求与资金使用计划（需对应具体业务发展阶段）。创新差异化维度失分主要因为未体现技术壁垒或模式创新，需明确：1）核心专利/技术独占性（如AI算法、材料创新等）；2）用户价值主张的不可替代性（如解决传统方案无法处理的特定场景）；3）与竞品的差异化对比矩阵（至少3个关键维度的量化对比）。\n\n项目距离优秀（8/10）还差1.49分，需重点补足以下短板：1）建立完整的财务模型，建议增加\"财务测算表+敏感性分析\"模块；2）强化创新性论证，建议补充\"技术专利证书/研发成果证明\"及\"创新应用场景案例\"。同时建议优化市场分析维度，增加行业增长数据支撑（如引用第三方机构预测）、完善竞争分析框架（建议采用波特五力模型），并深化问题定义部分，通过用户访谈视频/痛点调研报告增强说服力。",
+            "tools_used": [
+              "rubric_engine",
+              "kg_scores"
+            ]
+          },
+          "planner": {
+            "agent": "行动规划师",
+            "analysis": "本周建议行动:\n- **完成500份问卷数据收集与分析**: ['设计包含教材闲置率/购书支出/交易频率等核心指标的问卷', '通过校园微信群/QQ群定向发放500份问卷', '回收后用SPSS进行交叉分析（重点关注专业/年级/购书金额分布）', '将结果与闲鱼/转转现有校园交易数据对比', '根据实际数据调整市场规模测算模型']\n  验收标准: 回收有效问卷≥400份，输出包含闲置率/交易意愿/客单价的统计分析报告\n- **制定ISBN扫码功能技术实现方案**: ['调研OCR技术（如百度AI开放平台）与ISBN数据库接口方案', '设计扫码后自动填充书名/作者/定价的交互流程图', '与计科同学确认开发周期（需兼容微信小程序环境）', '制定测试用例（包含破损ISBN码/多版本教材等场景）', '输出包含技术选型/开发排期/成本预估的文档']\n  验收标准: 完成技术方案文档，明确开发所需时间/预算/第三方接口选择\n\n阶段目标: 完成本校用户需求验证与技术可行性确认，为MVP开发提供数据支撑",
+            "tools_used": [
+              "diagnosis",
+              "next_task",
+              "critic"
+            ],
+            "plan_data": {
+              "this_week": [
+                {
+                  "task": "完成500份问卷数据收集与分析",
+                  "why": "验证单校2万学生中30%交易需求的主观推测，明确TAM/SAM/SOM分层逻辑",
+                  "how": [
+                    "设计包含教材闲置率/购书支出/交易频率等核心指标的问卷",
+                    "通过校园微信群/QQ群定向发放500份问卷",
+                    "回收后用SPSS进行交叉分析（重点关注专业/年级/购书金额分布）",
+                    "将结果与闲鱼/转转现有校园交易数据对比",
+                    "根据实际数据调整市场规模测算模型"
+                  ],
+                  "acceptance": "回收有效问卷≥400份，输出包含闲置率/交易意愿/客单价的统计分析报告"
+                },
+                {
+                  "task": "制定ISBN扫码功能技术实现方案",
+                  "why": "确保核心功能开发可行性，避免技术路线模糊导致资源浪费",
+                  "how": [
+                    "调研OCR技术（如百度AI开放平台）与ISBN数据库接口方案",
+                    "设计扫码后自动填充书名/作者/定价的交互流程图",
+                    "与计科同学确认开发周期（需兼容微信小程序环境）",
+                    "制定测试用例（包含破损ISBN码/多版本教材等场景）",
+                    "输出包含技术选型/开发排期/成本预估的文档"
+                  ],
+                  "acceptance": "完成技术方案文档，明确开发所需时间/预算/第三方接口选择"
+                }
+              ],
+              "milestone": "完成本校用户需求验证与技术可行性确认，为MVP开发提供数据支撑"
+            }
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "本校在读本科生与研究生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e2",
+              "label": "教材闲置浪费",
+              "type": "pain_point"
+            },
+            {
+              "id": "e3",
+              "label": "新生买书贵",
+              "type": "pain_point"
+            },
+            {
+              "id": "e4",
+              "label": "CampusBook",
+              "type": "solution"
+            },
+            {
+              "id": "e5",
+              "label": "闲鱼、转转",
+              "type": "competitor"
+            },
+            {
+              "id": "e6",
+              "label": "单校约2万学生",
+              "type": "market"
+            },
+            {
+              "id": "e7",
+              "label": "校团委创业场地",
+              "type": "resource"
+            },
+            {
+              "id": "e8",
+              "label": "5%服务费+优先展示特权",
+              "type": "business_model"
+            },
+            {
+              "id": "e9",
+              "label": "3名经管学生+1名计科学生",
+              "type": "team"
+            },
+            {
+              "id": "e10",
+              "label": "计划发放500份问卷",
+              "type": "evidence"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "面临"
+            },
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "面临"
+            },
+            {
+              "source": "e4",
+              "target": "e2",
+              "relation": "解决"
+            },
+            {
+              "source": "e4",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e4",
+              "target": "e5",
+              "relation": "差异化竞争"
+            },
+            {
+              "source": "e4",
+              "target": "e6",
+              "relation": "针对"
+            },
+            {
+              "source": "e4",
+              "target": "e8",
+              "relation": "采用"
+            },
+            {
+              "source": "e9",
+              "target": "e7",
+              "relation": "获得"
+            },
+            {
+              "source": "e4",
+              "target": "e10",
+              "relation": "验证"
+            }
+          ],
+          "structural_gaps": [
+            "缺少技术实现细节",
+            "问卷数据尚未收集"
+          ],
+          "content_strengths": [
+            "目标用户定位精准",
+            "商业模式清晰可行",
+            "团队具备跨学科能力"
+          ],
+          "completeness_score": 7,
+          "section_scores": {
+            "problem_definition": 8,
+            "user_evidence": 3,
+            "solution_feasibility": 7,
+            "business_model": 7,
+            "competitive_advantage": 6
+          },
+          "insight": "项目具备清晰的校园场景切入点和可验证的扩展路径，但需补充技术实现细节并完成用户数据验证"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.6099,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5818,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.5806,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          }
+        ],
+        "web_search": {},
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 9,
+          "covered_count": 9,
+          "total_dimensions": 10,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "本校在读本科生与研究生"
+              ]
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": true,
+              "count": 2,
+              "entities": [
+                "教材闲置浪费",
+                "新生买书贵"
+              ]
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "CampusBook"
+              ]
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": false,
+              "count": 0,
+              "entities": []
+            },
+            "market": {
+              "name": "市场环境",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "单校约2万学生"
+              ]
+            },
+            "competitor": {
+              "name": "竞品对手",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "闲鱼、转转"
+              ]
+            },
+            "resource": {
+              "name": "关键资源",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "校团委创业场地"
+              ]
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "5%服务费+优先展示特权"
+              ]
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "3名经管学生+1名计科学生"
+              ]
+            },
+            "evidence": {
+              "name": "验证证据",
+              "covered": true,
+              "count": 1,
+              "entities": [
+                "计划发放500份问卷"
+              ]
+            }
+          },
+          "cross_links": [
+            {
+              "from_dim": "目标用户",
+              "relation": "面临",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "目标用户",
+              "relation": "面临",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "解决",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "解决",
+              "to_dim": "痛点问题"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "差异化竞争",
+              "to_dim": "竞品对手"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "针对",
+              "to_dim": "市场环境"
+            },
+            {
+              "from_dim": "解决方案",
+              "relation": "采用",
+              "to_dim": "商业模式"
+            },
+            {
+              "from_dim": "团队能力",
+              "relation": "获得",
+              "to_dim": "关键资源"
+            }
+          ],
+          "missing_dimensions": [
+            {
+              "dimension": "技术路线",
+              "importance": "高",
+              "recommendation": "请补充技术路线相关的描述"
+            }
+          ],
+          "hub_entities": [
+            {
+              "entity": "CampusBook",
+              "connections": 6
+            },
+            {
+              "entity": "本校在读本科生与研究生",
+              "connections": 2
+            },
+            {
+              "entity": "教材闲置浪费",
+              "connections": 2
+            },
+            {
+              "entity": "新生买书贵",
+              "connections": 2
+            }
+          ],
+          "pattern_warnings": [],
+          "pattern_strengths": [
+            {
+              "note": "用户-痛点-方案三角关系完整，项目逻辑基础扎实"
+            },
+            {
+              "note": "跨维度联动较多(9条)，说明项目内在逻辑串联较好"
+            },
+            {
+              "note": "有4条完整价值链路，项目逻辑闭环性强"
+            }
+          ],
+          "value_loops": [
+            {
+              "chain": "用户→痛点→方案",
+              "complete": true,
+              "dims": [
+                "stakeholder",
+                "pain_point",
+                "solution"
+              ]
+            },
+            {
+              "chain": "方案→商业模式",
+              "complete": true,
+              "dims": [
+                "solution",
+                "business_model"
+              ]
+            },
+            {
+              "chain": "完整价值环路",
+              "complete": true,
+              "dims": [
+                "stakeholder",
+                "pain_point",
+                "solution",
+                "business_model"
+              ]
+            },
+            {
+              "chain": "痛点→证据验证",
+              "complete": true,
+              "dims": [
+                "pain_point",
+                "evidence"
+              ]
+            },
+            {
+              "chain": "方案→技术实现",
+              "complete": false,
+              "dims": [
+                "solution",
+                "technology"
+              ]
+            }
+          ],
+          "complete_loops": 4,
+          "llm_insight": "关键断裂点：技术路线缺失导致解决方案无法落地，尤其在与闲鱼/转转的竞争中缺乏差异化技术壁垒。最紧迫补强方向是明确CampusBook的技术架构（如开发基于LBS的校园二手教材交易系统、电子书资源聚合平台或教材租赁管理系统），并评估现有团队能否支撑核心功能开发（如计科学生是否具备移动端开发、支付接口对接能力）。需优先确定技术可行性，否则问卷验证将失去产品迭代基础。"
+        },
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 5.0,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？"
+          },
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。"
+          }
+        ],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "8122716c-516d-4a39-aeee-cfccaa5ef423",
+      "created_at": "2026-03-26T17:18:19.616892"
+    }
+  ],
+  "teacher_feedback": [],
+  "teacher_annotations": [],
+  "teacher_feedback_files": [],
+  "teacher_document_edits": []
+}

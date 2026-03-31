@@ -1,0 +1,1664 @@
+{
+  "project_id": "demo-project-llm",
+  "submissions": [
+    {
+      "student_id": "student-001",
+      "class_id": "2026A",
+      "cohort_id": "2026-Spring",
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "????????????,??????????,??????????????,?????????????????",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "需求证据不足，导致项目落地可行性受到严重影响。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+        "socratic_questions": [
+          "你们如何确定目标用户群体的需求是真实存在的？",
+          "你们是否进行了用户调研或市场研究来支持你们的需求假设？",
+          "你们如何确保你们的解决方案能够解决用户的具体问题？",
+          "你们是否有具体的用户反馈或案例来证明需求的存在？"
+        ]
+      },
+      "next_task": {
+        "title": "收集用户需求证据",
+        "description": "为了增强项目的可行性，需要通过用户调研、市场研究或案例分析来收集具体的用户需求证据。",
+        "acceptance_criteria": [
+          "提交一份详细的用户需求调研报告，包括调研方法、样本量、调研结果和分析。",
+          "提供至少三个具体的用户案例，证明需求的存在和对解决方案的需求。",
+          "更新项目文档，包含新的用户需求证据，以增强项目的可行性。"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "router": {
+          "focus": [
+            "coursework"
+          ],
+          "tone": "neutral",
+          "risk_level": "low",
+          "should_call": [
+            "student_learning"
+          ],
+          "engine": "llm"
+        },
+        "memory": [],
+        "student_learning": {
+          "agent": "student_learning",
+          "mode": "coursework",
+          "definition": "创新创业课程旨在培养学生识别和利用商业机会的能力，包括但不限于市场分析、产品开发、团队建设、资金筹集、风险评估等方面。",
+          "example": "学生团队开发了一款基于人工智能的健康监测应用，通过市场调研确定目标用户群体，设计产品功能，制定营销策略，并通过路演向潜在投资者展示。",
+          "common_mistakes": [
+            "忽视市场需求",
+            "团队合作不力",
+            "资金管理不当",
+            "产品定位模糊",
+            "缺乏持续创新"
+          ],
+          "practice_task": "选择一个你感兴趣的领域，进行初步的市场调研，确定潜在的商业机会，然后设计一个初步的商业计划。",
+          "expected_artifact": "一份详细的商业计划书，包括市场分析、产品或服务描述、营销策略、团队介绍、财务预测等。",
+          "evaluation_criteria": [
+            "市场分析的深度和准确性",
+            "商业计划的创新性和可行性",
+            "团队合作的表现",
+            "财务预测的合理性",
+            "展示和沟通的效果"
+          ],
+          "engine": "llm"
+        },
+        "project_coach": {
+          "agent": "project_coach",
+          "category_inference": "科技创新",
+          "diagnosis": {
+            "mode": "coursework",
+            "overall_score": 0.0,
+            "bottleneck": "需求证据不足，导致项目落地可行性受到严重影响。",
+            "triggered_rules": [
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H14",
+                "name": "路演叙事断裂",
+                "severity": "low"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              }
+            ],
+            "rubric": [
+              {
+                "item": "Problem Definition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "User Evidence Strength",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Solution Feasibility",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Business Model Consistency",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Market & Competition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Financial Logic",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Innovation & Differentiation",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Team & Execution",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              },
+              {
+                "item": "Presentation Quality",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              }
+            ],
+            "capability_map": [
+              {
+                "stage": "痛点发现",
+                "dimension": "敏锐度与同理心",
+                "focus": "识别真需求并给出用户证据"
+              },
+              {
+                "stage": "方案策划",
+                "dimension": "创造力与可行性",
+                "focus": "验证创新点并匹配资源"
+              },
+              {
+                "stage": "商业建模",
+                "dimension": "商业逻辑性",
+                "focus": "打通价值-渠道-收入闭环"
+              },
+              {
+                "stage": "团队与资源",
+                "dimension": "协作与执行力",
+                "focus": "分工、里程碑与交付能力"
+              },
+              {
+                "stage": "路演表达",
+                "dimension": "叙事与抗压",
+                "focus": "结构完整、数据可信、问答稳定"
+              }
+            ],
+            "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+            "socratic_questions": [
+              "你们如何确定目标用户群体的需求是真实存在的？",
+              "你们是否进行了用户调研或市场研究来支持你们的需求假设？",
+              "你们如何确保你们的解决方案能够解决用户的具体问题？",
+              "你们是否有具体的用户反馈或案例来证明需求的存在？"
+            ]
+          },
+          "next_task": {
+            "title": "收集用户需求证据",
+            "description": "为了增强项目的可行性，需要通过用户调研、市场研究或案例分析来收集具体的用户需求证据。",
+            "acceptance_criteria": [
+              "提交一份详细的用户需求调研报告，包括调研方法、样本量、调研结果和分析。",
+              "提供至少三个具体的用户案例，证明需求的存在和对解决方案的需求。",
+              "更新项目文档，包含新的用户需求证据，以增强项目的可行性。"
+            ]
+          },
+          "reference_cases": [
+            {
+              "case_id": "case_8af36c2560a3",
+              "category": "科技创新",
+              "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+              "confidence": 0.75
+            },
+            {
+              "case_id": "case_f7a843988992",
+              "category": "科技创新",
+              "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+              "confidence": 0.9
+            },
+            {
+              "case_id": "case_45b1ac814edb",
+              "category": "科技创新",
+              "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+              "confidence": 0.9
+            }
+          ],
+          "engine": "llm+rule"
+        },
+        "competition_advisor": {
+          "agent": "competition_advisor",
+          "skipped": true
+        },
+        "instructor_assistant": {
+          "agent": "instructor_assistant",
+          "skipped": true
+        },
+        "critic": {
+          "challenge_points": [
+            "需求证据不足，导致项目落地可行性受到严重影响。"
+          ],
+          "missing_evidence": [
+            "用户调研或市场研究的数据和报告",
+            "具体的用户案例",
+            "更新的项目文档，包含新的用户需求证据"
+          ],
+          "counterfactual_questions": [
+            "如果项目已经进行了用户调研或市场研究，是否可以提高项目的可行性？",
+            "是否有其他方法可以验证需求的存在性，而不仅仅是用户案例？",
+            "如果项目文档已经更新，是否可以重新评估项目的可行性？"
+          ],
+          "engine": "llm"
+        },
+        "grader": {
+          "overall_score": 2.0,
+          "grading_comment": "项目在多个方面存在严重不足，特别是需求证据和创新点验证方面。这些不足严重影响了项目的落地可行性。建议进行更深入的用户调研和市场研究，以增强需求证据的可信度，并通过实验设计来验证创新点。",
+          "strongest_dim": [],
+          "weakest_dim": [
+            "需求证据",
+            "创新点验证"
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "engine": "llm"
+        },
+        "planner": {
+          "execution_plan": [
+            "收集用户需求证据",
+            "提交一份详细的用户需求调研报告，包括调研方法、样本量、调研结果和分析",
+            "提供至少三个具体的用户案例，证明需求的存在和对解决方案的需求",
+            "更新项目文档，包含新的用户需求证据，以增强项目的可行性"
+          ],
+          "next_24h_goal": "开始进行用户调研或市场研究，收集初步数据",
+          "next_72h_goal": "完成用户需求调研报告，并提供至少三个具体的用户案例",
+          "checkpoint": [
+            "提交用户需求调研报告",
+            "提供用户案例",
+            "更新项目文档"
+          ],
+          "engine": "llm"
+        },
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "called_agents": [
+            "student_learning"
+          ]
+        }
+      },
+      "submission_id": "baf2a21e-e47c-4546-ab22-2c31ad5836a3",
+      "created_at": "2026-03-14T01:16:21.485473"
+    },
+    {
+      "student_id": "student-001",
+      "class_id": "2026A",
+      "cohort_id": "2026-Spring",
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "??????5???,??????????,?????????",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "需求证据不足，导致项目需求的真实性与用户接受度无法验证，影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+        "socratic_questions": [
+          "你们是如何确定目标用户群体的需求的？",
+          "你们是否进行了用户访谈或市场调研以验证需求的真实性？",
+          "你们的解决方案是否基于对用户需求的深入理解？",
+          "你们是否有具体的用户反馈或数据来支持你们的需求假设？",
+          "你们如何确保解决方案能够满足目标用户的需求？"
+        ]
+      },
+      "next_task": {
+        "title": "收集并验证用户需求证据",
+        "description": "通过用户访谈、问卷调查、市场调研等方式，收集并验证用户需求的真实性与强度，确保项目需求的准确性和用户接受度。",
+        "acceptance_criteria": [
+          "完成至少50份用户访谈或问卷调查",
+          "整理并分析用户反馈，形成需求验证报告",
+          "报告中包含用户需求的强度、真实性及解决方案的匹配度",
+          "用户需求验证报告获得项目指导教师的认可"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "router": {
+          "focus": [
+            "收集用户需求证据"
+          ],
+          "tone": "专业",
+          "risk_level": "medium",
+          "should_call": [
+            "student_learning"
+          ],
+          "engine": "llm"
+        },
+        "memory": [
+          {
+            "ts": "2026-03-14T01:16:21.485473",
+            "text": "????????????,??????????,??????????????,?????????????????",
+            "rules": [
+              "H3",
+              "H5",
+              "H7",
+              "H13"
+            ],
+            "next_task": {
+              "title": "收集用户需求证据",
+              "description": "为了增强项目的可行性，需要通过用户调研、市场研究或案例分析来收集具体的用户需求证据。",
+              "acceptance_criteria": [
+                "提交一份详细的用户需求调研报告，包括调研方法、样本量、调研结果和分析。",
+                "提供至少三个具体的用户案例，证明需求的存在和对解决方案的需求。",
+                "更新项目文档，包含新的用户需求证据，以增强项目的可行性。"
+              ]
+            }
+          }
+        ],
+        "student_learning": {
+          "agent": "student_learning",
+          "mode": "coursework",
+          "definition": "创新创业课程旨在培养学生识别和把握商业机会的能力，通过理论学习和实践操作，使学生能够理解和掌握创新思维、创业精神以及创业过程中的关键技能。",
+          "example": "学生通过学习创新创业课程，掌握了市场调研、商业计划书撰写、团队组建和管理等技能，并成功地将一个创意转化为实际的商业项目。",
+          "common_mistakes": [
+            "过分依赖理论而忽视实践操作",
+            "缺乏明确的商业目标",
+            "忽视市场调研",
+            "团队管理不当"
+          ],
+          "practice_task": "选择一个创新项目，进行市场调研，撰写商业计划书，并组建团队进行模拟运营。",
+          "expected_artifact": "一份完整的商业计划书，以及团队模拟运营的报告。",
+          "evaluation_criteria": [
+            "项目创新性",
+            "市场调研的深度和广度",
+            "商业计划书的逻辑性和可行性",
+            "团队合作与管理能力"
+          ],
+          "engine": "llm"
+        },
+        "project_coach": {
+          "agent": "project_coach",
+          "category_inference": "科技创新",
+          "diagnosis": {
+            "mode": "coursework",
+            "overall_score": 0.0,
+            "bottleneck": "需求证据不足，导致项目需求的真实性与用户接受度无法验证，影响项目落地可行性。",
+            "triggered_rules": [
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H14",
+                "name": "路演叙事断裂",
+                "severity": "low"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              }
+            ],
+            "rubric": [
+              {
+                "item": "Problem Definition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "User Evidence Strength",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Solution Feasibility",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Business Model Consistency",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Market & Competition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Financial Logic",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Innovation & Differentiation",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Team & Execution",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              },
+              {
+                "item": "Presentation Quality",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              }
+            ],
+            "capability_map": [
+              {
+                "stage": "痛点发现",
+                "dimension": "敏锐度与同理心",
+                "focus": "识别真需求并给出用户证据"
+              },
+              {
+                "stage": "方案策划",
+                "dimension": "创造力与可行性",
+                "focus": "验证创新点并匹配资源"
+              },
+              {
+                "stage": "商业建模",
+                "dimension": "商业逻辑性",
+                "focus": "打通价值-渠道-收入闭环"
+              },
+              {
+                "stage": "团队与资源",
+                "dimension": "协作与执行力",
+                "focus": "分工、里程碑与交付能力"
+              },
+              {
+                "stage": "路演表达",
+                "dimension": "叙事与抗压",
+                "focus": "结构完整、数据可信、问答稳定"
+              }
+            ],
+            "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+            "socratic_questions": [
+              "你们是如何确定目标用户群体的需求的？",
+              "你们是否进行了用户访谈或市场调研以验证需求的真实性？",
+              "你们的解决方案是否基于对用户需求的深入理解？",
+              "你们是否有具体的用户反馈或数据来支持你们的需求假设？",
+              "你们如何确保解决方案能够满足目标用户的需求？"
+            ]
+          },
+          "next_task": {
+            "title": "收集并验证用户需求证据",
+            "description": "通过用户访谈、问卷调查、市场调研等方式，收集并验证用户需求的真实性与强度，确保项目需求的准确性和用户接受度。",
+            "acceptance_criteria": [
+              "完成至少50份用户访谈或问卷调查",
+              "整理并分析用户反馈，形成需求验证报告",
+              "报告中包含用户需求的强度、真实性及解决方案的匹配度",
+              "用户需求验证报告获得项目指导教师的认可"
+            ]
+          },
+          "reference_cases": [
+            {
+              "case_id": "case_8af36c2560a3",
+              "category": "科技创新",
+              "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+              "confidence": 0.75
+            },
+            {
+              "case_id": "case_f7a843988992",
+              "category": "科技创新",
+              "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+              "confidence": 0.9
+            },
+            {
+              "case_id": "case_45b1ac814edb",
+              "category": "科技创新",
+              "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+              "confidence": 0.9
+            }
+          ],
+          "engine": "llm+rule"
+        },
+        "competition_advisor": {
+          "agent": "competition_advisor",
+          "skipped": true
+        },
+        "instructor_assistant": {
+          "agent": "instructor_assistant",
+          "skipped": true
+        },
+        "critic": {
+          "challenge_points": [
+            "需求证据不足",
+            "定价无支付意愿证据",
+            "创新点不可验证",
+            "实验设计不合格",
+            "评分项证据覆盖不足"
+          ],
+          "missing_evidence": [
+            "用户访谈或市场调研的证据",
+            "具体的用户反馈或数据来支持需求假设",
+            "解决方案满足目标用户需求的证据"
+          ],
+          "counterfactual_questions": [
+            "如果已经有初步的用户访谈或市场调研，为何诊断中没有体现？",
+            "是否有其他方式可以验证创新点的真实性，而不仅仅是用户需求？",
+            "为何实验设计被认为不合格，具体问题是什么？"
+          ],
+          "engine": "llm"
+        },
+        "grader": {
+          "overall_score": 0.0,
+          "grading_comment": "项目需求的真实性与用户接受度无法验证，影响项目落地可行性。需求证据不足，定价无支付意愿证据，创新点不可验证，实验设计不合格，评分项证据覆盖不足。",
+          "strongest_dim": [],
+          "weakest_dim": [
+            "Problem Definition",
+            "User Evidence Strength",
+            "Solution Feasibility",
+            "Business Model Consistency",
+            "Market & Competition",
+            "Financial Logic",
+            "Innovation & Differentiation",
+            "Team & Execution",
+            "Presentation Quality"
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "engine": "llm"
+        },
+        "planner": {
+          "execution_plan": [
+            "收集至少50份用户访谈或问卷调查的数据",
+            "整理并分析用户反馈，形成需求验证报告",
+            "报告中包含用户需求的强度、真实性及解决方案的匹配度",
+            "用户需求验证报告获得项目指导教师的认可"
+          ],
+          "next_24h_goal": "开始进行用户访谈或问卷调查，收集初步数据",
+          "next_72h_goal": "完成至少30份用户访谈或问卷调查，开始整理和分析数据",
+          "checkpoint": [
+            "完成至少50份用户访谈或问卷调查",
+            "整理并分析用户反馈，形成需求验证报告",
+            "报告中包含用户需求的强度、真实性及解决方案的匹配度",
+            "用户需求验证报告获得项目指导教师的认可"
+          ],
+          "engine": "llm"
+        },
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "called_agents": [
+            "student_learning"
+          ]
+        }
+      },
+      "submission_id": "74580e6c-fd5e-4677-8ae2-e9fa96ba6521",
+      "created_at": "2026-03-14T01:17:27.273162"
+    },
+    {
+      "student_id": "student-001",
+      "class_id": "2026A",
+      "cohort_id": "2026-Spring",
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "??????5???,??????????,?????????",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "需求证据不足，导致项目需求的验证性和落地可行性受到严重影响。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+        "socratic_questions": [
+          "你们是如何确定目标用户群体的需求的？",
+          "你们是否进行了用户调研，以验证需求的真实性和普遍性？",
+          "你们如何确保所提出的解决方案能够真正解决用户面临的问题？",
+          "你们是否考虑过竞争对手的产品或服务，以及它们如何满足用户需求？",
+          "你们是否有具体的用户反馈或案例来支持你们的需求假设？"
+        ]
+      },
+      "next_task": {
+        "title": "进行用户需求验证",
+        "description": "通过用户访谈、问卷调查或市场调研等方式，收集和分析用户需求，确保项目需求的准确性和可行性。",
+        "acceptance_criteria": [
+          "完成至少50份用户调查问卷或访谈记录",
+          "整理并分析用户反馈，形成需求验证报告",
+          "报告中包含用户需求的真实性和普遍性的证据"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "router": {
+          "focus": [
+            "收集用户需求证据",
+            "用户需求验证报告"
+          ],
+          "tone": "专业",
+          "risk_level": "medium",
+          "should_call": [
+            "student_learning",
+            "project_coach"
+          ],
+          "engine": "llm"
+        },
+        "memory": [
+          {
+            "ts": "2026-03-14T01:16:21.485473",
+            "text": "????????????,??????????,??????????????,?????????????????",
+            "rules": [
+              "H3",
+              "H5",
+              "H7",
+              "H13"
+            ],
+            "next_task": {
+              "title": "收集用户需求证据",
+              "description": "为了增强项目的可行性，需要通过用户调研、市场研究或案例分析来收集具体的用户需求证据。",
+              "acceptance_criteria": [
+                "提交一份详细的用户需求调研报告，包括调研方法、样本量、调研结果和分析。",
+                "提供至少三个具体的用户案例，证明需求的存在和对解决方案的需求。",
+                "更新项目文档，包含新的用户需求证据，以增强项目的可行性。"
+              ]
+            }
+          },
+          {
+            "ts": "2026-03-14T01:17:27.273162",
+            "text": "??????5???,??????????,?????????",
+            "rules": [
+              "H3",
+              "H5",
+              "H7",
+              "H13"
+            ],
+            "next_task": {
+              "title": "收集并验证用户需求证据",
+              "description": "通过用户访谈、问卷调查、市场调研等方式，收集并验证用户需求的真实性与强度，确保项目需求的准确性和用户接受度。",
+              "acceptance_criteria": [
+                "完成至少50份用户访谈或问卷调查",
+                "整理并分析用户反馈，形成需求验证报告",
+                "报告中包含用户需求的强度、真实性及解决方案的匹配度",
+                "用户需求验证报告获得项目指导教师的认可"
+              ]
+            }
+          }
+        ],
+        "student_learning": {
+          "agent": "student_learning",
+          "mode": "coursework",
+          "definition": "创新创业课程旨在培养学生识别商业机会、开发创新产品或服务、并成功实现商业化的技能。",
+          "example": "学生团队开发了一款基于AI的健康管理应用，并通过市场调研确定了目标用户群体，最终成功获得种子轮融资。",
+          "common_mistakes": [
+            "忽视市场需求",
+            "团队合作不力",
+            "财务管理不当",
+            "缺乏持续创新能力"
+          ],
+          "practice_task": "选择一个你感兴趣的领域，进行初步的市场调研，确定一个潜在的商业机会，并设计一个初步的商业计划。",
+          "expected_artifact": "一份详细的商业计划书，包括市场分析、产品或服务描述、营销策略、财务预测等。",
+          "evaluation_criteria": [
+            "市场调研的深度和广度",
+            "商业机会的创新性和可行性",
+            "商业计划的完整性",
+            "团队合作的表现"
+          ],
+          "engine": "llm"
+        },
+        "project_coach": {
+          "agent": "project_coach",
+          "category_inference": "科技创新",
+          "diagnosis": {
+            "mode": "coursework",
+            "overall_score": 0.0,
+            "bottleneck": "需求证据不足，导致项目需求的验证性和落地可行性受到严重影响。",
+            "triggered_rules": [
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H14",
+                "name": "路演叙事断裂",
+                "severity": "low"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              }
+            ],
+            "rubric": [
+              {
+                "item": "Problem Definition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "User Evidence Strength",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Solution Feasibility",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Business Model Consistency",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Market & Competition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Financial Logic",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Innovation & Differentiation",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Team & Execution",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              },
+              {
+                "item": "Presentation Quality",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              }
+            ],
+            "capability_map": [
+              {
+                "stage": "痛点发现",
+                "dimension": "敏锐度与同理心",
+                "focus": "识别真需求并给出用户证据"
+              },
+              {
+                "stage": "方案策划",
+                "dimension": "创造力与可行性",
+                "focus": "验证创新点并匹配资源"
+              },
+              {
+                "stage": "商业建模",
+                "dimension": "商业逻辑性",
+                "focus": "打通价值-渠道-收入闭环"
+              },
+              {
+                "stage": "团队与资源",
+                "dimension": "协作与执行力",
+                "focus": "分工、里程碑与交付能力"
+              },
+              {
+                "stage": "路演表达",
+                "dimension": "叙事与抗压",
+                "focus": "结构完整、数据可信、问答稳定"
+              }
+            ],
+            "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+            "socratic_questions": [
+              "你们是如何确定目标用户群体的需求的？",
+              "你们是否进行了用户调研，以验证需求的真实性和普遍性？",
+              "你们如何确保所提出的解决方案能够真正解决用户面临的问题？",
+              "你们是否考虑过竞争对手的产品或服务，以及它们如何满足用户需求？",
+              "你们是否有具体的用户反馈或案例来支持你们的需求假设？"
+            ]
+          },
+          "next_task": {
+            "title": "进行用户需求验证",
+            "description": "通过用户访谈、问卷调查或市场调研等方式，收集和分析用户需求，确保项目需求的准确性和可行性。",
+            "acceptance_criteria": [
+              "完成至少50份用户调查问卷或访谈记录",
+              "整理并分析用户反馈，形成需求验证报告",
+              "报告中包含用户需求的真实性和普遍性的证据"
+            ]
+          },
+          "reference_cases": [
+            {
+              "case_id": "case_8af36c2560a3",
+              "category": "科技创新",
+              "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+              "confidence": 0.75
+            },
+            {
+              "case_id": "case_f7a843988992",
+              "category": "科技创新",
+              "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+              "confidence": 0.9
+            },
+            {
+              "case_id": "case_45b1ac814edb",
+              "category": "科技创新",
+              "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+              "confidence": 0.9
+            }
+          ],
+          "engine": "llm+rule"
+        },
+        "competition_advisor": {
+          "agent": "competition_advisor",
+          "skipped": true
+        },
+        "instructor_assistant": {
+          "agent": "instructor_assistant",
+          "skipped": true
+        },
+        "critic": {
+          "challenge_points": [
+            "需求证据不足",
+            "创新点不可验证"
+          ],
+          "missing_evidence": [
+            "具体的用户案例",
+            "用户需求的强度和普遍性证据",
+            "解决方案与用户需求的匹配度"
+          ],
+          "counterfactual_questions": [
+            "如果已经有初步的用户调研数据，为何仍需进一步收集证据？",
+            "是否有其他方法可以验证创新点，而不仅仅是依赖用户需求证据？",
+            "在没有具体用户需求证据的情况下，如何评估项目的商业模型一致性？"
+          ],
+          "engine": "llm"
+        },
+        "grader": {
+          "overall_score": 2.5,
+          "grading_comment": "项目在多个维度上存在需求证据不足的问题，导致项目需求的验证性和落地可行性受到严重影响。创新点的验证性也存在问题。建议进一步收集用户需求证据，验证创新点，并评估商业模型的一致性。",
+          "strongest_dim": [],
+          "weakest_dim": [
+            "需求证据",
+            "创新点验证"
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "engine": "llm"
+        },
+        "planner": {
+          "execution_plan": [
+            "通过用户访谈、问卷调查或市场调研等方式，收集至少50份用户调查问卷或访谈记录。",
+            "整理并分析用户反馈，形成需求验证报告。",
+            "确保报告中包含用户需求的真实性和普遍性的证据。",
+            "利用收集到的证据来验证项目的创新点和解决方案的可行性。",
+            "根据收集到的用户需求证据，评估项目的商业模型一致性。"
+          ],
+          "next_24h_goal": "开始设计用户调研问卷或访谈大纲，准备进行初步的用户访谈或问卷调查。",
+          "next_72h_goal": "完成至少20份用户调查问卷或访谈记录，初步分析用户反馈，开始撰写需求验证报告的初稿。",
+          "checkpoint": [
+            "完成至少50份用户调查问卷或访谈记录",
+            "整理并分析用户反馈，形成需求验证报告",
+            "报告中包含用户需求的真实性和普遍性的证据"
+          ],
+          "engine": "llm"
+        },
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "called_agents": [
+            "project_coach",
+            "student_learning"
+          ],
+          "skipped_agents": [
+            "competition_advisor",
+            "instructor_assistant"
+          ]
+        }
+      },
+      "submission_id": "d6f25222-183b-4e54-b21b-0696146262dc",
+      "created_at": "2026-03-14T01:18:34.280442"
+    }
+  ],
+  "teacher_feedback": []
+}

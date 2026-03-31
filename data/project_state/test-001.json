@@ -1,0 +1,826 @@
+{
+  "project_id": "test-001",
+  "submissions": [
+    {
+      "student_id": "s-001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我想做一个校园二手交易平台，目标用户是大学生，你觉得这个想法怎么样？",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "核心瓶颈在于需求验证不足（H5），需优先通过用户调研和行为数据证明大学生对二手交易的高频需求及现有解决方案的痛点，否则项目无法突破0到1的验证阶段",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+        "socratic_questions": [
+          "你观察到哪些具体现象能证明大学生存在未被满足的二手交易需求？",
+          "现有校园二手交易方式（如微信群、线下跳蚤市场）存在哪些可量化的痛点？",
+          "如何证明你的平台设计能比闲鱼等现有平台更符合大学生使用场景？",
+          "准备用什么量化指标（如交易频次、闲置物品量）来验证需求真实性？",
+          "是否做过目标用户的行为数据采集？他们的二手交易决策链路是怎样的？"
+        ]
+      },
+      "next_task": {
+        "title": "需求验证实验设计与执行",
+        "description": "设计并执行针对目标用户的定量需求验证实验，需包含：1）至少500份有效问卷的二手交易行为数据采集 2）20组深度访谈获取真实需求痛点 3）现有平台使用障碍的对比分析 4）初步定价敏感度测试",
+        "acceptance_criteria": [
+          "输出完整问卷样本及数据分析报告（含需求强度量化指标）",
+          "整理用户访谈的痛点分类矩阵（至少包含3个核心痛点）",
+          "制作现有平台对比分析表格（覆盖5个主流平台的优劣势）",
+          "提供定价测试的支付意愿分布数据",
+          "形成可验证的需求主张文档（包含假设验证结论）"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "router": {
+          "focus": [
+            "可行性分析",
+            "目标用户需求",
+            "竞争分析",
+            "项目实施"
+          ],
+          "tone": "积极鼓励",
+          "risk_level": "medium",
+          "should_call": [
+            "student_learning",
+            "project_coach"
+          ],
+          "engine": "llm"
+        },
+        "memory": [],
+        "student_learning": {
+          "agent": "student_learning",
+          "mode": "coursework",
+          "definition": "校园二手交易平台是一个针对大学生群体的在线市场，允许用户发布、浏览和交易二手商品，如教材、电子产品、家具等，解决资源浪费和学生经济压力问题。",
+          "example": "类似‘校园集市’的微信小程序，整合学校认证系统，提供线下自提点和担保交易功能。",
+          "common_mistakes": [
+            "忽视校园场景的特殊性（如快递限制、学生信用体系）",
+            "功能设计脱离实际需求（如过度追求复杂功能）",
+            "未建立有效的信任机制（如缺乏用户评价和身份验证）",
+            "推广策略缺乏针对性（如忽略社团合作和线下活动）"
+          ],
+          "practice_task": "1. 用问卷调研3所高校学生的二手交易痛点\n2. 制作包含5个核心功能的MVP功能清单\n3. 设计用户身份认证和评价体系原型\n4. 拟定3种不同的校园推广方案",
+          "expected_artifact": "包含用户画像、功能架构图、运营策略和财务预测的商业计划书（15页以内）",
+          "evaluation_criteria": [
+            "是否精准识别大学生群体的核心交易需求",
+            "平台差异化竞争优势是否明确",
+            "用户留存策略是否考虑学生流动性特点",
+            "商业模式是否包含可持续的盈利路径",
+            "风险预案是否覆盖校园政策和交易纠纷问题"
+          ],
+          "engine": "llm"
+        },
+        "project_coach": {
+          "agent": "project_coach",
+          "category_inference": "科技创新",
+          "diagnosis": {
+            "mode": "coursework",
+            "overall_score": 0.0,
+            "bottleneck": "核心瓶颈在于需求验证不足（H5），需优先通过用户调研和行为数据证明大学生对二手交易的高频需求及现有解决方案的痛点，否则项目无法突破0到1的验证阶段",
+            "triggered_rules": [
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H14",
+                "name": "路演叙事断裂",
+                "severity": "low"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              }
+            ],
+            "rubric": [
+              {
+                "item": "Problem Definition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "User Evidence Strength",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Solution Feasibility",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Business Model Consistency",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.15
+              },
+              {
+                "item": "Market & Competition",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Financial Logic",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Innovation & Differentiation",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.1
+              },
+              {
+                "item": "Team & Execution",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              },
+              {
+                "item": "Presentation Quality",
+                "score": 0.0,
+                "status": "risk",
+                "weight": 0.05
+              }
+            ],
+            "capability_map": [
+              {
+                "stage": "痛点发现",
+                "dimension": "敏锐度与同理心",
+                "focus": "识别真需求并给出用户证据"
+              },
+              {
+                "stage": "方案策划",
+                "dimension": "创造力与可行性",
+                "focus": "验证创新点并匹配资源"
+              },
+              {
+                "stage": "商业建模",
+                "dimension": "商业逻辑性",
+                "focus": "打通价值-渠道-收入闭环"
+              },
+              {
+                "stage": "团队与资源",
+                "dimension": "协作与执行力",
+                "focus": "分工、里程碑与交付能力"
+              },
+              {
+                "stage": "路演表达",
+                "dimension": "叙事与抗压",
+                "focus": "结构完整、数据可信、问答稳定"
+              }
+            ],
+            "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+            "socratic_questions": [
+              "你观察到哪些具体现象能证明大学生存在未被满足的二手交易需求？",
+              "现有校园二手交易方式（如微信群、线下跳蚤市场）存在哪些可量化的痛点？",
+              "如何证明你的平台设计能比闲鱼等现有平台更符合大学生使用场景？",
+              "准备用什么量化指标（如交易频次、闲置物品量）来验证需求真实性？",
+              "是否做过目标用户的行为数据采集？他们的二手交易决策链路是怎样的？"
+            ]
+          },
+          "next_task": {
+            "title": "需求验证实验设计与执行",
+            "description": "设计并执行针对目标用户的定量需求验证实验，需包含：1）至少500份有效问卷的二手交易行为数据采集 2）20组深度访谈获取真实需求痛点 3）现有平台使用障碍的对比分析 4）初步定价敏感度测试",
+            "acceptance_criteria": [
+              "输出完整问卷样本及数据分析报告（含需求强度量化指标）",
+              "整理用户访谈的痛点分类矩阵（至少包含3个核心痛点）",
+              "制作现有平台对比分析表格（覆盖5个主流平台的优劣势）",
+              "提供定价测试的支付意愿分布数据",
+              "形成可验证的需求主张文档（包含假设验证结论）"
+            ]
+          },
+          "reference_cases": [
+            {
+              "case_id": "case_8af36c2560a3",
+              "category": "科技创新",
+              "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+              "confidence": 0.75
+            },
+            {
+              "case_id": "case_f7a843988992",
+              "category": "科技创新",
+              "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+              "confidence": 0.9
+            },
+            {
+              "case_id": "case_45b1ac814edb",
+              "category": "科技创新",
+              "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+              "confidence": 0.9
+            }
+          ],
+          "engine": "llm+rule"
+        },
+        "competition_advisor": {
+          "agent": "competition_advisor",
+          "skipped": true
+        },
+        "instructor_assistant": {
+          "agent": "instructor_assistant",
+          "skipped": true
+        },
+        "critic": {
+          "challenge_points": [
+            "是否需要500份问卷才能有效验证需求？是否存在更高效的小样本验证方法？",
+            "深度访谈的20组样本量是否足够代表大学生群体的多样性？",
+            "现有平台对比分析是否可能遗漏非主流但具有地域特色的校园二手交易渠道？"
+          ],
+          "missing_evidence": [
+            "大学生二手交易行为的时空分布特征数据",
+            "闲置物品品类的优先级排序及流通周期统计",
+            "现有交易方式（微信群/线下）的失败案例库",
+            "校园场景特有的信任建立机制需求证据",
+            "移动端与PC端使用场景的适配性验证数据"
+          ],
+          "counterfactual_questions": [
+            "如果问卷显示仅30%学生每月进行二手交易，是否仍具备商业可行性？",
+            "当定价测试显示0元交易偏好时，如何调整商业模式？",
+            "若主流平台已覆盖80%需求场景，是否需要重新定义差异化价值主张？",
+            "在用户访谈中发现需求强度低于预期时，是否应转向B2B校园商家模式？",
+            "当竞争分析显示现有平台无法被超越时，是否需要放弃校园场景专注细分品类？"
+          ],
+          "engine": "llm"
+        },
+        "grader": {
+          "overall_score": 0.0,
+          "grading_comment": "项目在需求验证（H5）和用户证据强度（User Evidence Strength）维度存在严重缺陷，缺乏大学生二手交易需求的实证数据支撑。同时在定价逻辑（H3）、创新点验证（H7）和实验设计（H13）方面也存在明显不足，所有评分项均未达标且处于风险状态。建议优先通过行为数据分析和用户访谈构建需求证据链，补充交易频次、品类分布等核心指标的量化验证。",
+          "strongest_dim": [],
+          "weakest_dim": [
+            "User Evidence Strength",
+            "Problem Definition",
+            "Solution Feasibility",
+            "Innovation & Differentiation"
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 0.0,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "engine": "llm"
+        },
+        "planner": {
+          "execution_plan": [
+            {
+              "step": 1,
+              "action": "设计标准化问卷与访谈提纲",
+              "deliverables": [
+                "问卷样本V1.0",
+                "访谈提纲V1.0"
+              ],
+              "resources": [
+                "Google Forms模板",
+                "Nvivo编码框架"
+              ],
+              "duration_hours": 6
+            },
+            {
+              "step": 2,
+              "action": "开展线上/线下混合调研",
+              "deliverables": [
+                "500+有效问卷数据",
+                "20组访谈录音转文字"
+              ],
+              "resources": [
+                "校园社团合作渠道",
+                "问卷星投放系统"
+              ],
+              "duration_hours": 24
+            },
+            {
+              "step": 3,
+              "action": "主流平台功能对比分析",
+              "deliverables": [
+                "5平台对比矩阵",
+                "差异化机会清单"
+              ],
+              "resources": [
+                "闲鱼/转转等平台账号",
+                "功能拆解模板"
+              ],
+              "duration_hours": 4
+            },
+            {
+              "step": 4,
+              "action": "定价敏感度测试",
+              "deliverables": [
+                "支付意愿热力图",
+                "价格锚定建议"
+              ],
+              "resources": [
+                "SurveyMonkey实验模块",
+                "A/B测试方案"
+              ],
+              "duration_hours": 8
+            }
+          ],
+          "next_24h_goal": "完成需求验证实验的工具开发并启动数据采集",
+          "next_72h_goal": "获取有效用户行为数据并输出初步需求验证结论",
+          "checkpoint": [
+            "问卷信效度检验报告",
+            "首日100份问卷回收记录",
+            "访谈对象筛选标准文档",
+            "平台对比分析维度定义表",
+            "定价测试场景模拟截图"
+          ],
+          "engine": "llm"
+        },
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "called_agents": [
+            "project_coach",
+            "student_learning"
+          ],
+          "skipped_agents": [
+            "competition_advisor",
+            "instructor_assistant"
+          ]
+        }
+      },
+      "submission_id": "765b65f2-2b23-4b48-a46b-0b949670c44e",
+      "created_at": "2026-03-14T01:54:52.158574"
+    },
+    {
+      "student_id": "s-001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我想做一个校园二手交易平台，目标用户是大学生，你觉得这个想法怎么样？",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "完成用户证据闭环",
+        "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+        "acceptance_criteria": [
+          ">=8条用户原话",
+          "痛点频次统计",
+          "至少1条反证样本"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "called_agents": [
+            "diagnosis_engine",
+            "composer"
+          ],
+          "skipped_agents": [],
+          "strategy": "fast_dialogue"
+        },
+        "diagnosis_engine": "rule",
+        "composer": "llm",
+        "inferred_category": "科技创新"
+      },
+      "submission_id": "8409d2a9-dac8-4d5c-9430-1fae11a85774",
+      "created_at": "2026-03-14T01:56:50.740284"
+    }
+  ],
+  "teacher_feedback": []
+}

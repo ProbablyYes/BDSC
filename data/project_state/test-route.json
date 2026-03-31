@@ -1,0 +1,1138 @@
+{
+  "project_id": "test-route",
+  "submissions": [
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "给我几个创业点子",
+      "diagnosis": {},
+      "next_task": {},
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_008",
+            "type": "Risk_Pattern_Edge",
+            "support": 4,
+            "teaching_note": "科技创新 类项目常见风险组合：market_size_fallacy、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_010",
+            "type": "Risk_Pattern_Edge",
+            "support": 3,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、no_competitor_claim、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "no_competitor_claim",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [],
+          "expanded_rule_ids": []
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "idea_brainstorm",
+          "confidence": 0.44285714285714284,
+          "pipeline": [
+            "coach",
+            "composer"
+          ],
+          "strategy": "intent_routed"
+        },
+        "critic": null,
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "96e4fb16-0240-45b7-8112-4c2ad27899ba",
+      "created_at": "2026-03-14T02:19:06.741949"
+    },
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我想做校园二手交易平台",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "完成用户证据闭环",
+        "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+        "acceptance_criteria": [
+          ">=8条用户原话",
+          "痛点频次统计",
+          "至少1条反证样本"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "confidence": 0.425,
+          "pipeline": [
+            "diagnosis",
+            "coach",
+            "critic",
+            "composer"
+          ],
+          "strategy": "intent_routed"
+        },
+        "critic": {
+          "challenge_questions": [
+            "如果校园内实际存在大量闲置物品但学生群体并未表现出强烈的交易意愿，你们如何证明这个平台能突破现有社交或线下交易方式的局限性？",
+            "在缺乏真实用户行为数据的情况下，如何量化验证学生对二手交易的持续需求强度与交易频率能否支撑平台商业模式？",
+            "当新生入学率波动或毕业季周期性影响二手商品供给时，平台如何通过需求验证结果证明自身具备抗周期能力？"
+          ],
+          "missing_evidence": [
+            "目标用户群体的二手交易行为数据统计",
+            "校园场景下现有交易渠道的痛点分析报告",
+            "不同年级/专业的学生需求差异性研究",
+            "竞品平台用户流失率与活跃度对比数据"
+          ],
+          "risk_summary": "需求验证缺失可能导致平台在用户规模和交易活跃度上无法达到可持续运营的临界值"
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "df44fb5b-cc8f-48c5-8280-e0e283473319",
+      "created_at": "2026-03-14T02:19:49.426224"
+    },
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我做了5份访谈，够不够",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.83,
+        "bottleneck": "当前最高风险为 H7（创新点不可验证），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 5.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "补齐证据并完成一次压力测试",
+        "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+        "acceptance_criteria": [
+          "新增3条可验证证据",
+          "完成1轮压力测试问答",
+          "更新修正后的版本说明"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_008",
+            "type": "Risk_Pattern_Edge",
+            "support": 4,
+            "teaching_note": "科技创新 类项目常见风险组合：market_size_fallacy、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_010",
+            "type": "Risk_Pattern_Edge",
+            "support": 3,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、no_competitor_claim、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "no_competitor_claim",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H7"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "evidence_check",
+          "confidence": 0.425,
+          "pipeline": [
+            "diagnosis",
+            "coach",
+            "composer"
+          ],
+          "strategy": "intent_routed"
+        },
+        "critic": null,
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "6a3f6e65-b115-493b-a1e9-bc954f6296ce",
+      "created_at": "2026-03-14T02:19:58.605913"
+    },
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我的商业模式是先免费再收费",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.0,
+        "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "完成用户证据闭环",
+        "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+        "acceptance_criteria": [
+          ">=8条用户原话",
+          "痛点频次统计",
+          "至少1条反证样本"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "business_model",
+          "confidence": 0.3833333333333333,
+          "pipeline": [
+            "diagnosis",
+            "coach",
+            "critic",
+            "composer"
+          ],
+          "strategy": "intent_routed"
+        },
+        "critic": {
+          "challenge_questions": [
+            "如果缺乏用户从免费服务转向付费的明确需求证据，如何证明你的商业模式能有效实现盈利转化？",
+            "当现有市场中已有大量免费服务满足同类需求时，你的产品凭什么让用户愿意支付溢价？",
+            "若用户在免费阶段形成习惯性依赖后拒绝付费，你的商业模式是否有应对这种需求衰减的弹性设计？"
+          ],
+          "missing_evidence": [
+            "目标用户群体的付费意愿调研数据",
+            "同类服务的市场渗透率与转化率对比分析",
+            "免费服务使用时长与付费转化的关联性实验数据",
+            "核心用户需求的优先级排序报告",
+            "用户行为路径中关键付费节点的触发机制验证"
+          ],
+          "risk_summary": "需求证据不足将导致商业模式的可持续性存疑，直接影响产品从免费到付费的转化可行性"
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "4236706a-6862-4d13-806a-a39629082bb4",
+      "created_at": "2026-03-14T02:20:43.865011"
+    },
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "帮我准备路演答辩",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.25,
+        "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 4.5,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。"
+      },
+      "next_task": {
+        "title": "完成用户证据闭环",
+        "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+        "acceptance_criteria": [
+          ">=8条用户原话",
+          "痛点频次统计",
+          "至少1条反证样本"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "confidence": 0.55,
+          "pipeline": [
+            "diagnosis",
+            "competition",
+            "critic",
+            "composer"
+          ],
+          "strategy": "intent_routed"
+        },
+        "critic": {
+          "challenge_questions": [
+            "如果目标用户群体的实际需求与项目假设存在显著偏差，你们是否有备用方案调整产品方向？",
+            "在缺乏直接支付意愿数据的情况下，如何量化证明用户愿意为产品核心功能付费？",
+            "当创新点无法通过现有实验验证时，是否考虑过用替代指标或第三方评估来增强说服力？"
+          ],
+          "missing_evidence": [
+            "用户行为数据或市场调研报告证明需求真实性",
+            "竞争对手同类产品的支付意愿基准数据",
+            "创新点经过独立测试的可验证结果"
+          ],
+          "risk_summary": "项目在核心需求验证、支付意愿支撑和创新点可证性方面存在关键证据缺口，可能导致落地可行性存疑和评分项覆盖不足"
+        },
+        "competition": {
+          "judge_questions": [
+            "项目的创新点与现有课程内容的关联性如何体现？是否真正解决了教学中的实际问题？",
+            "技术实现部分是否存在过度设计或简化假设？如何验证其可行性与有效性？",
+            "团队在时间管理与任务分配上是否合理？课程作业的阶段性成果如何支撑最终目标？"
+          ],
+          "defense_tips": [
+            "用对比表格明确展示项目与传统教学方法的差异，突出创新维度",
+            "准备3个不同深度的技术验证案例（基础测试/模拟场景/真实数据），根据评委专业背景灵活切换",
+            "制作Gantt图动态演示开发进度，重点说明关键节点的里程碑验证方法"
+          ],
+          "presentation_structure": [
+            "痛点分析（1min）：通过课堂场景视频/数据图表引发共鸣",
+            "技术路线（3min）：用流程图+代码片段演示核心算法实现",
+            "验证体系（2min）：展示测试用例设计与课程目标达成度评估矩阵"
+          ]
+        },
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "1d108358-2ead-453f-b117-50931f5807ed",
+      "created_at": "2026-03-14T02:21:46.430925"
+    },
+    {
+      "student_id": "s1",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "什么是lean canvas",
+      "diagnosis": {},
+      "next_task": {},
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_008",
+            "type": "Risk_Pattern_Edge",
+            "support": 4,
+            "teaching_note": "科技创新 类项目常见风险组合：market_size_fallacy、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_010",
+            "type": "Risk_Pattern_Edge",
+            "support": 3,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、no_competitor_claim、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "no_competitor_claim",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [],
+          "expanded_rule_ids": []
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "confidence": 0.5222222222222221,
+          "pipeline": [
+            "learning",
+            "composer"
+          ],
+          "strategy": "intent_routed"
+        },
+        "critic": null,
+        "competition": null,
+        "learning": {
+          "definition": "Lean Canvas是一种针对初创企业的商业模式设计工具，由Ash Maurya提出。它通过9个核心模块（问题、客户细分、解决方案、渠道、客户关系、收入流、关键资源、关键活动、关键合作伙伴）帮助创业者快速验证商业假设，强调用最小资源测试核心价值主张。",
+          "example": "共享单车公司使用Lean Canvas时，会明确'用户找不到便捷停车点'（问题），锁定'城市通勤者'（客户细分），设计'扫码解锁单车'（解决方案），通过'APP推广+线下投放'（渠道）获取用户，采用'按骑行计费'（收入流）模式，并验证'用户愿意为短途出行支付费用'的核心假设。",
+          "practice_task": "选择一个创业项目，用Lean Canvas模板完成以下步骤：1）确定3个核心客户细分群体 2）列出至少5个关键问题假设 3）设计对应的解决方案和验证方法 4）用1小时完成画布初稿并准备3分钟路演",
+          "common_mistakes": [
+            "未明确区分不同客户细分群体的核心需求",
+            "将解决方案与产品功能混淆，缺乏价值验证",
+            "忽略关键合作伙伴对成本结构的影响",
+            "收入流设计过于理想化，未考虑市场实际支付意愿",
+            "画布模块填写过于笼统，缺乏可验证的量化指标"
+          ]
+        },
+        "category": "科技创新"
+      },
+      "submission_id": "e881bbc2-10b6-4f56-ac65-0ad445255f66",
+      "created_at": "2026-03-14T02:22:24.873930"
+    }
+  ],
+  "teacher_feedback": []
+}

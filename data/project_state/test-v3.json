@@ -1,0 +1,554 @@
+{
+  "project_id": "test-v3",
+  "submissions": [
+    {
+      "student_id": "s001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我想做一个校园二手交易平台，目标用户是大学生，解决闲置物品浪费的问题",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": null,
+        "bottleneck": "",
+        "triggered_rules": [],
+        "rubric": [],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+        "info_sufficient": false
+      },
+      "next_task": {
+        "title": "描述你的项目",
+        "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+        "acceptance_criteria": [
+          "项目一句话描述",
+          "目标用户是谁",
+          "解决什么问题"
+        ]
+      },
+      "kg_analysis": {
+        "entities": [
+          {
+            "id": "e1",
+            "label": "校园二手交易平台",
+            "type": "平台"
+          },
+          {
+            "id": "e2",
+            "label": "大学生",
+            "type": "用户群体"
+          },
+          {
+            "id": "e3",
+            "label": "闲置物品浪费",
+            "type": "问题"
+          },
+          {
+            "id": "e4",
+            "label": "出售闲置物品",
+            "type": "用户需求"
+          },
+          {
+            "id": "e5",
+            "label": "购买二手物品",
+            "type": "用户需求"
+          }
+        ],
+        "relationships": [
+          {
+            "source": "e1",
+            "target": "e2",
+            "relation": "服务于"
+          },
+          {
+            "source": "e1",
+            "target": "e3",
+            "relation": "解决"
+          },
+          {
+            "source": "e2",
+            "target": "e4",
+            "relation": "需要"
+          },
+          {
+            "source": "e2",
+            "target": "e5",
+            "relation": "需要"
+          },
+          {
+            "source": "e4",
+            "target": "e5",
+            "relation": "促进"
+          }
+        ],
+        "structural_gaps": [
+          "解决方案的具体功能",
+          "商业模式"
+        ],
+        "content_strengths": [
+          "明确的用户定位",
+          "社会价值导向"
+        ],
+        "completeness_score": 6,
+        "section_scores": {
+          "problem_definition": 0,
+          "user_evidence": 0,
+          "solution_feasibility": 0,
+          "business_model": 0
+        },
+        "insight": "项目初步定位清晰，但需要补充具体解决方案设计、用户需求验证数据及可持续的商业模式说明，建议增加校园资源循环利用相关统计数据作为痛点支撑"
+      },
+      "hypergraph_insight": {},
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "idea_brainstorm",
+          "confidence": 0.85,
+          "pipeline": [
+            "coach",
+            "tutor",
+            "orchestrator"
+          ],
+          "nodes_visited": [
+            "router",
+            "coach",
+            "tutor",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "学习导师"
+          ],
+          "strategy": "langgraph_v3_role_agents"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "亮点：项目具备明确的用户定位（大学生群体）和清晰的社会价值导向（资源循环利用），符合当前校园经济数字化转型趋势。参考案例显示，类似项目通过精准需求洞察（如推送家代排版市场分析）和技术创新（禾光智能植物识别算法）成功构建差异化优势，这种结合科技与场景的思路值得借鉴。\n\n核心问题：解决方案缺乏功能层级设计，需补充物品认证、物流整合、信用评估等具体模块的实现逻辑；商业模式未体现可持续性，需明确盈利路径（如交易佣金、会员增值服务、广告分成等）。例如推送家案例通过\"AI工具+人工服务\"双轨模式实现商业闭环，而禾光智能则以技术授权+硬件销售构建收入体系，这些可作为参考。\n\n建议：1）开展3所高校的用户需求调研，收集闲置物品处理痛点数据（如交易失败率、物流痛点占比）；2）设计\"智能估价+线下自提点\"功能组合，参考CSDN博客中Spring Boot平台的开发框架；3）构建\"基础服务免费+增值服务付费\"的商业模式，可引入校园商家入驻分润机制。西安石油大学Magic Garden项目的推广阶段经验显示，初期可联合校方设立实体自提柜降低信任门槛。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search"
+            ]
+          },
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "学习导师",
+            "analysis": "校园二手交易平台是专为大学生群体设计的物品流转系统，通过线上或线下渠道让学生发布闲置物品、进行交易或交换，既减少资源浪费又满足学生对低成本商品的需求。这类平台通常结合社交裂变、信用体系、物流支持等特色功能，例如西安石油大学的Magic Garden平台通过搭建\"发布-议价-物流-评价\"的完整交易闭环，使2023年平台交易量同比增长47%（据其2026年1月更新的项目计划书）。三江学院的网罗校园小程序则通过LBS定位实现校区内即时交易，2024年数据显示其书籍类目复购率达68%。\n\n建议练习任务：请用SWOT分析法评估你设想的平台。首先通过问卷或访谈收集100名大学生的真实闲置物品处理痛点（如时间成本、信任问题等），然后设计3个核心功能（如基于校园卡的实名认证、二手物品估价工具、线下自提点地图），最后对比现有平台的运营数据（如CSDN博客提到的2026年Spring Boot平台日均访问量达3200次），思考如何在物流配送（参考Magic Garden的校园快线）、交易安全（借鉴网罗校园的芝麻信用接入）和用户粘性（如设置闲置积分兑换系统）方面形成差异化优势。",
+            "tools_used": [
+              "web_search",
+              "learning_llm"
+            ]
+          },
+          "grader": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "校园二手交易平台",
+              "type": "平台"
+            },
+            {
+              "id": "e2",
+              "label": "大学生",
+              "type": "用户群体"
+            },
+            {
+              "id": "e3",
+              "label": "闲置物品浪费",
+              "type": "问题"
+            },
+            {
+              "id": "e4",
+              "label": "出售闲置物品",
+              "type": "用户需求"
+            },
+            {
+              "id": "e5",
+              "label": "购买二手物品",
+              "type": "用户需求"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "服务于"
+            },
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e2",
+              "target": "e4",
+              "relation": "需要"
+            },
+            {
+              "source": "e2",
+              "target": "e5",
+              "relation": "需要"
+            },
+            {
+              "source": "e4",
+              "target": "e5",
+              "relation": "促进"
+            }
+          ],
+          "structural_gaps": [
+            "解决方案的具体功能",
+            "商业模式"
+          ],
+          "content_strengths": [
+            "明确的用户定位",
+            "社会价值导向"
+          ],
+          "completeness_score": 6,
+          "section_scores": {
+            "problem_definition": 0,
+            "user_evidence": 0,
+            "solution_feasibility": 0,
+            "business_model": 0
+          },
+          "insight": "项目初步定位清晰，但需要补充具体解决方案设计、用户需求验证数据及可持续的商业模式说明，建议增加校园资源循环利用相关统计数据作为痛点支撑"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.5409,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5185,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_1512b0f26aa4",
+            "category": "科技创新",
+            "project_name": "禾光智能——智能激光除草机器人系统",
+            "similarity": 0.4949,
+            "pain_points": [
+              "高污染",
+              "低效率",
+              "高成本"
+            ],
+            "solution": [
+              "智能激光除草机器人系统",
+              "低延迟的植物识别算法",
+              "亚毫米级精度的高能激光除草技术"
+            ],
+            "innovation_points": [
+              "无人驾驶激光除草机器人",
+              "智能激光除草技术"
+            ],
+            "evidence_quotes": [
+              "激光除草机器人凭借其精准识别杂草、最大限度减少对作物伤害的独特优势，迅速赢得了大规模种植农场、有机农业基地以及农机租赁公司的广泛青睐。",
+              "项目的主要收入来源包括设备销售收入、设备租赁收入和市场拓展与合作收入。设备销售收入是项目的主要收入来源，主要来自无人驾驶激光除草机器人的市场需求以及政府的政策支持；设备租赁收入通过与农机租赁公司合作，提供设备租赁服务；技术服务与维护收入来自提供机器人设备的技术支持和维护服务；市场拓展与合作收入则通过与农业合作社、农场等合作，带来联合研发或市场推广的收入。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy",
+              "weak_user_evidence"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "第 22 届北京理工大学“挑战杯” 1 / 39 项目介绍书 智能激光除草机器人系统 项目总负责人：王宇行 指导老师：李秀星 所在单位：计算机学院 第 22 届北京理工大学“挑战杯” Intelligent Laser Weeding Robot System 第 22 届北京理工大学“挑战杯” 2 / 39 智能激光除草机器人系统 王宇行，田甜，朱啸闻，林馨耀，杜一苇，郭宸溪，王德浩，毛子鸣 摘要：随着全球农业向智能化、绿色化、高效化转型，传统杂草管理方式面临 高污染、低效率、高成本等多重瓶颈，严重制约农业可持续发展。为此，本文 提出并研发了“禾光智能”无人驾驶激光除草机器人系统，融合计算机"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业方向 趋势 做一个校园二手交易平台，目标用户是大学生",
+          "results": [
+            {
+              "title": "[DOC] 一、产品定位 - 西安石油大学",
+              "snippet": "Magic Garden 校园二手交易平台. 项目计划书. 西安石油 ... 而且校园二手货交易市场目标顾客群——校园在校大学生已经形成。 ... 第三个是推广阶段，一个好的完善的二手交易平台 ...",
+              "url": "http://sysglc.xsyu.edu.cn/__local/D/34/07/B6E530AF059C82BB8B4C1D05951_85913C81_4C600.doc?e=.doc"
+            },
+            {
+              "title": "详情- 项目公示- 大学生创新创业训练计划管理系统 - 三江学院",
+              "snippet": "网罗校园服务平台是一款校园服务类应用小程序，通过智能手机终端来服务在校大学生的校园生活。项目的核心功能是提供一个校园闲置物品的交易平台。",
+              "url": "http://cxcy.sju.edu.cn/xm/CXCY/SJU/Item/Detail/e501050e-2423-4787-ae7e-e174d81e025f"
+            },
+            {
+              "title": "校园二手物品交易平台-计算机毕业设计源码38952 原创 - CSDN博客",
+              "snippet": "2026年1月3日·本论文介绍了一个基于Spring Boot框架开发的校园二手物品交易平台的设计与实现过程。平台主要面向学生用户、卖家用户和管理员三类用户群体，提供了多样化的 ...",
+              "url": "https://blog.csdn.net/vx1_Biye_Design/article/details/156419504"
+            }
+          ],
+          "summary": "- Magic Garden 校园二手交易平台. 项目计划书. 西安石油 ... 而且校园二手货交易市场目标顾客群——校园在校大学生已经形成。 ... 第三个是推广阶段，一个好的完善的二手交易平台 ...\n- 网罗校园服务平台是一款校园服务类应用小程序，通过智能手机终端来服务在校大学生的校园生活。项目的核心功能是提供一个校园闲置物品的交易平台。\n- 2026年1月3日·本论文介绍了一个基于Spring Boot框架开发的校园二手物品交易平台的设计与实现过程。平台主要面向学生用户、卖家用户和管理员三类用户群体，提供了多样化的 ..."
+        },
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": {
+          "definition": "校园二手交易平台是基于校园场景的在线或线下市场，允许学生发布、交换或转售闲置物品，通过资源再利用减少浪费并满足学生低成本获取物品的需求。",
+          "example": "西安石油大学的Magic Garden平台、三江学院的网罗校园小程序均通过整合学生闲置资源实现交易闭环，部分平台还附加物流支持和信用评价体系。",
+          "practice_task": "1.调研本校学生闲置物品类型及交易痛点；2.设计平台核心功能（如分类标签、竞价机制、线下自提点）；3.制定用户拉新策略（如与社团合作举办以物换物活动）",
+          "common_mistakes": [
+            "过度依赖第三方物流而忽视校园快递站合作",
+            "未建立用户身份认证导致交易纠纷频发"
+          ],
+          "recommended_reading": "CSDN博客《校园二手物品交易平台设计》、教育部大学生创新创业训练计划项目案例库、《商业模式画布》书籍"
+        },
+        "category": "科技创新"
+      },
+      "submission_id": "76cd5308-f13b-47ee-81e9-ae556a425175",
+      "created_at": "2026-03-14T07:50:05.032029"
+    },
+    {
+      "student_id": "s001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "什么是MVP？请教我",
+      "diagnosis": {},
+      "next_task": {},
+      "kg_analysis": {},
+      "hypergraph_insight": {},
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "confidence": 0.6,
+          "pipeline": [
+            "tutor",
+            "orchestrator"
+          ],
+          "nodes_visited": [
+            "router",
+            "tutor",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "学习导师"
+          ],
+          "strategy": "langgraph_v3_role_agents"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "学习导师",
+            "analysis": "**通俗定义**  \nMVP（Minimum Viable Product）是创业过程中用**最低成本、最短时间**开发出的**具备核心功能**的产品原型，目的是快速测试市场是否需要你的产品，而不是追求完美。就像搭积木时先搭出最基础的结构，再根据反馈逐步添加细节。关键在于：**用最少资源验证最大价值**。\n\n**真实例子**  \n襄阳市大学科技园的MVP实践就很典型。它最初并非直接建设高端产业园，而是先搭建基础孵化设施（如办公空间、会议室），并提供核心创业支持服务（如政策咨询、融资对接），形成一个“能跑”的创业生态雏形。通过观察入驻企业的反馈和需求，园区逐步扩展高技术产业配套服务（如技术共享平台、人才培训）。这种模式验证了市场需求，避免了盲目投入。根据国家税务总局数据，中国高技术产业收入同比增长16.1%，说明MVP的快速验证逻辑能有效适配技术迭代加速的市场环境。\n\n**练习任务**  \n请以校园场景为例，设计一个MVP方案。例如：  \n1. **目标**：验证“共享雨伞”在校园的可行性。  \n2. **核心功能**：扫码取伞、押金归还、基础定位追踪。  \n3. **成本控制**：用二手雨伞+简易电子锁+校园合作点位。  \n4. **验证方式**：投放100把伞，记录使用频率、用户反馈和损坏率。  \n完成后，分析数据：如果日均使用率低于5%，说明需求不足；如果归还率低于70%，需优化锁具或押金规则。**记住：MVP不是半成品，而是精准测试假设的工具**。",
+            "tools_used": [
+              "web_search",
+              "learning_llm"
+            ]
+          },
+          "grader": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {
+          "searched": true,
+          "query": "创新创业 MVP",
+          "results": [
+            {
+              "title": "襄阳市大学科技园",
+              "snippet": "创新创业Nav.国家级创新创业服务平台. 国家小型微型企业创业创新示范基地、国家级科技企业孵化器、全国创业孵化示范基地.",
+              "url": "https://www.xyusp.com/"
+            },
+            {
+              "title": "二代要摆正自己的位置：他不是我父亲，而是我老板-36氪",
+              "snippet": "郑烜乐： 光源资本是国内创业的产业投行，创业九年来差不多帮助250个创业企业和产业集团完成了400多笔融资和并购交易，也帮助很多产业集群进行资. 本变更和创新。",
+              "url": "https://36kr.com/p/2553495779219593"
+            },
+            {
+              "title": "中国科技创新产业快速发展，高技术产业收入同比增长16.1%",
+              "snippet": "中国国家税务总局税收数据显示，今年1—2月份，中国科技创新发展势头良好，高技术产业销售收入同比增长16.1%，科研技术服务业销售收入同比增长. 23.6%，知识产权（专利）密集型产业销售收入同比增长12.8%。",
+              "url": "https://sputniknews.cn/20260312/1070197181.html"
+            }
+          ],
+          "summary": "- 创新创业Nav.国家级创新创业服务平台. 国家小型微型企业创业创新示范基地、国家级科技企业孵化器、全国创业孵化示范基地.\n- 郑烜乐： 光源资本是国内创业的产业投行，创业九年来差不多帮助250个创业企业和产业集团完成了400多笔融资和并购交易，也帮助很多产业集群进行资. 本变更和创新。\n- 中国国家税务总局税收数据显示，今年1—2月份，中国科技创新发展势头良好，高技术产业销售收入同比增长16.1%，科研技术服务业销售收入同比增长. 23.6%，知识产权（专利）密集型产业销售收入同比增长12.8%。"
+        },
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": {
+          "definition": "MVP（Minimum Viable Product）指最小可行产品，是创业初期以最低成本开发的具备核心功能的产品原型，用于快速验证市场需求和商业模式。其目标是通过最小化功能集，以最快速度获取用户反馈并迭代优化。",
+          "example": "襄阳市大学科技园作为国家级创新创业服务平台，通过提供基础孵化设施和核心创业支持服务（如政策咨询、融资对接），形成MVP模式验证园区生态构建的可行性，后续根据企业需求逐步扩展高技术产业配套服务。",
+          "practice_task": "选择一个创业想法，列出其3个核心功能，设计一个能在2周内完成开发的MVP版本，并撰写用户测试计划。",
+          "common_mistakes": [
+            "将MVP等同于产品原型而忽略市场验证目标",
+            "过度追求功能完善导致开发周期过长"
+          ],
+          "recommended_reading": "《精益创业》（Eric Ries著）第二章：用MVP验证商业假设"
+        },
+        "category": ""
+      },
+      "submission_id": "67839cb9-0186-4f3b-80b5-ee790fff03f2",
+      "created_at": "2026-03-14T07:50:59.069529"
+    },
+    {
+      "student_id": "s001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "你好",
+      "diagnosis": {},
+      "next_task": {},
+      "kg_analysis": {},
+      "hypergraph_insight": {},
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "confidence": 0.95,
+          "pipeline": [
+            "orchestrator"
+          ],
+          "nodes_visited": [
+            "router",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router"
+          ],
+          "strategy": "langgraph_v3_role_agents"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": null,
+        "category": ""
+      },
+      "submission_id": "5643b9e2-462a-4aeb-a2f7-85720213922f",
+      "created_at": "2026-03-14T07:51:08.866939"
+    }
+  ],
+  "teacher_feedback": []
+}

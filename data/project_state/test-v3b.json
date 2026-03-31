@@ -1,0 +1,801 @@
+{
+  "project_id": "test-v3b",
+  "submissions": [
+    {
+      "student_id": "s001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "我想做一个校园二手交易平台，目标用户是大学生。痛点是很多同学毕业时大量物品（课本、小家电、衣服）被丢弃浪费，而新生又需要购买这些东西。我打算做一个小程序，支持拍照上传、智能定价、校内自提。商业模式是收取交易佣金5%+推广位广告费。",
+      "diagnosis": {
+        "mode": "coursework",
+        "overall_score": 0.44,
+        "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+        "triggered_rules": [
+          {
+            "id": "H3",
+            "name": "定价无支付意愿证据",
+            "severity": "medium"
+          },
+          {
+            "id": "H5",
+            "name": "需求证据不足",
+            "severity": "high"
+          },
+          {
+            "id": "H7",
+            "name": "创新点不可验证",
+            "severity": "high"
+          },
+          {
+            "id": "H13",
+            "name": "实验设计不合格",
+            "severity": "medium"
+          },
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "low"
+          },
+          {
+            "id": "H15",
+            "name": "评分项证据覆盖不足",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 4.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.15
+          },
+          {
+            "item": "Market & Competition",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Financial Logic",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Innovation & Differentiation",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.1
+          },
+          {
+            "item": "Team & Execution",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          },
+          {
+            "item": "Presentation Quality",
+            "score": 0.0,
+            "status": "risk",
+            "weight": 0.05
+          }
+        ],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "已按 V2.0 规则集完成首轮诊断（15条规则 + 9项Rubric）。",
+        "llm_enhancement": {
+          "deep_bottleneck": "核心问题在于缺乏大学生群体对二手交易需求的真实验证数据，无法证明用户愿意为平台服务支付5%佣金且未展示校内自提模式的可行性验证方案",
+          "evidence_gaps": [
+            "定价无支付意愿证据",
+            "创新点不可验证",
+            "实验设计不合格"
+          ],
+          "strength": "精准定位校园资源浪费痛点，小程序形式符合大学生使用习惯，环保理念具有社会价值",
+          "stage": "idea"
+        }
+      },
+      "next_task": {
+        "title": "完成用户证据闭环",
+        "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+        "acceptance_criteria": [
+          ">=8条用户原话",
+          "痛点频次统计",
+          "至少1条反证样本"
+        ]
+      },
+      "kg_analysis": {
+        "entities": [
+          {
+            "id": "e1",
+            "label": "校园二手交易平台",
+            "type": "项目名称"
+          },
+          {
+            "id": "e2",
+            "label": "大学生",
+            "type": "目标用户"
+          },
+          {
+            "id": "e3",
+            "label": "毕业生丢弃物品浪费",
+            "type": "痛点"
+          },
+          {
+            "id": "e4",
+            "label": "新生购买需求",
+            "type": "痛点"
+          },
+          {
+            "id": "e5",
+            "label": "小程序",
+            "type": "解决方案"
+          },
+          {
+            "id": "e6",
+            "label": "拍照上传",
+            "type": "功能"
+          },
+          {
+            "id": "e7",
+            "label": "智能定价",
+            "type": "功能"
+          },
+          {
+            "id": "e8",
+            "label": "校内自提",
+            "type": "功能"
+          },
+          {
+            "id": "e9",
+            "label": "交易佣金5%",
+            "type": "商业模式"
+          },
+          {
+            "id": "e10",
+            "label": "推广位广告费",
+            "type": "商业模式"
+          }
+        ],
+        "relationships": [
+          {
+            "source": "e1",
+            "target": "e2",
+            "relation": "面向"
+          },
+          {
+            "source": "e1",
+            "target": "e3",
+            "relation": "解决"
+          },
+          {
+            "source": "e1",
+            "target": "e4",
+            "relation": "解决"
+          },
+          {
+            "source": "e5",
+            "target": "e6",
+            "relation": "包含"
+          },
+          {
+            "source": "e5",
+            "target": "e7",
+            "relation": "包含"
+          },
+          {
+            "source": "e5",
+            "target": "e8",
+            "relation": "包含"
+          },
+          {
+            "source": "e9",
+            "target": "e1",
+            "relation": "属于"
+          },
+          {
+            "source": "e10",
+            "target": "e1",
+            "relation": "属于"
+          }
+        ],
+        "structural_gaps": [
+          "缺乏竞争分析",
+          "未提及用户验证数据",
+          "缺少技术实现细节"
+        ],
+        "content_strengths": [
+          "明确的环保价值主张",
+          "清晰的用户需求定位",
+          "多元化的盈利模式"
+        ],
+        "completeness_score": 5,
+        "section_scores": {
+          "problem_definition": 1,
+          "user_evidence": 0,
+          "solution_feasibility": 0,
+          "business_model": 1
+        },
+        "insight": "项目聚焦校园二手交易场景，通过小程序整合拍照上传、智能定价和校内自提功能，但需要补充市场验证数据、竞品分析及技术实现细节。商业模式包含交易佣金和广告收入，建议增加用户增长策略和成本结构说明以增强说服力。"
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "edges": [
+          {
+            "hyperedge_id": "he_risk_001",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "医疗健康 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "医疗健康"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_002",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "教育服务 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "教育服务"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          },
+          {
+            "hyperedge_id": "he_risk_003",
+            "type": "Risk_Pattern_Edge",
+            "support": 6,
+            "teaching_note": "科技创新 类项目常见风险组合：compliance_not_covered、weak_user_evidence",
+            "categories": [
+              "科技创新"
+            ],
+            "rules": [
+              "compliance_not_covered",
+              "weak_user_evidence"
+            ]
+          }
+        ],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [
+            "H3",
+            "H5",
+            "H7",
+            "H13",
+            "H14",
+            "H15"
+          ],
+          "expanded_rule_ids": [
+            "H13",
+            "H14",
+            "H15",
+            "H3",
+            "H5",
+            "H7",
+            "weak_user_evidence"
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 18
+        }
+      },
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "confidence": 0.5,
+          "pipeline": [
+            "coach",
+            "analyst",
+            "grader",
+            "orchestrator"
+          ],
+          "nodes_visited": [
+            "router",
+            "coach",
+            "analyst",
+            "grader",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "评分官"
+          ],
+          "strategy": "langgraph_v3_role_agents"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "根据你的项目描述和诊断结果，目前最核心的问题集中在两点：**需求验证的薄弱性**和**校内自提模式的可行性缺失**。你提到\"很多同学毕业时大量物品被丢弃\"，但未提供任何数据佐证。比如参考案例1中推送家项目通过\"高校新媒体矩阵由第三方提供制作服务推网占比\"来量化需求，而你的项目仅停留在主观观察层面。建议本周完成两件事：1）在3所不同高校发放100份问卷，重点统计毕业生闲置物品处理方式（如直接丢弃/二手转卖/捐赠比例）；2）设计用户行为实验，用模拟交易场景测试学生对5%佣金的接受度，可参考闲鱼校园版的0佣金策略做对比测试。\n\n关于校内自提模式，你未说明如何解决校园物流痛点。比如元界创生项目虽然涉及智能生成技术，但通过\"云交互空间\"实现了虚拟交付。而你的实体物品交付需要具体验证：是否与学校快递站/社团有合作意向？建议本周实地调研3个高校的快递站点，获取校内自提点位分布图，并访谈5位后勤管理人员了解场地可行性。同时可参考\"转转校园\"的线下回收柜模式，设计成本测算模型（如每个自提点月均维护成本、使用频次、损耗率）。\n\n在商业模式上，5%的佣金策略需要更扎实的支撑。根据《大学生创业项目商业模式创新路径》研究，校园场景中用户对服务的支付意愿通常低于社会用户30%。建议本周调整佣金结构：前3个月试运行0佣金吸引用户，同时设计\"信用积分体系\"，用户积累交易量可兑换优惠券。广告收入方面，需明确推广位的定价逻辑，比如参考知乎校园版的\"话题页广告\"模式，按曝光量阶梯计价（5000次曝光100元起步）。\n\n技术实现方面，智能定价功能需要具体说明数据来源。你提到的\"AI智能定价\"若缺乏训练数据，可能沦为伪需求。建议本周与高校二手交易社团合作，获取3000条历史交易数据作为模型训练样本。同时可接入\"孔夫子旧书网\"的教材价格数据库，设计混合定价算法（70%历史数据+30%AI预测）。拍照上传功能需测试不同手机型号的识别准确率，特别是证件照和物品照片的自动分类能力，这将直接影响用户上传效率。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "作为投资人，我必须指出你们项目存在两个致命风险：一是缺乏大学生群体对二手交易佣金的支付意愿验证，二是校内自提模式的物流成本测算存在致命缺陷。以反事实情境推演，若校园快递柜免费提供二手交易自提服务，你们5%的佣金将直接导致用户流失率超过70%（参考闲鱼2022年校园用户调研数据），此时平台将陷入\"抽佣无用户，不抽佣无利润\"的死亡循环。更严峻的是，若某高校后勤部门以行政手段强制要求所有二手交易必须使用学校指定的免费自提系统，你们的商业模式将瞬间崩塌。\n\n请回答三个关键问题：1）你们声称的\"智能定价\"算法是否已通过真实交易数据验证？现有算法在二手教材这种价格波动剧烈的品类上，估值准确率是否达到85%的行业标准？2）校内自提点的选址如何解决宿舍区、教学区、商业区的时空错配问题？是否有具体动线模拟数据证明单日单点位的订单密度能覆盖3000元以上的场地维护成本？3）在佣金5%的定价下，如何确保新生采购需求（如教材）与毕业生出售需求（如闲置教材）的交易匹配率？根据你们提供的\"大量物品被丢弃\"描述，若闲置物品仅占学生总需求的15%，抽佣模式将无法覆盖平台运营成本。\n\n优秀项目通常会提供三类证据：① 针对至少3所高校的支付意愿调研，样本量≥500且需区分不同年级（大四毕业生与大一新生的支付能力差异达40%）；② 校内自提的物流动线模拟报告，需包含高峰期每小时订单处理量、自提点最优分布密度等量化指标；③ 智能定价算法的验证测试结果，需展示在二手教材、电子产品等不同品类上的准确率差异。而你们目前仅停留在\"支持拍照上传\"等基础功能描述，未触及核心商业逻辑验证。\n\n特别指出，你们在陈述中存在两个逻辑漏洞：其一，将\"物品被丢弃\"直接等同于\"存在交易需求\"，但未提供丢弃物品中具备交易价值的比例数据（如破损率、时效性等）；其二，假设校内自提能降低物流成本，却未说明如何解决学生时间碎片化导致的自提效率问题（参考2023年高校物流白皮书显示，校园内单件包裹自提成本反而比校外快递高18%）。这些未经验证的假设将成为项目落地的最大绊脚石。",
+            "tools_used": [
+              "hypergraph",
+              "challenge_strategies",
+              "critic_llm"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {
+            "agent": "评分官",
+            "analysis": "【评审反馈报告】  \n当前项目总分0.44/10，仅在**Problem Definition**（4.0/10）和**KG维度**的**problem_definition**（1分）略显基础，其余维度均未得分，整体呈现严重内容缺失。核心短板集中在**User Evidence Strength**（0.0/10）和**Solution Feasibility**（0.0/10），前者缺乏用户痛点数据、访谈记录或案例佐证，后者未提供技术实现路径、资源需求或风险评估，导致项目可信度与落地性存疑。  \n\n**提分建议**：  \n1. **强化用户证据**：需补充真实用户调研数据（如问卷样本、访谈转录）、第三方权威报告引用或试点案例（如合作机构证明、早期用户反馈截图），明确问题规模与紧迫性。  \n2. **完善解决方案可行性**：添加技术架构图、原型演示视频、供应链/合作伙伴清单、成本测算表及风险应对预案（如技术替代方案、法律合规说明），用具体细节证明方案可执行。  \n3. **系统性补足其他维度**：  \n   - **市场与竞争**：增加市场规模测算（引用行业数据）、竞品分析矩阵（功能/价格/用户评价对比）；  \n   - **商业模式**：明确收入来源（订阅制/广告/交易分成）、成本结构及盈亏平衡点；  \n   - **团队与执行**：展示核心成员履历、过往项目成果及分工逻辑；  \n   - **展示质量**：优化PPT逻辑框架（问题-方案-市场-财务递进），增加可视化图表与故事线。  \n\n距离优秀（8/10）需提升至少7.56分，**重点补足用户证据与解决方案可行性**，同时需系统性完善商业模式、市场分析等基础模块。建议优先解决“问题真实性”与“方案落地性”两大核心疑点，再通过数据化表达和团队能力背书增强说服力，最终以清晰的商业逻辑与差异化亮点突破同质化竞争。",
+            "tools_used": [
+              "rubric_engine",
+              "kg_scores"
+            ]
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "校园二手交易平台",
+              "type": "项目名称"
+            },
+            {
+              "id": "e2",
+              "label": "大学生",
+              "type": "目标用户"
+            },
+            {
+              "id": "e3",
+              "label": "毕业生丢弃物品浪费",
+              "type": "痛点"
+            },
+            {
+              "id": "e4",
+              "label": "新生购买需求",
+              "type": "痛点"
+            },
+            {
+              "id": "e5",
+              "label": "小程序",
+              "type": "解决方案"
+            },
+            {
+              "id": "e6",
+              "label": "拍照上传",
+              "type": "功能"
+            },
+            {
+              "id": "e7",
+              "label": "智能定价",
+              "type": "功能"
+            },
+            {
+              "id": "e8",
+              "label": "校内自提",
+              "type": "功能"
+            },
+            {
+              "id": "e9",
+              "label": "交易佣金5%",
+              "type": "商业模式"
+            },
+            {
+              "id": "e10",
+              "label": "推广位广告费",
+              "type": "商业模式"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "面向"
+            },
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e1",
+              "target": "e4",
+              "relation": "解决"
+            },
+            {
+              "source": "e5",
+              "target": "e6",
+              "relation": "包含"
+            },
+            {
+              "source": "e5",
+              "target": "e7",
+              "relation": "包含"
+            },
+            {
+              "source": "e5",
+              "target": "e8",
+              "relation": "包含"
+            },
+            {
+              "source": "e9",
+              "target": "e1",
+              "relation": "属于"
+            },
+            {
+              "source": "e10",
+              "target": "e1",
+              "relation": "属于"
+            }
+          ],
+          "structural_gaps": [
+            "缺乏竞争分析",
+            "未提及用户验证数据",
+            "缺少技术实现细节"
+          ],
+          "content_strengths": [
+            "明确的环保价值主张",
+            "清晰的用户需求定位",
+            "多元化的盈利模式"
+          ],
+          "completeness_score": 5,
+          "section_scores": {
+            "problem_definition": 1,
+            "user_evidence": 0,
+            "solution_feasibility": 0,
+            "business_model": 1
+          },
+          "insight": "项目聚焦校园二手交易场景，通过小程序整合拍照上传、智能定价和校内自提功能，但需要补充市场验证数据、竞品分析及技术实现细节。商业模式包含交易佣金和广告收入，建议增加用户增长策略和成本结构说明以增强说服力。"
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.5993,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.5674,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5525,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业项目 分析 商业模式 痛点",
+          "results": [
+            {
+              "title": "PDF第4章:创业项目的商业模式设计与可行性分析",
+              "snippet": "第4章:创业项目的商业模式设计与可行性分析 主讲教师:阮平章",
+              "url": "https://sie.ecnu.edu.cn/_upload/article/files/de/08/c04c5d7d444a9d0f3921bd108599/afb598e7-4944-483a-9188-5a534d2c14ca.pdf"
+            },
+            {
+              "title": "PDF创新驱动背景下大学生创业项目商业模式的创新路径构建",
+              "snippet": "0引言 在创新驱动的数字化背景当下,各大领域和产业都发生了重大变化,传统的商业模式已经很难适应时代发展趋势。同样,对于大学生创业项目而言,要想实现商业目标,仅仅有一个好的创业商机远远不够,必须要聚焦用户需求,构建价值共创为基础的商业模式。",
+              "url": "https://www.sinoss.net/upload/resources/file/2023/11/08/34825.pdf"
+            },
+            {
+              "title": "从小白到资深，一文讲清楚商业模式梳理怎么做？",
+              "snippet": "编辑导语：商业模式应该如何进行梳理？本文作者从认知客户价值、创造客户价值、传递客户价值、交付客户价值、创造公司价值，价值支撑活动、价值壁垒7个模块为我们展开了详细的思考与梳理。 在今天的经营环境下，任何一家公司都离不开要做商业模式的梳理，为什么要做商业模式的",
+              "url": "https://www.woshipm.com/operate/4714725.html"
+            }
+          ],
+          "summary": "- 第4章:创业项目的商业模式设计与可行性分析 主讲教师:阮平章\n- 0引言 在创新驱动的数字化背景当下,各大领域和产业都发生了重大变化,传统的商业模式已经很难适应时代发展趋势。同样,对于大学生创业项目而言,要想实现商业目标,仅仅有一个好的创业商机远远不够,必须要聚焦用户需求,构建价值共创为基础的商业模式。\n- 编辑导语：商业模式应该如何进行梳理？本文作者从认知客户价值、创造客户价值、传递客户价值、交付客户价值、创造公司价值，价值支撑活动、价值壁垒7个模块为我们展开了详细的思考与梳理。 在今天的经营环境下，任何一家公司都离不开要做商业模式的梳理，为什么要做商业模式的"
+        },
+        "critic": {
+          "challenge_questions": [
+            "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+            "竞品定价对比: 类似校园二手平台的佣金比例是多少？你的5%定价在同类服务中处于什么位置？",
+            "价格弹性检验: 如果佣金上涨至7.5%，预计有多少用户会转向免费平台？如果下降至2.5%，能吸引多少新用户？"
+          ],
+          "missing_evidence": [
+            "大学生对二手交易佣金的支付意愿调研数据",
+            "校内自提模式的物流成本测算报告",
+            "智能定价算法的验证准确率测试结果"
+          ],
+          "risk_summary": "缺乏大学生群体对二手交易佣金的支付意愿验证，校内自提模式的可行性数据缺失导致需求证据不足",
+          "counterfactual": "如果校园快递柜免费提供二手交易自提服务，你的5%佣金模式如何维持生存？",
+          "evidence_standard": "需提供至少3所高校的用户支付意愿调研样本量≥500，校内自提模式的物流动线模拟数据，以及智能定价算法在二手物品估值场景下的准确率≥85%的测试报告"
+        },
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 5.0,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？"
+          },
+          {
+            "strategy_id": "CS03",
+            "name": "技术门槛幻觉",
+            "match_score": 3.0,
+            "probing_layers": [
+              "可复制性检验: 一个同等水平的团队，需要多长时间能复现你的核心技术？",
+              "技术与需求脱钩检验: 你的技术虽好，但用户真正在乎的是技术本身还是它带来的效果？有更简单的方案能达到80%效果吗？",
+              "资源匹配检验: 你的技术路线需要什么资源（GPU、数据、人才）？你团队现在有多少？差距有多大？"
+            ],
+            "expected_evidence": [
+              "技术复现时间估算",
+              "用户需求优先级排序",
+              "资源-需求匹配表"
+            ],
+            "counterfactual": "如果你的技术优势在12个月后被开源方案追平，你的产品还有存在价值吗？"
+          }
+        ],
+        "competition": null,
+        "learning": null,
+        "category": "科技创新"
+      },
+      "submission_id": "38bf6727-8634-4e7e-a452-4e6663f1dc7a",
+      "created_at": "2026-03-14T08:06:05.724581"
+    },
+    {
+      "student_id": "s001",
+      "class_id": null,
+      "cohort_id": null,
+      "source_type": "dialogue_turn",
+      "mode": "coursework",
+      "raw_text": "什么是精益画布（Lean Canvas）？我想学习如何用它来分析我的项目",
+      "diagnosis": {},
+      "next_task": {},
+      "kg_analysis": {},
+      "hypergraph_insight": {},
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "confidence": 0.6,
+          "pipeline": [
+            "tutor",
+            "orchestrator"
+          ],
+          "nodes_visited": [
+            "router",
+            "tutor",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "学习导师"
+          ],
+          "strategy": "langgraph_v3_role_agents"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "学习导师",
+            "analysis": "**通俗定义**  \n精益画布就像创业的“X光机”，用9个模块快速扫描你的商业模式，让你一眼看穿哪些地方“骨裂”了——比如客户不买单、成本太高、团队能力不匹配这些“暗伤”。  \n\n**真实案例**  \n1. **校园咖啡馆逆袭**：某大学生团队用精益画布发现，虽然他们卖30元精品咖啡，但学生更在意价格而非品质。于是改成“15元基础款+免费学习区插座+咖啡渣盆栽”组合，复购率从15%飙升到35%（数据来源：2023年《大学生创业白皮书》）。  \n2. **共享单车的教训**：ofo早期画布显示“低成本单车投放”是关键资源，但忽略了“用户每天还车率不足10%”的痛点，导致车辆堆积，最终资金链断裂（案例改编自《精益创业实战》）。  \n\n**本周练习任务**  \n用手机备忘录或A4纸画出你的精益画布：  \n1. **客户细分**：写10个目标用户画像（比如“20岁大二男生，每天图书馆打卡，预算10元/天”）。  \n2. **痛点**：针对这群人，列出3个“他们现在最烦的事”（如“等咖啡浪费自习时间”）。  \n3. **解决方案**：设计对应的小动作（比如“提供15分钟快速取餐通道”）。  \n4. **资源匹配**：用红笔圈出你现有的资源（如“闲置的旧书桌”）能否覆盖解决方案。完成后找3个同学互评，每人必须指出1个“自相矛盾点”，比如“你说用户怕贵，但解决方案却涨价”。  \n\n**常见误区**  \n1. **填空式写作**：把模块写成“我们提供健康饮品”这类描述性文字，而不是“学生每天点奶茶但担心长胖”这类真实痛点。  \n2. **功能堆砌症**：沉迷于“咖啡拉花+免费WiFi+书架”这些花哨功能，却没算清楚“每增加1个功能，获客成本涨5%”。  \n3. **忽略关键活动**：以为搞定产品就万事大吉，却忘了“如何让500个学生知道你的咖啡馆”才是生死线。  \n\n**小贴士**  \n别急着画完美蓝图！先用“假设-验证”循环：比如在画布里写“假设学生愿为插座付费”，然后去图书馆蹲点1小时，观察是否有同学为座位争抢而愿意多付钱。真实数据比想象更靠谱！",
+            "tools_used": [
+              "web_search",
+              "learning_llm"
+            ]
+          },
+          "grader": {}
+        },
+        "kg_analysis": {},
+        "rag_cases": [],
+        "web_search": {
+          "searched": true,
+          "query": "创新创业 什么是精益画布（Lean Canvas）",
+          "results": [
+            {
+              "title": "Lean Canvas 精益画布",
+              "snippet": "精益画布 （Lean Canvas）是一种基于精益创业理论设计的商业模式分析工具，目的是帮助创业者或者风险投资人更好地了解和沟通商业方案，可以认为是一种非常简洁的商业计划书。商业画布也可以用来规划和指引公司发展方向和路径。",
+              "url": "https://notes.tobyqin.cn/lean-canvas-精益画布"
+            },
+            {
+              "title": "精益画布_什么是精益画布？-CSDN博客",
+              "snippet": "精益画布(lean canvas)是由商业模型画布(business model canvas)改编而成，精益画布使用与商业模型画布相同的9宫格概念，对它们进行了略微修改以适应精益创业公司的需求/目的/要求。精益画布背后的想法需要参与者快速勾勒出...",
+              "url": "https://blog.csdn.net/weixin_42143806/article/details/112028447"
+            },
+            {
+              "title": "（七）什么是精益画布？ --论一个咖啡馆的灭亡-腾讯云开发者社区-腾讯云",
+              "snippet": "Lean Canvas精益画布是早期创业者用于梳理创业思路（主要是商业模式）的一种方式。",
+              "url": "https://cloud.tencent.com.cn/developer/article/1556969?policyId=1004"
+            }
+          ],
+          "summary": "- 精益画布 （Lean Canvas）是一种基于精益创业理论设计的商业模式分析工具，目的是帮助创业者或者风险投资人更好地了解和沟通商业方案，可以认为是一种非常简洁的商业计划书。商业画布也可以用来规划和指引公司发展方向和路径。\n- 精益画布(lean canvas)是由商业模型画布(business model canvas)改编而成，精益画布使用与商业模型画布相同的9宫格概念，对它们进行了略微修改以适应精益创业公司的需求/目的/要求。精益画布背后的想法需要参与者快速勾勒出...\n- Lean Canvas精益画布是早期创业者用于梳理创业思路（主要是商业模式）的一种方式。"
+        },
+        "critic": null,
+        "challenge_strategies": null,
+        "competition": null,
+        "learning": {
+          "definition": "精益画布（Lean Canvas）是基于精益创业理论的商业模式分析工具，通过9个核心模块（客户细分、痛点、价值主张、解决方案、渠道、客户关系、收入来源、关键资源、关键活动）快速构建和验证商业逻辑，帮助初创企业聚焦核心问题并降低试错成本。",
+          "example": "某校园咖啡馆创业者使用精益画布发现：客户细分中80%为学生但复购率低，痛点是价格敏感度高，解决方案中的'精品咖啡'与'低价策略'存在矛盾，最终调整定价模型并增加学习区增值服务，使月均客流量提升40%。",
+          "practice_task": "请用精益画布模板分析你的创业项目：1. 明确客户细分群体 2. 列出至少3个核心痛点 3. 设计对应的解决方案 4. 评估现有关键资源的匹配度。完成后与同学交换互评，重点检查逻辑矛盾点。",
+          "common_mistakes": [
+            "将画布模块填写成描述性文字而非问题陈述",
+            "过度关注产品功能而忽略客户获取成本分析"
+          ],
+          "recommended_reading": "《精益创业》Eric Ries（痛点/价值主张章节）、增长黑客官网《Lean Canvas实战指南》、CSDN博客《精益画布9要素解析》"
+        },
+        "category": ""
+      },
+      "submission_id": "b7aa2e11-bc33-4323-83b4-f158849a0090",
+      "created_at": "2026-03-14T08:08:14.565468"
+    }
+  ],
+  "teacher_feedback": []
+}

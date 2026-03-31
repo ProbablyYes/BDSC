@@ -1,0 +1,258 @@
+{
+  "project_id": "demo-hyper-001",
+  "submissions": [
+    {
+      "student_id": "stu-1",
+      "class_id": "2026A",
+      "cohort_id": "2026-Spring",
+      "source_type": "text",
+      "mode": "coursework",
+      "raw_text": "我们的项目是校园心理支持平台，访谈了用户，但担心没有竞争壁垒和市场规模夸大。",
+      "diagnosis": {
+        "mode": "coursework",
+        "bottleneck": "商业模型证据不足，尚未形成可执行闭环。",
+        "triggered_rules": [
+          {
+            "id": "H14",
+            "name": "路演叙事断裂",
+            "severity": "medium"
+          }
+        ],
+        "rubric": [
+          {
+            "item": "Problem Definition",
+            "score": 6.7,
+            "status": "ok"
+          },
+          {
+            "item": "User Evidence Strength",
+            "score": 6.8,
+            "status": "ok"
+          },
+          {
+            "item": "Solution Feasibility",
+            "score": 6.8,
+            "status": "ok"
+          },
+          {
+            "item": "Business Model Consistency",
+            "score": 6.9,
+            "status": "ok"
+          },
+          {
+            "item": "Market & Competition",
+            "score": 6.9,
+            "status": "ok"
+          }
+        ],
+        "summary": "系统已基于课程规则与项目文本生成首轮诊断，可继续迭代反馈。"
+      },
+      "next_task": {
+        "title": "补齐 BMC 的收入与渠道闭环",
+        "description": "基于一个清晰用户画像，完成价值主张-渠道-收入来源的一致性表。",
+        "acceptance_criteria": [
+          "给出1个目标用户细分",
+          "至少2个可触达渠道及获客成本估算",
+          "每种收入方式都有支付意愿证据"
+        ]
+      },
+      "hypergraph_insight": {
+        "ok": false,
+        "error": "hypergraph insight failed: Failed to DNS resolve address 9ea930aa.databases.neo4j.io:7687: [Errno 11001] getaddrinfo failed",
+        "edges": []
+      },
+      "agent_outputs": {
+        "student_learning": {
+          "agent": "student_learning",
+          "mode": "coursework",
+          "definition": "问题定义是将抽象想法收敛到具体用户、具体场景和可验证痛点的过程。",
+          "example": "目标用户为大一新生，场景为夜间找空教室，痛点是信息分散导致时间浪费。",
+          "common_mistakes": [
+            "只谈愿景不谈用户证据",
+            "把功能当痛点",
+            "没有反证样本"
+          ],
+          "practice_task": "访谈5位目标用户，整理出现频次最高的3个痛点并给出原话证据。",
+          "expected_artifact": "访谈记录表 + 痛点频次统计表",
+          "evaluation_criteria": [
+            "有真实引用",
+            "痛点可量化",
+            "结论和证据一致"
+          ]
+        },
+        "project_coach": {
+          "agent": "project_coach",
+          "category_inference": "科技创新",
+          "diagnosis": {
+            "mode": "coursework",
+            "bottleneck": "商业模型证据不足，尚未形成可执行闭环。",
+            "triggered_rules": [
+              {
+                "id": "H14",
+                "name": "路演叙事断裂",
+                "severity": "medium"
+              }
+            ],
+            "rubric": [
+              {
+                "item": "Problem Definition",
+                "score": 6.7,
+                "status": "ok"
+              },
+              {
+                "item": "User Evidence Strength",
+                "score": 6.8,
+                "status": "ok"
+              },
+              {
+                "item": "Solution Feasibility",
+                "score": 6.8,
+                "status": "ok"
+              },
+              {
+                "item": "Business Model Consistency",
+                "score": 6.9,
+                "status": "ok"
+              },
+              {
+                "item": "Market & Competition",
+                "score": 6.9,
+                "status": "ok"
+              }
+            ],
+            "summary": "系统已基于课程规则与项目文本生成首轮诊断，可继续迭代反馈。"
+          },
+          "next_task": {
+            "title": "补齐 BMC 的收入与渠道闭环",
+            "description": "基于一个清晰用户画像，完成价值主张-渠道-收入来源的一致性表。",
+            "acceptance_criteria": [
+              "给出1个目标用户细分",
+              "至少2个可触达渠道及获客成本估算",
+              "每种收入方式都有支付意愿证据"
+            ]
+          },
+          "reference_cases": [
+            {
+              "case_id": "case_8af36c2560a3",
+              "category": "科技创新",
+              "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+              "confidence": 0.75
+            },
+            {
+              "case_id": "case_f7a843988992",
+              "category": "科技创新",
+              "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+              "confidence": 0.9
+            },
+            {
+              "case_id": "case_45b1ac814edb",
+              "category": "科技创新",
+              "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+              "confidence": 0.9
+            }
+          ]
+        },
+        "competition_advisor": {
+          "agent": "competition_advisor",
+          "category_inference": "科技创新",
+          "rubric_advice": [
+            {
+              "item": "Problem Definition",
+              "estimated_score_0_5": 3.4,
+              "missing_evidence": "证据基础可继续增强",
+              "minimal_fix_24h": "补充至少2条数据证据并更新对照表",
+              "minimal_fix_72h": "完成一次小规模验证并更新财务假设"
+            },
+            {
+              "item": "User Evidence Strength",
+              "estimated_score_0_5": 3.4,
+              "missing_evidence": "证据基础可继续增强",
+              "minimal_fix_24h": "补充至少2条数据证据并更新对照表",
+              "minimal_fix_72h": "完成一次小规模验证并更新财务假设"
+            },
+            {
+              "item": "Solution Feasibility",
+              "estimated_score_0_5": 3.4,
+              "missing_evidence": "证据基础可继续增强",
+              "minimal_fix_24h": "补充至少2条数据证据并更新对照表",
+              "minimal_fix_72h": "完成一次小规模验证并更新财务假设"
+            },
+            {
+              "item": "Business Model Consistency",
+              "estimated_score_0_5": 3.5,
+              "missing_evidence": "证据基础可继续增强",
+              "minimal_fix_24h": "补充至少2条数据证据并更新对照表",
+              "minimal_fix_72h": "完成一次小规模验证并更新财务假设"
+            },
+            {
+              "item": "Market & Competition",
+              "estimated_score_0_5": 3.5,
+              "missing_evidence": "证据基础可继续增强",
+              "minimal_fix_24h": "补充至少2条数据证据并更新对照表",
+              "minimal_fix_72h": "完成一次小规模验证并更新财务假设"
+            }
+          ],
+          "benchmark_cases": [
+            {
+              "case_id": "case_8af36c2560a3",
+              "category": "科技创新",
+              "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+              "confidence": 0.75
+            },
+            {
+              "case_id": "case_f7a843988992",
+              "category": "科技创新",
+              "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+              "confidence": 0.9
+            },
+            {
+              "case_id": "case_45b1ac814edb",
+              "category": "科技创新",
+              "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+              "confidence": 0.9
+            }
+          ]
+        },
+        "instructor_assistant": {
+          "agent": "instructor_assistant",
+          "class_coverage_summary": {
+            "submission_count": 0,
+            "feedback_count": 0,
+            "high_risk_ratio": 0,
+            "triggered_rule_total": 0
+          },
+          "top_common_mistakes": [],
+          "reference_category_patterns": [
+            {
+              "category": "科技创新",
+              "case_count": 16
+            },
+            {
+              "category": "医疗健康",
+              "case_count": 11
+            },
+            {
+              "category": "工业制造",
+              "case_count": 8
+            },
+            {
+              "category": "教育服务",
+              "case_count": 8
+            },
+            {
+              "category": "交通运输",
+              "case_count": 7
+            }
+          ],
+          "suggested_interventions": [
+            "下周先讲客户-价值主张一致性，并要求提交证据对照表。",
+            "设置一次15分钟课堂压力测试，重点挑战无竞争与伪市场规模论证。"
+          ]
+        }
+      },
+      "submission_id": "8b1bfff3-7b75-47eb-9daf-64fda2207eb3",
+      "created_at": "2026-03-13T03:29:30.571110"
+    }
+  ],
+  "teacher_feedback": []
+}

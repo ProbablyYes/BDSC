@@ -34,10 +34,10 @@ node_modules/
 .next/
 .idea/
 
-# Local data
-data/uploads/student_submissions/**/*
+# Local data — keep .gitkeep for empty dirs, track everything else
+# data/uploads/student_submissions/**/*
 !data/uploads/student_submissions/.gitkeep
-data/project_state/**/*
+# data/project_state/**/*
 !data/project_state/.gitkeep
 
 # Teacher examples: keep only structure docs in git

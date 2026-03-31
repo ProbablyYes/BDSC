@@ -24,9 +24,9 @@ RULES = [
     {"id": "H4", "name": "TAM/SAM/SOM口径混乱", "severity": "high", "keywords": ["tam", "sam", "som", "市场规模"],
      "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
      "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。"},
-    {"id": "H5", "name": "需求证据不足", "severity": "high", "requires": ["访谈", "问卷", "用户证据", "调研"],
-     "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
-     "fix_hint": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。"},
+    {"id": "H5", "name": "需求证据不足", "severity": "high", "requires": ["访谈", "问卷", "用户证据", "调研", "内测", "使用日志", "点击率", "预约", "转化"],
+     "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+     "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。"},
     {"id": "H6", "name": "竞品对比不可比", "severity": "medium", "keywords": ["无竞争对手", "没有对手", "没有竞争对手", "独一无二"],
      "explanation": "声称'没有竞争对手'反而是危险信号——要么市场不存在，要么分析不够深入。",
      "fix_hint": "列出至少3个直接/间接竞品，做功能对比矩阵，标明你的差异化维度。"},
@@ -93,7 +93,7 @@ RULES = [
 
 RUBRICS = [
     {"item": "Problem Definition", "weight": 0.1, "evidence": ["痛点", "场景", "用户画像"], "rules": ["H1", "H5"]},
-    {"item": "User Evidence Strength", "weight": 0.15, "evidence": ["访谈", "问卷", "原话", "样本"], "rules": ["H5", "H13"]},
+    {"item": "User Evidence Strength", "weight": 0.15, "evidence": ["访谈", "问卷", "原话", "样本", "内测", "点击", "转化", "预约", "日志"], "rules": ["H5", "H13"]},
     {"item": "Solution Feasibility", "weight": 0.1, "evidence": ["技术路线", "mvp", "资源"], "rules": ["H7", "H12"]},
     {"item": "Business Model Consistency", "weight": 0.15, "evidence": ["价值主张", "渠道", "收入", "成本"], "rules": ["H1", "H2", "H3"]},
     {"item": "Market & Competition", "weight": 0.1, "evidence": ["市场规模", "tam", "sam", "som", "竞品"], "rules": ["H4", "H6"]},
@@ -126,6 +126,10 @@ _EVIDENCE_SYNONYMS: dict[str, list[str]] = {
     "ltv": ["用户价值", "lifetime value", "生命周期价值", "终身价值"],
     "访谈": ["用户访谈", "深度访谈", "调研访谈", "用户反馈", "用户洞察"],
     "问卷": ["调研问卷", "问卷调查", "线上调研", "需求调研"],
+    "点击": ["点击率", "点击数据", "点击转化", "CTR"],
+    "转化": ["转化率", "留资转化", "付费转化", "注册转化"],
+    "预约": ["预约页", "预约人数", "预约转化", "预定"],
+    "日志": ["使用日志", "行为日志", "埋点数据", "操作记录"],
     "竞品": ["竞争分析", "竞争对手", "竞品分析", "市场竞争", "对标分析"],
     "市场规模": ["market size", "市场空间", "行业规模", "市场前景"],
     "技术路线": ["技术方案", "技术架构", "技术栈", "系统架构"],
@@ -167,9 +171,16 @@ def _is_hit_rule(rule: dict, text: str, text_len: int = 0) -> bool:
     return False
 
 
-def _rule_penalty(severity: str, is_file: bool = False) -> float:
-    base = {"high": 0.9, "medium": 0.5}.get(severity, 0.25)
-    return base * 0.5 if is_file else base
+def _rule_penalty(severity: str, stage: str, is_file: bool = False) -> float:
+    base = {"high": 0.68, "medium": 0.36}.get(severity, 0.18)
+    stage_factor = {
+        "idea": 0.72,
+        "structured": 0.86,
+        "validated": 1.0,
+        "document": 1.0,
+    }.get(stage, 0.9)
+    penalty = base * stage_factor
+    return penalty * 0.65 if is_file else penalty
 
 
 def _infer_project_stage(text: str, is_file: bool = False) -> str:
@@ -189,14 +200,14 @@ def _infer_project_stage(text: str, is_file: bool = False) -> str:
 
 def _stage_baseline(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 5.4, "validated": 5.0, "structured": 4.6, "idea": 4.0}.get(stage, 4.6)
-    return {"idea": 3.0, "structured": 4.2, "validated": 5.3, "document": 5.8}.get(stage, 4.0)
+        return {"document": 5.9, "validated": 5.6, "structured": 5.2, "idea": 4.7}.get(stage, 5.2)
+    return {"idea": 4.1, "structured": 5.0, "validated": 5.9, "document": 6.3}.get(stage, 4.8)
 
 
 def _stage_ceiling(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 9.2, "validated": 8.6, "structured": 8.0, "idea": 7.2}.get(stage, 8.0)
-    return {"idea": 6.4, "structured": 7.8, "validated": 8.8, "document": 9.0}.get(stage, 7.8)
+        return {"document": 9.3, "validated": 8.8, "structured": 8.2, "idea": 7.5}.get(stage, 8.2)
+    return {"idea": 6.9, "structured": 8.1, "validated": 8.9, "document": 9.1}.get(stage, 8.0)
 
 
 def _score_band(score: float) -> str:
@@ -216,25 +227,25 @@ def _evidence_score(text: str, evidence_keywords: list[str], stage: str, is_file
     total = len(evidence_keywords)
     ratio = hit / max(total, 1)
     base = _stage_baseline(stage, is_file=is_file)
-    boost = ratio * (3.6 if is_file else 3.0)
+    boost = ratio * (3.4 if is_file else 2.8)
     if hit >= 3:
-        boost += 0.6
+        boost += 0.5
     elif hit == 0:
-        boost -= 0.4 if stage == "idea" else 0.7
+        boost -= 0.18 if stage == "idea" else 0.45
     return max(0.0, min(_stage_ceiling(stage, is_file=is_file), base + boost))
 
 
 def _suggest_next_task(primary_rule_id: str) -> dict:
     mapping = {
         "H5": {
-            "title": "完成用户证据闭环",
-            "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+            "title": "用一种最低成本的方法验证真实需求",
+            "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
             "template_guideline": [
-                "先选1类最核心用户，不要同时访谈很多类人",
-                "每份访谈至少记录场景、痛点原话、当前替代方案",
-                "整理成痛点频次表，并保留至少1条反证样本",
+                "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+                "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+                "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点",
             ],
-            "acceptance_criteria": [">=8条用户原话", "痛点频次统计", "至少1条反证样本"],
+            "acceptance_criteria": ["明确1个待验证判断", "完成1种验证动作", "拿到可复述的行为证据或反证"],
         },
         "H1": {
             "title": "重做价值主张一致性表",
@@ -265,6 +276,146 @@ def _suggest_next_task(primary_rule_id: str) -> dict:
                 "逐条补上制度、协议或风控措施",
             ],
             "acceptance_criteria": ["隐私条款草案", "数据流向图", "风险控制点清单"],
+        },
+        "H2": {
+            "title": "重做首批用户触达路径",
+            "description": "不要空讲增长，先把第一批用户从哪里来、怎么触达、为什么会点进来拆成一条真实路径。",
+            "template_guideline": [
+                "只保留2条最可能成功的渠道，不要同时铺太多",
+                "写清每条渠道对应的人群、触达动作、转化节点",
+                "给出每条渠道的首轮测试指标，例如点击、留资、加群或预约",
+            ],
+            "acceptance_criteria": ["2条可执行渠道", "每条渠道有转化节点", "首轮测试指标明确"],
+        },
+        "H3": {
+            "title": "先验证价格接受度而不是直接定价",
+            "description": "把“收费多少”改成“用户在什么条件下愿意付钱”，先验证支付门槛，再决定定价。",
+            "template_guideline": [
+                "列出基础版、进阶版、团队版3种可能付费对象",
+                "为每种对象写出“为什么值得付费”的具体触发点",
+                "用价格对话、预约付费按钮或小范围预售三选一测试接受度",
+            ],
+            "acceptance_criteria": ["至少2档价格假设", "对应价值点清楚", "拿到初步支付反馈"],
+        },
+        "H6": {
+            "title": "补一张真实可比的竞品/替代方案矩阵",
+            "description": "不要再写“没有对手”，先把用户现在怎么凑合解决这件事列出来，再比较你到底赢在哪里。",
+            "template_guideline": [
+                "至少列3种当前替代方案，包含直接竞品和土办法",
+                "比较功能、价格、使用门槛、迁移成本",
+                "最后只保留1个你最能打的差异点，不要铺太多卖点",
+            ],
+            "acceptance_criteria": ["至少3个替代方案", "4个比较维度", "1个核心差异点结论"],
+        },
+        "H7": {
+            "title": "把创新点变成一个可验证的小实验",
+            "description": "不要只说创新，先把最关键的新东西拆成一个最小实验，看它是否真的带来更好结果。",
+            "template_guideline": [
+                "写清创新点到底想改善什么结果",
+                "设一个最小对照：有这个功能和没有这个功能差在哪里",
+                "只盯1个结果指标，例如完成率、停留时长、理解准确率",
+            ],
+            "acceptance_criteria": ["创新假设明确", "有对照方案", "有1个可观测指标"],
+        },
+        "H10": {
+            "title": "把大计划压缩成最近两周可交付版本",
+            "description": "先别排很长时间线，只拆最近两周必须交付的东西，让执行显得真实可信。",
+            "template_guideline": [
+                "把大目标拆成2周内可完成的3个交付物",
+                "每个交付物写清负责人和完成标准",
+                "删掉当前资源明显做不到的远期事项",
+            ],
+            "acceptance_criteria": ["两周交付物清单", "负责人明确", "每项有完成标准"],
+        },
+        "H13": {
+            "title": "重做实验设计说明",
+            "description": "把“我们测过”改成“我们怎么测、测了多少、看什么指标”，否则验证没有说服力。",
+            "template_guideline": [
+                "写清样本是谁、数量多少、持续多久",
+                "只保留1-2个核心指标",
+                "说明什么结果算通过，什么结果算不过",
+            ],
+            "acceptance_criteria": ["样本量明确", "核心指标明确", "通过阈值明确"],
+        },
+        "H16": {
+            "title": "补齐“用户今天怎么凑合解决”的替代方案页",
+            "description": "真正的竞争不只来自同类产品，还来自用户现有习惯、表格、人工流程和免费工具。",
+            "template_guideline": [
+                "至少写3种当前凑合方案",
+                "标出每种方案为什么还被继续使用",
+                "说明你替换它最大的阻力是什么",
+            ],
+            "acceptance_criteria": ["3种替代方案", "每种有保留原因", "替换阻力清楚"],
+        },
+        "H17": {
+            "title": "把迁移成本说清楚",
+            "description": "如果用户要换到你这里，他要多学什么、多做什么、丢掉什么，这些都要算进去。",
+            "template_guideline": [
+                "拆时间成本、学习成本、数据迁移成本三类",
+                "说明哪一类成本最高",
+                "给出1个降低迁移成本的设计动作",
+            ],
+            "acceptance_criteria": ["3类迁移成本", "最高阻力点明确", "至少1个降阻动作"],
+        },
+        "H18": {
+            "title": "把用户规模拆成漏斗而不是一句总量",
+            "description": "不要直接拿总用户量推收入，先拆注册、活跃、付费三个层级，再看收入逻辑是否成立。",
+            "template_guideline": [
+                "列出注册、活跃、付费三层人数",
+                "为每层之间填一个转化率假设",
+                "再用付费层去推收入，而不是用总用户量",
+            ],
+            "acceptance_criteria": ["三层用户漏斗", "转化率假设", "收入推导基于付费层"],
+        },
+        "H19": {
+            "title": "把大市场改写成首年可触达市场",
+            "description": "不要只说行业很大，先说明你首年能通过哪些渠道碰到哪些具体人。",
+            "template_guideline": [
+                "只选首年最现实的1-2个渠道",
+                "估算每个渠道能触达的人数",
+                "写清这些人为什么会在这个渠道出现",
+            ],
+            "acceptance_criteria": ["首年渠道明确", "每条渠道有可触达人数", "触达逻辑合理"],
+        },
+        "H20": {
+            "title": "把关键结论逐条挂到证据上",
+            "description": "不要再用一句“验证了”带过，先把每个关键结论后面对应的证据补全。",
+            "template_guideline": [
+                "列出3个最关键结论",
+                "每个结论后面配1条数据、1条原话或1个实验结果",
+                "删掉没有证据支撑的强判断",
+            ],
+            "acceptance_criteria": ["3条关键结论", "每条有对应证据", "删除无证据强结论"],
+        },
+        "H21": {
+            "title": "把执行计划补上负责人",
+            "description": "计划本身不够，必须让人看到这件事到底谁来做、做到什么程度才算完成。",
+            "template_guideline": [
+                "列出最近3项关键动作",
+                "每项动作标明负责人",
+                "给每项动作补交付物和时间点",
+            ],
+            "acceptance_criteria": ["3项动作", "每项有负责人", "每项有交付物和时间点"],
+        },
+        "H22": {
+            "title": "把风控口号改成可执行预案",
+            "description": "别只写“加强风控”，要把什么时候触发、谁来处理、怎么处理写清楚。",
+            "template_guideline": [
+                "列出最现实的2类风险",
+                "每类风险写触发条件、负责人、处理动作",
+                "说明事后如何复盘和追踪",
+            ],
+            "acceptance_criteria": ["2类风险预案", "每类含触发条件", "每类含负责人和处理动作"],
+        },
+        "H23": {
+            "title": "把创新语言翻译成用户收益语言",
+            "description": "不要只讲技术领先，要让老师或评委立刻看懂：这到底给用户省了什么、快了什么、好在哪里。",
+            "template_guideline": [
+                "列出1个技术亮点",
+                "把它翻译成效率、成本、体验或结果上的具体收益",
+                "用一句非技术语言重新写价值主张",
+            ],
+            "acceptance_criteria": ["1个技术亮点", "1个可感知收益", "1句非技术版价值主张"],
         },
     }
     return mapping.get(
@@ -409,8 +560,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
                 "fix_task": rule.get("fix_hint", ""),
             })
 
-    evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑"] if _fuzzy_match(k, normalized_text))
-    if evidence_hits < 2 and not is_file and text_len > 150:
+    evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑", "原型", "内测", "实验"] if _fuzzy_match(k, normalized_text))
+    if evidence_hits < 1 and not is_file and text_len > 220 and project_stage != "idea":
         h15 = next((r for r in RULES if r["id"] == "H15"), {})
         triggered_rules.append({
             "id": "H15", "name": "评分项证据覆盖不足", "severity": "medium",
@@ -466,9 +617,10 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
         for row in RUBRICS:
             ev_score = _evidence_score(normalized_text, row["evidence"], stage=project_stage, is_file=is_file)
             penalties = sum(
-                _rule_penalty(r["severity"], is_file=is_file)
+                _rule_penalty(r["severity"], project_stage, is_file=is_file)
                 for r in triggered_rules if r["id"] in row["rules"]
             )
+            penalties = min(penalties, 1.15 if project_stage == "idea" else 1.45 if project_stage == "structured" else 1.8)
             dim_score = max(0.0, min(10.0, ev_score + length_bonus - penalties))
             rubric.append({
                 "item": row["item"],
@@ -482,8 +634,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
             total_weight += row["weight"]
 
     overall_score = round(weighted_total / total_weight, 2) if total_weight else 0.0
-    stage_floor = {"idea": 3.2, "structured": 4.5, "validated": 5.6, "document": 6.0}.get(project_stage, 4.0)
-    stage_ceiling = {"idea": 6.0, "structured": 7.6, "validated": 8.8, "document": 9.3}.get(project_stage, 8.0)
+    stage_floor = {"idea": 4.2, "structured": 5.0, "validated": 5.9, "document": 6.2}.get(project_stage, 4.8)
+    stage_ceiling = {"idea": 6.4, "structured": 7.9, "validated": 8.9, "document": 9.3}.get(project_stage, 8.1)
     overall_score = round(min(stage_ceiling, max(stage_floor, overall_score)), 2)
     high_rules = [r for r in triggered_rules if r["severity"] == "high"]
     primary_rule = high_rules[0]["id"] if high_rules else (triggered_rules[0]["id"] if triggered_rules else "NONE")

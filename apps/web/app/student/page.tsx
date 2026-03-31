@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Children, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -10,7 +10,6 @@ const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").t
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
 type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "interventions" | "debug";
-type CompetitionType = "" | "internet_plus" | "challenge_cup" | "innovation" | "math_modeling";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
 let _msgId = 0;
@@ -64,6 +63,81 @@ function renderAnnotatedStudentText(text: string, annotations: any[]) {
   return <div className="student-annotated-text">{nodes}</div>;
 }
 
+function MermaidBlock({ chart, theme }: { chart: string; theme: "dark" | "light" }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState("");
+  const renderKey = useMemo(() => `mermaid-${Math.random().toString(36).slice(2)}`, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function renderChart() {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "loose",
+          theme: theme === "dark" ? "dark" : "default",
+          fontFamily: "Inter, Segoe UI, sans-serif",
+        });
+        const { svg, bindFunctions } = await mermaid.render(`${renderKey}-${Date.now()}`, chart);
+        if (cancelled || !hostRef.current) return;
+        hostRef.current.innerHTML = svg;
+        bindFunctions?.(hostRef.current);
+        setError("");
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "图表渲染失败");
+      }
+    }
+
+    renderChart();
+    return () => {
+      cancelled = true;
+    };
+  }, [chart, renderKey, theme]);
+
+  return (
+    <div className="mermaid-card">
+      <div className="mermaid-head">
+        <span>流程图</span>
+        <span>Mermaid</span>
+      </div>
+      {error ? (
+        <div className="mermaid-error">
+          <div>图表渲染失败，先显示原始代码：</div>
+          <pre className="mermaid-fallback"><code>{chart}</code></pre>
+        </div>
+      ) : (
+        <div ref={hostRef} className="mermaid-stage" />
+      )}
+    </div>
+  );
+}
+
+function MarkdownContent({ content, theme }: { content: string; theme: "dark" | "light" }) {
+  const components = useMemo(() => ({
+    pre(props: any) {
+      const child = Children.toArray(props.children)[0] as any;
+      const className = String(child?.props?.className || "");
+      if (className.includes("language-mermaid")) {
+        const chart = String(child?.props?.children || "").replace(/\n$/, "");
+        return <MermaidBlock chart={chart} theme={theme} />;
+      }
+      return <pre {...props} />;
+    },
+    table(props: any) {
+      return (
+        <div className="md-table-wrap">
+          <table {...props} />
+        </div>
+      );
+    },
+  }), [theme]);
+
+  return <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>;
+}
+
 export default function StudentPage() {
   const currentUser = useAuth("student");
   const [projectId, setProjectId] = useState("");
@@ -97,7 +171,6 @@ export default function StudentPage() {
   const [pdfViewerUrl, setPdfViewerUrl] = useState<string>("");
 
   // competition & pitch simulation
-  const [competitionType, setCompetitionType] = useState<CompetitionType>("");
   const [pitchTimer, setPitchTimer] = useState<number>(0);
   const [pitchTimerRunning, setPitchTimerRunning] = useState(false);
   const [pitchDuration, setPitchDuration] = useState(300);
@@ -116,6 +189,8 @@ export default function StudentPage() {
   const [myTeams, setMyTeams] = useState<any[]>([]);
   const [joinCode, setJoinCode] = useState("");
   const [teamMsg, setTeamMsg] = useState("");
+  const [hyperLibrary, setHyperLibrary] = useState<any>(null);
+  const [hyperProjectView, setHyperProjectView] = useState<any>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -431,7 +506,6 @@ export default function StudentPage() {
             conversation_id: conversationId || undefined,
             class_id: classId || undefined, cohort_id: cohortId || undefined,
             message: text, mode,
-            competition_type: competitionType || undefined,
           }),
           signal: controller.signal,
         });
@@ -630,9 +704,58 @@ export default function StudentPage() {
   }, [latestResult]);
   const webSearch = latestResult?.agent_trace?.web_search ?? latestResult?.web_search ?? null;
   const orchestration = latestResult?.agent_trace?.orchestration ?? {};
-  const roleAgents = latestResult?.agent_trace?.role_agents ?? {};
   const pressureTrace = latestResult?.agent_trace?.pressure_test_trace ?? latestResult?.pressure_test_trace ?? null;
   const agentsCalled = orchestration?.agents_called ?? [];
+  const roleAgents = useMemo(() => {
+    const merged = new Map<string, any>();
+    const all = [...resultHistory, latestResult].filter(Boolean);
+    for (const item of all) {
+      const roles = item?.agent_trace?.role_agents ?? {};
+      for (const [key, rawVal] of Object.entries(roles)) {
+        const val: any = rawVal;
+        if (!val || typeof val !== "object") continue;
+        const prev = merged.get(key) ?? {};
+        merged.set(key, {
+          ...prev,
+          ...val,
+          turn_count: Number(prev.turn_count ?? 0) + 1,
+          tools_used: Array.from(new Set([...(prev.tools_used ?? []), ...(val.tools_used ?? [])])),
+          analysis: val.analysis ?? prev.analysis ?? "",
+        });
+      }
+    }
+    return Object.fromEntries(merged.entries());
+  }, [resultHistory, latestResult]);
+
+  useEffect(() => {
+    if (rightTab !== "hyper") return;
+    let cancelled = false;
+    fetch(`${API_BASE}/api/hypergraph/library?limit=16&t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setHyperLibrary(data?.data ?? null); })
+      .catch(() => { if (!cancelled) setHyperLibrary(null); });
+    return () => { cancelled = true; };
+  }, [rightTab, resultHistory.length, latestResult]);
+
+  useEffect(() => {
+    if (rightTab !== "hyper") return;
+    if (!hyperInsight && !hyperStudent) return;
+    let cancelled = false;
+    fetch(`${API_BASE}/api/hypergraph/project-view`, {
+      method: "POST",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        hypergraph_insight: hyperInsight ?? {},
+        hypergraph_student: hyperStudent ?? {},
+        pressure_test_trace: pressureTrace ?? {},
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setHyperProjectView(data?.data ?? null); })
+      .catch(() => { if (!cancelled) setHyperProjectView(null); });
+    return () => { cancelled = true; };
+  }, [rightTab, hyperInsight, hyperStudent, pressureTrace, resultHistory.length, latestResult]);
 
   // Cumulative planner tasks — kept across turns
   const cumulativePlannerTasks = useMemo(() => {
@@ -703,15 +826,6 @@ export default function StudentPage() {
             <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>项目教练</button>
           </div>
           <div className="topbar-mode-hint">{modeGuide}</div>
-          {mode === "competition" && (
-            <select className="topbar-competition-select" value={competitionType} onChange={(e) => setCompetitionType(e.target.value as CompetitionType)}>
-              <option value="">通用评分</option>
-              <option value="internet_plus">互联网+/中国国际大学生创新大赛</option>
-              <option value="challenge_cup">挑战杯</option>
-              <option value="innovation">创新创业大赛</option>
-              <option value="math_modeling">数学建模</option>
-            </select>
-          )}
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
           {pitchTimerRunning && (
             <div className={`pitch-timer-display ${pitchTimer <= 30 ? "urgent" : pitchTimer <= 60 ? "warning" : ""}`}>
@@ -821,15 +935,6 @@ export default function StudentPage() {
             <label>北京时间
               <input value={formatBjTime(new Date(), true)} readOnly />
             </label>
-            <label>目标赛事
-              <select value={competitionType} onChange={(e) => setCompetitionType(e.target.value as CompetitionType)} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg-secondary)",color:"var(--text-primary)"}}>
-                <option value="">不指定</option>
-                <option value="internet_plus">互联网+/中国国际大学生创新大赛</option>
-                <option value="challenge_cup">挑战杯</option>
-                <option value="innovation">创新创业大赛</option>
-                <option value="math_modeling">数学建模</option>
-              </select>
-            </label>
           </div>
         </div>
       )}
@@ -924,7 +1029,7 @@ export default function StudentPage() {
                             </div>
                           </details>
                         )}
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                        <MarkdownContent content={m.text} theme={theme} />
                         {loading && i === messages.length - 1 && <span className="streaming-cursor" />}
                         {m.text && !loading && <div className="ai-disclaimer">⚠ AI生成，仅供参考</div>}
                       </>
@@ -1109,6 +1214,22 @@ export default function StudentPage() {
                       {latestResult?.agent_trace?.orchestration?.intent_reason && (
                         <div className="panel-desc" style={{ marginBottom: 10 }}>识别理由：{latestResult.agent_trace.orchestration.intent_reason}</div>
                       )}
+                      {latestResult?.agent_trace?.orchestration && (
+                        <div className="panel-desc" style={{ marginBottom: 10 }}>
+                          连续模式：{latestResult.agent_trace.orchestration.conversation_continuation_mode || "new_analysis"}
+                          {" · "}
+                          评分追问：{latestResult.agent_trace.orchestration.score_request_detected ? "是" : "否"}
+                          {" · "}
+                          评委追问：{latestResult.agent_trace.orchestration.eval_followup_detected ? "是" : "否"}
+                          {" · "}
+                          RAG命中：{latestResult.agent_trace.orchestration.rag_hits ?? 0}
+                        </div>
+                      )}
+                      {latestResult?.agent_trace?.orchestration?.conversation_state_summary && (
+                        <div className="panel-desc" style={{ marginBottom: 10, whiteSpace: "pre-wrap" }}>
+                          连续摘要：{latestResult.agent_trace.orchestration.conversation_state_summary}
+                        </div>
+                      )}
                       <div className="agent-flow">
                         {agentsCalled.map((a: string, i: number) => (
                           <span key={i} className="agent-flow-node">
@@ -1138,10 +1259,13 @@ export default function StudentPage() {
                           <details key={key} className="agent-card" open>
                             <summary className="agent-card-header">
                               <span className="agent-card-name">{nameMap[key] ?? val.agent ?? key}</span>
-                              <span className="agent-card-tools">{(val.tools_used ?? []).map((t: string) => toolMap[t] ?? t).join(" · ")}</span>
+                              <span className="agent-card-tools">
+                                {(val.tools_used ?? []).map((t: string) => toolMap[t] ?? t).join(" · ")}
+                                {val.turn_count ? ` · 累积${val.turn_count}轮` : ""}
+                              </span>
                             </summary>
                             <div className="agent-card-body">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{val.analysis}</ReactMarkdown>
+                              <MarkdownContent content={val.analysis} theme={theme} />
                             </div>
                           </details>
                         );
@@ -1170,7 +1294,7 @@ export default function StudentPage() {
                               </summary>
                               <div className="task-card-body">
                                 {s(t.why) && <p className="task-why">{s(t.why)}</p>}
-                                {s(t.how) && <div className="task-how"><ReactMarkdown remarkPlugins={[remarkGfm]}>{s(t.how)}</ReactMarkdown></div>}
+                                {s(t.how) && <div className="task-how"><MarkdownContent content={s(t.how)} theme={theme} /></div>}
                                 {s(t.acceptance) && <div className="task-accept">{s(t.acceptance)}</div>}
                               </div>
                             </details>
@@ -1368,6 +1492,12 @@ export default function StudentPage() {
 
                     return (
                       <div className="kg-full">
+                        <div className="kg-summary-strip">
+                          <div className="kg-summary-card"><strong>{entities.length}</strong><span>累积实体</span></div>
+                          <div className="kg-summary-card"><strong>{rels.length}</strong><span>累积关系</span></div>
+                          <div className="kg-summary-card"><strong>{strengths.length}</strong><span>已形成优势</span></div>
+                          <div className="kg-summary-card"><strong>{gaps.length}</strong><span>待补结构缺口</span></div>
+                        </div>
                         <div className="kg-toolbar">
                           <span className="kg-toolbar-hint">滚轮缩放，拖拽平移</span>
                           <div style={{ display: "flex", gap: 6 }}>
@@ -1428,6 +1558,24 @@ export default function StudentPage() {
                           </div>
                         )}
 
+                        {branches.length > 0 && (
+                          <div className="kg-list-section">
+                            <h5>图谱覆盖类型</h5>
+                            <div className="kg-type-chip-row">
+                              {branches
+                                .sort((a, b) => b[1].length - a[1].length)
+                                .slice(0, 8)
+                                .map(([type, items]) => (
+                                  <div key={type} className="kg-type-chip">
+                                    <span className="kg-type-chip-dot" style={{ background: typeColors[type] ?? "#6ba3d6" }} />
+                                    <span>{typeNames[type] ?? type}</span>
+                                    <strong>{items.length}</strong>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Strengths */}
                         {strengths.length > 0 && (
                           <div className="kg-list-section good">
@@ -1458,7 +1606,7 @@ export default function StudentPage() {
                                 <summary>{s(t.task)}</summary>
                                 <div className="kg-task-body">
                                   {s(t.why) && <p>{s(t.why)}</p>}
-                                  {s(t.how) && <div><ReactMarkdown remarkPlugins={[remarkGfm]}>{s(t.how)}</ReactMarkdown></div>}
+                                  {s(t.how) && <div><MarkdownContent content={s(t.how)} theme={theme} /></div>}
                                 </div>
                               </details>
                             ))}
@@ -1489,168 +1637,213 @@ export default function StudentPage() {
               {rightTab === "hyper" && (
                 <div className="right-section">
                   <h4>项目全景诊断</h4>
-                  <div className="panel-desc">一个好的创业项目需要覆盖10个关键维度（用户、市场、技术、团队等）。这里检测你覆盖了几个，哪些<strong>还缺</strong>，以及和历史优秀/失败项目的模式对比。</div>
+                  <div className="panel-desc">这里不是再给你看一堆图谱术语，而是直接告诉你：你的项目目前结构上哪里强、哪里缺、评委最可能追问什么，以及这些判断背后的超图证据。</div>
                   {hyperStudent?.ok ? (
                     <>
-                      {/* Dimension Coverage Ring + Grid */}
-                      <div className="hyper-coverage">
-                        <div className="hyper-cov-head">
-                          <div className="score-total-ring" style={{ margin: "0" }}>
-                            <svg viewBox="0 0 80 80" className="ring-svg">
-                              <circle cx="40" cy="40" r="32" className="ring-bg" />
-                              <circle cx="40" cy="40" r="32" className="ring-fg" strokeDasharray={`${((hyperStudent.coverage_score ?? 0) / 10) * 201} 201`} />
-                            </svg>
-                            <div className="ring-text"><span className="ring-num">{hyperStudent.coverage_score}</span><span className="ring-max">/10</span></div>
-                          </div>
-                          <div className="hyper-cov-meta">
-                            <span className="hyper-cov-title">维度覆盖度</span>
-                            <span className="hyper-cov-sub">{hyperStudent.covered_count ?? 0}个已覆盖 / {hyperStudent.total_dimensions ?? 10}个总维度</span>
+                      <div className="hyper-impact-hero">
+                        <div className="hyper-impact-main">
+                          <div className="hyper-impact-title">你这个项目当前命中了多少关键维度</div>
+                          <div className="hyper-impact-sub">
+                            {hyperStudent.covered_count ?? 0} / {hyperStudent.total_dimensions ?? 10} 个维度已明确，覆盖度 {hyperStudent.coverage_score ?? 0}/10
+                            {" · "}
+                            本轮命中 {hyperProjectView?.matched_edges?.length ?? 0} 条模式，总库 {hyperLibrary?.overview?.edge_count ?? 0} 条超边
                           </div>
                         </div>
-                        <div className="hyper-dim-grid">
-                          {Object.entries(hyperStudent.dimensions ?? {}).map(([k, v]: [string, any]) => (
-                            <div key={k} className={`hyper-dim-chip ${v.covered ? "covered" : "missing"}`} title={v.covered ? `${v.count}个实体` : "未覆盖"}>
-                              <span className="hdim-dot" />{v.name}
-                              {v.covered && <span className="hdim-count">{v.count}</span>}
-                            </div>
-                          ))}
+                        <div
+                          className="hyper-impact-ring"
+                          style={{
+                            background: `conic-gradient(var(--accent) 0 ${(Number(hyperStudent.coverage_score ?? 0) / 10) * 360}deg, rgba(255,255,255,0.08) ${(Number(hyperStudent.coverage_score ?? 0) / 10) * 360}deg 360deg)`,
+                          }}
+                        >
+                          <div className="hyper-impact-ring-inner">
+                            <div className="hyper-impact-score">{hyperStudent.coverage_score ?? 0}<span>/10</span></div>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Missing Dimensions */}
-                      {(hyperStudent.missing_dimensions ?? []).length > 0 && (
-                        <div className="hyper-missing">
-                          <h5>🔴 你还没提到的关键维度</h5>
-                          <div className="panel-desc">按紧急度排序，优先补充排在前面的。</div>
-                          {hyperStudent.missing_dimensions.map((m: any, mi: number) => (
-                            <div key={mi} className={`hyper-missing-item importance-${m.importance}`}>
-                              <span className="hyper-missing-dim">{m.dimension}</span>
-                              <span className={`hyper-importance-badge ${m.importance}`}>{m.importance}</span>
-                              <p className="hyper-missing-reason">{m.recommendation}</p>
-                            </div>
-                          ))}
+                      <div className="hyper-dim-matrix">
+                        {Object.entries(hyperStudent.dimensions ?? {}).map(([k, v]: [string, any]) => (
+                          <div key={k} className={`hyper-dim-square ${v.covered ? "covered" : "missing"}`}>
+                            <div className="hyper-dim-square-name">{v.name}</div>
+                            <div className="hyper-dim-square-meta">{v.covered ? `${v.count} 个信号` : "待补充"}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {hyperProjectView && (
+                        <div className="hyper-guided-board">
+                          <div className="hyper-guided-card">
+                            <h5>超图对你项目最有用的结论</h5>
+                            <div className="panel-desc">先看这 3 条。它们是超图综合你本轮材料之后，最值得你立刻关注的地方。</div>
+                            {(hyperProjectView?.useful_cards ?? []).length > 0 ? (
+                              <div className="hyper-useful-grid">
+                                {(hyperProjectView.useful_cards ?? []).map((card: any, idx: number) => (
+                                  <div key={idx} className={`hyper-useful-card ${card.tone || ""}`}>
+                                    <div className="hyper-useful-head">
+                                      <strong>{card.title}</strong>
+                                      {card.importance ? <span>{card.importance}</span> : null}
+                                    </div>
+                                    <div className="hyper-useful-summary">{card.summary}</div>
+                                    {card.project_hint ? <div className="hyper-useful-hint">这对你意味着：{card.project_hint}</div> : null}
+                                    <p>{card.reason}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="panel-desc">当前还没有足够稳定的超图结论，先继续补充项目描述。</div>
+                            )}
+                          </div>
                         </div>
                       )}
 
-                      {/* Hub Entities */}
-                      {(hyperStudent.hub_entities ?? []).length > 0 && (
-                        <div className="hyper-hubs">
-                          <h5>核心支撑实体</h5>
-                          <div className="panel-desc">连接多个维度的关键实体，是你项目的核心支撑点。</div>
-                          {hyperStudent.hub_entities.map((h: any, hi: number) => (
-                            <div key={hi} className="hyper-hub-item">
-                              <span className="hyper-hub-name">{h.entity}</span>
-                              <span className="hyper-hub-deg">{h.connections}个维度</span>
-                              <p className="hyper-hub-note">{h.note}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Cross-dimensional Links */}
-                      {(hyperStudent.cross_links ?? []).length > 0 && (
-                        <div className="hyper-cross">
-                          <h5>🔗 你项目中的维度间联动</h5>
-                          <div className="panel-desc">这些联动关系说明你的项目有内在逻辑串联，联动越多越好。</div>
-                          {hyperStudent.cross_links.map((cl: any, ci: number) => (
-                            <div key={ci} className="hyper-cross-row">
-                              <span className="hyper-cross-from">{cl.from_dim}</span>
-                              <span className="hyper-cross-arrow">→ {cl.relation} →</span>
-                              <span className="hyper-cross-to">{cl.to_dim}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Pattern Warnings */}
-                      {(hyperStudent.pattern_warnings ?? []).length > 0 && (
-                        <div className="hyper-warnings">
-                          <h5>⚠ 历史失败模式预警</h5>
-                          <div className="panel-desc">你的项目和以往失败/高风险项目的某些模式相似，需要注意规避。</div>
-                          {hyperStudent.pattern_warnings.map((w: any, wi: number) => (
-                            <div key={wi} className="hyper-warning-item">{w.warning}</div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Pattern Strengths */}
-                      {(hyperStudent.pattern_strengths ?? []).length > 0 && (
-                        <div className="hyper-strengths">
-                          <h5>✅ 和优秀项目的相似之处</h5>
-                          {hyperStudent.pattern_strengths.map((s: any, si: number) => (
-                            <div key={si} className="hyper-strength-item">{s.note}</div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Value Loops */}
-                      {(hyperStudent.value_loops ?? []).length > 0 && (
-                        <div className="hyper-loops">
-                          <h5>价值链路完整度</h5>
-                          <div className="panel-desc">一个成功的创业项目需要完整的逻辑链路，断裂的链路是评委最容易追问的点。</div>
-                          {hyperStudent.value_loops.map((vl: any, vi: number) => (
-                            <div key={vi} className={`hyper-loop-item ${vl.complete ? "complete" : "broken"}`}>
-                              <span className="loop-status">{vl.complete ? "✓" : "✗"}</span>
-                              <span className="loop-chain">{vl.chain}</span>
-                            </div>
-                          ))}
-                          {hyperStudent.complete_loops != null && (
-                            <div className="hyper-loop-summary">
-                              {hyperStudent.complete_loops}/{(hyperStudent.value_loops ?? []).length} 条链路完整
+                      {(hyperInsight?.summary || (hyperInsight?.top_signals ?? []).length > 0) && (
+                        <div className="hyper-teaching-summary compact">
+                          {hyperInsight?.summary && <div className="hyper-insight-text">{hyperInsight.summary}</div>}
+                          {(hyperInsight?.top_signals ?? []).length > 0 && (
+                            <div className="hyper-signal-list">
+                              {(hyperInsight.top_signals ?? []).map((signal: string, idx: number) => (
+                                <div key={idx} className="hyper-signal-chip">{signal}</div>
+                              ))}
                             </div>
                           )}
                         </div>
                       )}
 
-                      {/* LLM Cross-dimensional Insight */}
-                      {hyperStudent.llm_insight && (
-                        <div className="hyper-llm-insight">
-                          <h5>AI 跨维度洞察</h5>
-                          <div className="hyper-insight-text">{hyperStudent.llm_insight}</div>
-                        </div>
-                      )}
+                      <div className="hyper-result-board">
+                        {(hyperStudent.missing_dimensions ?? []).length > 0 && (
+                          <div className="hyper-result-card">
+                            <h5>你最该先补的结构</h5>
+                            {hyperStudent.missing_dimensions.slice(0, 3).map((m: any, mi: number) => (
+                              <div key={mi} className={`hyper-missing-item importance-${m.importance}`}>
+                                <span className="hyper-missing-dim">{m.dimension}</span>
+                                <span className={`hyper-importance-badge ${m.importance}`}>{m.importance}</span>
+                                <p className="hyper-missing-reason">{m.recommendation}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {(hyperStudent.pattern_warnings ?? []).length > 0 && (
+                          <div className="hyper-result-card">
+                            <h5>历史模式里的风险提醒</h5>
+                            {(hyperStudent.pattern_warnings ?? []).slice(0, 3).map((w: any, wi: number) => (
+                              <div key={wi} className="hyper-warning-item">{w.warning}</div>
+                            ))}
+                          </div>
+                        )}
+                        {(hyperStudent.pattern_strengths ?? []).length > 0 && (
+                          <div className="hyper-result-card">
+                            <h5>你已经具备的优势结构</h5>
+                            {(hyperStudent.pattern_strengths ?? []).slice(0, 3).map((s: any, si: number) => (
+                              <div key={si} className="hyper-strength-item">
+                                {s.note}
+                                {s.edge_type && <span className="hyper-inline-meta">来源：{s.edge_type}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-                      {/* Teaching Hypergraph Edges */}
-                      {hyperEdges.length > 0 && (
-                        <div className="hyper-teaching">
-                          <h5>教学超图洞察</h5>
-                          <div className="panel-desc">从历史案例库中发现的跨维度关联模式。</div>
-                          {hyperEdges.map((e: any) => (
-                            <div key={e.hyperedge_id} className="hyper-edge-card">
-                              <span className={`hyper-edge-type ${e.type}`}>{{ Risk_Pattern_Edge: "风险模式", Value_Loop_Edge: "价值闭环", User_Pain_Fit_Edge: "用户痛点", Evidence_Grounding_Edge: "证据锚定", Market_Competition_Edge: "市场竞争", Execution_Gap_Edge: "执行断裂", Compliance_Safety_Edge: "合规安全", Ontology_Grounded_Edge: "本体落地", Innovation_Validation_Edge: "创新验证" }[e.type as string] ?? e.type}</span>
-                              <span className="hyper-edge-note">{e.teaching_note}</span>
-                              {e.retrieval_reason && <div className="panel-desc" style={{marginTop: 6}}>命中原因：{e.retrieval_reason}</div>}
-                              {(e.nodes ?? []).length > 0 && (
-                                <div className="hyper-edge-nodes">{e.nodes.map((n: string, ni: number) => <span key={ni} className="hyper-node-chip">{n.split("::").pop()}</span>)}</div>
-                              )}
-                              {(e.evidence_quotes ?? []).length > 0 && (
-                                <div style={{display:"grid",gap:6,marginTop:8}}>
-                                  {(e.evidence_quotes ?? []).map((q: string, qi: number) => (
-                                    <div key={qi} className="panel-desc" style={{margin:0}}>证据：{q}</div>
-                                  ))}
-                                </div>
-                              )}
+                      <details className="hyper-evidence-panel">
+                        <summary>展开看超图分析过程与老师可见证据</summary>
+                        {hyperProjectView && (
+                          <div className="hyper-guided-card" style={{ marginTop: 12 }}>
+                            <h5>本轮超图参与了什么判断</h5>
+                            <div className="hyper-guided-list">
+                              <div className="hyper-guided-item"><strong>命中超边族</strong><span>{(hyperProjectView?.process_trace?.edge_families ?? []).join(" / ") || "暂无"}</span></div>
+                              <div className="hyper-guided-item"><strong>关联规则</strong><span>{(hyperProjectView?.process_trace?.matched_rules ?? []).join(" / ") || "暂无"}</span></div>
+                              <div className="hyper-guided-item"><strong>追问策略</strong><span>{hyperProjectView?.process_trace?.selected_strategy || "暂无"}</span></div>
+                              <div className="hyper-guided-item"><strong>生成追问</strong><span>{hyperProjectView?.process_trace?.generated_question || "暂无"}</span></div>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                      {pressureTrace?.generated_question && (
-                        <div className="hyper-teaching" style={{marginTop: 12}}>
-                          <h5>本轮压力测试追问</h5>
-                          <div className="panel-desc">这条追问基于命中谬误、超边和策略自动生成。</div>
-                          <div className="hyper-edge-card">
-                            <span className="hyper-edge-type">启发式追问</span>
-                            <span className="hyper-edge-note">{pressureTrace.generated_question}</span>
-                            {pressureTrace?.evidence_quotes?.length > 0 && (
-                              <div style={{display:"grid",gap:6,marginTop:8}}>
-                                {pressureTrace.evidence_quotes.map((q: string, qi: number) => (
-                                  <div key={qi} className="panel-desc" style={{margin:0}}>依据：{q}</div>
+                          </div>
+                        )}
+
+                        {hyperLibrary?.overview && (
+                          <div className="hyper-library-board">
+                            <h5>我们的超图库</h5>
+                            <div className="panel-desc">这里显示的是当前持久化超图库总规模，不等于你这一轮命中的模式条数。</div>
+                            <div className="hyper-topology-grid">
+                              <div className="hyper-topology-card">
+                                <div className="hyper-topology-title">总库规模</div>
+                                <div className="hyper-topology-kpis">
+                                  <div><strong>{hyperLibrary?.overview?.edge_count ?? 0}</strong><span>超边</span></div>
+                                  <div><strong>{hyperLibrary?.overview?.node_count ?? 0}</strong><span>超节点</span></div>
+                                  <div><strong>{hyperLibrary?.overview?.avg_member_count ?? 0}</strong><span>平均成员数</span></div>
+                                </div>
+                              </div>
+                              <div className="hyper-topology-card">
+                                <div className="hyper-topology-title">本轮对照</div>
+                                <div className="hyper-topology-kpis">
+                                  <div><strong>{hyperProjectView?.matched_edges?.length ?? 0}</strong><span>命中超边</span></div>
+                                  <div><strong>{(hyperStudent?.hub_entities ?? []).length ?? 0}</strong><span>枢纽实体</span></div>
+                                  <div><strong>{(hyperStudent?.cross_links ?? []).length ?? 0}</strong><span>跨维链接</span></div>
+                                </div>
+                              </div>
+                              <div className="hyper-topology-card">
+                                <div className="hyper-topology-title">家族分布</div>
+                                {(hyperLibrary?.families ?? []).slice(0, 6).map((item: any, idx: number) => (
+                                  <div key={idx} className="hyper-family-row">
+                                    <span>{item.label ?? item.family}</span>
+                                    <b>{item.count}</b>
+                                  </div>
                                 ))}
                               </div>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+
+                        {(hyperStudent.hub_entities ?? []).length > 0 && (
+                          <div className="hyper-hubs">
+                            <h5>核心支撑实体</h5>
+                            {hyperStudent.hub_entities.map((h: any, hi: number) => (
+                              <div key={hi} className="hyper-hub-item">
+                                <span className="hyper-hub-name">{h.entity}</span>
+                                <span className="hyper-hub-deg">{h.connections}个维度</span>
+                                <p className="hyper-hub-note">{h.note}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {(hyperStudent.cross_links ?? []).length > 0 && (
+                          <div className="hyper-cross">
+                            <h5>维度联动证据</h5>
+                            {hyperStudent.cross_links.slice(0, 8).map((cl: any, ci: number) => (
+                              <div key={ci} className="hyper-cross-row">
+                                <span className="hyper-cross-from">{cl.from_dim}</span>
+                                <span className="hyper-cross-arrow">→ {cl.relation} →</span>
+                                <span className="hyper-cross-to">{cl.to_dim}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {hyperEdges.length > 0 && (
+                          <div className="hyper-teaching">
+                            <h5>命中的超边证据</h5>
+                            {hyperEdges.map((e: any) => (
+                              <div key={e.hyperedge_id} className="hyper-edge-card">
+                                <span className={`hyper-edge-type ${e.type}`}>{e.family_label || e.type}</span>
+                                <span className="hyper-edge-note">{e.teaching_note}</span>
+                                <div className="hyper-edge-meta">
+                                  <span>支持度 {e.support ?? 0}</span>
+                                  {e.stage_scope ? <span>阶段 {e.stage_scope}</span> : null}
+                                  {e.severity ? <span>强度 {e.severity}</span> : null}
+                                  {e.match_score ? <span>匹配分 {e.match_score}</span> : null}
+                                </div>
+                                {e.retrieval_reason && <div className="panel-desc" style={{marginTop: 6}}>命中原因：{e.retrieval_reason}</div>}
+                                {(e.rules ?? []).length > 0 && (
+                                  <div className="hyper-edge-nodes">
+                                    {(e.rules ?? []).map((rule: string, ri: number) => <span key={ri} className="hyper-node-chip">规则 {rule}</span>)}
+                                  </div>
+                                )}
+                                {(e.nodes ?? []).length > 0 && (
+                                  <div className="hyper-edge-nodes">{e.nodes.map((n: string, ni: number) => <span key={ni} className="hyper-node-chip">{n.split("::").pop()}</span>)}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </details>
                     </>
                   ) : (
                     <div className="hyper-empty-guide">

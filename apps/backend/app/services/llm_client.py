@@ -57,23 +57,15 @@ def _extract_json_obj(text: str) -> dict[str, Any]:
 
 
 class LlmClient:
-    """OpenAI-compatible client for SiliconFlow/Qwen/DeepSeek providers."""
+    """OpenAI-compatible client, currently pinned to SiliconFlow."""
 
     def __init__(self) -> None:
         self.enabled = bool(settings.llm_api_key and settings.llm_base_url)
         self._client: OpenAI | None = None
-        self._qwen_client: OpenAI | None = None
         if self.enabled:
             self._client = OpenAI(
                 api_key=settings.llm_api_key,
                 base_url=settings.llm_base_url,
-                timeout=180.0,
-                max_retries=1,
-            )
-        if settings.llm_qwen_api_key and settings.llm_qwen_base_url:
-            self._qwen_client = OpenAI(
-                api_key=settings.llm_qwen_api_key,
-                base_url=settings.llm_qwen_base_url,
                 timeout=180.0,
                 max_retries=1,
             )
@@ -85,16 +77,12 @@ class LlmClient:
 
     def _resolve_client_and_model(self, model: str | None = None) -> tuple[OpenAI | None, str]:
         model_name = model or settings.llm_fast_model or settings.llm_model
-        if self._qwen_client is not None and self._is_qwen_model(model_name):
-            return self._qwen_client, (settings.llm_qwen_model or model_name)
         return self._client, model_name
 
     def _provider_name(self, client: OpenAI | None) -> str:
         if client is None:
             return "disabled"
-        if client is self._qwen_client:
-            return "dashscope"
-        return "default"
+        return "siliconflow"
 
     @staticmethod
     def _error_kind(exc: Exception) -> str:
@@ -112,14 +100,16 @@ class LlmClient:
         return error_kind in {"connect_error", "timeout", "rate_limit"}
 
     def _fallback_target(self, client: OpenAI | None, model_name: str) -> tuple[OpenAI | None, str] | None:
-        if client is self._qwen_client and self._client is not None:
+        if client is self._client and self._client is not None:
             candidates = [
-                settings.llm_reason_model,
                 settings.llm_fast_model,
+                settings.llm_structured_model,
+                settings.llm_reason_model,
+                settings.llm_synthesis_model,
                 settings.llm_model,
             ]
             for candidate in candidates:
-                if candidate and not self._is_qwen_model(candidate):
+                if candidate and candidate != model_name:
                     return self._client, candidate
         return None
 
@@ -151,7 +141,7 @@ class LlmClient:
 
         stream = None
         last_exc: Exception | None = None
-        max_attempts = 3 if client is self._qwen_client else 2
+        max_attempts = 2
         for attempt in range(1, max_attempts + 1):
             try:
                 stream = _stream_once(client, model_name)
@@ -222,6 +212,38 @@ class LlmClient:
             temperature=temperature,
         )
         result = _extract_json_obj(raw)
+        if not result and raw and self.enabled:
+            repaired = self.chat_text(
+                system_prompt=(
+                    "你是 JSON 修复器。"
+                    "用户给你的是一个本来应该返回 JSON 对象的模型输出，但它可能混入说明文字、代码块、轻微格式错误，"
+                    "或者出现截断。请在尽量保留原意的前提下，把它修复成一个合法 JSON 对象。"
+                    "如果原文被截断，请只补齐最小必要结构，不要扩写成长文。"
+                    "只能返回 JSON 对象本身，不要解释。"
+                ),
+                user_prompt=(
+                    "请把下面内容修复为合法 JSON 对象；如果字段缺失，尽量根据已有内容补全最小可用结构，不要凭空扩写。\n\n"
+                    f"{raw[:4000]}"
+                ),
+                model=settings.llm_structured_model,
+                temperature=0.0,
+            )
+            result = _extract_json_obj(repaired)
+        if not result and self.enabled:
+            retry_raw = self.chat_text(
+                system_prompt=(
+                    system_prompt
+                    + "\n你上一次返回的内容不是合法 JSON，或者被截断了。"
+                    + "\n这一次请重新输出一个更短、更稳定的 JSON 对象。"
+                    + "\n要求：字段名不要变；字符串尽量简短；数组最多 3 项；不要输出解释文字，不要用 markdown。"
+                ),
+                user_prompt=user_prompt,
+                model=model or settings.llm_structured_model,
+                temperature=0.0,
+            )
+            retry_result = _extract_json_obj(retry_raw)
+            if retry_result:
+                return retry_result
         if not result and raw:
             logger.warning("chat_json: failed to parse JSON from LLM response (len=%d): %.200s", len(raw), raw)
         return result
@@ -237,9 +259,11 @@ class LlmClient:
         if client is None:
             return ""
         safe_temp = max(0.0, min(float(temperature), 1.2))
-        try:
-            resp = self._client.chat.completions.create(
-                model=model_name,
+        provider = self._provider_name(client)
+
+        def _call_once(call_client: OpenAI, call_model: str):
+            return call_client.chat.completions.create(
+                model=call_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
@@ -247,10 +271,41 @@ class LlmClient:
                 temperature=safe_temp,
                 stream=False,
             )
-            if resp.choices and resp.choices[0].message:
-                raw = resp.choices[0].message.content or ""
-                return _strip_think_tags(raw)
-        except Exception as exc:
-            logger.warning("LLM call failed (model=%s): %s", model_name, exc)
-            return ""
+
+        last_exc: Exception | None = None
+        max_attempts = 2
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = _call_once(client, model_name)
+                if resp.choices and resp.choices[0].message:
+                    raw = resp.choices[0].message.content or ""
+                    return _strip_think_tags(raw)
+                logger.warning("LLM call returned empty response (model=%s provider=%s attempt=%d)", model_name, provider, attempt)
+            except Exception as exc:
+                last_exc = exc
+                error_kind = self._error_kind(exc)
+                logger.warning(
+                    "LLM call failed (model=%s provider=%s attempt=%d kind=%s): %s",
+                    model_name, provider, attempt, error_kind, exc,
+                )
+                if attempt >= max_attempts or not self._should_retry(error_kind):
+                    break
+                time.sleep(min(1.5, 0.4 * attempt))
+
+        fallback = self._fallback_target(client, model_name)
+        if fallback:
+            fb_client, fb_model = fallback
+            fb_provider = self._provider_name(fb_client)
+            try:
+                logger.warning("LLM call fallback: %s/%s -> %s/%s", provider, model_name, fb_provider, fb_model)
+                resp = _call_once(fb_client, fb_model)
+                if resp.choices and resp.choices[0].message:
+                    raw = resp.choices[0].message.content or ""
+                    return _strip_think_tags(raw)
+            except Exception as exc:
+                last_exc = exc
+                logger.warning("LLM fallback failed (model=%s provider=%s kind=%s): %s", fb_model, fb_provider, self._error_kind(exc), exc)
+
+        if last_exc is not None:
+            logger.warning("LLM call exhausted retries (model=%s provider=%s): %s", model_name, provider, last_exc)
         return ""

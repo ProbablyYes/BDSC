@@ -284,6 +284,7 @@ def _safe_hypergraph_insight(hg: Any) -> dict:
         edges.append({
             "hyperedge_id": _safe_str(e.get("hyperedge_id", "")),
             "type": _safe_str(e.get("type", "")),
+            "family_label": _safe_str(e.get("family_label", "")),
             "support": int(e.get("support", 0) or 0),
             "teaching_note": _safe_str(e.get("teaching_note", "")),
             "rules": [_safe_str(x) for x in (e.get("rules") or [])[:6]],
@@ -291,6 +292,11 @@ def _safe_hypergraph_insight(hg: Any) -> dict:
             "nodes": [_safe_str(x) for x in (e.get("nodes") or [])[:12]],
             "evidence_quotes": [_safe_str(x) for x in (e.get("evidence_quotes") or [])[:3]],
             "retrieval_reason": _safe_str(e.get("retrieval_reason", "")),
+            "source_project_ids": [_safe_str(x) for x in (e.get("source_project_ids") or [])[:6]],
+            "confidence": float(e.get("confidence", 0) or 0),
+            "severity": _safe_str(e.get("severity", "")),
+            "score_impact": float(e.get("score_impact", 0) or 0),
+            "stage_scope": _safe_str(e.get("stage_scope", "")),
             "match_score": float(e.get("match_score", 0) or 0),
         })
     return {
@@ -337,13 +343,51 @@ def _safe_hypergraph_student(hs: Any) -> dict:
             })
         else:
             pattern_warnings.append({"warning": _safe_str(item)})
+    pattern_strengths = []
+    for item in (hs.get("pattern_strengths") or [])[:5]:
+        if isinstance(item, dict):
+            pattern_strengths.append({
+                "pattern_id": _safe_str(item.get("pattern_id", "")),
+                "note": _safe_str(item.get("note", "")),
+                "support": int(item.get("support", 0) or 0),
+                "edge_type": _safe_str(item.get("edge_type", "")),
+            })
+        else:
+            pattern_strengths.append({"note": _safe_str(item)})
+    dimensions = {}
+    raw_dimensions = hs.get("dimensions") or {}
+    if isinstance(raw_dimensions, dict):
+        for key, value in list(raw_dimensions.items())[:16]:
+            if not isinstance(value, dict):
+                continue
+            dimensions[_safe_str(key)] = {
+                "name": _safe_str(value.get("name", "")),
+                "covered": bool(value.get("covered")),
+                "entities": [_safe_str(x) for x in (value.get("entities") or [])[:5]],
+                "count": int(value.get("count", 0) or 0),
+            }
+    missing_dimensions = []
+    for item in (hs.get("missing_dimensions") or [])[:8]:
+        if not isinstance(item, dict):
+            continue
+        missing_dimensions.append({
+            "dimension": _safe_str(item.get("dimension", "")),
+            "importance": _safe_str(item.get("importance", "")),
+            "recommendation": _safe_str(item.get("recommendation", "")),
+        })
     return {
         "ok": bool(hs.get("ok")),
         "coverage_score": float(hs.get("coverage_score", 0) or 0),
+        "covered_count": int(hs.get("covered_count", 0) or 0),
+        "total_dimensions": int(hs.get("total_dimensions", 0) or 0),
+        "dimensions": dimensions,
         "hub_entities": hub_entities,
         "cross_links": cross_links,
         "pattern_warnings": pattern_warnings,
+        "pattern_strengths": pattern_strengths,
+        "missing_dimensions": missing_dimensions,
         "projected_edge_types": [_safe_str(x) for x in (hs.get("projected_edge_types") or [])[:8]],
+        "student_graph_stats": hs.get("student_graph_stats", {}) if isinstance(hs.get("student_graph_stats"), dict) else {},
     }
 
 
@@ -363,6 +407,13 @@ def _normalize_intent(raw_intent: Any, message: str = "") -> str:
     if any(k in intent for k in ["路演", "答辩", "演讲", "展示", "pitch"]):
         return "路演表达"
     return "综合咨询"
+
+
+def _submission_intent_shape(row: dict) -> str:
+    ao = row.get("agent_outputs", {}) if isinstance(row.get("agent_outputs"), dict) else {}
+    orchestration = ao.get("orchestration", {}) if isinstance(ao.get("orchestration"), dict) else {}
+    shape = _safe_str(row.get("intent_shape") or orchestration.get("intent_shape", "")).lower()
+    return shape if shape in {"single", "mixed"} else "single"
 
 
 def _infer_project_phase(text: str, next_task: dict | None = None, kg_analysis: dict | None = None) -> str:
@@ -471,6 +522,16 @@ def _build_agent_trace(
             "agents_called": result.get("agents_called", []),
             "resolved_agents": result.get("resolved_agents", []),
             "agent_reasoning": _safe_str(result.get("agent_reasoning", "")),
+            "score_request_detected": bool(result.get("score_request_detected", False)),
+            "eval_followup_detected": bool(result.get("eval_followup_detected", False)),
+            "conversation_continuation_mode": _safe_str(result.get("conversation_continuation_mode", "")) or "new_analysis",
+            "conversation_state_summary": _safe_str(result.get("conversation_state_summary", "")),
+            "rag_hits": len(result.get("rag_cases", []) or []),
+            "rag_case_ids": [
+                _safe_str(item.get("case_id") or item.get("project_name") or "")
+                for item in (result.get("rag_cases", []) or [])[:5]
+                if isinstance(item, dict)
+            ],
             "strategy": "langgraph_v4_parallel",
         },
         "role_agents": {
@@ -525,6 +586,11 @@ def _safe_agent_summary(sub: dict) -> dict:
         "intent_reason": _safe_str(orchestration.get("intent_reason", "") or ao.get("intent_reason", "")),
         "intent_confidence": float(orchestration.get("confidence", 0) or ao.get("intent_confidence", 0) or 0),
         "agent_reasoning": _safe_str(orchestration.get("agent_reasoning", "") or ao.get("agent_reasoning", "")),
+        "score_request_detected": bool(orchestration.get("score_request_detected", False)),
+        "eval_followup_detected": bool(orchestration.get("eval_followup_detected", False)),
+        "conversation_continuation_mode": _safe_str(orchestration.get("conversation_continuation_mode", "")) or "new_analysis",
+        "rag_hits": int(orchestration.get("rag_hits", 0) or 0),
+        "rag_case_ids": [_safe_str(x) for x in (orchestration.get("rag_case_ids", []) or [])[:5]],
     }
     return summary
 
@@ -583,6 +649,18 @@ def _teacher_intervention_hint(intent_mix: dict[str, int], latest_phase: str, ri
     return "建议先看最新任务与证据链，再决定是补课还是个别诊断。"
 
 
+def _submission_intent_shape(row: dict) -> str:
+    if not isinstance(row, dict):
+        return "single"
+    direct = _safe_str(row.get("intent_shape", ""))
+    if direct in {"single", "mixed"}:
+        return direct
+    ao = row.get("agent_outputs", {}) if isinstance(row.get("agent_outputs"), dict) else {}
+    orch = ao.get("orchestration", {}) if isinstance(ao.get("orchestration"), dict) else {}
+    shape = _safe_str(orch.get("intent_shape", ""))
+    return shape if shape in {"single", "mixed"} else "single"
+
+
 def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
     """Read real submissions from JsonStorage and compute metrics for one student."""
     project_id = f"project-{user_id}"
@@ -624,6 +702,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
     if include_detail:
         proj_list = []
         student_intent_mix: dict[str, int] = {}
+        student_shape_mix: dict[str, int] = {}
         latest_project_phase = ""
         latest_summary = ""
         project_snapshot_cards = []
@@ -641,6 +720,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
             latest_task = latest.get("next_task", {}) if isinstance(latest.get("next_task"), dict) else {}
             latest_phase = _safe_str(latest.get("project_phase", "")) or "持续迭代"
             intent_mix: dict[str, int] = {}
+            shape_mix: dict[str, int] = {}
             phase_history: list[dict] = []
             risk_evidence: list[dict] = []
             latest_quotes: list[dict] = []
@@ -652,10 +732,14 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                 )
                 intent_mix[intent] = intent_mix.get(intent, 0) + 1
                 student_intent_mix[intent] = student_intent_mix.get(intent, 0) + 1
+                shape = _submission_intent_shape(s)
+                shape_mix[shape] = shape_mix.get(shape, 0) + 1
+                student_shape_mix[shape] = student_shape_mix.get(shape, 0) + 1
                 phase_history.append({
                     "created_at": s.get("created_at", ""),
                     "phase": _safe_str(s.get("project_phase", "")) or latest_phase,
                     "intent": intent,
+                    "intent_shape": shape,
                     "score": s["_score"],
                 })
                 for q in _safe_evidence_quotes(s.get("evidence_quotes", [])):
@@ -688,6 +772,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                 "improvement": round(p_scores[-1] - p_scores[0], 1) if len(p_scores) >= 2 else 0,
                 "current_summary": project_summary,
                 "intent_distribution": intent_mix,
+                "intent_shape_distribution": shape_mix,
                 "top_risks": top_risks,
                 "latest_task": {
                     "title": _safe_str(latest_task.get("title", "")),
@@ -715,6 +800,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                             _safe_str(s.get("raw_text", "")),
                         ),
                         "intent_confidence": float(s.get("intent_confidence", 0) or 0),
+                        "intent_shape": _submission_intent_shape(s),
                         "source_type": s.get("source_type", "text"),
                         "filename": s.get("filename"),
                         "bottleneck": _safe_str(s.get("diagnosis", {}).get("bottleneck") or s.get("next_task", {}).get("bottleneck", "")),
@@ -749,6 +835,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                 latest_summary = project_summary
         result["projects"] = proj_list
         result["intent_distribution"] = student_intent_mix
+        result["intent_shape_distribution"] = student_shape_mix
         result["latest_phase"] = latest_project_phase or "持续迭代"
         result["student_case_summary"] = latest_summary or "该学生已有可追踪的多轮项目记录。"
         result["teacher_intervention"] = _teacher_intervention_hint(student_intent_mix, result["latest_phase"], [])
@@ -1110,7 +1197,7 @@ def _compose_assistant_message(
                 "7. 回复末尾附上：⚠ AI生成，仅供参考\n"
             ),
             user_prompt=f"学生说：{user_message}\n\n诊断上下文：\n{context_block}",
-            model=settings.llm_reason_model,
+            model=settings.llm_synthesis_model,
             temperature=0.35,
         )
         if reply and len(reply.strip()) > 30:
@@ -1174,6 +1261,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     project_phase = _infer_project_phase(payload.message, next_task, kg_analysis)
     intent = _normalize_intent(result.get("intent", ""), payload.message)
     intent_confidence = float(result.get("intent_confidence", 0) or 0)
+    intent_shape = _safe_str(result.get("intent_shape", "")) or "single"
     evidence_quotes = _extract_evidence_quotes(payload.message, diagnosis)
     import logging as _log
     _log.getLogger("main").info("API response: hyper_student.ok=%s, kg_entities=%d", hyper_student.get("ok"), len(kg_analysis.get("entities", [])))
@@ -1197,6 +1285,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "project_phase": project_phase,
             "intent": intent,
             "intent_confidence": intent_confidence,
+            "intent_shape": intent_shape,
             "source_type": "dialogue_turn",
             "mode": payload.mode,
             "raw_text": payload.message[:6000],
@@ -1285,6 +1374,7 @@ async def dialogue_turn_stream(request: Request):
             project_phase = _infer_project_phase(msg, pre.get("next_task", {}), pre.get("kg_analysis", {}))
             intent = _normalize_intent(pre.get("intent", ""), msg)
             intent_confidence = float(pre.get("intent_confidence", 0) or 0)
+            intent_shape = _safe_str(pre.get("intent_shape", "")) or "single"
             evidence_quotes = _extract_evidence_quotes(msg, pre.get("diagnosis", {}))
             agent_trace = _build_agent_trace(
                 pre,
@@ -1321,6 +1411,7 @@ async def dialogue_turn_stream(request: Request):
                 "project_phase": project_phase,
                 "intent": intent,
                 "intent_confidence": intent_confidence,
+                "intent_shape": intent_shape,
                 "class_id": payload.get("class_id"),
                 "cohort_id": payload.get("cohort_id"),
                 "source_type": "dialogue_turn_stream",
@@ -1669,6 +1760,7 @@ def get_project_submissions(project_id: str) -> dict:
                 or ((s.get("agent_outputs", {}) if isinstance(s.get("agent_outputs"), dict) else {}).get("orchestration", {}) or {}).get("intent", ""),
                 _safe_str(s.get("raw_text", "")),
             ),
+            "intent_shape": _submission_intent_shape(s),
             "source_type": s.get("source_type", ""),
             "filename": s.get("filename"),
             "text_preview": (s.get("raw_text") or "")[:120],
@@ -1991,7 +2083,7 @@ def teacher_generate_report(class_id: str | None = None, cohort_id: str | None =
             "5. 用自然段落，不超过500字\n"
         ),
         user_prompt=f"班级数据：\n{snapshot}",
-        model=settings.llm_reason_model,
+        model=settings.llm_fast_model,
         temperature=0.3,
     )
     return {"report": report.strip() if report else "报告生成失败", "snapshot": snapshot}
@@ -2142,7 +2234,7 @@ def teacher_project_insight_report(payload: dict) -> dict:
         ),
         user_prompt=f"当前分类项目数据：\n{json.dumps(snapshot, ensure_ascii=False)}",
         temperature=0.25,
-        model=settings.llm_reason_model,
+        model=settings.llm_structured_model,
     ) or {}
     if not isinstance(result, dict):
         return {**fallback, "snapshot": snapshot}
@@ -2409,7 +2501,7 @@ def teacher_project_evidence(project_id: str) -> dict:
 
 
 @app.post("/api/hypergraph/rebuild")
-def rebuild_hypergraph(min_pattern_support: int = 2, max_edges: int = 30) -> dict:
+def rebuild_hypergraph(min_pattern_support: int = 1, max_edges: int = 80) -> dict:
     data = hypergraph_service.rebuild(min_pattern_support=min_pattern_support, max_edges=max_edges)
     return {
         "min_pattern_support": min_pattern_support,
@@ -2419,7 +2511,7 @@ def rebuild_hypergraph(min_pattern_support: int = 2, max_edges: int = 30) -> dic
 
 
 @app.get("/api/hypergraph/insight")
-def hypergraph_insight(category: str | None = None, rule_ids: str = "", limit: int = 5) -> dict:
+def hypergraph_insight(category: str | None = None, rule_ids: str = "", limit: int = 8) -> dict:
     parsed_rule_ids = [x.strip() for x in rule_ids.split(",") if x.strip()]
     data = hypergraph_service.insight(category=category, rule_ids=parsed_rule_ids, limit=limit)
     return {
@@ -2428,6 +2520,22 @@ def hypergraph_insight(category: str | None = None, rule_ids: str = "", limit: i
         "limit": limit,
         "data": data,
     }
+
+
+@app.get("/api/hypergraph/library")
+def hypergraph_library(limit: int = 24) -> dict:
+    data = hypergraph_service.library_snapshot(limit=limit)
+    return {"limit": limit, "data": data}
+
+
+@app.post("/api/hypergraph/project-view")
+def hypergraph_project_view(payload: dict[str, Any]) -> dict:
+    data = hypergraph_service.project_match_view(
+        hypergraph_insight=payload.get("hypergraph_insight", {}) if isinstance(payload, dict) else {},
+        hypergraph_student=payload.get("hypergraph_student", {}) if isinstance(payload, dict) else {},
+        pressure_trace=payload.get("pressure_test_trace", {}) if isinstance(payload, dict) else {},
+    )
+    return {"data": data}
 
 
 def _safe_float(value: Any) -> float:

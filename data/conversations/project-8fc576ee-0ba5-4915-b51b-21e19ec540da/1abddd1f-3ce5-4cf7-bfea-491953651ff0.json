@@ -1,0 +1,1078 @@
+{
+  "conversation_id": "1abddd1f-3ce5-4cf7-bfea-491953651ff0",
+  "project_id": "project-8fc576ee-0ba5-4915-b51b-21e19ec540da",
+  "student_id": "None",
+  "title": "科技创新 · 完成用户证据闭环",
+  "summary": "项目具备清晰的AI技术应用方向和目标市场定位，但需要补充用户验证数据及可持续的盈利模式设计",
+  "created_at": "2026-03-30T18:52:49.427098+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "我在复盘我现在做的一个项目，叫NoteMind，是一个AI学习笔记整理助手。我是研一计算机的，当时是想做AI+效率工具+学习场景的东西，主要用户是大学生和研究生。 目前的产品思路是让用户上传PDF、PPT或者语音，然后用大模型API生成摘要、提取知识点，再转成Anki复习卡片。\n推广打算走B站、小红书的学习博主，还有高校群传播。定价是前期完全免费，等做到10万用户再考虑收费，可能是19元/月不限调用。\n竞品像Notion、Obsidian、幕布都有，但我们更偏AI自动整理+考试场景。市场我估算是全国高校千万级用户。\n不过我现在在想，我们其实主要成本是API调用和服务器，但我却假设可以先不考虑盈利、靠融资解决，而且“无限调用”这个定价也有点理想化。",
+      "timestamp": "2026-03-30T18:56:12.103430+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你的复盘思考很及时，这说明你已经从“如何做”开始转向思考“是否值得做”这个更本质的问题了。这是一个非常关键的进步。NoteMind这个项目，目前像是一艘引擎设计精良但尚未下水的船——技术路线清晰，但水（真实需求与付费意愿）的深浅和流向（市场与竞争）才是决定它能否远航的关键。\n\n### 总览：一个“想当然”的原型期项目\n整体来看，NoteMind处于典型的**原型期**。你有一个结合AI与学习场景的、逻辑自洽的产品构思，但整个项目的根基——即你假设的用户痛点及其强度、以及用户为此付费的意愿——都还停留在“想当然”的阶段，缺乏来自真实用户的证据支撑。这导致后续的商业模式设计（如定价）和增长路径（如免费获客）都像是建在沙地上的城堡。\n\n### 逻辑链路：从“麻烦”到“付费”的链条存在多处断裂\n我们来快速梳理一下你构想中的逻辑链条：\n*   **用户**：大学生、研究生。\n*   **痛点**：手动整理笔记、制作Anki复习卡片“很麻烦”。\n*   **方案**：用AI自动解析PDF/PPT/语音，生成摘要、知识点和Anki卡片。\n*   **变现**：前期免费，用户达10万后，以19元/月“不限调用”订阅收费。\n*   **壁垒**：暂不明确，可能是AI处理的质量与场景结合度。\n\n这条链路上，从“痛点”开始，几乎每一步都存在疑问或更优的替代路径，导致链条并未真正闭合：\n1.  **“麻烦”是否足以驱动行动？** 学生觉得“麻烦”的事情很多，但只有那些高频、高耗时、且严重影响核心目标（如考试成绩）的麻烦，才可能驱动他们去寻找并适应一个新工具。\n2.  **你的方案是“最优解”吗？** 在“解决整理麻烦”这条路上，已经存在太多岔路口：Notion/Obsidian（手动但灵活有掌控感）、各类免费Anki插件或脚本（半自动化）、同学间共享笔记（零成本社交解决）。你的AI全自动方案，必须证明自己节省的时间或提升的效果，显著优于这些现有习惯和免费方案。\n3.  **“19元无限调用”是可持续的商业假设吗？** 这可能是整个链条中最脆弱的一环。大模型API调用是**变动成本**，用户用得越多，你的成本就越高。一个备考季的重度用户，其API消耗成本可能轻松超过19元。这意味着“无限调用”模式在无外部输血的情况下，用户越多、使用越活跃，你亏损越快。历史上，从Notion AI到ChatGPT Plus，许多工具都从早期的“无限”或慷慨额度，转向了分级计费，核心原因就是成本不可控。\n\n### 逐一展开核心问题\n\n#### 1. 未经证实的核心假设：“麻烦”等于“付费需求”\n你提到“学生觉得手动整理笔记、做复习卡片很麻烦”，这是你产品的起点。但“麻烦”是一个极其模糊的感受，它需要被具体化和量化，才能判断是否构成商业机会。\n*   **“麻烦”的强度与频率**：是偶尔的烦躁，还是每周需要花费好几个小时、让人想要逃避的持续性痛苦？例如，对于需要记忆海量知识点（如医学、法律）或处理复杂文献综述（如理工科研一新生）的学生，这个痛点可能非常强烈。但对于很多文科生，用荧光笔在书上划重点、手写纲要可能就足够了。**你需要找到那些“最痛”的用户**，他们才是你早期的种子和付费意愿最强的群体。\n*   **“麻烦”的具体环节**：是摘抄原文太耗时？是归纳总结抓不住重点？还是把内容手动录入Anki并调整格式太繁琐？不同的“麻烦点”对应不同的解决方案。如果你的AI只是解决了“摘抄”的麻烦，但学生更痛苦的是“理解与归纳”，那么你的产品价值就大打折扣。\n\n#### 2. 被低估的竞争：你面对的是“零成本”的用户习惯\n你提到了Notion、Obsidian等竞品，但更直接、更可怕的竞争其实是**用户的现有习惯和零成本替代方案**。\n*   **免费且强大的生态**：Anki本身拥有一个庞大的插件生态。例如，已有插件可以实现网页内容抓取、配合脚本进行一定程度的自动化。学生为了不花钱，完全有动力去搜索和学习使用这些免费工具。你的AI方案必须在**节省时间的绝对值**或**生成内容的质量（如知识结构更清晰、记忆点更突出）** 上，带来压倒性的、可感知的优势。\n*   **社交化解决方案**：在很多高校，流传着往届师兄师姐的精华笔记、复习提纲和Anki牌组。获取这些资源的成本几乎是零（一次人情或一杯奶茶），且经过“学长认证”，信任度更高。你的AI如何与这种“社交传承”的便利性和可信度竞争？\n\n#### 3. 理想化且危险的商业模式\n你意识到了“无限调用”和“靠融资解决”的理想化，这很好，但需要更具体的危机感。\n*   **成本与定价的致命错配**：我们来做一个极简测算。假设处理一页PDF通过大模型API提取关键信息并制卡的成本是0.01元（这是一个非常保守的估计）。一个认真备考的学生，一个月处理500页资料（这可能只是一门课的体量）很常见。那么，仅这一个用户的API成本就是5元。如果他有3门课要复习，成本就是15元。你的订阅费是19元，扣除支付通道费、服务器等成本后，利润空间极薄甚至为负。而“无限调用”会吸引来的，恰恰是这些重度使用用户。**“无限”模式在工具型SaaS早期，常常是吸引“成本黑洞”型用户的陷阱。**\n*   **融资依赖的幻想**：指望用融资来覆盖初期的亏损，是很多技术背景创业者的典型思维。但投资人第一个问题永远是：“你如何证明这是一个真实、庞大且愿意付费的市场？” 没有用户付费意愿的证据，仅凭一个技术原型，在当前的融资环境下极难获得支持。你需要用最小的成本，自己先跑通“有人愿意付点钱”这个循环。\n\n### 下一步行动：从“自嗨开发”转向“证据收集”\n现在最该做的，不是去写下一行代码或设计更酷的界面，而是立刻停下对产品的空想，转身去面对真实的人。\n\n**你的下一步聚焦点：在48小时内，找到3-5位身边符合“备考压力大、笔记整理量大”特征的同学（比如正在备战法考、医考、期末考的同学），进行一次15分钟的深度对话。** 不要推销你的产品，而是带着好奇心去了解他们当下的真实工作流。\n\n### 追问：带着这些问题去开启对话\n为了让你这次对话更有收获，你可以试着围绕这几个问题展开：\n\n1.  **痛点具象化**：“为了准备这次考试，你是如何整理复习资料的？能和我一步步说说吗？在这个过程中，你觉得**最耗时、最重复、最让你头疼**的环节是什么？你估计每周要花多少时间在这个环节上？”（目标是量化“麻烦”）\n2.  **现有方案与成本**：“为了解决这个头疼的问题，你尝试过什么方法或工具吗？（比如找插件、买模板、和同学分工）你为这个‘解决方案’付出过什么？是钱，还是学习新工具的时间？”（目标是了解替代方案及其真实成本）\n3.  **价值与付费敏感度测试**：“如果我告诉你，有一个工具能把你刚才说的那个最头疼的环节（比如‘把PPT要点做成Anki卡片’）的时间减少80%，但一个月需要一杯奶茶钱（比如15块），你的第一反应是什么？是‘立刻给我链接’，还是‘我先看看免费版’，或者‘太贵了，我觉得现在的办法也能忍’？”（注意观察对方的表情和语气，这比答案本身更重要）\n\n### 外部参考\n关于创业项目财务可持续性的重要性，以及从免费到付费模式的挑战，是商业领域的普遍共识。你可以参考一些经典创业理论，如《精益创业》中关于“验证价值假设”的论述，或关注一些从免费转向分级定价的SaaS产品案例（如Notion AI）。\n\n⚠ AI生成，仅供参考",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "learning",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "intent_shape": "mixed",
+          "intent_reason": "长项目描述默认先进入综合项目诊断；判定为混合问题：项目介绍中同时涉及功能、用户、推广或竞争等多个主题；主意图归类为 project_diagnosis",
+          "confidence": 0.78,
+          "engine": "heuristic_long",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师"
+          ],
+          "resolved_agents": [
+            "coach",
+            "analyst"
+          ],
+          "agent_reasoning": "路由阶段先给出主 agent：coach；混合问题允许多 agent 协同，但保持主线清晰；项目教练模式收敛为教练主导",
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "你这个项目现在处在**原型期**。你现在的项目状态是，有一个挺清晰的技术原型想法，但整个项目还飘在半空中，最根本的问题是：你还没真正验证过，你假设的那个用户‘痛点’到底有多痛，以及学生是否愿意为这个‘痛’花钱。你卡在了‘想当然’的阶段，而不是基于证据的推进。\n\n你的核心假设是‘学生觉得手动整理笔记、做复习卡片很麻烦，所以愿意用AI自动生成’。但这个麻烦，是否真的足以驱动他们使用并付费？替代方案太多了：学生可以用Notion、Obsidian手动整理（虽然麻烦但有掌控感），可以用免费或更便宜的Anki插件，甚至直接手写。竞争不仅仅是功能竞争，更是用户习惯和零成本的竞争。大学生对价格极其敏感，你设想的‘19元/月不限调用’成本极高（API调用是边际成本），在没有规模效应和融资输血的情况下，这个模式几乎无法持续。你提到靠融资解决，但投资人第一个问题就是‘你怎么证明用户有这个需求，并且愿意付费？’没有这个证据，项目很难落地。\n\n## 我主要是根据这些信息做这个判断\n- 原文片段：“我在复盘我现在做的一个项目，叫NoteMind，是一个AI学习笔记整理助手...主要用户是大学生和研究生。” → 描述中缺少用户需求验证的证据。\n- 原文片段：“定价是前期完全免费，等做到10万用户再考虑收费，可能是19元/月” → 提到了定价，但没有提及用户支付意愿的任何验证。\n- 超图分析指出缺失维度：痛点问题(极高)，结构性(高)，这直接对应需求证据和商业模式的结构性缺陷。\n\n## 如果这一点继续不处理\n如果继续不处理这个需求证据的瓶颈，你会陷入‘自嗨式开发’：花时间做出一个原型，但推广时发现用户不买账，或者只愿意用免费版。这会直接卡住你获取种子用户、验证商业模式，以及后续任何融资或规模化发展的可能性。\n\n## 你下一步最该先盯住的一点\n现在最该先攻的一点，不是去完善产品功能，而是立刻去找到几个真实的目标用户（比如你身边的同学），验证他们是否真的被‘整理笔记、制作复习卡片’这件事困扰，以及他们对你解决方案的初步反应。\n\n## 我建议你先追问自己这几个问题\n- 你身边有没有同学，为了准备考试，会花大量时间手动把PPT内容整理成复习提纲或Anki卡片？具体观察或问问他们，这个过程最烦人的环节是什么？（是摘抄、归纳、还是格式转换？）\n- 如果你现在有一个能自动把PPT转成复习卡片的工具，但每月要收一杯奶茶钱（比如15-20元），你刚才访谈的那位同学，他/她第一反应是什么？是‘太好了，我马上用’，还是‘我先用用免费的看看’，或者‘太贵了，我自己弄也行’？\n- 对比一下，如果这个工具完全免费但每天有次数限制，和收费但无限使用，你觉得哪种模式更能让一个备考的学生下定决心开始用？为什么？\n\n## 这次主要依据\n本轮分析参考了知识图谱中关于‘证据支撑’的优势模式，并对比了‘推送家’等科技创新项目的案例，它们都强调了用‘痛点证据’和‘方案证据’来夯实用户证据强度。同时，结合了联网搜索中关于创业项目财务分析需关注收入来源和盈利能力的普遍原则。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "首先，这个项目在**产品逻辑和技术可行性上是清晰的**：AI自动整理学习笔记并生成复习卡片，切中了学生备考的刚需场景，技术路线（大模型API+Anki集成）合理，推广渠道（B站、小红书、高校群）也基本匹配目标用户。这是一个有潜力的工具型产品原型。\n\n但当前最大的风险在于**需求强度和付费意愿未经证实**，这直接动摇了商业模式的基础。你提到“学生觉得手动整理笔记很麻烦”，但麻烦并不等于付费动机。你需要具体验证两个核心假设：\n1.  **“麻烦”的具体程度和频率**：是偶尔的烦躁，还是每周花数小时、影响复习效率的持续痛点？例如，医学生或法学生面对海量文献整理，可能痛点更强；而普通文科生可能用免费标签工具就能解决。\n2.  **现有解决方案的替代成本**：你提到了Notion、Obsidian、幕布等竞品，但更直接的竞争可能是**Anki已有的免费/低价插件**（如AnkiConnect配合各种抓取工具），以及学生间共享笔记的社交习惯。如果现有方案成本（金钱+学习成本）接近零，你的AI附加值必须足够高。\n\n**关于定价和成本**，你意识到“无限调用”和依赖融资是理想化的，这很关键。大模型API成本是变动成本，随使用量线性增长，“无限调用”在免费期会迅速烧钱，而19元/月的定价可能无法覆盖重度用户成本（假设一个用户每月处理1000页PDF，仅API成本就可能超过10元）。历史上，许多工具型SaaS在早期用“无限”吸引用户，后期都因成本压力被迫改为分级定价（如Notion AI、ChatGPT Plus）。\n\n基于此，你需要优先回答以下追问：\n1.  **证据层面**：你能找到至少50名目标用户，展示他们**当前笔记整理流程的具体时间消耗、痛点表述以及为优化此流程已付出的成本（如购买模板、插件）**吗？这比泛泛的“麻烦”更有说服力。\n2.  **竞争层面**：与**Anki生态内已有的自动化插件（如“AnkiBrain”等）** 相比，你的AI生成在准确性、格式兼容性或节省时间上，是否有可量化的优势（例如，将制作卡片的平均时间从10分钟/张降到1分钟/张）？\n3.  **财务层面**：如果前期免费，你测算过**用户平均每月调用API处理多少页文档时，19元/月的定价才能达到盈亏平衡**吗？你需要一个基于真实API价格和预期使用率的基本模型，而不是等待10万用户后再思考。\n\n**总结**：项目方向正确，但必须从“技术可实现”转向“需求真存在且愿付费”的验证。下一步不是急着推广，而是带着上述问题，找到一小批高潜力用户（如备考职业资格考试的学生）做深度访谈和原型测试，收集他们为效率付费的具体证据。",
+            "tools_used": [
+              "diagnosis",
+              "kg_analysis",
+              "hypergraph_student",
+              "hypergraph",
+              "web_search"
+            ]
+          },
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "NoteMind",
+              "type": "solution"
+            },
+            {
+              "id": "e2",
+              "label": "大学生和研究生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e3",
+              "label": "大模型API",
+              "type": "technology"
+            },
+            {
+              "id": "e4",
+              "label": "Notion、Obsidian、幕布",
+              "type": "competitor"
+            },
+            {
+              "id": "e5",
+              "label": "全国高校千万级用户",
+              "type": "market"
+            },
+            {
+              "id": "e6",
+              "label": "API调用和服务器",
+              "type": "resource"
+            },
+            {
+              "id": "e7",
+              "label": "前期免费，10万用户后19元/月",
+              "type": "business_model"
+            },
+            {
+              "id": "e8",
+              "label": "研一计算机学生",
+              "type": "team"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e8",
+              "target": "e1",
+              "relation": "开发"
+            },
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "使用"
+            },
+            {
+              "source": "e1",
+              "target": "e4",
+              "relation": "竞争"
+            },
+            {
+              "source": "e5",
+              "target": "e2",
+              "relation": "覆盖"
+            },
+            {
+              "source": "e6",
+              "target": "e1",
+              "relation": "支撑"
+            },
+            {
+              "source": "e7",
+              "target": "e1",
+              "relation": "采用"
+            }
+          ],
+          "structural_gaps": [
+            "缺少用户使用证据",
+            "缺少具体盈利模式设计",
+            "缺少风险控制措施"
+          ],
+          "content_strengths": [
+            "目标用户定位明确",
+            "竞品分析清晰",
+            "市场估算合理"
+          ],
+          "completeness_score": 5,
+          "section_scores": {
+            "problem_definition": 3,
+            "user_evidence": 1,
+            "solution_feasibility": 5,
+            "business_model": 2,
+            "competitive_advantage": 3
+          },
+          "insight": "项目具备清晰的AI技术应用方向和目标市场定位，但需要补充用户验证数据及可持续的盈利模式设计"
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "edges": [
+            {
+              "hyperedge_id": "he_evidence_002",
+              "type": "Evidence_Grounding_Edge",
+              "support": 3,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [],
+              "rubrics": [
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测系统，可实现150飞秒的超高的时间分辨率、20纳米的超高空间分辨率，并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RubricItem::User Evidence Strength"
+              ],
+              "match_score": 4.4
+            },
+            {
+              "hyperedge_id": "he_evidence_001",
+              "type": "Evidence_Grounding_Edge",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常用“pain_points_evidence、user_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "提升医生诊疗的效率与精准性。",
+                "临床医学影像存在低质量图像而其无法提供准确诊疗信息的挑战。",
+                "提出基于融合特征退化感知的增强算法，实现单模态多退化的统一有效增强。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::医疗健康",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::user_evidence",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "match_score": 2.4
+            },
+            {
+              "hyperedge_id": "he_evidence_003",
+              "type": "Evidence_Grounding_Edge",
+              "support": 2,
+              "teaching_note": "其他类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "其他"
+              ],
+              "rules": [],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "传统遥感图像分析方法面临难以满足实际需求的瓶颈。",
+                "现有技术大多侧重于静态变化检测，只能对已经发生的地物变化进行事后分析，缺乏对未来变化趋势的预测能力。",
+                "遥感图像、时间信息与语义描述等多模态数据融合仍存在模态结构差异大、特征对齐困难等挑战。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::其他",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "match_score": 2.2
+            },
+            {
+              "hyperedge_id": "he_value_001",
+              "type": "Value_Loop_Edge",
+              "support": 1,
+              "teaching_note": "交通运输类项目常围绕“城市低空交通监管部门—传统监管系统无法对非合作无人机进行实时检测—采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性”形成价值闭环，并需要通过核心价值主张：提供高效、准确的无人机检测系统完成变现。",
+              "categories": [
+                "交通运输"
+              ],
+              "rules": [],
+              "rubrics": [
+                "Business Model Consistency",
+                "Risk Control"
+              ],
+              "evidence_quotes": [
+                "以数据平台备案方式为主的传统监管系统无法对非合作的无人机进行实时检测监控",
+                "无人机在城市中的应用场景增加，传统监管系统的探测手段在复杂城市地形下性能有限"
+              ],
+              "retrieval_reason": "目标用户、痛点、方案与商业模式同时出现，适合做价值闭环检索。",
+              "nodes": [
+                "BusinessModelAspect::核心价值主张：提供高效、准确的无人机检测系统",
+                "Category::交通运输",
+                "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                "Solution::采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性",
+                "Stakeholder::城市低空交通监管部门"
+              ],
+              "match_score": 2.0
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [
+              "H3",
+              "H5",
+              "H12",
+              "H15"
+            ],
+            "expanded_rule_ids": [
+              "H12",
+              "H15",
+              "H3",
+              "H5",
+              "weak_user_evidence"
+            ],
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ]
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "Category::交通运输",
+                "degree": 13,
+                "interpretation": "「交通运输」类别出现在13种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "Stakeholder::城市低空交通监管部门",
+                "degree": 3,
+                "interpretation": "目标用户「城市低空交通监管部门」被3种模式共享，是高频用户群"
+              },
+              {
+                "node": "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                "degree": 3,
+                "interpretation": "市场「低空经济市场规模预计到2035年将达到3.5万亿元」涉及3种模式，是热门目标市场"
+              },
+              {
+                "node": "Stakeholder::地质调查人员",
+                "degree": 3,
+                "interpretation": "目标用户「地质调查人员」被3种模式共享，是高频用户群"
+              },
+              {
+                "node": "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                "degree": 2,
+                "interpretation": "痛点「传统监管系统无法对非合作无人机进行实时检测」连接了2种模式，是高频真实问题"
+              }
+            ],
+            "avg_edge_size": 4.6,
+            "max_edge_size": 6
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 17,
+            "node_count": 39,
+            "family_counts": {
+              "Value_Loop_Edge": 4,
+              "User_Pain_Fit_Edge": 3,
+              "Evidence_Grounding_Edge": 3,
+              "Execution_Gap_Edge": 2,
+              "Market_Competition_Edge": 2,
+              "Compliance_Safety_Edge": 1,
+              "Innovation_Validation_Edge": 1,
+              "Ontology_Grounded_Edge": 1
+            }
+          }
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.6236,
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5965,
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.5891,
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业项目 分析 盈利 融资",
+          "results": [
+            {
+              "title": "如何写创业项目的财务分析 | 帆软数字化转型知识库",
+              "snippet": "3. 在财务分析中应重点关注哪些指标？ 在进行创业项目的财务分析时，有几个关键指标值得重点关注，这些指标能够全面反映项目的财务健康状况。 销售收入：销售收入是最直接反映项目经营成果的指标。",
+              "url": "https://www.fanruan.com/blog/article/1077398/"
+            },
+            {
+              "title": "创新创业项目计划书盈利能力分析 - 百度文库",
+              "snippet": "创新创业项目计划书盈利能力分析 创新创业项目计划书 盈利能力分析 第一章引言 1.1项目背景 随着经济全球化的加深和技术的不断进步，创新创业成为了许多人的选择。本项目计划书将对一个创新创业项目的盈利能力进行分析和评估，为投资者和创业者提供决策参考。 1.2项目简介 该项目旨在开发 ...",
+              "url": "https://wenku.baidu.com/view/0de627fbbad528ea81c758f5f61fb7360a4c2b7c.html"
+            },
+            {
+              "title": "创业计划融资分析撰写指南 (创业计划融资分析怎么写) - 创业助手",
+              "snippet": "创业计划融资分析撰写指南 创业者在撰写融资计划书时，融资分析是一个关键部分。以下是如何撰写一份专业的融资分析。 1. 项目概述 在开头部分，简要介绍你的创业项目，包括项目的目标、市场定位以及预期解决的问题。这一部分应该简洁明了，让投资者能够快速把握项目的核心价值。 2. 市场 ...",
+              "url": "https://chuangye.zaixianjisuan.com/zhidao/chuang-ye-ji-hua-rong-zi-fen-xi-zhuan-xie-zhi-nan.html"
+            }
+          ],
+          "summary": "- 3. 在财务分析中应重点关注哪些指标？ 在进行创业项目的财务分析时，有几个关键指标值得重点关注，这些指标能够全面反映项目的财务健康状况。 销售收入：销售收入是最直接反映项目经营成果的指标。\n- 创新创业项目计划书盈利能力分析 创新创业项目计划书 盈利能力分析 第一章引言 1.1项目背景 随着经济全球化的加深和技术的不断进步，创新创业成为了许多人的选择。本项目计划书将对一个创新创业项目的盈利能力进行分析和评估，为投资者和创业者提供决策参考。 1.2项目简介 该项目旨在开发 ...\n- 创业计划融资分析撰写指南 创业者在撰写融资计划书时，融资分析是一个关键部分。以下是如何撰写一份专业的融资分析。 1. 项目概述 在开头部分，简要介绍你的创业项目，包括项目的目标、市场定位以及预期解决的问题。这一部分应该简洁明了，让投资者能够快速把握项目的核心价值。 2. 市场 ..."
+        },
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 6.2,
+          "covered_count": 8,
+          "total_dimensions": 13,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": true,
+              "entities": [
+                "大学生和研究生"
+              ],
+              "count": 1
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": true,
+              "entities": [
+                "NoteMind"
+              ],
+              "count": 1
+            },
+            "innovation": {
+              "name": "创新点",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "market": {
+              "name": "目标市场",
+              "covered": true,
+              "entities": [
+                "全国高校千万级用户"
+              ],
+              "count": 1
+            },
+            "competitor": {
+              "name": "竞争格局",
+              "covered": true,
+              "entities": [
+                "Notion、Obsidian、幕布"
+              ],
+              "count": 1
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": true,
+              "entities": [
+                "前期免费，10万用户后19元/月"
+              ],
+              "count": 1
+            },
+            "execution_step": {
+              "name": "执行步骤",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "risk_control": {
+              "name": "风控合规",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "evidence": {
+              "name": "证据支撑",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": true,
+              "entities": [
+                "大模型API"
+              ],
+              "count": 1
+            },
+            "resource": {
+              "name": "资源优势",
+              "covered": true,
+              "entities": [
+                "API调用和服务器"
+              ],
+              "count": 1
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": true,
+              "entities": [
+                "研一计算机学生"
+              ],
+              "count": 1
+            }
+          },
+          "cross_links": [
+            {
+              "from_dim": "团队能力",
+              "to_dim": "解决方案",
+              "from_entity": "e8",
+              "to_entity": "e1",
+              "relation": "开发"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "技术路线",
+              "from_entity": "e1",
+              "to_entity": "e3",
+              "relation": "使用"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "竞争格局",
+              "from_entity": "e1",
+              "to_entity": "e4",
+              "relation": "竞争"
+            },
+            {
+              "from_dim": "目标市场",
+              "to_dim": "目标用户",
+              "from_entity": "e5",
+              "to_entity": "e2",
+              "relation": "覆盖"
+            },
+            {
+              "from_dim": "资源优势",
+              "to_dim": "解决方案",
+              "from_entity": "e6",
+              "to_entity": "e1",
+              "relation": "支撑"
+            },
+            {
+              "from_dim": "商业模式",
+              "to_dim": "解决方案",
+              "from_entity": "e7",
+              "to_entity": "e1",
+              "relation": "采用"
+            }
+          ],
+          "hub_entities": [
+            {
+              "entity": "e1",
+              "type": "solution",
+              "connections": 5,
+              "note": "「e1」连接5个维度，是项目的核心支撑点"
+            }
+          ],
+          "pattern_warnings": [],
+          "pattern_strengths": [
+            {
+              "pattern_id": "he_evidence_002",
+              "note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑User Evidence Strength。",
+              "support": 3,
+              "edge_type": "Evidence_Grounding_Edge"
+            }
+          ],
+          "projected_edge_types": [
+            "Market_Competition_Edge",
+            "Execution_Gap_Edge"
+          ],
+          "missing_dimensions": [
+            {
+              "dimension": "痛点问题",
+              "importance": "极高",
+              "recommendation": "没有清晰的痛点描述，项目缺乏存在的理由"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少用户使用证据"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少具体盈利模式设计"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少风险控制措施"
+            }
+          ],
+          "student_graph_stats": {
+            "nodes": 16,
+            "edges": 14
+          }
+        },
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 14.9,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "定价无支撑"
+            ],
+            "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS05",
+            "name": "商业模式闭环断裂",
+            "match_score": 8.4,
+            "probing_layers": [
+              "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+              "渠道可达性: 你说通过XX渠道获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+              "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。"
+            ],
+            "expected_evidence": [
+              "价值主张画布",
+              "渠道成本数据",
+              "变现路径和时间表"
+            ],
+            "counterfactual": "如果你的免费用户永远不转化为付费用户，公司的现金流能撑多久？",
+            "preferred_edge_types": [
+              "Value_Loop_Edge",
+              "Execution_Gap_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "单位经济未证成",
+              "客群与价值错位",
+              "用户价值与收入混淆"
+            ],
+            "strategy_logic": "价值闭环逻辑 + 现金流生存逻辑",
+            "matched_edge_types": [
+              "Value_Loop_Edge",
+              "Execution_Gap_Edge",
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS03",
+            "name": "技术门槛幻觉",
+            "match_score": 6.6,
+            "probing_layers": [
+              "可复制性检验: 一个同等水平的团队，需要多长时间能复现你的核心技术？",
+              "技术与需求脱钩检验: 你的技术虽好，但用户真正在乎的是技术本身还是它带来的效果？有更简单的方案能达到80%效果吗？",
+              "资源匹配检验: 你的技术路线需要什么资源（GPU、数据、人才）？你团队现在有多少？差距有多大？"
+            ],
+            "expected_evidence": [
+              "技术复现时间估算",
+              "用户需求优先级排序",
+              "资源-需求匹配表"
+            ],
+            "counterfactual": "如果你的技术优势在12个月后被开源方案追平，你的产品还有存在价值吗？",
+            "preferred_edge_types": [
+              "Innovation_Validation_Edge",
+              "Execution_Gap_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "资源错配风险",
+              "技术门槛幻觉",
+              "创新点不可验证"
+            ],
+            "strategy_logic": "技术可复制性逻辑 + 资源匹配逻辑",
+            "matched_edge_types": [
+              "Execution_Gap_Edge",
+              "Value_Loop_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "定价无支撑",
+          "fallacy_rule_id": "H3",
+          "retrieved_heterogeneous_subgraph": [
+            {
+              "edge_type": "Evidence_Grounding_Edge",
+              "hyperedge_id": "he_evidence_002",
+              "support": 3,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑User Evidence Strength。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测系统，可实现150飞秒的超高的时间分辨率、20纳米的超高空间分辨率，并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取。"
+              ]
+            },
+            {
+              "edge_type": "Evidence_Grounding_Edge",
+              "hyperedge_id": "he_evidence_001",
+              "support": 3,
+              "teaching_note": "医疗健康类项目常用“pain_points_evidence、user_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::医疗健康",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::user_evidence",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "提升医生诊疗的效率与精准性。",
+                "临床医学影像存在低质量图像而其无法提供准确诊疗信息的挑战。",
+                "提出基于融合特征退化感知的增强算法，实现单模态多退化的统一有效增强。"
+              ]
+            },
+            {
+              "edge_type": "Evidence_Grounding_Edge",
+              "hyperedge_id": "he_evidence_003",
+              "support": 2,
+              "teaching_note": "其他类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::其他",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "传统遥感图像分析方法面临难以满足实际需求的瓶颈。",
+                "现有技术大多侧重于静态变化检测，只能对已经发生的地物变化进行事后分析，缺乏对未来变化趋势的预测能力。",
+                "遥感图像、时间信息与语义描述等多模态数据融合仍存在模态结构差异大、特征对齐困难等挑战。"
+              ]
+            }
+          ],
+          "selected_strategy": "定价无支撑",
+          "selected_strategy_id": "CS08",
+          "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+          "generated_question": "你提到“、小红书的学习博主，还有高校群传播。定价是前期完全免费，等做到10万用户再考虑收费，可能是19元/月”。用户现在已经有哪些免费或更便宜的替代方案？你凭什么判断他会为你多付这笔钱？如果价格上调 50%，你预计谁会先流失？",
+          "evidence_quotes": [
+            "、小红书的学习博主，还有高校群传播。定价是前期完全免费，等做到10万用户再考虑收费，可能是19元/月",
+            "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+            "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "learning",
+          "overall_score": 4.5,
+          "score_band": "早期可塑",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "fallacy_label": "定价无支撑",
+              "severity": "medium",
+              "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+              "matched_keywords": [
+                "定价",
+                "收费"
+              ],
+              "missing_requires": [
+                "支付意愿",
+                "愿意付费"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Grounding_Edge",
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS08",
+                "CS05"
+              ],
+              "quote": "、小红书的学习博主，还有高校群传播。定价是前期完全免费，等做到10万用户再考虑收费，可能是19元/月",
+              "trigger_message": "原文片段：“、小红书的学习博主，还有高校群传播。定价是前期完全免费，等做到10万用户再考虑收费，可能是19元/月” → 触发「定价无支付意愿证据」，因为提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "impact": "没有支付意愿证据，收费设计容易被认为拍脑袋，影响商业模式可信度。",
+              "fix_task": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。"
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求证据不足",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+              "fix_hint": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研"
+              ],
+              "preferred_edge_types": [
+                "User_Pain_Fit_Edge",
+                "Evidence_Grounding_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS04"
+              ],
+              "quote": "我在复盘我现在做的一个项目，叫NoteMind，是一个AI学习笔记整理助手。我是研一计算机的，当时是想做AI+效率工具+学习场景的东西，主要用户是大学生和研究生。 目前的产品思路是让用户上传PDF、PPT或者语音，然后用大模型API生成摘要",
+              "trigger_message": "原文片段：“我在复盘我现在做的一个项目，叫NoteMind，是一个AI学习笔记整理助手。我是研一计算机的，当时是想做AI+效率工具+学习场景的东西，主要用户是大学生和研究生。 目前的产品思路是让用户上传PDF、PPT或者语音，然后用大模型API生成摘要” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、问卷数据等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "完成至少8份目标用户深度访谈，记录原话，形成痛点频次统计表。"
+            },
+            {
+              "id": "H12",
+              "name": "技术路线与资源不匹配",
+              "fallacy_label": "资源错配风险",
+              "severity": "high",
+              "explanation": "技术方案的资源需求（算力/硬件/团队能力）可能超出当前条件。",
+              "fix_hint": "评估团队现有技术栈，如果要用大模型考虑用API调用而非自研训练。",
+              "matched_keywords": [
+                "大模型"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Execution_Gap_Edge",
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS03",
+                "CS06"
+              ],
+              "quote": "户上传PDF、PPT或者语音，然后用大模型API生成摘要、提取知识点，再转成Anki复习卡片。 推广打",
+              "trigger_message": "原文片段：“户上传PDF、PPT或者语音，然后用大模型API生成摘要、提取知识点，再转成Anki复习卡片。 推广打” → 触发「技术路线与资源不匹配」，因为技术方案的资源需求（算力/硬件/团队能力）可能超出当前条件。",
+              "impact": "技术路线与资源不匹配会让执行计划显得不可信。",
+              "fix_task": "评估团队现有技术栈，如果要用大模型考虑用API调用而非自研训练。"
+            },
+            {
+              "id": "H15",
+              "name": "评分项证据覆盖不足",
+              "severity": "medium",
+              "fallacy_label": "证据覆盖不足",
+              "explanation": "多个评分维度缺少支撑证据，整体内容丰富度不够。补充更多数据和调研结果可以显著提分。",
+              "fix_hint": "检查9个评分维度，找出得分最低的2-3项，针对性补充证据。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Evidence_Grounding_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "CS04",
+                "CS05"
+              ],
+              "quote": "我在复盘我现在做的一个项目，叫NoteMind，是一个AI学习笔记整理助手。我是研一计算机的，当时是想做AI+效率工具+学习场景的东西，主要用户是大学生和研究生。 目前的产品思路是让用户上传PDF、PPT或者语音，然后用大模型API生成摘要",
+              "trigger_message": "原文整体信息仍偏概括，触发「评分项证据覆盖不足」，因为多个评分维度缺少支撑证据，整体内容丰富度不够。补充更多数据和调研结果可以显著提分。",
+              "impact": "评分项证据覆盖不足如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "检查9个评分维度，找出得分最低的2-3项，针对性补充证据。"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.77,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 3.07,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 3.07,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 4.92,
+              "status": "risk",
+              "weight": 0.15
+            },
+            {
+              "item": "Market & Competition",
+              "score": 5.27,
+              "status": "ok",
+              "weight": 0.1
+            },
+            {
+              "item": "Financial Logic",
+              "score": 3.97,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 3.97,
+              "status": "risk",
+              "weight": 0.1
+            },
+            {
+              "item": "Team & Execution",
+              "score": 3.07,
+              "status": "risk",
+              "weight": 0.05
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 3.47,
+              "status": "risk",
+              "weight": 0.05
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "完成用户证据闭环",
+          "description": "围绕单一用户场景完成至少8份访谈并形成证据矩阵。",
+          "template_guideline": [
+            "先选1类最核心用户，不要同时访谈很多类人",
+            "每份访谈至少记录场景、痛点原话、当前替代方案",
+            "整理成痛点频次表，并保留至少1条反证样本"
+          ],
+          "acceptance_criteria": [
+            ">=8条用户原话",
+            "痛点频次统计",
+            "至少1条反证样本"
+          ]
+        }
+      },
+      "timestamp": "2026-03-30T18:56:12.111711+08:00"
+    }
+  ]
+}

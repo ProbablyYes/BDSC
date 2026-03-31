@@ -25,7 +25,8 @@
     "password_salt": "bc67925c77ec4b0128472e01e819991c",
     "password_hash": "1857838b74f8475c7b959af2c332197bee7ffc35332b71f4d4e9d67ea2204198",
     "created_at": "2026-03-26T01:40:21.284834",
-    "updated_at": "2026-03-26T01:40:21.284834"
+    "updated_at": "2026-03-31T19:53:48.114090+08:00",
+    "last_login": "2026-03-31T19:53:48.114059+08:00"
   },
   {
     "user_id": "34dfb3d0-f976-42cc-a96f-16c32c79a7ad",
@@ -194,5 +195,36 @@
     "password_hash": "a445ebdc2cd2efdceb908f79038608b7abef142354443612b2c4b33fa5dd18bc",
     "created_at": "2026-03-29T18:00:35.407821+08:00",
     "updated_at": "2026-03-29T18:00:35.407821+08:00"
+  },
+  {
+    "user_id": "019acc33-1771-4630-a8cc-0b7d709378da",
+    "role": "admin",
+    "display_name": "lll",
+    "email": "123",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "b83f836f02ba67cb6665c847077f60d5",
+    "password_hash": "74bf4c728420675c58fb93776bc18fb4bd6f4c1dcb3ccdeb1c0bb477288b1f53",
+    "created_at": "2026-03-31T00:43:53.689551+08:00",
+    "updated_at": "2026-03-31T21:33:30.226650+08:00",
+    "last_login": "2026-03-31T21:33:30.226614+08:00"
+  },
+  {
+    "user_id": "f6e6cb79-89aa-4764-9339-cbe7b8219121",
+    "role": "teacher",
+    "display_name": "hhh",
+    "email": "1234",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "cde30c838b474b0d6206eae55afe3f7b",
+    "password_hash": "75476a21f0ecfcf6277e2060dfff252067ab737a4fa5a2f7e2da8bb40a8bf77c",
+    "status": "active",
+    "last_login": "2026-03-31T20:19:50.481513+08:00",
+    "created_at": "2026-03-31T19:36:50.199436+08:00",
+    "updated_at": "2026-03-31T20:19:50.481566+08:00"
   }
 ]

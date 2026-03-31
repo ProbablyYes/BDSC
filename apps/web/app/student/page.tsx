@@ -14,6 +14,39 @@ type ConvMeta = { conversation_id: string; title: string; created_at: string; me
 
 let _msgId = 0;
 
+const MODE_WELCOME: Record<string, { title: string; desc: string; hints: Array<{ icon: string; text: string }> }> = {
+  coursework: {
+    title: "你好，我是你的课程导师",
+    desc: "把你卡住的一个具体问题抛给我，我会先讲清你到底卡在哪，再把方法、判断标准和项目应用讲透。",
+    hints: [
+      { icon: "📚", text: "什么是价值主张？我总分不清它和产品功能有什么区别，能用一个简单的创业例子帮我讲清楚吗？" },
+      { icon: "🧭", text: "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？" },
+      { icon: "🧩", text: "老师说我的项目'有用不等于有商业价值'，这两者的区别到底在哪？怎么判断一个功能有没有商业价值？" },
+      { icon: "✍️", text: "什么叫MVP？它和'先做一个原型'有什么区别？我想知道怎么用最小成本验证一个想法是否成立。" },
+    ],
+  },
+  competition: {
+    title: "你好，我是你的竞赛教练",
+    desc: "如果你正准备比赛、答辩或路演，我会按评委视角帮你看证据、逻辑、扣分点和说服力。把你的项目材料发给我，或者先问我竞赛方法论。",
+    hints: [
+      { icon: "🏆", text: "互联网+比赛中评委打分最看重哪几项？每一项要做到什么程度才算及格？" },
+      { icon: "📊", text: "评委说我的项目'缺少需求验证的证据'，在竞赛材料里'证据'到底指什么？什么样的证据最有说服力？" },
+      { icon: "🎤", text: "路演开场30秒最该讲什么？有没有一个经过验证的黄金结构可以参考？" },
+      { icon: "🛡️", text: "答辩时评委最喜欢从哪些角度挑战？我该怎么提前准备防守策略？" },
+    ],
+  },
+  learning: {
+    title: "你好，我是你的项目教练",
+    desc: "把项目现状、卡点或材料发给我，我会优先判断你现在真正卡住的那一层，而不是一下子铺开一大堆任务。",
+    hints: [
+      { icon: "🎯", text: "从想法到MVP验证再到落地，一个创业项目要过哪几关？每一关该怎么判断自己有没有过关？" },
+      { icon: "🔎", text: "怎么判断我的项目现在该先做用户验证还是先做产品原型？有没有一个判断框架？" },
+      { icon: "🪫", text: "什么叫'需求验证'？我怎么用最低成本做一次有效的需求验证，验证完该看什么信号？" },
+      { icon: "🧠", text: "我有一个大方向但还没想清楚细节，怎么做需求验证来快速判断这个方向值不值得做？" },
+    ],
+  },
+};
+
 function parseServerTime(value?: string) {
   if (!value) return null;
   const normalized = /Z$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`;
@@ -63,10 +96,22 @@ function renderAnnotatedStudentText(text: string, annotations: any[]) {
   return <div className="student-annotated-text">{nodes}</div>;
 }
 
+function sanitizeMermaid(raw: string): string {
+  let s = raw.trim();
+  s = s.replace(/\u201c/g, "'").replace(/\u201d/g, "'");
+  s = s.replace(/\u2018/g, "'").replace(/\u2019/g, "'");
+  s = s.replace(/\uff1f/g, "?").replace(/\uff01/g, "!").replace(/\uff1b/g, ";");
+  s = s.replace(/\uff08/g, "(").replace(/\uff09/g, ")");
+  s = s.replace(/[\u200b\u200c\u200d\ufeff]/g, "");
+  s = s.replace(/(-->|-->) *\n/g, "$1 ");
+  return s;
+}
+
 function MermaidBlock({ chart, theme }: { chart: string; theme: "dark" | "light" }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const renderKey = useMemo(() => `mermaid-${Math.random().toString(36).slice(2)}`, []);
+  const cleanChart = useMemo(() => sanitizeMermaid(chart), [chart]);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,8 +124,10 @@ function MermaidBlock({ chart, theme }: { chart: string; theme: "dark" | "light"
           securityLevel: "loose",
           theme: theme === "dark" ? "dark" : "default",
           fontFamily: "Inter, Segoe UI, sans-serif",
-        });
-        const { svg, bindFunctions } = await mermaid.render(`${renderKey}-${Date.now()}`, chart);
+          fontSize: 12,
+          flowchart: { nodeSpacing: 16, rankSpacing: 28, curve: "basis", htmlLabels: true },
+        } as any);
+        const { svg, bindFunctions } = await mermaid.render(`${renderKey}-${Date.now()}`, cleanChart);
         if (cancelled || !hostRef.current) return;
         hostRef.current.innerHTML = svg;
         bindFunctions?.(hostRef.current);
@@ -95,7 +142,7 @@ function MermaidBlock({ chart, theme }: { chart: string; theme: "dark" | "light"
     return () => {
       cancelled = true;
     };
-  }, [chart, renderKey, theme]);
+  }, [cleanChart, renderKey, theme]);
 
   return (
     <div className="mermaid-card">
@@ -191,6 +238,7 @@ export default function StudentPage() {
   const [teamMsg, setTeamMsg] = useState("");
   const [hyperLibrary, setHyperLibrary] = useState<any>(null);
   const [hyperProjectView, setHyperProjectView] = useState<any>(null);
+  const modeWelcome = MODE_WELCOME[mode] ?? MODE_WELCOME.coursework;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -984,15 +1032,10 @@ export default function StudentPage() {
             {messages.length === 0 && (
               <div className="chat-welcome">
                 <div className="welcome-glow" />
-                <h2>你好，我是你的双创教练</h2>
-                <p>告诉我你的项目想法、当前困惑，或上传计划书，我会帮你诊断风险并给出下一步行动。</p>
+                <h2>{modeWelcome.title}</h2>
+                <p>{modeWelcome.desc}</p>
                 <div className="chat-hints">
-                  {[
-                    { icon: "💡", text: "我想做一个校园二手交易平台，目标用户是大学生" },
-                    { icon: "🔍", text: "帮我分析一下我的商业模式有什么问题" },
-                    { icon: "📚", text: "什么是TAM/SAM/SOM？我应该怎么写？" },
-                    { icon: "🏆", text: "我要参加中国国际大学生创新大赛，帮我评估项目" },
-                  ].map((h) => (
+                  {modeWelcome.hints.map((h) => (
                     <button key={h.text} className="hint-chip" onClick={() => { setInput(h.text); textareaRef.current?.focus(); }}>
                       <span className="hint-icon">{h.icon}</span>
                       <span>{h.text}</span>

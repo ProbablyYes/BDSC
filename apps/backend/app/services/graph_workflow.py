@@ -203,6 +203,68 @@ INTENTS: dict[str, dict] = {
 
 _FOCUSED_INTENTS = frozenset(k for k, v in INTENTS.items() if v.get("focused"))
 
+# ═══════════════════════════════════════════════════════════════════
+#  Intent × Complexity → base agent set (declarative matrix)
+# ═══════════════════════════════════════════════════════════════════
+
+AGENT_MATRIX: dict[str, dict[str, list[str]]] = {
+    "learning_concept": {
+        "simple": ["tutor"],
+        "medium": ["tutor", "coach"],
+        "complex": ["tutor", "coach", "analyst"],
+    },
+    "project_diagnosis": {
+        "simple": ["coach"],
+        "medium": ["coach", "analyst"],
+        "complex": ["coach", "analyst", "tutor", "planner"],
+    },
+    "business_model": {
+        "simple": ["tutor"],
+        "medium": ["coach", "tutor"],
+        "complex": ["coach", "analyst", "tutor", "planner"],
+    },
+    "evidence_check": {
+        "simple": ["analyst"],
+        "medium": ["analyst", "coach"],
+        "complex": ["analyst", "coach", "tutor"],
+    },
+    "market_competitor": {
+        "simple": ["tutor"],
+        "medium": ["tutor", "analyst"],
+        "complex": ["tutor", "analyst", "coach"],
+    },
+    "competition_prep": {
+        "simple": ["advisor"],
+        "medium": ["advisor", "coach"],
+        "complex": ["advisor", "coach", "analyst", "grader"],
+    },
+    "pressure_test": {
+        "simple": ["analyst"],
+        "medium": ["analyst", "coach"],
+        "complex": ["analyst", "coach", "advisor"],
+    },
+    "idea_brainstorm": {
+        "simple": ["tutor"],
+        "medium": ["tutor", "coach"],
+        "complex": ["tutor", "coach", "analyst"],
+    },
+    "general_chat": {
+        "simple": ["coach"],
+        "medium": ["coach"],
+        "complex": ["coach"],
+    },
+}
+
+
+def _complexity_tier(complexity: int, intent_shape: str) -> str:
+    if intent_shape == "mixed" and complexity >= 3:
+        return "complex"
+    if complexity >= 4:
+        return "complex"
+    if complexity >= 2 or intent_shape == "mixed":
+        return "medium"
+    return "simple"
+
 _FOLLOW_UP_SIGNALS = frozenset([
     "继续", "然后呢", "详细说说", "还有呢", "接着说", "展开讲讲",
     "怎么办", "具体怎么做", "再说说", "举个例子", "好的然后",
@@ -355,22 +417,12 @@ def _message_complexity(message: str, conversation_messages: list | None = None)
 
 
 def _should_use_focused_mode(state: WorkflowState) -> bool:
+    """Only general_chat uses focused mode; everything else goes through multi-agent."""
     intent = state.get("intent", "general_chat")
-    intent_shape = _normalize_intent_shape(state.get("intent_shape", "single"))
     msg = state.get("message", "")
-    conv = state.get("conversation_messages", [])
     if "[上传文件:" in msg:
         return False
-    if intent == "general_chat":
-        return True
-    if intent not in _FOCUSED_INTENTS:
-        return False
-    if intent_shape == "mixed":
-        return False
-    complexity = _message_complexity(msg, conv)
-    if intent == "learning_concept" and state.get("mode") in ("coursework", "learning"):
-        return complexity <= 1 and len(msg) < 130
-    return complexity <= 1 and len(msg) < 90
+    return intent == "general_chat"
 
 
 def _should_shallow_gather(state: WorkflowState) -> bool:
@@ -379,6 +431,10 @@ def _should_shallow_gather(state: WorkflowState) -> bool:
     msg = state.get("message", "")
     conv = state.get("conversation_messages", [])
     if "[上传文件:" in msg or intent not in _DISCOVERY_INTENTS:
+        return False
+    if intent == "learning_concept":
+        return False
+    if _is_generic_learning_question(msg) or _is_coursework_professional_question(msg):
         return False
     if intent_shape == "mixed":
         return False
@@ -853,94 +909,18 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
             "engine": "rule",
         }
 
-    project_like_direct = (
-        len(text) >= 120
-        and sum(1 for sig in ("我们做", "项目叫", "项目是", "产品", "功能", "用户", "推广", "商业模式", "收费", "竞争", "替代") if sig in message) >= 3
-    )
-    if project_like_direct:
+    # ── Rule-based concept detection (fast, accurate) ──
+    if _is_generic_learning_question(message) or _is_coursework_professional_question(message):
         return {
-            "intent": "project_diagnosis",
-            "confidence": 0.78,
-            "intent_shape": "mixed" if len(message) >= 180 else "single",
-            "intent_reason": _intent_reason_text(
-                "heuristic_long",
-                "project_diagnosis",
-                shape="mixed" if len(message) >= 180 else "single",
-                shape_reasons=["项目介绍中同时涉及功能、用户、推广或竞争等多个主题"],
-            ),
-            "agents": list(INTENTS["project_diagnosis"]["agents"]),
-            "engine": "heuristic_long",
-        }
-
-    competitor_direct = any(k in message for k in ("竞品", "类似", "对手", "市面上", "替代品", "替代方案", "同类产品"))
-    if competitor_direct and len(text) <= 140:
-        return {
-            "intent": "market_competitor",
-            "confidence": 0.82,
+            "intent": "learning_concept",
+            "confidence": 0.9,
             "intent_shape": "single",
-            "intent_reason": _intent_reason_text("rule", "market_competitor", matched=["竞品/类似产品"], shape="single"),
-            "agents": list(INTENTS["market_competitor"]["agents"]),
+            "intent_reason": _intent_reason_text("rule", "learning_concept", matched=["专业概念辅导/通俗讲解"], shape="single"),
+            "agents": list(INTENTS["learning_concept"]["agents"]),
             "engine": "rule",
         }
 
-    # ── Keyword scoring ──
-    score_table = _keyword_score_table(text)
-    scores: list[tuple[str, float]] = []
-    for iid, row in score_table.items():
-        matched = row.get("matched", [])
-        score = float(row.get("score", 0) or 0)
-        if matched:
-            logger.debug("classify kw: intent=%s matched=%s score=%.3f", iid, matched, score)
-        scores.append((iid, score))
-    scores.sort(key=lambda x: x[1], reverse=True)
-    kw_best, kw_score = scores[0]
-    kw_matched = list(score_table.get(kw_best, {}).get("matched", []))
-    shape, shape_reasons = _infer_intent_shape(message, score_table, conv)
-    logger.info("classify: msg='%s…' kw_best=%s kw_score=%.3f", text[:40], kw_best, kw_score)
-
-    # Very strong keyword hit → trust it directly
-    if kw_score >= 0.65:
-        r = {
-            "intent": kw_best, "confidence": min(1.0, kw_score),
-            "intent_shape": shape,
-            "intent_reason": _intent_reason_text("rule", kw_best, matched=kw_matched, shape=shape, shape_reasons=shape_reasons),
-            "agents": list(INTENTS[kw_best]["agents"]),
-            "engine": "rule",
-        }
-        logger.info("classify → %s (rule, score=%.2f)", kw_best, kw_score)
-        return r
-
-    distinctive_intents = {"market_competitor", "competition_prep", "learning_concept", "evidence_check", "pressure_test", "business_model"}
-    if kw_best in distinctive_intents and kw_score >= 0.35:
-        r = {
-            "intent": kw_best,
-            "confidence": min(0.88, max(0.5, kw_score)),
-            "intent_shape": shape,
-            "intent_reason": _intent_reason_text("rule", kw_best, matched=kw_matched, shape=shape, shape_reasons=shape_reasons),
-            "agents": list(INTENTS[kw_best]["agents"]),
-            "engine": "rule",
-        }
-        logger.info("classify → %s (distinctive-rule, score=%.2f)", kw_best, kw_score)
-        return r
-
-    project_like = (
-        len(text) >= 120
-        and any(sig in text for sig in ("我们做", "项目叫", "项目是", "功能", "核心", "产品", "推广", "用户", "商业模式"))
-    )
-    if project_like and kw_best not in {"competition_prep", "learning_concept"}:
-        inferred_shape = "mixed" if shape == "mixed" or len(text) >= 220 else "single"
-        r = {
-            "intent": "project_diagnosis",
-            "confidence": max(0.5, kw_score),
-            "intent_shape": inferred_shape,
-            "intent_reason": _intent_reason_text("heuristic_long", "project_diagnosis", matched=kw_matched, shape=inferred_shape, shape_reasons=shape_reasons),
-            "agents": list(INTENTS["project_diagnosis"]["agents"]),
-            "engine": "heuristic_long",
-        }
-        logger.info("classify → project_diagnosis (project-like)")
-        return r
-
-    # ── LLM classification (primary for anything not obvious) ──
+    # ── PRIMARY: LLM classification ──
     if _llm.enabled:
         conv_ctx = ""
         if conv:
@@ -954,40 +934,76 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
         intent_list = "\n".join(f"- {k}: {v['desc']}" for k, v in INTENTS.items())
         llm_r = _llm.chat_json(
             system_prompt=(
-                f"意图分类器。根据学生最新消息和对话上下文，选一个最匹配的意图。\n"
+                "你是一个精准的意图分类器。根据学生最新消息和对话上下文，判断学生的核心意图。\n\n"
                 f"可选意图:\n{intent_list}\n\n"
-                "分类原则:\n"
-                "- 学生问'有没有类似的/竞品/市面上'等→选market_competitor\n"
-                "- 学生在描述一个项目想法(哪怕很模糊)就选project_diagnosis\n"
-                "- 学生追问前面的话题，根据话题选对应意图\n"
-                "- 只有完全无关创业/项目的寒暄才选general_chat\n"
-                "- 学生上传了文件一定选project_diagnosis\n"
-                "- 如果学生一条消息里同时在说项目介绍、商业模式、推广、竞争、验证等多个主题，则 intent_shape 选 mixed，否则选 single\n"
+                "## 分类原则（按优先级排序）\n"
+                "1. **learning_concept**: 学生在问某个概念怎么理解、怎么做、有什么区别、某个方法论怎么用等。"
+                "即使消息中提到了'我的项目'，只要核心是在问概念/方法论而不是要求诊断项目，就选这个。"
+                "例: '什么是价值主张'、'TAM怎么算'、'有用和有商业价值的区别'、'MVP怎么做'、'怎么判断需求是否真实'\n"
+                "2. **project_diagnosis**: 学生在描述一个具体项目（包含功能、用户、商业模式等多个方面的实质信息），希望获得综合诊断或评价。"
+                "例: '我们做了一个AI论文工具，功能包括...'、'帮我看看这个项目方案'\n"
+                "3. **business_model**: 学生在讨论具体项目的定价、收入来源、盈利方式等商业模式问题。\n"
+                "4. **market_competitor**: 学生在问市面上有没有类似的产品、竞品、替代品。\n"
+                "5. **evidence_check**: 学生在讨论用户访谈、问卷、调研数据等证据。\n"
+                "6. **competition_prep**: 学生在讨论竞赛备赛、答辩技巧、路演方法等。\n"
+                "7. **pressure_test**: 学生在测试项目薄弱环节或挑战自己的假设。\n"
+                "8. **idea_brainstorm**: 学生还没有具体方向，在寻求创业灵感或方向建议。\n"
+                "9. **general_chat**: 完全与创业/项目无关的日常对话或寒暄。\n\n"
+                "## intent_shape 判断\n"
+                "- single: 消息围绕一个主题\n"
+                "- mixed: 消息同时涉及多个不同主题（如项目介绍+商业模式+推广+竞争）\n\n"
                 '输出JSON: {"intent":"ID","confidence":0.0-1.0,"intent_shape":"single|mixed","reason":"一句话理由"}'
             ),
             user_prompt=(
                 (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
                 + f"学生最新消息: {message[:500]}"
             ),
+            model=settings.llm_fast_model,
             temperature=0.05,
         )
         logger.info("classify LLM: %s", llm_r)
         if llm_r and llm_r.get("intent") in INTENTS:
             llm_conf = float(llm_r.get("confidence", 0))
-            if llm_conf > 0.3:
-                llm_shape = _normalize_intent_shape(llm_r.get("intent_shape", shape), default=shape)
+            if llm_conf > 0.4:
+                llm_shape = _normalize_intent_shape(llm_r.get("intent_shape", "single"), default="single")
                 r = {
                     "intent": llm_r["intent"],
                     "confidence": llm_conf,
                     "intent_shape": llm_shape,
-                    "intent_reason": _intent_reason_text("llm", llm_r["intent"], shape=llm_shape, shape_reasons=shape_reasons, llm_reason=str(llm_r.get("reason", "") or "")),
+                    "intent_reason": _intent_reason_text("llm", llm_r["intent"], shape=llm_shape, llm_reason=str(llm_r.get("reason", "") or "")),
                     "agents": list(INTENTS[llm_r["intent"]]["agents"]),
                     "engine": "llm",
                 }
                 logger.info("classify → %s (llm, conf=%.2f)", llm_r["intent"], llm_conf)
                 return r
 
-    # ── Fallback: use keyword result or heuristic ──
+    # ── FALLBACK: Keyword scoring (when LLM unavailable or low confidence) ──
+    score_table = _keyword_score_table(text)
+    scores: list[tuple[str, float]] = []
+    for iid, row in score_table.items():
+        matched = row.get("matched", [])
+        score = float(row.get("score", 0) or 0)
+        if matched:
+            logger.debug("classify kw: intent=%s matched=%s score=%.3f", iid, matched, score)
+        scores.append((iid, score))
+    scores.sort(key=lambda x: x[1], reverse=True)
+    kw_best, kw_score = scores[0]
+    kw_matched = list(score_table.get(kw_best, {}).get("matched", []))
+    shape, shape_reasons = _infer_intent_shape(message, score_table, conv)
+    logger.info("classify fallback: msg='%s…' kw_best=%s kw_score=%.3f", text[:40], kw_best, kw_score)
+
+    if kw_score >= 0.35:
+        r = {
+            "intent": kw_best,
+            "confidence": min(0.88, max(0.5, kw_score)),
+            "intent_shape": shape,
+            "intent_reason": _intent_reason_text("rule-fallback", kw_best, matched=kw_matched, shape=shape, shape_reasons=shape_reasons),
+            "agents": list(INTENTS[kw_best]["agents"]),
+            "engine": "rule-fallback",
+        }
+        logger.info("classify → %s (rule-fallback, score=%.2f)", kw_best, kw_score)
+        return r
+
     if kw_score >= 0.15:
         r = {
             "intent": kw_best, "confidence": kw_score,
@@ -1054,18 +1070,11 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
 # ═══════════════════════════════════════════════════════════════════
 
 def _adjust_pipeline_for_mode(agents: list[str], mode: str, intent: str) -> list[str]:
-    """Keep routing-stage pipeline to the primary agent for this mode."""
-    primary = [a for a in agents if a in AGENT_FNS][:1]
-    if mode == "competition" and intent != "general_chat":
-        return ["advisor"]
-    if mode == "learning" and intent != "general_chat":
-        return ["coach"]
-    if mode == "coursework":
-        if intent in ("learning_concept", "market_competitor"):
-            return ["tutor"]
-        if primary:
-            return primary
-    return primary or [a for a in agents if a in AGENT_FNS][:1]
+    """Pass through classifier-suggested agents — mode no longer locks primary agent.
+
+    _decide_agents handles the real selection via AGENT_MATRIX + mode_boost.
+    """
+    return [a for a in agents if a in AGENT_FNS][:2] or ["coach"]
 
 
 def router_agent(state: WorkflowState) -> dict:
@@ -1355,8 +1364,49 @@ def gather_context_node(state: WorkflowState) -> dict:
             "nodes_visited": ["gather_context"],
         }
 
+    # ── Lightweight gather for concept/learning questions ──
+    _is_concept_lightweight = (
+        intent == "learning_concept"
+        and not is_file
+        and not _has_explicit_project_context(msg)
+        and len(msg) < 250
+    )
+    if _is_concept_lightweight:
+        logger.info("gather_context: lightweight path for learning_concept")
+        rag_cases: list = []
+        rag_ctx = ""
+        if _rag is not None and _rag.case_count > 0:
+            try:
+                rag_cases = _rag.retrieve(msg[:500], top_k=3, category_filter=cat or None)
+                rag_ctx = _rag.format_for_llm(rag_cases)
+            except Exception:
+                pass
+        kg_result = _default_kg()
+        try:
+            from app.services.graph_service import search_nodes
+            kg_nodes = search_nodes(msg[:200], limit=5)
+            if kg_nodes:
+                kg_result["kg_grounding"] = kg_nodes
+        except Exception:
+            pass
+        return {
+            "diagnosis": diag_data,
+            "next_task": next_task,
+            "category": cat,
+            "kg_analysis": kg_result,
+            "rag_cases": rag_cases,
+            "rag_context": rag_ctx,
+            "web_search_result": {},
+            "hypergraph_insight": {},
+            "hypergraph_student": {},
+            "challenge_strategies": strategies,
+            "pressure_test_trace": {},
+            "needs_clarification": False,
+            "nodes_visited": ["gather_context"],
+        }
+
     # ────────────────────────────────────────────────────────────────
-    # STATIC + CONDITIONAL: Parallel I/O tasks
+    # STATIC + CONDITIONAL: Parallel I/O tasks (full weight)
     # ────────────────────────────────────────────────────────────────
     collected: dict[str, Any] = {}
 
@@ -1455,8 +1505,12 @@ def gather_context_node(state: WorkflowState) -> dict:
     msg_wants_web = any(w in msg for w in _WEB_SIGNAL_WORDS)
     fact_check_needed = any(w in msg for w in _FACT_CHECK_SIGNALS)
     need_web = msg_wants_web or fact_check_needed or intent_spec.get("need_web", False)
-    if mode == "coursework" and intent in ("learning_concept", "market_competitor", "idea_brainstorm", "business_model"):
-        need_web = True
+    if mode == "coursework":
+        if intent in ("market_competitor", "idea_brainstorm"):
+            need_web = True
+        elif intent in ("learning_concept", "business_model"):
+            if _has_explicit_project_context(msg) or msg_wants_web or fact_check_needed:
+                need_web = True
     if mode == "learning" and intent in ("project_diagnosis", "business_model", "pressure_test", "market_competitor"):
         if fact_check_needed or any(w in msg.lower() for w in _PROJECT_FACT_GROUNDING_SIGNALS):
             need_web = True
@@ -1716,10 +1770,71 @@ def _is_ghostwriting_request(text: str) -> bool:
     return any(re.search(p, content) for p in _GHOSTWRITE_PATTERNS)
 
 
+def _has_explicit_project_context(text: str) -> bool:
+    content = str(text or "")
+    return any(
+        sig in content
+        for sig in (
+            "我们做", "我们的项目", "我们项目", "项目叫", "项目是",
+            "目标用户", "核心功能", "推广", "收费", "竞品", "路演",
+            "答辩", "团队", "产品", "场景", "痛点", "解决方案",
+        )
+    )
+
+
+def _is_generic_learning_question(text: str) -> bool:
+    content = str(text or "").strip()
+    lowered = content.lower()
+    if not content or len(content) > 200:
+        return False
+    explain_signals = (
+        "什么是", "什么叫", "是什么意思", "不太理解", "不理解", "有点不懂",
+        "讲清楚", "解释一下", "怎么理解", "怎么判断", "怎么算", "怎么做",
+        "举个例子", "简单例子", "通俗", "区别", "到底",
+    )
+    topic_signals = (
+        "商业模式", "商业价值", "价值主张", "盈利模式",
+        "tam", "sam", "som", "mvp", "股权",
+        "用户画像", "护城河", "单位经济", "cac", "ltv",
+        "需求验证", "用户验证", "产品原型",
+    )
+    project_signals = (
+        "我们做", "我们的项目", "我们项目", "项目叫", "项目是",
+        "目标用户", "核心功能", "推广", "收费", "竞品", "路演", "答辩",
+    )
+    return (
+        any(sig in content for sig in explain_signals)
+        and any(sig in lowered for sig in topic_signals)
+        and not any(sig in content for sig in project_signals)
+    )
+
+
+def _is_coursework_professional_question(text: str) -> bool:
+    content = str(text or "").strip()
+    lowered = content.lower()
+    if not content or len(content) > 250 or _has_explicit_project_context(content):
+        return False
+    ask_signals = (
+        "什么是", "什么叫", "是什么意思", "不太理解", "不理解", "有点不懂",
+        "讲清楚", "解释一下", "怎么理解", "怎么判断", "怎么算", "怎么做",
+        "举个例子", "简单例子", "通俗", "区别", "有什么区别", "为什么",
+        "到底", "怎么用", "判断框架", "怎么验证",
+    )
+    topic_signals = (
+        "商业模式", "商业价值", "价值主张", "盈利模式", "用户画像",
+        "mvp", "商业画布", "lean canvas",
+        "tam", "sam", "som", "cac", "ltv", "单位经济", "护城河", "定价", "股权",
+        "增长飞轮", "留存", "转化", "北极星指标", "需求验证", "竞品分析",
+        "用户验证", "产品原型", "最小可行", "价值闭环",
+    )
+    return any(sig in content for sig in ask_signals) and any(sig in lowered for sig in topic_signals)
+
+
 def _extract_learning_keywords(text: str) -> list[str]:
     candidates = [
         "tam", "sam", "som", "mvp", "股权", "互联网+", "挑战杯", "商业模式",
-        "用户画像", "价值主张", "定价", "路演", "团队", "融资",
+        "用户画像", "价值主张", "定价", "路演", "团队", "融资", "护城河",
+        "单位经济", "cac", "ltv", "需求验证", "竞品分析", "北极星指标",
     ]
     lowered = (text or "").lower()
     hits = [kw for kw in candidates if kw.lower() in lowered]
@@ -1752,9 +1867,12 @@ def _fmt_learning_kg_nodes(nodes: list[dict[str, Any]], max_chars: int = 1000) -
 def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[str, list[dict[str, Any]]]:
     msg = str(state.get("message", ""))
     mode = str(state.get("mode", "coursework"))
-    conv_ctx = _build_conv_ctx(state, limit=4)
-    rag_ctx = state.get("rag_context", "")
-    ws_ctx = _fmt_ws(state.get("web_search_result", {}))
+    generic_learning = _is_generic_learning_question(msg) or _is_coursework_professional_question(msg)
+    explicit_project_context = _has_explicit_project_context(msg)
+    use_project_grounding = explicit_project_context or not generic_learning
+    conv_ctx = _build_conv_ctx(state, limit=4) if use_project_grounding else ""
+    rag_ctx = state.get("rag_context", "") if use_project_grounding else ""
+    ws_ctx = _fmt_ws(state.get("web_search_result", {})) if use_project_grounding else ""
     kg_nodes: list[dict[str, Any]] = []
 
     if _is_ghostwriting_request(msg):
@@ -1770,26 +1888,36 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         )
         return refusal, []
 
-    if _graph_service:
+    if _graph_service and use_project_grounding:
         keywords = _extract_learning_keywords(msg)
         kg_nodes = _graph_service.search_nodes(keywords, limit_per_keyword=2) if keywords else []
         logger.info("learning_tutor retrieved_kg_nodes=%s", kg_nodes)
 
     kg_ctx = _fmt_learning_kg_nodes(kg_nodes)
+    _tutor_mode_hint = {
+        "competition": "你现在还需要帮学生理解这个概念在竞赛评审中的权重和评委判断标准。",
+        "learning": "你现在还需要帮学生理解这个概念在项目实操中如何验证，做完后该看什么信号判断自己学会了。",
+    }.get(mode, "")
+
     llm_resp = _llm.chat_json(
         system_prompt=(
             "你是课程辅导模式下的真实导师。你的重点不是机械下诊断，而是结合学生当前项目教他怎么想、怎么做。\n"
-            "如果学生是在问概念、方法、赛事规则、项目思路或写法，请输出JSON，字段必须包含："
-            "current_judgment, method_explanation, project_application, common_pitfalls(list), practice_task, observation_point, source_note。\n"
+            + (f"{_tutor_mode_hint}\n" if _tutor_mode_hint else "")
+            + "如果学生是在问概念、方法、赛事规则、项目思路或写法，请输出JSON，字段必须包含："
+            "current_judgment, method_explanation, teacher_criteria, project_application, common_pitfalls(list), practice_task, observation_point, source_note。\n"
             "要求：\n"
-            "- current_judgment 先回应学生当前项目或问题，不要一上来背定义\n"
-            "- method_explanation 解释背后的方法论，要说清楚为什么这样看\n"
-            "- project_application 必须把方法落回学生项目，指出应该先看什么、再看什么\n"
+            "- current_judgment 先直接回应学生眼前这个具体困惑，不要一上来背定义或写成报告摘要\n"
+            "- method_explanation 解释背后的方法论，要说清楚为什么这样看；必要时补一个反例、边界条件或老师常见追问\n"
+            "- teacher_criteria 说明老师/评委通常会用什么标准判断这件事有没有想清楚，帮学生建立判断尺子\n"
+            "- project_application 必须把方法落回学生项目；如果信息不够，就说明还差哪块信息会影响判断，不要空讲\n"
+            "- 如果学生没有提供明确项目背景，就不要假设“你的项目”“你的产品”是什么；请先用一个公开、简单、人人能懂的创业例子讲清楚，再补一句以后放到项目里时该怎么判断\n"
             "- common_pitfalls 给 2-4 条，必须贴近学生这种场景\n"
-            "- practice_task 必须只有一个，且它是“理解方法的小练习”，不是完整项目推进计划\n"
+            "- practice_task 必须只有一个，且它是“理解方法的小练习”，不是完整项目推进计划；除非学生明确在问验证设计，否则不要泛泛要求做问卷\n"
             "- observation_point 说明学生做这个练习时最该观察什么信号\n"
             "- source_note 用一句话交代你主要参考了案例、联网资料还是本地KG；没有就写“本轮主要依据学生材料判断”\n"
-            "- 如果给了本地KG信息，优先使用，不要编造所谓“最新规则”\n"
+            "- 如果给了本地KG、案例或联网信息，优先使用，不要编造所谓“最新规则”\n"
+            "- 对于纯概念题，如果没有明确项目背景，不要硬套本地KG项目案例，更不要编造学生的行业、产品或商业设定\n"
+            "- 整体语气像老师在带学生把一道题想透，而不是在宣判项目好坏\n"
         ),
         user_prompt=(
             f"模式: {mode}\n学生问题:\n{msg}\n\n"
@@ -1807,6 +1935,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         llm_resp = {
             "current_judgment": "你现在最需要的，通常不是再多记几个术语，而是先把这个概念放回自己的项目里，看看它究竟在帮你判断哪一个关键环节。",
             "method_explanation": "一个方法论真正有用，不在于定义多完整，而在于它能不能帮你缩小问题范围、识别证据缺口，并指导下一步验证。",
+            "teacher_criteria": "真正想清楚的标准，不是你能把名词背出来，而是你能说明它为什么会改变你的判断，并指出你项目里对应的证据或缺口。",
             "project_application": "先把你的项目拆成用户、场景、价值、验证四个层次，看看这个概念到底是在解释哪个层次；如果落不回项目，说明你还没有真正理解它。",
             "common_pitfalls": ["只会背定义，不会落到项目里", "写成空话，没有证据或边界", "一次给自己布置太多任务"],
             "practice_task": "围绕你的项目，把这个概念写成 1 段项目化解释，再补 1 个它会影响你决策的具体场景。",
@@ -1818,6 +1947,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         text = (
             f"## 先看你现在这个问题\n{str(llm_resp.get('current_judgment') or '').strip()}\n\n"
             f"## 背后的方法\n{str(llm_resp.get('method_explanation') or '').strip()}\n\n"
+            f"## 老师通常会怎么判断你有没有想清楚\n{str(llm_resp.get('teacher_criteria') or '').strip()}\n\n"
             f"## 放回你的项目怎么用\n{str(llm_resp.get('project_application') or '').strip()}\n\n"
             "## 你最容易踩的坑\n"
             + "\n".join(f"- {item}" for item in (llm_resp.get("common_pitfalls") or [])[:4])
@@ -1830,6 +1960,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
     parts = [
         f"## 先看你现在这个问题\n{str(llm_resp.get('current_judgment') or '').strip()}",
         f"## 背后的方法\n{str(llm_resp.get('method_explanation') or '').strip()}",
+        f"## 老师通常会怎么判断你有没有想清楚\n{str(llm_resp.get('teacher_criteria') or '').strip()}",
         f"## 放回你的项目怎么用\n{str(llm_resp.get('project_application') or '').strip()}",
         "## 你最容易踩的坑\n" + "\n".join(f"- {item}" for item in (llm_resp.get("common_pitfalls") or [])[:4]),
         f"## 现在就能做的小练习\n{str(llm_resp.get('practice_task') or '').strip()}",
@@ -1994,9 +2125,9 @@ def _coach_analyze(state: dict) -> dict:
     hs_ctx = _fmt_hyper_student(hs)
 
     mode_hint = {
-        "coursework": "当前是课程辅导模式，侧重帮学生完成作业，注重逻辑完整性和方法论。",
-        "competition": "当前是竞赛教练模式，以专业、严谨、有证据的方式帮助学生提升竞争力，不要咄咄逼人。",
-        "learning": "当前是项目教练模式，重点是识别当前阶段最关键的瓶颈，并把下一步任务收敛成一个可执行动作。",
+        "coursework": "当前是课程辅导模式，侧重把方法讲透，帮学生理解判断标准，再落回项目。",
+        "competition": "当前是竞赛教练模式，侧重评委视角、证据链完整度和得分影响，语气专业克制。",
+        "learning": "当前是项目教练模式，侧重识别当前阶段最关键的瓶颈，用启发式追问推动思考。",
     }.get(mode, "")
 
     if mode == "learning" and _is_direct_solution_request(msg):
@@ -2053,16 +2184,18 @@ def _coach_analyze(state: dict) -> dict:
         coach_json = _llm.chat_json(
             system_prompt=(
                 "你是课程辅导模式下的项目导师。请输出 JSON，字段必须包含："
-                "opening_assessment, why_this_matters, method_bridge, secondary_insights(list), knowledge_extensions(list), next_focus, guiding_questions(list), source_note。\n"
+                "opening_assessment, why_this_matters, method_bridge, teacher_criteria, secondary_insights(list), knowledge_extensions(list), next_focus, guiding_questions(list), source_note。\n"
                 "要求：\n"
-                "- opening_assessment 先就事论事回应学生项目当前状态，不要套模板\n"
-                "- why_this_matters 解释为什么这个问题值得先想清楚\n"
-                "- method_bridge 要把问题上升为学生以后也能复用的方法\n"
+                "- opening_assessment 先就事论事回应学生项目当前状态，不要套模板，也不要一上来宣布项目整体失败\n"
+                "- why_this_matters 解释为什么这个问题值得先想清楚，尽量说清它会影响后面哪一步判断\n"
+                "- method_bridge 要把问题上升为学生以后也能复用的方法，像老师在讲'以后你遇到类似问题也可以这样看'\n"
+                "- teacher_criteria 说明老师通常会用什么标准判断这部分有没有写清、想清、证据是否够\n"
                 "- secondary_insights 给出按材料复杂度展开的2-6条补充洞察，不要固定三个；可以包含疑点、盲区、替代方案、迁移成本、跨学科视角\n"
                 "- knowledge_extensions 给出0-4条外部延伸视角，可来自案例知识库、行业公开事实、跨学科方法或可借用框架\n"
                 "- next_focus 只给一个最值得先观察的切入点，不要展开成任务清单\n"
                 "- guiding_questions 按材料复杂度给2-6个贴合学生项目的启发式追问；问题少就少给，问题多就多给，不要固定成两个或三个\n"
                 "- 如果你建议验证、调研或查资料，必须说清楚具体该验证什么判断、找哪类人、看什么行为信号；不要泛泛说“做问卷”\n"
+                "- 如果学生问的是概念、写法或框架，不要把回答写成大诊断报告，优先讲清楚这一题\n"
                 "- 如果有案例、联网或图谱依据，可在 source_note 里自然交代\n"
             ),
             user_prompt=(
@@ -2095,6 +2228,9 @@ def _coach_analyze(state: dict) -> dict:
             "## 把它变成你以后也能复用的方法\n"
             f"{str(coach_json.get('method_bridge') or '你可以把当前问题拆回“用户-场景-证据-动作”四层，先确认自己到底卡在判断、证据还是执行。').strip()}\n\n"
         )
+        teacher_criteria = str(coach_json.get("teacher_criteria") or "").strip()
+        if teacher_criteria:
+            analysis += f"## 老师通常会怎么判断这一块有没有想清楚\n{teacher_criteria}\n\n"
         if secondary_insights:
             analysis += "## 继续往下拆，还会冒出来这些问题\n" + "\n".join(f"- {item}" for item in secondary_insights[:max(question_limit, 3)]) + "\n\n"
         if knowledge_extensions:
@@ -2109,6 +2245,10 @@ def _coach_analyze(state: dict) -> dict:
         if source_note:
             analysis += f"\n\n## 这次主要依据\n{source_note}"
     else:
+        _comp_coach_extra = (
+            "- 你现在还需要兼顾评委视角：在 structural_layers 和 strategy_space 中指出哪些结构问题最容易被评委追问、哪些策略选择直接影响得分\n"
+            "- 如果材料里缺少评委必看的证据链（如用户验证、财务推演、竞争壁垒），请明确指出缺失对评分的影响\n"
+        ) if mode == "competition" else ""
         coach_json = _llm.chat_json(
             system_prompt=(
                 "你是一位真正带项目推进的项目教练。请输出 JSON，字段必须包含："
@@ -2124,7 +2264,8 @@ def _coach_analyze(state: dict) -> dict:
                 "- 例子不要停在抽象类比，要尽量带背景：例如企业规模、市场份额、行业习惯、迁移成本、监管门槛、真实用户行为\n"
                 "- evidence_used 需要引用学生原文或已有分析依据，2-3条即可\n"
                 "- consequence 说明如果这个瓶颈继续不处理，会卡住什么\n"
-                "- next_task_intro 只自然指出“最该先攻的一点”，不要展开成步骤、清单、验收标准；整段回复里分析应明显多于行动，行动最多占最后一小节\n"
+                + _comp_coach_extra
+                + "- next_task_intro 只自然指出“最该先攻的一点”，不要展开成步骤、清单、验收标准；整段回复里分析应明显多于行动，行动最多占最后一小节\n"
                 "- guiding_questions 按材料复杂度给2-6个真正能把学生往下逼近的追问，必须紧贴他的项目，不要空问“你商业模式是什么”；不要固定成三个\n"
                 "- source_note 可自然说明本轮有没有参考案例、联网资料、知识图谱或超图\n"
                 "- 语气像导师面对面讨论，不要机械复述“Project Stage / Current Diagnosis”这些英文标题\n"
@@ -2198,6 +2339,7 @@ def _coach_analyze(state: dict) -> dict:
 
 def _analyst_analyze(state: dict) -> dict:
     msg = state.get("message", "")
+    mode = state.get("mode", "coursework")
     diag = state.get("diagnosis", {})
     kg = state.get("kg_analysis", {})
     hs = state.get("hypergraph_student", {})
@@ -2236,10 +2378,17 @@ def _analyst_analyze(state: dict) -> dict:
         if hyper_insight.get("summary"):
             teaching_edge_ctx += f"\n超图摘要: {str(hyper_insight.get('summary', ''))[:120]}"
 
+    _analyst_mode_hint = {
+        "competition": "你同时兼顾评委视角：重点分析风险对获奖概率的影响，指出评委最可能追问的薄弱环节。",
+        "coursework": "你同时兼顾教学视角：解释每个风险为什么算风险，帮学生建立风险判断的思维框架。",
+        "learning": "你同时兼顾推进视角：按紧迫度排序风险，指出最小可行修复路径。",
+    }.get(mode, "")
+
     analysis = _llm.chat_text(
         system_prompt=(
             "你是一位经验丰富的投资人，正在对这个创业项目做尽职调查式的风险评估。\n"
-            "你的分析必须：\n"
+            + (f"{_analyst_mode_hint}\n" if _analyst_mode_hint else "")
+            + "你的分析必须：\n"
             "1. **先客观评估项目整体质量**：如果项目逻辑基本通顺、商业模式合理，"
             "你应该先肯定做得好的部分，然后指出可以改进的细节，而非硬找致命问题\n"
             "2. 只有在逻辑确实存在明显漏洞时（如获客渠道与用户完全不匹配、财务数据明显不合理），"
@@ -2591,24 +2740,21 @@ _AGENT_ORDER = ("coach", "analyst", "advisor", "tutor", "grader", "planner")
 
 
 def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
-    """Hybrid agent selection: static guarantees + dynamic heuristics.
+    """Four-phase agent selection: Matrix → Mode-boost → Static-rules → Cap.
 
-    STATIC RULES — non-negotiable, ensure consistent behaviour:
-      • File upload (any intent)            → Coach + Grader + Planner
-      • competition mode OR intent          → + Advisor
-      • Explicit scoring keywords in msg    → + Grader
+    Phase 1 — AGENT_MATRIX lookup
+      Base agents from intent × complexity tier.
 
-    DYNAMIC HEURISTICS — data-driven, provide flexibility:
-      • Coach   : diagnosis triggered rules > 0 OR KG entities ≥ 2
-                   OR intent is a project-analysis type
-      • Analyst : high-severity risks detected OR pressure_test intent
-                   OR evidence_check intent with multiple rules
-      • Tutor   : learning mode AND intent is not a focused-type
-      • Planner : KG entities ≥ 3 with project intent,
-                   OR coach is running AND diagnosis rules ≥ 2
+    Phase 2 — Mode boost (additive only, never removes)
+      competition → + advisor   learning → + coach   coursework → + tutor
 
-    Returns agents in canonical order (Coach → Analyst → Advisor →
-    Tutor → Grader → Planner) so later agents can reference earlier output.
+    Phase 3 — Static rules (non-negotiable guarantees)
+      File upload → + coach;  scoring request → + grader;
+      planning request → + planner;  high risk → + analyst
+
+    Phase 4 — Cap to max_agents (simple 1-2, medium 2-4, complex 3-6)
+
+    Returns agents in canonical order so later agents can reference earlier output.
     """
     intent = state.get("intent", "general_chat")
     mode = state.get("mode", "coursework")
@@ -2617,175 +2763,90 @@ def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
     conv = state.get("conversation_messages", [])
     is_file = "[上传文件:" in msg
     diag = state.get("diagnosis", {})
-    kg = state.get("kg_analysis", {})
-    intent_pipeline = [a for a in (state.get("intent_pipeline", []) or []) if a in AGENT_FNS]
-    intent_confidence = float(state.get("intent_confidence", 0) or 0)
     rules = diag.get("triggered_rules", []) or []
-    kg_entity_count = len(kg.get("entities", []))
     high_risk = sum(1 for r in rules if isinstance(r, dict) and r.get("severity") == "high")
     complexity = _message_complexity(msg, conv)
+    tier = _complexity_tier(complexity, intent_shape)
     asks_for_plan = any(w in msg for w in _PLANNING_SIGNALS)
     asks_for_score = _is_score_request_message(msg)
     asks_for_eval = _is_eval_followup_message(msg)
-    needs_competition_review = asks_for_eval or intent == "competition_prep" or mode == "competition"
 
     selected: set[str] = set()
     reasons: list[str] = []
 
-    if intent_confidence >= 0.35:
-        selected.update(intent_pipeline)
-        if intent_pipeline:
-            reasons.append(f"路由阶段先给出主 agent：{' / '.join(intent_pipeline[:2])}")
+    # ═══ Phase 1: AGENT_MATRIX lookup ═══
+    matrix_row = AGENT_MATRIX.get(intent, AGENT_MATRIX["general_chat"])
+    base = list(matrix_row.get(tier, matrix_row.get("simple", ["coach"])))
 
-    # ═══ STATIC RULES (guaranteed, non-negotiable) ═══
+    if intent == "business_model" and tier == "simple" and _has_explicit_project_context(msg):
+        base = ["coach"]
+        reasons.append("商业模式问题带项目背景，由教练主导")
 
+    selected.update(base)
+    reasons.append(f"MATRIX[{intent}][{tier}] -> {' / '.join(base)}")
+
+    # ═══ Phase 2: Mode boost (additive, never removes) ═══
+    if mode == "competition" and intent not in ("general_chat", "learning_concept"):
+        if "advisor" not in selected:
+            selected.add("advisor")
+            reasons.append("竞赛模式补竞赛顾问")
+    elif mode == "learning":
+        if "coach" not in selected:
+            selected.add("coach")
+            reasons.append("项目教练模式补教练")
+    elif mode == "coursework":
+        if "tutor" not in selected and intent != "general_chat":
+            selected.add("tutor")
+            reasons.append("课程辅导模式补课程导师")
+
+    # ═══ Phase 3: Static rules (non-negotiable guarantees) ═══
     if is_file:
         selected.add("coach")
-        reasons.append("上传文件后至少保留项目教练做主线分析")
         if asks_for_plan or complexity >= 3:
             selected.add("planner")
         if asks_for_score or mode == "competition":
             selected.add("grader")
-
-    if needs_competition_review:
-        selected.add("advisor")
-        reasons.append("竞赛模式、竞赛意图或评委视角追问优先引入竞赛顾问")
+        reasons.append("上传文件触发静态规则")
 
     if asks_for_score:
         selected.add("grader")
-        reasons.append("学生明确问到评分/得分，因此加入评分官")
+        reasons.append("学生明确问评分，加入评分官")
     elif asks_for_eval:
         selected.add("grader")
-        reasons.append("学生在追问评委视角、扣分点或优先修正项，因此同步加入评分官")
+        reasons.append("学生追问评委视角，加入评分官")
 
-    # ═══ DYNAMIC HEURISTICS (data-driven) ═══
-
-    if not selected and intent in AGENT_FNS:
-        selected.add(intent)
-
-    if intent_shape == "single":
-        if intent == "learning_concept":
-            selected = {"coach"} if mode == "learning" else {"tutor"}
-            reasons.append("单一概念问题保持单导师回复")
-        elif intent == "market_competitor":
-            if mode == "competition":
-                selected = {"advisor"}
-            elif mode == "learning":
-                selected = {"coach"}
-            else:
-                selected = {"tutor"}
-            reasons.append("单一竞品/同类问题保持单主线检索解答")
-        elif intent == "business_model":
-            selected.add("coach")
-            if high_risk >= 1 or len(rules) >= 2:
-                selected.add("analyst")
-                reasons.append("商业模式问题触发明显风险，因此补风险分析师")
-        elif intent == "evidence_check":
-            selected.add("analyst")
-            if asks_for_plan:
-                selected.add("planner")
-        elif intent == "pressure_test":
-            selected.update(("analyst", "coach"))
-            reasons.append("压力测试至少需要风险分析与教练追问配合")
-        elif intent == "competition_prep":
-            selected.update(("advisor", "coach"))
-            if asks_for_score or asks_for_eval:
-                selected.add("grader")
-            if high_risk >= 1 or len(rules) >= 2:
-                selected.add("analyst")
-            reasons.append("单一竞赛追问也需要竞赛顾问与项目教练共同完成评审视角分析")
-        elif intent == "project_diagnosis":
-            selected.add("coach")
-            if high_risk >= 1 or len(rules) >= 2:
-                selected.add("analyst")
-            if asks_for_eval:
-                selected.update(("advisor", "grader"))
-                reasons.append("项目诊断中的评委/评分追问，补竞赛顾问与评分官")
-        elif intent == "idea_brainstorm":
-            selected = {"coach"} if mode != "coursework" else {"tutor"}
-    else:
-        if intent == "project_diagnosis":
-            selected.update(("coach", "analyst"))
-            if mode == "coursework":
-                selected.add("tutor")
-            if asks_for_eval:
-                selected.update(("advisor", "grader"))
-        elif intent == "business_model":
-            selected.update(("coach", "analyst"))
-            if asks_for_eval:
-                selected.update(("advisor", "grader"))
-        elif intent == "evidence_check":
-            selected.update(("analyst", "coach"))
-        elif intent == "market_competitor":
-            if mode == "competition":
-                selected.update(("advisor", "analyst"))
-            else:
-                selected.update(("tutor", "analyst", "coach"))
-        elif intent == "competition_prep":
-            selected.update(("advisor", "coach"))
-            if asks_for_score or asks_for_eval:
-                selected.add("grader")
-            if high_risk >= 1 or len(rules) >= 2:
-                selected.add("analyst")
-        elif intent == "pressure_test":
-            selected.update(("analyst", "coach"))
-            if mode == "competition" or complexity >= 4:
-                selected.add("advisor")
-        elif intent == "learning_concept":
-            selected.update(("coach", "tutor") if mode == "coursework" else ("coach",))
-        elif intent == "idea_brainstorm":
-            selected.update(("coach", "tutor"))
-        reasons.append("混合问题允许多 agent 协同，但保持主线清晰")
-
-    if mode == "learning":
-        advisor_needed = intent == "competition_prep" or any(sig in msg for sig in ("评委", "路演", "答辩", "比赛", "获奖"))
-        grader_needed = asks_for_score or asks_for_eval
-
-        selected.discard("tutor")
-        selected.discard("planner")
-        selected.add("coach")
-
-        if not advisor_needed:
-            selected.discard("advisor")
-        else:
-            selected.add("advisor")
-
-        if not grader_needed:
-            selected.discard("grader")
-        else:
-            selected.add("grader")
-
-        if asks_for_plan or (is_file and complexity >= 3):
-            selected.add("planner")
-        reasons.append("项目教练模式以教练主导，但在评委视角或评分需求出现时按需补竞赛顾问/评分官")
-
-    if mode == "coursework" and intent in ("learning_concept", "market_competitor") and intent_shape == "single":
-        selected.discard("coach")
-        selected.discard("analyst")
-        selected.discard("planner")
-        reasons.append("课程辅导下的单一知识型问题尽量保持单导师")
+    needs_competition_review = asks_for_eval or intent == "competition_prep" or mode == "competition"
+    if needs_competition_review:
+        selected.add("advisor")
 
     if asks_for_plan and intent in ("project_diagnosis", "business_model", "evidence_check", "idea_brainstorm", "competition_prep"):
         selected.add("planner")
-        reasons.append("学生明确在问下一步/行动方案，因此补行动规划师")
+        reasons.append("学生问下一步行动，补行动规划师")
 
     if (high_risk >= 1 or len(rules) >= 3) and intent not in ("learning_concept", "general_chat"):
         selected.add("analyst")
+        reasons.append("检测到高风险规则，补风险分析师")
 
-    # Cap complex paths to avoid runaway fan-out.
+    # ═══ Phase 4: Order + Cap ═══
     order_basis = _AGENT_ORDER
     if asks_for_score or asks_for_eval:
         order_basis = ("coach", "advisor", "grader", "analyst", "planner", "tutor")
+
     ordered = [a for a in order_basis if a in selected]
+
     if asks_for_score or asks_for_eval:
-        max_agents = 4 if complexity <= 2 and intent_shape == "single" else 5
-    elif intent_shape == "mixed":
-        max_agents = 5 if complexity >= 3 else 4
+        max_agents = 5
+    elif tier == "complex":
+        max_agents = 6
+    elif tier == "medium":
+        max_agents = 4
     else:
-        max_agents = 3 if complexity <= 2 else 4
+        max_agents = 2
+
     ordered = ordered[:max_agents]
-    if len(ordered) == 0:
+    if not ordered:
         ordered = ["coach"]
+
     reasoning = "；".join(dict.fromkeys(reasons)) or "按主意图选择最小必要 agent 集合"
     return ordered, reasoning
 
@@ -2827,23 +2888,45 @@ def run_role_agents_node(state: WorkflowState) -> dict:
     logger.info("Dynamic agent selection: %s (intent=%s)", agents_to_run, intent)
     outputs: dict[str, dict] = {}
     state_snapshot = dict(state)
+    agents_set = set(agents_to_run)
 
-    for agent_key in agents_to_run:
-        fn = AGENT_FNS.get(agent_key)
+    # Dependency-aware phased parallel execution:
+    #   Phase 1 (parallel): coach, tutor  (independent)
+    #   Phase 2 (parallel): analyst, advisor, planner  (depend on coach_output)
+    #   Phase 3:            grader  (depends on advisor_output)
+    _P1 = {"coach", "tutor"}
+    _P2 = {"analyst", "advisor", "planner"}
+    _P3 = {"grader"}
+
+    def _run_one(key: str, snapshot: dict) -> tuple[str, dict]:
+        fn = AGENT_FNS.get(key)
         if not fn:
-            continue
+            return key, {"agent": key, "analysis": "", "tools_used": []}
         try:
-            result = fn(state_snapshot)
-            outputs[agent_key] = result
-            state_snapshot[f"{agent_key}_output"] = result
+            return key, fn(snapshot)
         except Exception as exc:
-            logger.warning("Agent %s failed: %s", agent_key, exc)
-            outputs[agent_key] = {
-                "agent": AGENT_DISPLAY.get(agent_key, agent_key),
-                "analysis": "",
-                "tools_used": [],
-                "error": str(exc),
-            }
+            logger.warning("Agent %s failed: %s", key, exc)
+            return key, {"agent": AGENT_DISPLAY.get(key, key), "analysis": "", "tools_used": [], "error": str(exc)}
+
+    def _run_phase(keys: set[str], snapshot: dict) -> None:
+        phase_agents = [k for k in agents_to_run if k in keys and k in agents_set]
+        if not phase_agents:
+            return
+        if len(phase_agents) == 1:
+            k, result = _run_one(phase_agents[0], snapshot)
+            outputs[k] = result
+            state_snapshot[f"{k}_output"] = result
+        else:
+            with ThreadPoolExecutor(max_workers=len(phase_agents)) as pool:
+                futures = {pool.submit(_run_one, k, dict(snapshot)): k for k in phase_agents}
+                for future in as_completed(futures):
+                    k, result = future.result()
+                    outputs[k] = result
+                    state_snapshot[f"{k}_output"] = result
+
+    _run_phase(_P1, state_snapshot)
+    _run_phase(_P2, state_snapshot)
+    _run_phase(_P3, state_snapshot)
 
     result_dict: dict[str, Any] = {
         "agents_called": [AGENT_DISPLAY.get(a, a) for a in agents_to_run],
@@ -2864,10 +2947,11 @@ def run_role_agents_node(state: WorkflowState) -> dict:
 
 _MODE_PERSONA: dict[str, str] = {
     "coursework": (
-        "你是一位会带学生学会做项目的课程导师。"
-        "你的目标不是急着判分，而是结合学生当前项目讲清方法、概念、判断依据和下一步观察点。"
-        "你会优先把抽象方法落回学生项目，必要时结合案例、公开事实、RAG 和本地知识图谱辅助讲解。"
-        "语气耐心、具体、像老师在办公室里一对一辅导。"
+        "你是一位真正懂创新创业课程教学的课程导师。"
+        "你擅长把商业模式、价值主张、市场分析、验证方法、竞品分析、单位经济等创业专业问题讲清楚。"
+        "你的目标不是急着判分，而是先帮助学生听懂、想通、会判断，再把抽象方法落回项目。"
+        "当学生没有给项目背景时，你会先用简单、真实、公开可理解的创业例子解释；当学生带着项目来问时，你再把方法落回他的项目。"
+        "语气耐心、专业、具体，像老师在办公室里一对一辅导，而不是像百科或评审报告。"
     ),
     "competition": (
         "你是一位资深创业竞赛教练，对互联网+、挑战杯等赛事非常熟悉。"
@@ -2897,14 +2981,15 @@ _FOCUSED_PROMPTS: dict[str, str] = {
     ),
     "learning_concept": (
         "学生想学习一个概念或方法论。你的任务：\n"
-        "1. 先结合学生当前项目，说明他为什么现在需要理解这个概念\n"
-        "2. 再用一句话通俗定义这个概念（不要教科书式定义）\n"
-        "3. 举2-3个真实的创业案例来解释（具体公司名、做了什么、结果如何）\n"
-        "4. 如果搜索结果有最新信息，引用具体数据、事实和链接\n"
-        "5. 给学生一个本周就能做的练习任务（非常具体，可执行）\n"
-        "6. 指出学生最容易踩的坑\n"
-        "7. 如果学生的项目上下文已知，把概念和他的项目关联起来解释，并告诉他先观察什么信号\n"
-        "用700-1200字回复。像真实导师，不要像百科词条。"
+        "1. 如果学生给了项目背景，先结合他的项目说明为什么现在需要理解这个概念；如果没给项目背景，就不要硬套项目\n"
+        "2. 用一句话通俗定义这个概念（不要教科书式定义）\n"
+        "3. 解释老师通常会怎么判断学生是不是真的理解了这个概念\n"
+        "4. 用1-2个简单、真实、公开可理解的创业例子来讲清楚，优先用咖啡店、外卖平台、打车平台、会员制产品、SaaS 等普通人能听懂的场景\n"
+        "5. 如果搜索结果有最新信息，引用具体数据、事实和链接；如果没有，也可以只靠成熟常识讲清楚，不要为了联网而硬凑\n"
+        "6. 给学生一个非常小、非常具体的练习，用来验证他是否真的理解了这个概念\n"
+        "7. 指出学生最容易踩的坑，最好点出一个常见误解\n"
+        "8. 如果学生的项目上下文已知，最后再补一句放回他的项目时应该先看什么信号\n"
+        "用700-1200字回复。像真实导师，不要像百科词条，也不要写成项目诊断报告。"
     ),
     "idea_brainstorm": (
         "学生想要创业方向建议。你的任务：\n"
@@ -3076,7 +3161,24 @@ def orchestrator(state: WorkflowState) -> dict:
                 "- 整篇回复里，分析与解释至少占七成篇幅；行动与任务最多放在最后一小节收束\n"
                 "- 如果已经有行动规划内容，只允许在最后单独一节引用它；前面各节禁止继续扩写成步骤、周计划或验收标准\n"
                 "- 如果没有行动规划内容，最多只给1个简短的下一步聚焦点，不要写成本周计划\n\n"
-                "## 回复逻辑结构\n"
+                + (
+                    "## 课程辅导模式额外要求\n"
+                    "- 这轮回复的第一任务是把学生当前这一题讲明白，不要先急着做宏大项目诊断\n"
+                    "- 如果课程导师已经提供了方法解释或判断标准，最终回复里必须保留这些教学性内容，不要只剩结论\n"
+                    "- 语气要像老师面对面讲解：先说学生为什么会卡住，再解释老师通常怎么判断，再落回项目\n"
+                    "- 即使项目教练或风险分析也参与了，最终成文仍然要像一节讲清楚问题的小辅导，而不是多份报告拼接\n\n"
+                    if mode == "coursework"
+                    else "## 竞赛教练模式额外要求\n"
+                    "- 保持评委视角，回答中必须体现证据链的强弱判断和对获奖可能性的影响\n"
+                    "- 如果评分官或竞赛顾问参与了本轮，必须整合他们的评分区间和扣分点分析，不要遗漏\n"
+                    "- 语气像高水平教练在赛前做最后复盘：专业、克制、每一句话都有依据\n\n"
+                    if mode == "competition"
+                    else "## 项目教练模式额外要求\n"
+                    "- 先判断项目阶段，再聚焦最关键的一个瓶颈深入分析，不要一次性铺开所有问题\n"
+                    "- 分析应明显多于行动建议，启发式追问优先于直接给答案\n"
+                    "- 如果学生还在方向探索期，带着他收敛场景和切口，而不是宣布'最大瓶颈'\n\n"
+                )
+                + "## 回复逻辑结构\n"
                 "1. **总览**（1-2句）：概括你对项目的整体判断\n"
                 "2. **逻辑链路**：用户是谁→痛点→方案→变现→壁垒，哪些通哪些断\n"
                 "3. **结构层原因**：不只说表面问题，还要解释这些问题背后共同指向的结构性断点\n"
@@ -3361,7 +3463,22 @@ def stream_orchestrator(state: dict):
         "- 整篇回复里，分析与解释至少占七成篇幅；行动与任务最多放在最后一小节收束\n"
         "- 如果已经有行动规划内容，只允许在最后单独一节引用；前面各节禁止继续扩写成步骤、周计划或验收标准\n"
         "- 如果没有行动规划内容，最多只给1个简短的下一步聚焦点，不展开成详细计划\n\n"
-        "## 回复逻辑结构\n"
+        + (
+            "## 课程辅导模式额外要求\n"
+            "- 这轮回复的第一任务是把学生当前这一题讲明白\n"
+            "- 保留课程导师的方法解释和判断标准，不要只剩结论\n"
+            "- 语气像老师面对面讲解\n\n"
+            if mode == "coursework"
+            else "## 竞赛教练模式额外要求\n"
+            "- 保持评委视角，体现证据链强弱和获奖可能性判断\n"
+            "- 整合评分区间和扣分点分析\n"
+            "- 语气专业克制，每句话有依据\n\n"
+            if mode == "competition"
+            else "## 项目教练模式额外要求\n"
+            "- 先判断项目阶段，聚焦最关键的一个瓶颈\n"
+            "- 分析多于行动，启发式追问优先\n\n"
+        )
+        + "## 回复逻辑结构\n"
         "1. 总览定位（1-2句话概括整体判断）\n"
         "2. 宏观框架梳理（用户→痛点→方案→变现逻辑链）\n"
         "3. 结构层原因（解释这些表层问题背后的共同断点）\n"

@@ -2836,40 +2836,51 @@ pre {
 }
 
 .mermaid-card {
-  margin: 18px 0;
+  margin: 14px 0;
   border: 1px solid var(--md-rule);
-  border-radius: 12px;
-  background: rgba(107, 138, 255, 0.05);
+  border-radius: 10px;
+  background: rgba(107, 138, 255, 0.04);
   overflow: hidden;
 }
 .mermaid-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  font-size: 11px;
+  padding: 5px 10px;
+  font-size: 10px;
   color: var(--text-muted);
-  background: rgba(107, 138, 255, 0.08);
-  border-bottom: 1px solid rgba(107, 138, 255, 0.12);
+  background: rgba(107, 138, 255, 0.07);
+  border-bottom: 1px solid rgba(107, 138, 255, 0.10);
 }
 .mermaid-stage {
-  padding: 12px;
-  overflow-x: auto;
+  padding: 10px;
+  overflow: auto;
+  max-height: 420px;
 }
 .mermaid-stage svg {
   display: block;
   max-width: 100%;
-  height: auto;
+  max-height: 400px;
+  width: auto !important;
+  height: auto !important;
   margin: 0 auto;
+  font-size: 12px;
+}
+.mermaid-stage .node rect,
+.mermaid-stage .node polygon,
+.mermaid-stage .node circle {
+  rx: 6;
+  ry: 6;
 }
 .mermaid-error {
-  padding: 12px;
-  font-size: 12px;
+  padding: 10px;
+  font-size: 11px;
   color: var(--text-secondary);
 }
 .mermaid-fallback {
-  margin-top: 8px;
+  margin-top: 6px;
   overflow-x: auto;
+  font-size: 11px;
 }
 
 

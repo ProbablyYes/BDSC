@@ -1,0 +1,3896 @@
+{
+  "conversation_id": "3274a32e-3d0f-474a-8e0b-f8192e77599c",
+  "project_id": "project-c59cb20f-c694-47ab-88cb-3010adfe01f1",
+  "student_id": "None",
+  "title": "看来你正在测试我们的对话系统。有什么具体的问题或",
+  "summary": "请提供更详细描述",
+  "created_at": "2026-03-31T21:10:55.197735+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "THIS IS A TEST",
+      "timestamp": "2026-03-31T21:10:58.098392+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "看来你正在测试我们的对话系统。有什么具体的问题或目标想要讨论吗？比如关于创业竞赛的准备，或者项目路演的技巧？",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "intent_shape": "single",
+          "intent_reason": "消息内容为测试，与创业/项目无关；判定为单一主问题；主意图归类为 general_chat",
+          "confidence": 1.0,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前问题足够聚焦，由编排器直接生成回答，不额外拆分角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 0,
+          "rag_case_ids": [],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "pressure_test_trace": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "matched_teacher_interventions": [],
+        "diagnosis": {},
+        "next_task": {}
+      },
+      "timestamp": "2026-03-31T21:10:58.098392+08:00"
+    },
+    {
+      "role": "user",
+      "content": "THIS IS A TEST",
+      "timestamp": "2026-03-31T21:11:05.956657+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "如果是测试，那我们可以直接进入正题。你对即将参加的创业竞赛有什么特别的担忧或者期待吗？比如在评委面前展示项目时有哪些方面让你感到不安？",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "general_chat",
+          "intent_shape": "single",
+          "intent_reason": "消息内容为测试，未涉及具体创业或项目问题；判定为单一主问题；主意图归类为 general_chat",
+          "confidence": 0.9,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: general_chat]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前问题足够聚焦，由编排器直接生成回答，不额外拆分角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 0,
+          "rag_case_ids": [],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {},
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": null,
+        "pressure_test_trace": null,
+        "competition": null,
+        "learning": null,
+        "category": "",
+        "matched_teacher_interventions": [],
+        "diagnosis": {},
+        "next_task": {}
+      },
+      "timestamp": "2026-03-31T21:11:05.965103+08:00"
+    },
+    {
+      "role": "user",
+      "content": "THIS IS A TEST2",
+      "timestamp": "2026-03-31T21:11:13.456395+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "从你的信息来看，你似乎正在准备参加一个创业竞赛，但目前提供的信息还比较有限。我很乐意帮助你更好地准备，但为了给出更有针对性的建议，我需要了解更多关于你的项目的核心信息。比如，你的项目是为了解决哪个具体群体的什么问题？这个问题在他们的日常生活中是如何体现的？你的解决方案又是如何与众不同或更有效的？\n\n接下来，为了进一步明确你的项目方向，我想先了解你最想服务的具体人群。你可以具体描述一下这个群体的特征，比如他们的年龄、身份、日常场景等。这样可以帮助我们更好地理解你的项目背景和目标用户。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "intent_shape": "single",
+          "intent_reason": "讨论竞赛备赛；判定为单一主问题；主意图归类为 competition_prep",
+          "confidence": 0.8,
+          "engine": "llm",
+          "pipeline": [
+            "advisor"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前进入信息补全阶段，先不调用角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 0,
+          "rag_case_ids": [],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [],
+        "pressure_test_trace": {
+          "fallacy_label": "",
+          "fallacy_rule_id": "",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "",
+          "selected_strategy_id": "",
+          "strategy_logic": "",
+          "generated_question": "如果把你现在这句话拆开来看，哪一个前提其实还没有被真正证明？你准备用什么证据补上它？",
+          "evidence_quotes": []
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "competition",
+          "overall_score": null,
+          "bottleneck": "",
+          "triggered_rules": [],
+          "rubric": [],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+          "info_sufficient": false,
+          "project_stage": "idea",
+          "score_band": "",
+          "grading_principles": [
+            "信息太少时不做完整评分",
+            "先补全目标用户、痛点、方案三项核心信息"
+          ]
+        },
+        "next_task": {
+          "title": "描述你的项目",
+          "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+          "acceptance_criteria": [
+            "项目一句话描述",
+            "目标用户是谁",
+            "解决什么问题"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T21:11:13.456395+08:00"
+    },
+    {
+      "role": "user",
+      "content": "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。",
+      "timestamp": "2026-03-31T21:11:20.396048+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你提到的项目方向很有潜力，尤其是在当前大学生群体中，他们往往拥有很多技能但缺乏有效的变现渠道。这是一个值得探索的领域，因为不仅能够帮助学生更好地利用自己的技能，同时也可能为他们提供额外的收入来源。不过，要确保你的项目能够成功，关键在于深入理解目标用户的具体需求和痛点，这样才能设计出真正有用的产品和服务。\n\n接下来，我有一个问题想进一步了解：你认为大学生在什么场景下会遇到技能变现的问题？这个问题现在通常是如何被解决的？了解这些可以帮助我们更好地定位你的项目，并找到差异化的机会。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "idea_brainstorm",
+          "intent_shape": "single",
+          "intent_reason": "学生在寻求一个具体的创业方向和模式建议；判定为单一主问题；主意图归类为 idea_brainstorm",
+          "confidence": 0.8,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前进入信息补全阶段，先不调用角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 0,
+          "rag_case_ids": [],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": []
+          },
+          {
+            "strategy_id": "CS12",
+            "name": "平台化过度扩张",
+            "match_score": 2.0,
+            "probing_layers": [
+              "你当前阶段的最小可行产品（MVP）只解决哪一个最具体的场景？请避免一次性覆盖整条价值链。",
+              "从单点工具到平台生态，中间至少要经历哪3个可验证的阶段？每个阶段的核心指标是什么？",
+              "如果你只允许做一件事做到极致（而不是做平台），你会选哪件事？为什么？"
+            ],
+            "expected_evidence": [
+              "单点MVP定义",
+              "阶段性产品路线图",
+              "每阶段的北极星指标设计"
+            ],
+            "counterfactual": "过早谈平台和生态，往往意味着对单点价值和执行路径还没有想清楚。",
+            "preferred_edge_types": [],
+            "supported_fallacies": [],
+            "strategy_logic": "",
+            "matched_edge_types": []
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "需求假设谬误",
+          "fallacy_rule_id": "H5",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "需求证据缺失",
+          "selected_strategy_id": "CS04",
+          "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+          "generated_question": "你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+          "evidence_quotes": [
+            "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "competition",
+          "overall_score": 5.0,
+          "score_band": "早期可塑",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H5（需求证据不足），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Chain_Edge",
+                "Stakeholder_Solution_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。",
+              "trigger_message": "原文片段：“我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事断裂谬误",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "narrative_structure_logic"
+              ],
+              "quote": "我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。",
+              "trigger_message": "原文片段：“我最近在想做一个偏平台类的项目，可能和技能或者兼职有关，但现在还没完全想清楚具体模式。感觉现在很多大学生有技能，但是变现渠道比较少。” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "ontology_nodes": [
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.06,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力"
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ]
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.06,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ]
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合"
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设"
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试"
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果"
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ]
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 6.49,
+              "status": "ok",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构"
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性"
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成"
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ]
+            },
+            {
+              "item": "Market & Competition",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局"
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图"
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵"
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ]
+            },
+            {
+              "item": "Financial Logic",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析"
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间"
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ]
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒"
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位"
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品"
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图"
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析"
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ]
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.64,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度"
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险"
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单"
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告"
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ]
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.49,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构"
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ]
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "用一种最低成本的方法验证真实需求",
+          "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+          "template_guideline": [
+            "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+            "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+            "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点"
+          ],
+          "acceptance_criteria": [
+            "明确1个待验证判断",
+            "完成1种验证动作",
+            "拿到可复述的行为证据或反证"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T21:11:20.407076+08:00"
+    },
+    {
+      "role": "user",
+      "content": "学生画像 UserProfile_Skill\n 年级：大三\n 专业：信息管理\n 兴趣：互联网产品 + 副业 + 平台经济\n\n项目草案 Project Draft\n 项目名：SkillBridge（校园技能撮合平台）\n\n 目标用户：\n\n供给侧：有设计、编程、剪辑等技能的大学生\n需求侧：中小商家、自媒体、小型创业团队\n\n 价值主张：\n帮助学生将技能变现，同时为小型需求方提供低成本服务\n\n 核心功能：\n\n学生发布技能标签（如“PPT设计”“剪辑”）\n需求方发布任务\n平台进行撮合\n支持评价体系\n\n 获客渠道：\n\n在高校社群推广\n在小红书/抖音发布“副业”内容\n与校园创业社团合作\n\n 定价模式：\n\n平台抽成10%\n可购买“优先曝光”服务\n\n 竞争分析：\n\n替代产品：猪八戒网、BOSS直聘（兼职）\n差异点：聚焦“学生群体+低成本需求”\n\n 市场规模：\n\n单校约2万学生\n假设10%学生有技能变现需求\n\n 财务假设：\n\n初期月交易额约5万元\n平台抽成约5000元\n\n 团队与资源：\n\n2名经管 + 2名计算机\n有校园推广资源\n\n 里程碑计划：\n\n第1个月上线MVP\n第3个月完成100单交易\n第6个月扩展到3所高校\n\n 路演叙事：\n强调“学生技能闲置+商家低成本需求”",
+      "timestamp": "2026-03-31T21:18:11.614610+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "从你提供的这份项目草案来看，你已经完成了一个创业想法的初步结构化梳理，这是一个很好的起点。你的方向——“校园技能撮合平台”——确实是一个在创业竞赛中常见且有社会价值的话题，容易引发评委的共鸣。然而，我必须非常直接地告诉你，以目前的形态参赛，你极有可能在第一轮评审中就遇到巨大挑战，核心原因在于**整个项目的逻辑链条缺乏实证支撑，呈现出一种“想当然”的推演状态**。\n\n在评委眼中，一个项目的说服力不在于故事是否动听，而在于从“用户是谁”到“如何盈利”再到“为何是你”的每一步，是否有坚实的证据或严密的逻辑作为基石。你的草案目前在这些关键节点上存在多处断裂。\n\n### 一、项目逻辑链路的断裂点分析\n\n让我们顺着你的草案，逐一审视从用户到壁垒的链条：\n\n1.  **用户与痛点（供给侧）：** 你定义了“有设计、编程、剪辑等技能的大学生”。问题是，你如何证明“有技能”与“有强烈的、未被满足的变现需求”之间存在强关联？一个会PS的学生，他的首要需求可能是完成作业、参加比赛或丰富个人作品集，而非变现。他们现有的变现渠道（熟人介绍、校内兼职群、BOSS直聘）可能已经“足够好”。**证据链的缺失在于：** 你缺少对目标学生群体的深度访谈，无法用他们的原话（例如：“我上次想接个设计私活，但在XX平台发了三天都没人理，价格还被压得很低”）来具象化这个痛点。\n2.  **用户与痛点（需求侧）：** “中小商家、自媒体、小型创业团队”需要“低成本服务”。这个假设的风险极高。“低成本”对商家而言，往往不是第一诉求，“确定性”（质量、交付时间、售后保障）才是。一个自媒体博主宁愿多花300元在猪八戒找一个有100个好评的服务商，也不愿省这300元去赌一个学生的水平和责任心。**证据链的断裂在于：** 你没有证明，你假设的这群商家，其价格敏感度能压倒对风险的厌恶。他们目前如何解决需求？如果答案是“淘宝/猪八戒/熟人”，那么你的平台需要提供何等额外的价值，才能让他们迁移？\n3.  **解决方案与匹配效率：** 你计划通过“技能标签”进行撮合。这引入了新的问题：技能标签的颗粒度太粗。“剪辑”标签下，可能是只会用剪映的新手，也可能是精通Premiere的专业选手。平台如何建立有效的技能评估和分级体系，确保匹配质量？初期，低质量的匹配会导致差评，差评会进一步恶化平台信誉，形成死亡螺旋。\n4.  **变现模式与支付意愿：** “平台抽成10%”和“优先曝光服务”是两个关键收费点，但草案中完全没有其合理性的论证。\n    *   **抽成10%：** 这个比例是如何得出的？是参考了竞品，还是预估了成本？更重要的是，你如何确保学生愿意被抽成？在熟人交易或直接对接盛行的环境下，10%可能直接促使双方“跳单”，绕过平台进行交易。\n    *   **优先曝光：** 这在平台初期是伪命题。当平台上总共只有10个任务时，“优先曝光”毫无价值。只有当任务多到需要被筛选时，这项服务才有意义。你颠倒了因果。\n5.  **竞争与壁垒：** 你识别了猪八戒网和BOSS直聘作为替代品，但分析过于表面。你的差异化“聚焦学生群体+低成本需求”，很可能不是壁垒，而是**限制**。\n    *   **学生群体的固有属性（流动性强、技能水平方差大、服务时间不稳定）** 恰恰是商家担忧的源头。\n    *   猪八戒网已经充斥了大量低价服务商，BOSS直聘的兼职板块也覆盖了大量学生。你的“聚焦”并未提供不可替代的价值。真正的壁垒应该思考如何利用“校园”这个独特场景，构建信任机制（例如：学生身份认证、与课程/学分结合的项目、校友导师点评等），这些你尚未涉及。\n\n### 二、结构性风险：为什么这些问题共同存在？\n\n上述这些看似分散的问题，共同指向几个更深层的、结构性的认知断点：\n\n1.  **对双边市场“冷启动”难度的低估。** 你将平台成功的关键归结为“在高校社群推广”和“发布‘副业’内容”。这只是市场触达，远非解决方案。真正的结构性难题是 **“鸡生蛋，蛋生鸡”**：没有优质任务，吸引不来优秀学生；没有优秀学生，吸引不来付费任务。你的计划中没有回答“第一个任务从哪来”、“第一个优质服务者从哪来”这个核心问题。历史上无数平台类项目死于此，评委对此类漏洞极为敏感。\n2.  **用直觉假设替代市场验证。** 这是最致命的一点。从“单校2万学生”假设“10%有需求”，再推导出“月交易额5万元”，整个逻辑链条建立在未经检验的假设上。评委必然会追问：“10%的依据是什么？哪怕你访谈过20个学生，有多少人表达了强烈意愿？”“月交易额5万元，对应多少笔订单？平均客单价多少？根据你的里程碑，第3个月100单，意味着客单价高达500元，这符合学生技能服务的市场行情吗？”缺乏验证的财务预测，在评委看来就是“拍脑袋”，会严重损害团队的专业性和可信度。\n3.  **价值主张停留在标签层面，未深入价值内核。** “学生=低成本”是一个简单标签，但并非稳固的价值主张。你需要回答：学生的“低成本”背后，能否带来独特的价值？例如，**是否更懂Z世代审美（服务新消费品牌）？是否响应更快、沟通更顺畅（因时间相对灵活）？是否更能理解校园市场（服务校内商家）？** 只有找到“低成本”之外或与之结合的独特价值点，你的平台才有存在的基础。\n\n### 三、策略空间：你可以选择的几条路径\n\n你不必推倒重来，但必须进行战略收缩和转型，从“建造平台”转向“验证需求”。这里有几条可供选择的路径，每条都意味着不同的资源投入和竞赛叙事：\n\n| 策略路径 | 核心打法 | 竞赛呈现优势 | 潜在风险与评委追问 |\n| :--- | :--- | :--- | :--- |\n| **A. 垂直场景切入** | 放弃全技能平台，选择一个学生优势明显、需求明确的细分场景深挖，如 **“高校学术海报设计”** 或 **“大学生创业团队MVP原型开发”** 。 | **务实、可验证**。容易冷启动（从几个实验室或创业社团开始），能快速建立专业标准和案例库。评委欣赏这种从“大而空”到“小而实”的战略聚焦能力。 | 市场规模天花板明显。需论证该垂直领域足够支撑初期增长，并清晰规划未来扩展路径。 |\n| **B. 服务中介转型** | 不自建复杂平台，团队先作为 **“精品技能服务工作室”** 。主动对接3-5个真实商家需求，再在校园内招募并管理学生完成，负责品控、沟通和交付。 | **最强验证**。能直接获得关于定价、交付流程、用户反馈的一手数据。产生真实交易记录和案例，是路演中最有力的证据。现金流可能更早出现。 | 商业模式从“平台”降维为“服务”，想象空间缩减。评委会关注你未来平台化的具体转型策略和时机。 |\n| **C. 工具化轻启动** | 先搁置复杂的交易和支付，做一个 **“技能作品集展示与需求对接”的轻量工具**。让学生展示作品，商家发布需求，平台仅促进联系，不介入资金。 | **快速验证双边活跃度**。极大降低初期开发成本和信任门槛，能最快速度测试是否有足够的学生愿意展示、商家愿意发布。 | 无法直接验证核心商业模式（抽成）。需说明工具积累到一定数据和用户后，如何平滑过渡到交易平台。 |\n\n### 四、核心问题逐一拆解与改进方向\n\n基于以上分析，你需要立刻着手处理以下核心问题：\n\n1.  **重塑价值主张，超越“低成本”标签。**\n    *   **行动：** 进行小微访谈。找2-3个本地探店自媒体博主或校园周边小店店主，问：“如果你需要做一个宣传视频，现在会怎么解决？如果有一个经过筛选、审美在线、响应快的在校生团队，价格是市场价的7折，但需要你花更多时间沟通需求，你愿意尝试吗？你最担心什么？” 他们的回答会帮你修正价值主张。也许真正的卖点是“更懂年轻人喜欢看什么”，而不是“更便宜”。\n\n2.  **用最小成本验证双边需求与支付意愿。**\n    *   **这是当前最高优先级任务。** 不要直接发泛泛的问卷。先做深度访谈，再辅以定量验证。\n    *   **对学生（供给侧）：** 找到你认为有技能的同学，问：“你过去通过技能赚过钱吗？渠道是什么？过程中最不爽的一点是什么？如果一个平台能帮你解决这个不爽点，但成交后抽成10%，你愿意吗？”\n    *   **对商家（需求侧）：** 问：“你最近一次外包设计/剪辑/编程任务，预算是多少？最终花了多少？对结果满意吗？如果不满意，主要是哪方面？” 这能验证“低成本需求”的真伪和强度。\n\n3.  **重构市场规模与财务模型。**\n    *   彻底抛弃“单校2万，10%需求”的算法。采用 **“从下至上”** 的估算。\n    *   **重新定义SOM（服务可获取市场）：** 例如，如果你采用**策略A**（垂直场景），你的SOM就是：**本校所有理工科实验室（假设50个）每年学术会议的海报设计需求（假设每个实验室年均2次）**。这样算出来的市场规模虽小，但极其扎实，评委无法反驳。\n    *   **财务预测**要基于SOM和验证过的转化率、客单价。例如：假设能接触到20个实验室，转化其中5个，每单客单价800元，平台抽成10%，那么一个季度的收入就是 `5单 * 800元 * 10% = 400元`。这个数字虽不起眼，但每一个参数都有来源和解释，可信度远超“月入五千”的虚数。\n\n4.  **设计具体的冷启动方案。**\n    *   在你的路演材料中，必须有一页专门讲 **“如何破局冷启动”** 。例如：“我们不会同时拉学生和商家。我们将**先成为第一批‘商家’**，利用团队资源，从校内学生会、社团那里承接3个真实的宣传设计任务，然后以‘官方合作项目’的名义，在相关院系招募学生参与。完成后，我们将这些成功案例作为‘信任状’，去接触校外商家。” 这展示了你们对平台经济关键难题的深刻理解和解决问题的能力。\n\n### 五、下一步行动：从推演到验证\n\n根据你当前最紧迫的任务，我建议你本周集中精力完成以下验证工作，这直接对应竞赛顾问指出的“快速补分项”：\n\n**核心行动：设计并执行一次结构化的微型验证。**\n1.  **定性深访（2天内）：** 分别找 **3位有技能的学生** 和 **2位潜在商家**（如校内咖啡馆老板、创业社团负责人），进行30分钟左右的开放式访谈。聚焦他们过去的实际行为、决策逻辑和未被满足的细节痛点。**务必录音或详细记录原话。**\n2.  **定量验证（3天内）：** 基于访谈发现，设计两份极简的问卷。\n    *   **给学生：** 问题不超过5个，核心验证“接单意愿”和“对抽成的容忍度”。例如：“如果有一个经过认证的、任务描述清晰的小额设计需求（酬劳200元），您愿意在课余时间接单吗？”“平台为您匹配、提供基础合同保障并处理纠纷，完成后抽取20元佣金，您能接受吗？”\n    *   **给商家：** 问题不超过5个，核心验证“对学生服务的顾虑”和“价格弹性”。例如：“对于一项预算500元左右的宣传图设计，如果选择学生服务者，您最担心的前三项是什么？（质量、沟通、交付时间、版权等）”“如果平台能提供学生过往作品集和完成率担保，您愿意尝试吗？”\n3.  **样本与渠道：** 通过你的校园资源，在相关社群发放。目标收集有效问卷：**供给侧（学生）50份以上，需求侧（商家）20份以上**。\n4.  **分析与应用（1天内）：** 分析数据，得出几个关键结论，例如：“超过60%的设计系同学表示愿意在平台接单，但对抽成超过15%有明显抵触”；“小微商家对‘交付时间延误’的担忧（占比70%）远高于‘价格’（占比40%）”。**这些结论，就是你修正项目方向、重塑价值主张和商业模式的唯一依据。**\n\n### 六、需要你深入思考的几个问题\n\n在开展上述行动的同时，请带着以下问题去观察和思考，它们能帮你更深入地打磨项目：\n\n1.  **信任构建的具体设计：** 除了评价体系，在平台从0到1的阶段，你能设计哪些轻量、低成本的机制来建立初始信任？例如：学生身份学籍认证？完成一个平台提供的“测试任务”作为技能凭证？邀请辅导员或专业老师作为“推荐人”？\n2.  **防跳单机制：** 你如何防止学生和商家在第一次合作后，就绕过平台进行后续交易？这不仅仅是技术问题，更是价值问题——你的平台必须提供他们私下交易无法获得的价值，是什么？\n3.  **风险与责任边界：** 如果学生交付的设计涉嫌侵权，或者商家拒不付款，平台的责任是什么？在你的商业计划书中，必须有“风险与应对”部分，展示你对此有清醒的认知和基本的预案。\n\n你的项目构想有潜力，但目前的草案更像一份“愿望清单”。创业竞赛的本质是考察团队的**思考深度、执行智慧和证据构建能力**。立即转向验证，用哪怕是很小的真实数据来替换掉那些宏大的假设，这是你当前提升获奖概率最有效、也是唯一正确的路径。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "competition_prep",
+          "intent_shape": "mixed",
+          "intent_reason": "关键词命中 竞赛/评委；主意图归类为 competition_prep",
+          "confidence": 0.86,
+          "engine": "rule",
+          "pipeline": [
+            "advisor"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "竞赛顾问",
+            "评分官",
+            "行动规划师"
+          ],
+          "resolved_agents": [
+            "coach",
+            "analyst",
+            "advisor",
+            "grader",
+            "planner"
+          ],
+          "agent_reasoning": "MATRIX[competition_prep][complex] -> advisor / coach / analyst / grader；学生问下一步行动，补行动规划师；检测到高风险规则，补风险分析师",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 5,
+          "rag_case_ids": [
+            "case_1135e29de95e",
+            "case_1447c6471429",
+            "case_8b9ecae17168",
+            "case_b719c62bb6ba",
+            "case_6c6304f12169"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "你这个项目现在处在**原型期**。你的项目目前还停留在概念草案阶段，最大的卡点不是功能设计或推广渠道，而是整个商业逻辑的起点——你还没有验证‘学生技能变现’和‘商家低成本需求’这两个核心假设是否真实、是否能在同一个平台上高效匹配。你现在做的更多是基于直觉的推演，比如‘学生有技能’‘商家要省钱’，但这两群人是否真的愿意在校园技能平台上交易、愿意付多少钱、会面临哪些你没考虑到的替代选择，这些关键证据链都是缺失的。这直接导致你的市场规模估算、财务预测和竞争分析都像空中楼阁，在评委看来是致命的‘拍脑袋’行为。\n\n瓶颈在于你默认了一个理想化的双边市场能自然形成，但忽略了真实世界的复杂约束。第一，用户行为与替代方案：学生兼职变现的首选是熟人介绍、校内勤工助学或BOSS直聘/实习僧这类成熟招聘平台，因为信任度高、结算有保障。你的平台需要证明能提供比这些渠道更优的体验（比如更快匹配、更少中介费），但目前没有证据。商家端，小商家找设计/剪辑，首选是淘宝、猪八戒或直接找熟人，因为需求明确、有大量案例可看、有平台担保。你的‘学生群体+低成本’优势，很可能被‘学生作品质量不稳定’‘交付时间受学业影响’‘售后无保障’等劣势对冲掉。第二，竞争与行业门槛：你提到了猪八戒和BOSS直聘是替代品，但低估了它们的网络效应和用户习惯。猪八戒上已经有大量低价服务商，商家为什么非要来一个只有学生的、案例可能更少的新平台？BOSS直聘的兼职板块已经覆盖了大量学生，你的差异化‘聚焦学生’其实并不独特。更重要的是，平台类项目的冷启动是最大门槛——没有足够多的优质技能学生，吸引不来商家；没有足够多的真实任务，留不住学生。你的获客计划（校园社群、小红书）过于宽泛，没有解决这个‘鸡生蛋蛋生鸡’的核心矛盾。第三，成本与执行条件：平台撮合需要基础的技术开发和运营成本（审核任务、处理纠纷、维护评价体系），初期月交易额5000元抽成可能连服务器费用都覆盖不了。你的团队配置（2经管+2计算机）能支撑MVP开发，但持续运营和拉新的成本被严重低估。行业约束在于，涉及金钱交易的平台需要解决支付、税务和可能的劳务纠纷问题，学生作为服务提供方，其劳务关系界定在法规上也可能存在模糊地带，这些你都没有考虑。\n\n## 我主要是根据这些信息做这个判断\n- 原文片段：‘定价模式：平台抽成10%’ – 触发「定价无支付意愿证据」，收费设计无验证。\n- 原文片段：‘市场规模：单校约2万学生，假设10%学生有技能变现需求’ – 触发「TAM/SAM/SOM口径混乱」，假设无来源。\n- 原文片段：‘竞争分析：替代产品：猪八戒网、BOSS直聘（兼职）’ – 承认替代方案存在，但对其优势和学生/商家的使用习惯分析不足。\n\n## 如果这一点继续不处理\n如果这个‘未经验证的核心假设’瓶颈不处理，项目会永远卡在‘纸上谈兵’阶段。在竞赛中，评委第一轮提问就会直指证据缺失，导致商业模式可信度得分极低，可能直接止步初赛。在真实创业中，你会浪费大量时间开发一个没人用的产品，或者推广一个无法转化的概念。\n\n## 再往下看，真正卡住你的结构层原因\n- {'layer': '市场假设未经检验，逻辑闭环断裂', 'reason': '你从‘学生有技能’直接跳跃到‘他们会来平台变现’，中间缺少了关键的用户行为验证。为什么有技能就一定要变现？变现的动机强度如何？他们当前如何解决？这个断点导致后续的所有规模估算（10%学生有需求）和财务预测都建立在沙地上。评委最可能追问的就是：‘你这10%的假设依据是什么？做过哪怕10个学生的访谈吗？’'}\n- {'layer': '双边网络冷启动难题被简化为推广问题', 'reason': '你将平台成功的关键归结为‘在高校社群推广’和‘发布内容’，但这只是触达，不是转化和留存。真正的结构问题是：先拉学生还是先拉商家？如何给先来的那一边提供价值？你提到的‘优先曝光’服务在平台初期流量为零时毫无吸引力。这个断点共同指向你对平台经济的内在规律理解尚浅，评委很容易看出你对‘冷启动策略’缺乏深度思考。'}\n- {'layer': '竞争壁垒构建在虚假差异化上', 'reason': '你认为‘聚焦学生群体’是差异点，但这很可能不是壁垒，而是限制。学生群体的流动性强（毕业即流失）、技能水平参差不齐、服务时间不稳定，这些特性可能让商家望而却步。真正的壁垒应该是基于学生群体特性构建的、对手难以复制的机制，比如基于校友关系的信任链、与课程学分结合的实践项目等，但这些你都没有涉及。结构上，这反映出你对自身定位的思考还不够深入，停留在表面标签。'}\n\n## 从策略空间看，你并不只有一种走法\n- {'strategy': '路径A：收缩场景，做深垂直', 'description': '放弃做全技能平台，选择一个极度细分、且学生优势明显的场景切入（例如：‘高校活动海报设计’或‘大学生初创团队MVP开发’）。这样需求更聚焦，冷启动更容易（从几个社团或创业比赛开始），也更容易构建基于场景的专业标准和信任体系。这个选择直接影响得分，因为它展示了从‘大而空’到‘小而实’的战略收敛能力，是评委喜欢的务实打法。'}\n- {'strategy': '路径B：转换角色，从平台到服务', 'description': '不自建撮合平台，而是先成为一家‘技能服务工作室’。团队亲自对接商家需求，再分包给筛选过的学生，并负责品控和交付。这样能最快验证需求真伪、定价水平和学生能力，同时积累案例和口碑。未来再考虑平台化。这个选择涉及重大取舍：放弃了平台的网络效应想象空间，换取了初期的生存验证和现金流可能性。评委可能会追问你长期愿景与当前打法的关联。'}\n- {'strategy': '路径C：强化工具属性，弱化交易属性', 'description': '先不做复杂的撮合和支付，而是做一个‘技能展示与轻量接洽’的工具。让学生可以精美地展示作品集，让商家可以发布需求并直接沟通，平台不介入交易和资金。降低初期复杂度和信任门槛，先跑通信息和连接。这个策略的风险在于可能无法直接验证商业模式（抽成），但能更轻快地验证双边活跃度。'}\n\n## 如果继续往下拆，我还会重点看这些地方\n- 疑点1：你假设的‘低成本’对商家真有吸引力吗？商家可能更看重‘高性价比’（质量/价格比），而非绝对低价。学生的‘低成本’若伴随‘低质量’或‘高风险’，吸引力为零。\n- 疑点2：‘技能标签’（如PPT设计）的颗粒度太粗。一个‘剪辑’标签下，可能是剪映用户，也可能是Premiere高手，价格和水平天差地别。平台如何定义和分级技能，建立有效的匹配标准？\n- 改进点3：评价体系在初期可能无效甚至有害。前100单如果出现几个差评，可能直接摧毁新生平台的信誉。是否需要设计更温和的初期反馈机制？\n- 结构断点4：学生作为服务方，其作品的知识产权归属问题如何界定？如果商家用了学生的设计稿但未付费，平台责任如何？这是法律层面的潜在断点。\n\n## 可以顺手借用的外部视角\n- {'insight': '案例参考：早期‘猪八戒网’是从‘悬赏模式’切入，让需求方发布任务并悬赏奖金，服务方投稿竞争。这解决了初期服务质量不确定的问题，也让需求方有更多选择。你的‘发布任务-直接撮合’模式，对需求方而言选择成本高、风险大。', 'source': '行业案例'}\n- {'insight': '跨学科框架：‘跨越鸿沟’理论。你的早期用户不应该是泛泛的‘有技能的学生’和‘中小商家’，而应该是‘创新者’和‘早期采用者’。比如，参加创业比赛急需原型设计的学生团队（需求方），和希望积累商业项目经验的设计系尖子生（供给方）。找到并服务好这群人，是跨越冷启动鸿沟的关键。', 'source': '技术采纳生命周期理论'}\n- {'insight': '监管常识：若平台涉及劳务报酬发放，可能需要考虑个人所得税代扣代缴义务。如果学生每月通过平台获得较高收入，平台是否有责任进行税务申报？虽然初期可能不被监管注意，但作为合规的商业计划，需要有所考量。', 'source': '财务与法律常识'}\n\n## 你下一步最该先盯住的一点\n现在最该先攻的一点，不是去画原型图或写代码，而是立刻走出门，去找至少5个你假设中的‘有技能的学生’和3个‘潜在的小商家需求方’，进行一场结构化的深度访谈，唯一目标就是验证或推翻你‘技能变现需求强烈且现有渠道不畅’这个根本假设。\n\n## 我建议你先追问自己这几个问题\n- 找一个你认为有PPT设计技能的同学，问他三个问题：1. 过去一年，有没有人付费请你做过设计？2. 如果有，是通过什么渠道找到你的？3. 如果没有，你会在什么情况下考虑去一个陌生平台接单？最担心什么？\n- 找一个学校周边的小商家（如奶茶店、文创店），问他们：最近一次需要做宣传图或视频时，是怎么解决的？花了多少钱？如果有一个平台能提供更便宜的学生服务，他们最大的顾虑会是什么？（是质量、沟通成本还是交付时间？）\n- 对比一下：一个商家在猪八戒网花500元能买到什么水平的服务（看案例）？你的平台上一个学生报价300元，你能向商家展示什么来证明这300元花得值？\n- 冷启动的具体第一步：如果让你下周就促成第一笔交易，你会具体找哪个学生和哪个商家？你如何说服他们绕过现有习惯，尝试你的平台？把这个过程一步步写下来。\n\n## 这次主要依据\n本轮分析结合了联网搜索的创赛评委关注点、知识库中的平台经济案例（如猪八戒网早期模式），以及超图分析指出的‘目标市场’和‘结构性’维度缺失。特别参考了评委对‘证据链’和‘逻辑闭环’的严苛要求。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "好的，投资人视角开启。我们来对这个“SkillBridge”项目进行一次尽职调查。\n\n首先，我必须肯定，这个项目的**核心逻辑是清晰且符合直觉的**。“学生技能闲置”与“商家低成本需求”的匹配，是一个经典的、有吸引力的双边市场故事，在创业竞赛中容易获得共鸣。团队构成（经管+计算机）和校园推广资源的配置也基本合理。如果路演叙事流畅，这是一个能进入下一轮讨论的项目。\n\n然而，评委的追问会立刻从“故事”转向“证据”和“结构”。目前草案最大的风险，正如教练所点出的，是**所有核心假设都未经任何验证，导致整个商业模式建立在流沙之上**。这直接关联到多个评分维度（市场可行性、财务合理性、竞争壁垒），是决定你能否获奖的关键。\n\n让我具体拆解几个评委必然会追问的致命风险与次级疑点：\n\n1.  **双边市场的“冷启动”与“鸡生蛋”困境被严重低估。** 你计划“在高校社群推广”以获取供给侧（学生），在小红书/抖音发布“副业”内容获取需求侧（商家）。但这里存在一个经典的结构性难题：初期没有足够多的优质任务，学生不会活跃；没有足够多的熟练学生，商家不会发布任务。你的获客渠道是割裂的，没有形成闭环。**评委会问：** “你的第一个商家任务从哪里来？你如何说服一个急需设计的自媒体博主，放弃成熟的猪八戒或熟人推荐，来你这个零评价、学生技能未知的新平台发布任务？请用具体的数据或试点案例说明你的冷启动策略。” 历史上无数平台类项目死于此，你的计划里完全没有应对方案。\n\n2.  **“低成本”价值主张面临残酷的替代品竞争，且定价逻辑脆弱。** 你以“聚焦学生群体+低成本需求”作为与猪八戒网、BOSS直聘的差异点。但这恰恰是最大的风险点。\n    *   **对需求方（商家）而言：** “低成本”往往意味着“高风险”和“低确定性”。一个创业团队为节省几百元，去雇佣一个技能、责任心、交付时间都不稳定的学生，其决策成本极高。猪八戒网虽然贵，但有平台担保、成熟服务商和大量案例可参考。**评委会追问：** “你如何证明，你假设的‘中小商家、自媒体’对价格的敏感度，能压倒他们对交付质量和稳定性的担忧？有没有具体行业（如本地餐饮外卖图设计）或任务类型（如简单的信息图剪辑）是学生群体具有确定性优势的？”\n    *   **对供给侧（学生）而言：** 10%的抽成和“优先曝光”服务的支付意愿存疑。学生本身对价格敏感，且大量技能变现发生在熟人圈、微信群或直接对接，平台抽成会成为阻力。**评委会要求验证：** “你如何确定10%是一个既能覆盖运营成本，又不会驱使学生跳单的平衡点？‘优先曝光’在任务总量不足的初期，真的有价值吗？”\n\n3.  **市场规模与财务预测完全脱离验证，是“拍脑袋”的典型。** “单校约2万学生，假设10%有需求”是无效估算。这10%如何得出？是看了什么报告，还是做了校园访谈？更关键的 **“月交易额5万元”** 这个数字，需要拆解：这需要多少笔订单？平均客单价多少？这需要多少活跃商家和学生才能支撑？这个数字与你的“第3个月100单”里程碑是否匹配？（100单平均客单价500元才能达到5万，这对学生技能任务而言偏高）。**评委会直接挑战：** “你的财务预测依据是什么？请展示你推导出‘月交易额5万元’所依据的任何一个实际调研数据或可类比的基准案例。”\n\n**策略空间与改进方向：**\n你不需要推翻整个项目，但必须从“推演”转向“验证”。你有几个可选的打法来提升项目的可信度：\n*   **策略A（聚焦验证需求）：** 放弃一开始就做平台的宏大构想，转为做一个“虚拟平台”或社群。例如，先深入一个细分技能（如“小红书封面设计”），亲自对接3-5个本地自媒体博主的需求，再在校园里招募有相应技能的学生完成，你居中协调。这个过程能真实验证需求强度、支付意愿、交付问题和定价区间。用这几次交易的全过程记录（沟通记录、交付物、付费凭证）作为路演的核心证据。\n*   **策略B（聚焦构建壁垒）：** 重新思考“低成本”之外的真正差异化价值。是否可以是“更快”（学生响应时间快）、“更懂Z世代审美”（针对新消费品牌）？然后围绕这个新价值点，设计你的首批种子用户获取策略。例如，与校内新媒体社团合作，承接校内各学生组织的宣传品任务，先跑通闭环、积累案例和评价，再向外拓展。\n\n**总结：**\n你的项目框架及格，但内里空心。评委青睐的不是一个完美的点子，而是一个**展现了深度思考、验证能力和迭代智慧**的团队。你现在的草案暴露的是“想当然”。你需要立刻行动，用最小的成本去获取关于双边用户真实行为的**具体证据**，哪怕只有十几个样本。把这些验证过程中的发现、挫折和调整写进你的商业计划书，远比一个漂亮的、但未经考验的蓝图更有说服力。风险不在于方向，而在于你们团队是否具备从构想者转型为验证者的执行力。",
+            "tools_used": [
+              "diagnosis",
+              "kg_analysis",
+              "hypergraph_student",
+              "hypergraph",
+              "web_search"
+            ]
+          },
+          "advisor": {
+            "agent": "竞赛顾问",
+            "analysis": "## 竞赛评估总览\n\n项目定位为校园技能撮合平台，概念具有社会价值，但当前处于原型期，核心商业假设未经实证。评分显示，项目在用户证据、财务逻辑、市场定义等关键说服力维度存在显著短板，整体呈现为‘直觉驱动型’草案。主要瓶颈在于双边市场的形成假设过于理想化，缺乏对用户真实行为、替代方案和支付意愿的验证，导致市场规模、财务预测和竞争分析的可信度不足。\n\n## 当前最影响得分的风险\n- 用户证据强度不足：缺乏对学生技能变现需求、商家低成本服务需求的具体访谈原话、问卷数据或行为证据，无法支撑‘真实痛点’和‘高频场景’的核心叙事。\n- 市场定义混乱：TAM/SAM/SOM口径模糊（例如，从‘单校2万学生’直接跳跃至‘10%有需求’），缺乏对第一阶段可触达细分市场（SOM）的严谨界定和论证。\n- 财务逻辑薄弱：成本结构、定价依据（如10%抽成和优先曝光定价）和单位经济模型（如单次服务成本）缺失，初期月交易额5万元的假设缺乏用户基数与转化率的支撑。\n- 创新点可验证性差：声称聚焦‘学生群体+低成本需求’作为差异化，但未提供证据说明此定位如何能有效对抗BOSS直聘、猪八戒网等成熟平台的替代性，或形成独特的留存机制。\n\n## Rubric 逐项评分\n\n### 问题定义（权重 10%）\n- **Estimated Score**: 2.3/5\n- **Missing Evidence**: 缺少明确的目标用户、场景边界或痛点频次证据；当前已触发“需求证据不足”，说明这项证据链还不够扎实。；缺少技术实现细节\n- **24h Fix**: 补一页“目标用户-场景-痛点”对照表，至少写清1类核心用户、1个高频场景、3条真实痛点表述。\n- **72h Fix**: 完成8份深访或等价证据收集，形成痛点频次统计，并据此重写问题定义页。\n\n### 用户证据强度（权重 15%）\n- **Estimated Score**: 2.3/5\n- **Missing Evidence**: 缺少访谈原话、问卷样本、使用数据或行为证据；当前已触发“需求证据不足”，说明这项证据链还不够扎实。；缺少技术实现细节\n- **24h Fix**: 整理现有用户反馈，至少补3条原话或3组行为数据，做成证据页。\n- **72h Fix**: 完成一轮结构化访谈/测试，形成样本说明、结论和反证样本。\n\n### 方案可行性（权重 10%）\n- **Estimated Score**: 3.7/5\n- **Missing Evidence**: 缺少技术路线、MVP验证结果、资源匹配或交付路径；缺少技术实现细节；缺少风险控制措施\n- **24h Fix**: 补一页“当前能做什么/不能做什么”的MVP边界和技术实现路径。\n- **72h Fix**: 拿出一轮真实测试结果，说明功能可用性、成本或效果指标。\n\n### 商业模式一致性（权重 15%）\n- **Estimated Score**: 4.2/5\n- **Missing Evidence**: 缺少价值主张、付费对象、渠道与收入逻辑的一致性说明；当前已触发“定价无支付意愿证据”，说明这项证据链还不够扎实。；缺少技术实现细节\n- **24h Fix**: 画出简版商业闭环：谁付费、为什么付费、通过什么渠道触达、钱怎么回来。\n- **72h Fix**: 补一版更完整的商业模式画布，并用小样本验证至少一个付费或转化假设。\n\n### 市场与竞争（权重 10%）\n- **Estimated Score**: 3.1/5\n- **Missing Evidence**: 缺少竞品矩阵、市场口径拆分或差异化论证；当前已触发“TAM/SAM/SOM口径混乱”，说明这项证据链还不够扎实。；缺少技术实现细节\n- **24h Fix**: 补3个直接/间接竞品，做一个功能-用户-价格-差异矩阵。\n- **72h Fix**: 重做TAM/SAM/SOM，并说明你第一阶段真正能切到哪一小块市场。\n\n### 财务逻辑（权重 10%）\n- **Estimated Score**: 2.6/5\n- **Missing Evidence**: 缺少成本、定价、单位经济或现金流假设；缺少技术实现细节；缺少风险控制措施\n- **24h Fix**: 补最小财务表：单次服务成本、定价、毛利和一个月运营假设。\n- **72h Fix**: 完成CAC/LTV/BEP三表，并解释关键参数是如何估出来的。\n\n### 创新与差异化（权重 10%）\n- **Estimated Score**: 2.6/5\n- **Missing Evidence**: 缺少可验证创新点、技术壁垒或替代性说明；缺少技术实现细节；缺少风险控制措施\n- **24h Fix**: 用1页明确回答：相比现有方案，你们到底多了什么不可替代价值。\n- **72h Fix**: 补实验、对照、专利/算法/数据壁垒或产品留存机制的证明材料。\n\n### 团队与执行（权重 5%）\n- **Estimated Score**: 3.7/5\n- **Missing Evidence**: 缺少团队分工、关键能力匹配或阶段里程碑；缺少技术实现细节；缺少风险控制措施\n- **24h Fix**: 补团队分工页，明确谁负责产品、技术、运营、答辩。\n- **72h Fix**: 给出未来12周里程碑表，每阶段对应可交付物和负责人。\n\n### 路演表达与材料（权重 5%）\n- **Estimated Score**: 3.5/5\n- **Missing Evidence**: 缺少有说服力的叙事结构、关键数据页或评委友好的表达；缺少技术实现细节；缺少风险控制措施\n- **24h Fix**: 重排路演目录，确保“问题-方案-证据-市场-模式-团队”顺序清楚。\n- **72h Fix**: 做一次模拟路演录屏，按问答反馈重写开场页、证据页和结尾页。\n\n## 评委可能会追问\n- 你提到学生有技能变现需求，但根据我们的经验，学生更倾向于通过熟人、校内渠道或大型招聘平台找兼职。你做过多少份访谈或问卷？能否展示一条学生原话，证明他们‘愿意在一个新的校园平台上接陌生商家的单’而不是用现有渠道？\n- 你的市场规模计算基于‘单校2万学生，10%有需求’。这10%的转化率依据是什么？是调研数据还是假设？你如何验证这些有需求的学生真的会成为你平台的活跃供给方？\n- 你计划抽成10%。这个比例是如何确定的？是否有任何证据表明，学生或商家愿意为你的撮合服务支付这个比例的费用？如果竞争对手（如猪八戒网）抽成更低或提供保障，你的平台如何留住用户？\n- 你提到商家有‘低成本需求’。但低成本往往伴随对质量、交付速度和信任的高要求。你的平台如何解决交易中的信任和纠纷问题？是否有任何机制或案例来证明你能保障双方权益？\n- 你的财务预测显示初期月交易额5万元。请拆解这个数字：需要多少活跃用户、发布多少任务、达成多少匹配才能实现？你的获客渠道（如高校社群、小红书）的预计转化成本和效率是多少？\n\n## 答辩应对建议\n- 在回答任何关于用户需求的问题时，优先引用你已收集的任何具体证据（如访谈片段、问卷统计），即使样本量小，也要清晰说明其代表性。避免使用‘我觉得’‘我认为’等主观表述。\n- 当被问及市场规模时，主动承认当前估算的局限性，并强调你计划通过MVP（最小可行产品）在单一校园进行验证，聚焦可实现的SOM（服务可获取市场），而非泛谈TAM（总潜在市场）。\n- 解释商业模式时，将10%抽成与平台提供的具体价值（如更精准的学生技能标签、更快的匹配速度、或更低的中介成本）挂钩。如果尚无支付意愿证据，可说明下一步将设计小规模付费测试来验证。\n- 面对竞品对比，不要否认替代方案的存在。应客观分析BOSS直聘、猪八戒网等平台在服务学生或小微商家时的潜在短板（如信息过载、价格偏高、流程复杂），并强调你的平台如何针对这些短板提供更轻量、更聚焦的解决方案。\n\n## 路演材料优化\n- 新增‘用户证据页’：至少包含3条来自学生或商家的访谈原话（可匿名），并附上简单的样本描述（如访谈了5名学生、3家小商家），直接支撑‘技能变现需求’和‘低成本服务需求’的痛点。\n- 重制‘市场分析页’：清晰区分TAM（全国大学生技能服务潜在市场）、SAM（你平台技术可覆盖的市场）、SOM（6个月内通过3所高校试点能实际触达的市场），并用逻辑或小数据说明SOM的估算依据。\n- 新增‘最小财务模型页’：展示基于单所高校试点的简单财务假设，包括预计活跃用户数、月均任务发布量、平台抽成收入、主要运营成本（如推广、维护），并计算单笔交易的毛利或盈亏平衡点。\n- 强化‘竞争矩阵页’：将猪八戒网、BOSS直聘等列为直接/间接竞品，用表格对比功能、目标用户、价格、优势劣势，并在最后明确标出SkillBridge的差异化定位（如‘更垂直的学生技能库’‘更轻量的交易流程’），并附上一句验证计划（如‘将通过A/B测试验证匹配效率’）。\n\n## 当前竞赛准备度\n38/100",
+            "tools_used": [
+              "competition_llm",
+              "rubric_engine",
+              "rag_reference"
+            ],
+            "rubric_breakdown": [
+              {
+                "item": "Problem Definition",
+                "item_label": "问题定义",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.3,
+                "missing_evidence": [
+                  "缺少明确的目标用户、场景边界或痛点频次证据",
+                  "当前已触发“需求证据不足”，说明这项证据链还不够扎实。",
+                  "缺少技术实现细节"
+                ],
+                "minimal_fix_24h": "补一页“目标用户-场景-痛点”对照表，至少写清1类核心用户、1个高频场景、3条真实痛点表述。",
+                "minimal_fix_72h": "完成8份深访或等价证据收集，形成痛点频次统计，并据此重写问题定义页。"
+              },
+              {
+                "item": "User Evidence Strength",
+                "item_label": "用户证据强度",
+                "weight": 0.15,
+                "estimated_score_0_5": 2.3,
+                "missing_evidence": [
+                  "缺少访谈原话、问卷样本、使用数据或行为证据",
+                  "当前已触发“需求证据不足”，说明这项证据链还不够扎实。",
+                  "缺少技术实现细节"
+                ],
+                "minimal_fix_24h": "整理现有用户反馈，至少补3条原话或3组行为数据，做成证据页。",
+                "minimal_fix_72h": "完成一轮结构化访谈/测试，形成样本说明、结论和反证样本。"
+              },
+              {
+                "item": "Solution Feasibility",
+                "item_label": "方案可行性",
+                "weight": 0.1,
+                "estimated_score_0_5": 3.7,
+                "missing_evidence": [
+                  "缺少技术路线、MVP验证结果、资源匹配或交付路径",
+                  "缺少技术实现细节",
+                  "缺少风险控制措施"
+                ],
+                "minimal_fix_24h": "补一页“当前能做什么/不能做什么”的MVP边界和技术实现路径。",
+                "minimal_fix_72h": "拿出一轮真实测试结果，说明功能可用性、成本或效果指标。"
+              },
+              {
+                "item": "Business Model Consistency",
+                "item_label": "商业模式一致性",
+                "weight": 0.15,
+                "estimated_score_0_5": 4.2,
+                "missing_evidence": [
+                  "缺少价值主张、付费对象、渠道与收入逻辑的一致性说明",
+                  "当前已触发“定价无支付意愿证据”，说明这项证据链还不够扎实。",
+                  "缺少技术实现细节"
+                ],
+                "minimal_fix_24h": "画出简版商业闭环：谁付费、为什么付费、通过什么渠道触达、钱怎么回来。",
+                "minimal_fix_72h": "补一版更完整的商业模式画布，并用小样本验证至少一个付费或转化假设。"
+              },
+              {
+                "item": "Market & Competition",
+                "item_label": "市场与竞争",
+                "weight": 0.1,
+                "estimated_score_0_5": 3.1,
+                "missing_evidence": [
+                  "缺少竞品矩阵、市场口径拆分或差异化论证",
+                  "当前已触发“TAM/SAM/SOM口径混乱”，说明这项证据链还不够扎实。",
+                  "缺少技术实现细节"
+                ],
+                "minimal_fix_24h": "补3个直接/间接竞品，做一个功能-用户-价格-差异矩阵。",
+                "minimal_fix_72h": "重做TAM/SAM/SOM，并说明你第一阶段真正能切到哪一小块市场。"
+              },
+              {
+                "item": "Financial Logic",
+                "item_label": "财务逻辑",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.6,
+                "missing_evidence": [
+                  "缺少成本、定价、单位经济或现金流假设",
+                  "缺少技术实现细节",
+                  "缺少风险控制措施"
+                ],
+                "minimal_fix_24h": "补最小财务表：单次服务成本、定价、毛利和一个月运营假设。",
+                "minimal_fix_72h": "完成CAC/LTV/BEP三表，并解释关键参数是如何估出来的。"
+              },
+              {
+                "item": "Innovation & Differentiation",
+                "item_label": "创新与差异化",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.6,
+                "missing_evidence": [
+                  "缺少可验证创新点、技术壁垒或替代性说明",
+                  "缺少技术实现细节",
+                  "缺少风险控制措施"
+                ],
+                "minimal_fix_24h": "用1页明确回答：相比现有方案，你们到底多了什么不可替代价值。",
+                "minimal_fix_72h": "补实验、对照、专利/算法/数据壁垒或产品留存机制的证明材料。"
+              },
+              {
+                "item": "Team & Execution",
+                "item_label": "团队与执行",
+                "weight": 0.05,
+                "estimated_score_0_5": 3.7,
+                "missing_evidence": [
+                  "缺少团队分工、关键能力匹配或阶段里程碑",
+                  "缺少技术实现细节",
+                  "缺少风险控制措施"
+                ],
+                "minimal_fix_24h": "补团队分工页，明确谁负责产品、技术、运营、答辩。",
+                "minimal_fix_72h": "给出未来12周里程碑表，每阶段对应可交付物和负责人。"
+              },
+              {
+                "item": "Presentation Quality",
+                "item_label": "路演表达与材料",
+                "weight": 0.05,
+                "estimated_score_0_5": 3.5,
+                "missing_evidence": [
+                  "缺少有说服力的叙事结构、关键数据页或评委友好的表达",
+                  "缺少技术实现细节",
+                  "缺少风险控制措施"
+                ],
+                "minimal_fix_24h": "重排路演目录，确保“问题-方案-证据-市场-模式-团队”顺序清楚。",
+                "minimal_fix_72h": "做一次模拟路演录屏，按问答反馈重写开场页、证据页和结尾页。"
+              }
+            ],
+            "judge_questions": [
+              "你提到学生有技能变现需求，但根据我们的经验，学生更倾向于通过熟人、校内渠道或大型招聘平台找兼职。你做过多少份访谈或问卷？能否展示一条学生原话，证明他们‘愿意在一个新的校园平台上接陌生商家的单’而不是用现有渠道？",
+              "你的市场规模计算基于‘单校2万学生，10%有需求’。这10%的转化率依据是什么？是调研数据还是假设？你如何验证这些有需求的学生真的会成为你平台的活跃供给方？",
+              "你计划抽成10%。这个比例是如何确定的？是否有任何证据表明，学生或商家愿意为你的撮合服务支付这个比例的费用？如果竞争对手（如猪八戒网）抽成更低或提供保障，你的平台如何留住用户？",
+              "你提到商家有‘低成本需求’。但低成本往往伴随对质量、交付速度和信任的高要求。你的平台如何解决交易中的信任和纠纷问题？是否有任何机制或案例来证明你能保障双方权益？",
+              "你的财务预测显示初期月交易额5万元。请拆解这个数字：需要多少活跃用户、发布多少任务、达成多少匹配才能实现？你的获客渠道（如高校社群、小红书）的预计转化成本和效率是多少？"
+            ],
+            "defense_tips": [
+              "在回答任何关于用户需求的问题时，优先引用你已收集的任何具体证据（如访谈片段、问卷统计），即使样本量小，也要清晰说明其代表性。避免使用‘我觉得’‘我认为’等主观表述。",
+              "当被问及市场规模时，主动承认当前估算的局限性，并强调你计划通过MVP（最小可行产品）在单一校园进行验证，聚焦可实现的SOM（服务可获取市场），而非泛谈TAM（总潜在市场）。",
+              "解释商业模式时，将10%抽成与平台提供的具体价值（如更精准的学生技能标签、更快的匹配速度、或更低的中介成本）挂钩。如果尚无支付意愿证据，可说明下一步将设计小规模付费测试来验证。",
+              "面对竞品对比，不要否认替代方案的存在。应客观分析BOSS直聘、猪八戒网等平台在服务学生或小微商家时的潜在短板（如信息过载、价格偏高、流程复杂），并强调你的平台如何针对这些短板提供更轻量、更聚焦的解决方案。"
+            ],
+            "ppt_adjustments": [
+              "新增‘用户证据页’：至少包含3条来自学生或商家的访谈原话（可匿名），并附上简单的样本描述（如访谈了5名学生、3家小商家），直接支撑‘技能变现需求’和‘低成本服务需求’的痛点。",
+              "重制‘市场分析页’：清晰区分TAM（全国大学生技能服务潜在市场）、SAM（你平台技术可覆盖的市场）、SOM（6个月内通过3所高校试点能实际触达的市场），并用逻辑或小数据说明SOM的估算依据。",
+              "新增‘最小财务模型页’：展示基于单所高校试点的简单财务假设，包括预计活跃用户数、月均任务发布量、平台抽成收入、主要运营成本（如推广、维护），并计算单笔交易的毛利或盈亏平衡点。",
+              "强化‘竞争矩阵页’：将猪八戒网、BOSS直聘等列为直接/间接竞品，用表格对比功能、目标用户、价格、优势劣势，并在最后明确标出SkillBridge的差异化定位（如‘更垂直的学生技能库’‘更轻量的交易流程’），并附上一句验证计划（如‘将通过A/B测试验证匹配效率’）。"
+            ],
+            "prize_readiness": 38
+          },
+          "tutor": {},
+          "grader": {
+            "agent": "评分官",
+            "analysis": "当前分数区间：6.13/10\n\n最伤分项：\n1. **用户证据强度**：缺乏对学生技能变现需求和商家低成本服务需求的具体访谈原话、问卷数据或行为证据，无法支撑“真实痛点”和“高频场景”的核心叙事。\n2. **市场定义**：TAM/SAM/SOM口径模糊，缺乏对第一阶段可触达细分市场（SOM）的严谨界定和论证。\n\n快速补分项：\n1. **增加用户访谈或问卷数据**：通过实际访谈或问卷收集学生和商家的具体需求和痛点，以增强用户证据的说服力。\n2. **明确市场细分**：细化市场细分，明确第一阶段的目标用户群体和市场规模，提供更严谨的市场定义和论证。",
+            "tools_used": [
+              "rubric_engine",
+              "kg_scores"
+            ]
+          },
+          "planner": {
+            "agent": "行动规划师",
+            "analysis": "本周建议行动:\n- **设计并执行用户验证问卷（针对供给侧学生和需求侧商家）**: 针对供给侧：设计5题问卷（如‘您是否愿意每周接3单技能服务？’‘您期望的单笔收入范围？’）；针对需求侧：设计5题问卷（如‘您是否愿意为学生服务支付比市场价低30%的价格？’‘哪些技能最需要但当前成本过高？’）；通过校园社团和商家微信群发放，收集至少100份供给侧和50份需求侧有效样本\n  验收标准: 供给侧支付意愿≥60%学生预期收入，需求侧价格敏感度≥70%受访者接受学生报价\n\n本周先不要做：\n- 技术开发\n- 渠道推广测试\n\n阶段目标: 完成用户需求与支付意愿的定量验证，修正TAM/SAM/SOM模型",
+            "tools_used": [
+              "diagnosis",
+              "next_task",
+              "critic"
+            ],
+            "plan_data": {
+              "this_week": [
+                {
+                  "task": "设计并执行用户验证问卷（针对供给侧学生和需求侧商家）",
+                  "why": "验证‘学生技能变现’和‘商家低成本需求’两个核心假设的真实性及支付意愿",
+                  "how": [
+                    "针对供给侧：设计5题问卷（如‘您是否愿意每周接3单技能服务？’‘您期望的单笔收入范围？’）",
+                    "针对需求侧：设计5题问卷（如‘您是否愿意为学生服务支付比市场价低30%的价格？’‘哪些技能最需要但当前成本过高？’）",
+                    "通过校园社团和商家微信群发放，收集至少100份供给侧和50份需求侧有效样本"
+                  ],
+                  "acceptance": "供给侧支付意愿≥60%学生预期收入，需求侧价格敏感度≥70%受访者接受学生报价"
+                }
+              ],
+              "not_now": [
+                "技术开发",
+                "渠道推广测试"
+              ],
+              "milestone": "完成用户需求与支付意愿的定量验证，修正TAM/SAM/SOM模型"
+            }
+          }
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "有设计、编程、剪辑等技能的大学生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e2",
+              "label": "中小商家、自媒体、小型创业团队",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e3",
+              "label": "学生技能闲置",
+              "type": "pain_point"
+            },
+            {
+              "id": "e4",
+              "label": "商家高成本需求",
+              "type": "pain_point"
+            },
+            {
+              "id": "e5",
+              "label": "SkillBridge平台",
+              "type": "solution"
+            },
+            {
+              "id": "e6",
+              "label": "平台抽成10%",
+              "type": "business_model"
+            },
+            {
+              "id": "e7",
+              "label": "猪八戒网、BOSS直聘",
+              "type": "competitor"
+            },
+            {
+              "id": "e8",
+              "label": "技能标签系统",
+              "type": "technology"
+            },
+            {
+              "id": "e9",
+              "label": "2名经管+2名计算机",
+              "type": "team"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e3",
+              "relation": "面临"
+            },
+            {
+              "source": "e2",
+              "target": "e4",
+              "relation": "面临"
+            },
+            {
+              "source": "e5",
+              "target": "e3",
+              "relation": "解决"
+            },
+            {
+              "source": "e5",
+              "target": "e4",
+              "relation": "解决"
+            },
+            {
+              "source": "e5",
+              "target": "e6",
+              "relation": "采用"
+            },
+            {
+              "source": "e5",
+              "target": "e7",
+              "relation": "竞争"
+            },
+            {
+              "source": "e5",
+              "target": "e8",
+              "relation": "使用"
+            },
+            {
+              "source": "e9",
+              "target": "e5",
+              "relation": "组建"
+            }
+          ],
+          "structural_gaps": [
+            "缺少技术实现细节",
+            "缺少风险控制措施",
+            "缺少用户验证数据"
+          ],
+          "content_strengths": [
+            "明确双侧用户群体",
+            "清晰的商业模式",
+            "可量化的市场假设"
+          ],
+          "completeness_score": 6,
+          "section_scores": {
+            "problem_definition": 5,
+            "user_evidence": 1,
+            "solution_feasibility": 4,
+            "business_model": 3,
+            "competitive_advantage": 2
+          },
+          "insight": "项目具备清晰的市场定位和商业模式，但需要补充技术实现细节和用户验证证据"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.6056,
+            "score_keyword": 0.009,
+            "score_vector": 0.6056,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_1447c6471429",
+            "category": "科技创新",
+            "project_name": "推送家2020Q2",
+            "similarity": 0.5966,
+            "score_keyword": 0.0,
+            "score_vector": 0.5966,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "价格高",
+              "质量参差不齐",
+              "缺乏监管"
+            ],
+            "solution": [
+              "融合AI智慧排版与专业设计服务",
+              "提供极速低价排版需求",
+              "形成优势互补的两大产品"
+            ],
+            "innovation_points": [
+              "云计算AI自动排版",
+              "PushKit机器学习模型"
+            ],
+            "evidence_quotes": [
+              "高校新媒体矩阵由第三方提供制作服务推文占比"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "专利与版权风险等侵权性问题"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "䲀鷐㹻融合AI智慧排版与专业设计服务的新媒体交易云 新媒体AI云计算互联网服务 3 4 新媒体文创设计交易云RNWU↯⃻勦䰟☛ 顾子豪联合创始人和执行首席创业背景和产品模式 我们将分两个部分讲述… 杨伊然联合创始人和运营首席业务概述和品牌成长 创业背景和产品模式 IndustryBackground.Products. 市场规模中国大陆新媒体行业市场规模RMB158bn2025E RMB68bn2020Q2 大多数是小规模零散自媒体出品质量通常不稳定 050001000015000200002500030000 2012A2013A2014A2015A2016A2017A2018A2019A2"
+          },
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "推送家商业计划书2020-GACC",
+            "similarity": 0.5824,
+            "score_keyword": 0.0,
+            "score_vector": 0.5824,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
+              "现有工具缺乏自动化、智慧化"
+            ],
+            "solution": [
+              "提供AI智慧自动排版工具和专业设计服务",
+              "建立新媒体交易云平台",
+              "提供一站式服务"
+            ],
+            "innovation_points": [
+              "双向开放的生态，而非单项闭环的平台",
+              "融合AI智慧排版与专业设计服务"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。"
+            ],
+            "risk_flags": [
+              "market_size_fallacy"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学"
+          },
+          {
+            "case_id": "case_b719c62bb6ba",
+            "category": "科技创新",
+            "project_name": "云游灵境-云交互空间实时生成技术引领者",
+            "similarity": 0.526,
+            "score_keyword": 0.007,
+            "score_vector": 0.526,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "博物馆数字场景交互方式单一",
+              "内容传播方式固定单向",
+              "观众难以沉浸参与到内容中"
+            ],
+            "solution": [
+              "数字空间快速搭建技术",
+              "多智能体交互技术",
+              "云实施*在线实时渲染推流技术"
+            ],
+            "innovation_points": [
+              "云实施*在线实时推流技术",
+              "云原生架构"
+            ],
+            "evidence_quotes": [
+              "小型娱乐活动、贸易消费类会展、博物馆趣味化"
+            ],
+            "risk_flags": [
+              "no_competitor_claim|market_size_fallacy|weak_user_evidence|compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "文化创意和区域合作组 云交互空间实时生成技术引领者 云游灵境 习近平总书记指出， 发展数字经济是把握新一轮科技革命和产业变革新机遇的战略选择 2020年，我国数字经济市场规模增长至40万亿元， 2022年，中国数字文化产业规模已达7841.6亿元。 文化传播重地，深耕千亿市场 数字博 物空间 城市应 急仿真 空间 虚拟农 资交互 空间 智慧城 市交互 空间 虚拟文 化交流 空间 虚拟教 育空间 上亿6000 博物馆数字 化建设需求 800+ 场 每年亿元级活动展演 数字展区 会展活动 数千 百万人级城市数字 化及应急仿真需求 自2019年起，团队深耕数字文化产业 广泛开展市场调研: 数万 扶农"
+          },
+          {
+            "case_id": "case_6c6304f12169",
+            "category": "科技创新",
+            "project_name": "京工智演 —— 数字表演产业化的领航者",
+            "similarity": 0.5251,
+            "score_keyword": 0.0,
+            "score_vector": 0.5251,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "创意方案难落地",
+              "整体个体难协同",
+              "转播跟拍效率低"
+            ],
+            "solution": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术",
+              "数据驱动三维全要素预演仿真技术"
+            ],
+            "innovation_points": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术"
+            ],
+            "evidence_quotes": [
+              "创意阶段形成的创意内容包括对导演设计描述的文字、视频图片等，但是在排练阶段，演员必须要通过表演执行数据来排练学习，包括每个演员的动作和走位数据。而现有过程中并没有从创意内容到执行数据精准有效的转换方式，创意内容也没有经过仿真数字的验证，比如按照创意设计演员的路线会有交叉产生碰撞，但创作团队预先无法发现。",
+              "服务类型为定制化的数字表演解决方案与标准化产品。初期配合实验室完成 2022 北京冬奥会仿真工作的同时，已承接张艺谋导演的湖南某大型演出项目，同时与恒大集团达成若干主题公园仿真合作意向。中期针对中小型演出，推广标准化产品，为中小型演艺公司赋能，整体提升中国文艺表演质量。公司的盈利模式主要包括产品研发费用、现场服务费用和票房收入分成。"
+            ],
+            "risk_flags": [
+              "no_competitor_claim",
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "1 目录 第一章 项目背景................................ ................................ ................................ ..........2 1.1 文艺演出发展趋势 ........................................................................................................................2 1.2 依托平台 ................................"
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创业大赛 评委 评分 路演 高校 校园 学生画像",
+          "results": [
+            {
+              "title": "大学生创赛路演全攻略：从零基础到惊艳评委的20条经验 - 知乎",
+              "snippet": "在大学生创新创业大赛中，路演是决定项目能否脱颖而出的关键环节。一个优秀的路演者不仅能清晰传达项目价值，还能通过感染力打动评委。本文将结合20条实战经验，从 开场技巧、核心逻辑、讲稿撰写到控时秘诀，助你快速掌握路演精髓。 一、路演的本质：谁适合做？为何重要？ 路演是站在 ...",
+              "url": "https://zhuanlan.zhihu.com/p/1907486630203327058"
+            },
+            {
+              "title": "湖南工学院第二届金种子杯大学生创业大赛校赛路演实施方案-湖南工学院创新创业教育中心",
+              "snippet": "为做好湖南工学院第二届金种子杯大学生创业大赛校赛路演组织工作，特制定以下实施方案。 一、赛事组织形式 校级决赛路演将采用线下路演的方式进行。各参赛团队成员和指导老师要求参加线下路演。 二、参赛项目 二级学院所有推荐项目按网评总分由高到低排序取前26的项目进入决赛路演。 三 ...",
+              "url": "https://www.hnit.edu.cn/cxcyxy/info/1031/4621.htm"
+            },
+            {
+              "title": "附件3：第九届中国国际\"互联网 +\"大学生创新创业大赛评审规则.docx-管理科学与工程学院",
+              "snippet": "附件第九届中国国际\"互联网+\"大学生创新创业大赛评审规则一、高教主赛道项目评审要点：创意组评审要点评审内容分值教育维度1.项目应弘扬正确的价值观，厚植家国情怀，恪守伦理规范，有助于培育创新创业精神。2.项目符合将专业知识与商业知识有效结合并转化为商业价值或社会价值的创新 ...",
+              "url": "https://mse.ctbu.edu.cn/info/1059/15722.htm"
+            }
+          ],
+          "summary": "- 在大学生创新创业大赛中，路演是决定项目能否脱颖而出的关键环节。一个优秀的路演者不仅能清晰传达项目价值，还能通过感染力打动评委。本文将结合20条实战经验，从 开场技巧、核心逻辑、讲稿撰写到控时秘诀，助你快速掌握路演精髓。 一、路演的本质：谁适合做？为何重要？ 路演是站在 ...\n- 为做好湖南工学院第二届金种子杯大学生创业大赛校赛路演组织工作，特制定以下实施方案。 一、赛事组织形式 校级决赛路演将采用线下路演的方式进行。各参赛团队成员和指导老师要求参加线下路演。 二、参赛项目 二级学院所有推荐项目按网评总分由高到低排序取前26的项目进入决赛路演。 三 ...\n- 附件第九届中国国际\"互联网+\"大学生创新创业大赛评审规则一、高教主赛道项目评审要点：创意组评审要点评审内容分值教育维度1.项目应弘扬正确的价值观，厚植家国情怀，恪守伦理规范，有助于培育创新创业精神。2.项目符合将专业知识与商业知识有效结合并转化为商业价值或社会价值的创新 ..."
+        },
+        "hypergraph_student": {
+          "ok": true,
+          "coverage_score": 4.7,
+          "covered_count": 7,
+          "total_dimensions": 15,
+          "dimensions": {
+            "stakeholder": {
+              "name": "目标用户",
+              "covered": true,
+              "entities": [
+                "有设计、编程、剪辑等技能的大学生",
+                "中小商家、自媒体、小型创业团队"
+              ],
+              "count": 2
+            },
+            "pain_point": {
+              "name": "痛点问题",
+              "covered": true,
+              "entities": [
+                "学生技能闲置",
+                "商家高成本需求"
+              ],
+              "count": 2
+            },
+            "solution": {
+              "name": "解决方案",
+              "covered": true,
+              "entities": [
+                "SkillBridge平台"
+              ],
+              "count": 1
+            },
+            "innovation": {
+              "name": "创新点",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "market": {
+              "name": "目标市场",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "competitor": {
+              "name": "竞争格局",
+              "covered": true,
+              "entities": [
+                "猪八戒网、BOSS直聘"
+              ],
+              "count": 1
+            },
+            "business_model": {
+              "name": "商业模式",
+              "covered": true,
+              "entities": [
+                "平台抽成10%"
+              ],
+              "count": 1
+            },
+            "execution_step": {
+              "name": "执行步骤",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "risk_control": {
+              "name": "风控合规",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "evidence": {
+              "name": "证据与数据",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "technology": {
+              "name": "技术路线",
+              "covered": true,
+              "entities": [
+                "技能标签系统"
+              ],
+              "count": 1
+            },
+            "resource": {
+              "name": "资源优势",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "team": {
+              "name": "团队能力",
+              "covered": true,
+              "entities": [
+                "2名经管+2名计算机"
+              ],
+              "count": 1
+            },
+            "risk": {
+              "name": "风险与合规",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            },
+            "channel": {
+              "name": "获客渠道",
+              "covered": false,
+              "entities": [],
+              "count": 0
+            }
+          },
+          "cross_links": [
+            {
+              "from_dim": "目标用户",
+              "to_dim": "痛点问题",
+              "from_entity": "e1",
+              "to_entity": "e3",
+              "relation": "面临"
+            },
+            {
+              "from_dim": "目标用户",
+              "to_dim": "痛点问题",
+              "from_entity": "e2",
+              "to_entity": "e4",
+              "relation": "面临"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "痛点问题",
+              "from_entity": "e5",
+              "to_entity": "e3",
+              "relation": "解决"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "痛点问题",
+              "from_entity": "e5",
+              "to_entity": "e4",
+              "relation": "解决"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "商业模式",
+              "from_entity": "e5",
+              "to_entity": "e6",
+              "relation": "采用"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "竞争格局",
+              "from_entity": "e5",
+              "to_entity": "e7",
+              "relation": "竞争"
+            },
+            {
+              "from_dim": "解决方案",
+              "to_dim": "技术路线",
+              "from_entity": "e5",
+              "to_entity": "e8",
+              "relation": "使用"
+            },
+            {
+              "from_dim": "团队能力",
+              "to_dim": "解决方案",
+              "from_entity": "e9",
+              "to_entity": "e5",
+              "relation": "组建"
+            }
+          ],
+          "hub_entities": [
+            {
+              "entity": "e5",
+              "type": "solution",
+              "connections": 6,
+              "note": "「e5」连接6个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e3",
+              "type": "pain_point",
+              "connections": 2,
+              "note": "「e3」连接2个维度，是项目的核心支撑点"
+            },
+            {
+              "entity": "e4",
+              "type": "pain_point",
+              "connections": 2,
+              "note": "「e4」连接2个维度，是项目的核心支撑点"
+            }
+          ],
+          "pattern_warnings": [],
+          "pattern_strengths": [],
+          "projected_edge_types": [
+            "User_Pain_Fit_Edge",
+            "Value_Loop_Edge",
+            "Market_Competition_Edge",
+            "Execution_Gap_Edge"
+          ],
+          "missing_dimensions": [
+            {
+              "dimension": "目标市场",
+              "importance": "高",
+              "recommendation": "没有市场分析，无法评估商业可行性"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少技术实现细节"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少风险控制措施"
+            },
+            {
+              "dimension": "结构性",
+              "importance": "高",
+              "recommendation": "缺少用户验证数据"
+            },
+            {
+              "dimension": "资源优势",
+              "importance": "低",
+              "recommendation": "未提及资源优势，但可后续补充"
+            }
+          ],
+          "template_matches": [
+            {
+              "id": "T1_user_pain_solution_bm",
+              "name": "痛点-人群-解决方案-商业模式闭环",
+              "description": "用户→痛点→方案→商业模式形成完整闭环",
+              "dimensions": [
+                "stakeholder",
+                "pain_point",
+                "solution",
+                "business_model"
+              ],
+              "missing_dimensions": [],
+              "status": "complete",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H1",
+                "H2",
+                "H3"
+              ]
+            },
+            {
+              "id": "T2_user_pain_evidence",
+              "name": "痛点证据链",
+              "description": "针对核心痛点提供用户证据",
+              "dimensions": [
+                "stakeholder",
+                "pain_point",
+                "evidence"
+              ],
+              "missing_dimensions": [
+                "evidence"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H5"
+              ]
+            },
+            {
+              "id": "T3_solution_tech_market",
+              "name": "方案-技术-市场匹配",
+              "description": "技术路线与目标市场匹配",
+              "dimensions": [
+                "solution",
+                "technology",
+                "market"
+              ],
+              "missing_dimensions": [
+                "market"
+              ],
+              "status": "partial",
+              "pattern_type": "neutral",
+              "linked_rules": []
+            },
+            {
+              "id": "T4_market_competition_solution",
+              "name": "市场-竞品-方案定位",
+              "description": "在既有竞争格局中清晰定位方案",
+              "dimensions": [
+                "market",
+                "competitor",
+                "solution"
+              ],
+              "missing_dimensions": [
+                "market"
+              ],
+              "status": "partial",
+              "pattern_type": "neutral",
+              "linked_rules": []
+            },
+            {
+              "id": "T5_business_model_finance",
+              "name": "商业模式-财务逻辑",
+              "description": "商业模式与资源/团队可行性匹配",
+              "dimensions": [
+                "business_model",
+                "resource",
+                "team"
+              ],
+              "missing_dimensions": [
+                "resource"
+              ],
+              "status": "partial",
+              "pattern_type": "neutral",
+              "linked_rules": []
+            },
+            {
+              "id": "T6_unit_economics",
+              "name": "单位经济模型闭环",
+              "description": "单位经济与市场/资源约束一致",
+              "dimensions": [
+                "business_model",
+                "market",
+                "resource"
+              ],
+              "missing_dimensions": [
+                "market",
+                "resource"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H8",
+                "H9"
+              ]
+            },
+            {
+              "id": "T7_growth_path",
+              "name": "增长路径",
+              "description": "获客渠道与目标用户/市场相匹配",
+              "dimensions": [
+                "stakeholder",
+                "channel",
+                "market"
+              ],
+              "missing_dimensions": [
+                "channel",
+                "market"
+              ],
+              "status": "partial",
+              "pattern_type": "neutral",
+              "linked_rules": []
+            },
+            {
+              "id": "T8_team_execution",
+              "name": "团队-里程碑-资源",
+              "description": "团队能力与关键资源支撑里程碑达成",
+              "dimensions": [
+                "team",
+                "resource",
+                "market"
+              ],
+              "missing_dimensions": [
+                "resource",
+                "market"
+              ],
+              "status": "partial",
+              "pattern_type": "neutral",
+              "linked_rules": []
+            },
+            {
+              "id": "T9_risk_control",
+              "name": "风险与合规",
+              "description": "涉及数据/合规场景时给出控制措施",
+              "dimensions": [
+                "risk",
+                "evidence",
+                "market"
+              ],
+              "missing_dimensions": [
+                "risk",
+                "evidence",
+                "market"
+              ],
+              "status": "missing",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H11"
+              ]
+            },
+            {
+              "id": "T10_user_pain_solution_evidence",
+              "name": "问题-方案-证据三角",
+              "description": "核心方案有用户与实验双重证据支持",
+              "dimensions": [
+                "stakeholder",
+                "pain_point",
+                "solution",
+                "evidence"
+              ],
+              "missing_dimensions": [
+                "evidence"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H5",
+                "H7"
+              ]
+            },
+            {
+              "id": "T11_market_size_growth",
+              "name": "市场规模-增长假设",
+              "description": "市场规模与增长路径假设一致",
+              "dimensions": [
+                "market",
+                "business_model"
+              ],
+              "missing_dimensions": [
+                "market"
+              ],
+              "status": "partial",
+              "pattern_type": "risk",
+              "linked_rules": [
+                "H4",
+                "H9"
+              ]
+            },
+            {
+              "id": "T12_competition_moat",
+              "name": "竞品-护城河",
+              "description": "在竞争格局中说明护城河与资源壁垒",
+              "dimensions": [
+                "competitor",
+                "resource",
+                "business_model"
+              ],
+              "missing_dimensions": [
+                "resource"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H6",
+                "H7"
+              ]
+            },
+            {
+              "id": "T13_tech_feasibility",
+              "name": "技术可行性",
+              "description": "技术方案与团队/资源能力匹配",
+              "dimensions": [
+                "technology",
+                "team",
+                "resource"
+              ],
+              "missing_dimensions": [
+                "resource"
+              ],
+              "status": "partial",
+              "pattern_type": "neutral",
+              "linked_rules": []
+            },
+            {
+              "id": "T14_evidence_financial",
+              "name": "证据-财务",
+              "description": "财务模型关键参数有数据或实验支撑",
+              "dimensions": [
+                "evidence",
+                "business_model"
+              ],
+              "missing_dimensions": [
+                "evidence"
+              ],
+              "status": "partial",
+              "pattern_type": "risk",
+              "linked_rules": [
+                "H8"
+              ]
+            },
+            {
+              "id": "T15_evidence_market",
+              "name": "证据-市场规模",
+              "description": "市场规模假设有公开数据或调研支撑",
+              "dimensions": [
+                "evidence",
+                "market"
+              ],
+              "missing_dimensions": [
+                "evidence",
+                "market"
+              ],
+              "status": "missing",
+              "pattern_type": "risk",
+              "linked_rules": [
+                "H4"
+              ]
+            },
+            {
+              "id": "T16_user_channel",
+              "name": "用户-渠道匹配",
+              "description": "获客渠道与用户行为习惯匹配",
+              "dimensions": [
+                "stakeholder",
+                "channel"
+              ],
+              "missing_dimensions": [
+                "channel"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H2"
+              ]
+            },
+            {
+              "id": "T17_pain_solution_pricing",
+              "name": "痛点-方案-定价",
+              "description": "定价与痛点强度/替代方案价格一致",
+              "dimensions": [
+                "pain_point",
+                "solution",
+                "business_model"
+              ],
+              "missing_dimensions": [],
+              "status": "complete",
+              "pattern_type": "risk",
+              "linked_rules": [
+                "H3"
+              ]
+            },
+            {
+              "id": "T18_team_risk",
+              "name": "团队-风险",
+              "description": "关键风险有明确负责人与缓解计划",
+              "dimensions": [
+                "team",
+                "risk"
+              ],
+              "missing_dimensions": [
+                "risk"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H10",
+                "H11"
+              ]
+            },
+            {
+              "id": "T19_loop_full",
+              "name": "完整商业闭环",
+              "description": "从用户到商业模式的完整闭环",
+              "dimensions": [
+                "stakeholder",
+                "pain_point",
+                "solution",
+                "market",
+                "competitor",
+                "business_model"
+              ],
+              "missing_dimensions": [
+                "market"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H1",
+                "H2",
+                "H3",
+                "H4",
+                "H6",
+                "H8"
+              ]
+            },
+            {
+              "id": "T20_growth_defensibility",
+              "name": "增长-护城河",
+              "description": "增长路径与护城河相互支撑",
+              "dimensions": [
+                "market",
+                "business_model",
+                "resource"
+              ],
+              "missing_dimensions": [
+                "market",
+                "resource"
+              ],
+              "status": "partial",
+              "pattern_type": "ideal",
+              "linked_rules": [
+                "H6",
+                "H9",
+                "H12"
+              ]
+            }
+          ],
+          "consistency_issues": [
+            {
+              "id": "G2_user_without_evidence",
+              "description": "有目标用户与痛点，但缺少证据维度",
+              "message": "已描述用户与痛点，但缺少任何访谈或问卷等证据。",
+              "pressure_questions": [
+                "你是否进行过至少8次深度访谈？请给出1-2条用户原话。",
+                "如果评委质疑这是你想象出来的痛点，你会拿出哪份材料？"
+              ]
+            },
+            {
+              "id": "G6_no_market",
+              "description": "缺少市场维度",
+              "message": "尚未说明市场规模或目标市场，无法评估商业空间。",
+              "pressure_questions": [
+                "请给出目标市场的大致规模以及主要数据来源（行业报告/公开数据等）。"
+              ]
+            },
+            {
+              "id": "G11_no_channel_detail",
+              "description": "只有模糊的线上推广/自媒体说法",
+              "message": "获客方式仅停留在模糊的线上推广，缺少可执行渠道。",
+              "pressure_questions": [
+                "请列出3个最有可能触达目标用户的具体渠道，并估算每个渠道的 CAC。"
+              ]
+            },
+            {
+              "id": "G14_no_growth_logic",
+              "description": "没有给出从0到1的增长路径",
+              "message": "尚未说明从冷启动到规模化的增长路径。",
+              "pressure_questions": [
+                "用3-5步描述你从第一个付费用户到前100个用户的获取路径。"
+              ]
+            },
+            {
+              "id": "G16_team_no_roadmap",
+              "description": "团队存在但缺少里程碑规划",
+              "message": "团队已介绍，但缺少阶段性里程碑与分工。",
+              "pressure_questions": [
+                "未来3个月内你们各自要完成哪些可验收的里程碑？"
+              ]
+            },
+            {
+              "id": "G19_no_metric_focus",
+              "description": "没有明确单一北极星指标",
+              "message": "缺少聚焦的核心业务指标，难以评估项目进展。",
+              "pressure_questions": [
+                "如果只能选一个指标衡量项目成败，你会选什么？为什么？"
+              ]
+            },
+            {
+              "id": "G20_no_risk_section",
+              "description": "商业计划中完全没有风险章节",
+              "message": "商业计划中缺少风险与对策章节，评委难以信任预期。",
+              "pressure_questions": [
+                "请列出3个最可能让项目失败的风险，并给出各自的一条缓解措施。"
+              ]
+            }
+          ],
+          "student_graph_stats": {
+            "nodes": 18,
+            "edges": 15
+          }
+        },
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 9.1,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS10",
+            "name": "TAM/SAM/SOM混乱",
+            "match_score": 9.1,
+            "probing_layers": [
+              "口径检验: 你说的市场规模是TAM还是SAM？你实际能触达的市场(SOM)有多大？",
+              "自下而上估算: 请用'单价×目标用户数×复购频次'来估算你第一年的实际可获得市场。",
+              "增长合理性: 从SOM到SAM，你的增长路径是什么？每一步需要什么资源？"
+            ],
+            "expected_evidence": [
+              "TAM/SAM/SOM三层估算",
+              "自下而上的市场测算",
+              "增长路径规划"
+            ],
+            "counterfactual": "一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "市场规模口径谬误",
+              "大数幻觉谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "TAM/SAM/SOM 口径校验 + 增长合理性",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 8.6,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "定价无支撑"
+            ],
+            "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+            "matched_edge_types": [
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "大数幻觉谬误",
+          "fallacy_rule_id": "H4",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "1%市场份额幻觉",
+          "selected_strategy_id": "CS02",
+          "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+          "generated_question": "你提到“聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财”。这批人具体散落在哪些渠道里？你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。",
+          "evidence_quotes": [
+            "聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "competition",
+          "overall_score": 6.13,
+          "score_band": "基本成形",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H3",
+              "name": "定价无支付意愿证据",
+              "fallacy_label": "定价拍脑袋谬误",
+              "severity": "medium",
+              "explanation": "提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "fix_hint": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+              "matched_keywords": [
+                "定价"
+              ],
+              "missing_requires": [
+                "支付意愿",
+                "愿意付费"
+              ],
+              "preferred_edge_types": [
+                "Value_Loop_Edge",
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "cashflow_survival_logic"
+              ],
+              "quote": "业”内容 与校园创业社团合作  定价模式： 平台抽成10% 可购买“优先曝光”服务  竞争",
+              "trigger_message": "原文片段：“业”内容 与校园创业社团合作  定价模式： 平台抽成10% 可购买“优先曝光”服务  竞争” → 触发「定价无支付意愿证据」，因为提到了定价/收费，但没有提及用户支付意愿验证。定价不能拍脑袋，需要真实调研数据支撑。",
+              "impact": "没有支付意愿证据，收费设计容易被认为拍脑袋，影响商业模式可信度。",
+              "fix_task": "设计一个支付意愿调研（如Van Westendorp价格敏感度测试），收集至少20份有效数据。",
+              "ontology_nodes": [
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ]
+            },
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "fallacy_label": "大数幻觉谬误",
+              "severity": "high",
+              "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "matched_keywords": [
+                "市场规模"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "market_sizing_logic"
+              ],
+              "quote": "聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财",
+              "trigger_message": "原文片段：“聚焦“学生群体+低成本需求”  市场规模： 单校约2万学生 假设10%学生有技能变现需求  财” → 触发「TAM/SAM/SOM口径混乱」，因为提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "impact": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。",
+              "fix_task": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "ontology_nodes": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "X_tam",
+                  "kind": "metric",
+                  "label": "TAM",
+                  "description": "总体可服务市场总量"
+                },
+                {
+                  "id": "X_sam",
+                  "kind": "metric",
+                  "label": "SAM",
+                  "description": "产品理论可覆盖的细分市场"
+                },
+                {
+                  "id": "X_som",
+                  "kind": "metric",
+                  "label": "SOM",
+                  "description": "在现实约束下可获得的市场份额"
+                }
+              ]
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Chain_Edge",
+                "Stakeholder_Solution_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "学生画像 UserProfile_Skill  年级：大三  专业：信息管理  兴趣：互联网产品 + 副业 + 平台经济 项目草案 Project Draft  项目名：SkillBridge（校园技能撮合平台）  目标用户： 供",
+              "trigger_message": "原文片段：“学生画像 UserProfile_Skill  年级：大三  专业：信息管理  兴趣：互联网产品 + 副业 + 平台经济 项目草案 Project Draft  项目名：SkillBridge（校园技能撮合平台）  目标用户： 供” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H21",
+              "name": "执行步骤缺少负责人",
+              "fallacy_label": "执行无责任人谬误",
+              "severity": "medium",
+              "explanation": "写了执行计划但没有负责人，计划容易停留在纸面，难以证明执行能力。",
+              "fix_hint": "为每个关键里程碑补充负责人、时间节点和交付物。",
+              "matched_keywords": [
+                "计划",
+                "里程碑"
+              ],
+              "missing_requires": [
+                "负责人",
+                "分工",
+                "谁负责"
+              ],
+              "preferred_edge_types": [
+                "Execution_Dependency_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "execution_feasibility_logic"
+              ],
+              "quote": "计算机 有校园推广资源  里程碑计划： 第1个月上线MVP 第3个月完成100单交易 第6个月",
+              "trigger_message": "原文片段：“计算机 有校园推广资源  里程碑计划： 第1个月上线MVP 第3个月完成100单交易 第6个月” → 触发「执行步骤缺少负责人」，因为写了执行计划但没有负责人，计划容易停留在纸面，难以证明执行能力。",
+              "impact": "没有负责人会让执行计划变成口号，难以落地。",
+              "fix_task": "为每个关键里程碑补充负责人、时间节点和交付物。"
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.57,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力"
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ]
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.57,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ]
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 7.47,
+              "status": "ok",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合"
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设"
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试"
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果"
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ]
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 8.39,
+              "status": "ok",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构"
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性"
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成"
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ]
+            },
+            {
+              "item": "Market & Competition",
+              "score": 6.14,
+              "status": "ok",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局"
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图"
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵"
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ]
+            },
+            {
+              "item": "Financial Logic",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析"
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间"
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ]
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒"
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位"
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品"
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图"
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析"
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ]
+            },
+            {
+              "item": "Team & Execution",
+              "score": 7.47,
+              "status": "ok",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度"
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险"
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单"
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告"
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ]
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 7.0,
+              "status": "ok",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构"
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ]
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "template_guideline": [
+            "先明确当前最高风险点是什么",
+            "补至少3条能直接支撑该点的证据",
+            "用评委视角做一轮反问并更新答案"
+          ],
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T21:18:11.614610+08:00"
+    },
+    {
+      "role": "user",
+      "content": "我们现在觉得这个平台只要用户多了就能跑起来，因为供需两边都会自然增长。\n\n另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，先跑起来再说。",
+      "timestamp": "2026-03-31T21:24:13.034064+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "你提出的这两点——“用户多了就能跑起来”和“先做小程序跑起来再说”——恰恰暴露了你项目当前最致命的两个认知盲区。这不仅是产品策略问题，更是竞赛叙事中评委会重点攻击的软肋。上一轮我们判断项目的核心风险在于**逻辑链条缺乏实证支撑**，而你现在的想法，正是这种“想当然”推演的典型体现。\n\n让我直接一点：如果你带着这样的表述去路演，评委会在3分钟内判定项目不可行，因为这两句话背后，隐藏着平台型创业最经典的“冷启动陷阱”和“价值主张模糊”两大死穴。\n\n### 一、为什么“用户多了就能跑起来”是一个危险的幻觉？\n\n你假设的是一个完美的网络效应：供给吸引需求，需求再吸引更多供给，形成正向循环。但这个循环的**第一推动力从何而来**？在平台价值（即匹配成功的交易）显现之前，供需双方都没有理由主动加入一个空空如也的新平台。\n\n这会导致一个评委必问、而你目前无法回答的问题：**你的前100个技能学生和前50个需求订单，具体从哪里来？**\n\n让我们拆解你的双边市场，看看“自然增长”假设为何不成立：\n\n| 角色 | 现有选择（你的竞品） | 加入你空平台的机会成本 | “自然”加入你的可能性 |\n| :--- | :--- | :--- | :--- |\n| **供给侧（技能学生）** | 1. **熟人网络**：信任度高，沟通成本低。<br>2. **闲鱼/豆瓣**：流量大，需求可见。<br>3. **猪八戒等垂直平台**：需求专业，但竞争激烈。<br>4. **校内社团/老师推荐**：精准且背书强。 | 需要花费时间完善线上资料、作品集，并等待不确定的订单。 | **极低**。技能强、有口碑的学生不缺渠道；技能一般的学生在陌生平台缺乏竞争力。没有明确的“拉力”，他们不会迁移。 |\n| **需求侧（中小商家）** | 1. **专业外包公司/工作室**：交付稳定，省心。<br>2. **猪八戒等平台**：服务者众多，可比价。<br>3. **雇佣兼职员工**：管理更直接。<br>4. **自己动手/忽略需求**：成本最低。 | 需要承担“学生可能不专业、交付不稳定、沟通耗时”的信任风险和时间成本。 | **极低**。除非你的平台能显著降低他们的风险或成本，否则他们没有理由放弃成熟方案，去尝试一个由未知学生组成的平台。 |\n\n**结论是：校园技能撮合不具备社交产品的单边网络效应（如发朋友圈），其价值完全依赖于另一端用户的密度和质量。在从0到1的阶段，不存在“自然增长”，只有“艰难地创造增长”。** 你提到的“自然增长”，其实是成功跨越冷启动阶段后的结果，而你现在的全部精力，必须放在如何度过从0到0.1这个最危险的阶段。\n\n### 二、为什么“先做小程序，不考虑复杂算法”可能让事情更糟？\n\n这个想法本身符合“敏捷开发”的精神，但在你的具体语境下，它可能演变成一场灾难。因为它回避了核心问题：**你的平台初期到底提供什么核心价值？**\n\n如果匹配效率（算法）不是你初期提供的价值，那你就必须提供其他更强大的价值来吸引用户。否则，一个功能简陋的小程序，凭什么让用户放弃体验更好的闲鱼？\n\n“不考虑复杂算法”通常意味着几种初级的匹配方式：\n1.  **信息列表（类公告板）**：需求方发布，供给方抢单或联系。这本质上和微信群、豆瓣小组没有区别，你的平台只是一个更漂亮的布告栏。\n2.  **简单搜索/筛选**：按技能标签、价格筛选。这依然没有解决信息过载和信任问题。\n3.  **人工推荐**：运营人员手动匹配。这在小规模时可行，但完全不可规模化，会成为运营黑洞。\n\n**关键在于，你必须明确你选择哪一种，并围绕它构建你初期的运营重心和独特价值。** 例如，如果你选择“人工推荐”，那么你的价值主张就不是“海量匹配”，而是“精准推荐和品质担保”，你的运营成本（人力）和叙事重点就要向这里倾斜。\n\n### 三、结构性断点：从“好想法”到“可执行计划”的缺失\n\n你当前的困境，背后是三个更深层的结构性断点：\n\n1.  **价值假设未经压力测试**：你认为“有技能的大学生需要变现平台”，但这可能是个伪命题。真正需要帮助的，或许是那些“技能处于中游、有提升意愿、但缺乏初始信任背书”的学生。而“中小商家”这个定义过于宽泛，校园周边的打印店和线上的初创团队，需求完全不同。你尚未通过哪怕一次真实的交易，来验证“谁在什么情况下最需要你”。\n\n2.  **增长引擎设计完全缺失**：“自然增长”不是策略。你需要一个像公式一样可重复、可解释的冷启动引擎。例如：\n    > **引擎假设**：与一个学校的“数字媒体协会”合作（获取首批20名审核过的设计师）-> 为学校周边5家新开业奶茶店提供“开业设计包”优惠（创造首批真实需求）-> 促成交易并收集案例 -> 用案例去拓展下一个社团和下一批商家。\n    这个引擎里的每一个环节（如何合作、如何优惠、如何分成）都需要具体设计，这才是评委想看到的“可行性”。\n\n3.  **竞争壁垒构建于虚无**：“先做小程序”意味着技术壁垒几乎为零。那么你的核心壁垒是什么？是初期积累的优质用户关系？是独特的信任机制（如同学身份认证+课程积分）？还是对校园场景的深度理解？在你的草案中，这些壁垒的设计是空白的。评委一定会问：“如果腾讯或阿里也看中这个市场，快速复制一个小程序，你凭什么活下来？” 你必须现在就想好答案。\n\n### 四、你的策略空间：不止“大而全的平台”一条路\n\n你不需要立刻建造一个“技能淘宝”。在竞赛中，一个**小而美、验证透彻**的单点突破故事，远比一个**大而空、漏洞百出**的平台故事更有说服力。你有多个更可行的切口：\n\n| 路径 | 核心策略 | 优势（对竞赛而言） | 挑战 |\n| :--- | :--- | :--- | :--- |\n| **A. 供给驱动（垂直社群）** | 与一个强势校园社团（如设计协会）独家合作，成为其官方变现渠道。 | 快速获得高质量、有背书的供给端，差异化明显，故事性强。 | 市场天花板低，依赖社团关系，复制到其他学校需重新谈判。 |\n| **B. 需求驱动（解决方案商）** | 自己先接单（如校园周边商家设计需求），再分包给招募的学生，你负责品控和客户管理。 | 确保有真实收入和闭环验证，商业模式清晰，能直接回答“如何赚第一块钱”。 | 模式重，规模化慢，更像服务公司而非平台。 |\n| **C. 场景切入（单点爆破）** | 只做一个高频、标准化的服务，如“PPT美化”、“简历优化”。 | 需求明确，交付标准清晰，容易实现产品化和自动化匹配，最符合MVP精神。 | 需要敢于做减法，市场想象空间可能较小。 |\n| **D. 工具赋能（曲线救国）** | 先做帮助技能学生管理作品集、生成报价单、电子签合同的小工具。 | 低成本获取供给端用户，积累数据和信任，冷启动难度低。 | 离最终商业模式较远，竞赛叙事需要巧妙设计，解释如何过渡。 |\n\n对于竞赛，**路径C（场景切入）或路径A（供给驱动）往往是更优选择**，因为它们能让你在最短时间内，集中资源完成一个“从痛点验证到交易闭环”的完整故事，证据链会非常扎实。\n\n### 五、核心问题逐一展开与行动聚焦\n\n基于上述分析，你下一步绝对不能直接开始开发小程序。那会把宝贵的备战时间浪费在搭建一个可能没人用的“空中楼阁”上。\n\n**你下一步唯一且最重要的焦点是：用最低成本，验证一次最小单元的闭环交易。**\n\n具体来说，你需要立刻动手完成以下动作：\n1.  **找到一个真实的需求方**：就在你的校园周边，找一家可能需要设计、文案或视频服务的小店（新开的奶茶店、健身房、独立书店等）。直接拜访店主，了解他们现在如何解决这些需求，预算多少，对与学生合作有何顾虑。\n2.  **找到一个匹配的供给方**：在你的同学或社团中，找一个具备相应技能且有兴趣接单的同学。\n3.  **促成这笔交易**：你作为中间人，协助双方明确需求、价格、交付标准和修改次数。你可以甚至承诺自己承担部分风险（如不满意可退款），以促成这“第一单”。\n4.  **全程记录**：记录下双方在过程中所有的痛点、顾虑、满意的点。这将成为你项目最宝贵的**原始证据**。\n\n这单交易的成功与否、过程中的细节，将直接回答：需求是否真实？学生能否交付？信任如何建立？价值如何分配？——这些才是你商业计划书里最有力的内容。\n\n### 六、几个需要你立刻回答的苏格拉底式问题\n\n在行动前，请先诚实地回答这几个问题，它们能帮你理清思路：\n\n1.  你能立刻说出你身边**3个有PS、编程或剪辑技能的同学**吗？他们最近一次通过什么渠道、帮谁、做了什么、赚了多少钱？在整个过程中，他们抱怨最多的是什么？（这将验证供给侧痛点的真实性）\n2.  如果让你明天就必须促成SkillBridge的**第一笔收费订单**，你会选择哪个技能（如公众号排版）和哪个需求方（如某个校园自媒体）？为什么是这一单？为了促成它，你需要额外提供什么担保或服务？（这将逼你设计启动策略）\n3.  抛开“平台”的宏大概念，如果SkillBridge在第一阶段只是一个**高质量的“校园技能卖家”微信群**，由你严格审核入群成员并手动匹配订单，这个模式能跑通吗？它的天花板在哪里？（这将帮你找到最核心的价值点）\n\n### 七、外部参考视角\n\n历史上成功的平台，都不是一开始就做大的。例如：\n- **猪八戒网**：早期并非全品类平台，而是从“网站设计”这个相对标准、需求旺盛的品类切入，聚集了第一批“威客”（供给）。\n- **在行（后并入脉脉）**：早期通过深度运营，聚集了一批行业专家（供给），打造了“一对一经验咨询”的标杆案例，才逐步开放平台。\n\n这些案例的共同点是：**单点突破，用深度运营解决冷启动问题，建立口碑后再图扩张。** 这正是你现在最需要借鉴的思路。\n\n---\n**总结**：放弃“自然增长”的幻想，停止对“简单小程序”的盲目乐观。你的竞赛之路，始于一次真实的、哪怕再小的交易验证。把这次验证的过程、数据和思考，变成你项目计划书中最坚实的基石。这才是从“想法”走向“获奖项目”的唯一路径。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "project_diagnosis",
+          "intent_shape": "single",
+          "intent_reason": "学生描述了项目的初步想法和计划，寻求反馈；判定为单一主问题；主意图归类为 project_diagnosis",
+          "confidence": 0.8,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "项目教练",
+            "风险分析师",
+            "竞赛顾问"
+          ],
+          "resolved_agents": [
+            "coach",
+            "analyst",
+            "advisor"
+          ],
+          "agent_reasoning": "MATRIX[project_diagnosis][medium] -> coach / analyst；竞赛模式补竞赛顾问；检测到高风险规则，补风险分析师",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 0,
+          "rag_case_ids": [],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "你这个项目现在处在**想法期**。你的项目目前还停留在‘想法感觉’阶段，真正卡在‘供需冷启动’这个死循环上。你假设用户多了平台就能自然运转，但评委一眼就会问：第一批用户从哪来？凭什么来？没有可控的获客渠道和明确的启动策略，这个想法就只是个漂亮的空中楼阁。\n\n你提到的‘自然增长’是最大的认知陷阱。校园技能撮合不是社交产品，没有网络效应前，供需两端都不会‘自然’出现。供给侧（有技能的学生）为什么要花时间上传作品、等待不确定的订单，而不是直接去猪八戒、闲鱼或接熟人介绍？需求侧（中小商家）为什么相信一个学生平台能稳定交付，而不是找成熟的工作室？这里涉及三个核心疑点：1）替代方案太强：学生兼职市场早已被各类平台（任务群、豆瓣小组、闲鱼）和熟人网络瓜分，你的平台价值主张不够锋利。2）双边启动成本高：你需要同时说服足够多的‘优质供给’和‘真实需求’上线并互动，任何一边不足都会导致另一边流失。3）信任与交付风险：技能服务不是标品，涉及沟通、修改、付款安全，你‘不考虑复杂算法’意味着匹配和风控完全靠人工或运气，这会极大限制规模和用户体验。\n\n## 我主要是根据这些信息做这个判断\n- 原文片段：‘用户多了就能跑起来，因为供需两边都会自然增长’ – 这暴露了对双边市场冷启动难度的严重低估。\n- 原文片段：‘先只做一个小程序，不考虑太复杂的撮合算法，先跑起来再说’ – 这表明产品核心价值（匹配效率）和初期运营重心尚未明确。\n\n## 如果这一点继续不处理\n如果这个‘冷启动死循环’不打破，你的项目将永远停留在想法阶段。在竞赛中，你会因为无法回答‘第一批用户从哪来’、‘如何实现首批100笔交易’这样具体的问题而失分，商业计划书中的增长曲线会显得苍白无力，最终被评委判定为‘缺乏落地可行性’。\n\n## 再往下看，真正卡住你的结构层原因\n- 底层断点一：价值假设未经压力测试。你认为‘有技能的大学生需要变现平台’，但更可能的是，技能强、有口碑的学生根本不缺渠道；技能一般的学生在平台上缺乏竞争力，反而会拉低平台质量。这共同指向一个底层问题：你尚未找到那个‘非你不可’的初始用户群和场景。\n- 底层断点二：增长引擎设计缺失。‘自然增长’不是一个策略，而是结果。你缺乏一个可重复、可控制、成本可控的冷启动路径（例如，是先绑定几个社团批量获取供给，还是先搞定几家校园周边商家创造需求）。这个断点会让你的财务模型和竞赛叙事完全站不住脚。\n- 底层断点三：竞争壁垒认知浅。你认为‘先做小程序跑起来’是敏捷，但在评委眼中，这恰恰暴露了项目护城河极浅。任何团队都可以快速复制一个界面，你的核心壁垒应该是初期积累的优质用户关系、独特的匹配机制或信任体系，而这些在你的草案中完全看不到设计。评委最可能追问的就是：‘如果腾讯也做一个小程序，你凭什么活下来？’\n\n## 从策略空间看，你并不只有一种走法\n- 路径A（供给驱动）：放弃泛泛的‘有技能的学生’，全力攻破一个垂直技能社群（例如，某个大学的设计协会），成为他们的‘官方接单平台’。用深度合作换取第一批高质量、有声誉的供给，再用这批供给作为招牌去吸引需求。这能快速建立口碑和差异化，但市场天花板可能较低。\n- 路径B（需求驱动）：不做开放平台，先成为一个‘解决方案供应商’。主动承接校园周边商家的设计、视频需求（如奶茶店菜单、社团招新视频），然后反向招募和组队学生来完成。你扮演项目经理和质量把关人。这能确保初期有真实交易和收入，但较重，规模化慢。\n- 路径C（场景切入）：放弃‘撮合平台’的大帽子，聚焦一个高频、标准化的小场景。例如，只做‘PPT美化’或‘简历优化’，因为这类需求明确、交付标准相对清晰、客单价低、决策快，更容易实现单点突破和自动化匹配。之后再横向扩展。这最符合‘精益创业’的评委偏好，但需要你敢做减法。\n- 路径D（工具赋能）：先不做撮合，做一个帮助技能学生展示作品集、生成报价单、管理合同的小工具（小程序）。先以工具属性获取供给端用户，积累数据和信任，再自然过渡到推荐需求。这能降低冷启动难度，但离最终商业模式较远，竞赛叙事需要精心设计。\n\n## 如果继续往下拆，我还会重点看这些地方\n- ‘中小商家’这个需求侧定义过于模糊。校园周边的打印店、新开的小餐馆，和线上初创公司，他们的需求频率、预算、对学生能力的信任度天差地别。你需要立刻收敛到其中一类。\n- 你忽略了‘平台治理’这个隐形成本。即使只有100个用户，也会出现纠纷、爽约、质量不符的情况。你打算如何仲裁？这直接影响平台信誉和留存。\n- ‘不考虑复杂算法’可能是个正确决策，但你必须明确初期的匹配规则是什么？是人工推荐、标签搜索，还是抢单模式？不同的规则会塑造完全不同的社区文化和运营负担。\n\n## 可以顺手借用的外部视角\n- 案例参考：看看‘猪八戒网’早期的发家史，它并不是一开始就做全品类平台，而是从‘网站设计’这个当时需求旺盛且相对标准的品类切入，聚集了一批威客（供给），才逐步扩张。‘在行’（现‘脉脉高聘’）也是先通过运营，聚集了一批行业专家（供给），再开放需求侧。\n- 行业事实：在双边市场中，补贴需求侧（给买家优惠）通常比补贴供给侧（给卖家奖励）更能快速启动，因为买家决策更简单，且一个买家可以产生多笔交易。但你需要想清楚，你最初的补贴‘弹药’从哪来？\n- 跨学科框架：可以借鉴‘看板管理’思维。不要想着一下子建成平台，而是先可视化整个‘技能服务交付’的全流程（从需求发布到付款完结），找到当前现实中效率最低、痛点最明显的那个环节（比如，需求描述不清导致反复沟通），用你的产品先解决这一个环节的问题。\n\n## 你下一步最该先盯住的一点\n现在最该先攻的一点，不是画原型图，而是立刻去验证：在你预设的场景里，是否存在一群‘有技能但现有渠道不够用’的学生，以及一群‘愿意尝试学生服务并为此付费’的真实买家。你需要为这个最小假设找到哪怕一个证据。\n\n## 我建议你先追问自己这几个问题\n- 你能立刻说出3个你认识的有技能（比如PS很好）的同学吗？他们最近一次通过什么渠道、帮谁、做了什么事、赚了多少钱？这个过程里，最大的不爽是什么？\n- 校园里哪一类小商家（奶茶店、健身房、考研机构？）最可能有持续的设计/文案需求？你能找到一家店的老板，花10分钟问问他现在是怎么解决这些需求的，预算多少，对学生团队有什么顾虑吗？\n- 如果让你明天就促成第一笔交易，你会选择上面哪个技能和哪个需求来匹配？为什么是这一单而不是别的？促成它需要你额外做什么（比如担保、修改次数约定）？\n\n## 这次主要依据\n本次分析基于通用商业常识和经典双边市场启动案例（如猪八戒网、在行），未联网获取实时数据。",
+            "tools_used": [
+              "diagnosis",
+              "rag",
+              "kg_extract",
+              "web_search",
+              "hypergraph"
+            ]
+          },
+          "analyst": {
+            "agent": "风险分析师",
+            "analysis": "作为投资人，我首先肯定你对“校园技能撮合”赛道的直觉判断，其社会价值和市场潜力是成立的。然而，你当前“用户多了就能跑起来”的假设，以及“先做小程序跑起来再说”的策略，暴露了你对平台型创业核心挑战——**冷启动**——的认知过于乐观，这将是评委追问的焦点，并可能直接导致项目叙事断裂。\n\n**1. “自然增长”是最大的认知陷阱，核心风险是双边市场的“鸡与蛋”死循环。**\n你提到“供需两边都会自然增长”，这在逻辑上不成立。技能撮合平台不具备社交或内容平台的单边网络效应（如微信、抖音），其价值完全取决于另一端用户的密度和质量。在平台初期，供给侧（技能学生）看不到足够多的优质订单，就没有动力完善资料、响应需求；需求侧（中小商家）看不到足够多的可靠服务者，就不会发布预算。这是一个经典的“冷启动”难题。你的项目目前没有给出任何打破这一循环的具体、可控的启动策略，这是致命的可行性漏洞。评委必然会追问：“你的前100个供给方和需求方，你具体打算从哪里、用什么方法、花多少成本找来？”\n\n**2. 忽视现有替代方案的强度，是需求侧（H5）和供给侧（H2）渠道风险的共同根源。**\n教练分析已指出，学生有猪八戒、闲鱼、熟人介绍等成熟渠道；商家有成熟工作室或专业外包平台。你的平台凭什么吸引他们迁移？你计划“先只做一个小程序”，这意味着在产品体验和匹配效率上短期内无法超越现有方案。那么，你的核心价值主张必须极其锋利。例如，你是否能通过“校友背书”、“校园场景专属”（如快速响应校内活动需求）或“极低佣金试运行”来创造差异化吸引力？目前草案中缺乏这种针对性的价值锚点。你需要具体验证：在你的目标校园里，有多少比例的有技能学生**当前**在通过哪些渠道接单？他们最大的不满是什么？这些不满是否足以驱动他们尝试一个新平台？\n\n**3. 策略过于粗放，缺乏从0到1的可行路径和验证思路。**\n“先跑起来再说”的策略在平台创业中风险极高，因为错误的启动可能迅速耗尽种子用户信任，形成“平台不靠谱”的负面口碑，再无翻身机会。你应该思考更精细的启动策略，例如：\n*   **单点突破**：是否可以从一个技能（如PPT美化）、一个需求场景（如校园周边小店的海报设计）、甚至一所学校开始，集中资源打透，验证匹配闭环，再横向复制？这比做一个泛泛的技能平台更容易成功。\n*   **非对称启动**：是否可以优先搞定一端？例如，先以“免费为本地50家小微商家提供一次品牌诊断”为钩子，积累起一批初始需求，再带着这些真实需求去招募学生供给方，这样对学生的吸引力会大得多。\n*   **验证什么**：你需要验证的不是“有没有需求”这种泛泛的问题，而是具体的判断，例如：“信息管理专业的大三学生，是否愿意为了一单预算300元、交付周期3天的公众号排版需求，放弃闲鱼上熟悉的交易模式，来我们平台完成从注册、上传作品到接单的全流程？” 这个流程的转化率数据，才是真正的试金石。\n\n**总结与建议：**\n你的项目卡在了从“好想法”到“可执行计划”的关键一跃。当前最大的风险是**冷启动策略缺失**，这直接导致渠道不可达（H2）和需求证据不足（H5）。在路演中，如果你无法清晰阐述如何用最小成本、最快速度获取第一批高质量的双边用户并让他们完成交易，评委将判定项目不可行。\n\n**你需要立刻深挖并准备回答：**\n1.  **启动策略**：你的“第一个校园”选在哪里？具体如何说服第一批（比如20个）技能学生入驻？你给他们看得见的“诱饵”是什么（是首批订单，还是流量承诺）？\n2.  **差异化价值**：与闲鱼/猪八戒相比，你解决了一个他们解决不了的什么**具体痛点**？（例如：闲鱼上设计需求描述不专业，沟通成本高，你的平台能否通过标准化需求模板和校园经理初审来解决？）\n3.  **早期指标**：在MVP（最小可行产品）阶段，你认为最关键的一个运营指标是什么？是“首单成交时间”，还是“双边用户留存率”？你打算如何优化它？\n\n把这些问题想透，你的项目才能从空中楼阁落到实地。",
+            "tools_used": [
+              "diagnosis",
+              "kg_analysis",
+              "hypergraph_student",
+              "hypergraph"
+            ]
+          },
+          "advisor": {
+            "agent": "竞赛顾问",
+            "analysis": "## 竞赛评估总览\n\n项目处于想法期，核心风险在于对‘自然增长’的假设过于乐观，未能解决双边市场的冷启动难题。评分显示，在问题定义、用户证据、商业模式等关键维度均存在显著证据缺口，导致项目说服力不足。当前方案缺乏对现有替代方案（如闲鱼、猪八戒、熟人网络）的有效差异化论证，且未提供可控的获客渠道和启动策略，这使得项目在竞赛评审中极易因可行性问题被质疑。\n\n## 当前最影响得分的风险\n- 渠道不可达：项目假设用户会自然增长，但未提供任何具体、可控的渠道来获取第一批供给侧（有技能的学生）和需求侧（中小商家）用户。在竞品和熟人网络已瓜分市场的情况下，缺乏渠道策略将直接导致项目无法启动。\n- 需求证据不足：缺乏对目标用户（如信息管理专业大三学生）在具体场景（如寻找副业）下的痛点频次、行为数据的收集与呈现。现有材料仅停留在用户画像描述，无法证明需求真实且高频。\n- 商业模式一致性断裂：价值主张（校园技能撮合）与付费对象、收入逻辑之间的关联未阐明。例如，未说明是向需求侧收费、供给侧收费还是平台抽成，也未解释在冷启动阶段如何说服任何一方付费。\n- 路演叙事断裂：材料结构松散，未能构建一个从问题痛点到解决方案、再到市场验证的连贯故事线，导致评委难以快速理解项目核心价值与可行性。\n\n## Rubric 逐项评分\n\n### 问题定义（权重 10%）\n- **Estimated Score**: 1.8/5\n- **Missing Evidence**: 缺少明确的目标用户、场景边界或痛点频次证据；当前已触发“需求证据不足”，说明这项证据链还不够扎实。；文本过短\n- **24h Fix**: 补一页“目标用户-场景-痛点”对照表，至少写清1类核心用户、1个高频场景、3条真实痛点表述。\n- **72h Fix**: 完成8份深访或等价证据收集，形成痛点频次统计，并据此重写问题定义页。\n\n### 用户证据强度（权重 15%）\n- **Estimated Score**: 1.8/5\n- **Missing Evidence**: 缺少访谈原话、问卷样本、使用数据或行为证据；当前已触发“需求证据不足”，说明这项证据链还不够扎实。；文本过短\n- **24h Fix**: 整理现有用户反馈，至少补3条原话或3组行为数据，做成证据页。\n- **72h Fix**: 完成一轮结构化访谈/测试，形成样本说明、结论和反证样本。\n\n### 方案可行性（权重 10%）\n- **Estimated Score**: 2.0/5\n- **Missing Evidence**: 缺少技术路线、MVP验证结果、资源匹配或交付路径；文本过短\n- **24h Fix**: 补一页“当前能做什么/不能做什么”的MVP边界和技术实现路径。\n- **72h Fix**: 拿出一轮真实测试结果，说明功能可用性、成本或效果指标。\n\n### 商业模式一致性（权重 15%）\n- **Estimated Score**: 1.8/5\n- **Missing Evidence**: 缺少价值主张、付费对象、渠道与收入逻辑的一致性说明；当前已触发“渠道不可达”，说明这项证据链还不够扎实。；文本过短\n- **24h Fix**: 画出简版商业闭环：谁付费、为什么付费、通过什么渠道触达、钱怎么回来。\n- **72h Fix**: 补一版更完整的商业模式画布，并用小样本验证至少一个付费或转化假设。\n\n### 市场与竞争（权重 10%）\n- **Estimated Score**: 2.0/5\n- **Missing Evidence**: 缺少竞品矩阵、市场口径拆分或差异化论证；文本过短\n- **24h Fix**: 补3个直接/间接竞品，做一个功能-用户-价格-差异矩阵。\n- **72h Fix**: 重做TAM/SAM/SOM，并说明你第一阶段真正能切到哪一小块市场。\n\n### 财务逻辑（权重 10%）\n- **Estimated Score**: 2.0/5\n- **Missing Evidence**: 缺少成本、定价、单位经济或现金流假设；文本过短\n- **24h Fix**: 补最小财务表：单次服务成本、定价、毛利和一个月运营假设。\n- **72h Fix**: 完成CAC/LTV/BEP三表，并解释关键参数是如何估出来的。\n\n### 创新与差异化（权重 10%）\n- **Estimated Score**: 2.0/5\n- **Missing Evidence**: 缺少可验证创新点、技术壁垒或替代性说明；文本过短\n- **24h Fix**: 用1页明确回答：相比现有方案，你们到底多了什么不可替代价值。\n- **72h Fix**: 补实验、对照、专利/算法/数据壁垒或产品留存机制的证明材料。\n\n### 团队与执行（权重 5%）\n- **Estimated Score**: 2.0/5\n- **Missing Evidence**: 缺少团队分工、关键能力匹配或阶段里程碑；文本过短\n- **24h Fix**: 补团队分工页，明确谁负责产品、技术、运营、答辩。\n- **72h Fix**: 给出未来12周里程碑表，每阶段对应可交付物和负责人。\n\n### 路演表达与材料（权重 5%）\n- **Estimated Score**: 1.9/5\n- **Missing Evidence**: 缺少有说服力的叙事结构、关键数据页或评委友好的表达；当前已触发“路演叙事断裂”，说明这项证据链还不够扎实。；文本过短\n- **24h Fix**: 重排路演目录，确保“问题-方案-证据-市场-模式-团队”顺序清楚。\n- **72h Fix**: 做一次模拟路演录屏，按问答反馈重写开场页、证据页和结尾页。\n\n## 评委可能会追问\n- 你提到平台用户多了就能跑起来，但第一批种子用户从哪里来？请给出具体的、可执行的获客渠道和运营动作，比如你们计划通过校园社团合作还是商家地推？\n- 市场上已经有闲鱼、猪八戒网甚至豆瓣小组等平台提供技能服务撮合，学生和商家为什么非要选择你们这个新平台？请用具体数据或案例说明你们的不可替代性。\n- 你的目标用户之一是‘中小商家’，但他们通常对交付质量和稳定性要求较高。你如何证明大学生技能者能满足他们的需求？是否有过试点订单或合作案例？\n- 你们的商业模式中，谁付费？为什么愿意付费？请给出定价依据和至少一个愿意付费的假设用户样本。\n- 你提到‘先做小程序，不考虑复杂算法’，但小程序如何解决供需匹配的效率问题？如果初期依赖人工撮合，你们的运营成本和时间成本如何控制？\n\n## 答辩应对建议\n- 避免使用‘自然增长’‘跑起来再说’等模糊表述。取而代之，应明确陈述冷启动策略，例如：‘我们计划通过与3个校园设计社团合作，首批招募50名经过审核的技能供给方；同时通过本地中小商家商会进行地推，获取20个试点需求订单，完成闭环验证。’\n- 当被问及竞品时，不要否认竞品存在。应承认闲鱼、猪八戒等平台的成熟度，但聚焦于校园场景的独特价值：例如，‘我们的差异化在于深度聚焦校园场景，通过同学身份认证和课程项目关联，构建更高的初始信任度，这是泛平台无法提供的。’并准备好具体案例或访谈片段支撑。\n- 对于商业模式问题，必须明确回答付费主体和定价逻辑。例如：‘初期我们采用需求侧付费模式，平台抽取10%佣金。定价参考了校园兼职市场均价，并通过5个试点订单验证了商家接受度。’确保每个数字都有来源假设。\n- 在解释方案可行性时，将‘简单小程序’与明确的运营路径绑定。例如：‘我们MVP的核心不是算法，而是人工审核+社群运营。我们已经规划了首月每周8小时的运营人力投入，用于审核技能者、匹配订单和跟进交付，确保初期用户体验。’\n\n## 路演材料优化\n- 在‘问题定义’部分，增加一页‘目标用户-场景-痛点’对照表。具体列出：核心用户（如‘信息管理专业大三学生’）、高频场景（如‘学期中寻找与专业相关的设计副业’）、3条以上源自访谈或观察的真实痛点表述（例如：‘在闲鱼接单时因身份是学生而被压价’、‘熟人介绍机会不稳定且难以议价’）。\n- 新增‘用户证据’页，至少呈现3条来自潜在用户（供给侧或需求侧）的访谈原话或行为数据截图（例如：豆瓣小组相关帖子的内容分析、闲鱼上学生技能服务者的接单频率统计），用以证明痛点真实存在。\n- 在‘市场与竞争’部分，用矩阵图清晰对比3个关键竞品（如闲鱼、猪八戒网、校园任务微信群）在功能、用户群、价格和信任机制上的差异，并突出SkillBridge在‘校园身份认证’和‘课程项目整合’上的差异化定位。\n- 重排叙事顺序，确保PPT目录严格遵循‘痛点与证据 -> 解决方案与MVP -> 竞品分析与差异化 -> 商业模式与启动策略 -> 团队与里程碑’的逻辑流，删除所有模糊的愿景性描述，每页聚焦一个可验证的论点。\n\n## 当前竞赛准备度\n28/100",
+            "tools_used": [
+              "competition_llm",
+              "rubric_engine",
+              "rag_reference"
+            ],
+            "rubric_breakdown": [
+              {
+                "item": "Problem Definition",
+                "item_label": "问题定义",
+                "weight": 0.1,
+                "estimated_score_0_5": 1.8,
+                "missing_evidence": [
+                  "缺少明确的目标用户、场景边界或痛点频次证据",
+                  "当前已触发“需求证据不足”，说明这项证据链还不够扎实。",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "补一页“目标用户-场景-痛点”对照表，至少写清1类核心用户、1个高频场景、3条真实痛点表述。",
+                "minimal_fix_72h": "完成8份深访或等价证据收集，形成痛点频次统计，并据此重写问题定义页。"
+              },
+              {
+                "item": "User Evidence Strength",
+                "item_label": "用户证据强度",
+                "weight": 0.15,
+                "estimated_score_0_5": 1.8,
+                "missing_evidence": [
+                  "缺少访谈原话、问卷样本、使用数据或行为证据",
+                  "当前已触发“需求证据不足”，说明这项证据链还不够扎实。",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "整理现有用户反馈，至少补3条原话或3组行为数据，做成证据页。",
+                "minimal_fix_72h": "完成一轮结构化访谈/测试，形成样本说明、结论和反证样本。"
+              },
+              {
+                "item": "Solution Feasibility",
+                "item_label": "方案可行性",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.0,
+                "missing_evidence": [
+                  "缺少技术路线、MVP验证结果、资源匹配或交付路径",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "补一页“当前能做什么/不能做什么”的MVP边界和技术实现路径。",
+                "minimal_fix_72h": "拿出一轮真实测试结果，说明功能可用性、成本或效果指标。"
+              },
+              {
+                "item": "Business Model Consistency",
+                "item_label": "商业模式一致性",
+                "weight": 0.15,
+                "estimated_score_0_5": 1.8,
+                "missing_evidence": [
+                  "缺少价值主张、付费对象、渠道与收入逻辑的一致性说明",
+                  "当前已触发“渠道不可达”，说明这项证据链还不够扎实。",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "画出简版商业闭环：谁付费、为什么付费、通过什么渠道触达、钱怎么回来。",
+                "minimal_fix_72h": "补一版更完整的商业模式画布，并用小样本验证至少一个付费或转化假设。"
+              },
+              {
+                "item": "Market & Competition",
+                "item_label": "市场与竞争",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.0,
+                "missing_evidence": [
+                  "缺少竞品矩阵、市场口径拆分或差异化论证",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "补3个直接/间接竞品，做一个功能-用户-价格-差异矩阵。",
+                "minimal_fix_72h": "重做TAM/SAM/SOM，并说明你第一阶段真正能切到哪一小块市场。"
+              },
+              {
+                "item": "Financial Logic",
+                "item_label": "财务逻辑",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.0,
+                "missing_evidence": [
+                  "缺少成本、定价、单位经济或现金流假设",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "补最小财务表：单次服务成本、定价、毛利和一个月运营假设。",
+                "minimal_fix_72h": "完成CAC/LTV/BEP三表，并解释关键参数是如何估出来的。"
+              },
+              {
+                "item": "Innovation & Differentiation",
+                "item_label": "创新与差异化",
+                "weight": 0.1,
+                "estimated_score_0_5": 2.0,
+                "missing_evidence": [
+                  "缺少可验证创新点、技术壁垒或替代性说明",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "用1页明确回答：相比现有方案，你们到底多了什么不可替代价值。",
+                "minimal_fix_72h": "补实验、对照、专利/算法/数据壁垒或产品留存机制的证明材料。"
+              },
+              {
+                "item": "Team & Execution",
+                "item_label": "团队与执行",
+                "weight": 0.05,
+                "estimated_score_0_5": 2.0,
+                "missing_evidence": [
+                  "缺少团队分工、关键能力匹配或阶段里程碑",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "补团队分工页，明确谁负责产品、技术、运营、答辩。",
+                "minimal_fix_72h": "给出未来12周里程碑表，每阶段对应可交付物和负责人。"
+              },
+              {
+                "item": "Presentation Quality",
+                "item_label": "路演表达与材料",
+                "weight": 0.05,
+                "estimated_score_0_5": 1.9,
+                "missing_evidence": [
+                  "缺少有说服力的叙事结构、关键数据页或评委友好的表达",
+                  "当前已触发“路演叙事断裂”，说明这项证据链还不够扎实。",
+                  "文本过短"
+                ],
+                "minimal_fix_24h": "重排路演目录，确保“问题-方案-证据-市场-模式-团队”顺序清楚。",
+                "minimal_fix_72h": "做一次模拟路演录屏，按问答反馈重写开场页、证据页和结尾页。"
+              }
+            ],
+            "judge_questions": [
+              "你提到平台用户多了就能跑起来，但第一批种子用户从哪里来？请给出具体的、可执行的获客渠道和运营动作，比如你们计划通过校园社团合作还是商家地推？",
+              "市场上已经有闲鱼、猪八戒网甚至豆瓣小组等平台提供技能服务撮合，学生和商家为什么非要选择你们这个新平台？请用具体数据或案例说明你们的不可替代性。",
+              "你的目标用户之一是‘中小商家’，但他们通常对交付质量和稳定性要求较高。你如何证明大学生技能者能满足他们的需求？是否有过试点订单或合作案例？",
+              "你们的商业模式中，谁付费？为什么愿意付费？请给出定价依据和至少一个愿意付费的假设用户样本。",
+              "你提到‘先做小程序，不考虑复杂算法’，但小程序如何解决供需匹配的效率问题？如果初期依赖人工撮合，你们的运营成本和时间成本如何控制？"
+            ],
+            "defense_tips": [
+              "避免使用‘自然增长’‘跑起来再说’等模糊表述。取而代之，应明确陈述冷启动策略，例如：‘我们计划通过与3个校园设计社团合作，首批招募50名经过审核的技能供给方；同时通过本地中小商家商会进行地推，获取20个试点需求订单，完成闭环验证。’",
+              "当被问及竞品时，不要否认竞品存在。应承认闲鱼、猪八戒等平台的成熟度，但聚焦于校园场景的独特价值：例如，‘我们的差异化在于深度聚焦校园场景，通过同学身份认证和课程项目关联，构建更高的初始信任度，这是泛平台无法提供的。’并准备好具体案例或访谈片段支撑。",
+              "对于商业模式问题，必须明确回答付费主体和定价逻辑。例如：‘初期我们采用需求侧付费模式，平台抽取10%佣金。定价参考了校园兼职市场均价，并通过5个试点订单验证了商家接受度。’确保每个数字都有来源假设。",
+              "在解释方案可行性时，将‘简单小程序’与明确的运营路径绑定。例如：‘我们MVP的核心不是算法，而是人工审核+社群运营。我们已经规划了首月每周8小时的运营人力投入，用于审核技能者、匹配订单和跟进交付，确保初期用户体验。’"
+            ],
+            "ppt_adjustments": [
+              "在‘问题定义’部分，增加一页‘目标用户-场景-痛点’对照表。具体列出：核心用户（如‘信息管理专业大三学生’）、高频场景（如‘学期中寻找与专业相关的设计副业’）、3条以上源自访谈或观察的真实痛点表述（例如：‘在闲鱼接单时因身份是学生而被压价’、‘熟人介绍机会不稳定且难以议价’）。",
+              "新增‘用户证据’页，至少呈现3条来自潜在用户（供给侧或需求侧）的访谈原话或行为数据截图（例如：豆瓣小组相关帖子的内容分析、闲鱼上学生技能服务者的接单频率统计），用以证明痛点真实存在。",
+              "在‘市场与竞争’部分，用矩阵图清晰对比3个关键竞品（如闲鱼、猪八戒网、校园任务微信群）在功能、用户群、价格和信任机制上的差异，并突出SkillBridge在‘校园身份认证’和‘课程项目整合’上的差异化定位。",
+              "重排叙事顺序，确保PPT目录严格遵循‘痛点与证据 -> 解决方案与MVP -> 竞品分析与差异化 -> 商业模式与启动策略 -> 团队与里程碑’的逻辑流，删除所有模糊的愿景性描述，每页聚焦一个可验证的论点。"
+            ],
+            "prize_readiness": 28
+          },
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 4.8,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": [
+              "Value_Loop_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS05",
+            "name": "商业模式闭环断裂",
+            "match_score": 4.8,
+            "probing_layers": [
+              "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+              "渠道可达性: 你说通过XX渠道获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+              "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。"
+            ],
+            "expected_evidence": [
+              "价值主张画布",
+              "渠道成本数据",
+              "变现路径和时间表"
+            ],
+            "counterfactual": "如果你的免费用户永远不转化为付费用户，公司的现金流能撑多久？",
+            "preferred_edge_types": [
+              "Value_Loop_Edge",
+              "Execution_Gap_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "单位经济未证成",
+              "客群与价值错位",
+              "用户价值与收入混淆"
+            ],
+            "strategy_logic": "价值闭环逻辑 + 现金流生存逻辑",
+            "matched_edge_types": [
+              "Value_Loop_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 3.8,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "渠道幻觉谬误",
+          "fallacy_rule_id": "H2",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "需求证据缺失",
+          "selected_strategy_id": "CS04",
+          "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+          "generated_question": "你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+          "evidence_quotes": [
+            "用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "competition",
+          "overall_score": 4.2,
+          "score_band": "早期可塑",
+          "project_stage": "idea",
+          "bottleneck": "当前最高风险为 H2（渠道不可达），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H2",
+              "name": "渠道不可达",
+              "fallacy_label": "渠道幻觉谬误",
+              "severity": "high",
+              "explanation": "获客渠道依赖'自然增长/裂变'缺乏可控性。评委会质疑：如果裂变不起来怎么办？",
+              "fix_hint": "列出至少2条可控的付费/合作获客渠道，并估算CAC。",
+              "matched_keywords": [
+                "自然增长"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Value_Loop_Edge",
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "precision_acquisition_logic"
+              ],
+              "quote": "用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，",
+              "trigger_message": "原文片段：“用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，” → 触发「渠道不可达」，因为获客渠道依赖'自然增长/裂变'缺乏可控性。评委会质疑：如果裂变不起来怎么办？",
+              "impact": "渠道不可达会让获客计划失真，进一步影响增长预测和竞赛说服力。",
+              "fix_task": "列出至少2条可控的付费/合作获客渠道，并估算CAC。",
+              "ontology_nodes": [
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                }
+              ]
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Chain_Edge",
+                "Stakeholder_Solution_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "我们现在觉得这个平台只要用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，先跑起来再说。",
+              "trigger_message": "原文片段：“我们现在觉得这个平台只要用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，先跑起来再说。” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事断裂谬误",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "narrative_structure_logic"
+              ],
+              "quote": "我们现在觉得这个平台只要用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，先跑起来再说。",
+              "trigger_message": "原文片段：“我们现在觉得这个平台只要用户多了就能跑起来，因为供需两边都会自然增长。 另外我们打算先只做一个小程序，不考虑太复杂的撮合算法，先跑起来再说。” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "ontology_nodes": [
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 3.53,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力"
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ]
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 3.53,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ]
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.02,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合"
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设"
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试"
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果"
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ]
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 3.53,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构"
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性"
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成"
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ]
+            },
+            {
+              "item": "Market & Competition",
+              "score": 4.02,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局"
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图"
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵"
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ]
+            },
+            {
+              "item": "Financial Logic",
+              "score": 4.02,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析"
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间"
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ]
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.02,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒"
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位"
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品"
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图"
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析"
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ]
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.02,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度"
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险"
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单"
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告"
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ]
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 3.89,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构"
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ]
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "重做首批用户触达路径",
+          "description": "不要空讲增长，先把第一批用户从哪里来、怎么触达、为什么会点进来拆成一条真实路径。",
+          "template_guideline": [
+            "只保留2条最可能成功的渠道，不要同时铺太多",
+            "写清每条渠道对应的人群、触达动作、转化节点",
+            "给出每条渠道的首轮测试指标，例如点击、留资、加群或预约"
+          ],
+          "acceptance_criteria": [
+            "2条可执行渠道",
+            "每条渠道有转化节点",
+            "首轮测试指标明确"
+          ]
+        }
+      },
+      "timestamp": "2026-03-31T21:24:13.059142+08:00"
+    }
+  ]
+}

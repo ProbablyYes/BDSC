@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import json
+import re
 from pathlib import Path
 
 from app.config import settings
@@ -90,6 +91,84 @@ RULES = [
      "explanation": "强调了技术或创新性，但没有说明它给用户带来什么可感知价值。",
      "fix_hint": "把创新点翻译成用户价值语言：具体提升了什么、节省了什么、替代了什么。"},
 ]
+
+RULE_FALLACY_MAP: dict[str, str] = {
+    "H1": "价值主张失焦谬误",
+    "H2": "渠道幻觉谬误",
+    "H3": "定价拍脑袋谬误",
+    "H4": "大数幻觉谬误",
+    "H5": "需求假设谬误",
+    "H6": "竞争真空谬误",
+    "H7": "创新口号谬误",
+    "H8": "单位经济谬误",
+    "H9": "增长跳跃谬误",
+    "H10": "里程碑不实谬误",
+    "H11": "合规盲区谬误",
+    "H12": "资源错配谬误",
+    "H13": "实验设计缺陷谬误",
+    "H14": "叙事断裂谬误",
+    "H15": "评分项证据覆盖不足",
+    "H16": "替代方案盲视谬误",
+    "H17": "迁移成本忽视谬误",
+    "H18": "用户口径混淆谬误",
+    "H19": "可触达市场缺失谬误",
+    "H20": "证据-结论跳步谬误",
+    "H21": "执行无责任人谬误",
+    "H22": "风控口号谬误",
+    "H23": "创新-价值脱节谬误",
+}
+
+RULE_EDGE_MAP: dict[str, list[str]] = {
+    "H1": ["Value_Loop_Edge", "Stakeholder_Solution_Edge"],
+    "H2": ["Value_Loop_Edge", "Risk_Pattern_Edge"],
+    "H3": ["Value_Loop_Edge", "Risk_Pattern_Edge"],
+    "H4": ["Risk_Pattern_Edge"],
+    "H5": ["Evidence_Chain_Edge", "Stakeholder_Solution_Edge"],
+    "H6": ["Competitive_Landscape_Edge", "Risk_Pattern_Edge"],
+    "H7": ["Innovation_Differentiation_Edge", "Evidence_Chain_Edge"],
+    "H8": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
+    "H9": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
+    "H10": ["Execution_Dependency_Edge"],
+    "H11": ["Risk_Pattern_Edge"],
+    "H12": ["Execution_Dependency_Edge", "Risk_Pattern_Edge"],
+    "H13": ["Evidence_Chain_Edge"],
+    "H14": ["Value_Loop_Edge"],
+    "H15": ["Evidence_Chain_Edge"],
+    "H16": ["Competitive_Landscape_Edge"],
+    "H17": ["Competitive_Landscape_Edge", "Risk_Pattern_Edge"],
+    "H18": ["Financial_Logic_Edge"],
+    "H19": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
+    "H20": ["Evidence_Chain_Edge", "Risk_Pattern_Edge"],
+    "H21": ["Execution_Dependency_Edge"],
+    "H22": ["Risk_Pattern_Edge"],
+    "H23": ["Innovation_Differentiation_Edge", "Stakeholder_Solution_Edge"],
+}
+
+RULE_STRATEGY_MAP: dict[str, list[str]] = {
+    "H1": ["broad_competition_logic"],
+    "H2": ["precision_acquisition_logic"],
+    "H3": ["cashflow_survival_logic"],
+    "H4": ["market_sizing_logic"],
+    "H5": ["evidence_validation_logic"],
+    "H6": ["broad_competition_logic"],
+    "H7": ["evidence_validation_logic"],
+    "H8": ["cashflow_survival_logic"],
+    "H9": ["market_sizing_logic", "cashflow_survival_logic"],
+    "H10": ["execution_feasibility_logic"],
+    "H11": ["compliance_risk_logic"],
+    "H12": ["execution_feasibility_logic"],
+    "H13": ["evidence_validation_logic"],
+    "H14": ["narrative_structure_logic"],
+    "H15": ["evidence_validation_logic"],
+    "H16": ["broad_competition_logic"],
+    "H17": ["broad_competition_logic", "precision_acquisition_logic"],
+    "H18": ["cashflow_survival_logic"],
+    "H19": ["market_sizing_logic", "precision_acquisition_logic"],
+    "H20": ["evidence_validation_logic"],
+    "H21": ["execution_feasibility_logic"],
+    "H22": ["compliance_risk_logic"],
+    "H23": ["evidence_validation_logic", "broad_competition_logic"],
+}
 
 RUBRICS = [
     {"item": "Problem Definition", "weight": 0.1, "evidence": ["痛点", "场景", "用户画像"], "rules": ["H1", "H5"]},

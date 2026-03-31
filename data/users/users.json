@@ -194,5 +194,48 @@
     "password_hash": "a445ebdc2cd2efdceb908f79038608b7abef142354443612b2c4b33fa5dd18bc",
     "created_at": "2026-03-29T18:00:35.407821+08:00",
     "updated_at": "2026-03-29T18:00:35.407821+08:00"
+  },
+  {
+    "user_id": "a64a1865-121d-44d4-8062-cd86e93cc10f",
+    "role": "student",
+    "display_name": "用户6233",
+    "email": "15825956233@phone.local",
+    "phone": "15825956233",
+    "student_id": null,
+    "class_id": null,
+    "cohort_id": null,
+    "bio": "",
+    "password_salt": "3b9123562641fa0d4c352f6f14503657",
+    "password_hash": "8de0bbee19a4993a1ddfd46e2ff2318ef97bd9986d81ea0fd7fec165f1c14766",
+    "created_at": "2026-03-31T15:39:54.884743+08:00",
+    "updated_at": "2026-03-31T15:39:54.884743+08:00"
+  },
+  {
+    "user_id": "c59cb20f-c694-47ab-88cb-3010adfe01f1",
+    "role": "student",
+    "display_name": "你的名字",
+    "email": "000101",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "b40550ab4602cc3fe1e4fbdb12e11fc0",
+    "password_hash": "74bc16dd4e20f78a68a1c3490e51edbd072b9553696cd9abdcdb1c51a78f357c",
+    "created_at": "2026-03-31T15:59:47.830897+08:00",
+    "updated_at": "2026-03-31T15:59:47.830897+08:00"
+  },
+  {
+    "user_id": "de63d07a-f32b-4cf2-9b63-76b1bf2cf61c",
+    "role": "admin",
+    "display_name": "admin1",
+    "email": "123456",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "cefd3d27d87f41c1db0a1c949b6e613c",
+    "password_hash": "aa3f08e31f9b9dd10f7d136a0ac82bb720568d3c9e3d681d94c25f72af1f25b0",
+    "created_at": "2026-03-31T16:11:13.274205+08:00",
+    "updated_at": "2026-03-31T16:11:13.274205+08:00"
   }
 ]

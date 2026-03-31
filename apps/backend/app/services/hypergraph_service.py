@@ -534,6 +534,20 @@ class HypergraphService:
             return ""
         return self._alias_to_rule.get(raw, raw)
 
+    @staticmethod
+    def _unique_texts(items: list[Any], max_items: int = 20) -> list[str]:
+        """Deduplicate and clean a list of text values, preserving order."""
+        seen: set[str] = set()
+        out: list[str] = []
+        for v in items or []:
+            t = str(v or "").strip()
+            if t and t not in seen:
+                seen.add(t)
+                out.append(t)
+            if len(out) >= max_items:
+                break
+        return out
+
     def _expand_rule_ids(self, values: list[Any] | None, max_items: int = 12) -> list[str]:
         out: list[str] = []
         seen: set[str] = set()

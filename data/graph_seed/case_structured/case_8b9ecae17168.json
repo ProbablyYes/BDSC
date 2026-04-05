@@ -1,5 +1,6 @@
 {
   "case_id": "case_8b9ecae17168",
+  "document_id": "doc_69389479b5b0",
   "source": {
     "file_path": "科技创新/推送家商业计划书2020-GACC.pdf",
     "file_name": "推送家商业计划书2020-GACC.pdf",
@@ -15,82 +16,104 @@
   "document_stats": {
     "segment_count": 21,
     "full_text_chars": 27308,
-    "core_text_chars": 27308,
+    "core_text_chars": 22708,
     "appendix_start_index": null,
-    "has_appendix_evidence": false
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 22,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 22,
+    "hypergraph_hyperedge_count": 1
   },
   "project_profile": {
-    "project_name": "推送家商业计划书2020-GACC",
+    "project_name": "PushPlus",
     "target_users": [
-      "中小微企业新媒体运营岗位从业者",
-      "全日制本科大学中各级微信公众号运营者",
-      "自由设计行业从业者"
+      "新媒体内容创作者"
     ],
     "pain_points": [
-      "新媒体代排版设计市场分散，普通消费者很难直接与设计者取得联系",
-      "现有工具缺乏自动化、智慧化"
+      "新媒体内容排版设计需求量大",
+      "传统排版设计耗时耗力"
     ],
     "solution": [
-      "提供AI智慧自动排版工具和专业设计服务",
-      "建立新媒体交易云平台",
-      "提供一站式服务"
+      "AI智慧自动排版技术",
+      "专业代排版设计服务"
     ],
     "innovation_points": [
-      "双向开放的生态，而非单项闭环的平台",
-      "融合AI智慧排版与专业设计服务",
-      "提供兼职机会给新媒体相关技能的设计师"
+      "AI智慧排版",
+      "专业设计服务结合"
     ],
     "business_model": [
-      "基于交易佣金的商业模式",
-      "付费的订阅会员服务",
-      "平台保障性补贴"
+      "提供AI智慧排版和专业设计服务",
+      "周销售单量超10万"
     ],
     "market_analysis": [
-      "新媒体市场前景巨大",
-      "国内新媒体设计市场存在巨大需求",
-      "AI智慧设计涉及高专业素养和数据积累"
+      "新媒体市场价值超百亿",
+      "中国新媒体消费者日均阅读时间76.8分钟"
     ],
     "execution_plan": [
-      "完全建成智排技术系统和匠排交易系统",
-      "组建专业市场营销团队",
-      "提高用户对品牌忠诚度",
-      "灵活调整团队策略，建立有吸引力的人才发展规划"
+      "一年半潜心研发和业务拓展",
+      "拥有7名核心成员和数十人设计师团队"
     ],
     "risk_control": [
-      "灵活调整团队策略",
-      "加大品牌宣传力度",
-      "提高用户粘度"
+      "【通用风险控制】AI技术风险，通过持续研发和测试控制，确保技术稳定性和创新性",
+      "【通用风险控制】市场竞争风险，通过SWOT分析和市场调查数据，制定差异化竞争策略",
+      "【通用风险控制】人才流失风险，通过扁平化高效治理体制和团队建设实践，提高团队凝聚力"
     ]
   },
-  "risk_flags": [
-    "market_size_fallacy"
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H3",
+    "risk_rule:H5"
   ],
   "evidence": [
     {
       "id": "case_8b9ecae17168_e1",
-      "type": "user_evidence",
+      "type": "market_analysis_evidence",
       "quote": "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
-      "chunk_id": "C3",
-      "source_unit": "page_6"
+      "chunk_id": "C1",
+      "source_unit": "page_1"
     },
     {
       "id": "case_8b9ecae17168_e2",
-      "type": "business_model_evidence",
-      "quote": "「匠排」产品采用基于交易佣金的商业模式，加之付费的订阅会员服务构成完整的盈利蓝图。",
-      "chunk_id": "C5",
-      "source_unit": "page_9"
+      "type": "market_analysis_evidence",
+      "quote": "根据安永（Ernst & Young）在2016年发表的市场研究表明，中国新媒体消费者中，平均每天用于阅读新媒体内容的时间达到了76.8分钟。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
     },
     {
       "id": "case_8b9ecae17168_e3",
-      "type": "risk_evidence",
-      "quote": "推送家作为平台型的一站式新媒体设计交易云，除了服务「智排」用户外，还需要积累大量的优质新媒体设计资源供应者（排版设计师），不论资金还是行业门槛都相对较高。",
-      "chunk_id": "C7",
-      "source_unit": "page_12"
+      "type": "business_model_evidence",
+      "quote": "在国内主流电商“淘宝”一搜便知，推送代排版设计需求量巨大，周平均销售单量超过100000。",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_8b9ecae17168_e4",
+      "type": "execution_plan_evidence",
+      "quote": "经过一年半的潜心研发和业务拓展，推送家团队目前拥有7名核心成员和1个数十人规模的「匠排」认证设计师（SmartPlus Certificated）团队。",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
     }
   ],
   "rubric_coverage": [
     {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
       "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
       "covered": true
     },
     {
@@ -98,7 +121,23 @@
       "covered": true
     },
     {
-      "rubric_item": "Risk Control",
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
       "covered": true
     }
   ],
@@ -107,8 +146,176 @@
   "llm": {
     "enabled": true,
     "provider": "qwen",
-    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
     "used": true
   },
-  "generated_at": "2026-03-08T13:39:54Z"
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:42:08Z",
+  "risk_flags": [
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中提到新媒体内容排版设计需求量大，传统排版设计耗时耗力，有用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中提到需求量巨大，但未提供具体的访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中提到AI智慧自动排版技术和专业代排版设计服务，技术路线与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中提到周销售单量超10万，商业模式包括AI智慧排版和专业设计服务，形成闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中提到新媒体市场价值超百亿，日均阅读时间76.8分钟，需求量巨大，且有竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "文本中提到周销售单量超10万，但未提供具体的财务数据或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中提到AI智慧排版与专业设计服务结合，具有可验证的竞争优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中提到团队拥有7名核心成员和数十人设计师团队，且有明确的业务拓展时间表。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 9.0,
+      "reason": "文本结构完整，数据有说服力，且获得多个奖项和资助。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提到获客渠道难以有效触达目标用户的情况。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "周销售单量超10万",
+      "reason": "文本中提到定价/收费但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到新媒体市场价值超百亿，市场规模口径合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "需求量巨大",
+      "reason": "文本中提到需求量巨大但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到竞品分析，未声称无竞品或无竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到AI智慧排版与专业设计服务结合，创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提供具体的财务数据，但未出现明显的单位经济不成立的情况。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现‘只要拿下1%市场’等自上而下估算的情况。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到一年半的潜心研发和业务拓展，时间表和里程碑较为现实。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未涉及高风险领域的合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到AI智慧排版技术，技术路线与资源匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提到实验/测试的具体样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中叙事结构完整，未出现断裂或跳跃。"
+    },
+    {
+      "id": "H15",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中多个关键Rubric维度均有支撑证据。"
+    }
+  ]
 }

@@ -1,0 +1,371 @@
+{
+  "case_id": "case_1d74266e7f96",
+  "document_id": "doc_053bd8bd6383",
+  "source": {
+    "file_path": "社会公益/海角公益在线支教平台.pdf",
+    "file_name": "海角公益在线支教平台.pdf",
+    "category": "社会公益",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 69,
+    "full_text_chars": 56480,
+    "core_text_chars": 42604,
+    "appendix_start_index": 2,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 70,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 70,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "海角公益",
+    "target_users": [
+      "教育资源匮乏地区的学生群体",
+      "乡村教师"
+    ],
+    "pain_points": [
+      "教育资源分配不均",
+      "部分地区教育资源缺失",
+      "乡村教师培训不足"
+    ],
+    "solution": [
+      "提供一对一、一对多在线教育服务平台",
+      "利用名校师资和高校资源提供高质量教育"
+    ],
+    "innovation_points": [
+      "自主研发双向互动视频授课教室技术",
+      "结合社会教育机构和广告商资源实现可持续运营"
+    ],
+    "business_model": [
+      "为社会教育机构提供有偿入驻服务",
+      "提供“学霸笔记”资源有偿下载",
+      "依托网站流量吸引广告商投资",
+      "拓展至公益家教领域"
+    ],
+    "market_analysis": [
+      "已服务10个省市，30所中小学，1万人次",
+      "累计视频授课时间达3万小时",
+      "与多所985高校和公益机构合作"
+    ],
+    "execution_plan": [
+      "2014年6月至9月联合高校开展暑期“爱心支教”活动",
+      "与思源公益合作开展吉林、甘肃、贵州等地区的在线教育项目",
+      "不断吸纳高校志愿者并协助高校开展公益教育项目"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】确保在线教育内容符合教育部门要求，保护学生隐私"
+    ]
+  },
+  "tags": [
+    "category:社会公益",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_1d74266e7f96_e1",
+      "type": "user_evidence",
+      "quote": "为教育资源匮乏地区的学生群体带去学习机会",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e2",
+      "type": "pain_points_evidence",
+      "quote": "改善教育分配不均，改善部分地区教育资源缺失问题",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e3",
+      "type": "solution_evidence",
+      "quote": "提供一对一、一对多在线教育服务平台",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e4",
+      "type": "innovation_points_evidence",
+      "quote": "自主研发的海角双向互动视频授课教室技术",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e5",
+      "type": "business_model_evidence",
+      "quote": "成立初期组织通过为社会教育机构提供有偿入驻、“学霸笔记”资源有偿下载等服务获得收入",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_1d74266e7f96_e6",
+      "type": "market_analysis_evidence",
+      "quote": "现阶段网站累计服务10个省市，30所中小学，服务1万人次，累计视频授课时间达3万个小时",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e7",
+      "type": "execution_plan_evidence",
+      "quote": "2014年6月至9月将联合各大高校开展暑期“爱心支教”在线支教活动和乡村教师培训计划并与思源公益合作开展吉林、甘肃、贵州等偏远地区的在线教育公益项目",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_1d74266e7f96_e8",
+      "type": "risk_evidence",
+      "quote": "确保在线教育内容符合教育部门要求，保护学生隐私",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e9",
+      "type": "risk_evidence",
+      "quote": "通过实际服务数据验证教育效果，确保公益目标可实现",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_1d74266e7f96_e10",
+      "type": "risk_evidence",
+      "quote": "定期收集和分析教学反馈，持续优化课程内容和服务质量",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 执行总结 1 1 执行总结 1.1 海角公益 海角公益组织是一家以提供线上教育服务为龙头， 研发完善线上软件为依托， 致力于改 善教育分配不均， 改善部分地区教育资源缺失问题的民办非营利机构。 本机构将依托自主研 发的海角双向互动视频授课教室技术， 为教育资源匮乏地区的学生群体带去学习机会， 是一 家社会公益机构。 现阶段海角将专注于线上教育软件研发， 以“让爱和教育没有距离 ”为组织理念，凭 借自身的研发能力和管理优势，为教育资源稀缺地区提供高质量的线上教育和完善的教育 服务。本组织将凭借授课教室技术和名校师资， 依托各大高校资源， 开展在线支教、 爱心家 教、 乡村教师培训等多项公益活动， 进一步提升资源匮乏地区教育水平， 不断扩大公益范围， 帮助更多的孩子体验现代教育。 本公益组织成立已 1 年，已成功与上海交通大学教务处、 家教部、 生活园区等部门， 教 育部易班中心、中国好大学在线、TECC 公益、思源公益等机构，上海交通大学、华东师范 大学等 985 名校签署合作协议， 更有百余所高校陆续加盟海角公益。 我们将不断吸纳高校志 愿者并协助高校开展公益教育项目。 海角公益组",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:35:34Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了教育资源匮乏地区的学生群体和乡村教师培训不足的问题，有具体的用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了已服务10个省市，30所中小学，1万人次，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了利用名校师资和高校资源提供在线教育服务，自主研发双向互动视频授课教室技术，技术路线与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目通过为社会教育机构提供有偿入驻服务和“学霸笔记”资源有偿下载获得收入，商业模式与公益目标形成了一定的闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目提到了与多所985高校和公益机构合作，但未详细说明市场规模和竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了收入来源，但未提供具体的财务数据和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目强调了自主研发的双向互动视频授课教室技术，以及结合社会教育机构和广告商资源实现可持续运营的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目团队已与多所高校和公益机构合作，有明确的里程碑和可交付物。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目材料结构完整，提供了具体的数据和合作案例，具有较强的说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目明确指出为教育资源匮乏地区的学生群体提供高质量的线上教育和完善的教育服务。",
+      "reason": "项目目标用户与价值主张匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目已成功与多所高校和公益机构合作，渠道较为明确。",
+      "reason": "项目渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到为社会教育机构提供有偿入驻服务和“学霸笔记”资源有偿下载，但未提供用户支付意愿的验证。",
+      "reason": "项目提到定价/收费但缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了与多所985高校和公益机构合作，但未详细说明市场规模。",
+      "reason": "市场规模口径未出现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到了已服务10个省市，30所中小学，1万人次，但未提供具体的用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了与多所985高校和公益机构合作，但未详细说明竞品分析。",
+      "reason": "项目未声称无竞品或无竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目强调了自主研发的双向互动视频授课教室技术，以及结合社会教育机构和广告商资源实现可持续运营的创新点。",
+      "reason": "项目创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到通过为社会教育机构提供有偿入驻服务和“学霸笔记”资源有偿下载获得收入，但未提供具体的财务数据和单位经济分析。",
+      "reason": "项目单位经济不成立，可能存在长期亏损风险。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未出现‘只要拿下1%市场’等自上而下估算。",
+      "reason": "项目增长逻辑未出现跳跃。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目团队已与多所高校和公益机构合作，有明确的里程碑和可交付物。",
+      "reason": "项目里程碑可交付。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到确保在线教育内容符合教育部门要求，保护学生隐私。",
+      "reason": "项目合规/伦理意识较强。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目自主研发双向互动视频授课教室技术，技术路线与资源匹配。",
+      "reason": "项目技术路线与资源匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未提到实验/测试，但已实际运营并积累了大量服务数据。",
+      "reason": "项目实验设计未出现不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构完整，提供了具体的数据和合作案例。",
+      "reason": "项目路演叙事未出现断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目在用户证据强度、财务逻辑等方面缺乏支撑证据。",
+      "reason": "项目多个关键 Rubric 维度缺乏支撑证据。"
+    }
+  ]
+}

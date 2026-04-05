@@ -1,0 +1,352 @@
+{
+  "case_id": "case_f5812729209d",
+  "document_id": "doc_6a81c775c6db",
+  "source": {
+    "file_path": "医疗健康/536445-慧警康策——智能疾病预警与辅助诊断系统-项目策划书-41a38e4d.pdf",
+    "file_name": "536445-慧警康策——智能疾病预警与辅助诊断系统-项目策划书-41a38e4d.pdf",
+    "category": "医疗健康",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 78,
+    "full_text_chars": 61216,
+    "core_text_chars": 1152,
+    "appendix_start_index": 5,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 79,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 79,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "慧警康策——智能疾病预警与辅助诊断系统",
+    "target_users": [],
+    "pain_points": [
+      "疾病预警和信息检索不准确",
+      "疾病诊断精度不高"
+    ],
+    "solution": [
+      "融合知识图谱技术提供疾病预警、信息检索和辅助诊断服务",
+      "使用 BDCP 模型提高知识抽取的鲁棒性"
+    ],
+    "innovation_points": [
+      "提出鲁棒小样本实体识别方法",
+      "构建多模态医学领域知识图谱",
+      "改进 KIM 模型用于医学辅助诊断"
+    ],
+    "business_model": [
+      "为医生和患者提供精准医学知识服务",
+      "主要收入来源为平台服务费"
+    ],
+    "market_analysis": [
+      "优于对比的基线模型，具有广泛的应用前景"
+    ],
+    "execution_plan": [
+      "已在中国医学科学院医学知识综合服务平台投入应用"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】合规与伦理意识：确保患者数据隐私和安全，符合医疗行业标准",
+      "【逻辑自洽与闭环】逻辑自洽性检查：通过实验验证模型的有效性和可行性，确保结果可交付"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_f5812729209d_e1",
+      "type": "user_evidence",
+      "quote": "为医生和患者提供具有较高可信度的疾病预警、信息检索和辅助诊断服务。",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_f5812729209d_e2",
+      "type": "pain_points",
+      "quote": "多模态智能疾病检索预警系统聚焦于疾病预警和信息检索；智能医疗辅助诊断系统侧重于疾病的诊断。",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_f5812729209d_e3",
+      "type": "solution",
+      "quote": "通过融合知识图谱等技术，为医生和患者提供具有较高可信度的疾病预警、信息检索和辅助诊断服务。",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_f5812729209d_e4",
+      "type": "innovation_points",
+      "quote": "提出了基于边界判别和关联净化的鲁棒小样本实体识别方法。",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_f5812729209d_e5",
+      "type": "business_model_evidence",
+      "quote": "项目成果目前已在中国医学科学院医学信息技术研究所医学知识综合服务平台投入应用，为百万用户提供精准医学知识服务。",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_f5812729209d_e6",
+      "type": "market_analysis",
+      "quote": "本项目经实验比较，优于本项目对比的基线模型，具有优越的性能和广泛的应用前景。",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_f5812729209d_e7",
+      "type": "execution_plan",
+      "quote": "项目成果目前已在中国医学科学院医学信息技术研究所医学知识综合服务平台投入应用，为百万用户提供精准医学知识服务。",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_f5812729209d_e8",
+      "type": "risk_evidence",
+      "quote": "实验表明，该框架能基于患者个性化数据与医学知识，提供更准确、个性化的诊断建议，展现了在医疗领域的应用潜力。",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 慧警康策——智能疾病预警与辅助诊断系统 摘 要 智能疾病预警与辅助诊断系统是由多模态智能疾病检索预警系统和智能医 疗辅助诊断系统两大子系统组成。多模态智能疾病检索预警系统聚焦于疾病预警 和信息检索；智能医疗辅助诊断系统侧重于疾病的诊断。该系统通过融合知识图 谱等技术，为医生和患者提供具有较高可信度的疾病预警、信息检索和辅助诊断 服务。 本项目主要研究内容和创新点如下： 首先，提出了基于边界判别和关联净化的鲁棒小样本实体识别方法。首先， 在语段检测阶段，该方法引入实体边界判别模块，将令牌表示多样化地分配至相 对应最接近的组件，从而提供具有高度判别区分能力的边界表示空间。在实体分 类阶段，该方法通过最小化干扰信息和促进关联泛化以实现实体和上下文之间的 关联净化，从而减轻文本对抗攻击导致的扰动。在包含对抗样本的不同小样本命 名实体识别数据集上进行的大量实验表明了所提 BDCP 模型能够提高知识抽取 跨域迁移学习的鲁棒性。 其次，提出了基于流水线知识抽取的多模态知识图谱构建技术，并基于此构 建了多模态医学领域知识图谱用于辅助疾病检索预警。项目使用从 A+ 医学百 科、39 医学网等百科网站",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:53:12Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了疾病预警和信息检索不准确、疾病诊断精度不高的痛点，并提供了具体的应用场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到已在中国医学科学院医学知识综合服务平台投入应用，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了基于边界判别和关联净化的鲁棒小样本实体识别方法，以及多模态医学领域知识图谱构建技术，技术路线与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目的主要收入来源为平台服务费，但未详细说明客户、渠道、成本等信息，形成了一定的闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了广泛的应用前景，但未提供 TAM/SAM/SOM 的具体口径，也未进行详细的竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到主要收入来源为平台服务费，但未提供具体的财务逻辑分析，如单位经济、LTV 和 CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了鲁棒小样本实体识别方法和多模态医学领域知识图谱构建技术，具有明确的创新点和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未提供团队背景和执行能力的具体信息，里程碑也未详细说明。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，提到了实验验证和应用情况，但部分信息不够详细。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目为医生和患者提供精准医学知识服务，目标用户与价值主张匹配。",
+      "reason": "项目明确为医生和患者提供精准医学知识服务，目标用户与价值主张匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目在中国医学科学院医学知识综合服务平台投入应用，说明渠道可达。",
+      "reason": "项目已在中国医学科学院医学知识综合服务平台投入应用，说明渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到主要收入来源为平台服务费，但未提供用户支付意愿的验证。",
+      "reason": "项目提到主要收入来源为平台服务费，但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到了广泛的应用前景，但未提供 TAM/SAM/SOM 的具体口径。",
+      "reason": "项目提到了广泛的应用前景，但未提供 TAM/SAM/SOM 的具体口径。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未提供具体的用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未声称无竞品，但未进行详细的竞品分析。",
+      "reason": "项目未声称无竞品，但未进行详细的竞品分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了鲁棒小样本实体识别方法和多模态医学领域知识图谱构建技术，并进行了实验验证。",
+      "reason": "项目提出了鲁棒小样本实体识别方法和多模态医学领域知识图谱构建技术，并进行了实验验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未提供具体的财务逻辑分析，但未明确提到单位经济不成立。",
+      "reason": "项目未提供具体的财务逻辑分析，但未明确提到单位经济不成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到‘具有广泛的应用前景’，但未提供具体的增长逻辑。",
+      "reason": "项目提到‘具有广泛的应用前景’，但未提供具体的增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未提供具体的时间表或里程碑。",
+      "reason": "项目未提供具体的时间表或里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到确保患者数据隐私和安全，符合医疗行业标准。",
+      "reason": "项目提到确保患者数据隐私和安全，符合医疗行业标准。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了基于边界判别和关联净化的鲁棒小样本实体识别方法，技术路线与资源匹配。",
+      "reason": "项目提出了基于边界判别和关联净化的鲁棒小样本实体识别方法，技术路线与资源匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了实验验证模型的有效性和可行性，但未详细说明样本量和评价指标。",
+      "reason": "项目提到了实验验证模型的有效性和可行性，但未详细说明样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构完整，提到了实验验证和应用情况。",
+      "reason": "项目材料结构完整，提到了实验验证和应用情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目在多个关键 Rubric 维度（如用户证据强度、市场与竞争、财务逻辑、团队与执行）缺乏支撑证据。",
+      "reason": "项目在多个关键 Rubric 维度（如用户证据强度、市场与竞争、财务逻辑、团队与执行）缺乏支撑证据。"
+    }
+  ]
+}

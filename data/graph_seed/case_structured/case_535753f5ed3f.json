@@ -1,0 +1,298 @@
+{
+  "case_id": "case_535753f5ed3f",
+  "document_id": "doc_734c78d01cea",
+  "source": {
+    "file_path": "医疗健康/462516-灵眼守护——基于rPPG的无接触式健康监测及AI预警移动平台-项目策划书-98852d69.pdf",
+    "file_name": "462516-灵眼守护——基于rPPG的无接触式健康监测及AI预警移动平台-项目策划书-98852d69.pdf",
+    "category": "医疗健康",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 73,
+    "full_text_chars": 44223,
+    "core_text_chars": 0,
+    "appendix_start_index": 4,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 74,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 74,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "462516-灵眼守护——基于rPPG的无接触式健康监测及AI预警移动平台-项目策划书-98852d69",
+    "target_users": [
+      "独居老人",
+      "居家养老家庭",
+      "社区养老服务机构",
+      "养老院及老年公寓"
+    ],
+    "pain_points": [
+      "人口老龄化严重，独居老人缺乏及时陪伴与照料",
+      "传统监测设备（如手环）佩戴率低、充电繁琐、易产生排斥感",
+      "现有紧急救助体系不完善，突发疾病（如摔倒）难以第一时间发现"
+    ],
+    "solution": [
+      "AI实时预警平台，集成心率、呼吸率、血压及跌倒检测功能",
+      "基于国产DeepSeek大模型的个性化智能进化，实现安全脱敏的数据分析",
+      "多终端联动（手机APP、桌面机、智能床头、机器人）"
+    ],
+    "innovation_points": [
+      "纯视觉无接触感知，无需任何可穿戴设备，降低老人心理负担",
+      "多模态融合预警，结合生理数据与环境视觉信息进行摔倒精准识别",
+      "端云结合架构，保障数据实时性的同时兼顾长周期健康分析"
+    ],
+    "business_model": [
+      "养老院、老年公寓系统部署及定制化服务",
+      "智能硬件销售（智能床头、机器人）及APP增值会员服务",
+      "社区养老数据中台及适老化改造项目"
+    ],
+    "market_analysis": [],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H9"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 2 3 4 目录 目录 .....................................................................................................................................................4 摘 要 .............................................................................................................................................6 关键词： .............................................................................................................................................7 远程光电描记、无接触式健康监测、AI 健康预警、跌倒检测 ...........",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": false
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:48:34Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了独居老人缺乏及时陪伴与照料、传统监测设备佩戴率低、现有紧急救助体系不完善等具体痛点，并提供了用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据，仅描述了痛点。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了基于rPPG的无接触式健康监测及AI预警平台，技术路线合理，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了养老院、老年公寓系统部署、智能硬件销售及APP增值会员服务等商业模式，但未详细说明成本和营收的具体构成。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了人口老龄化严重，但未提供具体的TAM/SAM/SOM数据，竞品分析也较为简略。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV和CAC等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了纯视觉无接触感知、多模态融合预警等创新点，并提供了技术方案。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细说明团队背景和执行能力，里程碑也未明确列出。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目策划书结构完整，描述清晰，但部分细节缺乏具体数据支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户与价值主张匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了多终端联动的获客渠道，未发现难以有效触达目标用户的情况。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "智能硬件销售（智能床头、机器人）及APP增值会员服务",
+      "reason": "项目提到了智能硬件销售和APP增值会员服务，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "人口老龄化严重",
+      "reason": "项目仅提到人口老龄化严重，但未提供具体的TAM/SAM/SOM数据，口径较为混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "传统监测设备（如手环）佩戴率低、充电繁琐、易产生排斥感",
+      "reason": "项目描述了痛点，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "传统监测设备（如手环）佩戴率低、充电繁琐、易产生排斥感",
+      "reason": "项目提到传统监测设备的问题，但未详细对比现有竞品，竞品分析明显失真。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了纯视觉无接触感知、多模态融合预警等可验证的创新点。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "只要拿下 1% 市场",
+      "reason": "项目在描述市场潜力时出现了‘只要拿下 1% 市场’等自上而下估算的表述。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物",
+      "reason": "项目未详细列出时间表和里程碑，缺少可交付物的具体描述。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域，未发现合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目技术路线合理，未发现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提到具体的实验/测试，但未发现实验设计不合格的情况。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目策划书结构完整，未发现叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据",
+      "reason": "项目在用户证据强度、市场与竞争、财务逻辑、团队与执行等多个关键维度缺乏充分的支撑证据。"
+    }
+  ]
+}

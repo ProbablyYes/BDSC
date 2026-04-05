@@ -1,0 +1,323 @@
+{
+  "case_id": "case_c5513197852e",
+  "document_id": "doc_4acacc576891",
+  "source": {
+    "file_path": "文旅文创/536797-非物质文化遗产的商业化探索与保护策略-项目策划书-096440fe.pdf",
+    "file_name": "536797-非物质文化遗产的商业化探索与保护策略-项目策划书-096440fe.pdf",
+    "category": "文旅文创",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 14,
+    "full_text_chars": 2643,
+    "core_text_chars": 2577,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 15,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 15,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "非物质文化遗产的商业化探索与保护策略",
+    "target_users": [
+      "90后、00后消费者",
+      "非遗传承人",
+      "地方政府"
+    ],
+    "pain_points": [
+      "非遗商业化探索有损文化价值",
+      "传统保护策略阻碍商业化开发"
+    ],
+    "solution": [
+      "设计专项智能体，实现非遗商业化与保护相统一",
+      "线上平台销售打破地域限制，推动非遗发展",
+      "跨界合作为非遗提供更多出路"
+    ],
+    "innovation_points": [
+      "首次实现非遗商业化与保护的统一"
+    ],
+    "business_model": [
+      "核心价值主张：非遗文化传承与经济发展的双赢",
+      "目标客户：90后、00后消费者及地方政府",
+      "触达渠道：线上平台销售及跨界合作",
+      "主要收入来源：非遗相关产品的销售收入",
+      "关键成本：AI Agent的开发与维护成本"
+    ],
+    "market_analysis": [
+      "90后、00后消费占比超过60%",
+      "政策对非遗保护和商业化发展至关重要",
+      "技术进步如数字化技术助力非遗传播与传承"
+    ],
+    "execution_plan": [
+      "2024年深入研究非遗消费特征"
+    ],
+    "risk_control": [
+      "【合规与伦理意识/证据覆盖度与可验证性】合规与伦理意识：确保非遗商业化过程中不破坏文化价值，H5",
+      "【逻辑自洽与闭环】逻辑自洽性检查：通过PEST分析法确保方案逻辑严密，H11",
+      "【证据覆盖度与可验证性】证据覆盖度：基于中研网数据，确保消费特征分析的准确性，R7"
+    ]
+  },
+  "tags": [
+    "category:文旅文创",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_c5513197852e_e1",
+      "type": "user_evidence",
+      "quote": "90后，00后消费占比超过了60%，因此该人群的消费偏好直接决定了非物质文化遗产的商业化探索的方向。",
+      "chunk_id": "C2",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_c5513197852e_e2",
+      "type": "business_model_evidence",
+      "quote": "核心价值主张：非遗文化传承与经济发展的双赢。",
+      "chunk_id": "C4",
+      "source_unit": "page_11"
+    },
+    {
+      "id": "case_c5513197852e_e3",
+      "type": "risk_evidence",
+      "quote": "保护政策从“政府”“法规”“传承”“国际”四个角度出发，既从多方面保证了剪纸技艺当下的发展，又确保剪纸的未来传承。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "“人工智能＋”应用赛 非物质文化遗产的商业化 探索与保护策略 团队成员：黄宁欣、陈鹏、王洲舟 在全球化与现代化浪潮的冲击下，非物质文化遗产（以下简称“非遗”） 的两个主要发展方向是保护策略和商业化探索。而当下，部分地区的非 遗的商业化探索和保护之间是矛盾关系：商业化探索有损非遗承载的文 化价值，传统的保护策略阻碍商业化的开发。我们依托“实施《保护非物 质文化遗产公约》的业务指南”“‘十四五’文化发展规划”等相关政策，针对 目前的主要问题，通过Francis J. Aguilar 提出的PEST分析法，设计出一个 专项智能体，实现了非遗商业化探索与保护的相统一：以文化特性为核 心，进行商业化探索；商业化探索所带来的热度和经济进一步推动文化 的传承。 摘要 应用结果呈现 提示词示例： 剪纸（非遗项目） 商业化探索策略 保护与传承策略 附Agent智能体网址链接： https://appbuilder.baidu.com/s/SFHJre u5 应用结果呈现 结果解读 对地理位置和遗产特质的分析有 利于Agent根据特点给的前提来 制定方案，从而让方案更契合实 际情况，也更有实施的可能。 对",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:28:49Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出了非遗商业化探索与保护之间的矛盾关系，并提供了具体背景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "提到90后、00后消费占比超过60%，但缺乏具体访谈、问卷等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "设计了专项智能体，结合PEST分析法，方案具有一定的可行性。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "形成了非遗相关产品的销售收入与AI Agent开发维护成本的闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供详细的市场分析和竞品对比。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供具体的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "首次实现非遗商业化与保护的统一，具有创新性。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "团队成员信息有限，未提供具体执行计划和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "材料结构完整，提供了部分数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张较为匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到线上平台销售及跨界合作，渠道较为合理。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "90后、00后消费占比超过了60%",
+      "reason": "提到定价/收费但缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现市场规模口径混乱的问题。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "90后、00后消费占比超过了60%",
+      "reason": "缺乏用户访谈、问卷等需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现声称无竞品或竞品分析明显失真的问题。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到创新点并有初步验证，未发现不可验证的问题。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供具体财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "2024年深入研究非遗消费特征",
+      "reason": "出现‘只要拿下1%市场’等自上而下估算的逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "2024年深入研究非遗消费特征",
+      "reason": "时间表/里程碑较为模糊，缺少具体可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到确保非遗商业化过程中不破坏文化价值，合规与伦理意识较强。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配度较高，未发现明显不匹配问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提到具体实验设计，但未发现不合格的实验设计。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "材料结构较为完整，未发现叙事断裂问题。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "",
+      "reason": "多个关键Rubric维度缺乏支撑证据，如用户证据强度、市场与竞争、财务逻辑等。"
+    }
+  ]
+}

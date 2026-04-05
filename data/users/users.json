@@ -11,7 +11,8 @@
     "password_salt": "24a789ba9e3c49d92f2d344dfbaad4c8",
     "password_hash": "769a037d1e957e50ab7d4e052777a3c8897c2a7c6441c27ece7a893a179e642a",
     "created_at": "2026-03-26T01:38:01.045169",
-    "updated_at": "2026-03-26T01:38:01.045169"
+    "updated_at": "2026-04-05T16:52:00.239789+08:00",
+    "last_login": "2026-04-05T16:52:00.239789+08:00"
   },
   {
     "user_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
@@ -68,7 +69,8 @@
     "password_salt": "206b7df8ec2a362a86b8df1ecf0cba64",
     "password_hash": "a79dafaa830c3e18890a97aea71ab46c5816ee82b782e8cd2e16f75fb09c6548",
     "created_at": "2026-03-29T17:47:35.642065+08:00",
-    "updated_at": "2026-03-29T17:47:35.642065+08:00"
+    "updated_at": "2026-04-01T11:02:58.304033+08:00",
+    "last_login": "2026-04-01T11:02:58.304033+08:00"
   },
   {
     "user_id": "36dbb73e-c0eb-497d-82a0-537596f6b007",
@@ -96,7 +98,8 @@
     "password_salt": "0640beea8ca0f9be36147fda97ea23a8",
     "password_hash": "7fe1f05360c06a1d7780a5998b63b9f7b4743839d7d9f7804972583901c79374",
     "created_at": "2026-03-29T17:50:30.828123+08:00",
-    "updated_at": "2026-03-29T17:50:30.828123+08:00"
+    "updated_at": "2026-04-01T11:03:54.728438+08:00",
+    "last_login": "2026-04-01T11:03:54.728438+08:00"
   },
   {
     "user_id": "ddda9973-fbaf-409a-bdcf-b1a8569b5f5e",
@@ -124,7 +127,8 @@
     "password_salt": "c3dad81aec97b5cc20d559da060f4236",
     "password_hash": "f6e4abbabf2f460f6db1b37df29feeaa0524437da12eb265bacb8409f131c32f",
     "created_at": "2026-03-29T17:55:38.293887+08:00",
-    "updated_at": "2026-03-29T17:55:38.293887+08:00"
+    "updated_at": "2026-04-01T11:02:42.369394+08:00",
+    "last_login": "2026-04-01T11:02:42.369394+08:00"
   },
   {
     "user_id": "51f4f0e2-900f-4d8e-a1d6-a973ebe81dfa",

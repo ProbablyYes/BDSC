@@ -1,0 +1,358 @@
+{
+  "case_id": "case_c40b429a266e",
+  "document_id": "doc_24b66f666038",
+  "source": {
+    "file_path": "政务治理/475594-智擎风控——跨平台多语种信息风险智能感知与政务协同治理平台-项目策划书-b2d1af65.pdf",
+    "file_name": "475594-智擎风控——跨平台多语种信息风险智能感知与政务协同治理平台-项目策划书-b2d1af65.pdf",
+    "category": "政务治理",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 59659,
+    "core_text_chars": 24529,
+    "appendix_start_index": 33,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "智擎风控——跨平台多语种信息风险智能感知与政务协同治理平台",
+    "target_users": [
+      "政府机构",
+      "企业风控部门"
+    ],
+    "pain_points": [
+      "现有事件库数据利用不足",
+      "缺乏深度语义理解和情感分析能力",
+      "难以适应多语言环境下的复杂传播场景"
+    ],
+    "solution": [
+      "构建跨平台多语种事件库",
+      "接入讯飞大模型进行法律语言调试",
+      "实现风险因子从定性到定量评估的跨越"
+    ],
+    "innovation_points": [
+      "混合式数据采集策略",
+      "法律风险量化公式",
+      "基于讯飞大模型的风险识别方法"
+    ],
+    "business_model": [
+      "提供风险预警与管理决策支持服务",
+      "目标客户为政府机构和企业",
+      "通过Web前端平台触达客户"
+    ],
+    "market_analysis": [
+      "全球化加速推动跨平台多语种事件传播和风险识别需求",
+      "现有研究方法存在数据利用和语义理解不足的问题"
+    ],
+    "execution_plan": [
+      "动态爬取事件数据",
+      "完成非结构化文本向结构化事件数据库的转换",
+      "构建Web前端平台进行可视化展示"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】合规与伦理风险：通过讯飞大模型进行法律语言调试，确保合规性。",
+      "【合规与伦理意识/逻辑自洽与闭环】逻辑自洽性：通过法律风险量化公式，确保风险识别和预警的科学性和可验证性。",
+      "【通用风险控制】证据覆盖度：基于13065条数据构建事件库，为风险识别提供可靠数据支持。"
+    ]
+  },
+  "tags": [
+    "category:政务治理",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_c40b429a266e_e1",
+      "type": "user_evidence",
+      "quote": "帮助预警、应对和管理风险，能够有效支撑风险预警与管理决策。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e2",
+      "type": "pain_points_evidence",
+      "quote": "现有研究方法存在数据利用和语义理解不足的问题。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e3",
+      "type": "solution_evidence",
+      "quote": "通过接入讯飞大模型以进行法律语言调试，从而提高对风险传播事件的自动化分析能力。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e4",
+      "type": "innovation_points_evidence",
+      "quote": "综合法律风险权重、法律类型和传播热度设计了法律风险计算公式。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e5",
+      "type": "business_model_evidence",
+      "quote": "构建了Web前端平台，可视化进行事件爬取、风险识别等任务。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e6",
+      "type": "market_analysis_evidence",
+      "quote": "随着全球化进程的加速，跨平台、多语种的事件传播和风险识别成为信息时代的重要课题。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e7",
+      "type": "execution_plan_evidence",
+      "quote": "最终构建事件库含13065条数据。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_c40b429a266e_e8",
+      "type": "risk_control_evidence",
+      "quote": "通过对法律文档的分析，识别出与事件相关的法律风险，并基于事件的发展趋势提出相应的风险预警。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "II 摘 要 随着全球化进程的加速，跨平台、多语种的事件传播和风险识别成为信息时代 的重要课题。重大传播风险事件库的构建旨在收集风险事件信息，帮助预警、应对 和管理风险，能够有效支撑风险预警与管理决策。然而，针对大型的事件库，当前 的研究方法往往无法充分利用其中大规模的数据，并且缺乏深度语义理解和情感分 析的能力，限制了对风险事件的深入挖掘和洞察。同时，受限于数据规模利用不足、 语义理解深度欠缺等问题，现有事件库难以适应多语言环境下的复杂传播场景。为 回应上述挑战，本项目基于SpringBoot、Vue、ECharts、Axios等技术，探索跨平台、 多语种事件库的构建，并通过接入讯飞大模型以进行法律语言调试，从而提高对风 险传播事件的自动化分析能力。此外，构建了Web前端平台，可视化进行事件爬取、 风险识别等任务，从而形成完整的传播事件库构建与风险识别系统。 本项目主要工作和创新点如下： 1.构建跨平台多语种事件库：通过混合式数据采集策略，整合Jsoup爬虫与API 接口，以新浪网为例进行事件数据的动态爬取，结合讯飞大模型的多语种翻译与语 义解析能力，完成非结构化文本向结构化事件数据",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:00:15Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了现有事件库数据利用不足、缺乏深度语义理解和情感分析能力、难以适应多语言环境下的复杂传播场景等痛点，并提供了具体的用户场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目提到了基于13065条数据构建事件库，但未提供用户访谈、问卷等直接证据来验证需求。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了混合式数据采集策略、法律风险量化公式和基于讯飞大模型的风险识别方法，技术路线与资源匹配度较高。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目明确了目标客户为政府机构和企业，并通过Web前端平台触达客户，商业模式较为一致。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目提到了全球化加速推动跨平台多语种事件传播和风险识别需求，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供具体的财务逻辑，如单位经济、LTV和CAC等指标。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目通过接入讯飞大模型进行法律语言调试，提高了自动化分析能力，具有明显的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未提供团队背景和执行计划，里程碑和可交付物不明确。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，提供了技术方案和市场背景，数据具有一定的说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目通过Web前端平台触达客户，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的市场规模口径，但未发现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目未提供用户访谈、问卷等直接证据来验证需求。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，但竞品分析不够详细。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目通过法律风险量化公式和讯飞大模型的调试，创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务逻辑，但未发现单位经济不成立的证据。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
+      "reason": "项目未提供明确的执行计划和里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了合规与伦理风险，并通过讯飞大模型进行法律语言调试，确保合规性。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目技术路线与资源匹配度较高，未发现技术路线与资源不匹配的问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的实验设计，但未发现实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，未发现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目在用户证据强度、财务逻辑和团队与执行等方面缺乏充分的支撑证据。"
+    }
+  ]
+}

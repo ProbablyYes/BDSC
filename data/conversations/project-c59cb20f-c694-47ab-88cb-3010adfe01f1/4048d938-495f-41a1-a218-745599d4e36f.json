@@ -1,0 +1,1175 @@
+{
+  "conversation_id": "4048d938-495f-41a1-a218-745599d4e36f",
+  "project_id": "project-c59cb20f-c694-47ab-88cb-3010adfe01f1",
+  "student_id": "None",
+  "title": "科技创新 · 补齐证据并完成一次压力测试",
+  "summary": "请提供更详细描述",
+  "created_at": "2026-04-01T10:23:14.057063+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+      "timestamp": "2026-04-01T10:25:27.257230+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "看到你的问题，我特别理解。很多同学在学概念时觉得“我懂了”，但一落到自己项目里，数字怎么来的、为什么这么算，心里就没底了。这种感觉很正常，因为市场估算不是纯数学，而是带着商业逻辑的“合理推演”。我们今天就用一个你我都熟悉的例子，从头到尾走一遍，帮你把“虚”的感觉变成“实”的框架。\n\n### 总览\n简单来说，TAM/SAM/SOM 是一个从“理想世界”到“现实战场”的漏斗。它不仅是给投资人看的数字，更是帮你自己理清“我到底在哪个池塘里钓鱼”的战略工具。算不清楚，往往是因为中间的“过滤条件”没想透。\n\n### 用一个真实例子走一遍：校园智能健身镜项目\n假设你是一个大学生创业团队，想做一款面向高校宿舍的、轻量且便宜的“智能健身镜”（带AI动作纠正和课程）。\n\n**第一步：TAM (Total Addressable Market) - 最大潜在市场**\n*   **是什么**：理论上，你的产品或服务在全球范围内能服务的最大市场需求总量。\n*   **怎么算**：从最宽泛的相关需求入手。\n*   **例子推演**：\n    *   **思路**：我们的产品是“健身镜”，核心满足的是“居家健身”需求。所以，TAM应该是全球或全国“居家健身”市场的规模。\n    *   **找数据**：你需要引用权威报告。比如，根据艾瑞咨询《2023年中国智能健身镜行业研究报告》，2022年中国居家健身市场规模约为 **5000亿元**。\n    *   **你的TAM**：**5000亿元**（中国居家健身市场总规模）。\n    *   **关键点**：这里没有加任何限制，只要是“在家健身”的人，理论上都是你的潜在客户。数据来源要注明，这是可信度的基础。\n\n**第二步：SAM (Serviceable Addressable Market) - 可服务市场**\n*   **是什么**：在TAM里，你的产品**具体形态和价格**能真正触达和服务的市场。\n*   **怎么算**：给TAM加上你的**产品核心限制条件**，通常是：产品形态、价格区间、核心功能。\n*   **例子推演**：\n    *   **过滤条件1（产品形态）**：我们做的是“智能健身镜”，不是跑步机、哑铃或健身APP。所以，我们要看“智能健身硬件”这个细分市场。报告里可能显示，2022年中国智能健身硬件市场规模约为 **200亿元**。\n    *   **过滤条件2（价格与定位）**：市面上的健身镜（如FITURE、Mirror）售价在3000-8000元，主打家庭场景。我们的产品是“校园轻量版”，定价目标在 **1000-1500元**，主打宿舍场景。这一定价和定位会进一步筛选用户。\n    *   **如何估算SAM**：这里需要一点合理的假设和推算。\n        1.  假设200亿的智能健身硬件市场中，健身镜品类约占 **30%**，即 **60亿元**。\n        2.  在这60亿中，假设我们1500元以下的“平价市场”能吸引其中 **20%** 的份额（因为主流产品更贵），即 **12亿元**。\n    *   **你的SAM**：**约12亿元**（中国平价智能健身镜市场）。\n    *   **关键点**：从TAM到SAM的“转化率”（这里是12亿/5000亿=0.24%）不重要，重要的是你**为什么这么假设**。你的理由是：“因为产品形态聚焦硬件，且定价策略切入了主流品牌未充分覆盖的平价细分市场。”这个逻辑链条必须清晰。\n\n**第三步：SOM (Serviceable Obtainable Market) - 可获得市场**\n*   **是什么**：在SAM里，以你团队**当前的资源和能力**，在**一个特定时间周期内**（比如第一年）实际能拿下的市场。\n*   **怎么算**：给SAM加上你**当前的执行限制条件**，通常是：启动区域、渠道能力、团队规模、时间。\n*   **例子推演**：\n    *   **过滤条件1（启动区域）**：我们是学生团队，资源有限，第一年只进攻 **北京高校市场**。\n    *   **过滤条件2（目标用户）**：在北京高校的在校生中，我们对标“有健身意愿、宿舍空间允许、能接受千元级消费”的学生。假设北京高校学生总数100万人，通过调研假设这类学生占比 **10%**，即10万人。\n    *   **过滤条件3（时间与渗透率）**：第一年，我们预计能通过校园推广、社团合作等方式，触达这10万目标用户中的 **5%**，并实现 **2%** 的转化购买（即1000人）。\n    *   **如何估算SOM**：\n        1.  目标用户数：100万 * 10% = **10万人**\n        2.  第一年预计销量：10万人 * 5%触达率 * 2%转化率 = **1000台**\n        3.  第一年SOM（收入）：1000台 * 1500元/台 = **150万元**\n    *   **你的SOM**：**150万元**（第一年在北京高校市场的预期收入）。\n    *   **关键点**：SOM必须**具体、可衡量、与团队能力匹配**。你说“拿下5%的触达率和2%的转化率”，就需要解释“凭什么”，比如“因为我们团队有5个成员覆盖10所重点高校，计划与20个健身社团合作地推”。SOM是验证你执行计划可行性的关键。\n\n### 把方法落回你的项目：HealthNote (AI健康记录助手)\n现在，我们试着用这个框架来框一下你的项目。你需要自己填上具体的数字和假设，我帮你理清每个层级的思考逻辑：\n\n1.  **TAM（最大潜在市场）**：\n    *   你的产品解决的核心需求是什么？是“健康管理”还是“医疗数据记录”？这决定了你去看哪个大盘子。\n    *   **建议**：可能是“中国数字健康管理市场”规模。去查找权威报告（如易观、艾瑞、头豹研究院的报告），找到一个总数字。比如，“2023年中国数字健康管理市场规模达X亿元”。这就是你的TAM。\n\n2.  **SAM（可服务市场）**：\n    *   加上你的产品限制：它是一个“AI健康记录与分析助手”，主要软件形态，可能包含APP、小程序。\n    *   **过滤条件**：\n        *   **用户群**：你定位“年轻白领”和“慢性病患者”。这两个群体在数字健康管理大盘里占比多少？可能需要拆开估算再加总。\n        *   **功能**：聚焦于“记录”与“AI分析”，而非在线问诊、药品电商。这对应哪个细分市场？可能是“健康管理工具类应用”市场。\n    *   **如何估算**：找到“健康管理APP”或“慢病管理APP”的市场规模数据。如果找不到直接数据，可以估算：数字健康管理市场中，工具类应用约占Y%。然后，其中针对你目标用户的功能模块又占多少？你需要给出合理的假设比例。\n\n3.  **SOM（可获得市场）**：\n    *   这是你最需要想清楚的一步，也是避免“用户多了自然能跑通”这种模糊想法的关键。\n    *   **过滤条件**：\n        *   **启动区域/渠道**：你第一年从哪里开始？是一个城市？还是通过线上社区（如知乎健康板块、慢病社群）冷启动？\n        *   **时间与目标**：第一年，你的核心目标是什么？是获取10万注册用户？还是获得1万日活用户？还是验证付费转化？\n        *   **资源限制**：你们是学生团队，技术开发、市场推广的时间和资金预算是多少？这决定了你的触达能力和转化天花板。\n    *   **如何估算**：例如，如果你决定第一年通过运营10个200人的精准慢病社群（共2000人）进行冷启动，假设通过内容和服务转化其中20%成为用户，那么SOM就是 **400名初始核心用户**。你的第一年目标不是收入，而是验证这400人是否真的需要并持续使用你的产品。\n\n### 你最容易踩的坑与自查清单\n对照你的HealthNote项目，检查一下：\n- **有没有用SAM当TAM**？比如，直接说“中国慢病管理市场有1亿用户”作为TAM，但其实慢病管理只是数字健康大市场的一部分。\n- **从SAM到SOM的逻辑是否跳跃**？比如，SAM是“1亿慢病患者”，SOM直接说“第一年获取100万用户”。这个转化需要极强的渠道和资源支撑，学生团队通常不具备。你的SOM必须小到让你能说清楚“我们怎么做到”。\n- **是否忽略了时间维度**？SOM一定是**一段时间内**（通常12-18个月）的目标。不要说“我们的市场很大”，要说“我们第一年能拿下其中很小但关键的一块”。\n\n### 下一步行动\n**不要急着去算一个完美的数字**。你的下一步是：**为你的HealthNote项目，清晰写出从TAM到SAM的每一个“过滤条件”的文字描述**。\n例如：“我们的TAM是X报告中的中国数字健康市场（XX亿元）。我们通过‘产品形态过滤’（聚焦记录分析工具而非问诊电商）和‘用户群过滤’（聚焦年轻白领与慢病患者），将市场缩小到SAM（约YY亿元）。其中，我们第一年通过...（具体渠道）主要获取...（具体用户画像）用户，预计SOM为ZZ名用户。”\n\n当你把这些过滤条件写清楚，数字反而可以后期根据调研修正，但你的商业逻辑已经扎实了。\n\n### 追问\n1.  如果让你现在为HealthNote选一个**第一年的SOM**，你会把它定义为什么？（例如：成功让200名糖尿病患者连续使用3个月？还是从某个线上社区获取5000个注册用户？）**为什么**这个目标对你验证项目最关键？\n2.  要估算“关注健康管理的年轻白领”在你的SAM中的规模，除了查报告，你能想到一两个可以**间接估算的数据来源或方法**吗？（比如，某款主流健康APP中该年龄段的用户占比？）\n\n### 外部参考\n（本次分析基于通用的市场分析方法论和常见的创业教学案例，未使用特定的联网数据源。建议你在实际操作中查阅以下类型的权威报告来获取基础数据）\n-   艾瑞咨询 (iResearch)、易观分析 (Analysys)、头豹研究院 (LeadLeo) 等机构发布的“数字健康”、“慢病管理”、“健康科技”行业研究报告。\n-   国家统计局、卫健委发布的关于慢性病患病率、人口结构的数据公报。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "intent_shape": "single",
+          "intent_reason": "关键词命中 专业概念辅导/通俗讲解；判定为单一主问题；主意图归类为 learning_concept",
+          "confidence": 0.9,
+          "engine": "rule",
+          "pipeline": [
+            "tutor"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "课程导师"
+          ],
+          "resolved_agents": [
+            "tutor"
+          ],
+          "agent_reasoning": "MATRIX[learning_concept][simple] -> tutor",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 3,
+          "rag_case_ids": [
+            "case_d241794a2920",
+            "case_6c6304f12169",
+            "case_d0fb63a34420"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "课程导师",
+            "analysis": "## 先看你现在这个问题\nTAM/SAM/SOM需要从市场边界到具体场景层层聚焦，比如智能水杯项目：TAM是全球喝水人群的消费总额，SAM是其中愿意买智能水杯的群体规模，SOM是某个城市3个月内能触达的用户数\n\n## 背后的方法\n计算逻辑是：1. TAM找最大合理市场（如全球市场规模） 2. SAM加核心限制条件（如价格/功能/渠道） 3. SOM加执行限制（如团队能力/区域/时间）。关键要确保每个层级都有明确过滤条件，比如TAM到SAM要问'我们的产品能解决这个细分场景的什么痛点？'\n\n## 老师通常会怎么判断你有没有想清楚\n评委关注三个维度：1. 数据来源是否权威（如第三方报告/政府统计） 2. 过滤条件是否合理（如从TAM到SAM的转化率是否符合行业规律） 3. SOM是否与当前资源匹配（如团队规模/渠道覆盖能力）\n\n## 放回你的项目怎么用\n假设你做校园共享充电宝：TAM是全国大学生充电需求总额，SAM是每天需要充电超过3次的学生群体，SOM是你们学校3个月内能覆盖的宿舍楼数量\n\n## 你最容易踩的坑\n- 用SAM数据直接当TAM（如把校园市场算成全国市场）\n- SOM与SAM比例失衡（如SAM是100万但SOM突然变成5000万）\n- 忽略时间维度（如把12个月的SOM算成3个月）\n\n## 现在就能做的小练习\n用'便携式充电宝'产品，按这个框架重新计算三个市场指标，特别注意每个层级的过滤条件说明\n\n## 做的时候重点观察什么\n观察你的过滤条件是否形成清晰的逻辑链条，比如TAM到SAM的转化率是否与行业调研数据吻合（如智能硬件产品通常2-5%的转化率）\n\n## 这次主要依据\n本轮主要参考本地KG中智能硬件创业案例及市场分析方法论",
+            "tools_used": [
+              "learning_llm",
+              "rag_reference"
+            ],
+            "retrieved_kg_nodes": [],
+            "mode": "coursework"
+          },
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [
+          {
+            "case_id": "case_d241794a2920",
+            "category": "科技创新",
+            "project_name": "元创未来——构建高交互元宇宙空间",
+            "similarity": 0.4471,
+            "score_keyword": 0.0,
+            "score_vector": 0.4471,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "现有博物馆数字场景交互方式单一鼠标点选式为主，可交互物体少",
+              "内容传播方式固定单向",
+              "观众难以沉浸参与到内容中"
+            ],
+            "solution": [
+              "高效快速",
+              "形成虚拟空间",
+              "研发周期缩短一半以上"
+            ],
+            "innovation_points": [
+              "现有博物馆数字场景交互方式单一鼠标点选式为主，可交互物体少",
+              "内容传播方式固定单向"
+            ],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [],
+            "summary": "2O23.3 构建高交互元宇宙空间 元创未来 以仿真技术搭建通往未来的元宇宙之路 实现元宇宙技术在文化和教育领域的大规模应用 党的二十大提出， 让中华民族凝聚力和中华文化影响力不断增强, 而从动画可视化技术到虚拟现实、增强现实技术到现在的元宇宙技术等数字化方式, 可助力文化的共享与共荣。 2020年，我国数字经济市场规模增长至40万亿元， 2022年，中国数字文化产业规模已达7841.6亿元。 文化传播重地，深耕千亿市场 上亿 项目背景 现有博物馆数字场景交互方式单一鼠标点选式为主，可交互物体少 内容传播方式固定单向 观众难以沉浸参与到内容中 09年国庆60周年群众游行水晶石公司制作3分钟虚拟"
+          },
+          {
+            "case_id": "case_6c6304f12169",
+            "category": "科技创新",
+            "project_name": "京工智演 —— 数字表演产业化的领航者",
+            "similarity": 0.4458,
+            "score_keyword": 0.0,
+            "score_vector": 0.4458,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "创意方案难落地",
+              "整体个体难协同",
+              "转播跟拍效率低"
+            ],
+            "solution": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术",
+              "数据驱动三维全要素预演仿真技术"
+            ],
+            "innovation_points": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术"
+            ],
+            "evidence_quotes": [
+              "创意阶段形成的创意内容包括对导演设计描述的文字、视频图片等，但是在排练阶段，演员必须要通过表演执行数据来排练学习，包括每个演员的动作和走位数据。而现有过程中并没有从创意内容到执行数据精准有效的转换方式，创意内容也没有经过仿真数字的验证，比如按照创意设计演员的路线会有交叉产生碰撞，但创作团队预先无法发现。",
+              "服务类型为定制化的数字表演解决方案与标准化产品。初期配合实验室完成 2022 北京冬奥会仿真工作的同时，已承接张艺谋导演的湖南某大型演出项目，同时与恒大集团达成若干主题公园仿真合作意向。中期针对中小型演出，推广标准化产品，为中小型演艺公司赋能，整体提升中国文艺表演质量。公司的盈利模式主要包括产品研发费用、现场服务费用和票房收入分成。"
+            ],
+            "risk_flags": [
+              "no_competitor_claim",
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "1 目录 第一章 项目背景................................ ................................ ................................ ..........2 1.1 文艺演出发展趋势 ........................................................................................................................2 1.2 依托平台 ................................"
+          },
+          {
+            "case_id": "case_d0fb63a34420",
+            "category": "科技创新",
+            "project_name": "禾光智能--精准制导激光除草机器人系统",
+            "similarity": 0.43,
+            "score_keyword": 0.0222,
+            "score_vector": 0.43,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "人工除草效率低下",
+              "化学除草伴随严重的生态环境破坏与农产品安全风险",
+              "复杂地形识别障碍"
+            ],
+            "solution": [
+              "自主研发‘禾光智能——精准制导激光除草机器人系统’",
+              "系统融合人工智能、高精度感知与新能源驱动等多项先进技术",
+              "构建贯穿‘识别—制导—执行—部署’的全链路智能除草作业体系"
+            ],
+            "innovation_points": [
+              "高鲁棒性杂草精确识别网络",
+              "靶向化杂草生长点激光定位技术"
+            ],
+            "evidence_quotes": [
+              "传统杂草治理方式的弊端日益显现，面临效率低下与生态风险并存的双重困境：人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。",
+              "在农业数字化转型与生态文明建设双重驱动下，复杂地形识别障碍、化学药剂依赖及劳动力短缺等问题，已成为制约农业新质生产力提升与绿色转型的关键障碍。"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第十九届“挑战杯”全国大学生课外学术科技作品竞赛参赛作品 申报类别：信息技术 作者：毛子鸣，王宇行，朱啸闻，林馨耀，田甜，杜一苇，郭宸溪，王德浩 第十九届 “挑战杯” 全国大学生课外学术科技作品竞赛 禾光智能 精准制导激光除草机器人系 统 tong 统 类别： □ 自然科学类学术论文 □ 哲学社会科学类社会调查报告和学术论文 □ 科技发明制作A 类 ■ 科技发明制作B 类 第十九届“挑战杯”全国大学生课外学术科技作品竞赛参赛作品 摘 要 在国家推进农业现代化和实现粮食安全战略的时代背景下， 传统杂草治理 方式的弊端日益显现，面临 效率低下与生态风险 并存的双重困境：人工除草效 率难以满足规模化"
+          }
+        ],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 7.3,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS10",
+            "name": "TAM/SAM/SOM混乱",
+            "match_score": 7.3,
+            "probing_layers": [
+              "口径检验: 你说的市场规模是TAM还是SAM？你实际能触达的市场(SOM)有多大？",
+              "自下而上估算: 请用'单价×目标用户数×复购频次'来估算你第一年的实际可获得市场。",
+              "增长合理性: 从SOM到SAM，你的增长路径是什么？每一步需要什么资源？"
+            ],
+            "expected_evidence": [
+              "TAM/SAM/SOM三层估算",
+              "自下而上的市场测算",
+              "增长路径规划"
+            ],
+            "counterfactual": "一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "市场规模口径谬误",
+              "大数幻觉谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "TAM/SAM/SOM 口径校验 + 增长合理性",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": []
+          }
+        ],
+        "pressure_test_trace": {},
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": 5.0,
+          "score_band": "早期可塑",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "fallacy_label": "大数幻觉谬误",
+              "severity": "high",
+              "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "matched_keywords": [
+                "tam",
+                "sam",
+                "som"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "market_sizing_logic"
+              ],
+              "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+              "trigger_message": "原文片段：“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发” → 触发「TAM/SAM/SOM口径混乱」，因为提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "impact": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。",
+              "fix_task": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "ontology_nodes": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "X_tam",
+                  "kind": "metric",
+                  "label": "TAM",
+                  "description": "总体可服务市场总量"
+                },
+                {
+                  "id": "X_sam",
+                  "kind": "metric",
+                  "label": "SAM",
+                  "description": "产品理论可覆盖的细分市场"
+                },
+                {
+                  "id": "X_som",
+                  "kind": "metric",
+                  "label": "SOM",
+                  "description": "在现实约束下可获得的市场份额"
+                }
+              ]
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Chain_Edge",
+                "Stakeholder_Solution_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+              "trigger_message": "原文片段：“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事断裂谬误",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "narrative_structure_logic"
+              ],
+              "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+              "trigger_message": "原文片段：“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "ontology_nodes": [
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.04,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力"
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ]
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.04,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ]
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.62,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合"
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设"
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试"
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果"
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ]
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 4.62,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构"
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性"
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成"
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ]
+            },
+            {
+              "item": "Market & Competition",
+              "score": 6.67,
+              "status": "ok",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局"
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图"
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵"
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ]
+            },
+            {
+              "item": "Financial Logic",
+              "score": 4.62,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析"
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间"
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ]
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.62,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒"
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位"
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品"
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图"
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析"
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ]
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.62,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度"
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险"
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单"
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告"
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ]
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.47,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构"
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ]
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成首轮诊断（23条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "template_guideline": [
+            "先明确当前最高风险点是什么",
+            "补至少3条能直接支撑该点的证据",
+            "用评委视角做一轮反问并更新答案"
+          ],
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ]
+        }
+      },
+      "timestamp": "2026-04-01T10:25:27.257230+08:00"
+    },
+    {
+      "role": "user",
+      "content": "可以给我画个图表展示一下吗",
+      "timestamp": "2026-04-01T10:27:40.880663+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "没问题，用图表来展示，确实能让TAM/SAM/SOM这个“漏斗”的逻辑更直观。我们接着上一轮智能手环的例子，把它画出来，这样你就能清晰地看到每一层是怎么“筛”出来的。\n\n### 图表展示：智能手环项目的TAM-SAM-SOM漏斗\n\n为了让你看得更清楚，我用一个**双层漏斗**来展示。第一层是市场规模（用户数/金额），第二层是定义每一层市场的**核心筛选条件**。\n\n```mermaid\ngraph TD\n    subgraph “市场规模（以用户数为例）”\n        A[TAM: 全球可穿戴设备潜在用户<br>约10亿人] --> B[SAM: 具备健康监测功能的<br>智能手环潜在用户<br>约3亿人]\n        B --> C[SOM: 初期可触达用户<br>（中国一线城市25-40岁健身人群）<br>约500万人]\n    end\n\n    subgraph “筛选条件与逻辑”\n        D[“全球成年人口中<br>有消费电子使用习惯的人群”] --> E\n        E[“筛选条件1: 产品形态（手环 vs 手表/其他）<br>筛选条件2: 核心功能（必须有心率、血氧等健康监测）”] --> F\n        F[“筛选条件3: 地域（中国一线城市）<br>筛选条件4: 用户画像（25-40岁，有健身习惯，关注健康数据）”]\n    end\n\n    A -.-> D\n    B -.-> E\n    C -.-> F\n```\n\n**我来解释一下这个图表的逻辑：**\n\n1.  **市场规模（上层漏斗）**：这是最终呈现的数字结果，从上到下逐层缩小。\n    *   **TAM (10亿人)**：这是最顶层的“理想池塘”。我们假设全球有消费电子使用习惯的成年人口中，理论上都是可穿戴设备的潜在用户。这个数字通常来自行业报告（如IDC、Gartner对全球可穿戴设备市场的出货量或用户基数预测）。\n    *   **SAM (3亿人)**：我们“有能力且打算”去服务的市场。这里应用了两个关键的**产品维度**筛选：第一，只做“手环”形态，排除智能手表等其他品类；第二，核心功能必须聚焦在“健康监测”（如连续心率、血氧、睡眠分析），排除那些只做基础通知的设备。这个数字是TAM乘以一个合理的比例估算出来的（例如，根据行业数据，健康手环占整个可穿戴市场约30%的份额）。\n    *   **SOM (500万人)**：这是我们创业**第一年或前18个月真正能够钓到鱼**的细分市场。这里应用了最严格的**市场进入维度**筛选：**地域（中国一线城市）** 和 **用户画像（25-40岁，有健身习惯）**。这个数字需要更落地的估算，比如查阅一线城市该年龄段人口普查数据，再乘以健身人群渗透率等。\n\n2.  **筛选条件（下层逻辑链）**：这是上层数字之所以成立的**理由和推导过程**，是评委和投资人最看重的部分。\n    *   每一个筛选条件都必须**合理、可解释**。比如，从SAM到SOM，选择“一线城市”是因为消费能力强、对新科技接受度高；选择“健身人群”是因为他们对健康数据有最强的主动需求和付费意愿。\n    *   这些条件必须是**递进关系**，而不是胡乱堆砌。通常是先定产品（SAM），再定市场切入策略（SOM）。\n\n### 如何把这个框架用回你自己的项目？\n\n现在，你可以试着为你提到的“AI+健康管理”项目画一个类似的图表。关键不在于数字一开始多精确，而在于**逻辑是否自洽**。\n\n**举个例子，如果你的初步想法是“为糖尿病患者提供AI饮食建议助手”：**\n\n| 层级 | 定义思路 | 可能的估算逻辑（示例） |\n| :--- | :--- | :--- |\n| **TAM** | 全球健康管理市场/数字健康市场 | 查阅报告，如“全球数字健康市场规模达XXX亿美元”。这是你的天空。 |\n| **SAM** | **聚焦于“糖尿病管理”的数字健康市场**。筛选条件：1. 疾病领域（糖尿病）；2. 干预方式（包含饮食管理）。 | 用TAM × 糖尿病在慢病市场中的占比 × 饮食管理在糖尿病干预中的重要性系数。这是你决定要耕种的田地。 |\n| **SOM** | **初期触达的用户**。筛选条件：1. 地域（如中国）；2. 用户类型（新确诊的2型糖尿病患者）；3. 渠道（与特定医院或诊所合作）。 | 用中国每年新确诊2型糖尿病患者人数 × 你能通过初期合作渠道覆盖的预估比例。这是你第一季要播下的种子。 |\n\n**画图时的核心检查点：**\n1.  **SAM的筛选条件**是否围绕你的**产品核心功能**（AI、饮食、糖尿病）？\n2.  **SOM的筛选条件**是否围绕你的**市场进入策略**（地域、具体用户群、获客渠道）？\n3.  从TAM到SOM，每层的数字是否都能通过公开数据（统计年鉴、行业报告、学术论文）或合理的假设推演出来？\n\n### 下一步聚焦\n\n**不要急于求成去算一个完美的数字。** 我建议你先做这个小练习：\n1.  在一张白纸上，为你当前最倾向的那个“AI+健康”切入点（比如糖尿病饮食、久坐提醒、睡眠改善等），画出类似的双层漏斗图。\n2.  在“筛选条件”那一层，强迫自己写下至少2个定义SAM的**产品条件**，和2个定义SOM的**市场条件**。\n\n做完这个，你“发虚”的感觉就会踏实一大半。因为这说明你思考的不是一个模糊的大市场，而是一个有边界、可触及的真实起点。\n\n### 可以深入思考的问题\n\n1.  在你构思的SOM中，**哪一个筛选条件是最关键、最不能放弃的**？是特定用户画像，还是独特的合作渠道？为什么？\n2.  如果为了更快验证市场，你考虑将SOM进一步缩小（例如只做一个城市的某个社区），你的估算逻辑和图表会如何调整？这会对你的产品开发和运营策略产生什么影响？\n\n希望这个图表和分解能帮到你。动手画一画，思路会清晰很多。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "intent_shape": "single",
+          "intent_reason": "学生询问如何计算TAM、SAM、SOM并希望用一个真实例子来学习；判定为单一主问题；主意图归类为 learning_concept",
+          "confidence": 1.0,
+          "engine": "llm",
+          "pipeline": [
+            "tutor"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "课程导师"
+          ],
+          "resolved_agents": [
+            "tutor"
+          ],
+          "agent_reasoning": "MATRIX[learning_concept][simple] -> tutor",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 3,
+          "rag_case_ids": [
+            "case_6c6304f12169",
+            "case_1135e29de95e",
+            "case_d241794a2920"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "课程导师",
+            "analysis": "## 先看你现在这个问题\n图表展示需要结合具体行业场景才能准确呈现，建议先明确项目类型。这里用智能手环行业为例说明TAM-SAM-SOM的分层逻辑\n\n## 背后的方法\nTAM是理论最大市场（如全球智能穿戴设备市场），SAM是技术/服务可覆盖的子市场（如具备健康监测功能的智能手环市场），SOM是初期可触达的细分市场（如一线城市25-40岁健身人群）。关键要建立从宏观到微观的过滤逻辑，每个层级都要有明确的筛选条件\n\n## 老师通常会怎么判断你有没有想清楚\n评委关注：1）市场分层是否符合产业实际 2）数据来源是否可验证 3）过滤条件是否合理 4）计算过程是否可重复\n\n## 放回你的项目怎么用\n若你的项目是数字表演产业，TAM可从全球演艺市场规模切入，SAM聚焦需要虚拟仿真技术的大型演出项目，SOM则限定到北京/上海的年预算500万以上的剧院客户\n\n## 你最容易踩的坑\n- 混淆SAM和SOM的过滤维度（如将地域和功能特性混用）\n- 使用不可验证的行业预测数据\n- 未说明市场数据的统计年份和来源渠道\n\n## 现在就能做的小练习\n用智能手环案例：1）先查2023全球可穿戴设备TAM数据 2）列出SAM的3个过滤条件 3）确定SOM的地理和用户范围\n\n## 做的时候重点观察什么\n注意每个层级的过滤条件是否形成递进关系，最终SOM数据是否能通过公开招标信息或客户访谈验证\n\n## 这次主要依据\n参考本地KG案例：京工智演项目中SAM计算采用了剧院数字化改造预算数据",
+            "tools_used": [
+              "learning_llm",
+              "rag_reference"
+            ],
+            "retrieved_kg_nodes": [],
+            "mode": "coursework"
+          },
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述"
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [
+          {
+            "case_id": "case_6c6304f12169",
+            "category": "科技创新",
+            "project_name": "京工智演 —— 数字表演产业化的领航者",
+            "similarity": 0.4871,
+            "score_keyword": 0.0,
+            "score_vector": 0.4871,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "创意方案难落地",
+              "整体个体难协同",
+              "转播跟拍效率低"
+            ],
+            "solution": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术",
+              "数据驱动三维全要素预演仿真技术"
+            ],
+            "innovation_points": [
+              "表演行为建模与仿真推演技术",
+              "虚拟转播与导播画面推荐技术"
+            ],
+            "evidence_quotes": [
+              "创意阶段形成的创意内容包括对导演设计描述的文字、视频图片等，但是在排练阶段，演员必须要通过表演执行数据来排练学习，包括每个演员的动作和走位数据。而现有过程中并没有从创意内容到执行数据精准有效的转换方式，创意内容也没有经过仿真数字的验证，比如按照创意设计演员的路线会有交叉产生碰撞，但创作团队预先无法发现。",
+              "服务类型为定制化的数字表演解决方案与标准化产品。初期配合实验室完成 2022 北京冬奥会仿真工作的同时，已承接张艺谋导演的湖南某大型演出项目，同时与恒大集团达成若干主题公园仿真合作意向。中期针对中小型演出，推广标准化产品，为中小型演艺公司赋能，整体提升中国文艺表演质量。公司的盈利模式主要包括产品研发费用、现场服务费用和票房收入分成。"
+            ],
+            "risk_flags": [
+              "no_competitor_claim",
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": true
+              }
+            ],
+            "summary": "1 目录 第一章 项目背景................................ ................................ ................................ ..........2 1.1 文艺演出发展趋势 ........................................................................................................................2 1.2 依托平台 ................................"
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "元界创生——云交互空间智能生成技术领航者",
+            "similarity": 0.487,
+            "score_keyword": 0.0,
+            "score_vector": 0.487,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "solution": [
+              "一、项目背景 .......................................... 6",
+              "二、行业现状 .......................................... 7",
+              "三、痛点分析 ......................................... 10"
+            ],
+            "innovation_points": [
+              "大学生创新创业大赛",
+              "项目计划书"
+            ],
+            "evidence_quotes": [
+              "1. 潜在客户 ......................................... 28",
+              "2. 定价模式 ......................................... 29"
+            ],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Risk Control",
+                "covered": false
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ....................................................."
+          },
+          {
+            "case_id": "case_d241794a2920",
+            "category": "科技创新",
+            "project_name": "元创未来——构建高交互元宇宙空间",
+            "similarity": 0.4819,
+            "score_keyword": 0.0,
+            "score_vector": 0.4819,
+            "retrieval_mode": "vector",
+            "tags": [],
+            "pain_points": [
+              "现有博物馆数字场景交互方式单一鼠标点选式为主，可交互物体少",
+              "内容传播方式固定单向",
+              "观众难以沉浸参与到内容中"
+            ],
+            "solution": [
+              "高效快速",
+              "形成虚拟空间",
+              "研发周期缩短一半以上"
+            ],
+            "innovation_points": [
+              "现有博物馆数字场景交互方式单一鼠标点选式为主，可交互物体少",
+              "内容传播方式固定单向"
+            ],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "weak_user_evidence",
+              "compliance_not_covered"
+            ],
+            "rubric_coverage": [],
+            "summary": "2O23.3 构建高交互元宇宙空间 元创未来 以仿真技术搭建通往未来的元宇宙之路 实现元宇宙技术在文化和教育领域的大规模应用 党的二十大提出， 让中华民族凝聚力和中华文化影响力不断增强, 而从动画可视化技术到虚拟现实、增强现实技术到现在的元宇宙技术等数字化方式, 可助力文化的共享与共荣。 2020年，我国数字经济市场规模增长至40万亿元， 2022年，中国数字文化产业规模已达7841.6亿元。 文化传播重地，深耕千亿市场 上亿 项目背景 现有博物馆数字场景交互方式单一鼠标点选式为主，可交互物体少 内容传播方式固定单向 观众难以沉浸参与到内容中 09年国庆60周年群众游行水晶石公司制作3分钟虚拟"
+          }
+        ],
+        "web_search": {},
+        "hypergraph_student": {},
+        "critic": null,
+        "challenge_strategies": [],
+        "pressure_test_trace": {},
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "diagnosis": {
+          "mode": "coursework",
+          "overall_score": null,
+          "bottleneck": "",
+          "triggered_rules": [],
+          "rubric": [],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+          "info_sufficient": false,
+          "project_stage": "idea",
+          "score_band": "",
+          "grading_principles": [
+            "信息太少时不做完整评分",
+            "先补全目标用户、痛点、方案三项核心信息"
+          ]
+        },
+        "next_task": {
+          "title": "描述你的项目",
+          "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+          "acceptance_criteria": [
+            "项目一句话描述",
+            "目标用户是谁",
+            "解决什么问题"
+          ]
+        }
+      },
+      "timestamp": "2026-04-01T10:27:40.888216+08:00"
+    }
+  ]
+}

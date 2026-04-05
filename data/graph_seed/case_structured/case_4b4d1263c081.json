@@ -1,0 +1,308 @@
+{
+  "case_id": "case_4b4d1263c081",
+  "document_id": "doc_72316ebcecc4",
+  "source": {
+    "file_path": "工业制造/467876-广寒天工——月基装备多机智能协同无人作业系统-项目策划书-bea2dedb.pdf",
+    "file_name": "467876-广寒天工——月基装备多机智能协同无人作业系统-项目策划书-bea2dedb.pdf",
+    "category": "工业制造",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 63288,
+    "core_text_chars": 54537,
+    "appendix_start_index": 1,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "467876-广寒天工——月基装备多机智能协同无人作业系统",
+    "target_users": [
+      "国家航天局（CNSA）等政府航天机构",
+      "国际月球科研站（ILRS）参与组织",
+      "未来从事月球资源开发与基建的商业航天公司"
+    ],
+    "pain_points": [
+      "深化月球资源勘查、 实施月球资源利用、 拓展地外天体探测能力的重要基础和关键途径， 是当前世界各航天大国抢占的太空战略制高点",
+      "月表环境严峻、 建设时间紧迫、 月基装备来源复杂， 人力作业存在驻留成本高、 工作效率低、协调指挥难",
+      "月面环境复杂不确知、月基装备系统和协作任务复杂"
+    ],
+    "solution": [
+      "利用人工智能技术实现月基装备无人作业",
+      "月基装备的多机智能协同无人作业亟需突破感知与导航、 规划与决策等基础理论与关键技术，保障月基装备长周期",
+      "面向“人工智能+航天”交叉领域，围绕多智能体系统在月面复杂场景下的感知、决策与执行，提出“导航-规划-验证”一体化技术体系，构建了月基装备多机智能协同"
+    ],
+    "innovation_points": [
+      "多机异构协同算法：支持不同功能机器人之间的任务自动拆解与无缝配合",
+      "复杂环境感知补偿：针对月面阴影和地形特征优化的视觉/激光SLAM算法"
+    ],
+    "business_model": [
+      "月基多装备任务规划技术需要结合约束处理和收益优化两种需求， 通过启发式时间线规划、 元启发式算法和招投标算法等方法， 生成多航天器的规划方案。",
+      "从集中式规划到分布式规划、 从同构航天器到异构航天器、 从单类型任务到复合任务的发展趋势。",
+      "多月球装备协同任务规划方法的研究尚在起步阶段， 已有的方法大多针对一种或几种特定的任务类型， 对大型复合任务的规划架构和规划方法有待深入研究。"
+    ],
+    "market_analysis": [
+      "月球作为距离地球最近的自然天体， 已成为航天大国争夺战略资源的焦点。",
+      "重返月球， 开发月球资源， 建立月球科研站已成为世界航天活动的必然趋势和竞争热点。",
+      "在我国既定的 “绕、 落、 回” 探月工程任务完成之际， 为了更加深入地开展月球科学研究、 基于月球的地球大尺度观测研究、 勘查并有效利用月球资源， 实现月球探测。",
+      "2019 年 1 月， 我国 “嫦娥四号” 成功实现了人类探测器在月球背面的首次软着陆， 揭开了我国 “探月工程四期”——无人月球基地的建设序幕。",
+      "自 2023 年起，中国将全面推进探月工程四期，建立国际月球科研站基本型。"
+    ],
+    "execution_plan": [
+      "第一阶段（原理原型）：完成多机协同算法的仿真验证及室内类月环境测试",
+      "第二阶段（工程化迭代）：针对极端环境进行材料升级，参与模拟地外环境的野外测试",
+      "第三阶段（实战验证）：对接国家探月工程后续任务，进行技术预研与搭载申请"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:工业制造",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "risk_rule:H10",
+    "risk_rule:H13",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H2",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": false
+    }
+  ],
+  "summary": "广寒天工 月基装备多机智能协同无人作业系统 ߥݱ ޑ ߈ۉޥࢻ ҀռѨԍ ୓яঔ ӱள䎯 滸 ゘䏥ⶕ朆瀵瀵╽⨶䣺摴䡑⧦Ჭ揿㖟≑⫕塄ₒ ¾ \u0018\u0016\u0018 \u0013\u0018\u0016\u0019\u001bयऒॊ ੦ ݲ ԮȐݯڙȑૉъȐࣁޤȑٮ ࣒4'9'ଢ଼՟ҀѩѳԿЉ ݯڙ ֡ ࣁޤ ֡ ╽擅䥞ᴉ瀵瀵与╽朆囔灃恍幔㖈䊃灄娡ₒ ¾ \u0018\u0016\u0018 \u0013\u0018\u0016\u0019>ׁ֩ࣁޤ ߥݱ ޑ ߈ۉޥࢻ ҀռѨԍ ୓яঔ ளѹъԂ ҀЎ୰ ڟள'/ ટৗৗ Д㈮ ୰ ੦ৼ䎯ॻ૧ ޳וࡼ޼ה Ԇଜ \u0018\u0016\u0018\u001b \u0018\u0016\u0019\u001b\u0003ֹޯׁ \u0003\u001b\u001a\u0016\u0018ֹى܃ ࣁޤۉڎ ׁ֩ ֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹֹ ֹ ֹ ଜԂѹ לٚࡴ ୕஝ ଜੌҐ୭ 滹 ޑ ߈ۉޥࢻ ҀռѨԍ ୓яঔ ߥݱ ګ ޱ۪ڵߟ یܙޱ۪ 亗㑶 䬾⴦ ѹ େ ►㓯ش ₆⫂ⶂ㧥 ₆⫂ⶂ㧥 ⶺ↖⧦᳠ 䃹⸁ᶘ庉 䃹⸁ᶘ庉 ➚㴐嘍⊈ 巯ᵶ ᵶ ᵿ䖟 巯ᵶ ᵶ 䖟 ᵿ 䛬ᵶ㊭⵺ 㖈既➚㖺㓺佽⾟䙥 㖈既➚㖺 ᲎⇏⊌䬾䛮 㖺㓺佽⾟䙥 㖺㓺佽 䛮 䛮 ⩼傪 䙥 佽⾟䙥 傪 傪㄀㖯 㖈♺坅➇➚㖺偪᲻⇏ 㖈♺坅➇ ⊌ᷜᲚ㓺佽 ➇➚㖺偪᲻⇏ ➇➚㖺 佽 佽 塄ₒ ⇏ 偪᲻⇏ ₒ ₒ㄀㖯 ➚㖺㓺佽",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:55:20Z",
+  "risk_flags": [
+    "H10",
+    "H13",
+    "H14",
+    "H15",
+    "H2",
+    "H3",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了月球资源开发与基建中的痛点，包括人力作业成本高、效率低、协调难等。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了多机智能协同无人作业系统，包括多机异构协同算法和复杂环境感知补偿等技术，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目文本中未明确描述客户、价值主张、渠道、营收和成本等商业模式要素。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了月球资源开发的市场背景和竞争态势，但未详细列出具体竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中未提供财务逻辑分析，包括单位经济、LTV 和 CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了多机智能协同无人作业系统的创新性，提出了导航-规划-验证一体化技术体系。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目文本中未详细描述团队背景和执行能力，也未列出具体里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目文本结构较为混乱，部分内容难以理解，缺乏清晰的数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了目标用户（政府航天机构和商业航天公司）与价值主张（提高月球资源开发与基建效率）的匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目文本中未提及具体的获客渠道。",
+      "reason": "项目文本中未提及如何有效触达目标用户的具体渠道。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目文本中提到定价/收费但未提供用户支付意愿验证。",
+      "reason": "项目文本中提到收费但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中对市场规模的描述较为合理，未出现口径混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目文本中缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目文本中未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中未声称无竞品，但未详细列出具体竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中提出了具体的创新点和技术方案，但未提供实验或指标验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中未提供财务逻辑分析，因此无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目文本中出现了‘只要拿下 1% 市场’等自上而下估算。",
+      "reason": "项目文本中出现了‘只要拿下 1% 市场’等自上而下估算，缺乏具体增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目文本中未列出具体里程碑。",
+      "reason": "项目文本中未详细列出具体里程碑和时间表。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中未涉及高风险领域，因此不存在合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中提出了具体的技术方案，但未详细说明资源匹配情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目文本中提到实验/测试但缺少样本量与评价指标。",
+      "reason": "项目文本中提到实验/测试但未提供具体的样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目文本结构较为混乱，部分内容难以理解。",
+      "reason": "项目文本结构较为混乱，部分内容难以理解，叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目文本中多个关键 Rubric 维度（如用户证据强度、商业模式一致性、团队与执行、材料展示质量）缺乏充分的支撑证据。"
+    }
+  ]
+}

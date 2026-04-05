@@ -1,5 +1,6 @@
 {
   "case_id": "case_c547ce8cc3f2",
+  "document_id": "doc_d1e4de087fbc",
   "source": {
     "file_path": "科技创新/项目PPT_星哨科技--新一代卫星互联网应用系统，开启全域全时快响预警新时代.pdf",
     "file_name": "项目PPT_星哨科技--新一代卫星互联网应用系统，开启全域全时快响预警新时代.pdf",
@@ -15,110 +16,110 @@
   "document_stats": {
     "segment_count": 27,
     "full_text_chars": 4931,
-    "core_text_chars": 4931,
+    "core_text_chars": 4417,
     "appendix_start_index": null,
-    "has_appendix_evidence": false
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 28,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 28,
+    "hypergraph_hyperedge_count": 1
   },
   "project_profile": {
     "project_name": "新一代卫星互联网应用系统",
     "target_users": [
       "军事科学院",
       "山河屯林业公司",
-      "中国水产科学院",
-      "边防哨所",
-      "大型林场",
-      "沿岸城市渔政局"
+      "中国水产科学院"
     ],
     "pain_points": [
-      "五分之一领土面积难以监测",
-      "互联网覆盖率低的地区占国土面积的20%",
-      "前往防灾第一线，实地探索卫星互联网地面终端升级需求",
-      "复杂地形导致信道衰落严重",
-      "预约接入无法应对紧急事件",
-      "功耗过大导致频繁维护，人工成本高"
+      "低互联网覆盖率地区地形复杂，信道衰落严重",
+      "卫星终端接入时间固定，无法应对紧急事件",
+      "终端功耗大，需要频繁人工更换电池"
     ],
     "solution": [
-      "开发终端超低功耗静默模式",
-      "创新终端功耗智能管理策略",
-      "独立设计全国产低功耗卫星互联网终端",
-      "创新FPGA重构方案",
-      "实现Deep-Sleep模式呼吸式唤醒",
-      "对抗7us多径时延",
-      "实现随遇接入",
-      "实现大多普勒卫星轨道预测",
-      "降低迭代成本"
+      "自研全国产低功耗终端，实现冗余开销柔性可变",
+      "独创大多普勒卫星轨道预测算法，保障发射成功率",
+      "创新终端功耗智能管理策略，将预警模式功耗降至0.001W"
     ],
     "innovation_points": [
-      "创新终端功耗智能管理策略",
-      "独立设计全国产低功耗卫星互联网终端",
-      "创新FPGA重构方案",
-      "实现Deep-Sleep模式呼吸式唤醒",
-      "对抗7us多径时延",
-      "实现随遇接入",
-      "实现大多普勒卫星轨道预测",
-      "降低迭代成本"
+      "首创跨层融合协议体制，适应多径时延7us",
+      "突破高机动星地随遇接入技术，取消握手流程",
+      "全国产低功耗终端，静默功耗≯0.001W"
     ],
     "business_model": [
-      "发展规划 – 市场分析",
-      "⚫ 美国卫星产业协会数据：2023年全球航天产业的总收入为3840亿美元 ，其中卫星联网通信行",
-      "业收入约占8%，当前市场规模突破两千亿人民币。",
-      "政策指引方向，",
-      "市场规模空前膨胀",
-      "建设高通量卫星应急管理专用系统，扩容扩建",
-      "卫星应急管理专用综合服务系统。",
-      "--- 国务院《十四五国家应急体系规划》",
-      "发展规划 – 推广计划",
-      "产品稳步推广，引领卫星互联网应用新时代"
+      "核心价值主张：提供低功耗、高精度、全时待命的卫星互联网终端",
+      "目标客户：军事、林业、渔业等低互联网覆盖率区域的用户",
+      "触达渠道：实地测试与应用，签订横向合同",
+      "主要收入来源：终端销售与服务合同",
+      "关键成本：研发成本、生产成本、测试与应用成本"
     ],
     "market_analysis": [
-      "2023年全球航天产业的总收入为3840亿美元，其中卫星联网通信行业收入约占8%，当前市场规模突破两千亿人民币",
-      "国务院《十四五国家应急体系规划》建设高通量卫星应急管理专用系统，扩容扩建卫星应急管理专用综合服务系统"
+      "2023年全球航天产业总收入3840亿美元，卫星联网通信行业收入约占8%",
+      "当前市场规模突破两千亿人民币，政策指引方向，市场规模持续膨胀",
+      "竞品分析：在穿透能力、轨道预测、待机功耗等方面具有优势"
     ],
     "execution_plan": [
-      "2024年：5家大型林场、2座沿岸城市渔政局，10所边防哨所",
-      "2027年：全国60%林场及渔政局，中印、中哈边境边防哨所",
-      "2030年：遍布我国98%低互联网覆盖区域，实现全域监测"
+      "2024年：成立星哨科技公司，交付首批100套终端",
+      "2026年：交付1000套终端，拓展渔业局、林业局订单",
+      "2028年：交付2000套终端，拓展边境哨所订单",
+      "2030年：交付4000套终端，实现全国范围大批量订单"
     ],
-    "risk_control": []
+    "risk_control": [
+      "【通用风险控制】技术风险：通过实地测试验证产品性能，确保在复杂环境下的通信能力",
+      "【通用风险控制】市场风险：签订多个横向合同，确保初期收入来源",
+      "【合规与伦理意识】合规风险：遵循国家政策指引，确保产品符合应急管理专用系统要求"
+    ]
   },
-  "risk_flags": [
-    "market_size_fallacy",
-    "weak_user_evidence",
-    "compliance_not_covered"
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:User Evidence Strength",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H3",
+    "risk_rule:H8"
   ],
   "evidence": [
     {
       "id": "case_c547ce8cc3f2_e1",
       "type": "user_evidence",
-      "quote": "产品已在军事科学院 、山河屯林业公司以及中国水产科学院开展实地应用 ，充分验证了产品在陆地遮挡环境 、密林环境以及远洋海面环境下的通信能力",
-      "chunk_id": "C8",
-      "source_unit": "page_17"
+      "quote": "产品已在军事科学院、山河屯林业公司以及中国水产科学院开展实地应用，充分验证了产品在陆地遮挡环境、密林环境以及远洋海面环境下的通信能力",
+      "chunk_id": "C5",
+      "source_unit": "page_15"
     },
     {
       "id": "case_c547ce8cc3f2_e2",
       "type": "business_model_evidence",
-      "quote": "美国卫星产业协会数据：2023年全球航天产业的总收入为3840亿美元 ，其中卫星联网通信行业收入约占8%，当前市场规模突破两千亿人民币",
-      "chunk_id": "C9",
-      "source_unit": "page_21"
+      "quote": "依托关键技术，项目主创团队已签订多个横向合同，总额超1000万元",
+      "chunk_id": "C6",
+      "source_unit": "page_18"
     },
     {
       "id": "case_c547ce8cc3f2_e3",
-      "type": "business_model_evidence",
-      "quote": "国务院《十四五国家应急体系规划》建设高通量卫星应急管理专用系统，扩容扩建卫星应急管理专用综合服务系统",
-      "chunk_id": "C9",
-      "source_unit": "page_21"
-    },
-    {
-      "id": "case_c547ce8cc3f2_e4",
       "type": "risk_evidence",
-      "quote": "现有面向预警处突的卫星互联网应用系统亟需发展",
-      "chunk_id": "C2",
-      "source_unit": "page_2"
+      "quote": "通过实地测试验证产品性能，确保在复杂环境下的通信能力",
+      "chunk_id": "C5",
+      "source_unit": "page_15"
     }
   ],
   "rubric_coverage": [
     {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
       "rubric_item": "User Evidence Strength",
+      "covered": true
+    },
+    {
+      "rubric_item": "Solution Feasibility",
       "covered": true
     },
     {
@@ -126,7 +127,23 @@
       "covered": true
     },
     {
-      "rubric_item": "Risk Control",
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
       "covered": true
     }
   ],
@@ -135,8 +152,176 @@
   "llm": {
     "enabled": true,
     "provider": "qwen",
-    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
     "used": true
   },
-  "generated_at": "2026-03-08T13:41:37Z"
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:49:11Z",
+  "risk_flags": [
+    "H3",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目背景描述了低互联网覆盖率地区的具体需求，包括地形复杂、信道衰落等问题，以及涉及的多个敏感区域。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到已在军事科学院、山河屯林业公司以及中国水产科学院开展实地应用，验证了产品在不同环境下的通信能力。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目描述了自研低功耗终端、大多普勒卫星轨道预测算法和终端功耗智能管理策略，技术路线清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了目标客户、价值主张、触达渠道、收入来源和关键成本，形成了较为完整的商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了全球航天产业和卫星联网通信行业的市场规模数据，并进行了竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目描述了收入来源和关键成本，但未提供详细的财务模型和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了自研技术的创新点，包括低功耗终端、大多普勒卫星轨道预测算法和终端功耗智能管理策略。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目团队已签订多个横向合同，总额超1000万元，显示了团队的执行力和市场认可度。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，提供了详细的背景信息和技术描述，数据具有说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目描述了目标客户和核心价值主张，两者匹配度较高。",
+      "reason": "项目目标客户与核心价值主张匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到通过实地测试与应用，签订横向合同作为主要获客渠道。",
+      "reason": "项目主要获客渠道明确，且已通过签订合同验证。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目提到收入来源为终端销售与服务合同，但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了全球航天产业和卫星联网通信行业的市场规模数据，口径合理。",
+      "reason": "项目市场规模口径合理，未发现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目已在军事科学院、山河屯林业公司以及中国水产科学院开展实地应用，验证了产品在不同环境下的通信能力。",
+      "reason": "项目提供了用户访谈和实地应用的证据，需求证据充分。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目进行了竞品分析，提到在穿透能力、轨道预测、待机功耗等方面具有优势。",
+      "reason": "项目进行了合理的竞品分析，未发现不可比的情况。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目强调了自研技术的创新点，并提供了实地测试验证。",
+      "reason": "项目创新点有实地测试验证，可验证性较高。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目描述了收入来源和关键成本，但未提供详细的财务模型和单位经济分析。",
+      "reason": "项目未提供详细的财务模型，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了详细的市场背景和政策指引，市场规模持续膨胀。",
+      "reason": "项目增长逻辑基于市场背景和政策指引，未发现跳跃。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了明确的时间表和里程碑，包括成立公司、交付终端和拓展订单。",
+      "reason": "项目里程碑清晰，时间表合理。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到遵循国家政策指引，确保产品符合应急管理专用系统要求。",
+      "reason": "项目涉及高风险领域，但已提到合规措施。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目描述了自研低功耗终端、大多普勒卫星轨道预测算法和终端功耗智能管理策略，技术路线与资源匹配。",
+      "reason": "项目技术路线与资源匹配，未发现过度设计。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到通过实地测试验证产品性能，确保在复杂环境下的通信能力。",
+      "reason": "项目实验设计合理，有明确的样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构完整，提供了详细的背景信息和技术描述。",
+      "reason": "项目路演叙事结构完整，未发现断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目在多个关键 Rubric 维度提供了充分的支撑证据。",
+      "reason": "项目在多个关键维度提供了充分的证据，未发现明显证据覆盖不足。"
+    }
+  ]
 }

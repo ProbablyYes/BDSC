@@ -1,0 +1,329 @@
+{
+  "case_id": "case_f26ccbb55a19",
+  "document_id": "doc_2ab8682c6421",
+  "source": {
+    "file_path": "农业发展/504593-农夜智巡——AI夜视开启无人机植保新篇章-项目策划书-56560002.pdf",
+    "file_name": "504593-农夜智巡——AI夜视开启无人机植保新篇章-项目策划书-56560002.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 77,
+    "full_text_chars": 59992,
+    "core_text_chars": 54173,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 78,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 78,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "农夜智巡",
+    "target_users": [
+      "农业植保无人机用户",
+      "夜间病虫害防治需求的农户"
+    ],
+    "pain_points": [
+      "夜间作业感知能力不足，飞行安全难以保障",
+      "补光设备体积大、能耗高，影响续航与载荷",
+      "现有产品升级复杂，功能冗余且兼容性差"
+    ],
+    "solution": [
+      "提出先进暗光增强技术，实现极暗光条件下的清晰成像"
+    ],
+    "innovation_points": [
+      "基于全元物理量噪声模型和渐进归一化流网络的双引擎架构",
+      "无需昂贵硬件改造，通过软件升级实现星光级成像能力",
+      "支持区域和作物类型差异化部署，提高兼容性和灵活性"
+    ],
+    "business_model": [
+      "核心价值主张：解决无人机夜间植保的技术瓶颈",
+      "目标客户：农业植保无人机用户和农户",
+      "触达渠道：农业技术推广机构和无人机植保服务公司",
+      "主要收入来源：软件升级服务费和技术授权费",
+      "关键成本：研发成本和市场推广成本"
+    ],
+    "market_analysis": [
+      "我国农业生产因夜间病虫害导致的减产高达总产量的 10%-20%",
+      "夜间作业具有温度适宜、湿度较高、农药吸收率好等优势",
+      "现有无人机技术难以充分利用夜间作业时间窗口"
+    ],
+    "execution_plan": [
+      "项目初期：完成算法研发和嵌入式系统设计",
+      "中期：进行实地测试和优化，确保技术稳定性和可靠性",
+      "后期：推广市场，与植保无人机厂商合作，实现规模化应用"
+    ],
+    "risk_control": [
+      "【通用风险控制】技术风险：通过实地测试和优化，确保算法在极暗光条件下的稳定性和可靠性",
+      "【通用风险控制】市场风险：与农业技术推广机构合作，确保技术的市场接受度和推广效果",
+      "【合规与伦理意识】合规风险：遵守国家关于农业无人机使用的相关法规，确保项目合法合规"
+    ]
+  },
+  "tags": [
+    "category:农业发展",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_f26ccbb55a19_e1",
+      "type": "pain_points_evidence",
+      "quote": "一是传统视觉系统在微光环境下感知能力不足，难以保障飞行安全；二是外置补光设备体积大、能耗高，严重制约续航与载荷；三是现有产品更新方案无法精细化控制且更新复杂，导致产品功能冗余且兼容性差。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_f26ccbb55a19_e2",
+      "type": "solution_evidence",
+      "quote": "本项目提出的先进暗光增强技术，基于全元物理量噪声模型和渐进归一化流网络，在 0.001 Lux 极暗光条件下实现高保真清晰成像。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_f26ccbb55a19_e4",
+      "type": "business_model_evidence",
+      "quote": "这一创新使得普通植保无人机仅需通过软件升级就能获得夜间作业能力，实现全天候应用。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_f26ccbb55a19_e5",
+      "type": "market_analysis_evidence",
+      "quote": "据统计，我国农业生产因夜间病虫害导致的减产高达总产量的 10%-20%，这一数字凸显解决夜间作业难题的紧迫性。",
+      "chunk_id": "C2",
+      "source_unit": "page_8"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "第十九届“挑战杯”全国大学生课外学术科技作品竞赛“人工智能+”专项赛——“农夜智巡” 摘要 无人机技术以其高效、精准和灵活的特点，突破了传统农业在时空和人力上 的局限，正在成为现代农业植保的重要支撑力量。国家已将科技创新置于推动农 业高质量发展的核心位置，明确提出要以无人机等新型农业装备为抓手，赋能数 字农业、智慧农业建设，为乡村振兴和粮食安全提供强有力的科技支撑。 然而，当前无人机植保作业在夜间跨时段运行方面仍面临明显短板，主要集 中在三大痛点：一是传统视觉系统在微光环境下感知能力不足，难以保障飞行安 全；二是外置补光设备体积大、能耗高，严重制约续航与载荷；三是现有产品更 新方案无法精细化控制且更新复杂，导致产品功能冗余且兼容性差。这些问题导 致无人机难以充分利用夜间温度和湿度优势，制约了全天候精准植保能力的发挥。 针对上述痛点，“农夜智巡”应运而生。首先，本项目提出的先进暗光增强 技术，基于全元物理量噪声模型和渐进归一化流网络，在 0.001 Lux 极暗光条件 下实现高保真清晰成像。其次，我们将算法直接嵌入普通 CMOS 传感器，实现 “软硬协同”的轻量化解决方案。借助边缘计算和",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:46:33Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 9.0,
+      "reason": "需求真实具体，有用户场景支撑，如夜间病虫害防治和飞行安全。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "缺乏具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "技术路线明确，基于全元物理量噪声模型和渐进归一化流网络，且无需昂贵硬件改造。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "客户、价值主张、渠道、营收、成本基本形成闭环，但具体细节和数据支持较少。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "市场分析合理，提到夜间病虫害导致的减产，竞品分析较为客观。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到收入来源和成本，但缺乏具体的财务数据和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "创新点明确，通过软件升级实现星光级成像能力，具有差异化优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 5.0,
+      "reason": "提到项目初期、中期和后期的计划，但缺乏具体团队能力和里程碑的详细描述。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "BP/路演结构完整，数据有说服力，但可以进一步细化。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，解决夜间植保的技术瓶颈。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "触达渠道明确，通过农业技术推广机构和无人机植保服务公司。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "提到软件升级服务费和技术授权费，但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场规模口径合理，提到夜间病虫害导致的减产。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "缺乏具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "竞品分析较为客观，提到现有产品的不足。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点明确，通过软件升级实现星光级成像能力，具有可验证性。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供具体的财务数据，但未明确提到单位经济不成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未出现自上而下估算的增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "时间表/里程碑较为合理，但缺乏具体团队能力和交付物的详细描述。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到合规风险并有相应的控制措施。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配，无需昂贵硬件改造。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到实地测试和优化，但未详细说明样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "路演叙事结构完整，但可以进一步细化。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度和团队与执行。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度和团队与执行。"
+    }
+  ]
+}

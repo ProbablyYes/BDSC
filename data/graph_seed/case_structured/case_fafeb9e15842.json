@@ -1,0 +1,369 @@
+{
+  "case_id": "case_fafeb9e15842",
+  "document_id": "doc_611d8683e573",
+  "source": {
+    "file_path": "科技创新/星哨科技-新一代卫星互联网应用系统域，开启全全时快响预警新时代-商业计划书.pdf",
+    "file_name": "星哨科技-新一代卫星互联网应用系统域，开启全全时快响预警新时代-商业计划书.pdf",
+    "category": "科技创新",
+    "doc_type": "pdf",
+    "parse_quality": "B",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 68,
+    "full_text_chars": 16920,
+    "core_text_chars": 772,
+    "appendix_start_index": 2,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 69,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 69,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "星哨科技-新一代卫星互联网应用系统",
+    "target_users": [
+      "森林防火部门",
+      "应急救援机构"
+    ],
+    "pain_points": [
+      "现有终端在复杂环境下通信受阻",
+      "卫星通信终端需要预约接入，延误信息传递",
+      "现有终端功耗大，维护成本高"
+    ],
+    "solution": [
+      "发明跨层融合协议体制的森林防火卫星通信终端",
+      "实现多种复杂环境下的适应性",
+      "支持星地随遇接入，无需预约",
+      "待机超200天无需维护"
+    ],
+    "innovation_points": [
+      "跨层融合协议体制",
+      "适应多种复杂环境",
+      "星地随遇接入",
+      "低功耗长待机"
+    ],
+    "business_model": [
+      "提供高性能卫星通信终端设备",
+      "通过设备销售和维护服务获取收入",
+      "利用国家政策支持拓展市场"
+    ],
+    "market_analysis": [
+      "2021年中国卫星互联网产业规模约为292.5亿元",
+      "预计2025年将升至446.92亿元，复合增长率为11.2%",
+      "国内卫星互联网市场发展机遇良好"
+    ],
+    "execution_plan": [
+      "已授权国家发明专利20项",
+      "发表高水平学术论文13篇",
+      "获得软件著作权6项"
+    ],
+    "risk_control": [
+      "【通用风险控制】确保设备在极端条件下的可靠性和安全性"
+    ]
+  },
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_fafeb9e15842_e1",
+      "type": "user_evidence",
+      "quote": "森林防火部门、应急救援机构",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e2",
+      "type": "pain_points_evidence",
+      "quote": "现有终端在复杂环境下受到复杂影响，需要对抗数十条多径干扰，功率严重受损",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e3",
+      "type": "pain_points_evidence",
+      "quote": "现有卫星通信终端与卫星链接需要预约，只有固定时间可以上传信号，延误信息传递",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e4",
+      "type": "pain_points_evidence",
+      "quote": "现有的卫星互联网通信终端功耗大，续航时间短，需要频繁的进行维护",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e5",
+      "type": "solution_evidence",
+      "quote": "发明我国首套具备跨层融合协议体制的森林防火卫星通信终端，实现了对现有卫星通信终端适应（适应多种复杂环境）、联通（星地随遇接入）、降本（待机超 200 天无需维护）的技术升级",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e6",
+      "type": "innovation_points_evidence",
+      "quote": "提出新方法、融合新技术，发明我国首套具备跨层融合协议体制的森林防火卫星通信终端",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e7",
+      "type": "business_model_evidence",
+      "quote": "授权国家发明专利20 项，高水平学术论文 13 篇，获得软件著作权 6 项，实现了核心技术的自主可控",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e8",
+      "type": "market_analysis_evidence",
+      "quote": "2021 年中国卫星互联网产业规模约为 292.5 亿元，预计 2025 年将升至 446.92 亿元，2021-2025 年复合增长率为 11.2%",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_fafeb9e15842_e9",
+      "type": "execution_plan_evidence",
+      "quote": "授权国家发明专利20 项，高水平学术论文 13 篇，获得软件著作权 6 项，实现了核心技术的自主可控",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 星哨科技 - - 新一代卫星互联网应用系统， 开启全域全时快响预警新时代， 开启全域全时快响预警新时代 项 目 类 别: 科 技 创 新 和 未 来 产 业 学 历 组 别: 研 究 生 创 意 组 项目 负 责 人: 杨硕 2 项目概述 ⚫ 卫星互联网：卫星互联网是基于卫星通信系统， 能够独立运行的网络系统， 是“空天地”一体化网络的重要组成部分。 ⚫ 卫星互联网通信终端：卫星互联网通信终端是卫星互联网与用户连接的 “桥梁”——没有终端，卫星互联网发挥不了作用，“空天地”一体化网络 也无从谈起。 ⚫ 市场分析：据相关统计结果表示，2021 年中国卫星互联网产业规模约为 292.5 亿元，预计 2025 年将升至 446.92 亿元，2021-2025 年复合增长率为 11.2%。 国内卫星互联网尚处于初期发展阶段， 但受益于近年来国家出台的多 政策措施，国内卫星互联网市场发展机遇良好。 ⚫ 痛点问题：“通信受阻”——现有终端在复杂环境下受到复杂影响，需要 对抗数十条多径干扰，功率严重受损；“预约接入”——现有卫星通信终端 与卫星链接需要预约，只有固定时间可以上传信号，延误信息传递",
+  "confidence": 0.55,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:47:48Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了现有卫星通信终端在复杂环境下的通信受阻、需要预约接入以及高功耗和维护成本的问题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了跨层融合协议体制的卫星通信终端，适应多种复杂环境，支持星地随遇接入，低功耗长待机，但未详细说明技术实现路径。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目通过设备销售和维护服务获取收入，利用国家政策支持拓展市场，但未详细说明成本结构和盈利模式。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了中国卫星互联网产业规模的数据，并提到市场发展机遇良好，但未详细分析竞争对手。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV 和 CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了跨层融合协议体制的创新性，并提到已授权国家发明专利20项，发表高水平学术论文13篇，获得软件著作权6项。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细说明团队成员的背景和能力，以及具体的执行计划和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，提供了产业规模数据和技术创新点，但部分信息缺乏详细支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户为森林防火部门和应急救援机构，价值主张为解决通信受阻和预约接入问题，两者匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提到具体获客渠道，但目标用户明确，且国家政策支持可能有助于市场拓展。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "通过设备销售和维护服务获取收入",
+      "reason": "项目提到通过设备销售和维护服务获取收入，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了 TAM/SAM/SOM 的数据，口径合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "现有终端在复杂环境下受到复杂影响，需要对抗数十条多径干扰，功率严重受损",
+      "reason": "项目描述了痛点问题，但未提供用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，但未详细分析竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目强调了技术创新点，并提供了专利和论文等证据。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "预计2025年将升至446.92亿元，2021-2025年复合增长率为11.2%",
+      "reason": "项目使用了市场增长数据进行自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "",
+      "reason": "项目未提供具体的时间表和里程碑，无法评估其可交付性。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域，无需特别关注合规/伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未详细说明技术路线与资源匹配情况，但未表现出明显的不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提到具体实验设计，但提供了专利和论文等技术验证证据。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，未表现出明显的叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "",
+      "reason": "项目在用户证据强度、财务逻辑、团队与执行等关键维度缺乏充分支撑证据。"
+    }
+  ]
+}

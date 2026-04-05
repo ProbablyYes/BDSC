@@ -1,0 +1,354 @@
+{
+  "case_id": "case_105359c35d4c",
+  "document_id": "doc_6f108be4fb45",
+  "source": {
+    "file_path": "医疗健康/467896-臻视赋医——面向真实临床场景的医学影像通用增强算法研究-项目策划书-a5403ba3.pdf",
+    "file_name": "467896-臻视赋医——面向真实临床场景的医学影像通用增强算法研究-项目策划书-a5403ba3.pdf",
+    "category": "医疗健康",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 78,
+    "full_text_chars": 71350,
+    "core_text_chars": 64067,
+    "appendix_start_index": 3,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 79,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 79,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "臻视赋医——面向真实临床场景的医学影像通用增强算法研究",
+    "target_users": [
+      "分级诊疗机构"
+    ],
+    "pain_points": [
+      "低质量医学影像影响诊断准确性",
+      "不同医疗中心影像质量差异大",
+      "多器官影像数据分布差异大"
+    ],
+    "solution": [
+      "提出融合特征退化感知的增强算法",
+      "设计“Reconstruction-Adaption”范式",
+      "构建基础增强模型，针对不同器官保存少量参数"
+    ],
+    "innovation_points": [
+      "低数据依赖和计算成本的自适应增强"
+    ],
+    "business_model": [
+      "提升医生诊疗效率与精准性",
+      "解决多中心数据使用问题"
+    ],
+    "market_analysis": [
+      "临床医学影像质量提升需求大",
+      "多中心数据分布差异显著",
+      "分级诊疗与远程医疗市场潜力大"
+    ],
+    "execution_plan": [
+      "2025年7月前完成算法开发",
+      "设计并验证“Reconstruction-Adaption”范式",
+      "针对不同器官优化模型参数"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】隐私数据使用问题通过“由简至繁”思想解决，确保数据安全"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H5",
+    "risk_rule:H6"
+  ],
+  "evidence": [
+    {
+      "id": "case_105359c35d4c_e1",
+      "type": "user_evidence",
+      "quote": "提升医生诊疗的效率与精准性。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_105359c35d4c_e2",
+      "type": "pain_points_evidence",
+      "quote": "临床医学影像存在低质量图像而其无法提供准确诊疗信息的挑战。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_105359c35d4c_e3",
+      "type": "solution_evidence",
+      "quote": "提出基于融合特征退化感知的增强算法，实现单模态多退化的统一有效增强。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_105359c35d4c_e4",
+      "type": "innovation_points_evidence",
+      "quote": "通过融合退化注意力的局部路径将退化知识引入增强过程，利用融合谱卷积的全局路径提升细节增强效果。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_105359c35d4c_e5",
+      "type": "business_model_evidence",
+      "quote": "可解决当下分级诊疗与远程医疗所面临的基层设备与操作人员水平差异大，不同医学中心获取医学影像质量差异大而造成医生诊断效率低的问题。",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_105359c35d4c_e6",
+      "type": "market_analysis_evidence",
+      "quote": "促进分级诊疗有序展开，保证远程诊疗效果一致。",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_105359c35d4c_e7",
+      "type": "execution_plan_evidence",
+      "quote": "2025年7月前完成算法开发。",
+      "chunk_id": "C5",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_105359c35d4c_e8",
+      "type": "risk_evidence",
+      "quote": "充分考虑实际多中心数据因隐私性等多种原因导致的数据使用问题，通过“由简至繁”与“一般到特殊”的思想，设计了“Reconstruction-Adaption”范式。",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "臻视赋医——面向真实临床场景的 医学影像通用增强算法研究 参 赛 赛 道 人工智能+医疗健康 申 报 人 姓 名 叶思翔 合 作 者 姓 名 韩浩楠、胡婷欣、郝进宝 林辰羿、蔡玖珅、杜嘉伟 崔月、孔怡然、袁国栋 指 导 教 师 张老师 李老师 陆老师 2025 年 7 月 1 摘要 本作品面向临床医学影像存在低质量图像而其无法提供准确诊疗信息的挑 战，旨在解决现有方法无法处理临床医学影像多种退化类型交错杂糅，多个中心 应用算法性能退化与多器官（模态）数据分布差异大，进而无法使用统一算法高 效便捷地提升图像质量的问题。 针对临床影像退化复杂，提出基于融合特征退化感知的增强算法，充分考虑 多种退化增强易导致模型收敛于平凡解的问题；通过融合退化注意力的局部路径 将退化知识引入增强过程，利用融合谱卷积的全局路径提升细节增强效果，实现 单模态多退化的统一有效增强，解决了由于病理性因素和成像过程带来复杂退化 进而导致增强算法临床应用性能下降的问题，提升医生诊疗的效率与精准性。 针对不同医疗中心数据分布差异，提出基于重建自适应的医学影像增强算法； 充分考虑实际多中心数据因隐私性等多种原因导致的数据使",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:49:22Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H5",
+    "H6"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了低质量医学影像影响诊断准确性的问题，并描述了不同医疗中心影像质量差异大的情况。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了融合特征退化感知的增强算法，并设计了‘Reconstruction-Adaption’范式，技术路线较为清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未详细描述客户、价值主张、渠道、营收、成本等商业模型要素。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目提到了分级诊疗与远程医疗市场潜力大，但未详细分析市场规模和竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供财务逻辑分析，如单位经济、LTV、CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了融合特征退化感知的增强算法，具有一定的创新性和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目团队成员和指导教师信息齐全，但未详细描述里程碑和具体可交付物。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，描述清晰，但部分商业模型和财务逻辑缺乏详细数据。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户为医生，价值主张为提升诊疗效率与精准性，二者匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体获客渠道，但未表明渠道难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及定价或收费，因此不存在支付意愿验证问题。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了市场潜力，但未详细计算 TAM/SAM/SOM，未发现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。",
+      "reason": "项目缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未详细分析竞品，仅提到‘无竞品/无竞争对手’。",
+      "reason": "项目声称无竞品，但未提供详细竞品分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了具体的创新点，如融合特征退化感知的增强算法。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未使用‘只要拿下 1% 市场’等自上而下估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "2025年7月前完成算法开发 设计并验证‘Reconstruction-Adaption’范式 针对不同器官优化模型参数",
+      "reason": "项目时间表较为笼统，未详细描述具体里程碑和可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "隐私数据使用问题通过‘由简至繁’思想解决，确保数据安全",
+      "reason": "项目提到了隐私数据的处理方法。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目技术路线与资源匹配，未提出过高要求。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了实验设计，但未详细描述样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未发现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目缺乏用户证据强度、商业模式一致性和财务逻辑的详细描述。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据。"
+    }
+  ]
+}

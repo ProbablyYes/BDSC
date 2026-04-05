@@ -182,6 +182,50 @@ RUBRICS = [
     {"item": "Presentation Quality", "weight": 0.05, "evidence": ["路演", "结构", "叙事", "数据支撑"], "rules": ["H14", "H15"]},
 ]
 
+COMPETITION_RUBRIC_WEIGHTS: dict[str, dict[str, float]] = {
+    "internet_plus": {
+        "Problem Definition": 0.08,
+        "User Evidence Strength": 0.10,
+        "Solution Feasibility": 0.10,
+        "Business Model Consistency": 0.20,
+        "Market & Competition": 0.15,
+        "Financial Logic": 0.10,
+        "Innovation & Differentiation": 0.10,
+        "Team & Execution": 0.07,
+        "Presentation Quality": 0.10,
+    },
+    "challenge_cup": {
+        "Problem Definition": 0.10,
+        "User Evidence Strength": 0.15,
+        "Solution Feasibility": 0.15,
+        "Business Model Consistency": 0.08,
+        "Market & Competition": 0.07,
+        "Financial Logic": 0.05,
+        "Innovation & Differentiation": 0.20,
+        "Team & Execution": 0.10,
+        "Presentation Quality": 0.10,
+    },
+    "dachuang": {
+        "Problem Definition": 0.12,
+        "User Evidence Strength": 0.12,
+        "Solution Feasibility": 0.18,
+        "Business Model Consistency": 0.10,
+        "Market & Competition": 0.08,
+        "Financial Logic": 0.08,
+        "Innovation & Differentiation": 0.15,
+        "Team & Execution": 0.12,
+        "Presentation Quality": 0.05,
+    },
+}
+
+
+def _get_rubrics(competition_type: str = "") -> list[dict]:
+    """Return RUBRICS with weights adjusted for the given competition type."""
+    overrides = COMPETITION_RUBRIC_WEIGHTS.get(competition_type, {})
+    if not overrides:
+        return RUBRICS
+    return [{**row, "weight": overrides.get(row["item"], row["weight"])} for row in RUBRICS]
+
 CAPABILITY_MAP = [
     {"stage": "痛点发现", "dimension": "敏锐度与同理心", "focus": "识别真需求并给出用户证据"},
     {"stage": "方案策划", "dimension": "创造力与可行性", "focus": "验证创新点并匹配资源"},
@@ -583,11 +627,12 @@ def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
     return None
 
 
-def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
+def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: str = "") -> DiagnosisResult:
     normalized_text = input_text.lower()
     is_file = "[" + "上传文件:" in input_text
     text_len = len(normalized_text)
     project_stage = _infer_project_stage(normalized_text, is_file=is_file)
+    active_rubrics = _get_rubrics(competition_type)
 
     if not is_file and text_len < 50:
         return DiagnosisResult(
@@ -670,7 +715,7 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
 
     if llm_scores:
         llm_map = {s["item"]: s for s in llm_scores}
-        for row in RUBRICS:
+        for row in active_rubrics:
             llm_s = llm_map.get(row["item"])
             if llm_s:
                 dim_score = max(0.0, min(10.0, float(llm_s.get("score", 5))))
@@ -693,7 +738,7 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
             total_weight += row["weight"]
     else:
         length_bonus = min(1.0, text_len / 2200) if is_file else min(0.6, text_len / 700)
-        for row in RUBRICS:
+        for row in active_rubrics:
             ev_score = _evidence_score(normalized_text, row["evidence"], stage=project_stage, is_file=is_file)
             penalties = sum(
                 _rule_penalty(r["severity"], project_stage, is_file=is_file)
@@ -739,8 +784,10 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
             enriched["ontology_tasks"] = tasks
         triggered_with_ontology.append(enriched)
 
+    comp_label = {"internet_plus": "互联网+", "challenge_cup": "挑战杯", "dachuang": "大创"}.get(competition_type, "")
     diagnosis = {
         "mode": mode,
+        "competition_type": competition_type,
         "overall_score": overall_score,
         "score_band": _score_band(overall_score),
         "project_stage": project_stage,
@@ -753,7 +800,10 @@ def run_diagnosis(input_text: str, mode: str = "coursework") -> DiagnosisResult:
             "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
             "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上",
         ],
-        "summary": f"已按 V2.0 规则集完成首轮诊断（{len(RULES)}条规则 + {len(RUBRICS)}项Rubric）。",
+        "summary": (
+            f"已按 V2.0 规则集完成{'「' + comp_label + '」赛道权重下的' if comp_label else ''}诊断"
+            f"（{len(RULES)}条规则 + {len(active_rubrics)}项Rubric）。"
+        ),
         "info_sufficient": True,
     }
     return DiagnosisResult(diagnosis=diagnosis, next_task=next_task)

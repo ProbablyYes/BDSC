@@ -71,6 +71,7 @@ def init_workflow_services(rag_engine=None, graph_service=None, hypergraph_servi
 class WorkflowState(TypedDict, total=False):
     message: str
     mode: str
+    competition_type: str
     project_state: dict
     history_context: str
     conversation_messages: list
@@ -98,14 +99,17 @@ class WorkflowState(TypedDict, total=False):
     kg_analysis: dict
     rag_cases: list
     rag_context: str
+    rag_enrichment_insight: str
     web_search_result: dict
     hypergraph_insight: dict
     hypergraph_student: dict
+    hyper_consistency_issues: list
     critic: dict
     challenge_strategies: list
     pressure_test_trace: dict
     competition: dict
     learning: dict
+    kb_utilization: dict
     needs_clarification: bool
     clarification_reason: str
     clarification_questions: list[str]
@@ -282,9 +286,8 @@ _DISCOVERY_INTENTS = frozenset([
 ])
 
 _VAGUE_PROJECT_SIGNALS = frozenset([
-    "有个想法", "一个想法", "想做一个", "大概想做", "还没想好", "还不太确定",
-    "先聊聊", "还在想", "可能做", "初步想法", "雏形", "暂时没有", "还没明确",
-    "一个方向", "这个方向", "这个赛道", "这个领域", "整体逻辑有没有问题", "社会价值",
+    "有个想法", "一个想法", "大概想做", "还没想好", "还不太确定",
+    "先聊聊", "还在想", "可能做", "初步想法", "暂时没有", "还没明确",
 ])
 
 _USER_SLOT_HINTS = frozenset([
@@ -300,6 +303,9 @@ _SOLUTION_SLOT_HINTS = frozenset([
 _PAIN_SLOT_HINTS = frozenset([
     "问题", "痛点", "麻烦", "低效", "困难", "不方便", "太慢", "成本高",
     "耗时", "费劲", "负担", "不知道", "难以", "不踏实",
+    "没有好的", "没有渠道", "找不到", "接不到", "不好找", "不信任",
+    "不靠谱", "效率低", "门槛高", "赚不到", "不匹配", "信息不对称",
+    "缺乏", "浪费", "体验差", "不透明", "没保障",
 ])
 
 
@@ -426,6 +432,7 @@ def _should_use_focused_mode(state: WorkflowState) -> bool:
 
 
 def _should_shallow_gather(state: WorkflowState) -> bool:
+    """Only trigger shallow gather for truly vague FIRST messages with no context."""
     intent = state.get("intent", "general_chat")
     intent_shape = _normalize_intent_shape(state.get("intent_shape", "single"))
     msg = state.get("message", "")
@@ -436,68 +443,128 @@ def _should_shallow_gather(state: WorkflowState) -> bool:
         return False
     if _is_generic_learning_question(msg) or _is_coursework_professional_question(msg):
         return False
+    if any(sig in msg for sig in _ADVICE_SEEKING_SIGNALS):
+        return False
     if intent_shape == "mixed":
         return False
-    if len(msg) >= 220:
+    if len(msg) >= 180:
         return False
-    if conv and _infer_prev_intent(conv) == intent and _message_complexity(msg, conv) >= 2:
+    if conv:
         return False
-    return any(sig in msg for sig in _VAGUE_PROJECT_SIGNALS) or len(msg) < 120
+    has_vague = any(sig in msg for sig in _VAGUE_PROJECT_SIGNALS)
+    is_very_short = len(msg) < 60 and not any(sig in msg for sig in _SOLUTION_SLOT_HINTS)
+    return has_vague and is_very_short
+
+
+_ADVICE_SEEKING_SIGNALS = frozenset([
+    "你觉得怎么样", "你觉得", "帮我看看", "怎么样", "可行吗", "有没有问题",
+    "第一步", "应该干什么", "应该做什么", "先做什么", "怎么做", "怎么推进",
+    "怎么改", "能不能做", "有戏吗", "靠谱吗", "你怎么看", "帮我分析",
+])
+
+_BUSINESS_SLOT_HINTS = frozenset([
+    "盈利", "变现", "收费", "商业模式", "成本", "收入", "渠道",
+    "赚钱", "抽成", "佣金", "会员", "订阅", "广告", "付费",
+    "定价", "客单价", "毛利", "营收", "接单", "副业",
+])
+
+
+def _accumulate_conv_slots(conv: list[dict]) -> dict[str, bool]:
+    """Scan conversation history to find slots already mentioned in prior turns."""
+    acc_user = False
+    acc_pain = False
+    acc_solution = False
+    acc_business = False
+    for m in conv:
+        if m.get("role") != "user":
+            continue
+        c = str(m.get("content", ""))
+        c_lower = c.lower()
+        if any(t in c for t in _USER_SLOT_HINTS):
+            acc_user = True
+        if any(t in c for t in _PAIN_SLOT_HINTS) or "解决" in c:
+            acc_pain = True
+        if any(t in c_lower for t in _SOLUTION_SLOT_HINTS) or "做了个" in c:
+            acc_solution = True
+        if any(t in c_lower for t in _BUSINESS_SLOT_HINTS):
+            acc_business = True
+    return {"user": acc_user, "pain": acc_pain, "solution": acc_solution, "business": acc_business}
 
 
 def _assess_clarification_need(state: WorkflowState) -> dict[str, Any]:
+    _NO_NEED = {"needs_clarification": False, "clarification_reason": "", "clarification_questions": [], "clarification_missing": []}
     intent = state.get("intent", "general_chat")
     msg = state.get("message", "")
     diag = state.get("diagnosis", {}) if isinstance(state.get("diagnosis"), dict) else {}
     kg = state.get("kg_analysis", {}) if isinstance(state.get("kg_analysis"), dict) else {}
     conv = state.get("conversation_messages", [])
     if "[上传文件:" in msg or intent not in _DISCOVERY_INTENTS:
-        return {"needs_clarification": False, "clarification_reason": "", "clarification_questions": [], "clarification_missing": []}
+        return _NO_NEED
 
+    # If the student is actively seeking advice/evaluation, never block with clarification
+    if any(sig in msg for sig in _ADVICE_SEEKING_SIGNALS):
+        logger.info("assess_clarification: advice-seeking detected, skip clarification")
+        return _NO_NEED
+    if any(sig in msg for sig in _EVALUATION_FOLLOWUP_SIGNALS):
+        return _NO_NEED
+
+    # Accumulate slots from current message + conversation history
+    acc = _accumulate_conv_slots(conv)
     entities = kg.get("entities", []) if isinstance(kg.get("entities"), list) else []
     entity_types = {str(e.get("type", "")) for e in entities if isinstance(e, dict)}
     text_lower = msg.lower()
-    inferred_has_user = any(term in msg for term in _USER_SLOT_HINTS)
-    inferred_has_solution = any(term in text_lower for term in _SOLUTION_SLOT_HINTS) or "做了个" in msg
-    inferred_has_pain = any(term in msg for term in _PAIN_SLOT_HINTS) or "解决" in msg
-    inferred_has_business = any(term in text_lower for term in ("盈利", "变现", "收费", "商业模式", "成本", "收入", "渠道"))
-    slot_hits = sum(1 for flag in (inferred_has_user, inferred_has_pain, inferred_has_solution, inferred_has_business) if flag)
+    cur_has_user = any(term in msg for term in _USER_SLOT_HINTS)
+    cur_has_solution = any(term in text_lower for term in _SOLUTION_SLOT_HINTS) or "做了个" in msg
+    cur_has_pain = any(term in msg for term in _PAIN_SLOT_HINTS) or "解决" in msg
+    cur_has_business = any(term in text_lower for term in _BUSINESS_SLOT_HINTS)
+
+    has_user = cur_has_user or acc["user"] or "stakeholder" in entity_types
+    has_pain = cur_has_pain or acc["pain"] or "pain_point" in entity_types
+    has_solution = cur_has_solution or acc["solution"] or "solution" in entity_types
+    has_business = cur_has_business or acc["business"] or "business_model" in entity_types
+
+    slot_hits = sum(1 for flag in (has_user, has_pain, has_solution, has_business) if flag)
     missing: list[str] = []
-    if "stakeholder" not in entity_types and not inferred_has_user:
+    if not has_user:
         missing.append("目标用户")
-    if "pain_point" not in entity_types and not inferred_has_pain:
+    if not has_pain:
         missing.append("核心痛点")
-    if "solution" not in entity_types and not inferred_has_solution:
+    if not has_solution:
         missing.append("解决方案")
-    if intent in ("business_model", "competition_prep") and "business_model" not in entity_types and not inferred_has_business:
+    if intent in ("business_model", "competition_prep") and not has_business:
         missing.append("商业模式")
+
+    # Multi-turn conversations: much higher bar for clarification
+    n_user_turns = sum(1 for m in conv if m.get("role") == "user")
+    if n_user_turns >= 2:
+        if len(missing) <= 2:
+            logger.info("assess_clarification: multi-turn (%d user turns), missing=%d <=2, skip", n_user_turns, len(missing))
+            return _NO_NEED
+    if n_user_turns >= 1 and slot_hits >= 2:
+        logger.info("assess_clarification: has prior context + %d slots filled, skip", slot_hits)
+        return _NO_NEED
 
     vague_signal = any(sig in msg for sig in _VAGUE_PROJECT_SIGNALS)
     direction_exploration = (
         any(sig in msg for sig in ("方向", "赛道", "领域"))
-        and len(missing) >= 2
+        and len(missing) >= 3
         and len(msg) < 420
     )
-    brief_project = len(msg) < 180 and _message_complexity(msg, conv) <= 2
     info_sufficient = bool(diag.get("info_sufficient", True))
-    need = (not info_sufficient) or len(missing) >= 2 or (brief_project and len(missing) >= 1) or vague_signal or direction_exploration
+    need = (
+        (not info_sufficient and len(missing) >= 2)
+        or len(missing) >= 3
+        or (vague_signal and len(missing) >= 2)
+        or direction_exploration
+    )
 
-    # If the student has already given a reasonably complete project sketch,
-    # avoid over-triggering clarification just because one slot is still fuzzy.
-    if len(msg) >= 220 and slot_hits >= 2 and len(missing) <= 2 and not direction_exploration:
+    if len(msg) >= 180 and slot_hits >= 2:
         need = False
-    if len(msg) >= 320 and slot_hits >= 1 and len(missing) <= 2:
-        need = False
-
-    if conv and _infer_prev_intent(conv) == intent and len(msg) >= 90 and len(missing) <= 1:
-        need = False
-    prev_intent = _infer_prev_intent(conv) if conv else None
-    asks_eval_followup = any(sig in msg for sig in _EVALUATION_FOLLOWUP_SIGNALS)
-    if conv and prev_intent in {"project_diagnosis", "competition_prep", "business_model", "pressure_test"} and asks_eval_followup:
+    if len(msg) >= 100 and slot_hits >= 1 and len(missing) <= 1:
         need = False
 
     question_bank = {
-        "目标用户": "你现在最想服务的是哪一类具体人群？最好具体到年龄、身份、场景，而不是“所有人”。",
+        "目标用户": "你现在最想服务的是哪一类具体人群？最好具体到年龄、身份、场景，而不是\u201c所有人\u201d。",
         "核心痛点": "这类人在什么场景下会遇到什么具体痛点？这个问题现在通常怎么被凑合解决？",
         "解决方案": "你的产品或服务到底准备怎么解决这个问题？用户第一次使用时会经历什么流程？",
         "商业模式": "如果这个方向成立，你准备靠什么赚钱或形成可持续模式？哪怕只是初步设想也可以。",
@@ -520,7 +587,6 @@ def _assess_clarification_need(state: WorkflowState) -> dict[str, Any]:
         "clarification_questions": questions[:6],
         "clarification_missing": missing[:4],
     }
-
 
 def _clarification_fallback_reply(state: WorkflowState) -> str:
     reason = str(state.get("clarification_reason") or "当前信息还不够完整，我先帮你把项目关键要素补齐。")
@@ -835,6 +901,7 @@ def _build_pressure_test_trace(
     strategies: list[dict[str, Any]],
     hypergraph_insight: dict,
     message: str = "",
+    consistency_issues: list[dict[str, Any]] | None = None,
 ) -> dict:
     top_rule = _top_triggered_rule(diag, message)
     top_strategy = strategies[0] if strategies and isinstance(strategies[0], dict) else {}
@@ -851,6 +918,15 @@ def _build_pressure_test_trace(
             "evidence_quotes": edge.get("evidence_quotes") or [],
         })
     generated_question = _compose_pressure_question(message, top_rule, top_strategy, edge_items)
+
+    # Merge consistency-rule pressure questions as fallback/supplement
+    consistency_questions = []
+    for ci in (consistency_issues or [])[:4]:
+        for pq in (ci.get("pressure_questions") or [])[:1]:
+            q = str(pq).strip()
+            if q and q != generated_question:
+                consistency_questions.append(q)
+
     evidence_quotes = []
     if top_rule.get("quote"):
         evidence_quotes.append(str(top_rule.get("quote")))
@@ -867,6 +943,7 @@ def _build_pressure_test_trace(
         "selected_strategy_id": top_strategy.get("strategy_id") or "",
         "strategy_logic": top_strategy.get("strategy_logic") or "",
         "generated_question": generated_question,
+        "consistency_pressure_questions": consistency_questions[:3],
         "evidence_quotes": evidence_quotes[:3],
     }
 
@@ -1324,7 +1401,8 @@ def gather_context_node(state: WorkflowState) -> dict:
     from app.services.challenge_strategies import match_strategies
     from app.services.diagnosis_engine import run_diagnosis
 
-    diag_obj = run_diagnosis(input_text=msg, mode=mode)
+    comp_type = state.get("competition_type", "")
+    diag_obj = run_diagnosis(input_text=msg, mode=mode, competition_type=comp_type)
     diag_data: dict = diag_obj.diagnosis
     next_task: dict = diag_obj.next_task
     cat = infer_category(msg)
@@ -1333,6 +1411,17 @@ def gather_context_node(state: WorkflowState) -> dict:
     top_rule = _top_triggered_rule(diag_data, msg)
     top_fallacy = str(top_rule.get("fallacy_label") or "")
     preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])
+
+    # Cross-turn RAG dedup: collect case_ids already cited in earlier turns
+    _history_case_ids: set[str] = set()
+    for _hm in state.get("conversation_messages", []):
+        _trace = _hm.get("agent_trace") if isinstance(_hm, dict) else None
+        if isinstance(_trace, dict):
+            _orch = _trace.get("orchestration") or _trace
+            for _cid in (_orch.get("rag_case_ids") or []):
+                if _cid:
+                    _history_case_ids.add(str(_cid))
+
     strategies = match_strategies(
         msg,
         rule_ids,
@@ -1355,9 +1444,11 @@ def gather_context_node(state: WorkflowState) -> dict:
             "kg_analysis": _default_kg(),
             "rag_cases": [],
             "rag_context": "",
+            "rag_enrichment_insight": "",
             "web_search_result": {},
             "hypergraph_insight": {},
             "hypergraph_student": {},
+            "hyper_consistency_issues": [],
             "challenge_strategies": strategies,
             "pressure_test_trace": pressure_trace,
             **clarify,
@@ -1372,23 +1463,56 @@ def gather_context_node(state: WorkflowState) -> dict:
         and len(msg) < 250
     )
     if _is_concept_lightweight:
+        from app.services.rag_engine import RagEngine
         logger.info("gather_context: lightweight path for learning_concept")
         rag_cases: list = []
         rag_ctx = ""
+        rag_ei = ""
+        _lw_kb_util: dict = {}
         if _rag is not None and _rag.case_count > 0:
             try:
-                rag_cases = _rag.retrieve(msg[:500], top_k=3, category_filter=cat or None)
+                rag_cases = _rag.retrieve(
+                    msg[:500], top_k=3, category_filter=cat or None,
+                    exclude_ids=_history_case_ids or None,
+                )
+                # Neo4j enrichment for lightweight path too
+                if _graph_service and rag_cases:
+                    try:
+                        hit_ids = [c["case_id"] for c in rag_cases if c.get("case_id")]
+                        _sr = [r.get("id", "") for r in (diag_data.get("triggered_rules") or [])
+                               if isinstance(r, dict) and r.get("id")]
+                        enriched = _graph_service.enrich_rag_hits(hit_ids, _sr)
+                        if enriched:
+                            for c in rag_cases:
+                                extra = enriched.get(c.get("case_id", ""))
+                                if extra:
+                                    c.update(extra)
+                    except Exception:
+                        pass
                 rag_ctx = _rag.format_for_llm(rag_cases)
+                rag_ei = RagEngine.format_enrichment_insight(rag_cases)
+                _lw_kb_util = {
+                    "retrieval_mode": rag_cases[0].get("retrieval_mode", "auto") if rag_cases else "auto",
+                    "total_kb_cases": _rag.case_count,
+                    "excluded_history_count": len(_history_case_ids),
+                    "hits_count": len(rag_cases),
+                    "neo4j_enriched": any(c.get("neo4j_enriched") for c in rag_cases),
+                    "neo4j_enriched_count": sum(1 for c in rag_cases if c.get("neo4j_enriched")),
+                    "category_filter": cat or "",
+                    "top_k_requested": 3,
+                }
             except Exception:
                 pass
         kg_result = _default_kg()
-        try:
-            from app.services.graph_service import search_nodes
-            kg_nodes = search_nodes(msg[:200], limit=5)
-            if kg_nodes:
-                kg_result["kg_grounding"] = kg_nodes
-        except Exception:
-            pass
+        if _graph_service:
+            try:
+                keywords = [w for w in re.findall(r"[\u4e00-\u9fff]{2,}", msg[:200]) if len(w) >= 2][:4]
+                if keywords:
+                    kg_nodes = _graph_service.search_nodes(keywords, limit_per_keyword=2)
+                    if kg_nodes:
+                        kg_result["kg_grounding"] = kg_nodes
+            except Exception:
+                pass
         return {
             "diagnosis": diag_data,
             "next_task": next_task,
@@ -1396,9 +1520,12 @@ def gather_context_node(state: WorkflowState) -> dict:
             "kg_analysis": kg_result,
             "rag_cases": rag_cases,
             "rag_context": rag_ctx,
+            "rag_enrichment_insight": rag_ei,
+            "kb_utilization": _lw_kb_util,
             "web_search_result": {},
             "hypergraph_insight": {},
             "hypergraph_student": {},
+            "hyper_consistency_issues": [],
             "challenge_strategies": strategies,
             "pressure_test_trace": {},
             "needs_clarification": False,
@@ -1410,30 +1537,109 @@ def gather_context_node(state: WorkflowState) -> dict:
     # ────────────────────────────────────────────────────────────────
     collected: dict[str, Any] = {}
 
-    # -- STATIC: RAG (always, fast vector search) --
+    # -- STATIC: RAG (vector search + MMR + Neo4j enrich + complementary search) --
     def _task_rag():
+        from app.services.rag_engine import RagEngine
         if _rag is None or _rag.case_count == 0:
-            return {"rag_cases": [], "rag_context": ""}
+            return {"rag_cases": [], "rag_context": "", "rag_enrichment_insight": "", "kb_utilization": {}}
         tag_filter: list[str] = []
         if cat:
             tag_filter.append(f"category:{cat}")
-        rag_top_k = 5 if intent in ("market_competitor", "competition_prep", "learning_concept", "idea_brainstorm") else 3
+        rag_top_k = 5 if intent in ("market_competitor", "competition_prep", "learning_concept", "idea_brainstorm") else 4
         cases = _rag.retrieve(
             msg[:1000],
             top_k=rag_top_k,
             category_filter=cat or None,
             tags=tag_filter or None,
+            exclude_ids=_history_case_ids or None,
         )
+        retrieval_mode = cases[0].get("retrieval_mode", "auto") if cases else "auto"
+
+        # Complementary search: find cases strong where student is weak
+        complementary_ids: list[str] = []
+        if _graph_service:
+            try:
+                rubric = diag_data.get("rubric", []) or []
+                weak_dims = [
+                    str(r.get("item", ""))
+                    for r in rubric
+                    if isinstance(r, dict) and float(r.get("score", 10)) < 5
+                ]
+                if weak_dims:
+                    existing_ids = [c.get("case_id", "") for c in cases]
+                    complementary_ids = _graph_service.find_complementary_cases(
+                        weak_dims, exclude_ids=existing_ids, limit=2,
+                    )
+                    if complementary_ids:
+                        extra_cases = _rag.retrieve(
+                            msg[:500], top_k=len(complementary_ids) + 2,
+                            exclude_ids=set(existing_ids) | _history_case_ids,
+                        )
+                        for ec in extra_cases:
+                            if ec.get("case_id") in complementary_ids and len(cases) < rag_top_k + 2:
+                                ec["complementary"] = True
+                                cases.append(ec)
+                        logger.info("Complementary search added %d cases for weak dims: %s",
+                                    len([c for c in cases if c.get("complementary")]), weak_dims)
+            except Exception as exc:
+                logger.warning("Complementary search failed: %s", exc)
+
         logger.info(
-            "RAG retrieve: intent=%s top_k=%s category=%s hits=%s case_ids=%s",
-            intent,
-            rag_top_k,
-            cat or "",
-            len(cases),
-            [str(c.get("case_id") or c.get("project_name") or "") for c in cases[:5]],
+            "RAG retrieve: intent=%s top_k=%s category=%s hits=%s excluded=%s case_ids=%s",
+            intent, rag_top_k, cat or "", len(cases), len(_history_case_ids),
+            [str(c.get("case_id") or c.get("project_name") or "") for c in cases[:6]],
         )
+
+        # Neo4j deep enrichment: bridge case_id === Project.id
+        neo4j_enriched = False
+        enrichment_count = 0
+        if _graph_service and cases:
+            try:
+                hit_ids = [c["case_id"] for c in cases if c.get("case_id")]
+                _student_rules = [r.get("id", "") for r in (diag_data.get("triggered_rules") or [])
+                                  if isinstance(r, dict) and r.get("id")]
+                enriched = _graph_service.enrich_rag_hits(hit_ids, _student_rules)
+                if enriched:
+                    neo4j_enriched = True
+                    for c in cases:
+                        extra = enriched.get(c.get("case_id", ""))
+                        if extra:
+                            c.update(extra)
+                            enrichment_count += 1
+                    logger.info("Neo4j enriched %d/%d RAG cases", enrichment_count, len(cases))
+            except Exception as exc:
+                logger.warning("Neo4j RAG enrichment failed: %s", exc)
+
         ctx = _rag.format_for_llm(cases)
-        return {"rag_cases": cases, "rag_context": ctx}
+        enrichment_insight = RagEngine.format_enrichment_insight(cases)
+        search_trace = []
+        for c in cases:
+            search_trace.append({
+                "case_id": str(c.get("case_id") or c.get("project_name") or "")[:60],
+                "score": round(float(c.get("score") or c.get("similarity", 0) or 0), 3),
+                "category": str(c.get("category") or "")[:30],
+                "neo4j_enriched": bool(c.get("neo4j_enriched")),
+                "complementary": bool(c.get("complementary")),
+                "hyper_driven": bool(c.get("hyper_driven")),
+                "snippet": str(c.get("project_name") or c.get("case_id") or "")[:40],
+            })
+        weak_dims_searched = [str(r.get("item", "")) for r in (diag_data.get("rubric", []) or [])
+                              if isinstance(r, dict) and float(r.get("score", 10)) < 5]
+        kb_util = {
+            "retrieval_mode": retrieval_mode,
+            "total_kb_cases": _rag.case_count,
+            "excluded_history_count": len(_history_case_ids),
+            "hits_count": len(cases),
+            "neo4j_enriched": neo4j_enriched,
+            "neo4j_enriched_count": enrichment_count,
+            "complementary_count": len(complementary_ids),
+            "category_filter": cat or "",
+            "top_k_requested": rag_top_k,
+            "search_trace": search_trace,
+            "query_preview": msg[:120],
+            "weak_dims_for_complementary": weak_dims_searched[:4],
+        }
+        return {"rag_cases": cases, "rag_context": ctx, "rag_enrichment_insight": enrichment_insight, "kb_utilization": kb_util}
 
     # -- STATIC: KG Extraction (structured LLM, produces section_scores) --
     def _task_kg():
@@ -1529,8 +1735,12 @@ def gather_context_node(state: WorkflowState) -> dict:
             web_n = max(web_n, 5)
         tasks.append(lambda n=web_n: _task_web(n))
 
-    # Hypergraph teaching: conditional on file or diagnostic intents
-    if is_file or intent in ("project_diagnosis", "evidence_check", "competition_prep", "pressure_test", "business_model"):
+    # Hypergraph teaching: trigger for all project-related intents
+    if is_file or intent in (
+        "project_diagnosis", "evidence_check", "competition_prep",
+        "pressure_test", "business_model", "idea_brainstorm",
+        "market_competitor", "team_execution", "growth_strategy",
+    ):
         tasks.append(_task_hyper_teaching)
 
     logger.info(
@@ -1578,6 +1788,62 @@ def gather_context_node(state: WorkflowState) -> dict:
         except Exception as exc:
             logger.warning("Hypergraph student analysis failed: %s", exc)
 
+    # ── RAG-Hypergraph bridge: if coverage is low, do supplementary RAG search ──
+    _hyper_driven = False
+    if (
+        _rag is not None
+        and _rag.case_count > 0
+        and isinstance(hyper_student, dict)
+        and hyper_student.get("ok")
+        and hyper_student.get("coverage_score", 10) < 5
+    ):
+        _DIM_KEYWORD_MAP = {
+            "evidence": "证据 验证 数据支撑",
+            "competitor": "竞品 替代方案 竞争",
+            "market": "市场规模 TAM 目标市场",
+            "business_model": "商业模式 盈利 收费",
+            "stakeholder": "目标用户 用户画像",
+            "risk": "风险 合规",
+            "channel": "获客 渠道 推广",
+        }
+        hyper_missing_dims = [
+            str(m.get("dimension", "")) for m in hyper_student.get("missing_dimensions", [])
+            if isinstance(m, dict) and m.get("importance") in ("极高", "高")
+        ]
+        boost_keywords: list[str] = []
+        for md in hyper_missing_dims[:3]:
+            for dim_key, kws in _DIM_KEYWORD_MAP.items():
+                if dim_key in md or md in kws:
+                    boost_keywords.append(kws.split()[0])
+                    break
+        if boost_keywords:
+            try:
+                existing_ids = {c.get("case_id", "") for c in (collected.get("rag_cases") or [])}
+                boost_query = msg[:300] + " " + " ".join(boost_keywords)
+                extra_cases = _rag.retrieve(boost_query, top_k=2, exclude_ids=existing_ids | (_history_case_ids or set()))
+                rag_cases_list = list(collected.get("rag_cases") or [])
+                for ec in extra_cases:
+                    if ec.get("case_id") not in existing_ids and len(rag_cases_list) < 7:
+                        ec["hyper_driven"] = True
+                        rag_cases_list.append(ec)
+                        _hyper_driven = True
+                if _hyper_driven:
+                    from app.services.rag_engine import RagEngine
+                    collected["rag_cases"] = rag_cases_list
+                    collected["rag_context"] = _rag.format_for_llm(rag_cases_list)
+                    collected["rag_enrichment_insight"] = RagEngine.format_enrichment_insight(rag_cases_list)
+                    logger.info("Hyper-driven RAG boost: added %d cases for missing dims %s",
+                                sum(1 for c in rag_cases_list if c.get("hyper_driven")), hyper_missing_dims)
+            except Exception as exc:
+                logger.warning("Hyper-driven RAG boost failed: %s", exc)
+
+    if _hyper_driven:
+        kb_util = collected.get("kb_utilization", {})
+        if isinstance(kb_util, dict):
+            kb_util["hyper_driven_search"] = True
+            kb_util["hyper_driven_dims"] = hyper_missing_dims[:3]
+            collected["kb_utilization"] = kb_util
+
     selected_edge_types = list(preferred_edge_types)
     selected_edge_types.extend([str(x) for x in (hyper_student.get("projected_edge_types") or []) if x])
     selected_edge_types.extend([
@@ -1599,7 +1865,10 @@ def gather_context_node(state: WorkflowState) -> dict:
         "diagnosis": diag_data,
         "kg_analysis": kg,
     })
-    pressure_trace = _build_pressure_test_trace(diag_data, strategies, collected.get("hypergraph_insight", {}), msg)
+    pressure_trace = _build_pressure_test_trace(
+        diag_data, strategies, collected.get("hypergraph_insight", {}), msg,
+        consistency_issues=hyper_student.get("consistency_issues", []) if isinstance(hyper_student, dict) else [],
+    )
 
     return {
         "diagnosis": diag_data,
@@ -1608,9 +1877,12 @@ def gather_context_node(state: WorkflowState) -> dict:
         "kg_analysis": kg,
         "rag_cases": collected.get("rag_cases", []),
         "rag_context": collected.get("rag_context", ""),
+        "rag_enrichment_insight": collected.get("rag_enrichment_insight", ""),
+        "kb_utilization": collected.get("kb_utilization", {}),
         "web_search_result": collected.get("web_search_result", {}),
         "hypergraph_insight": collected.get("hypergraph_insight", {}),
         "hypergraph_student": hyper_student,
+        "hyper_consistency_issues": hyper_student.get("consistency_issues", []) if isinstance(hyper_student, dict) else [],
         "challenge_strategies": strategies,
         "pressure_test_trace": pressure_trace,
         **clarify,
@@ -1731,7 +2003,6 @@ def _fmt_hyper_student(hs: dict) -> str:
     hubs = hs.get("hub_entities", [])
     if hubs:
         parts.append(f"核心实体: {', '.join(h['entity'] for h in hubs[:3])}")
-    # Template-based loops
     tm = hs.get("template_matches", [])
     incomplete = [t for t in tm if t.get("status") != "complete"]
     if incomplete:
@@ -1745,10 +2016,95 @@ def _fmt_hyper_student(hs: dict) -> str:
     strengths = hs.get("pattern_strengths", [])
     if strengths:
         parts.append(f"优势模式: {strengths[0].get('note','')}")
-    # Consistency issues provide explicit约束违背
     issues = hs.get("consistency_issues", [])
     if issues:
         parts.append(f"一致性诊断: {issues[0].get('message','')}")
+    return "\n".join(parts)
+
+
+def _fmt_hyper_for_agent(
+    hs: dict,
+    hyper_insight: dict,
+    role: str,
+) -> str:
+    """Build a targeted hypergraph context string for a specific agent role.
+
+    Each agent only receives the hypergraph signals relevant to its function,
+    keeping prompts focused and avoiding information overload.
+    """
+    if not hs or not hs.get("ok"):
+        return ""
+    parts: list[str] = []
+    cov = hs.get("coverage_score", 0)
+    tm = hs.get("template_matches", [])
+    complete_count = sum(1 for t in tm if t.get("status") == "complete")
+    total_tm = len(tm) or 20
+    issues = hs.get("consistency_issues", [])
+    warnings = hs.get("pattern_warnings", [])
+    missing = hs.get("missing_dimensions", [])
+    edges = (hyper_insight or {}).get("edges", []) if isinstance(hyper_insight, dict) else []
+
+    if role == "coach":
+        parts.append(f"超图维度覆盖: {cov}/10")
+        incomplete = [t for t in tm if t.get("status") != "complete"][:2]
+        for t in incomplete:
+            miss = ", ".join(t.get("missing_dimensions", [])[:3])
+            parts.append(f"未闭合逻辑环「{t.get('name','')}」缺: {miss}")
+        for ci in issues[:2]:
+            parts.append(f"一致性问题: {ci.get('message','')}")
+            pqs = ci.get("pressure_questions", [])
+            if pqs:
+                parts.append(f"  → 可追问: {pqs[0]}")
+
+    elif role == "analyst":
+        _risk_rules = {"G1", "G3", "G5", "G8", "G9", "G18", "G12", "G20"}
+        for w in warnings[:3]:
+            parts.append(f"超图风险模式: {w.get('warning','')}")
+        risk_issues = [ci for ci in issues if ci.get("id", "").split("_")[0] in _risk_rules]
+        for ci in (risk_issues or issues)[:3]:
+            parts.append(f"一致性风险({ci.get('id','')}): {ci.get('message','')}")
+        for edge in edges[:3]:
+            if isinstance(edge, dict):
+                note = str(edge.get("teaching_note", "") or "")[:60]
+                parts.append(f"教学超边: {edge.get('type','')}: {note}")
+        if (hyper_insight or {}).get("summary"):
+            parts.append(f"超图摘要: {str(hyper_insight['summary'])[:120]}")
+        crit_missing = [m for m in missing if m.get("importance") in ("极高", "高")]
+        if crit_missing:
+            parts.append("关键缺失: " + "; ".join(
+                f"{m['dimension']}—{m['recommendation']}" for m in crit_missing[:3]
+            ))
+
+    elif role == "advisor":
+        parts.append(f"超图闭环完成度: {complete_count}/{total_tm}")
+        parts.append(f"维度覆盖: {cov}/10" + (" (低于竞赛基准8/10)" if cov < 8 else " (达标)"))
+        critical_templates = {"T1_user_pain_solution_bm", "T10_user_pain_solution_evidence", "T19_loop_full"}
+        for t in tm:
+            if t.get("id") in critical_templates and t.get("status") != "complete":
+                miss = ", ".join(t.get("missing_dimensions", [])[:3])
+                parts.append(f"竞赛关键闭环缺失「{t.get('name','')}」: 缺 {miss}")
+        if warnings:
+            parts.append(f"风险模式: {warnings[0].get('warning','')[:80]}")
+
+    elif role == "grader":
+        parts.append(f"超图维度覆盖: {cov}/10, 一致性问题{len(issues)}项, 闭环{complete_count}/{total_tm}")
+
+    elif role == "planner":
+        for m in missing[:3]:
+            parts.append(f"待补维度: {m.get('dimension','')}({m.get('importance','')}) — {m.get('recommendation','')}")
+        for ci in issues[:3]:
+            pqs = ci.get("pressure_questions", [])
+            if pqs:
+                parts.append(f"行动线索({ci.get('id','')}): {pqs[0]}")
+        incomplete = [t for t in tm if t.get("status") == "partial"][:2]
+        for t in incomplete:
+            miss = ", ".join(t.get("missing_dimensions", [])[:2])
+            parts.append(f"可推进闭环「{t.get('name','')}」: 补充 {miss}")
+
+    elif role == "tutor":
+        if cov > 0:
+            parts.append(f"学生当前项目维度覆盖: {cov}/10")
+
     return "\n".join(parts)
 
 
@@ -2122,7 +2478,8 @@ def _coach_analyze(state: dict) -> dict:
     ws_ctx = _fmt_ws(ws)
     conv_ctx = _build_conv_ctx(state)
     hs = state.get("hypergraph_student", {})
-    hs_ctx = _fmt_hyper_student(hs)
+    hyper_insight = state.get("hypergraph_insight", {})
+    hs_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "coach")
 
     mode_hint = {
         "coursework": "当前是课程辅导模式，侧重把方法讲透，帮学生理解判断标准，再落回项目。",
@@ -2135,10 +2492,31 @@ def _coach_analyze(state: dict) -> dict:
             "agent": "项目教练",
             "analysis": _coach_guardrail_reply(state),
             "tools_used": ["diagnosis", "challenge_strategies", "next_task"],
+            "hyper_context_sent": hs_ctx,
         }
 
+    # Build neo4j_ctx from enriched RAG cases (unified pipeline)
     neo4j_ctx = ""
-    if _graph_service and kg.get("entities"):
+    rag_insight = state.get("rag_enrichment_insight", "")
+    enriched_cases = [c for c in (state.get("rag_cases") or []) if c.get("neo4j_enriched")]
+    if enriched_cases:
+        parts_neo = []
+        for ec in enriched_cases[:3]:
+            name = ec.get("project_name", "")
+            cov = ec.get("graph_rubric_covered", [])
+            uncov = ec.get("graph_rubric_uncovered", [])
+            shared_rules = (ec.get("rule_overlap") or {}).get("shared", [])
+            only_student = (ec.get("rule_overlap") or {}).get("only_in_student", [])
+            parts_neo.append(
+                f"{name}(覆盖{len(cov)}维度/缺{len(uncov)}维度"
+                + (f",共同风险:{','.join(shared_rules[:3])}" if shared_rules else "")
+                + (f",你独有风险:{','.join(only_student[:2])}" if only_student else "")
+                + ")"
+            )
+        neo4j_ctx = "知识库案例深度对比: " + "; ".join(parts_neo)
+        if rag_insight:
+            neo4j_ctx += "\n" + rag_insight
+    elif _graph_service and kg.get("entities"):
         top_labels = [e["label"] for e in kg["entities"][:5] if e.get("label")]
         try:
             related = _graph_service.find_similar_entities(top_labels, limit=5)
@@ -2205,8 +2583,9 @@ def _coach_analyze(state: dict) -> dict:
                 + f"项目阶段: {stage_label}\n"
                 + f"当前瓶颈: {bottleneck}\n"
                 + (f"KG洞察: {kg.get('insight','')}\n" if kg.get("insight") else "")
-                + (f"超图分析: {hs_ctx[:300]}\n" if hs_ctx else "")
-                + (f"案例参考: {rag_ctx[:400]}\n" if rag_ctx else "")
+                + (f"超图诊断:\n{hs_ctx}\n" if hs_ctx else "")
+                + (f"案例参考: {rag_ctx[:800]}\n" if rag_ctx else "")
+                + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
                 + (f"联网搜索: {ws_ctx[:300]}\n" if ws_ctx else "")
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
             ),
@@ -2281,8 +2660,9 @@ def _coach_analyze(state: dict) -> dict:
                 + f"项目阶段: {stage_label}\n"
                 + f"当前瓶颈: {bottleneck}\n"
                 + (f"KG洞察: {kg.get('insight','')}\n" if kg.get("insight") else "")
-                + (f"超图分析: {hs_ctx[:400]}\n" if hs_ctx else "")
-                + (f"案例参考: {rag_ctx[:500]}\n" if rag_ctx else "")
+                + (f"超图诊断:\n{hs_ctx}\n" if hs_ctx else "")
+                + (f"案例参考: {rag_ctx[:800]}\n" if rag_ctx else "")
+                + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
                 + (f"联网搜索: {ws_ctx[:350]}\n" if ws_ctx else "")
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
                 + "已有证据:\n"
@@ -2334,6 +2714,7 @@ def _coach_analyze(state: dict) -> dict:
         "agent": "项目教练",
         "analysis": analysis or "",
         "tools_used": ["diagnosis", "rag", "kg_extract", "web_search", "hypergraph"],
+        "hyper_context_sent": hs_ctx,
     }
 
 
@@ -2348,6 +2729,8 @@ def _analyst_analyze(state: dict) -> dict:
     conv_ctx = _build_conv_ctx(state)
     coach_out = state.get("coach_output", {})
     ws_ctx = _fmt_ws(ws)
+    rag_ctx = state.get("rag_context", "")
+    rag_insight = state.get("rag_enrichment_insight", "")
 
     rules = diag.get("triggered_rules", []) or []
     bottleneck = diag.get("bottleneck", "")
@@ -2355,28 +2738,7 @@ def _analyst_analyze(state: dict) -> dict:
         f"{r.get('id','')}:{r.get('name','')}" for r in rules[:5] if isinstance(r, dict)
     )
 
-    hyper_risk_ctx = ""
-    if hs.get("ok"):
-        warnings = hs.get("pattern_warnings", [])
-        missing = hs.get("missing_dimensions", [])
-        if warnings:
-            hyper_risk_ctx += "超图风险预警: " + "; ".join(w["warning"] for w in warnings[:2]) + "\n"
-        if missing:
-            critical = [m for m in missing if m.get("importance") in ("极高", "高")]
-            if critical:
-                hyper_risk_ctx += "关键缺失维度: " + "; ".join(
-                    f"{m['dimension']}—{m['recommendation']}" for m in critical[:3]
-                ) + "\n"
-
-    teaching_edge_ctx = ""
-    edges = hyper_insight.get("edges", []) if isinstance(hyper_insight, dict) else []
-    if edges:
-        teaching_edge_ctx = "教学超边命中: " + "; ".join(
-            f"{str(edge.get('type', ''))}:{str(edge.get('teaching_note', '') or edge.get('summary', ''))[:60]}"
-            for edge in edges[:3] if isinstance(edge, dict)
-        )
-        if hyper_insight.get("summary"):
-            teaching_edge_ctx += f"\n超图摘要: {str(hyper_insight.get('summary', ''))[:120]}"
+    hyper_analyst_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "analyst")
 
     _analyst_mode_hint = {
         "competition": "你同时兼顾评委视角：重点分析风险对获奖概率的影响，指出评委最可能追问的薄弱环节。",
@@ -2414,17 +2776,24 @@ def _analyst_analyze(state: dict) -> dict:
             + f"触发风险规则: {rule_summary}\n"
             + f"KG结构缺陷: {kg.get('structural_gaps', [])}\n"
             + (f"教练分析摘要: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
-            + (f"{hyper_risk_ctx}" if hyper_risk_ctx else "")
-            + (f"{teaching_edge_ctx}\n" if teaching_edge_ctx else "")
+            + (f"案例对比参考:\n{rag_ctx[:600]}\n" if rag_ctx else "")
+            + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
+            + (f"超图风险诊断:\n{hyper_analyst_ctx}\n" if hyper_analyst_ctx else "")
             + (f"联网事实:\n{ws_ctx[:350]}\n" if ws_ctx else "")
         ),
         model=settings.llm_reason_model,
         temperature=0.35,
     )
+    tools = ["diagnosis", "kg_analysis", "hypergraph_student", "hypergraph"]
+    if ws_ctx:
+        tools.append("web_search")
+    if rag_ctx:
+        tools.append("rag_reference")
     return {
         "agent": "风险分析师",
         "analysis": analysis or "",
-        "tools_used": ["diagnosis", "kg_analysis", "hypergraph_student", "hypergraph", "web_search"] if ws_ctx else ["diagnosis", "kg_analysis", "hypergraph_student", "hypergraph"],
+        "tools_used": tools,
+        "hyper_context_sent": hyper_analyst_ctx,
     }
 
 
@@ -2432,12 +2801,45 @@ def _advisor_analyze(state: dict) -> dict:
     msg = state.get("message", "")
     mode = state.get("mode", "coursework")
     rag_ctx = state.get("rag_context", "")
+    rag_insight = state.get("rag_enrichment_insight", "")
     diag = state.get("diagnosis", {})
     kg = state.get("kg_analysis", {})
     conv_ctx = _build_conv_ctx(state)
     coach_out = state.get("coach_output", {})
+    hs = state.get("hypergraph_student", {})
+    hyper_insight = state.get("hypergraph_insight", {})
+    hyper_advisor_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "advisor")
 
+    comp_type = state.get("competition_type", "") or diag.get("competition_type", "")
     comp_urgency = "竞赛教练模式——学生正在备赛，请以专业评委和教练的标准帮助他提升获奖概率，但保持克制、严谨、基于证据。" if mode == "competition" else ""
+
+    _COMP_ADVISOR_HINTS = {
+        "internet_plus": (
+            "你当前辅导的是「互联网+」赛道项目。评审特别看重：\n"
+            "- 商业模式创新性与可持续盈利能力（权重最高）\n"
+            "- 市场规模论证（TAM/SAM/SOM）与竞品差异化\n"
+            "- 路演表达的完整性、数据可信度和团队协作展示\n"
+            "- 社会价值与带动就业能力\n"
+            "请以这些侧重点来评判项目并给出针对性建议。"
+        ),
+        "challenge_cup": (
+            "你当前辅导的是「挑战杯」赛道项目。评审特别看重：\n"
+            "- 科技创新含量与技术难度（权重最高）\n"
+            "- 用户调研的严谨性和证据链（访谈/实验/数据）\n"
+            "- 方案的技术可行性和原型验证\n"
+            "- 团队科研能力与实际执行记录\n"
+            "请以这些侧重点来评判项目并给出针对性建议。"
+        ),
+        "dachuang": (
+            "你当前辅导的是「大创（大学生创新创业训练计划）」项目。评审特别看重：\n"
+            "- 方案可行性和实际动手能力（权重最高）\n"
+            "- 创新性：是否有新视角、新方法或新应用\n"
+            "- 团队执行力：分工明确、有里程碑规划\n"
+            "- 训练过程记录与阶段性成果展示\n"
+            "请以这些侧重点来评判项目并给出针对性建议。"
+        ),
+    }
+    comp_hint = _COMP_ADVISOR_HINTS.get(comp_type, "")
 
     n_rules = len(diag.get("triggered_rules", []) or [])
     quality_hint = ""
@@ -2455,7 +2857,8 @@ def _advisor_analyze(state: dict) -> dict:
         system_prompt=(
             "你是一位专业的创业竞赛教练与评委顾问。请基于给定的逐项评分结果，输出JSON字段："
             "overview, top_risks(list), judge_questions(list), defense_tips(list), ppt_adjustments(list), prize_readiness(0-100)。\n"
-            "要求：\n"
+            + (f"\n{comp_hint}\n\n" if comp_hint else "")
+            + "要求：\n"
             "- 语气专业、克制、严谨，不要咄咄逼人\n"
             "- 风险要和逐项评分保持一致，不要另起炉灶\n"
             "- 按材料复杂度指出最影响竞赛说服力的2-5个扣分点，不要固定成三个\n"
@@ -2467,9 +2870,11 @@ def _advisor_analyze(state: dict) -> dict:
         user_prompt=(
             f"学生说:\n{msg[:1200]}\n模式:{mode}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
-            + (f"参考案例:\n{rag_ctx[:600]}\n\n" if rag_ctx else "")
+            + (f"参考案例:\n{rag_ctx[:900]}\n\n" if rag_ctx else "")
+            + (f"案例对比洞察: {rag_insight}\n\n" if rag_insight else "")
             + (f"教练分析摘要:\n{str(coach_out.get('analysis',''))[:400]}\n\n" if coach_out.get('analysis') else "")
             + (f"诊断瓶颈:{diag.get('bottleneck','')}\n\n" if diag.get("bottleneck") else "")
+            + (f"超图竞赛准备度:\n{hyper_advisor_ctx}\n\n" if hyper_advisor_ctx else "")
             + f"Rubric逐项评分:\n{breakdown_md}"
         ),
         model=settings.llm_reason_model,
@@ -2514,12 +2919,15 @@ def _advisor_analyze(state: dict) -> dict:
         "defense_tips": defense_tips,
         "ppt_adjustments": ppt_adjustments,
         "prize_readiness": prize_readiness,
+        "hyper_context_sent": hyper_advisor_ctx,
     }
 
 
 def _tutor_analyze(state: dict) -> dict:
     mode = state.get("mode", "coursework")
     analysis, kg_nodes = _build_learning_tutor_reply(state, structured=True)
+    hs = state.get("hypergraph_student", {})
+    hyper_tutor_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "tutor")
     tools = ["learning_llm"]
     if state.get("rag_context"):
         tools.append("rag_reference")
@@ -2533,6 +2941,7 @@ def _tutor_analyze(state: dict) -> dict:
         "tools_used": tools,
         "retrieved_kg_nodes": kg_nodes,
         "mode": mode,
+        "hyper_context_sent": hyper_tutor_ctx,
     }
 
 
@@ -2545,6 +2954,8 @@ def _grader_analyze(state: dict) -> dict:
     sec_scores = kg.get("section_scores", {})
     conv_ctx = _build_conv_ctx(state, limit=4)
     advisor_out = state.get("advisor_output", {})
+    hs = state.get("hypergraph_student", {})
+    hyper_grader_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "grader")
 
     if not rubric or overall is None:
         return {
@@ -2586,8 +2997,9 @@ def _grader_analyze(state: dict) -> dict:
             + f"Rubric评分:\n{score_text}\n\n"
             + f"总分: {overall}/10\n"
             + f"距离优秀(8/10)还差: {score_gap}\n"
-            + (f"最低分维度: {', '.join(f'{r['item']}({r['score']}/10)' for r in low_rows)}\n" if low_rows else "")
+            + (("最低分维度: " + ", ".join("{}({}/10)".format(r["item"], r["score"]) for r in low_rows) + "\n") if low_rows else "")
             + f"KG维度评分: {sec_scores}\n"
+            + (f"超图评分信号: {hyper_grader_ctx}\n" if hyper_grader_ctx else "")
             + (f"同轮竞赛顾问摘要: {advisor_summary}\n" if advisor_summary else "")
         ),
         model=settings.llm_fast_model,
@@ -2597,6 +3009,7 @@ def _grader_analyze(state: dict) -> dict:
         "agent": "评分官",
         "analysis": analysis or "",
         "tools_used": ["rubric_engine", "kg_scores"],
+        "hyper_context_sent": hyper_grader_ctx,
     }
 
 
@@ -2609,13 +3022,8 @@ def _planner_analyze(state: dict) -> dict:
     conv_ctx = _build_conv_ctx(state, limit=4)
     coach_out = state.get("coach_output", {})
 
-    hs_missing_ctx = ""
-    if hs.get("ok"):
-        missing = hs.get("missing_dimensions", [])
-        if missing:
-            hs_missing_ctx = "超图缺失维度(按紧急度): " + "; ".join(
-                f"{m['dimension']}({m['importance']})" for m in missing[:4]
-            )
+    hyper_insight = state.get("hypergraph_insight", {})
+    hs_missing_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "planner")
 
     kg_entities = kg.get("entities", [])
     entity_ctx = ""
@@ -2656,7 +3064,7 @@ def _planner_analyze(state: dict) -> dict:
             + f"结构缺陷: {kg.get('structural_gaps',[])}\n"
             + f"内容优势: {kg.get('content_strengths',[][:2])}\n"
             + (f"教练核心发现: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
-            + (f"{hs_missing_ctx}\n" if hs_missing_ctx else "")
+            + (f"超图行动线索:\n{hs_missing_ctx}\n" if hs_missing_ctx else "")
         ),
         model=settings.llm_structured_model,
         temperature=0.25,
@@ -2688,6 +3096,7 @@ def _planner_analyze(state: dict) -> dict:
         "analysis": analysis_text,
         "tools_used": ["diagnosis", "next_task", "critic"],
         "plan_data": plan or {},
+        "hyper_context_sent": hs_missing_ctx,
     }
 
 
@@ -3039,18 +3448,21 @@ def _build_gathered_context(state: WorkflowState) -> str:
         if kg.get("structural_gaps"):
             parts.append(f"结构缺陷: {', '.join(kg['structural_gaps'][:3])}")
 
-    # RAG cases
+    # RAG cases + enrichment insight
     rag_ctx = state.get("rag_context", "")
     if rag_ctx:
         parts.append(f"\n## 参考案例\n{rag_ctx[:600]}")
+    rag_ei = state.get("rag_enrichment_insight", "")
+    if rag_ei:
+        parts.append(f"案例对比洞察: {rag_ei}")
 
     # Hypergraph
     hs = state.get("hypergraph_student", {})
     if hs.get("ok"):
-        parts.append(f"\n## 超图分析\n维度覆盖: {hs.get('coverage_score', 0)}/10")
-        missing = hs.get("missing_dimensions", [])
-        if missing:
-            parts.append(f"缺失维度: {', '.join(m['dimension'] for m in missing[:3])}")
+        hyper_insight = state.get("hypergraph_insight", {})
+        hs_full = _fmt_hyper_for_agent(hs, hyper_insight, "coach")
+        if hs_full:
+            parts.append(f"\n## 超图分析\n{hs_full}")
 
     # Diagnosis
     diag = state.get("diagnosis", {})
@@ -3171,7 +3583,14 @@ def orchestrator(state: WorkflowState) -> dict:
                     else "## 竞赛教练模式额外要求\n"
                     "- 保持评委视角，回答中必须体现证据链的强弱判断和对获奖可能性的影响\n"
                     "- 如果评分官或竞赛顾问参与了本轮，必须整合他们的评分区间和扣分点分析，不要遗漏\n"
-                    "- 语气像高水平教练在赛前做最后复盘：专业、克制、每一句话都有依据\n\n"
+                    "- 语气像高水平教练在赛前做最后复盘：专业、克制、每一句话都有依据\n"
+                    + (
+                        ("- 学生已选定赛道："
+                         + {"internet_plus": "互联网+", "challenge_cup": "挑战杯", "dachuang": "大创"}.get(state.get("competition_type", ""), "通用")
+                         + "\n  请按该赛道评审标准的权重侧重点进行分析和建议\n\n")
+                        if state.get("competition_type")
+                        else "\n"
+                    )
                     if mode == "competition"
                     else "## 项目教练模式额外要求\n"
                     "- 先判断项目阶段，再聚焦最关键的一个瓶颈深入分析，不要一次性铺开所有问题\n"
@@ -3310,10 +3729,12 @@ def run_workflow(
     history_context: str = "",
     conversation_messages: list | None = None,
     teacher_feedback_context: str = "",
+    competition_type: str = "",
 ) -> dict[str, Any]:
     initial: WorkflowState = {
         "message": message,
         "mode": mode,
+        "competition_type": competition_type,
         "project_state": project_state or {},
         "history_context": history_context,
         "conversation_messages": conversation_messages or [],
@@ -3329,11 +3750,13 @@ def run_workflow_pre_orchestrate(
     history_context: str = "",
     conversation_messages: list | None = None,
     teacher_feedback_context: str = "",
+    competition_type: str = "",
 ) -> dict[str, Any]:
     """Run router + gather + agents but NOT orchestrator. Returns state for streaming."""
     initial: WorkflowState = {
         "message": message,
         "mode": mode,
+        "competition_type": competition_type,
         "project_state": project_state or {},
         "history_context": history_context,
         "conversation_messages": conversation_messages or [],

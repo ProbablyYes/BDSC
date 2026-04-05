@@ -1,0 +1,293 @@
+{
+  "case_id": "case_9eda9c027008",
+  "document_id": "doc_99fa5c68d12c",
+  "source": {
+    "file_path": "政务治理/477722-物衡智判——基于DS大模型的物权所有权纠纷智能推理系统-项目策划书-1a6638cb.pdf",
+    "file_name": "477722-物衡智判——基于DS大模型的物权所有权纠纷智能推理系统-项目策划书-1a6638cb.pdf",
+    "category": "政务治理",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 73,
+    "full_text_chars": 67490,
+    "core_text_chars": 0,
+    "appendix_start_index": 5,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 74,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 74,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "物衡智判——基于 DS 大模型的物权所有权纠纷智能推理系统",
+    "target_users": [
+      "基层法院法官及法官助理",
+      "面临物权纠纷的社会公众",
+      "社区调解委员会及政务咨询中心"
+    ],
+    "pain_points": [
+      "物权纠纷案件数量庞大，基层法院法官工作压力巨大",
+      "物权纠纷案件复杂多样，涉及大量证据和法律条文",
+      "社会公众对物权纠纷的法律知识匮乏，难以有效维护自身权益"
+    ],
+    "solution": [
+      "构建基于大模型的端到端法律推理架构",
+      "意图识别系统：支持自然语言输入，自动解析当事人诉求与争议焦点",
+      "智能类案检索：基于案由、证据链和判决结果的多维语义匹配"
+    ],
+    "innovation_points": [
+      "层次化法律数据结构：将海量判例转化为可检索的层次化导航索引",
+      "跨模态法律检索：支持视觉语义转化与法律条文关联",
+      "动态演化立场建模：模拟法庭辩论中不同立场对案件推理的影响"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "行业趋势：国家“智慧法院”建设持续推进，法律AI市场年增长率超过20%"
+    ],
+    "execution_plan": [],
+    "risk_control": [
+      "法律准确性风险：AI推理可能存在“幻觉”，需建立法律专家终审机制与引用来源回溯",
+      "数据安全风险：严格保护当事人隐私数据，实施本地化部署或加密处理"
+    ]
+  },
+  "tags": [
+    "category:政务治理",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "物衡智判 ——基于 DS 大模型的物权所有权纠纷智能推理系统 项 目 策 划 书 项目名称： 物衡智判——基于 DS 大模型的物权所有权纠纷智能推理系统 参加赛道： 人工智能 + 政务管理 负责人： 罗逸凡 团队成员： 陈久宸 黄偲炫 邱然 陈星颐 赵子萱 陈晋加 指导老师： 孟老师 郭老师 史老师 目录 摘要................................................................................................................................ 7 Abstract .......................................................................................................................... 9 PPT 部分核心内容展示（完整版在附加材料里面） .............................................. 13 一、项目",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": false
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:00:16Z",
+  "risk_flags": [
+    "H13",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了基层法院法官、法官助理及社会公众在物权纠纷案件中面临的痛点，包括案件数量庞大、复杂多样以及法律知识匮乏。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有提供具体的用户访谈、问卷或行为数据等原始证据来支持需求的真实性。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了基于大模型的端到端法律推理架构，包括意图识别、智能类案检索、层次化法律数据结构、跨模态法律检索和动态演化立场建模，技术路线较为清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目文本中没有详细描述客户、价值主张、渠道、营收和成本等商业模式闭环的内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了法律AI市场的年增长率超过20%，并指出了国家‘智慧法院’建设的行业趋势，但未详细分析具体竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有提供单位经济模型或财务预测，无法判断财务逻辑是否成立。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了基于大模型的法律推理系统在意图识别、智能类案检索、跨模态法律检索等方面的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目团队成员较多，且有指导老师支持，但未详细描述团队成员的具体能力和里程碑计划。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，提到了多个技术方案和行业趋势，但缺乏具体数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目明确指出了目标用户（基层法院法官及法官助理、社会公众、社区调解委员会及政务咨询中心）和价值主张（解决物权纠纷案件数量庞大、复杂多样及法律知识匮乏的问题）",
+      "reason": "目标用户与价值主张匹配度较高。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了目标用户包括基层法院法官及法官助理、社会公众、社区调解委员会及政务咨询中心，但未具体描述获客渠道。",
+      "reason": "虽然未具体描述获客渠道，但目标用户群体明确。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到了定价/收费，但没有提供用户支付意愿的验证证据。",
+      "reason": "提到定价/收费但缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了法律AI市场的年增长率超过20%，并指出了国家‘智慧法院’建设的行业趋势。",
+      "reason": "市场规模口径较为合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目文本中没有提供具体的用户访谈、问卷或行为数据等原始证据来支持需求的真实性。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未声称‘无竞品/无竞争对手’，但未详细分析具体竞品。",
+      "reason": "虽然未详细分析具体竞品，但未声称‘无竞品/无竞争对手’。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目强调了基于大模型的法律推理系统在意图识别、智能类案检索、跨模态法律检索等方面的创新点，并提到了法律专家终审机制与引用来源回溯。",
+      "reason": "创新点较为明确且有验证机制。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目文本中没有提供单位经济模型或财务预测，无法判断财务逻辑是否成立。",
+      "reason": "缺乏财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了法律AI市场的年增长率超过20%，并指出了国家‘智慧法院’建设的行业趋势。",
+      "reason": "增长逻辑较为合理。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目团队成员较多，且有指导老师支持，但未详细描述团队成员的具体能力和里程碑计划。",
+      "reason": "虽然未详细描述里程碑计划，但团队成员和指导老师支持较强。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了数据安全风险，严格保护当事人隐私数据，实施本地化部署或加密处理。",
+      "reason": "有数据安全和隐私保护措施。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了基于大模型的端到端法律推理架构，技术路线较为清晰。",
+      "reason": "技术路线与资源匹配度较高。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到AI推理可能存在‘幻觉’，需建立法律专家终审机制与引用来源回溯，但未具体描述实验设计与评价指标。",
+      "reason": "提到实验但缺少样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构较为完整，提到了多个技术方案和行业趋势。",
+      "reason": "路演叙事结构较为完整。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目文本中缺乏用户证据强度、商业模式一致性和财务逻辑等方面的支撑证据。",
+      "reason": "多个关键Rubric维度缺乏支撑证据。"
+    }
+  ]
+}

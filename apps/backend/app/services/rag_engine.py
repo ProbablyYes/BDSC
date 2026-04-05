@@ -307,20 +307,115 @@ class RagEngine:
         except Exception:
             return None
 
+    # ------------------------------------------------------------------
+    # MMR: balance relevance with diversity via embedding similarity
+    # ------------------------------------------------------------------
+    def _mmr_select(
+        self,
+        working_indices: list[int],
+        working_chunks: list[CaseChunk],
+        scores_normed: np.ndarray,
+        top_k: int,
+        exclude_ids: set[str] | None,
+        lambda_param: float = 0.55,
+    ) -> list[int]:
+        """Return local indices selected by Maximal Marginal Relevance."""
+        if self._embeddings is None:
+            return []
+        subset_embs = self._embeddings[working_indices]
+        n = len(working_indices)
+        candidates = set(range(n))
+        if exclude_ids:
+            candidates = {i for i in candidates
+                          if working_chunks[i].case_id not in exclude_ids}
+        if not candidates:
+            return []
+
+        selected: list[int] = []
+        seen_names: set[str] = set()
+        max_per_cat = max(1, (top_k + 1) // 2)
+        cat_count: dict[str, int] = {}
+
+        while len(selected) < top_k and candidates:
+            best_local: int | None = None
+            best_mmr = -1e9
+            for idx in candidates:
+                relevance = float(scores_normed[idx])
+                if selected:
+                    sim_to_sel = float(max(
+                        np.dot(subset_embs[idx], subset_embs[s])
+                        for s in selected
+                    ))
+                else:
+                    sim_to_sel = 0.0
+                mmr = lambda_param * relevance - (1 - lambda_param) * sim_to_sel
+                if mmr > best_mmr:
+                    best_mmr = mmr
+                    best_local = idx
+            if best_local is None:
+                break
+            candidates.discard(best_local)
+            chunk = working_chunks[best_local]
+            if chunk.project_name in seen_names:
+                continue
+            cat = chunk.category
+            if cat_count.get(cat, 0) >= max_per_cat:
+                continue
+            seen_names.add(chunk.project_name)
+            cat_count[cat] = cat_count.get(cat, 0) + 1
+            selected.append(best_local)
+        return selected
+
+    # ------------------------------------------------------------------
+    # Category-aware greedy fallback (no embeddings)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _category_aware_select(
+        working_chunks: list[CaseChunk],
+        ranked_indices: np.ndarray,
+        top_k: int,
+        exclude_ids: set[str] | None,
+    ) -> list[int]:
+        selected: list[int] = []
+        seen_names: set[str] = set()
+        max_per_cat = max(1, (top_k + 1) // 2)
+        cat_count: dict[str, int] = {}
+        for local_idx_np in ranked_indices:
+            if len(selected) >= top_k:
+                break
+            local_idx = int(local_idx_np)
+            c = working_chunks[local_idx]
+            if exclude_ids and c.case_id in exclude_ids:
+                continue
+            if c.project_name in seen_names:
+                continue
+            cat = c.category
+            if cat_count.get(cat, 0) >= max_per_cat:
+                continue
+            seen_names.add(c.project_name)
+            cat_count[cat] = cat_count.get(cat, 0) + 1
+            selected.append(local_idx)
+        return selected
+
+    # ------------------------------------------------------------------
+    # Main retrieval
+    # ------------------------------------------------------------------
     def retrieve(
         self,
         query: str,
         top_k: int = 3,
         category_filter: str | None = None,
         tags: list[str] | None = None,
-        mode: str = "auto",  # "auto" | "keyword" | "vector" | "hybrid"
+        mode: str = "auto",
+        exclude_ids: set[str] | None = None,
     ) -> list[dict[str, Any]]:
-        """Retrieve most relevant cases with multi-route检索和标签过滤.
+        """Retrieve most relevant cases with diversity-aware reranking.
 
-        - keyword: 只用 TF-IDF 关键字匹配
-        - vector: 只用向量相似度（若向量不可用则回退到 keyword）
-        - hybrid: 关键字 + 向量归一化后加权融合
-        - auto: 默认策略，优先向量，否则 keyword（与旧版行为兼容）
+        Improvements over v1:
+        - ``exclude_ids``: skip cases already cited in earlier turns
+        - MMR reranking when embeddings available (balances relevance + diversity)
+        - Category cap: single category cannot dominate results
+        - Soft fallback: if exclusion leaves too few results, retry without it
         """
         if not self._chunks:
             return []
@@ -328,7 +423,6 @@ class RagEngine:
         working_chunks = self._chunks
         working_indices = list(range(len(self._chunks)))
 
-        # 1) 先按类别做 coarse 过滤
         if category_filter:
             pairs = [(i, c) for i, c in enumerate(self._chunks) if c.category == category_filter]
             if not pairs:
@@ -336,7 +430,6 @@ class RagEngine:
             working_indices = [p[0] for p in pairs]
             working_chunks = [p[1] for p in pairs]
 
-        # 2) 再按标签做精细过滤（必须全部命中要求的标签）
         tag_filter = set(tags or [])
         if tag_filter:
             tagged_pairs: list[tuple[int, CaseChunk]] = []
@@ -361,7 +454,6 @@ class RagEngine:
                 subset_embs = self._embeddings[working_indices]
                 vector_scores = subset_embs @ q_vec
 
-        # 选择检索模式
         effective_mode = (mode or settings.rag_retrieval_mode).lower()
         if effective_mode not in {"auto", "keyword", "vector", "hybrid"}:
             effective_mode = "auto"
@@ -370,30 +462,23 @@ class RagEngine:
             if arr is None or arr.size == 0:
                 return None
             arr = arr.astype(float)
-            max_v = float(arr.max())
-            min_v = float(arr.min())
-            if max_v - min_v < 1e-8:
-                return np.ones_like(arr) * 0.5
-            return (arr - min_v) / (max_v - min_v)
+            mx, mn = float(arr.max()), float(arr.min())
+            return np.ones_like(arr) * 0.5 if mx - mn < 1e-8 else (arr - mn) / (mx - mn)
 
         scores: np.ndarray
         if effective_mode == "keyword":
             scores = keyword_scores
         elif effective_mode == "vector":
-            if vector_scores is not None:
-                scores = vector_scores
-            else:
-                scores = keyword_scores
+            scores = vector_scores if vector_scores is not None else keyword_scores
         elif effective_mode == "hybrid":
             if vector_scores is not None:
-                k_norm = _norm(keyword_scores) or keyword_scores
-                v_norm = _norm(vector_scores) or vector_scores
-                alpha = float(getattr(settings, "rag_hybrid_alpha", 0.6) or 0.6)
-                alpha = max(0.0, min(1.0, alpha))
-                scores = (1.0 - alpha) * k_norm + alpha * v_norm
+                k_n = _norm(keyword_scores) or keyword_scores
+                v_n = _norm(vector_scores) or vector_scores
+                alpha = max(0.0, min(1.0, float(getattr(settings, "rag_hybrid_alpha", 0.6) or 0.6)))
+                scores = (1.0 - alpha) * k_n + alpha * v_n
             else:
                 scores = keyword_scores
-        else:  # auto
+        else:
             if vector_scores is not None:
                 scores = vector_scores
                 effective_mode = "vector"
@@ -401,64 +486,159 @@ class RagEngine:
                 scores = keyword_scores
                 effective_mode = "keyword"
 
-        ranked = np.argsort(scores)[::-1]
-        results: list[dict[str, Any]] = []
-        seen_names: set[str] = set()
-        for local_idx in ranked:
-            if len(results) >= top_k:
-                break
-            c = working_chunks[local_idx]
-            if c.project_name in seen_names:
-                continue
-            seen_names.add(c.project_name)
+        scores_normed = _norm(scores)
+        if scores_normed is None:
+            scores_normed = scores
 
+        use_mmr = (self._embed_ready and self._embeddings is not None
+                   and vector_scores is not None and len(working_chunks) > top_k)
+
+        def _select(excl: set[str] | None) -> list[int]:
+            if use_mmr:
+                return self._mmr_select(
+                    working_indices, working_chunks, scores_normed,
+                    top_k, exclude_ids=excl, lambda_param=0.55,
+                )
+            ranked = np.argsort(scores)[::-1]
+            return self._category_aware_select(working_chunks, ranked, top_k, exclude_ids=excl)
+
+        chosen = _select(exclude_ids)
+        if len(chosen) < min(top_k, len(working_chunks)) and exclude_ids:
+            chosen = _select(None)
+
+        results: list[dict[str, Any]] = []
+        for local_idx in chosen:
+            c = working_chunks[local_idx]
             kw_score = float(keyword_scores[local_idx]) if keyword_scores.size else 0.0
             vec_score = float(vector_scores[local_idx]) if vector_scores is not None else 0.0
             combined = float(scores[local_idx])
-
-            results.append(
-                {
-                    "case_id": c.case_id,
-                    "category": c.category,
-                    "project_name": c.project_name,
-                    "similarity": round(combined, 4),
-                    "score_keyword": round(kw_score, 4),
-                    "score_vector": round(vec_score, 4),
-                    "retrieval_mode": effective_mode,
-                    "tags": c.tags,
-                    "pain_points": c.pain_points[:3],
-                    "solution": c.solution[:3],
-                    "innovation_points": c.innovation_points[:2],
-                    "evidence_quotes": c.evidence_quotes[:2],
-                    "risk_flags": c.risk_flags,
-                    "rubric_coverage": c.rubric_coverage,
-                    "summary": c.summary[:300],
-                }
-            )
+            results.append({
+                "case_id": c.case_id,
+                "category": c.category,
+                "project_name": c.project_name,
+                "similarity": round(combined, 4),
+                "score_keyword": round(kw_score, 4),
+                "score_vector": round(vec_score, 4),
+                "retrieval_mode": effective_mode,
+                "tags": c.tags,
+                "pain_points": c.pain_points[:3],
+                "solution": c.solution[:3],
+                "innovation_points": c.innovation_points[:3],
+                "business_model": c.business_model[:3],
+                "evidence_quotes": c.evidence_quotes[:2],
+                "risk_flags": c.risk_flags,
+                "rubric_coverage": c.rubric_coverage,
+                "summary": c.summary[:300],
+            })
         return results
 
-    def format_for_llm(self, results: list[dict[str, Any]], max_chars: int = 1500) -> str:
-        """Format RAG results into a compact context block for LLM prompts."""
+    def format_for_llm(self, results: list[dict[str, Any]], max_chars: int = 2500) -> str:
+        """Format RAG results for LLM prompts. When Neo4j enrichment is present,
+        uses graph fields for richer context including rule overlap and rubric comparison."""
         if not results:
             return ""
+        show_n = min(len(results), 4)
         parts: list[str] = []
-        for i, r in enumerate(results[:3], 1):
+        for i, r in enumerate(results[:show_n], 1):
+            enriched = r.get("neo4j_enriched", False)
             part = f"### 参考案例{i}: {r['project_name']}（{r['category']}，相似度{r['similarity']:.0%}）\n"
-            if r.get("pain_points"):
-                part += f"- 痛点: {'; '.join(r['pain_points'][:2])}\n"
-            if r.get("solution"):
-                part += f"- 方案: {'; '.join(r['solution'][:2])}\n"
-            if r.get("evidence_quotes"):
-                part += f"- 证据引用: \"{r['evidence_quotes'][0][:100]}\"\n"
-            covered = [rc["rubric_item"] for rc in r.get("rubric_coverage", []) if rc.get("covered")]
-            uncovered = [rc["rubric_item"] for rc in r.get("rubric_coverage", []) if not rc.get("covered")]
-            if covered:
-                part += f"- 评分项已覆盖: {', '.join(covered)}\n"
-            if uncovered:
-                part += f"- 评分项未覆盖: {', '.join(uncovered)}\n"
+
+            pains = r.get("graph_pains") if enriched else r.get("pain_points")
+            sols = r.get("graph_solutions") if enriched else r.get("solution")
+            inns = r.get("graph_innovations") if enriched else r.get("innovation_points")
+            biz = r.get("graph_biz_models") if enriched else r.get("business_model")
+
+            if pains:
+                part += f"- 痛点: {'; '.join(pains[:4])}\n"
+            if sols:
+                part += f"- 方案: {'; '.join(sols[:4])}\n"
+            if inns:
+                part += f"- 创新点: {'; '.join(inns[:3])}\n"
+            if biz:
+                part += f"- 商业模式: {'; '.join(biz[:3])}\n"
+
+            if enriched:
+                overlap = r.get("rule_overlap", {})
+                shared = overlap.get("shared", [])
+                only_case = overlap.get("only_in_case", [])
+                only_student = overlap.get("only_in_student", [])
+                if shared:
+                    part += f"- 你和此案例共同触发的风险: {', '.join(shared[:4])}\n"
+                if only_case:
+                    part += f"- 此案例额外触发的风险(你未触发): {', '.join(only_case[:4])}\n"
+                if only_student:
+                    part += f"- 你独有的风险(此案例未触发): {', '.join(only_student[:4])}\n"
+
+                cov = r.get("graph_rubric_covered", [])
+                uncov = r.get("graph_rubric_uncovered", [])
+                if cov:
+                    part += f"- 案例已覆盖评分维度: {', '.join(cov)}\n"
+                if uncov:
+                    part += f"- 案例未覆盖评分维度: {', '.join(uncov)}\n"
+
+                ev_count = r.get("graph_evidence_count", 0)
+                if ev_count:
+                    part += f"- 案例证据链: {ev_count}条\n"
+
+                markets = r.get("graph_markets", [])
+                if markets:
+                    part += f"- 市场分析: {'; '.join(markets[:3])}\n"
+            else:
+                if r.get("evidence_quotes"):
+                    part += f"- 证据引用: \"{r['evidence_quotes'][0][:120]}\"\n"
+                covered = [rc["rubric_item"] for rc in r.get("rubric_coverage", []) if rc.get("covered")]
+                uncovered = [rc["rubric_item"] for rc in r.get("rubric_coverage", []) if not rc.get("covered")]
+                if covered:
+                    part += f"- 已覆盖评分项: {', '.join(covered)}\n"
+                if uncovered:
+                    part += f"- 未覆盖评分项: {', '.join(uncovered)}\n"
+
             parts.append(part)
         text = "\n".join(parts)
         return text[:max_chars]
+
+    @staticmethod
+    def format_enrichment_insight(results: list[dict[str, Any]]) -> str:
+        """Extract cross-case comparison insights from enriched RAG results.
+
+        Produces a concise text block highlighting patterns across all retrieved
+        cases versus the student's project, suitable for injection into agent prompts.
+        """
+        enriched = [r for r in results if r.get("neo4j_enriched")]
+        if not enriched:
+            return ""
+        lines: list[str] = []
+
+        all_shared: list[str] = []
+        all_only_student: list[str] = []
+        case_rubric_covered: dict[str, int] = {}
+        case_rubric_uncovered: dict[str, int] = {}
+        for r in enriched:
+            overlap = r.get("rule_overlap", {})
+            all_shared.extend(overlap.get("shared", []))
+            all_only_student.extend(overlap.get("only_in_student", []))
+            for dim in r.get("graph_rubric_covered", []):
+                case_rubric_covered[dim] = case_rubric_covered.get(dim, 0) + 1
+            for dim in r.get("graph_rubric_uncovered", []):
+                case_rubric_uncovered[dim] = case_rubric_uncovered.get(dim, 0) + 1
+
+        n = len(enriched)
+        if all_only_student:
+            from collections import Counter
+            top_student_only = Counter(all_only_student).most_common(3)
+            student_risk_str = ", ".join(f"{rid}(你独有)" for rid, _ in top_student_only)
+            lines.append(f"风险对比: {student_risk_str}——参考案例中都没有触发这些规则，说明这可能是你项目特有的薄弱环节。")
+
+        dims_all_covered = [d for d, c in case_rubric_covered.items() if c == n]
+        dims_student_gap = [d for d in dims_all_covered if d in case_rubric_uncovered or d not in case_rubric_covered]
+        if dims_all_covered:
+            lines.append(f"参考案例普遍覆盖的维度: {', '.join(dims_all_covered[:5])}。")
+
+        categories = [r.get("category", "") for r in enriched if r.get("category")]
+        if len(set(categories)) > 1:
+            lines.append(f"跨领域启发: 本轮案例来自{', '.join(set(categories))}等{len(set(categories))}个不同领域。")
+
+        return "\n".join(lines) if lines else ""
 
     @property
     def case_count(self) -> int:

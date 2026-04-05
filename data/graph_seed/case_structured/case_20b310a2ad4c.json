@@ -1,5 +1,6 @@
 {
   "case_id": "case_20b310a2ad4c",
+  "document_id": "doc_776411f8e2d1",
   "source": {
     "file_path": "文旅文创/470021-Go2重塑入境游-项目策划书-ef7fa22d.pdf",
     "file_name": "470021-Go2重塑入境游-项目策划书-ef7fa22d.pdf",
@@ -15,103 +16,137 @@
   "document_stats": {
     "segment_count": 36,
     "full_text_chars": 31308,
-    "core_text_chars": 31308,
+    "core_text_chars": 14310,
     "appendix_start_index": 2,
-    "has_appendix_evidence": true
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 37,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 37,
+    "hypergraph_hyperedge_count": 1
   },
   "project_profile": {
-    "project_name": "Go2重塑入境游",
+    "project_name": "Go2",
     "target_users": [
-      "外籍游客",
-      "旅行社"
+      "入境外国游客",
+      "中国旅行社"
     ],
     "pain_points": [
-      "外籍游客端：需求与体验的强烈割裂",
-      "旅行社端：传统模式难抵现代竞争压力"
+      "语言不通，自主规划行程易出错",
+      "旅行社获客难，人效低",
+      "传统旅行社行程灵活性不足，难以满足个性化需求"
     ],
     "solution": [
-      "基于 CP-SAT 算法的动态行程优化引擎",
-      "混合专家模型（MoE）",
-      "AI 技术赋能，实现智能化驱动",
-      "提供优化且差异化的服务",
-      "一键生成包含文化体验、交通、住宿的完整行程",
-      "集成 AR 实景导航与语音讲解功能"
+      "基于 CP-SAT 算法的动态行程优化引擎，10 秒内重规划行程，准确率 98%",
+      "混合专家模型与改进 RAG 算法，0.8 秒内响应问答",
+      "FFM 召回排序推荐架构，推荐准确率 82%"
     ],
     "innovation_points": [
-      "基于 CP-SAT 算法生成的训练数据集",
-      "混合专家（Moe）的大模型架构和改进的 Rag 算法"
+      "动态行程优化引擎，快速响应行程变化",
+      "高效问答响应，提升用户体验",
+      "个性化推荐，精准满足用户需求"
     ],
     "business_model": [
-      "平台使用费与服务费",
-      "数据洞察报告服务",
-      "交易分成模式",
-      "网红合作与旅行种草官计划"
+      "为 C 端和 B 端提供服务，试点阶段与 20 余家 B 端企业合作",
+      "C 端 7 日留存率 37%，B 端预订转化率提升 40%"
     ],
     "market_analysis": [
-      "入境游市场将保持 15%以上的年均增长率",
-      "入境游政策持续放开，文化旅游产业不断升级"
+      "2024 年入境外国游客达 1.32 亿人次",
+      "传统旅行社面临获客难、人效低、数据化能力弱等挑战",
+      "国家及地方政府出台多项扶持政策，包括签证便利化"
     ],
     "execution_plan": [
-      "第一时期：产品孵化期 (1 - 2 年)",
-      "第二时期：产品推广期 (3 - 4 年)"
+      "试点阶段与 20 余家 B 端企业合作",
+      "未来将扩大合作范围，提升服务覆盖度"
     ],
     "risk_control": [
-      "通过精准营销服务，广告投放转化率提升了 40%",
-      "智能推荐系统，其客房入住率提高了 25%",
-      "产业协同机会挖掘效率提升 30%"
+      "【合规与伦理意识】合规与伦理意识：项目遵守国家及地方入境旅游扶持政策，确保合法合规运营"
     ]
   },
-  "risk_flags": [
-    "market_size_fallacy",
-    "weak_user_evidence"
+  "tags": [
+    "category:文旅文创",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6"
   ],
   "evidence": [
     {
       "id": "case_20b310a2ad4c_e1",
       "type": "user_evidence",
-      "quote": "广告投放转化率提升了 40%",
-      "chunk_id": "C5",
-      "source_unit": "page_17"
+      "quote": "Go2 项目是团队打造的 AI 旅行社交平台，旨在解决中国入境旅游市场供需矛盾",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
     },
     {
       "id": "case_20b310a2ad4c_e2",
-      "type": "user_evidence",
-      "quote": "客房入住率提高了 25%",
-      "chunk_id": "C5",
-      "source_unit": "page_17"
+      "type": "pain_points_evidence",
+      "quote": "假日影响）对海外游客而言较为陌生，自主规划行程易出现疏漏。而传统旅行社行程灵活性不足，难以满足游客个性化需求，如游客未提前了解黄金周时间，导致行程规划失误。",
+      "chunk_id": "C2",
+      "source_unit": "page_8"
     },
     {
       "id": "case_20b310a2ad4c_e3",
-      "type": "user_evidence",
-      "quote": "产业协同机会挖掘效率提升 30%",
-      "chunk_id": "C5",
-      "source_unit": "page_17"
+      "type": "solution_evidence",
+      "quote": "核心技术包括基于 CP-SAT 算法的动态行程优化引擎（10 秒内重规划行程，准确率 98%）、混合专家模型与改进 RAG 算法（0.8 秒内响应问答）、FFM 召回排序推荐架构（推荐准确率 82%）",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
     },
     {
       "id": "case_20b310a2ad4c_e4",
-      "type": "business_model_evidence",
-      "quote": "地接社系统接入服务收入达 25 万元，占总收入的 50%",
-      "chunk_id": "C7",
-      "source_unit": "page_36"
+      "type": "innovation_points_evidence",
+      "quote": "这为通过技术创新与模式优化切入市场、重塑服务体验提供了明确方向",
+      "chunk_id": "C2",
+      "source_unit": "page_8"
     },
     {
       "id": "case_20b310a2ad4c_e5",
       "type": "business_model_evidence",
-      "quote": "企业定制旅游解决方案收入为 10 万元，占比 20%",
-      "chunk_id": "C7",
-      "source_unit": "page_36"
+      "quote": "为 C 端和 B 端提供相应服务，试点阶段与 20 余家 B 端企业合作，C 端 7 日留存率 37%，B 端预订转化率提升 40%",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
     },
     {
       "id": "case_20b310a2ad4c_e6",
-      "type": "business_model_evidence",
-      "quote": "C 端用户订阅和广告收入为 15 万元，占比 30%",
-      "chunk_id": "C7",
-      "source_unit": "page_36"
+      "type": "market_analysis_evidence",
+      "quote": "2024 年入境外国游客达 1.32 亿人次但外籍游客面临语言不通等问题、旅行社存在获客难等人效低困境，且有签证便利化等政策支持",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_20b310a2ad4c_e7",
+      "type": "execution_plan_evidence",
+      "quote": "试点阶段与 20 余家 B 端企业合作，未来将扩大合作范围，提升服务覆盖度",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_20b310a2ad4c_e8",
+      "type": "risk_evidence",
+      "quote": "项目遵守国家及地方入境旅游扶持政策，确保合法合规运营",
+      "chunk_id": "C1",
+      "source_unit": "page_4"
     }
   ],
   "rubric_coverage": [
     {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
       "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
       "covered": true
     },
     {
@@ -119,17 +154,204 @@
       "covered": true
     },
     {
-      "rubric_item": "Risk Control",
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
       "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
     }
   ],
-  "summary": "目录 第一章 项目概述 ...............................................................6 1.1 项目背景 ..............................................................6 1.2 行业现状 ..............................................................7 1.3 痛点分析 ..............................................................7 （一）外籍游客端：需求与体验的强烈割裂 ............................... 7 （二）旅行社端：传统模式难抵现代竞争压力 ............................. 8 1.4 政策支持 ..............................................................8 第二章 产品及服务 ..............",
+  "summary": "摘要 中文摘要 Go2 项目是团队打造的 AI 旅行社交平台，旨在解决中国入境旅游市场 供需矛盾，其背景是 2024 年入境外国游客达 1.32 亿人次但外籍游客 面临语言不通等问题、旅行社存在获客难等人效低困境，且有签证便 利化等政策支持；核心技术包括基于 CP-SAT 算法的动态行程优化引擎 （10 秒内重规划行程，准确率 98%）、混合专家模型与改进 RAG 算法 （0.8 秒内响应问答）、FFM 召回排序推荐架构（推荐准确率 82%）； 为 C 端和 B 端提供相应服务，试点阶段与 20 余家 B 端企业合作，C 端 7 日留存率 37%，B 端预订转化率提升 40%等，团队有专业背景，还涉 及市场分析、战略规划、投资财务及风险管理等内容。 English Abstract The Go2 project, an AI travel social platform , aims to resolve the supply-demand contradiction in China's inbound tourism market. In 2024, there were 132",
   "confidence": 0.9,
   "llm": {
     "enabled": true,
     "provider": "qwen",
-    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
     "used": true
   },
-  "generated_at": "2026-03-08T13:32:42Z"
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:28:16Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H6"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确描述了语言不通、自主规划行程易出错、旅行社获客难、人效低等痛点，并有用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到了 C 端 7 日留存率 37% 和 B 端预订转化率提升 40%，但缺乏具体的用户访谈、问卷等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线明确，包括 CP-SAT 算法、混合专家模型与改进 RAG 算法、FFM 召回排序推荐架构，且有具体的技术指标。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "为 C 端和 B 端提供服务，试点阶段与 20 余家 B 端企业合作，商业模式较为清晰。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "提到 2024 年入境外国游客达 1.32 亿人次，传统旅行社面临获客难、人效低等挑战，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供详细的财务数据，如单位经济模型、LTV 和 CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了基于 CP-SAT 算法的动态行程优化引擎、混合专家模型与改进 RAG 算法、FFM 召回排序推荐架构等创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 5.0,
+      "reason": "提到团队有专业背景，但未详细描述团队成员的具体能力和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "BP/路演结构较为完整，提到了具体的技术指标和用户数据。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，解决了语言不通、行程规划等问题。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到了与 20 余家 B 端企业合作，渠道较为明确。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "C 端 7 日留存率 37%，B 端预订转化率提升 40%",
+      "reason": "提到定价/收费但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场规模口径较为合理，提到 2024 年入境外国游客达 1.32 亿人次。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "",
+      "reason": "缺乏用户访谈、问卷等需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "传统旅行社面临获客难、人效低、数据化能力弱等挑战",
+      "reason": "未详细分析竞品，仅提到传统旅行社的挑战。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点有具体的技术指标支持，如动态行程优化引擎、问答响应、推荐准确率等。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供足够的财务数据来判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未出现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未来将扩大合作范围，提升服务覆盖度",
+      "reason": "时间表/里程碑不明确，缺乏具体可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目遵守国家及地方入境旅游扶持政策，确保合法合规运营",
+      "reason": "提到了合规与伦理意识，但未详细说明具体措施。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与项目现状匹配，未出现资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提到实验/测试，因此不存在实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "路演叙事结构较为完整，未出现断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、财务逻辑、团队与执行等。"
+    }
+  ]
 }

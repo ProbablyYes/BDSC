@@ -1,0 +1,324 @@
+{
+  "case_id": "case_9cb9a7d2a28c",
+  "document_id": "doc_42a69067b783",
+  "source": {
+    "file_path": "政务治理/536827-文思智铠——生成式大语言模型安全优化模块-项目策划书-b7f59b1f.pdf",
+    "file_name": "536827-文思智铠——生成式大语言模型安全优化模块-项目策划书-b7f59b1f.pdf",
+    "category": "政务治理",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 34,
+    "full_text_chars": 6843,
+    "core_text_chars": 6843,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 35,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 35,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "文思智铠——生成式大语言模型安全优化模块",
+    "target_users": [
+      "政府、高校研究所",
+      "领域头部企业",
+      "在线咨询平台、金融信息服务、政府部门与公共服务、新闻传媒与内容创作"
+    ],
+    "pain_points": [
+      "大语言模型存在事实性幻觉和忠实性幻觉，影响使用体验",
+      "大语言模型在医疗、法律等行业应用受限，安全性、公平性、稳定性亟待提升",
+      "开源模型存在安全隐患，如数据集质量不齐、无法有效防范攻击"
+    ],
+    "solution": [
+      "提供生成式大语言模型的安全优化模块，提升模型的安全性、公平性和稳定性",
+      "利用可解释性方法进行幻觉检测，实时识别并调整模型输出中的幻觉现象",
+      "构建集成化的幻觉检测与抑制系统，实现高效、实时的幻觉抑制"
+    ],
+    "innovation_points": [
+      "首个具备强大中文能力与多语言能力的安全模块",
+      "率先具备多模态能力的安全优化模块",
+      "在幻觉现象产生理论及检测方法论方面拥有2项专利"
+    ],
+    "business_model": [
+      "政府、高校研究所低价投放，反馈改进提升科研准确性、安全性",
+      "与领域头部企业合作，前期试用推广安全模块功能，逐步扩大合作、定制产品",
+      "依托开源社区扩大认知度，借助低阶代码参数提升影响力，搭建自有网站交易售后一站式服务"
+    ],
+    "market_analysis": [
+      "国内外2023年大模型安全问题诉讼超过千起，市场对大语言模型安全需求迫切",
+      "Pastral+ WenS在多个benchmark数据集上表现优异，具备市场竞争力"
+    ],
+    "execution_plan": [
+      "第一年：政府、高校研究所低价投放，收集反馈，改进产品",
+      "第二年：与领域头部企业合作，试用推广安全模块功能"
+    ],
+    "risk_control": [
+      "【合规与伦理意识/证据覆盖度与可验证性】合规与伦理意识：在算法设计过程中采取有效措施防止产生歧视，确保模型输出的公平性（H5）",
+      "【逻辑自洽与闭环】逻辑自洽性检查：通过多数据集和应用场景测试，确保模型输出的准确性和可靠性（H11）",
+      "【通用风险控制】证据覆盖度：使用首个大语言模型安全性能评估模块Purple Llama进行测试，提供可验证的性能指标（H14）"
+    ]
+  },
+  "tags": [
+    "category:政务治理",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_9cb9a7d2a28c_e1",
+      "type": "user_evidence",
+      "quote": "政府、高校研究所低价投放、反馈改进提升科研准确性、安全性",
+      "chunk_id": "C9",
+      "source_unit": "page_26"
+    },
+    {
+      "id": "case_9cb9a7d2a28c_e2",
+      "type": "business_model_evidence",
+      "quote": "与领域头部企业合作前期试用推广安全模块功能逐步扩大合作、定制产品",
+      "chunk_id": "C9",
+      "source_unit": "page_26"
+    },
+    {
+      "id": "case_9cb9a7d2a28c_e3",
+      "type": "risk_evidence",
+      "quote": "在算法设计……等过程中，采取有效措施防止产生民族、信仰、国别、地域、性别、年龄、职业、健康等歧视",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "生成式大语言模型安全优化模块 文思 智铠大模型 安全团队 2 时代背景 国内大语言模型算力资源、技术能力、生态环境均与世界一流水平存在差距 时代背景 人工智能大语言模型广泛应用下，安全性、公平性、稳定性成为关注焦点 大模型自主化安全化路线的下沉试验迫在眉睫 网信办《生成式人工智能服务管理暂行办法》第一章第四条：（二）在算法设计……等过程中，采取有效措施防止产生民族、信仰、国别、地域、性别、年龄、职业、健康等歧视；…… 2024年【谷歌“窃取”OpenAI模型关键信息】……还原了OpenAI大模型的整个投影矩阵，还知道了确切隐藏维度大小……并且这种方法同样适用于GPT-4。 3 时代背景 国内大语言模型算力资源、技术能力、生态环境均与世界一流水平存在差距 时代背景 人工智能大语言模型广泛应用下，安全性、公平性、稳定性成为关注焦点 大模型自主化安全化路线的下沉试验迫在眉睫 网信办《生成式人工智能服务管理暂行办法》第一章第四条：（二）在算法设计……等过程中，采取有效措施防止产生民族、信仰、国别、地域、性别、年龄、职业、健康等歧视；…… 2024年【谷歌“窃取”OpenAI模型关键信息】……还",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:02:18Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了大语言模型存在的事实性幻觉和忠实性幻觉，以及在医疗、法律等行业应用受限的问题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到市场对大语言模型安全需求迫切，但未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了利用可解释性方法进行幻觉检测和构建集成化的幻觉检测与抑制系统，技术路线合理。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了与政府、高校研究所和领域头部企业的合作模式，以及通过自有网站提供一站式服务。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了国内外2023年大模型安全问题诉讼超过千起，以及在多个benchmark数据集上的表现。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到政府、高校研究所低价投放，但未提供具体的财务数据或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了首个具备强大中文能力与多语言能力的安全模块，以及2项专利。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目未详细描述团队成员及其具体能力，也未提供明确的里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，提到了多个关键点，但部分信息较为简略。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了目标用户与价值主张的匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了与政府、高校研究所和领域头部企业的合作渠道，渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "政府、高校研究所低价投放，反馈改进提升科研准确性、安全性",
+      "reason": "项目提到定价但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了市场规模的合理性，未发现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "国内外2023年大模型安全问题诉讼超过千起，市场对大语言模型安全需求迫切",
+      "reason": "项目提到市场对大语言模型安全需求迫切，但未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了竞品分析，未声称无竞品或无竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了2项专利，创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供详细的财务数据，但未发现明显的单位经济不成立问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现‘只要拿下1%市场’等自上而下估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "与领域头部企业合作前期试用推广安全模块功能逐步扩大合作、定制产品",
+      "reason": "项目未提供具体的时间表或里程碑，显得不现实。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了合规与伦理意识，未发现合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目技术路线与资源匹配，未发现技术路线与资源不匹配问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了使用首个大语言模型安全性能评估模块Purple Llama进行测试，实验设计合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未发现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "政府、高校研究所低价投放、反馈改进提升科研准确性、安全性",
+      "reason": "项目在多个关键Rubric维度（如用户证据强度、财务逻辑、团队与执行）缺乏支撑证据。"
+    }
+  ]
+}

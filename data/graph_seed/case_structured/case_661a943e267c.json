@@ -1,0 +1,351 @@
+{
+  "case_id": "case_661a943e267c",
+  "document_id": "doc_7f3b30920f17",
+  "source": {
+    "file_path": "工业制造/477717-极端环境勘测革新——支持超实时感知与厘米级建模的无人机自主巡检系统-项目策划书-0599ace6.pdf",
+    "file_name": "477717-极端环境勘测革新——支持超实时感知与厘米级建模的无人机自主巡检系统-项目策划书-0599ace6.pdf",
+    "category": "工业制造",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 78,
+    "full_text_chars": 56336,
+    "core_text_chars": 49010,
+    "appendix_start_index": 1,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 79,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 79,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "极端环境勘测革新——支持超实时感知与厘米级建模的无人机自主巡检系统",
+    "target_users": [
+      "矿山勘探人员",
+      "矿业安全管理人员"
+    ],
+    "pain_points": [
+      "传统勘探手段效率低、成本高、精度差",
+      "矿井下环境复杂，存在高危作业风险",
+      "井下极端工况对无人机感知、定位、避障提出严苛要求"
+    ],
+    "solution": [
+      "构建视觉传感器-激光雷达多源融合智能算法",
+      "攻克超轻量级多源融合感知、厘米级定位算法及动态避障等关键技术"
+    ],
+    "innovation_points": [
+      "设计基于多模态深度特征融合的轻量级感知技术",
+      "构建基于地质特征库在线查询匹配的厘米级定位算法",
+      "开发基于强化模仿学习策略的动态避障技术"
+    ],
+    "business_model": [
+      "为矿山企业提供高效稳定的巡检服务",
+      "通过技术优势降低客户成本，提高安全性",
+      "主要收入来源为巡检服务费"
+    ],
+    "market_analysis": [
+      "矿山勘探巡检市场存在显著局限",
+      "现有技术难以满足极端环境需求",
+      "项目具有明显技术优势和市场潜力"
+    ],
+    "execution_plan": [
+      "构建多源融合智能算法",
+      "攻克关键技术",
+      "完成全自主巡检勘探系统研发"
+    ],
+    "risk_control": [
+      "【通用风险控制】环境风险：极端光照与高粉尘干扰，通过多源融合感知技术提高精确度",
+      "【通用风险控制】市场风险：现有技术局限，通过技术创新形成差异化优势"
+    ]
+  },
+  "tags": [
+    "category:工业制造",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_661a943e267c_e1",
+      "type": "pain_points_evidence",
+      "quote": "传统人工与智能探测手段在效率、 安全性、 成本与精度等方面存在显著局限。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_661a943e267c_e2",
+      "type": "solution_evidence",
+      "quote": "通过构建视觉传感器-激光雷达多源融合智能算法， 攻克超轻量级多源融合感知、基于地质特征库在线查询匹配的厘米级定位算法 及基于强化模仿学习策略的动态避障等关键技术。",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_661a943e267c_e3",
+      "type": "innovation_points_evidence",
+      "quote": "核心创新包括： (1)设计基于多模态深度特征融合的轻量级感知技术，构建一种基于多传感器深度特征的多源",
+      "chunk_id": "C3",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_661a943e267c_e4",
+      "type": "business_model_evidence",
+      "quote": "项目依托矿井极端环境下感知、 定位、 避障多维度数据库， 构建全自主巡检勘探系统。",
+      "chunk_id": "C4",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_661a943e267c_e5",
+      "type": "market_analysis_evidence",
+      "quote": "矿山等极端封闭环境下勘探巡检面临复杂地质环境与高危作业的双重挑战， 传统人工与智能探测手段在效率、 安全性、 成本与精度等方面存在显著局限。",
+      "chunk_id": "C5",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_661a943e267c_e6",
+      "type": "execution_plan_evidence",
+      "quote": "项目依托矿井极端环境下感知、 定位、 避障多维度数据库， 构建全自主巡检勘探系统，核心创新包括： (1)设计基于多模态深度特征融合的轻量级感知技术，构建一种基于多传感器深度特征的多源",
+      "chunk_id": "C6",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_661a943e267c_e7",
+      "type": "risk_evidence",
+      "quote": "考虑到无人机本身载荷有限，现有感知、定位、避障算法性能有限，难以实现对极端环境的高效稳定巡检。",
+      "chunk_id": "C7",
+      "source_unit": "page_6"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "第十九届“挑战杯”全国大学生课外学术科技作品竞赛 “人工智能+”应用赛 研究报告 作品名称： 极端环境勘测革新——支持超实时感知 与厘米级建模的无人机自主巡检系统 选题研究方向： 人工智能+工业制造 应用赛 学校全称： XXXX 大学 申报者姓名：尹星宇 谢炜明 贾明东 戴天一 褚昭晨 李思远 雷煜霏 I 摘 要 矿山等极端封闭环境下勘探巡检面临复杂地质环境与高危作业 的双重挑战， 传统人工与智能探测手段在效率、 安全性、 成本与精度 等方面存在显著局限。2019 年山西铁矿透水事故、2021 年山东烟台 笏山金矿重大爆炸等事故屡屡发生， 危害矿业人员安全， 对国家经济 建设造成财产损失，亟待开展矿井下无人化探测装备研发与应用。 微小型无人机凭借其灵活性与低成本优势， 为极端井下环境探测 提供了革新路径， 但井下极端工况对无人机感知、 定位、 避障提出了 严苛要求： 巡检系统需要在极端光照与高粉尘(100mg/m³)严重干扰下 实现对危机区域精确感知； 在无GNSS 信号与狭窄巷道(3-5m)中实现 系统厘米级定位建模； 在动态障碍物与复杂气流等高碰撞风险区域实 时高效避障。考虑到无人",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:56:57Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了矿山勘探巡检面临的复杂地质环境与高危作业的双重挑战，以及传统手段的局限性。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了多源融合智能算法、轻量级感知技术、厘米级定位算法及动态避障技术，技术路线较为合理。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目明确提到为矿山企业提供高效稳定的巡检服务，主要收入来源为巡检服务费，但未详细说明成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目分析了矿山勘探巡检市场的局限性，强调了现有技术难以满足极端环境需求，但未详细列出具体竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到主要收入来源为巡检服务费，但未提供具体的财务数据或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了多项技术创新，包括多源融合智能算法、轻量级感知技术、厘米级定位算法及动态避障技术。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细说明团队成员的具体背景和能力，也未提供明确的里程碑计划。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目结构较为完整，明确指出了问题、解决方案和市场潜力，但缺乏具体用户证据和财务数据。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户与价值主张匹配，未出现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体获客渠道，但未表明难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "主要收入来源为巡检服务费",
+      "reason": "项目提到定价/收费但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的市场规模口径，但未出现口径混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "传统人工与智能探测手段在效率、 安全性、 成本与精度等方面存在显著局限。",
+      "reason": "项目缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，但未详细列出具体竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了多项可验证的技术创新点。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，但未表明单位经济不成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "完成全自主巡检勘探系统研发",
+      "reason": "项目提到完成全自主巡检勘探系统研发，但未提供具体的时间表和里程碑计划。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域的合规/伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目技术路线与资源匹配，未出现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体实验/测试，但未表明实验设计不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目叙事结构较为完整，未出现明显断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目未提供具体的用户访谈、问卷或行为数据等原始证据，未详细说明团队成员的具体背景和能力，也未提供明确的里程碑计划。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，包括用户证据强度、团队与执行。"
+    }
+  ]
+}

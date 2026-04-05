@@ -1,66 +1,80 @@
 [
   {
-    "case_id": "case_2a71c097a760",
-    "file_path": "交通运输/460878-智卫天穹——面向复杂_机检测系统-项目策划书-13992725.pdf",
+    "case_id": "case_18e94d2d521b",
+    "file_path": "交通运输/460878-智卫天穹——面向复杂城市环境的AI雷达_多模态融合无人机检测系统-项目策划书-13992725.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_2a71c097a760.json"
+    "output_file": "case_18e94d2d521b.json"
   },
   {
-    "case_id": "case_67787abb3a32",
-    "file_path": "交通运输/514480-稳定不倒——非同轴两_衡控制技术-项目策划书-84bcfcb5.pdf",
+    "case_id": "case_85a9b7738559",
+    "file_path": "交通运输/478803-极野智驭-驾驭荒野，赋能特种车辆全自动作业新时代-项目策划书-8a8acfac.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_67787abb3a32.json"
+    "output_file": "case_85a9b7738559.json"
   },
   {
-    "case_id": "case_eef989768940",
-    "file_path": "交通运输/528229-深海幽灵-面向海洋强_无人航行器-项目策划书-02addcc8.pdf",
+    "case_id": "case_a8b6b65b6e82",
+    "file_path": "交通运输/514480-稳定不倒——非同轴两轮系统自平衡控制技术-项目策划书-84bcfcb5.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_eef989768940.json"
+    "output_file": "case_a8b6b65b6e82.json"
   },
   {
-    "case_id": "case_553f1b37ac3f",
-    "file_path": "交通运输/532268-面向低空经济的人工智_感知与应用-项目策划书-160cc323.pdf",
+    "case_id": "case_67c30fba3729",
+    "file_path": "交通运输/528229-深海幽灵-面向海洋强国战略的新一代仿生蝠鲼_AI智能自反馈水下无人航行器无人航行器-项目策划书-02addcc8.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_553f1b37ac3f.json"
+    "output_file": "case_67c30fba3729.json"
   },
   {
-    "case_id": "case_0fa0b27a67d9",
-    "file_path": "交通运输/536238-“充”出新天地，“智_站决策优化-项目策划书-5ff06adc.pdf",
+    "case_id": "case_a91542be7113",
+    "file_path": "交通运输/536238-智慧碳中和——人工智能的充电场站决策优化-项目策划书-5ff06adc.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_0fa0b27a67d9.json"
+    "output_file": "case_a91542be7113.json"
   },
   {
-    "case_id": "case_f1458819e932",
-    "file_path": "交通运输/536287-视界智通--交通长时_时分析系统-项目策划书-97e16607.pdf",
+    "case_id": "case_8172b015c1a9",
+    "file_path": "交通运输/536287-视界智通--交通长时视频实时分析系统-项目策划书-97e16607.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_f1458819e932.json"
+    "output_file": "case_8172b015c1a9.json"
   },
   {
-    "case_id": "case_9a5dffb122a7",
-    "file_path": "交通运输/537021-低空智驭——大小模型_群智控系统-项目策划书-199cfbe1.pdf",
+    "case_id": "case_a44942248185",
+    "file_path": "交通运输/537021-低空智驭——大小模型协同的无人机集群智控系统-项目策划书-199cfbe1.pdf",
     "category": "交通运输",
     "confidence": 0.9,
-    "output_file": "case_9a5dffb122a7.json"
+    "output_file": "case_a44942248185.json"
   },
   {
-    "case_id": "case_0a05f09ca80e",
-    "file_path": "其他/458152-“预行智控”——面向_智能机器人-项目策划书-112a55e3.pdf",
+    "case_id": "case_bcf9f7824942",
+    "file_path": "其他/457623-星眸智析--多模态卫星时空变化与未来推演系统-项目策划书-44ee2220.pdf",
     "category": "其他",
     "confidence": 0.9,
-    "output_file": "case_0a05f09ca80e.json"
+    "output_file": "case_bcf9f7824942.json"
   },
   {
-    "case_id": "case_eb31de46fed7",
-    "file_path": "其他/474460-多场感知，孪生驱动—_技术引领者-项目策划书-1a45b018.pdf",
+    "case_id": "case_c34c77489ebe",
+    "file_path": "其他/458152-“预行智控”——面向未知空间探索救援的具身智能机器人-项目策划书-112a55e3.pdf",
     "category": "其他",
     "confidence": 0.9,
-    "output_file": "case_eb31de46fed7.json"
+    "output_file": "case_c34c77489ebe.json"
+  },
+  {
+    "case_id": "case_71ef044b3921",
+    "file_path": "其他/474460-多场感知，孪生驱动—装备结构实时承载性能AI预报技术-项目策划书-1a45b018.pdf",
+    "category": "其他",
+    "confidence": 0.9,
+    "output_file": "case_71ef044b3921.json"
+  },
+  {
+    "case_id": "case_7a64fed68a2a",
+    "file_path": "其他/478331-极端气象下电力系统韧性构建：电力先锋团队南网百企脆弱性诊断及系统性解决方案-项目策划书-19f309ac.pdf",
+    "category": "其他",
+    "confidence": 0.9,
+    "output_file": "case_7a64fed68a2a.json"
   },
   {
     "case_id": "case_a0624e5cbc6e",
@@ -70,102 +84,116 @@
     "output_file": "case_a0624e5cbc6e.json"
   },
   {
-    "case_id": "case_bd9e37dc6fa6",
-    "file_path": "其他/506602-鲲澜芯动：多模态水下_能决策方案-项目策划书-6f8ac1bc.pdf",
+    "case_id": "case_ee66508cee75",
+    "file_path": "其他/506602-鲲澜芯动：多模态水下智能决策方案-项目策划书-6f8ac1bc.pdf",
     "category": "其他",
     "confidence": 0.9,
-    "output_file": "case_bd9e37dc6fa6.json"
+    "output_file": "case_ee66508cee75.json"
   },
   {
-    "case_id": "case_7cac78168494",
-    "file_path": "其他/536523-基于YOLO的AI视_能感知系统-项目策划书-3cc9bf6e.pdf",
+    "case_id": "case_2ae706584324",
+    "file_path": "其他/535591-EvoRobo：下一代自学习自演进的智能机器人-项目策划书-fe2e79cb.pdf",
     "category": "其他",
     "confidence": 0.9,
-    "output_file": "case_7cac78168494.json"
+    "output_file": "case_2ae706584324.json"
   },
   {
-    "case_id": "case_236c8dc6eaef",
-    "file_path": "农业发展/474266-千帆助农：AI农业灾_警决策助手-项目策划书-92795855.pdf",
+    "case_id": "case_efd7e6d150e3",
+    "file_path": "其他/536523-基于YOLO的AI视觉检测与热态反演的船舶智能感知系统-项目策划书-3cc9bf6e.pdf",
+    "category": "其他",
+    "confidence": 0.9,
+    "output_file": "case_efd7e6d150e3.json"
+  },
+  {
+    "case_id": "case_2d9dfeac57ca",
+    "file_path": "农业发展/474266-千帆助农：基于百度千帆平台的农业灾害预警决策助手-项目策划书-92795855.pdf",
+    "category": "农业发展",
+    "confidence": 0.75,
+    "output_file": "case_2d9dfeac57ca.json"
+  },
+  {
+    "case_id": "case_ee14df2ba13c",
+    "file_path": "农业发展/476164-智禾——以“小白菜”为例的植物生长健康状态监测系统-项目策划书-9016c30d.pdf",
     "category": "农业发展",
     "confidence": 0.9,
-    "output_file": "case_236c8dc6eaef.json"
+    "output_file": "case_ee14df2ba13c.json"
   },
   {
-    "case_id": "case_caf19cb5d602",
-    "file_path": "农业发展/476164-智禾——以“小白菜”_态监测系统-项目策划书-9016c30d.pdf",
+    "case_id": "case_d4159d1901f0",
+    "file_path": "农业发展/477027-赛道AGRO-AIO农田杂草自动识别的智能农业系统-项目策划书-4bf8428f.pdf",
     "category": "农业发展",
     "confidence": 0.9,
-    "output_file": "case_caf19cb5d602.json"
+    "output_file": "case_d4159d1901f0.json"
   },
   {
-    "case_id": "case_564ad53d79f4",
-    "file_path": "农业发展/477027-赛道AGRO-AIO_能农业系统-项目策划书-4bf8428f.pdf",
+    "case_id": "case_f26ccbb55a19",
+    "file_path": "农业发展/504593-农夜智巡——AI夜视开启无人机植保新篇章-项目策划书-56560002.pdf",
     "category": "农业发展",
     "confidence": 0.9,
-    "output_file": "case_564ad53d79f4.json"
+    "output_file": "case_f26ccbb55a19.json"
   },
   {
-    "case_id": "case_8e5bff9ad607",
-    "file_path": "农业发展/504593-农夜智巡——AI夜视_植保新篇章-项目策划书-56560002.pdf",
+    "case_id": "case_d2579640f869",
+    "file_path": "农业发展/532015-献计献策：云计策数智农业产品化解决方案-项目策划书-cb4bc081.pdf",
     "category": "农业发展",
     "confidence": 0.9,
-    "output_file": "case_8e5bff9ad607.json"
+    "output_file": "case_d2579640f869.json"
   },
   {
-    "case_id": "case_c01a662979fc",
-    "file_path": "农业发展/532015-献计献“策”：云计策_化解决方案-项目策划书-cb4bc081.pdf",
-    "category": "农业发展",
-    "confidence": 0.9,
-    "output_file": "case_c01a662979fc.json"
+    "case_id": "case_9484dd40cb89",
+    "file_path": "医疗健康/13.省级创业项目-5G时代下健康体育生活方式自媒体平台的构建.docx",
+    "category": "医疗健康",
+    "confidence": 0.55,
+    "output_file": "case_9484dd40cb89.json"
   },
   {
-    "case_id": "case_25f70b633574",
-    "file_path": "医疗健康/458183-析光知理——快速脑瘤_能分析系统-项目策划书-a2e44160.pdf",
+    "case_id": "case_a45cce49f9c4",
+    "file_path": "医疗健康/458183-析光知理——快速脑瘤病理学人工智能分析系统-项目策划书-a2e44160.pdf",
+    "category": "医疗健康",
+    "confidence": 0.75,
+    "output_file": "case_a45cce49f9c4.json"
+  },
+  {
+    "case_id": "case_15e831df090d",
+    "file_path": "医疗健康/459201-脉语智鉴——结合视触感知和大模型的智能脉诊系统-项目策划书-7c3bf6da.pdf",
+    "category": "医疗健康",
+    "confidence": 0.75,
+    "output_file": "case_15e831df090d.json"
+  },
+  {
+    "case_id": "case_535753f5ed3f",
+    "file_path": "医疗健康/462516-灵眼守护——基于rPPG的无接触式健康监测及AI预警移动平台-项目策划书-98852d69.pdf",
+    "category": "医疗健康",
+    "confidence": 0.75,
+    "output_file": "case_535753f5ed3f.json"
+  },
+  {
+    "case_id": "case_105359c35d4c",
+    "file_path": "医疗健康/467896-臻视赋医——面向真实临床场景的医学影像通用增强算法研究-项目策划书-a5403ba3.pdf",
     "category": "医疗健康",
     "confidence": 0.9,
-    "output_file": "case_25f70b633574.json"
+    "output_file": "case_105359c35d4c.json"
   },
   {
-    "case_id": "case_8bff996b559c",
-    "file_path": "医疗健康/459201-脉语智鉴——结合视触_能脉诊系统-项目策划书-7c3bf6da.pdf",
+    "case_id": "case_c661aa0d29b3",
+    "file_path": "医疗健康/476125-超晰视界——手持超声图像跨域增强技术-项目策划书-237feb7a.pdf",
     "category": "医疗健康",
     "confidence": 0.9,
-    "output_file": "case_8bff996b559c.json"
+    "output_file": "case_c661aa0d29b3.json"
   },
   {
-    "case_id": "case_40f0839f2ff5",
-    "file_path": "医疗健康/462516-灵眼守护——基于rP_警移动平台-项目策划书-98852d69.pdf",
+    "case_id": "case_a59352927eac",
+    "file_path": "医疗健康/476471-智眸明析——眼底临床_准化大模型诊断报告智能标项目策划书-7384e632.pdf",
     "category": "医疗健康",
     "confidence": 0.9,
-    "output_file": "case_40f0839f2ff5.json"
+    "output_file": "case_a59352927eac.json"
   },
   {
-    "case_id": "case_c8730f7950c6",
-    "file_path": "医疗健康/467896-臻视赋医——面向真实_强算法研究-项目策划书-a5403ba3.pdf",
+    "case_id": "case_d30326ae244e",
+    "file_path": "医疗健康/478797-明眸智芯-眼部智能软芯片健康监测开拓者-项目策划书-c1d26af0.pdf",
     "category": "医疗健康",
     "confidence": 0.9,
-    "output_file": "case_c8730f7950c6.json"
-  },
-  {
-    "case_id": "case_0a000a2da259",
-    "file_path": "医疗健康/476125-超晰视界——手持超声_域增强技术-项目策划书-237feb7a.pdf",
-    "category": "医疗健康",
-    "confidence": 0.9,
-    "output_file": "case_0a000a2da259.json"
-  },
-  {
-    "case_id": "case_8ac18c9d5fc2",
-    "file_path": "医疗健康/476471-智眸明析——眼底临床_准化大模型-项目策划书-7384e632.pdf",
-    "category": "医疗健康",
-    "confidence": 0.9,
-    "output_file": "case_8ac18c9d5fc2.json"
-  },
-  {
-    "case_id": "case_f134b34b56b1",
-    "file_path": "医疗健康/478797-明眸智芯-眼部智能软_监测开拓者-项目策划书-c1d26af0.pdf",
-    "category": "医疗健康",
-    "confidence": 0.9,
-    "output_file": "case_f134b34b56b1.json"
+    "output_file": "case_d30326ae244e.json"
   },
   {
     "case_id": "case_2ec8ca03bca5",
@@ -175,11 +203,11 @@
     "output_file": "case_2ec8ca03bca5.json"
   },
   {
-    "case_id": "case_aeb0d07e33bd",
-    "file_path": "医疗健康/536445-慧警康策——智能疾病_助诊断系统-项目策划书-41a38e4d.pdf",
+    "case_id": "case_f5812729209d",
+    "file_path": "医疗健康/536445-慧警康策——智能疾病预警与辅助诊断系统-项目策划书-41a38e4d.pdf",
     "category": "医疗健康",
     "confidence": 0.9,
-    "output_file": "case_aeb0d07e33bd.json"
+    "output_file": "case_f5812729209d.json"
   },
   {
     "case_id": "case_c1e2597b715d",
@@ -189,109 +217,130 @@
     "output_file": "case_c1e2597b715d.json"
   },
   {
-    "case_id": "case_e3004acb34e9",
-    "file_path": "医疗健康/指导案例——慧心晰影.pptx",
+    "case_id": "case_4f02070b3113",
+    "file_path": "医疗健康/飞行医院——致力于支医扶贫的多功能移动医疗队计划书年红色筑梦之旅”赛道 创意组.docx",
     "category": "医疗健康",
-    "confidence": 0.55,
-    "output_file": "case_e3004acb34e9.json"
+    "confidence": 0.9,
+    "output_file": "case_4f02070b3113.json"
   },
   {
-    "case_id": "case_5b021e355f45",
-    "file_path": "工业制造/466062-智链图谱——工业机器_I决策系统-项目策划书-e2c31c91.pdf",
+    "case_id": "case_f8130b75b4aa",
+    "file_path": "工业制造/466062-智链图谱——工业机器人工艺参数AI决策系统-项目策划书-e2c31c91.pdf",
     "category": "工业制造",
     "confidence": 0.9,
-    "output_file": "case_5b021e355f45.json"
+    "output_file": "case_f8130b75b4aa.json"
   },
   {
-    "case_id": "case_3e9642f159c0",
-    "file_path": "工业制造/469906-“仪探究净”基于深度_损检测系统-项目策划书-c208324f.pdf",
+    "case_id": "case_4b4d1263c081",
+    "file_path": "工业制造/467876-广寒天工——月基装备多机智能协同无人作业系统-项目策划书-bea2dedb.pdf",
     "category": "工业制造",
     "confidence": 0.9,
-    "output_file": "case_3e9642f159c0.json"
+    "output_file": "case_4b4d1263c081.json"
   },
   {
-    "case_id": "case_a8ce8c08efc7",
-    "file_path": "工业制造/477717-极端环境勘测革新——_主巡检系统-项目策划书-0599ace6.pdf",
+    "case_id": "case_badd40d500ea",
+    "file_path": "工业制造/469906-“仪探究净”基于深度学习的红外无损检测系统-项目策划书-c208324f.pdf",
     "category": "工业制造",
     "confidence": 0.9,
-    "output_file": "case_a8ce8c08efc7.json"
+    "output_file": "case_badd40d500ea.json"
   },
   {
-    "case_id": "case_2b92bd611281",
-    "file_path": "工业制造/478844-AI赋能空天地海一体_体天线设计-项目策划书-c45d831a.pdf",
+    "case_id": "case_661a943e267c",
+    "file_path": "工业制造/477717-极端环境勘测革新——支持超实时感知与厘米级建模的无人机自主巡检系统-项目策划书-0599ace6.pdf",
     "category": "工业制造",
     "confidence": 0.9,
-    "output_file": "case_2b92bd611281.json"
+    "output_file": "case_661a943e267c.json"
   },
   {
-    "case_id": "case_7b6493018b4b",
-    "file_path": "工业制造/479531-灵嗅智探—氢能厂站A_能巡检系统-项目策划书-86d0cc04.pdf",
+    "case_id": "case_35ee79db3a75",
+    "file_path": "工业制造/478844-AI赋能空天地海一体化场景下无人飞行器的多波束多极化透-反一体天线-项目策划书-c45d831a.pdf",
     "category": "工业制造",
     "confidence": 0.75,
-    "output_file": "case_7b6493018b4b.json"
+    "output_file": "case_35ee79db3a75.json"
   },
   {
-    "case_id": "case_0dffcf7cca34",
-    "file_path": "工业制造/528934-燃煤电厂湿法脱硫节能_能控制系统-项目策划书-7c97df8d.pdf",
+    "case_id": "case_5c7fb9130e91",
+    "file_path": "工业制造/479531-灵嗅智探—氢能厂站 AI智能巡检系统 -项目策划书-86d0cc04.pdf",
+    "category": "工业制造",
+    "confidence": 0.75,
+    "output_file": "case_5c7fb9130e91.json"
+  },
+  {
+    "case_id": "case_99815a84e532",
+    "file_path": "工业制造/528934-燃煤电厂湿法脱硫节能降碳智能控制系统-项目策划书-7c97df8d.pdf",
     "category": "工业制造",
     "confidence": 0.9,
-    "output_file": "case_0dffcf7cca34.json"
+    "output_file": "case_99815a84e532.json"
   },
   {
-    "case_id": "case_eb0fba6e301d",
-    "file_path": "工业制造/531650-听危声防——基于光纤_安全守护者-项目策划书-24344a34.pdf",
+    "case_id": "case_7e656049929a",
+    "file_path": "工业制造/531650-听危声防——基于光纤声纹定位与智能预警的煤矿安全守护者 -项目策划书-24344a34.pdf",
     "category": "工业制造",
-    "confidence": 0.9,
-    "output_file": "case_eb0fba6e301d.json"
+    "confidence": 0.75,
+    "output_file": "case_7e656049929a.json"
   },
   {
-    "case_id": "case_dd9e575d4f06",
-    "file_path": "工业制造/536565-闻声识障——特殊地形_巡检守护者-项目策划书-5932ee20.pdf",
+    "case_id": "case_b30dfb691947",
+    "file_path": "工业制造/536565-闻声识障——特殊地形的智能巡检守护者-项目策划书-5932ee20.pdf",
     "category": "工业制造",
-    "confidence": 0.9,
-    "output_file": "case_dd9e575d4f06.json"
+    "confidence": 0.75,
+    "output_file": "case_b30dfb691947.json"
   },
   {
-    "case_id": "case_9d4fba541f63",
-    "file_path": "政务治理/472908-讯海智航——全流程新_机协作平台-项目策划书-d829a727.pdf",
+    "case_id": "case_0df4eb42f70c",
+    "file_path": "政务治理/472908-讯海智航——全流程新闻分析智能人机协作平台-项目策划书-d829a727.pdf",
     "category": "政务治理",
     "confidence": 0.9,
-    "output_file": "case_9d4fba541f63.json"
+    "output_file": "case_0df4eb42f70c.json"
   },
   {
-    "case_id": "case_3efe0b61e806",
-    "file_path": "政务治理/475594-智擎风控——跨平台多_同治理平台-项目策划书-b2d1af65.pdf",
+    "case_id": "case_c40b429a266e",
+    "file_path": "政务治理/475594-智擎风控——跨平台多语种信息风险智能感知与政务协同治理平台-项目策划书-b2d1af65.pdf",
     "category": "政务治理",
     "confidence": 0.9,
-    "output_file": "case_3efe0b61e806.json"
+    "output_file": "case_c40b429a266e.json"
   },
   {
-    "case_id": "case_dd82a407ebf9",
-    "file_path": "政务治理/477722-物衡智判——基于DS_能推理系统-项目策划书-1a6638cb.pdf",
+    "case_id": "case_9eda9c027008",
+    "file_path": "政务治理/477722-物衡智判——基于DS大模型的物权所有权纠纷智能推理系统-项目策划书-1a6638cb.pdf",
+    "category": "政务治理",
+    "confidence": 0.75,
+    "output_file": "case_9eda9c027008.json"
+  },
+  {
+    "case_id": "case_3e5ec6460062",
+    "file_path": "政务治理/510255-图盾智控——图计算赋能的金融风险识别与智能防控系统-项目策划书-2e385988.pdf",
     "category": "政务治理",
     "confidence": 0.9,
-    "output_file": "case_dd82a407ebf9.json"
+    "output_file": "case_3e5ec6460062.json"
   },
   {
-    "case_id": "case_27392b6bdae2",
-    "file_path": "政务治理/536827-文思智铠——生成式大_全优化模块-项目策划书-b7f59b1f.pdf",
+    "case_id": "case_f1742ebcac9e",
+    "file_path": "政务治理/534785-数湖启智——多源异构数据湖智算系统-项目策划书-f602ec7a.pdf",
+    "category": "政务治理",
+    "confidence": 0.75,
+    "output_file": "case_f1742ebcac9e.json"
+  },
+  {
+    "case_id": "case_9cb9a7d2a28c",
+    "file_path": "政务治理/536827-文思智铠——生成式大语言模型安全优化模块-项目策划书-b7f59b1f.pdf",
     "category": "政务治理",
     "confidence": 0.9,
-    "output_file": "case_27392b6bdae2.json"
+    "output_file": "case_9cb9a7d2a28c.json"
   },
   {
-    "case_id": "case_5edd4b3ebf3d",
-    "file_path": "教育服务/465772-红旅智创：AI驱动的_践育人系统-项目策划书-18b3ff8b.pdf",
+    "case_id": "case_5b8111094417",
+    "file_path": "教育服务/465772-红旅智创：AI驱动的思政实践育人系统-项目策划书-18b3ff8b.pdf",
     "category": "教育服务",
     "confidence": 0.9,
-    "output_file": "case_5edd4b3ebf3d.json"
+    "output_file": "case_5b8111094417.json"
   },
   {
-    "case_id": "case_cc3a75e05824",
-    "file_path": "教育服务/474847-睿云智学——PLC智_云实验平台-项目策划书-875f02e6.pdf",
+    "case_id": "case_eb4e2938e451",
+    "file_path": "教育服务/475513-人工智能赋能教学解决方案——智能教育平台与教育大模型-项目策划书-050501c7.pdf",
     "category": "教育服务",
     "confidence": 0.9,
-    "output_file": "case_cc3a75e05824.json"
+    "output_file": "case_eb4e2938e451.json"
   },
   {
     "case_id": "case_315837c25fd6",
@@ -301,39 +350,39 @@
     "output_file": "case_315837c25fd6.json"
   },
   {
-    "case_id": "case_c2a3a9d6083d",
-    "file_path": "教育服务/478806-飞创智教——SIGM_济教培工坊-项目策划书-af6fd67b.pdf",
+    "case_id": "case_ab5ace1ee4cb",
+    "file_path": "教育服务/478806-飞创智教——SIGMA人工智能与低空经济教培工坊-项目策划书-af6fd67b.pdf",
     "category": "教育服务",
     "confidence": 0.9,
-    "output_file": "case_c2a3a9d6083d.json"
+    "output_file": "case_ab5ace1ee4cb.json"
   },
   {
     "case_id": "case_93eae06c2608",
     "file_path": "教育服务/534724-华宸AI智评系统-项目策划书-674f094c.pdf",
     "category": "教育服务",
-    "confidence": 0.9,
+    "confidence": 0.75,
     "output_file": "case_93eae06c2608.json"
   },
   {
-    "case_id": "case_c2e4291f9b06",
-    "file_path": "教育服务/536350-“声”动学堂--个性_能教学助手-项目策划书-630037af.pdf",
+    "case_id": "case_8639ecc88e95",
+    "file_path": "教育服务/536350-“声”动学堂——个性化人工智能教学助手项目说明书-项目策划书-630037af.pdf",
     "category": "教育服务",
     "confidence": 0.9,
-    "output_file": "case_c2e4291f9b06.json"
+    "output_file": "case_8639ecc88e95.json"
   },
   {
-    "case_id": "case_1c031870871a",
-    "file_path": "教育服务/536359-基于虚实结合视觉伺服_习平台设计-项目策划书-06a991e7.pdf",
+    "case_id": "case_a683a5fcaa0a",
+    "file_path": "教育服务/536359-基于虚实结合视觉伺服机械臂的智能学习平台设计-项目策划书-06a991e7.pdf",
     "category": "教育服务",
     "confidence": 0.75,
-    "output_file": "case_1c031870871a.json"
+    "output_file": "case_a683a5fcaa0a.json"
   },
   {
-    "case_id": "case_45b140a58759",
-    "file_path": "教育服务/536732-育见先贤—基于多模态_式教育系统-项目策划书-34502047.pdf",
+    "case_id": "case_2b94cfa5cb98",
+    "file_path": "教育服务/536732-育见先贤—基于多模态技术的历史人物交互式教育系统-项目策划书-34502047.pdf",
     "category": "教育服务",
     "confidence": 0.9,
-    "output_file": "case_45b140a58759.json"
+    "output_file": "case_2b94cfa5cb98.json"
   },
   {
     "case_id": "case_20b310a2ad4c",
@@ -343,17 +392,17 @@
     "output_file": "case_20b310a2ad4c.json"
   },
   {
-    "case_id": "case_e5ee18aa48fa",
-    "file_path": "文旅文创/536797-非物质文化遗产的商业_与保护策略-项目策划书-096440fe.pdf",
+    "case_id": "case_c5513197852e",
+    "file_path": "文旅文创/536797-非物质文化遗产的商业化探索与保护策略-项目策划书-096440fe.pdf",
     "category": "文旅文创",
     "confidence": 0.9,
-    "output_file": "case_e5ee18aa48fa.json"
+    "output_file": "case_c5513197852e.json"
   },
   {
     "case_id": "case_fd6daf935bd8",
     "file_path": "智能制造/商业计划书-讯海智航——全流程新闻写作AI辅助平台.pdf",
     "category": "智能制造",
-    "confidence": 0.9,
+    "confidence": 0.75,
     "output_file": "case_fd6daf935bd8.json"
   },
   {
@@ -371,95 +420,116 @@
     "output_file": "case_1d81de8aafb9.json"
   },
   {
-    "case_id": "case_a865351f8a89",
-    "file_path": "环境保护/475224-面向湿地生态监测的多_能解译技术-项目策划书-86619d62.pdf",
+    "case_id": "case_bf184c6cce86",
+    "file_path": "环境保护/475224-面向湿地生态监测的多源遥感智能解译技术-项目策划书-86619d62.pdf",
     "category": "环境保护",
-    "confidence": 0.9,
-    "output_file": "case_a865351f8a89.json"
+    "confidence": 0.75,
+    "output_file": "case_bf184c6cce86.json"
   },
   {
-    "case_id": "case_47421737a3fd",
-    "file_path": "环境保护/475625-京芯智水——智慧赋能_统创新力量-项目策划书-87fb3713.pdf",
+    "case_id": "case_cff87cf39446",
+    "file_path": "环境保护/475625-京芯智水——智慧赋能水质检测-治理协同系统创新力量-项目策划书-87fb3713.pdf",
     "category": "环境保护",
-    "confidence": 0.9,
-    "output_file": "case_47421737a3fd.json"
+    "confidence": 0.75,
+    "output_file": "case_cff87cf39446.json"
   },
   {
-    "case_id": "case_160e84d58cac",
-    "file_path": "环境保护/478359-碳智通：AI驱动的减_同优化平台-项目策划书-228bb989.pdf",
+    "case_id": "case_225010712507",
+    "file_path": "环境保护/478359-碳智通：AI驱动减污降碳智能政策评估与协同优化平台-项目策划书-228bb989.pdf",
     "category": "环境保护",
     "confidence": 0.9,
-    "output_file": "case_160e84d58cac.json"
+    "output_file": "case_225010712507.json"
   },
   {
-    "case_id": "case_99ab63e193ff",
-    "file_path": "环境保护/521155-零碳智汇-适用多行业_化评价系统-项目策划书-68838ac0.pdf",
+    "case_id": "case_9bf9e3d4d1d1",
+    "file_path": "环境保护/521155-零碳智汇-适用多行业的碳捕集一体化评价系统-项目策划书-68838ac0.pdf",
     "category": "环境保护",
     "confidence": 0.9,
-    "output_file": "case_99ab63e193ff.json"
+    "output_file": "case_9bf9e3d4d1d1.json"
   },
   {
-    "case_id": "case_544e116a0f8c",
-    "file_path": "环境保护/528249-碳索未来—智能化CO_技术与装备-项目策划书-7ec902bc.pdf",
+    "case_id": "case_d3abd2486870",
+    "file_path": "环境保护/528249-碳索未来—智能化CO2捕集技术与装备-项目策划书-7ec902bc.pdf",
     "category": "环境保护",
     "confidence": 0.9,
-    "output_file": "case_544e116a0f8c.json"
+    "output_file": "case_d3abd2486870.json"
   },
   {
-    "case_id": "case_c368a9534d28",
-    "file_path": "环境保护/536209-'智防·星火'——基_灾预警系统-项目策划书-8b0e4614.pdf",
+    "case_id": "case_97e2aaf70734",
+    "file_path": "环境保护/536209-智防·星火——基于华为loT和-项目策划书-8b0e4614.pdf",
     "category": "环境保护",
     "confidence": 0.9,
-    "output_file": "case_c368a9534d28.json"
+    "output_file": "case_97e2aaf70734.json"
   },
   {
-    "case_id": "case_8af36c2560a3",
-    "file_path": "科技创新/402012-精微智控--面向智能_环调控系统-论文_调研报告-8f106ef5.pdf",
+    "case_id": "case_2439d2e06588",
+    "file_path": "环境保护/清源计划项目计划书.pdf",
+    "category": "环境保护",
+    "confidence": 0.9,
+    "output_file": "case_2439d2e06588.json"
+  },
+  {
+    "case_id": "case_1d74266e7f96",
+    "file_path": "社会公益/海角公益在线支教平台.pdf",
+    "category": "社会公益",
+    "confidence": 0.9,
+    "output_file": "case_1d74266e7f96.json"
+  },
+  {
+    "case_id": "case_cf1a91618898",
+    "file_path": "社会公益/高校正能量联盟项目计划书.pdf",
+    "category": "社会公益",
+    "confidence": 0.75,
+    "output_file": "case_cf1a91618898.json"
+  },
+  {
+    "case_id": "case_821844d1eaed",
+    "file_path": "科技创新/402012-精微智控--面向智能精密制造的电子动态闭环调控系统-论文_调研报告-8f106ef5.pdf",
     "category": "科技创新",
     "confidence": 0.75,
-    "output_file": "case_8af36c2560a3.json"
+    "output_file": "case_821844d1eaed.json"
   },
   {
-    "case_id": "case_f7a843988992",
-    "file_path": "科技创新/482576-银构芯生——3D异质_连材料技术-论文_调研报告-3460bdc7.pdf",
+    "case_id": "case_72295e1d90ed",
+    "file_path": "科技创新/482576-银构芯生——3D异质集成高可靠封装互连材料技术-论文_调研报告-3460bdc7.pdf",
+    "category": "科技创新",
+    "confidence": 0.75,
+    "output_file": "case_72295e1d90ed.json"
+  },
+  {
+    "case_id": "case_a498ec8c0770",
+    "file_path": "科技创新/482605-灵枢微创--人体自然腔道复杂环境下变刚度柔性手术机器人-论文_调研报告-b56e9ce7.pdf",
     "category": "科技创新",
     "confidence": 0.9,
-    "output_file": "case_f7a843988992.json"
+    "output_file": "case_a498ec8c0770.json"
   },
   {
-    "case_id": "case_45b1ac814edb",
-    "file_path": "科技创新/482648-医联农村，e路助农—_化路径研究-论文_调研报告-9448021f.pdf",
+    "case_id": "case_aaa5cf6dd70f",
+    "file_path": "科技创新/482648-医联农村，e路助农—农村互联网医疗应用调查和优化路径研究 -论文_调研报告-9448021f.pdf",
     "category": "科技创新",
     "confidence": 0.9,
-    "output_file": "case_45b1ac814edb.json"
+    "output_file": "case_aaa5cf6dd70f.json"
   },
   {
-    "case_id": "case_7329280477d5",
-    "file_path": "科技创新/482709-千钧问鼎——尖端超高_自主化研制-论文_调研报告-846e639b.pdf",
+    "case_id": "case_81bd41c4f863",
+    "file_path": "科技创新/482709-千钧问鼎——尖端超高压制造装备核心部件自主化研制-论文_调研报告-846e639b.pdf",
     "category": "科技创新",
     "confidence": 0.9,
-    "output_file": "case_7329280477d5.json"
+    "output_file": "case_81bd41c4f863.json"
   },
   {
-    "case_id": "case_d0fb63a34420",
-    "file_path": "科技创新/482816-禾光智能--精准制导_机器人系统-论文_调研报告-cb00df64.pdf",
+    "case_id": "case_106839a62240",
+    "file_path": "科技创新/482816-禾光智能--精准制导激光除草机器人系统-论文_调研报告-cb00df64.pdf",
     "category": "科技创新",
     "confidence": 0.9,
-    "output_file": "case_d0fb63a34420.json"
+    "output_file": "case_106839a62240.json"
   },
   {
-    "case_id": "case_c613037ea1dc",
-    "file_path": "科技创新/Word版计划书_星哨科技--商业计划书.pdf",
+    "case_id": "case_83d252dd4946",
+    "file_path": "科技创新/【国赛】“求是鹰眼”反无人机系统.pdf",
     "category": "科技创新",
-    "confidence": 0.55,
-    "output_file": "case_c613037ea1dc.json"
-  },
-  {
-    "case_id": "case_5b13f1c1bd9c",
-    "file_path": "科技创新/“挑战杯”项目计划书_雁字成行2020 - V22.pdf",
-    "category": "科技创新",
-    "confidence": 0.9,
-    "output_file": "case_5b13f1c1bd9c.json"
+    "confidence": 0.75,
+    "output_file": "case_83d252dd4946.json"
   },
   {
     "case_id": "case_b719c62bb6ba",
@@ -479,22 +549,15 @@
     "case_id": "case_43210f67ee34",
     "file_path": "科技创新/元界创生——云上交互空间智能生成技术领跑者_计划书.pdf",
     "category": "科技创新",
-    "confidence": 0.9,
+    "confidence": 0.75,
     "output_file": "case_43210f67ee34.json"
   },
   {
     "case_id": "case_1135e29de95e",
     "file_path": "科技创新/指导案例——元界创生云上交互空间智能生成技术领跑者_计划书.pdf",
     "category": "科技创新",
-    "confidence": 0.9,
+    "confidence": 0.75,
     "output_file": "case_1135e29de95e.json"
-  },
-  {
-    "case_id": "case_1447c6471429",
-    "file_path": "科技创新/推送家2020Q2.pdf",
-    "category": "科技创新",
-    "confidence": 0.9,
-    "output_file": "case_1447c6471429.json"
   },
   {
     "case_id": "case_8b9ecae17168",
@@ -509,6 +572,13 @@
     "category": "科技创新",
     "confidence": 0.9,
     "output_file": "case_317f0438a5dd.json"
+  },
+  {
+    "case_id": "case_fafeb9e15842",
+    "file_path": "科技创新/星哨科技-新一代卫星互联网应用系统域，开启全全时快响预警新时代-商业计划书.pdf",
+    "category": "科技创新",
+    "confidence": 0.55,
+    "output_file": "case_fafeb9e15842.json"
   },
   {
     "case_id": "case_1512b0f26aa4",

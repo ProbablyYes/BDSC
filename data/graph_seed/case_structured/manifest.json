@@ -140,6 +140,13 @@
     "output_file": "case_d2579640f869.json"
   },
   {
+    "case_id": "case_7129550f1fc9",
+    "file_path": "农业发展/上海师范大学 创青春 上海贝耳农业科技有限公司.pdf",
+    "category": "农业发展",
+    "confidence": 0.9,
+    "output_file": "case_7129550f1fc9.json"
+  },
+  {
     "case_id": "case_9484dd40cb89",
     "file_path": "医疗健康/13.省级创业项目-5G时代下健康体育生活方式自媒体平台的构建.docx",
     "category": "医疗健康",
@@ -217,6 +224,13 @@
     "output_file": "case_c1e2597b715d.json"
   },
   {
+    "case_id": "case_c7a02700fbc0",
+    "file_path": "医疗健康/清华大学 海斯凯尔医学技术有限公司项目运营报告.pdf",
+    "category": "医疗健康",
+    "confidence": 0.9,
+    "output_file": "case_c7a02700fbc0.json"
+  },
+  {
     "case_id": "case_4f02070b3113",
     "file_path": "医疗健康/飞行医院——致力于支医扶贫的多功能移动医疗队计划书年红色筑梦之旅”赛道 创意组.docx",
     "category": "医疗健康",
@@ -285,6 +299,13 @@
     "category": "工业制造",
     "confidence": 0.75,
     "output_file": "case_b30dfb691947.json"
+  },
+  {
+    "case_id": "case_c6900035299b",
+    "file_path": "工业制造/华东理工大学  M.E.T光纤光栅传感器有限责任公司。.pdf",
+    "category": "工业制造",
+    "confidence": 0.9,
+    "output_file": "case_c6900035299b.json"
   },
   {
     "case_id": "case_0df4eb42f70c",
@@ -385,6 +406,13 @@
     "output_file": "case_2b94cfa5cb98.json"
   },
   {
+    "case_id": "case_17c3feff6017",
+    "file_path": "教育服务/云实验-互联网+项目策划书.pdf",
+    "category": "教育服务",
+    "confidence": 0.9,
+    "output_file": "case_17c3feff6017.json"
+  },
+  {
     "case_id": "case_20b310a2ad4c",
     "file_path": "文旅文创/470021-Go2重塑入境游-项目策划书-ef7fa22d.pdf",
     "category": "文旅文创",
@@ -399,6 +427,13 @@
     "output_file": "case_c5513197852e.json"
   },
   {
+    "case_id": "case_20c6a399181d",
+    "file_path": "文旅文创/麦扑文化创意-智慧旅游.pdf",
+    "category": "文旅文创",
+    "confidence": 0.9,
+    "output_file": "case_20c6a399181d.json"
+  },
+  {
     "case_id": "case_fd6daf935bd8",
     "file_path": "智能制造/商业计划书-讯海智航——全流程新闻写作AI辅助平台.pdf",
     "category": "智能制造",
@@ -406,11 +441,39 @@
     "output_file": "case_fd6daf935bd8.json"
   },
   {
+    "case_id": "case_4dd206b97f63",
+    "file_path": "智能制造/复旦大学  银浆、柔性透明导电膜、抗菌材料用纳米银线项目.pdf",
+    "category": "智能制造",
+    "confidence": 0.9,
+    "output_file": "case_4dd206b97f63.json"
+  },
+  {
     "case_id": "case_8391b61334d9",
     "file_path": "智能制造/指导案例——夜视鹰瞳项目商业计划书.docx",
     "category": "智能制造",
     "confidence": 0.7,
     "output_file": "case_8391b61334d9.json"
+  },
+  {
+    "case_id": "case_006ebe070c07",
+    "file_path": "智能制造/浙江大学  杭州云造科技有限公司——商业创新设计机构.pdf",
+    "category": "智能制造",
+    "confidence": 0.9,
+    "output_file": "case_006ebe070c07.json"
+  },
+  {
+    "case_id": "case_cda90a998113",
+    "file_path": "智能制造/浙江大学  杭州利珀科技有限公司——机器视觉表面缺陷检测.pdf",
+    "category": "智能制造",
+    "confidence": 0.9,
+    "output_file": "case_cda90a998113.json"
+  },
+  {
+    "case_id": "case_da7c59011c2f",
+    "file_path": "智能制造/清华大学  紫晶立方3D打印机.pdf",
+    "category": "智能制造",
+    "confidence": 0.9,
+    "output_file": "case_da7c59011c2f.json"
   },
   {
     "case_id": "case_1d81de8aafb9",
@@ -553,6 +616,13 @@
     "output_file": "case_43210f67ee34.json"
   },
   {
+    "case_id": "case_1071280b4ee5",
+    "file_path": "科技创新/大连理工大学 创青春 独到科技（北京）有限公司项目运营报告。.pdf",
+    "category": "科技创新",
+    "confidence": 0.9,
+    "output_file": "case_1071280b4ee5.json"
+  },
+  {
     "case_id": "case_1135e29de95e",
     "file_path": "科技创新/指导案例——元界创生云上交互空间智能生成技术领跑者_计划书.pdf",
     "category": "科技创新",
@@ -593,5 +663,19 @@
     "category": "科技创新",
     "confidence": 0.9,
     "output_file": "case_c547ce8cc3f2.json"
+  },
+  {
+    "case_id": "case_e3020c0304f9",
+    "file_path": "金融经济/供应链类金融商业计划书.docx",
+    "category": "金融经济",
+    "confidence": 0.7,
+    "output_file": "case_e3020c0304f9.json"
+  },
+  {
+    "case_id": "case_f1f5448a9cd2",
+    "file_path": "金融经济/金融超市创业计划书.docx",
+    "category": "金融经济",
+    "confidence": 0.7,
+    "output_file": "case_f1f5448a9cd2.json"
   }
 ]

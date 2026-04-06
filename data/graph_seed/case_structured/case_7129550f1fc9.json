@@ -1,0 +1,361 @@
+{
+  "case_id": "case_7129550f1fc9",
+  "document_id": "doc_624c50e4153c",
+  "source": {
+    "file_path": "农业发展/上海师范大学 创青春 上海贝耳农业科技有限公司.pdf",
+    "file_name": "上海师范大学 创青春 上海贝耳农业科技有限公司.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 76,
+    "full_text_chars": 34039,
+    "core_text_chars": 20751,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 77,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 77,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "贝耳田园",
+    "target_users": [
+      "关注绿色健康生活的消费者",
+      "需要借助互联网技术拓展营销渠道的中小型生态农业生产企业"
+    ],
+    "pain_points": [
+      "中小型生态农业生产企业缺乏年轻、有创新思维并能熟练运用互联网及移动终端技术的营销团队"
+    ],
+    "solution": [
+      "开发“贝耳田园”在线营销平台，以游戏化方式模拟真实农场种植养殖，汇聚人气并让消费者参与产品种植加工过程",
+      "以线下传统销售和推广渠道为基础，结合互联网和移动终端技术，探索生态农产品的网络营销模式",
+      "初期选择销售“蛙稻米”系列产品，并计划逐步将平台应用到蔬菜、水果、家禽等其他生态农产品"
+    ],
+    "innovation_points": [
+      "将游戏化元素融入在线营销平台，通过模拟真实农场种植养殖过程来提升消费者参与感和教育效果",
+      "探索以互联网技术和移动终端技术为基础的网络营销模式，与传统销售渠道、网点的消费体验相结合"
+    ],
+    "business_model": [
+      "收入来源初期为“蛙稻米”系列产品的销售",
+      "未来计划通过销售大米产品获得的消费群体延伸到其他生态健康产品，实现销售产品多元化"
+    ],
+    "market_analysis": [
+      "“蛙稻米”产品符合人们绿色健康生活的需求",
+      "“蛙稻米”产品系列全面，可满足不同消费群体的需要，市场需求较大",
+      "许多中小型生态农业生产型企业面临营销困境，需要探索新的网络营销模式"
+    ],
+    "execution_plan": [
+      "初期以“蛙稻米”产品的销售作为起步，根据其产品特性和市场特点制定营销策略，实现公司初期的盈利增长",
+      "未来计划将“贝耳田园”平台逐步开发应用到蔬菜、水果、家禽等其他生态农产品"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】网络供应商监管的缺失， 导致目前绿色有机大米在网络销售渠道非常混乱。"
+    ]
+  },
+  "tags": [
+    "category:农业发展",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H11",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6"
+  ],
+  "evidence": [
+    {
+      "id": "case_7129550f1fc9_e1",
+      "type": "user_evidence",
+      "quote": "自在源公司迫切需要一支年轻、有活力、有创新思维并能够熟练运用互联网及移动终端技术的营销团队。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_7129550f1fc9_e2",
+      "type": "business_model_evidence",
+      "quote": "开发“贝耳田园”在线营销平台，模拟真实农场的种植养殖方式，以游戏的途径汇聚人气，参与产品种植加工过程。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_7129550f1fc9_e3",
+      "type": "business_model_evidence",
+      "quote": "贝耳公司选择“蛙稻米”产品的销售作为起步，通过销售大米产品所获得的消费群体，可以延伸到其它生态健康产品，有利于后期公司销售产品的多元化，实现快速发展。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_7129550f1fc9_e4",
+      "type": "market_analysis_evidence",
+      "quote": "该产品符合人们绿色健康生活的需求；该产品系列全面，可满足不同消费群体的需要，市场需求较大；",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_7129550f1fc9_e5",
+      "type": "market_analysis_evidence",
+      "quote": "自在源公司所面临的困境，也正是目前许多中小型生态农业生产型企业所同样遭遇的。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_7129550f1fc9_e6",
+      "type": "execution_plan_evidence",
+      "quote": "因此，我们将根据“蛙稻米”产品的特性、市场的特点制定营销策略，实现公司初期的盈利增长。",
+      "chunk_id": "C2",
+      "source_unit": "page_11"
+    },
+    {
+      "id": "case_7129550f1fc9_e7",
+      "type": "execution_plan_evidence",
+      "quote": "“贝耳田园”平台将逐步开发应用到蔬菜、水果、家禽等其他生态农产品",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "上海贝耳农业科技有限公司 上海贝耳农业科技有限公司以线下传统销售和推广渠道为基础， 利用互联网 和移动终端技术， 开发 “贝耳田园” 在线营销平台， 模拟真实农场的种植养殖方 式，以游戏的途径汇聚人气，参与产品种植加工过程。 “贝耳田园”平台将逐步 开发应用到蔬菜、 水果、 家禽等其他生态农产品， 达到生态农产品的教育消费目 的， 提升消费者对产品的认知度和信任度， 推动生态农产品消费市场的健康发展。 3 1.1.2 创业机会 根据战略目标，自在源公司规划在未来五年将“蛙稻米”生产面积扩展至 50000 亩的规模，将青浦练塘作为“蛙稻米”核心产区辐射周边区域，共同做好 国家生态产业。 同时也将试点良种推广， 将更多优质稻米品种纳入到安全食材生 产的范畴，并将配套近百亩集加工、包装、储藏、配送等全冷链式的加工中心。 值此发展契机， 自在源公司迫切需要一支年轻、 有活力、 有创新思维并能够熟练 运用互联网及移动终端技术的营销团队。 自在源公司所面临的困境， 也正是目前许多中小型生态农业生产型企业所同 样遭遇的。 探索以互联网技术和移动终端技术为基础的网络营销模式， 与传统销 售渠道、 网点",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-05T15:08:11Z",
+  "risk_flags": [
+    "H10",
+    "H11",
+    "H13",
+    "H15",
+    "H3",
+    "H5",
+    "H6"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了中小型生态农业生产企业缺乏年轻、有创新思维并能熟练运用互联网及移动终端技术的营销团队，以及消费者对绿色健康生活的需求。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到市场需求较大，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出开发在线营销平台，结合游戏化元素和传统销售渠道，技术路线与资源匹配度较高。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目商业模式较为清晰，初期以“蛙稻米”产品销售为主，未来计划扩展到其他生态农产品，形成销售产品多元化。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目提到许多中小型生态农业生产型企业面临营销困境，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到收入来源，但未提供具体的财务数据或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目通过游戏化方式提升消费者参与感和教育效果，具有一定的创新性和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目提到需要一支年轻、有活力、有创新思维并能够熟练运用互联网及移动终端技术的营销团队，但未具体说明现有团队的能力和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，描述了项目背景、目标和计划，但部分细节可以进一步完善。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户与价值主张较为匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目结合了传统销售渠道和互联网技术，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "收入来源初期为“蛙稻米”系列产品的销售 未来计划通过销售大米产品获得的消费群体延伸到其他生态健康产品，实现销售产品多元化",
+      "reason": "项目提到定价/收费，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未详细描述 TAM/SAM/SOM 口径，但未发现口径混乱的问题。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "“蛙稻米”产品符合人们绿色健康生活的需求 “蛙稻米”产品系列全面，可满足不同消费群体的需要，市场需求较大",
+      "reason": "项目提到市场需求较大，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "许多中小型生态农业生产型企业面临营销困境，需要探索新的网络营销模式",
+      "reason": "项目未详细分析竞品，仅提到许多中小型生态农业生产型企业面临营销困境。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到通过游戏化方式提升消费者参与感和教育效果，创新点较为明确。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，但未发现明显的单位经济不成立问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现“只要拿下 1% 市场”等自上而下估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "自在源公司规划在未来五年将“蛙稻米”生产面积扩展至 50000 亩的规模，将青浦练塘作为“蛙稻米”核心产区辐射周边区域，共同做好国家生态产业。",
+      "reason": "项目提到未来五年的扩展计划，但未提供具体的里程碑和可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "网络供应商监管的缺失， 导致目前绿色有机大米在网络销售渠道非常混乱。",
+      "reason": "项目提到网络供应商监管缺失，但未提供具体的合规或伦理说明。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目技术路线与资源匹配度较高，未发现技术路线与资源不匹配的问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "开发“贝耳田园”在线营销平台，模拟真实农场的种植养殖方式，以游戏的途径汇聚人气，参与产品种植加工过程。",
+      "reason": "项目提到开发在线营销平台，但未提供具体的实验设计和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未发现叙事断裂问题。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到市场需求较大，但未提供具体的用户访谈、问卷或其他需求验证证据。项目提到定价/收费，但未提供用户支付意愿的验证证据。项目提到未来五年的扩展计划，但未提供具体的里程碑和可交付物。项目提到网络供应商监管缺失，但未提供具体的合规或伦理说明。项目提到开发在线营销平台，但未提供具体的实验设计和评价指标。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、财务逻辑、团队与执行、合规/伦理、实验设计等。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "创青春"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ]
+}

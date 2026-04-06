@@ -87,6 +87,21 @@ rag_engine = RagEngine()
 rag_engine.initialize()
 init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
 
+def _background_hyper_rebuild():
+    """Run hypergraph rebuild in background so it doesn't block server startup."""
+    import threading
+    def _do():
+        try:
+            result = hypergraph_service.rebuild(min_pattern_support=1, max_edges=200)
+            logger.info("Hypergraph background rebuild done: %s edges, %s nodes",
+                        result.get("total_edges"), result.get("total_nodes"))
+        except Exception as exc:
+            logger.warning("Hypergraph background rebuild failed (non-fatal): %s", exc)
+    t = threading.Thread(target=_do, daemon=True)
+    t.start()
+
+_background_hyper_rebuild()
+
 # Setup teacher file feedback routes
 setup_teacher_file_feedback_routes(app, json_store, settings)
 
@@ -94,6 +109,23 @@ setup_teacher_file_feedback_routes(app, json_store, settings)
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(timestamp=datetime.utcnow())
+
+
+@app.get("/api/kb-stats")
+def kb_stats() -> dict:
+    """Return real-time knowledge base statistics from Neo4j + RAG + Hypergraph."""
+    neo4j_stats = graph_service.get_kb_stats()
+    rag_count = rag_engine.case_count
+    rag_embed_ready = rag_engine.embed_ready
+    hyper_summary = hypergraph_service.summary()
+    return {
+        "neo4j": neo4j_stats,
+        "rag": {
+            "corpus_count": rag_count,
+            "embed_ready": rag_embed_ready,
+        },
+        "hypergraph_local": hyper_summary,
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -714,6 +746,31 @@ def _extract_evidence_quotes(raw_text: str, diagnosis: dict | None = None, filen
     return quotes[:5]
 
 
+def _generate_conversation_title(
+    user_message: str,
+    assistant_message: str,
+    category: str = "",
+) -> str:
+    """Use LLM to generate a concise 6-12 character conversation title."""
+    try:
+        if not composer_llm.enabled:
+            return ""
+        snippet_user = user_message.strip()[:300]
+        snippet_ai = assistant_message.strip()[:300]
+        raw = composer_llm.chat_text(
+            system_prompt=(
+                "你是标题生成器。根据学生与AI助教的对话生成一个6-12字的中文标题，"
+                "概括对话核心主题。只输出标题文字，不要引号、标点或解释。"
+            ),
+            user_prompt=f"类别: {category or '无'}\n学生: {snippet_user}\nAI: {snippet_ai}",
+            temperature=0.3,
+        )
+        title = str(raw or "").strip().replace('"', "").replace("'", "")[:20]
+        return title if len(title) >= 2 else ""
+    except Exception:
+        return ""
+
+
 def _build_agent_trace(
     result: dict,
     *,
@@ -770,6 +827,8 @@ def _build_agent_trace(
         "matched_teacher_interventions": matched_interventions or [],
         "kb_utilization": result.get("kb_utilization", {}),
         "rag_enrichment_insight": result.get("rag_enrichment_insight", ""),
+        "neo4j_graph_hits": result.get("neo4j_graph_hits", []),
+        "incremental_stats": result.get("incremental_stats", {}),
     }
 
 
@@ -1521,6 +1580,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     conv_store.append_message(payload.project_id, conv_id, {
         "role": "user", "content": payload.message,
     })
+    llm_title = _generate_conversation_title(payload.message, assistant_message, category)
     conv_store.append_message(payload.project_id, conv_id, {
         "role": "assistant", "content": assistant_message,
         "agent_trace": {
@@ -1531,8 +1591,10 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "hypergraph_insight": hyper_insight,
             "pressure_test_trace": result.get("pressure_test_trace"),
             "matched_teacher_interventions": matched_interventions,
+            "execution_trace": result.get("execution_trace", {}),
+            "exploration_state": result.get("exploration_state", {}),
         },
-    })
+    }, generated_title=llm_title or None)
 
     return DialogueTurnResponse(
         project_id=payload.project_id,
@@ -1547,6 +1609,19 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         rag_cases=rag_cases,
         pressure_test_trace=result.get("pressure_test_trace", {}),
         agent_trace=agent_trace,
+        insight_sources={
+            "case_transfer_insight": result.get("case_transfer_insight", ""),
+            "hyper_narrative": result.get("hyper_narrative", ""),
+            "web_facts": result.get("web_facts", []),
+            "gather_layers": {
+                "data_maturity": result.get("_data_maturity", "unknown"),
+                "l1_ran": any([
+                    result.get("_l1_hyper_teaching_ran"),
+                    result.get("_l1_hyper_student_ran"),
+                    result.get("_l1_neo4j_graph_ran"),
+                ]),
+            },
+        },
     )
 
 
@@ -1613,6 +1688,19 @@ async def dialogue_turn_stream(request: Request):
                 "hypergraph_insight": pre.get("hypergraph_insight", {}),
                 "rag_cases": pre.get("rag_cases", []),
                 "agent_trace": agent_trace,
+                "execution_trace": pre.get("execution_trace", {}),
+                "exploration_state": pre.get("exploration_state", {}),
+                "insight_sources": {
+                    "case_transfer_insight": pre.get("case_transfer_insight", ""),
+                    "hyper_narrative": pre.get("hyper_narrative", ""),
+                    "web_facts": pre.get("web_facts", []),
+                    "gather_layers": {
+                        "l0_tasks": ["rag", "kg"],
+                        "l1_tasks_run": [k for k in ["hyper_teaching", "hyper_student", "neo4j_graph"]
+                                         if pre.get(f"_l1_{k}_ran")],
+                        "data_maturity": pre.get("_data_maturity", "unknown"),
+                    },
+                },
             }
             yield f"data: {json.dumps({'type': 'meta', 'data': side_data}, ensure_ascii=False)}\n\n"
 
@@ -1646,6 +1734,7 @@ async def dialogue_turn_stream(request: Request):
                 "agent_outputs": agent_trace,
             })
             conv_store.append_message(project_id, conv_id, {"role": "user", "content": msg})
+            stream_title = _generate_conversation_title(msg, full_text, pre.get("category", ""))
             conv_store.append_message(project_id, conv_id, {
                 "role": "assistant",
                 "content": full_text,
@@ -1657,8 +1746,10 @@ async def dialogue_turn_stream(request: Request):
                     "hypergraph_insight": pre.get("hypergraph_insight", {}),
                     "pressure_test_trace": pre.get("pressure_test_trace"),
                     "matched_teacher_interventions": matched_interventions,
+                    "execution_trace": pre.get("execution_trace", {}),
+                    "exploration_state": pre.get("exploration_state", {}),
                 },
-            })
+            }, generated_title=stream_title or None)
         except Exception as exc:
             logger.warning("dialogue_turn_stream failed: %s", exc)
             yield f"data: {json.dumps({'type': 'error', 'data': {'conversation_id': conv_id, 'message': '流式生成失败，请稍后重试。', 'detail': str(exc)[:200]}}, ensure_ascii=False)}\n\n"
@@ -1824,6 +1915,7 @@ async def dialogue_turn_upload(
     conv_store.append_message(project_id, conv_id, {
         "role": "user", "content": f"[上传文件: {file.filename}] {message}",
     })
+    file_title = _generate_conversation_title(message, assistant_message, category)
     conv_store.append_message(project_id, conv_id, {
         "role": "assistant", "content": assistant_message,
         "agent_trace": {
@@ -1837,7 +1929,7 @@ async def dialogue_turn_upload(
             "file_url": file_url,
             "filename": file.filename,
         },
-    })
+    }, generated_title=file_title or None)
 
     return {
         "conversation_id": conv_id,
@@ -2720,7 +2812,7 @@ def teacher_project_evidence(project_id: str) -> dict:
 
 
 @app.post("/api/hypergraph/rebuild")
-def rebuild_hypergraph(min_pattern_support: int = 1, max_edges: int = 80) -> dict:
+def rebuild_hypergraph(min_pattern_support: int = 1, max_edges: int = 200) -> dict:
     data = hypergraph_service.rebuild(min_pattern_support=min_pattern_support, max_edges=max_edges)
     return {
         "min_pattern_support": min_pattern_support,

@@ -479,21 +479,21 @@ EDGE_PREFIX: dict[str, str] = {
 }
 
 EDGE_TARGET_COUNTS: dict[str, int] = {
-    "Risk_Pattern_Edge": 10,
-    "Value_Loop_Edge": 8,
-    "User_Pain_Fit_Edge": 6,
-    "Evidence_Grounding_Edge": 6,
-    "Execution_Gap_Edge": 5,
-    "Market_Competition_Edge": 5,
-    "Compliance_Safety_Edge": 4,
-    "Innovation_Validation_Edge": 4,
-    "Pricing_Unit_Economics_Edge": 5,
-    "Substitute_Migration_Edge": 5,
-    "Trust_Adoption_Edge": 4,
-    "Retention_Workflow_Embed_Edge": 4,
-    "Stage_Goal_Fit_Edge": 4,
-    "Rule_Rubric_Tension_Edge": 5,
-    "Ontology_Grounded_Edge": 3,
+    "Risk_Pattern_Edge": 18,
+    "Value_Loop_Edge": 16,
+    "User_Pain_Fit_Edge": 12,
+    "Evidence_Grounding_Edge": 12,
+    "Execution_Gap_Edge": 10,
+    "Market_Competition_Edge": 10,
+    "Compliance_Safety_Edge": 8,
+    "Innovation_Validation_Edge": 8,
+    "Pricing_Unit_Economics_Edge": 10,
+    "Substitute_Migration_Edge": 10,
+    "Trust_Adoption_Edge": 8,
+    "Retention_Workflow_Embed_Edge": 8,
+    "Stage_Goal_Fit_Edge": 8,
+    "Rule_Rubric_Tension_Edge": 10,
+    "Ontology_Grounded_Edge": 6,
 }
 
 
@@ -574,14 +574,6 @@ class HypergraphService:
         canonical_values = {self._canonical_rule_id(v) for v in values if str(v).strip()}
         canonical_targets = {self._canonical_rule_id(v) for v in targets if str(v).strip()}
         return bool(canonical_values & canonical_targets)
-
-    # ═══════════════════════════════════════════════════
-    #  1. Rebuild global teaching hypergraph from Neo4j
-    # ═══════════════════════════════════════════════════
-
-    def rebuild(self, min_pattern_support: int = 1, max_edges: int = 80) -> dict[str, Any]:
-        min_pattern_support = max(1, min(min_pattern_support, 10))
-        max_edges = max(5, min(max_edges, 100))
 
     @staticmethod
     def _parse_node_members(node_set: set[str] | None) -> list[dict[str, str]]:
@@ -834,9 +826,9 @@ class HypergraphService:
     #  1. Rebuild global teaching hypergraph from Neo4j
     # ═══════════════════════════════════════════════════
 
-    def rebuild(self, min_pattern_support: int = 1, max_edges: int = 80) -> dict[str, Any]:
+    def rebuild(self, min_pattern_support: int = 1, max_edges: int = 200) -> dict[str, Any]:
         min_pattern_support = max(1, min(min_pattern_support, 10))
-        max_edges = max(5, min(max_edges, 100))
+        max_edges = max(5, min(max_edges, 300))
         rows = self._load_project_rows()
         ontology_rows = self._load_ontology_rows()
         edge_to_nodes: dict[str, set[str]] = {}
@@ -1258,19 +1250,22 @@ class HypergraphService:
 
         total_budget = max_edges
         created_counts: Counter[str] = Counter()
+        available_counts: dict[str, int] = {}
         for edge_type, target_count in EDGE_TARGET_COUNTS.items():
             patterns = list(families[edge_type].values())
-            patterns.sort(key=lambda item: (int(item.get("support", 0)), len(item.get("node_set", []))), reverse=True)
+            eligible = [p for p in patterns if int(p.get("support", 0)) >= min_pattern_support]
+            available_counts[edge_type] = len(eligible)
+            eligible.sort(key=lambda item: (int(item.get("support", 0)), len(item.get("node_set", []))), reverse=True)
             count = 0
-            for payload in patterns:
+            for payload in eligible:
                 if total_budget <= 0 or count >= target_count:
                     break
-                if int(payload.get("support", 0)) < min_pattern_support:
-                    continue
                 self._add_record(edge_to_nodes, records, edge_type, payload)
                 count += 1
                 total_budget -= 1
             created_counts[edge_type] = count
+            logger.info("Hypergraph edge type %s: %d available, %d created (target=%d)",
+                        edge_type, len(eligible), count, target_count)
 
         self._hypergraph = hnx.Hypergraph(edge_to_nodes) if edge_to_nodes else hnx.Hypergraph({})
         self._records = records
@@ -1281,6 +1276,7 @@ class HypergraphService:
         return {
             "ok": True,
             "created": dict(created_counts),
+            "available_patterns": available_counts,
             "total_nodes": len(self._hypergraph.nodes) if self._hypergraph else 0,
             "total_edges": len(self._hypergraph.edges) if self._hypergraph else 0,
             "persisted": persist_result,
@@ -1392,6 +1388,15 @@ class HypergraphService:
                 "node_count": len(self._hypergraph.nodes) if self._hypergraph else 0,
                 "family_counts": dict(self._family_counts),
             },
+        }
+
+    def summary(self) -> dict[str, Any]:
+        """Quick stats about the in-memory hypergraph."""
+        return {
+            "edge_count": len(self._records),
+            "node_count": len(self._hypergraph.nodes) if self._hypergraph else 0,
+            "family_counts": dict(self._family_counts),
+            "rebuilt": len(self._records) > 0,
         }
 
     def library_snapshot(self, limit: int = 24) -> dict[str, Any]:

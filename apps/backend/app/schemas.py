@@ -130,6 +130,7 @@ class DialogueTurnResponse(BaseModel):
     rag_cases: list = Field(default_factory=list)
     pressure_test_trace: dict = Field(default_factory=dict)
     agent_trace: dict = Field(default_factory=dict)
+    insight_sources: dict = Field(default_factory=dict)
 
 
 class AuthRegisterPayload(BaseModel):

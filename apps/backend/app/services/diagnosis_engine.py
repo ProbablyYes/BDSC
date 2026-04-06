@@ -226,6 +226,124 @@ def _get_rubrics(competition_type: str = "") -> list[dict]:
         return RUBRICS
     return [{**row, "weight": overrides.get(row["item"], row["weight"])} for row in RUBRICS]
 
+COMPETITION_RULE_EMPHASIS: dict[str, dict[str, str]] = {
+    "H1": {
+        "internet_plus": "互联网+评审高度关注客户-价值主张一致性，这直接影响商业模式得分",
+        "challenge_cup": "挑战杯更关注技术创新，但清晰的用户定位仍是基本要求",
+        "dachuang": "大创项目需明确服务对象，评审会检查用户定位是否切实",
+    },
+    "H2": {
+        "internet_plus": "互联网+评委会追问渠道可达性和获客路径的具体数据",
+        "challenge_cup": "挑战杯对渠道要求较低，但应用落地型项目仍需说明推广路径",
+        "dachuang": "大创评审关注方案是否可执行，渠道可达性是落地能力的一部分",
+    },
+    "H3": {
+        "internet_plus": "这是互联网+核心扣分点：定价和支付意愿验证直接决定商业模式是否成立",
+        "challenge_cup": "挑战杯不强制要求定价模型，但若涉及应用落地建议简要说明",
+        "dachuang": "大创项目如涉及创业训练赛道，需有基本的价值交换逻辑",
+    },
+    "H4": {
+        "internet_plus": "互联网+要求TAM/SAM/SOM论证清晰，这是市场维度的关键评审点",
+        "challenge_cup": "挑战杯对市场规模论证的要求低于互联网+，但不应完全缺失",
+        "dachuang": "大创项目建议有基本的市场空间判断，不需要严格的三层市场分析",
+    },
+    "H5": {
+        "internet_plus": "用户证据是互联网+评审的基础，缺乏证据会严重影响多个维度得分",
+        "challenge_cup": "挑战杯特别看重调研严谨性，需求证据不足会直接影响评分",
+        "dachuang": "大创评审看重实践过程，用户调研是证明动手能力的重要依据",
+    },
+    "H6": {
+        "internet_plus": "互联网+要求完整的竞品对比矩阵，声称无竞争对手是常见扣分点",
+        "challenge_cup": "挑战杯看重技术对比和文献综述，需说明与现有方案的差异",
+        "dachuang": "大创项目至少应说明现有替代方案，体现对领域的了解",
+    },
+    "H7": {
+        "internet_plus": "互联网+要求创新点有可验证的对比依据，不能只停在口号层面",
+        "challenge_cup": "这是挑战杯最核心的评审维度——创新含量必须有实验或原型验证",
+        "dachuang": "大创评审看重是否有新视角或新方法，创新可验证性是加分项",
+    },
+    "H8": {
+        "internet_plus": "单位经济模型是互联网+答辩必问环节，务必完善CAC/LTV分析",
+        "challenge_cup": "挑战杯通常不直接考核单位经济，但应用型项目可作为加分项",
+        "dachuang": "大创创业训练赛道建议有基本的经济可行性分析",
+    },
+    "H9": {
+        "internet_plus": "互联网+评委对增长逻辑敏感，'占1%市场'式论证会被追问",
+        "challenge_cup": "挑战杯对增长预测要求不高，但技术推广路径应合理",
+        "dachuang": "大创项目的增长预期应实事求是，与训练计划周期匹配",
+    },
+    "H10": {
+        "internet_plus": "互联网+要求有清晰的里程碑和可交付物，时间表应具体可执行",
+        "challenge_cup": "挑战杯看重研究进度和阶段性成果，里程碑需与实验计划匹配",
+        "dachuang": "这是大创评审重点——训练过程记录和里程碑追踪直接影响评审",
+    },
+    "H11": {
+        "internet_plus": "涉及隐私、数据、医疗等领域时，互联网+评委必看合规措施",
+        "challenge_cup": "挑战杯涉及实验伦理和数据安全时，合规审查是基本要求",
+        "dachuang": "大创项目应体现对合规和伦理的基本意识",
+    },
+    "H12": {
+        "internet_plus": "互联网+评委会追问技术路线与团队资源是否匹配",
+        "challenge_cup": "这是挑战杯关键评审点——技术路线必须与团队科研能力匹配",
+        "dachuang": "大创评审特别看重方案的可落地性，技术路线需匹配团队能力",
+    },
+    "H13": {
+        "internet_plus": "互联网+鼓励有实验数据支撑产品假设，但不强制要求学术级实验",
+        "challenge_cup": "这是挑战杯核心评审维度——实验设计的严谨性和可重复性",
+        "dachuang": "大创项目的实验设计应体现科学训练过程，不需要顶刊级别",
+    },
+    "H14": {
+        "internet_plus": "互联网+路演表达是重要评审维度，叙事结构直接影响评委印象",
+        "challenge_cup": "挑战杯看重汇报的逻辑性和学术规范，叙事可稍弱但逻辑须清晰",
+        "dachuang": "大创答辩要求清晰表达，重点展示训练过程和成果",
+    },
+    "H15": {
+        "internet_plus": "互联网+评审是逐维度打分，证据覆盖不全会拉低多个维度",
+        "challenge_cup": "挑战杯评审看重证据链完整度，特别是实验和调研部分",
+        "dachuang": "大创评审关注过程性证据，阶段成果记录是关键",
+    },
+    "H16": {
+        "internet_plus": "互联网+评委常追问'如果巨头进入怎么办'，替代方案分析很重要",
+        "challenge_cup": "挑战杯需要文献综述和现有方案对比，替代方案是基本功",
+        "dachuang": "大创项目应了解领域内已有方案，体现调研深度",
+    },
+    "H17": {
+        "internet_plus": "互联网+评审会考虑用户迁移成本，这影响市场进入策略评价",
+        "challenge_cup": "挑战杯对迁移成本的关注较低，除非是产品替换类项目",
+        "dachuang": "大创项目如涉及替换现有方案，应简要说明切换难度",
+    },
+    "H18": {
+        "internet_plus": "互联网+评委区分付费用户和注册用户，混淆会影响商业模式可信度",
+        "challenge_cup": "挑战杯对用户分层要求不高，但应准确表述用户相关数据",
+        "dachuang": "大创项目引用用户数据时应区分类型，体现数据素养",
+    },
+    "H19": {
+        "internet_plus": "互联网+要求可触达市场(SOM)的论证路径，不能只说TAM",
+        "challenge_cup": "挑战杯对市场口径的精确度要求低于互联网+",
+        "dachuang": "大创项目有基本的目标用户规模估计即可",
+    },
+    "H20": {
+        "internet_plus": "互联网+评委对'数据注水'非常敏感，证据与结论必须对应",
+        "challenge_cup": "这是挑战杯调研严谨性的核心——证据必须支撑结论",
+        "dachuang": "大创评审看重实事求是，证据与结论的对应关系是基本要求",
+    },
+    "H21": {
+        "internet_plus": "互联网+要求团队分工明确，执行步骤需有负责人",
+        "challenge_cup": "挑战杯看重团队协作，但分工形式可更灵活",
+        "dachuang": "大创项目的分工和负责人是评审检查训练过程的重要依据",
+    },
+    "H22": {
+        "internet_plus": "互联网+要求有具体的风控措施和预案，不能空泛描述",
+        "challenge_cup": "挑战杯涉及实验安全时需有具体措施，其他类型可简要说明",
+        "dachuang": "大创项目应有基本的风险意识和应对思路",
+    },
+    "H23": {
+        "internet_plus": "互联网+要求创新点直接转化为用户价值，技术创新需连接商业逻辑",
+        "challenge_cup": "挑战杯允许纯技术创新，但应说明潜在应用价值",
+        "dachuang": "大创项目的创新应服务于实际问题，不能为创新而创新",
+    },
+}
+
 CAPABILITY_MAP = [
     {"stage": "痛点发现", "dimension": "敏锐度与同理心", "focus": "识别真需求并给出用户证据"},
     {"stage": "方案策划", "dimension": "创造力与可行性", "focus": "验证创新点并匹配资源"},
@@ -703,6 +821,22 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
 
     unique_triggered = {r["id"]: r for r in triggered_rules}
     triggered_rules = list(unique_triggered.values())
+
+    if competition_type:
+        for rule in triggered_rules:
+            emphasis = COMPETITION_RULE_EMPHASIS.get(rule["id"], {})
+            ctx = emphasis.get(competition_type, "")
+            if ctx:
+                rule["competition_context"] = ctx
+
+    for rule in triggered_rules:
+        task = _suggest_next_task(rule["id"])
+        rule["linked_task"] = {
+            "title": task.get("title", ""),
+            "description": task.get("description", ""),
+            "acceptance_criteria": task.get("acceptance_criteria", []),
+            "template_guideline": task.get("template_guideline", []),
+        }
 
     # ── LLM-based scoring for uploaded files ──
     llm_scores = None

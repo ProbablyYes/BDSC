@@ -195,6 +195,18 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
         tags = data.get("tags", []) or []
         if not isinstance(tags, list):
             tags = [str(tags)]
+
+        for cls in data.get("分类", []):
+            if not isinstance(cls, dict) or cls.get("类型") != "赛事":
+                continue
+            cname = cls.get("名称", "")
+            if "互联网" in cname:
+                tags.append("competition:internet_plus")
+            elif "挑战杯" in cname:
+                tags.append("competition:challenge_cup")
+            elif "大创" in cname or "创青春" in cname:
+                tags.append("competition:dachuang")
+
         chunk = CaseChunk(
             case_id=data.get("case_id", fp.stem),
             category=data.get("source", {}).get("category", "未分类"),
@@ -408,6 +420,7 @@ class RagEngine:
         tags: list[str] | None = None,
         mode: str = "auto",
         exclude_ids: set[str] | None = None,
+        competition_type: str | None = None,
     ) -> list[dict[str, Any]]:
         """Retrieve most relevant cases with diversity-aware reranking.
 
@@ -489,6 +502,12 @@ class RagEngine:
         scores_normed = _norm(scores)
         if scores_normed is None:
             scores_normed = scores
+
+        if competition_type:
+            comp_tag = f"competition:{competition_type}"
+            for i, chunk in enumerate(working_chunks):
+                if comp_tag in (chunk.tags or []):
+                    scores_normed[i] = min(1.0, float(scores_normed[i]) + 0.08)
 
         use_mmr = (self._embed_ready and self._embeddings is not None
                    and vector_scores is not None and len(working_chunks) > top_k)

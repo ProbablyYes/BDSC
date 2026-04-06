@@ -235,17 +235,21 @@ def main(argv: list[str] | None = None) -> None:
     if args.category:
         allowed = set(args.category)
         files = [p for p in files if detect_category(Path(normalize_rel_path(p, root))) in allowed]
+    total = len(files)
+    print(f"[build_metadata] discovered {total} files under {root}")
 
-    rows = [
-        build_row(
+    rows: list[dict] = []
+    for idx, path in enumerate(files, start=1):
+        rel_path = normalize_rel_path(path, root)
+        print(f"[build_metadata] processing {idx}/{total}: {rel_path}", flush=True)
+        row = build_row(
             path,
             root,
             existing,
             parse_pdf_deep=not args.fast,
             max_parse_file_mb=args.max_parse_mb,
         )
-        for path in files
-    ]
+        rows.append(row)
     rows.sort(key=lambda x: (x["category"], x["file_path"]))
 
     with metadata_path.open("w", encoding="utf-8-sig", newline="") as fp:

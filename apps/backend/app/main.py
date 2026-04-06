@@ -113,7 +113,55 @@ def auth_register(payload: AuthRegisterPayload) -> AuthUserResponse:
 def auth_login(payload: AuthLoginPayload) -> AuthUserResponse:
     user = user_store.authenticate(payload.email, payload.password)
     if not user:
+        # 登录失败也写入访问日志（不记录密码）
+        existing = user_store.get_by_email(payload.email) or {}
+        role = str(existing.get("role", "")) if existing else ""
+        role_label = {"student": "学生", "teacher": "教师", "admin": "管理员"}.get(role, "用户")
+        display_name = str(
+            (existing.get("display_name") if existing else "")
+            or (existing.get("email") if existing else "")
+            or payload.email
+        )
+        user_id = existing.get("user_id") if existing else None
+        user_label = f"{role_label}:{display_name}" if display_name else role_label or payload.email
+        _append_access_log(
+            {
+                "time": datetime.utcnow().isoformat() + "Z",
+                "user": user_label,
+                "user_id": user_id,
+                "role": role,
+                "display_name": existing.get("display_name") if existing else None,
+                "action": "LOGIN_FAILED",
+                "detail": "邮箱或密码错误",
+                "status": "FAILED",
+                "method": "POST",
+                "path": "/api/auth/login",
+                "status_code": 401,
+                "duration_ms": 0,
+            }
+        )
         raise HTTPException(status_code=401, detail="邮箱或密码错误")
+    # 记录登录成功到访问日志，包含 user_id 与角色信息
+    role = str(user.get("role", ""))
+    role_label = {"student": "学生", "teacher": "教师", "admin": "管理员"}.get(role, "用户")
+    display_name = str(user.get("display_name") or user.get("email") or user.get("user_id") or "")
+    user_label = f"{role_label}:{display_name}" if display_name else role_label
+    _append_access_log(
+        {
+            "time": datetime.utcnow().isoformat() + "Z",
+            "user": user_label,
+            "user_id": user.get("user_id"),
+            "role": role,
+            "display_name": user.get("display_name"),
+            "action": "LOGIN",
+            "detail": "用户密码登录成功",
+            "status": "OK",
+            "method": "POST",
+            "path": "/api/auth/login",
+            "status_code": 200,
+            "duration_ms": 0,
+        }
+    )
     return AuthUserResponse(status="ok", user=user)
 
 
@@ -324,6 +372,571 @@ def admin_list_teachers() -> dict:
     return {"count": len(rows), "teachers": rows}
 
 
+@app.get("/api/admin/projects")
+def admin_projects_overview(limit: int = 500) -> dict:
+    """Admin overview of projects based on conversations + project_state.
+
+    This scans data/conversations for all project_ids and then joins with
+    JsonStorage project_state to retrieve the latest scoring / risk info.
+    Each project_id appears至多一次，按最新时间排序返回。
+    """
+    conv_root = conv_store.root
+    if not conv_root.exists():  # type: ignore[attr-defined]
+        return {"count": 0, "projects": []}
+
+    projects: list[dict[str, Any]] = []
+
+    for project_dir in sorted(conv_root.iterdir()):  # type: ignore[attr-defined]
+        if not project_dir.is_dir():
+            continue
+        project_id = project_dir.name
+
+        latest_conv: dict[str, Any] | None = None
+        latest_ts = ""
+        for path in sorted(project_dir.glob("*.json")):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except Exception:  # noqa: BLE001
+                continue
+            if not isinstance(data, dict):
+                continue
+            ts = _safe_str(data.get("created_at", ""))
+            msgs = data.get("messages") or []
+            if isinstance(msgs, list) and msgs:
+                last_msg_ts = _safe_str(msgs[-1].get("timestamp", "")) or ts
+            else:
+                last_msg_ts = ts
+            if last_msg_ts > latest_ts:
+                latest_ts = last_msg_ts
+                latest_conv = data
+
+        if not latest_conv:
+            continue
+
+        pid = _safe_str(latest_conv.get("project_id") or project_id)
+        student_id = _safe_str(latest_conv.get("student_id", ""))
+
+        # Join with JsonStorage to get scoring / risk information
+        project_state = json_store.load_project(pid)
+        submissions = list(project_state.get("submissions", []) or [])
+        latest_sub: dict[str, Any] | None = None
+        if submissions:
+            submissions.sort(key=lambda row: _safe_str(row.get("created_at", "")))
+            latest_sub = submissions[-1]
+
+        diagnosis = (
+            latest_sub.get("diagnosis", {})
+            if isinstance(latest_sub, dict) and isinstance(latest_sub.get("diagnosis"), dict)
+            else {}
+        )
+        overall_score = diagnosis.get("overall_score", 0)
+        triggered_rules = [
+            r.get("id")
+            for r in diagnosis.get("triggered_rules", []) or []
+            if isinstance(r, dict)
+        ]
+        created_at = _safe_str(
+            (latest_sub or {}).get("created_at") or latest_ts
+        )
+        class_id = _safe_str((latest_sub or {}).get("class_id", "")) or None
+        logical_project_id = _safe_str((latest_sub or {}).get("logical_project_id", ""))
+        source_type = _safe_str((latest_sub or {}).get("source_type", ""))
+        filename = (latest_sub or {}).get("filename")
+
+        projects.append(
+            {
+                "project_id": pid,
+                "logical_project_id": logical_project_id,
+                "student_id": student_id,
+                "class_id": class_id,
+                "created_at": created_at,
+                "source_type": source_type,
+                "filename": filename,
+                "overall_score": overall_score,
+                "triggered_rules": triggered_rules,
+            }
+        )
+
+    projects.sort(key=lambda row: _safe_str(row.get("created_at", "")), reverse=True)
+    if limit and limit > 0:
+        projects = projects[:limit]
+    return {"count": len(projects), "projects": projects}
+
+
+def _append_access_log(entry: dict[str, Any]) -> None:
+    """Append a single access-log entry to data/logs/access_logs.json.
+
+    This is a lightweight JSON-based logger used by the admin console.
+    Failures in logging must never break the main business logic, so
+    all errors are swallowed after writing a warning.
+    """
+    log_file = settings.data_root / "logs" / "access_logs.json"
+    try:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            raw = json.loads(log_file.read_text(encoding="utf-8"))
+            if not isinstance(raw, list):
+                logs: list[dict[str, Any]] = []
+            else:
+                logs = [item for item in raw if isinstance(item, dict)]
+        except Exception:  # noqa: BLE001
+            logs = []
+
+        record = dict(entry)
+        if "time" not in record or not record["time"]:
+            record["time"] = datetime.utcnow().isoformat() + "Z"
+
+        logs.append(record)
+        log_file.write_text(json.dumps(logs, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        logger.warning("Failed to append access log entry", exc_info=True)
+
+
+def _load_access_logs() -> dict[str, Any]:
+    """Load raw access logs from JSON and compute aggregate statistics.
+
+    The log file is stored under data/logs/access_logs.json and contains
+    a list of entries with fields such as time, user, method, path,
+    status, status_code and duration_ms.
+    """
+    log_file = settings.data_root / "logs" / "access_logs.json"
+    if not log_file.exists():
+        return {
+            "logs": [],
+            "stats": {
+                "total_requests": 0,
+                "success_count": 0,
+                "error_count": 0,
+                "blocked_count": 0,
+                "avg_duration_ms": 0.0,
+                "p95_duration_ms": 0.0,
+                "top_paths": [],
+            },
+        }
+
+    try:
+        data = json.loads(log_file.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        data = []
+
+    if not isinstance(data, list):
+        data = []
+
+    logs: list[dict[str, Any]] = []
+    for item in data:
+        if isinstance(item, dict):
+            logs.append(item)
+
+    # Sort by time descending if possible
+    def _parse_time(value: Any) -> float:
+        try:
+            return datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp()
+        except Exception:  # noqa: BLE001
+            return 0.0
+
+    logs.sort(key=lambda row: _parse_time(row.get("time")), reverse=True)
+
+    total = len(logs)
+    success_count = 0
+    error_count = 0
+    blocked_count = 0
+    durations: list[float] = []
+    path_stats: dict[str, dict[str, Any]] = {}
+
+    for row in logs:
+        status_str = str(row.get("status", "")).upper()
+        code = int(row.get("status_code", 0) or 0)
+        duration = float(row.get("duration_ms", 0) or 0)
+        if duration > 0:
+            durations.append(duration)
+
+        if status_str == "BLOCKED" or code == 403:
+            blocked_count += 1
+            status_bucket = "blocked_count"
+        elif 200 <= code < 400 and status_str == "OK":
+            success_count += 1
+            status_bucket = "success_count"
+        else:
+            error_count += 1
+            status_bucket = "error_count"
+
+        path = str(row.get("path") or "").strip()
+        if path:
+            stat = path_stats.setdefault(
+                path,
+                {
+                    "path": path,
+                    "count": 0,
+                    "total_duration_ms": 0.0,
+                    "success_count": 0,
+                    "error_count": 0,
+                    "blocked_count": 0,
+                },
+            )
+            stat["count"] += 1
+            stat["total_duration_ms"] += max(duration, 0.0)
+            stat[status_bucket] += 1
+
+    avg_duration = round(sum(durations) / len(durations), 2) if durations else 0.0
+    p95_duration = 0.0
+    if durations:
+        sorted_durations = sorted(durations)
+        idx = max(0, int(math.ceil(0.95 * len(sorted_durations))) - 1)
+        p95_duration = round(sorted_durations[idx], 2)
+
+    top_paths: list[dict[str, Any]] = []
+    for stat in path_stats.values():
+        count = max(1, int(stat.get("count", 0) or 0))
+        avg = stat["total_duration_ms"] / count
+        top_paths.append(
+            {
+                "path": stat["path"],
+                "count": count,
+                "avg_duration_ms": round(avg, 2),
+                "success_count": int(stat.get("success_count", 0) or 0),
+                "error_count": int(stat.get("error_count", 0) or 0),
+                "blocked_count": int(stat.get("blocked_count", 0) or 0),
+            }
+        )
+
+    top_paths.sort(key=lambda row: row["count"], reverse=True)
+
+    stats = {
+        "total_requests": total,
+        "success_count": success_count,
+        "error_count": error_count,
+        "blocked_count": blocked_count,
+        "avg_duration_ms": avg_duration,
+        "p95_duration_ms": p95_duration,
+        "top_paths": top_paths[:12],
+    }
+
+    return {"logs": logs, "stats": stats}
+
+
+@app.get("/api/admin/interventions")
+def admin_interventions() -> dict:
+    """Aggregate teaching interventions across all teachers for admin view.
+
+    This scans JsonStorage for teacher_interventions and groups them by
+    teacher and student so that the admin can monitor intervention
+    workload and coverage.
+    """
+    projects = json_store.list_projects()
+    all_items: list[dict[str, Any]] = []
+    teacher_ids: set[str] = set()
+    student_ids: set[str] = set()
+    status_totals: dict[str, int] = {}
+
+    def _student_id_from_project(project_id: str) -> str:
+        if project_id.startswith("project-") and len(project_id) > len("project-"):
+            return project_id[len("project-") :]
+        return ""
+
+    for project in projects:
+        project_id = _safe_str(project.get("project_id", ""))
+        root_student_id = _student_id_from_project(project_id)
+        interventions = project.get("teacher_interventions", []) or []
+        if not isinstance(interventions, list):
+            continue
+        for item in interventions:
+            if not isinstance(item, dict):
+                continue
+            teacher_id = _safe_str(item.get("teacher_id", ""))
+            if not teacher_id:
+                continue
+            teacher_ids.add(teacher_id)
+            target_student_id = _safe_str(item.get("target_student_id") or root_student_id)
+            if target_student_id:
+                student_ids.add(target_student_id)
+            status = _safe_str(item.get("status", "draft")).lower() or "draft"
+            status_totals[status] = status_totals.get(status, 0) + 1
+
+            teacher_info = user_store.get_by_id(teacher_id) or {}
+            student_info = user_store.get_by_id(target_student_id) or {}
+
+            all_items.append(
+                {
+                    "intervention_id": _safe_str(item.get("intervention_id", "")),
+                    "project_id": project_id,
+                    "logical_project_id": _safe_str(item.get("logical_project_id", "")),
+                    "teacher_id": teacher_id,
+                    "teacher_name": teacher_info.get("display_name") or teacher_info.get("email") or teacher_id,
+                    "student_id": target_student_id,
+                    "student_name": student_info.get("display_name") or target_student_id,
+                    "title": _safe_str(item.get("title", "")),
+                    "reason_summary": _safe_str(item.get("reason_summary", "")),
+                    "status": status,
+                    "scope_type": _safe_str(item.get("scope_type", "")),
+                    "scope_id": _safe_str(item.get("scope_id", "")),
+                    "priority": _safe_str(item.get("priority", "")),
+                    "created_at": _safe_str(item.get("created_at", "")),
+                    "updated_at": _safe_str(item.get("updated_at", "")),
+                }
+            )
+
+    # Build teacher-level aggregates
+    teacher_stats: dict[str, dict[str, Any]] = {}
+    teacher_students: dict[str, set[str]] = {}
+    for row in all_items:
+        teacher_id = row["teacher_id"]
+        target_student_id = row.get("student_id", "") or ""
+        status = row.get("status", "draft") or "draft"
+        if teacher_id not in teacher_stats:
+            info = user_store.get_by_id(teacher_id) or {}
+            teacher_stats[teacher_id] = {
+                "teacher_id": teacher_id,
+                "name": info.get("display_name") or info.get("email") or teacher_id,
+                "email": info.get("email", ""),
+                "total_interventions": 0,
+                "draft": 0,
+                "approved": 0,
+                "sent": 0,
+                "viewed": 0,
+                "completed": 0,
+                "archived": 0,
+                "student_count": 0,
+            }
+            teacher_students[teacher_id] = set()
+        stat = teacher_stats[teacher_id]
+        stat["total_interventions"] += 1
+        if status in stat:
+            stat[status] += 1
+        if target_student_id:
+            teacher_students[teacher_id].add(target_student_id)
+
+    for teacher_id, students in teacher_students.items():
+        teacher_stats[teacher_id]["student_count"] = len(students)
+
+    teachers_out = sorted(
+        teacher_stats.values(),
+        key=lambda r: (r["total_interventions"], r["student_count"]),
+        reverse=True,
+    )
+
+    completed_count = status_totals.get("completed", 0)
+
+    # Normalize status buckets for summary
+    all_status_keys = [
+        "draft",
+        "approved",
+        "sent",
+        "viewed",
+        "completed",
+        "archived",
+    ]
+    status_summary = {key: int(status_totals.get(key, 0) or 0) for key in all_status_keys}
+
+    # Recent interventions sorted by updated_at/created_at desc
+    def _parse_ts(row: dict) -> str:
+        return _safe_str(row.get("updated_at") or row.get("created_at") or "")
+
+    all_items.sort(key=_parse_ts, reverse=True)
+
+    return {
+        "summary": {
+            "total_interventions": len(all_items),
+            "teacher_count": len(teacher_ids),
+            "student_count": len(student_ids),
+            "completed_count": completed_count,
+            "status_counts": status_summary,
+        },
+        "teachers": teachers_out,
+        "recent": all_items[:120],
+    }
+
+
+def _build_teacher_intervention_impact(teacher_id: str) -> dict[str, Any]:
+    """Aggregate intervention effect for one teacher across all projects.
+
+    This looks at teacher_interventions in JsonStorage, pairs them with
+    before/after submissions around the sent_at timestamp, and computes
+    simple score / risk deltas for an "effect dashboard" view.
+    """
+    projects = json_store.list_projects()
+
+    def _student_id_from_project(project_id: str) -> str:
+        if project_id.startswith("project-") and len(project_id) > len("project-"):
+            return project_id[len("project-") :]
+        return ""
+
+    def _extract_score(sub: dict) -> float | None:
+        if not sub:
+            return None
+        diag = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+        raw_score = diag.get("overall_score", sub.get("overall_score", 0))
+        score = _safe_float(raw_score)
+        return score if score > 0 else None
+
+    def _extract_triggered_rules(sub: dict) -> list[Any]:
+        if not sub:
+            return []
+        return sub.get("triggered_rules") or (
+            (sub.get("diagnosis") or {}).get("triggered_rules", [])
+            if isinstance(sub.get("diagnosis"), dict)
+            else []
+        )
+
+    def _risk_score_from_label(label: str) -> int:
+        if label == "高":
+            return 2
+        if label == "中":
+            return 1
+        return 0
+
+    records: list[dict[str, Any]] = []
+    status_totals: dict[str, int] = {}
+    effect_totals: dict[str, int] = {"positive": 0, "neutral": 0, "negative": 0, "no_followup": 0}
+    priority_accum: dict[str, dict[str, Any]] = {}
+    timeline_accum: dict[str, dict[str, int]] = {}
+
+    score_gain_total = 0.0
+    risk_delta_total = 0.0
+    effective_count = 0
+
+    for project in projects:
+        project_id = _safe_str(project.get("project_id", ""))
+        submissions = list(project.get("submissions", []) or [])
+        if submissions:
+            submissions.sort(key=lambda row: row.get("created_at", ""))
+        interventions = project.get("teacher_interventions", []) or []
+        if not isinstance(interventions, list):
+            continue
+        for item in interventions:
+            if not isinstance(item, dict):
+                continue
+            t_id = _safe_str(item.get("teacher_id", ""))
+            if teacher_id and t_id != teacher_id:
+                continue
+            status = _safe_str(item.get("status", "draft")).lower() or "draft"
+            status_totals[status] = status_totals.get(status, 0) + 1
+
+            sent_ts = _safe_str(item.get("sent_at") or item.get("updated_at") or item.get("created_at") or "")
+            before_sub = None
+            after_sub = None
+            if submissions and sent_ts:
+                before_subs = [s for s in submissions if _safe_str(s.get("created_at", "")) < sent_ts]
+                after_subs = [s for s in submissions if _safe_str(s.get("created_at", "")) >= sent_ts]
+                before_sub = before_subs[-1] if before_subs else None
+                after_sub = after_subs[-1] if after_subs else None
+
+            score_before = _extract_score(before_sub)
+            score_after = _extract_score(after_sub)
+            triggered_before = _extract_triggered_rules(before_sub)
+            triggered_after = _extract_triggered_rules(after_sub)
+            risk_label_before = _risk_level(score_before or 0.0, triggered_before) if score_before is not None else ""
+            risk_label_after = _risk_level(score_after or 0.0, triggered_after) if score_after is not None else ""
+
+            if after_sub is None or score_before is None or score_after is None:
+                effect_label = "no_followup"
+                score_delta = 0.0
+                risk_delta = 0.0
+            else:
+                score_delta = round(score_after - score_before, 2)
+                risk_before_v = _risk_score_from_label(risk_label_before)
+                risk_after_v = _risk_score_from_label(risk_label_after)
+                risk_delta = risk_after_v - risk_before_v
+                if score_delta >= 0.8 and risk_after_v <= risk_before_v:
+                    effect_label = "positive"
+                elif score_delta <= -0.5 and risk_after_v >= risk_before_v:
+                    effect_label = "negative"
+                else:
+                    effect_label = "neutral"
+                score_gain_total += score_delta
+                risk_delta_total += risk_delta
+                effective_count += 1
+
+            effect_totals[effect_label] = effect_totals.get(effect_label, 0) + 1
+
+            priority = _safe_str(item.get("priority", "medium")) or "medium"
+            bucket = priority_accum.setdefault(priority, {"priority": priority, "count": 0, "score_gain_total": 0.0, "risk_delta_total": 0.0})
+            bucket["count"] += 1
+            bucket["score_gain_total"] += score_delta
+            bucket["risk_delta_total"] += risk_delta
+
+            day_key = _safe_str(sent_ts or item.get("created_at") or "")[:10]
+            if day_key:
+                t_bucket = timeline_accum.setdefault(day_key, {"date": day_key, "total": 0, "effective": 0, "positive": 0, "negative": 0, "neutral": 0})
+                t_bucket["total"] += 1
+                if effect_label != "no_followup":
+                    t_bucket["effective"] += 1
+                if effect_label in {"positive", "negative", "neutral"}:
+                    t_bucket[effect_label] += 1
+
+            student_id = _safe_str(item.get("target_student_id") or _student_id_from_project(project_id))
+            base_sub = after_sub or before_sub or {}
+
+            records.append({
+                "intervention_id": _safe_str(item.get("intervention_id", "")),
+                "project_id": project_id,
+                "logical_project_id": _safe_str(item.get("logical_project_id", "")),
+                "teacher_id": t_id,
+                "student_id": student_id,
+                "class_id": _safe_str(base_sub.get("class_id", project.get("class_id", ""))),
+                "cohort_id": _safe_str(base_sub.get("cohort_id", project.get("cohort_id", ""))),
+                "title": _safe_str(item.get("title", "")),
+                "reason_summary": _safe_str(item.get("reason_summary", "")),
+                "priority": priority,
+                "status": status,
+                "sent_at": _safe_str(item.get("sent_at", "")),
+                "viewed_at": _safe_str(item.get("viewed_at", "")),
+                "score_before": score_before,
+                "score_after": score_after,
+                "score_delta": score_delta,
+                "risk_level_before": risk_label_before,
+                "risk_level_after": risk_label_after,
+                "risk_delta": risk_delta,
+                "effect": effect_label,
+                "latest_submission_at": _safe_str(base_sub.get("created_at", "")),
+            })
+
+    by_priority = []
+    for priority, bucket in priority_accum.items():
+        count = max(1, int(bucket.get("count", 0) or 0))
+        by_priority.append({
+            "priority": priority,
+            "count": int(bucket.get("count", 0) or 0),
+            "avg_score_gain": round(float(bucket.get("score_gain_total", 0.0)) / count, 2),
+            "avg_risk_delta": round(float(bucket.get("risk_delta_total", 0.0)) / count, 3),
+        })
+    by_priority.sort(key=lambda r: {"high": 0, "medium": 1, "low": 2}.get(r["priority"], 3))
+
+    timeline = sorted(timeline_accum.values(), key=lambda r: r["date"])
+
+    status_summary = {key: int(status_totals.get(key, 0) or 0) for key in ["draft", "approved", "sent", "viewed", "completed", "archived"]}
+
+    avg_score_gain = round(score_gain_total / max(effective_count, 1), 2) if effective_count else 0.0
+    avg_risk_delta = round(risk_delta_total / max(effective_count, 1), 3) if effective_count else 0.0
+
+    return {
+        "teacher_id": teacher_id,
+        "summary": {
+            "total_interventions": len(records),
+            "effective_interventions": effective_count,
+            "status_counts": status_summary,
+            "effect_counts": effect_totals,
+            "avg_score_gain": avg_score_gain,
+            "avg_risk_delta": avg_risk_delta,
+        },
+        "by_priority": by_priority,
+        "timeline": timeline,
+        "items": sorted(records, key=lambda r: r.get("latest_submission_at", ""), reverse=True)[:200],
+    }
+
+
+@app.get("/api/teacher/assistant/intervention-impact")
+def teacher_intervention_impact(teacher_id: str) -> dict[str, Any]:
+    if not teacher_id:
+        raise HTTPException(status_code=400, detail="teacher_id is required")
+    return _build_teacher_intervention_impact(teacher_id)
+
+
+@app.get("/api/admin/logs")
+def admin_logs() -> dict:
+    """Admin view of access logs + aggregate statistics."""
+    return _load_access_logs()
+
+
 # ── SMS verification (dev mode: code returned in response) ──
 
 _sms_codes: dict[str, tuple[str, float]] = {}
@@ -343,15 +956,75 @@ def sms_login(payload: SmsLoginPayload) -> AuthUserResponse:
     phone = payload.phone.strip()
     record = _sms_codes.get(phone)
     if not record:
+        _append_access_log(
+            {
+                "time": datetime.utcnow().isoformat() + "Z",
+                "user": f"phone:{phone}",
+                "action": "LOGIN_SMS_FAILED",
+                "detail": "未发送验证码",
+                "status": "FAILED",
+                "method": "POST",
+                "path": "/api/auth/sms/login",
+                "status_code": 400,
+                "duration_ms": 0,
+            }
+        )
         raise HTTPException(status_code=400, detail="请先获取验证码")
     stored_code, ts = record
     if time.time() - ts > SMS_CODE_TTL:
         _sms_codes.pop(phone, None)
+        _append_access_log(
+            {
+                "time": datetime.utcnow().isoformat() + "Z",
+                "user": f"phone:{phone}",
+                "action": "LOGIN_SMS_FAILED",
+                "detail": "验证码已过期",
+                "status": "FAILED",
+                "method": "POST",
+                "path": "/api/auth/sms/login",
+                "status_code": 400,
+                "duration_ms": 0,
+            }
+        )
         raise HTTPException(status_code=400, detail="验证码已过期，请重新获取")
     if payload.code.strip() != stored_code:
+        _append_access_log(
+            {
+                "time": datetime.utcnow().isoformat() + "Z",
+                "user": f"phone:{phone}",
+                "action": "LOGIN_SMS_FAILED",
+                "detail": "验证码不正确",
+                "status": "FAILED",
+                "method": "POST",
+                "path": "/api/auth/sms/login",
+                "status_code": 400,
+                "duration_ms": 0,
+            }
+        )
         raise HTTPException(status_code=400, detail="验证码不正确")
     _sms_codes.pop(phone, None)
     user = user_store.get_or_create_by_phone(phone)
+    # 记录短信登录成功到访问日志
+    role = str(user.get("role", ""))
+    role_label = {"student": "学生", "teacher": "教师", "admin": "管理员"}.get(role, "用户")
+    display_name = str(user.get("display_name") or user.get("phone") or user.get("email") or user.get("user_id") or "")
+    user_label = f"{role_label}:{display_name}" if display_name else role_label
+    _append_access_log(
+        {
+            "time": datetime.utcnow().isoformat() + "Z",
+            "user": user_label,
+            "user_id": user.get("user_id"),
+            "role": role,
+            "display_name": user.get("display_name"),
+            "action": "LOGIN_SMS",
+            "detail": "用户短信登录成功",
+            "status": "OK",
+            "method": "POST",
+            "path": "/api/auth/sms/login",
+            "status_code": 200,
+            "duration_ms": 0,
+        }
+    )
     return AuthUserResponse(status="ok", user=user)
 
 

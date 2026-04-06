@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
-type AdminTab = "dashboard" | "teachers" | "users" | "projects" | "vulnerabilities" | "logs";
+type AdminTab = "dashboard" | "teachers" | "interventions" | "users" | "projects" | "vulnerabilities" | "logs";
 type UserRole = "student" | "teacher" | "admin";
 type UserRecord = {
   id: string;
@@ -42,6 +42,100 @@ type TeacherStat = {
 
 type TeacherSortKey = "rank" | "avg_score" | "risk_rate" | "active_students" | "team_count" | "intervention_coverage";
 
+type InterventionStatus = "draft" | "approved" | "sent" | "viewed" | "completed" | "archived";
+
+type InterventionSummary = {
+  total_interventions: number;
+  teacher_count: number;
+  student_count: number;
+  completed_count: number;
+  status_counts: Record<InterventionStatus, number>;
+};
+
+type TeacherInterventionAgg = {
+  teacher_id: string;
+  name: string;
+  email: string;
+  total_interventions: number;
+  draft: number;
+  approved: number;
+  sent: number;
+  viewed: number;
+  completed: number;
+  archived: number;
+  student_count: number;
+};
+
+type InterventionRecord = {
+  intervention_id: string;
+  project_id: string;
+  logical_project_id: string;
+  teacher_id: string;
+  teacher_name: string;
+  student_id: string;
+  student_name: string;
+  title: string;
+  reason_summary: string;
+  status: InterventionStatus | string;
+  scope_type: string;
+  scope_id: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type AdminLogEntry = {
+  time: string;
+  user: string;
+  action: string;
+  detail: string;
+  status: string;
+  path: string;
+  method?: string;
+  status_code?: number;
+  duration_ms?: number;
+  user_id?: string;
+  role?: UserRole | string;
+  display_name?: string;
+};
+
+type AdminLogPathStat = {
+  path: string;
+  count: number;
+  avg_duration_ms: number;
+  success_count: number;
+  error_count: number;
+  blocked_count: number;
+};
+
+type AdminLogStats = {
+  total_requests: number;
+  success_count: number;
+  error_count: number;
+  blocked_count: number;
+  avg_duration_ms: number;
+  p95_duration_ms: number;
+  top_paths: AdminLogPathStat[];
+};
+
+const INTERVENTION_STATUS_LABEL: Record<InterventionStatus, string> = {
+  draft: "草稿",
+  approved: "已审批",
+  sent: "已发送",
+  viewed: "已查看",
+  completed: "已完成",
+  archived: "已归档",
+};
+
+function getUserIdFromProjectId(projectId: string | undefined | null): string {
+  if (!projectId) return "";
+  const pid = String(projectId);
+  if (pid.startsWith("project-")) {
+    return pid.slice("project-".length);
+  }
+  return pid;
+}
+
 export default function AdminPage() {
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -66,16 +160,14 @@ export default function AdminPage() {
   const [teachers, setTeachers] = useState<TeacherStat[]>([]);
   const [teacherSortKey, setTeacherSortKey] = useState<TeacherSortKey>("rank");
 
+  // Teaching interventions (admin)
+  const [interventionSummary, setInterventionSummary] = useState<InterventionSummary | null>(null);
+  const [interventionTeachers, setInterventionTeachers] = useState<TeacherInterventionAgg[]>([]);
+  const [recentInterventions, setRecentInterventions] = useState<InterventionRecord[]>([]);
+
   // Logs
-  const [accessLogs, setAccessLogs] = useState<any[]>([
-    { time: "2026-03-22 14:32", user: "student-001", action: "LOGIN", detail: "学生登录", status: "OK" },
-    { time: "2026-03-22 14:33", user: "student-001", action: "DIALOGUE", detail: "发送对话消息", status: "OK" },
-    { time: "2026-03-22 14:35", user: "student-001", action: "UPLOAD", detail: "上传文件 BP.pdf", status: "OK" },
-    { time: "2026-03-22 15:01", user: "student-002", action: "UNAUTHORIZED", detail: "尝试访问 /api/teacher/dashboard", status: "BLOCKED" },
-    { time: "2026-03-22 15:10", user: "teacher-001", action: "LOGIN", detail: "教师登录", status: "OK" },
-    { time: "2026-03-22 15:12", user: "teacher-001", action: "FEEDBACK", detail: "提交批注反馈", status: "OK" },
-    { time: "2026-03-22 16:00", user: "student-003", action: "UNAUTHORIZED", detail: "尝试访问 /api/teacher/interventions", status: "BLOCKED" },
-  ]);
+  const [accessLogs, setAccessLogs] = useState<AdminLogEntry[]>([]);
+  const [logStats, setLogStats] = useState<AdminLogStats | null>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -94,6 +186,10 @@ export default function AdminPage() {
       loadTeams();
     } else if (tab === "teachers") {
       loadTeachers();
+    } else if (tab === "interventions") {
+      loadInterventions();
+    } else if (tab === "logs") {
+      loadLogs();
     }
   }, [tab]);
 
@@ -112,9 +208,12 @@ export default function AdminPage() {
       });
     }
     try {
-      const r2 = await fetch(`${API}/api/teacher/submissions`);
+      const r2 = await fetch(`${API}/api/admin/projects`);
       const d2 = await r2.json();
-      setAllProjects(d2.submissions ?? []);
+      const projects = Array.isArray(d2.projects) ? d2.projects : [];
+      const list = [...projects];
+      list.sort((a: any, b: any) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
+      setAllProjects(list);
     } catch {
       setAllProjects([]);
     }
@@ -183,7 +282,161 @@ export default function AdminPage() {
     }
   }
 
+  async function loadInterventions() {
+    try {
+      const r = await fetch(`${API}/api/admin/interventions`);
+      const d = await r.json();
+      const summaryRaw = d.summary ?? null;
+      if (summaryRaw) {
+        const statusCounts = summaryRaw.status_counts ?? {};
+        const normalizedStatus: Record<InterventionStatus, number> = {
+          draft: Number(statusCounts.draft ?? 0),
+          approved: Number(statusCounts.approved ?? 0),
+          sent: Number(statusCounts.sent ?? 0),
+          viewed: Number(statusCounts.viewed ?? 0),
+          completed: Number(statusCounts.completed ?? 0),
+          archived: Number(statusCounts.archived ?? 0),
+        };
+        setInterventionSummary({
+          total_interventions: Number(summaryRaw.total_interventions ?? 0),
+          teacher_count: Number(summaryRaw.teacher_count ?? 0),
+          student_count: Number(summaryRaw.student_count ?? 0),
+          completed_count: Number(summaryRaw.completed_count ?? 0),
+          status_counts: normalizedStatus,
+        });
+      } else {
+        setInterventionSummary(null);
+      }
+
+      const teachersRaw: TeacherInterventionAgg[] = (d.teachers ?? []).map((t: any): TeacherInterventionAgg => ({
+        teacher_id: String(t.teacher_id ?? ""),
+        name: t.name ?? t.display_name ?? t.email ?? String(t.teacher_id ?? ""),
+        email: t.email ?? "",
+        total_interventions: Number(t.total_interventions ?? 0),
+        draft: Number(t.draft ?? 0),
+        approved: Number(t.approved ?? 0),
+        sent: Number(t.sent ?? 0),
+        viewed: Number(t.viewed ?? 0),
+        completed: Number(t.completed ?? 0),
+        archived: Number(t.archived ?? 0),
+        student_count: Number(t.student_count ?? 0),
+      }));
+      setInterventionTeachers(teachersRaw);
+
+      const recentRaw: InterventionRecord[] = (d.recent ?? []).map((row: any): InterventionRecord => ({
+        intervention_id: String(row.intervention_id ?? ""),
+        project_id: String(row.project_id ?? ""),
+        logical_project_id: String(row.logical_project_id ?? ""),
+        teacher_id: String(row.teacher_id ?? ""),
+        teacher_name: row.teacher_name ?? row.teacher_id ?? "",
+        student_id: String(row.student_id ?? ""),
+        student_name: row.student_name ?? row.student_id ?? "",
+        title: row.title ?? "",
+        reason_summary: row.reason_summary ?? "",
+        status: (row.status ?? "draft") as InterventionStatus | string,
+        scope_type: row.scope_type ?? "",
+        scope_id: row.scope_id ?? "",
+        priority: row.priority ?? "",
+        created_at: row.created_at ?? "",
+        updated_at: row.updated_at ?? "",
+      }));
+      setRecentInterventions(recentRaw);
+    } catch {
+      setInterventionSummary(null);
+      setInterventionTeachers([]);
+      setRecentInterventions([]);
+    }
+  }
+
+  async function loadLogs() {
+    try {
+      const r = await fetch(`${API}/api/admin/logs`);
+      const d = await r.json();
+      const rawLogs: AdminLogEntry[] = (d.logs ?? d ?? []).map((row: any): AdminLogEntry => ({
+        time: row.time ?? "",
+        user: row.user ?? "",
+        action: row.action ?? "",
+        detail: row.detail ?? "",
+        status: row.status ?? "",
+        path: row.path ?? "",
+        method: row.method,
+        status_code: typeof row.status_code === "number" ? row.status_code : undefined,
+        duration_ms: typeof row.duration_ms === "number" ? row.duration_ms : undefined,
+        user_id: row.user_id ? String(row.user_id) : undefined,
+        role: row.role as UserRole | string | undefined,
+        display_name: row.display_name ?? undefined,
+      }));
+      setAccessLogs(rawLogs);
+
+      const s = d.stats ?? null;
+      if (s) {
+        const topPaths: AdminLogPathStat[] = (s.top_paths ?? []).map((p: any): AdminLogPathStat => ({
+          path: p.path ?? "",
+          count: Number(p.count ?? 0),
+          avg_duration_ms: Number(p.avg_duration_ms ?? 0),
+          success_count: Number(p.success_count ?? 0),
+          error_count: Number(p.error_count ?? 0),
+          blocked_count: Number(p.blocked_count ?? 0),
+        }));
+        setLogStats({
+          total_requests: Number(s.total_requests ?? rawLogs.length ?? 0),
+          success_count: Number(s.success_count ?? 0),
+          error_count: Number(s.error_count ?? 0),
+          blocked_count: Number(s.blocked_count ?? 0),
+          avg_duration_ms: Number(s.avg_duration_ms ?? 0),
+          p95_duration_ms: Number(s.p95_duration_ms ?? 0),
+          top_paths: topPaths,
+        });
+      } else {
+        setLogStats(null);
+      }
+    } catch {
+      setAccessLogs([]);
+      setLogStats(null);
+    }
+  }
+
   const [teams, setTeams] = useState<TeamInfo[]>([]);
+
+  const studentNameByUserId = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const u of users) {
+      if (u.id) {
+        map[u.id] = u.name || u.email || u.id;
+      }
+    }
+    return map;
+  }, [users]);
+
+  const userTeamNames = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const t of teams) {
+      const teamName = t.team_name || "";
+      if (!teamName) continue;
+      for (const m of t.members) {
+        const uid = m.user_id;
+        if (!uid) continue;
+        if (!map[uid]) map[uid] = [];
+        if (!map[uid].includes(teamName)) {
+          map[uid].push(teamName);
+        }
+      }
+    }
+    return map;
+  }, [teams]);
+
+  const projectTeamCount = useMemo(() => {
+    const teamNames = new Set<string>();
+    for (const p of allProjects) {
+      const uid = getUserIdFromProjectId(p.project_id);
+      if (!uid) continue;
+      const names = userTeamNames[uid] ?? [];
+      for (const name of names) {
+        if (name) teamNames.add(name);
+      }
+    }
+    return teamNames.size;
+  }, [allProjects, userTeamNames]);
 
   const baseUsers = useMemo(() => {
     let list = users;
@@ -498,6 +751,7 @@ export default function AdminPage() {
   const TABS: { id: AdminTab; label: string; icon: string }[] = [
     { id: "dashboard", label: "全局大盘", icon: "📊" },
     { id: "teachers", label: "教师表现", icon: "🏅" },
+    { id: "interventions", label: "教学干预", icon: "🧭" },
     { id: "users", label: "用户管理", icon: "👥" },
     { id: "projects", label: "项目总览", icon: "📋" },
     { id: "vulnerabilities", label: "漏洞看板", icon: "🔍" },
@@ -966,6 +1220,132 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* ── Teaching Interventions (Admin) ── */}
+          {tab === "interventions" && (
+            <div className="admin-panel fade-up">
+              <div className="admin-panel-header">
+                <h2>教学干预监控</h2>
+                <span className="admin-panel-desc">从学校视角总览各教师的教学干预任务与覆盖范围</span>
+              </div>
+
+              {interventionSummary ? (
+                <>
+                  <div className="admin-kpi-grid">
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">📝</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">干预任务总数</span>
+                        <strong className="admin-kpi-value">{interventionSummary.total_interventions}</strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">👩‍🏫</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">参与教师数</span>
+                        <strong className="admin-kpi-value">{interventionSummary.teacher_count}</strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">👨‍🎓</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">被干预学生数</span>
+                        <strong className="admin-kpi-value">{interventionSummary.student_count}</strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">✅</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">已完成干预</span>
+                        <strong className="admin-kpi-value">{interventionSummary.completed_count}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="admin-section">
+                    <h3>教师干预聚合表</h3>
+                    <div className="admin-table">
+                      <div className="admin-table-header">
+                        <span>教师</span><span>总干预数</span><span>草稿</span><span>已审批</span><span>已发送</span><span>已查看</span><span>已完成</span><span>已归档</span><span>覆盖学生数</span>
+                      </div>
+                      {interventionTeachers.map((t) => (
+                        <div key={t.teacher_id} className="admin-table-row">
+                          <span>
+                            <div className="admin-cell-primary">{t.name}</div>
+                            <div className="admin-cell-muted" style={{ fontSize: 11 }}>{t.email}</div>
+                          </span>
+                          <span>{t.total_interventions}</span>
+                          <span>{t.draft}</span>
+                          <span>{t.approved}</span>
+                          <span>{t.sent}</span>
+                          <span>{t.viewed}</span>
+                          <span>{t.completed}</span>
+                          <span>{t.archived}</span>
+                          <span>{t.student_count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="admin-section">
+                    <h3>最近干预记录</h3>
+                    {recentInterventions.length > 0 ? (
+                      <div className="admin-table">
+                        <div className="admin-table-header">
+                          <span>时间</span><span>教师</span><span>学生</span><span>标题</span><span>状态</span><span>作用范围</span><span>项目ID</span>
+                        </div>
+                        {recentInterventions.map((item) => {
+                          const statusKey = (item.status || "draft") as InterventionStatus;
+                          const statusLabel = INTERVENTION_STATUS_LABEL[statusKey] ?? item.status;
+                          const statusClass =
+                            statusKey === "completed"
+                              ? "good"
+                              : statusKey === "sent" || statusKey === "viewed" || statusKey === "approved"
+                                ? "warn"
+                                : "";
+                          const timeText = (item.updated_at || item.created_at || "").slice(0, 16);
+                          let scopeText = "-";
+                          if (item.scope_type === "team") scopeText = `团队 ${item.scope_id}`;
+                          else if (item.scope_type === "student") scopeText = `学生 ${item.scope_id}`;
+                          else if (item.scope_type === "project") scopeText = `项目 ${item.scope_id}`;
+                          return (
+                            <div key={item.intervention_id} className="admin-table-row">
+                              <span className="admin-cell-muted">{timeText}</span>
+                              <span>
+                                <div className="admin-cell-primary">{item.teacher_name}</div>
+                                <div className="admin-cell-muted" style={{ fontSize: 11 }}>{item.teacher_id}</div>
+                              </span>
+                              <span>
+                                <div>{item.student_name}</div>
+                                <div className="admin-cell-muted" style={{ fontSize: 11 }}>{item.student_id}</div>
+                              </span>
+                              <span>{item.title}</span>
+                              <span>
+                                <span className={`admin-status-dot ${statusClass}`} />
+                                {statusLabel}
+                              </span>
+                              <span>{scopeText}</span>
+                              <span className="admin-cell-muted">{item.project_id}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="admin-empty">
+                        <div className="admin-empty-icon">🧭</div>
+                        <p>当前暂无教学干预记录。教师在教师端创建干预计划后，这里会自动汇总。</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="admin-empty">
+                  <div className="admin-empty-icon">🧭</div>
+                  <p>暂未统计到教学干预数据。待教师端开始批量下发干预任务后，这里将展示全局监控视图。</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ── Projects Overview ── */}
           {tab === "projects" && (
             <div className="admin-panel fade-up">
@@ -992,8 +1372,8 @@ export default function AdminPage() {
                 <div className="admin-kpi">
                   <div className="admin-kpi-icon">🏫</div>
                   <div className="admin-kpi-content">
-                    <span className="admin-kpi-label">涉及班级</span>
-                    <strong className="admin-kpi-value">{Object.keys(stats.classStats).length}</strong>
+                    <span className="admin-kpi-label">涉及团队</span>
+                    <strong className="admin-kpi-value">{projectTeamCount}</strong>
                   </div>
                 </div>
               </div>
@@ -1001,28 +1381,38 @@ export default function AdminPage() {
               {allProjects.length > 0 ? (
                 <div className="admin-table">
                   <div className="admin-table-header">
-                    <span>项目ID</span><span>学生</span><span>班级</span><span>评分</span><span>风险规则</span><span>提交时间</span>
+                    <span>项目ID</span><span>学生</span><span>团队</span><span>评分</span><span>风险规则</span><span>提交时间</span>
                   </div>
-                  {allProjects.map((p, i) => (
-                    <div key={i} className="admin-table-row">
-                      <span className="admin-cell-primary">{p.project_id}</span>
-                      <span>{p.student_id}</span>
-                      <span>{p.class_id || "—"}</span>
-                      <span>
-                        <span className={`admin-score ${(p.overall_score ?? 0) >= 7 ? "good" : (p.overall_score ?? 0) >= 4 ? "warn" : "danger"}`}>
-                          {p.overall_score ?? "—"}
+                  {allProjects.map((p, i) => {
+                    const studentUserId = getUserIdFromProjectId(p.project_id);
+                    const studentName =
+                      (studentUserId && studentNameByUserId[studentUserId])
+                      || p.student_id
+                      || studentUserId
+                      || "未知学生";
+                    const teamNamesForStudent = studentUserId ? userTeamNames[studentUserId] ?? [] : [];
+                    const teamLabel = teamNamesForStudent.length ? teamNamesForStudent.join("、") : "未加入团队";
+                    return (
+                      <div key={i} className="admin-table-row">
+                        <span className="admin-cell-primary">{p.project_id}</span>
+                        <span>{studentName}</span>
+                        <span>{teamLabel}</span>
+                        <span>
+                          <span className={`admin-score ${(p.overall_score ?? 0) >= 7 ? "good" : (p.overall_score ?? 0) >= 4 ? "warn" : "danger"}`}>
+                            {p.overall_score ?? "—"}
+                          </span>
                         </span>
-                      </span>
-                      <span>
-                        {(p.triggered_rules ?? []).length > 0 ? (
-                          <span className="admin-risk-count">{(p.triggered_rules ?? []).length} 条</span>
-                        ) : (
-                          <span className="admin-cell-muted">无</span>
-                        )}
-                      </span>
-                      <span className="admin-cell-muted">{(p.created_at ?? "").slice(0, 16)}</span>
-                    </div>
-                  ))}
+                        <span>
+                          {(p.triggered_rules ?? []).length > 0 ? (
+                            <span className="admin-risk-count">{(p.triggered_rules ?? []).length} 条</span>
+                          ) : (
+                            <span className="admin-cell-muted">无</span>
+                          )}
+                        </span>
+                        <span className="admin-cell-muted">{(p.created_at ?? "").slice(0, 16)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="admin-empty">暂无项目数据。学生在学生端对话后会自动产生项目数据。</div>
@@ -1113,35 +1503,116 @@ export default function AdminPage() {
                 <span className="admin-panel-desc">记录所有用户的关键操作与越权访问尝试</span>
               </div>
 
+              {logStats && (
+                <div className="admin-kpi-grid" style={{ marginBottom: 16 }}>
+                  <div className="admin-kpi">
+                    <div className="admin-kpi-icon">📡</div>
+                    <div className="admin-kpi-content">
+                      <span className="admin-kpi-label">总请求数</span>
+                      <strong className="admin-kpi-value">{logStats.total_requests}</strong>
+                    </div>
+                  </div>
+                  <div className="admin-kpi">
+                    <div className="admin-kpi-icon">✅</div>
+                    <div className="admin-kpi-content">
+                      <span className="admin-kpi-label">成功请求</span>
+                      <strong className="admin-kpi-value">{logStats.success_count}</strong>
+                    </div>
+                  </div>
+                  <div className="admin-kpi">
+                    <div className="admin-kpi-icon">⚠️</div>
+                    <div className="admin-kpi-content">
+                      <span className="admin-kpi-label">错误请求</span>
+                      <strong className="admin-kpi-value">{logStats.error_count}</strong>
+                    </div>
+                  </div>
+                  <div className="admin-kpi">
+                    <div className="admin-kpi-icon">🚫</div>
+                    <div className="admin-kpi-content">
+                      <span className="admin-kpi-label">拦截次数</span>
+                      <strong className="admin-kpi-value">{logStats.blocked_count}</strong>
+                    </div>
+                  </div>
+                  <div className="admin-kpi">
+                    <div className="admin-kpi-icon">⏱️</div>
+                    <div className="admin-kpi-content">
+                      <span className="admin-kpi-label">平均耗时 / P95</span>
+                      <strong className="admin-kpi-value">{Math.round(logStats.avg_duration_ms)}ms / {Math.round(logStats.p95_duration_ms)}ms</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="admin-table">
                 <div className="admin-table-header">
-                  <span>时间</span><span>用户</span><span>操作类型</span><span>详情</span><span>状态</span>
+                  <span>时间</span><span>用户</span><span>操作类型</span><span>请求路径</span><span>详情</span><span>状态</span>
                 </div>
-                {accessLogs.map((log, i) => (
-                  <div key={i} className={`admin-table-row ${log.status === "BLOCKED" ? "blocked" : ""}`}>
-                    <span className="admin-cell-muted">{log.time}</span>
-                    <span className="admin-cell-primary">{log.user}</span>
-                    <span>
-                      <span className={`admin-log-action ${log.action === "UNAUTHORIZED" ? "danger" : ""}`}>
-                        {log.action}
+                {accessLogs.map((log, i) => {
+                  const roleLabel =
+                    log.role === "student"
+                      ? "学生"
+                      : log.role === "teacher"
+                      ? "教师"
+                      : log.role === "admin"
+                      ? "管理员"
+                      : log.role
+                      ? String(log.role)
+                      : "";
+                  const name =
+                    (log.display_name && String(log.display_name)) ||
+                    (log.user && String(log.user)) ||
+                    (log.user_id && String(log.user_id)) ||
+                    "";
+                  const userLabel = roleLabel && name ? `${roleLabel} · ${name}` : name || log.user || "-";
+
+                  return (
+                    <div key={i} className={`admin-table-row ${log.status === "BLOCKED" ? "blocked" : ""}`}>
+                      <span className="admin-cell-muted">{log.time}</span>
+                      <span className="admin-cell-primary">{userLabel}</span>
+                      <span>
+                        <span className={`admin-log-action ${log.action === "UNAUTHORIZED" ? "danger" : ""}`}>
+                          {log.action}
+                        </span>
                       </span>
-                    </span>
-                    <span>{log.detail}</span>
-                    <span>
-                      {log.status === "BLOCKED" ? (
-                        <span className="admin-log-blocked">🚫 已拦截 (403)</span>
-                      ) : (
-                        <span className="admin-log-ok">✓ 正常</span>
-                      )}
-                    </span>
-                  </div>
-                ))}
+                      <span>{log.path || "-"}</span>
+                      <span>{log.detail}</span>
+                      <span>
+                        {log.status === "BLOCKED" ? (
+                          <span className="admin-log-blocked">🚫 已拦截 (403)</span>
+                        ) : (
+                          <span className="admin-log-ok">✓ 正常</span>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="admin-log-summary">
                 <span>总操作 {accessLogs.length} 条</span>
                 <span className="admin-log-blocked-count">越权拦截 {accessLogs.filter((l) => l.status === "BLOCKED").length} 次</span>
               </div>
+
+              {logStats && logStats.top_paths.length > 0 && (
+                <div className="admin-section" style={{ marginTop: 16 }}>
+                  <h3>热门 API 路径</h3>
+                  <div className="admin-table">
+                    <div className="admin-table-header">
+                      <span>路径</span><span>请求数</span><span>平均耗时 (ms)</span><span>成功</span><span>错误</span><span>拦截</span>
+                    </div>
+                    {logStats.top_paths.map((p) => (
+                      <div key={p.path} className="admin-table-row">
+                        <span className="admin-cell-primary">{p.path}</span>
+                        <span>{p.count}</span>
+                        <span>{Math.round(p.avg_duration_ms)}</span>
+                        <span>{p.success_count}</span>
+                        <span>{p.error_count}</span>
+                        <span>{p.blocked_count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>

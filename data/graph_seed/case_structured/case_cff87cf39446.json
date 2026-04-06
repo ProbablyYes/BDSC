@@ -1,0 +1,297 @@
+{
+  "case_id": "case_cff87cf39446",
+  "document_id": "doc_1cc343118a2d",
+  "source": {
+    "file_path": "环境保护/475625-京芯智水——智慧赋能水质检测-治理协同系统创新力量-项目策划书-87fb3713.pdf",
+    "file_name": "475625-京芯智水——智慧赋能水质检测-治理协同系统创新力量-项目策划书-87fb3713.pdf",
+    "category": "环境保护",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 61257,
+    "core_text_chars": 123,
+    "appendix_start_index": 6,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "京芯智水——智慧赋能水质检测-治理协同系统",
+    "target_users": [
+      "环保监管部门",
+      "工业企业",
+      "科研机构"
+    ],
+    "pain_points": [
+      "检测不精准：传统方式难以快速准确识别复杂废水成分",
+      "治理依赖人工：治理过程缺乏实时反馈，药剂投放往往过量或不足",
+      "协同效率低：检测与治理环节脱节，无法实现闭环自动化"
+    ],
+    "solution": [
+      "AI驱动的检测系统：利用图像识别与深度学习搭建水质成分分析模型",
+      "智能决策调控：基于AI算法自动调控治理参数（如催化剂剂量、反应时间）",
+      "协同系统架构：构建从取水、检测到反馈治理的数字化全流程"
+    ],
+    "innovation_points": [
+      "纸芯片开发技术：低成本、便携式的现场快速检测载体",
+      "深度学习网络：针对复杂水质图像进行训练，提升识别精度",
+      "协同控制算法：通过AI决策分类调控治理过程，实现降本增效"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "市场需求：随着环保政策趋严，高效水质检测与治理的需求持续增长",
+      "竞争格局：目前市场上缺乏集成检测与智能治理的综合解决方案"
+    ],
+    "execution_plan": [
+      "完成从实验室原型到工业化设备的迭代升级",
+      "在雄安白洋淀、延安延河等重点流域开展规模化试点",
+      "构建覆盖多参数、多场景的全国性智慧水质大数据地图"
+    ],
+    "risk_control": [
+      "技术风险：持续优化AI模型，确保检测与治理的稳定性与准确性",
+      "政策风险：密切关注环保政策动态，确保产品符合最新法规要求"
+    ]
+  },
+  "tags": [
+    "category:环境保护",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 京芯智水——智慧赋能水质检测-治理协同系统创新力量 2 京芯智水——智慧赋能水质检测-治理协同系统创新力量 项目重点 PPT 展示 3 京芯智水——智慧赋能水质检测-治理协同系统创新力量 4 京芯智水——智慧赋能水质检测-治理协同系统创新力量",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:31:21Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "详细描述了检测不精准、治理依赖人工、协同效率低等痛点，并提供了具体用户场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线包括纸芯片开发、深度学习网络和协同控制算法，与项目目标匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未详细描述客户、价值主张、渠道、营收、成本等形成闭环的具体内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "描述了市场需求和竞争格局，指出市场上缺乏集成检测与智能治理的综合解决方案。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供单位经济模型或财务预测的具体数据。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了AI驱动的检测系统、智能决策调控和协同系统架构的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未详细描述团队背景和执行计划，里程碑较为模糊。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "PPT展示结构完整，但部分内容较为简略。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体获客渠道，但未表明难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未提供用户支付意愿验证。",
+      "reason": "提到定价/收费但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场规模口径描述合理，未发现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "竞品分析客观，指出市场上缺乏集成检测与智能治理的综合解决方案。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点有技术支撑，未发现不可验证的情况。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供财务数据，但未发现单位经济不成立的描述。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现自上而下估算的增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "里程碑较为模糊，未提供具体可交付物。",
+      "reason": "里程碑描述较为模糊，缺乏具体可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，或未提及合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与项目现状匹配，未发现资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及实验/测试，因此不存在实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "路演叙事结构完整，未发现断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "多个关键 Rubric 维度（如用户证据强度、商业模式一致性、财务逻辑、团队与执行）缺乏充分支撑证据。"
+    }
+  ]
+}

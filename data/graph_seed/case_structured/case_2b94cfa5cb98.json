@@ -1,0 +1,299 @@
+{
+  "case_id": "case_2b94cfa5cb98",
+  "document_id": "doc_b16688ad934e",
+  "source": {
+    "file_path": "教育服务/536732-育见先贤—基于多模态技术的历史人物交互式教育系统-项目策划书-34502047.pdf",
+    "file_name": "536732-育见先贤—基于多模态技术的历史人物交互式教育系统-项目策划书-34502047.pdf",
+    "category": "教育服务",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 15,
+    "full_text_chars": 16048,
+    "core_text_chars": 16048,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 16,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 16,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "EduSages: 基于多模态技术的历史人物交互式教育系统",
+    "target_users": [],
+    "pain_points": [
+      "传统教育方法难以建立情感连接，导致学习热情不足和效果有限"
+    ],
+    "solution": [
+      "利用多模态AI技术，提供与历史人物互动的教育体验，增强学习兴趣和效果"
+    ],
+    "innovation_points": [
+      "结合多模态技术，创造沉浸式学习环境"
+    ],
+    "business_model": [
+      "ᅦXტ༢๤ 15 [26] Fan W, Ding Y, Ning L, et al. A survey on rag meeting llms: Toward"
+    ],
+    "market_analysis": [],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:教育服务",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_2b94cfa5cb98_e1",
+      "type": "user_evidence",
+      "quote": "Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge.",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_2b94cfa5cb98_e2",
+      "type": "solution_evidence",
+      "quote": "EduSages: A Multimodal AI-Driven Interactive Educational System for Engaging with Historical Figures",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_2b94cfa5cb98_e3",
+      "type": "innovation_points_evidence",
+      "quote": "A Multimodal AI-Driven Interactive Educational System",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": false
+    }
+  ],
+  "summary": "2025 ୍ 3 ᄅ XXX2025 ୍็ᅞЖં໓ March. 2025 ტ༢๤ ᅦX1) ৙XX1) ຦XX1) ᅦX1)ݒX1) 1) (XXX,൧,ݓXXX) ᅋ ေ࿐༝ಣ౦a࿐༝ི ࿐ त ࿐ള ު ༢๤đ࿐ളૌॖၛ ࢝ ৯b ՍӮ EduSages: A Multimodal AI-Driven Interactive Educational System for Engaging with Historical Figures ZHANG X1) LI X1) W ANG X1) ZHANG X1) W ANG X1) GUO X1) 1) Abstract Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge. This often results in a lack of enthu- siasm fo",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:06:20Z",
+  "risk_flags": [
+    "H14",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出了传统教育方法的痛点，即难以建立情感连接，导致学习热情不足和效果有限。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出了利用多模态AI技术提供与历史人物互动的教育体验，技术路线较为清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未详细描述客户、价值主张、渠道、营收、成本等商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供市场规模（TAM/SAM/SOM）的具体数据，也未进行竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提及单位经济模型或财务逻辑的具体内容。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了多模态AI技术的创新性和差异化，能够提供沉浸式学习环境。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供团队背景和执行计划的具体信息。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": false,
+      "score": 5.0,
+      "reason": "提供的信息较为简略，缺乏完整的BP或路演材料。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及获客渠道，但未明确表示渠道不可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge.",
+      "reason": "提到定价/收费但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及市场规模的具体数据，但未出现口径混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge.",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及竞品分析，但未声称无竞品或无竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到了多模态AI技术的创新性和差异化，但未强调不可验证的创新点。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及具体的财务逻辑，因此无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及具体的时间表或里程碑，但未出现明显不现实的情况。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未涉及高风险领域，因此不存在合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及具体的实验设计，因此不存在不合格的情况。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "EduSages: A Multimodal AI-Driven Interactive Educational System for Engaging with Historical Figures",
+      "reason": "叙事结构较为简略，缺乏完整的故事线。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "Traditional education primarily relies on one-way, rote learning methods, making it difficult to establish an emotional connection between students and knowledge.",
+      "reason": "多个关键 Rubric 维度（R2, R4, R5, R6, R8, R9）缺乏支撑证据。"
+    }
+  ]
+}

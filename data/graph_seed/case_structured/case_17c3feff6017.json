@@ -1,0 +1,399 @@
+{
+  "case_id": "case_17c3feff6017",
+  "document_id": "doc_970152fbb1be",
+  "source": {
+    "file_path": "教育服务/云实验-互联网+项目策划书.pdf",
+    "file_name": "云实验-互联网+项目策划书.pdf",
+    "category": "教育服务",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 13,
+    "full_text_chars": 14133,
+    "core_text_chars": 11891,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 14,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 14,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "云实验",
+    "target_users": [
+      "初中、高中和大学阶段学习化学的学生"
+    ],
+    "pain_points": [
+      "化学实验消耗大量昂贵药品和器材，造成较高的经济成本。",
+      "化学实验会产生污染，对人体和环境造成影响，导致部分人对化工类工作和学科产生抵触。",
+      "高危化学实验存在操作风险，可能导致安全事故。",
+      "实验室资源紧张限制了学生的操作练习时间。"
+    ],
+    "solution": [
+      "开发一款虚拟化学实验APP，收录化学药品的理化性质、价格、反应条件及实验器材信息。",
+      "学生可在APP中输入原材料、规格用量及反应条件，APP自动进行虚拟反应并展示过程变化、现象及产物。",
+      "APP在实验结束后会指出操作错误并提供改正方案。",
+      "APP提供实验过程自主功能，允许学生手动组装仪器、控制操作时间和温度。"
+    ],
+    "innovation_points": [
+      "通过虚拟实验节约大量实验药品和器材，减少学校开支。",
+      "减少实验对环境的污染。",
+      "模拟高危实验以规避实际操作风险。",
+      "缓解实验室资源紧张问题，增加学生练习机会。"
+    ],
+    "business_model": [
+      "而化学也是一门以实验为基础的学科，化学离不开实验， 而化学作为当今社会非常重要的一类学科， 实际进行的化学实验也就显得尤为重要。",
+      "当今工业发展中化工厂也占据了很大的一部分， 工厂中时时刻刻都在进行实验。",
+      "而进行实验就避免不了需要药品和器材，药品的消耗的器材的损耗也是十分的巨大，有些原材料也是非常的昂贵， 这些损耗都需要消耗钱去解决；",
+      "并且了解化工的人都知道，化工中最避免不了的就是污染， 无论是对人体还是对环境都会产生一定的影响， 这也是现在很多人对化工类的工作和学科避之不及的一个主要原因。",
+      "因此这样一个可以在网络上进行化学实验的 APP 是一个很好的可以改变现状的工具。",
+      "学生可以在 APP 中输入原材料和原材料的规格用量以及反应的环境条件， APP会自动进行虚拟反应， 提供反应过程中的变化、 现象， 以及每一步会产生什么样的产物"
+    ],
+    "market_analysis": [
+      "结束后指出过程中的错误功能在虚拟实验结束后，过程中出现的一些错误 APP都会一一指出并且会根据实际情况给出最佳的改正方案",
+      "实验过程自主功能该功能会让学生在实验中自己动手组装实验所需的仪器以及每件仪器的规格，并且过程中的操作进行的时间和温度控制都需要学生手动进行操作。",
+      "因此学生们可以在实验的过程中学到一些东西，并且对于一些有创造性的学生也可以节约一些药品和时间。"
+    ],
+    "execution_plan": [
+      "前期阶段专注于开发能够进行简单化学实验的APP功能。",
+      "中期阶段引入教学中危险系数较高的实验模拟，用于训练学生的细节操作能力。",
+      "后期阶段模拟工业上的生产流程与产率收益计算，旨在帮助学生为工业生产发展作出贡献。"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:教育服务",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H13",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H7",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_17c3feff6017_e1",
+      "type": "user_evidence",
+      "quote": "学生们首次接触化学都是在初中，可能有的会早一些在初一，有的会晚一些在初三，但是每一个接触过化学的学生都会对化学的实验印象非常深刻",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_17c3feff6017_e2",
+      "type": "user_evidence",
+      "quote": "进行实验就避免不了需要药品和器材，药品的消耗的器材的损耗也是十分的巨大，有些原材料也是非常的昂贵，这些损耗都需要消耗钱去解决",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_17c3feff6017_e3",
+      "type": "user_evidence",
+      "quote": "化工中最避免不了的就是污染，无论是对人体还是对环境都会产生一定的影响，这也是现在很多人对化工类的工作和学科避之不及的一个主要原因",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_17c3feff6017_e4",
+      "type": "user_evidence",
+      "quote": "该APP会收录现有的化学药品的理化性质、市场上的价格、储存条件、各类反应的反应条件、反应的化学方程式，实验器材的市场价格、规格、使用方法以及功能",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_17c3feff6017_e5",
+      "type": "user_evidence",
+      "quote": "学生可以在APP中输入原材料和原材料的规格用量以及反应的环境条件，APP会自动进行虚拟反应，提供反应过程中的变化、现象，以及每一步会产生什么样的产物以及副产物",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_17c3feff6017_e6",
+      "type": "user_evidence",
+      "quote": "在虚拟实验结束后，过程中出现的一些错误APP都会一一指出并且会根据实际情况给出最佳的改正方案",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_17c3feff6017_e7",
+      "type": "user_evidence",
+      "quote": "该功能会让学生在实验中自己动手组装实验所需的仪器以及每件仪器的规格，并且过程中的操作进行的时间和温度控制都需要学生手动进行操作",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_17c3feff6017_e8",
+      "type": "user_evidence",
+      "quote": "我们团队规划发展大体分为前、中、后期三个时期：前期进行简单的实验；中期进行教学中危险系数较高的实验；后期模拟工业上生产流程、产率收益计算",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_17c3feff6017_e9",
+      "type": "user_evidence",
+      "quote": "可以节约大量的实验药品，减少学校的一大笔开销；可以减少一些实验对环境的污染；可以减少一些高危实验的风险；可以让学生有更多的时间进行实验操作",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_17c3feff6017_e10",
+      "type": "user_evidence",
+      "quote": "避免由于实验室紧张造成的尴尬状况",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_17c3feff6017_e11",
+      "type": "user_evidence",
+      "quote": "APP的改错功能也会让学生对自己错误有更加深刻的认识",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_17c3feff6017_e12",
+      "type": "user_evidence",
+      "quote": "实验过程细节操作全是由学生自己手动进行操作，所以也会锻炼学生对于实验的一些细节的把握",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 一、产品与服务介绍 1.1APP的设计 学生们首次接触化学都是在初中， 可能有的会早一些在初一， 有的会晚一些在初三， 但是每 一个接触过化学的学生都会对化学的实验印象非常深刻， 初中时候学生都会觉得化学实验很 好玩， 感觉一些现象很神奇。而化学也是一门以实验为基础的学科，化学离不开实验， 而化 学作为当今社会非常重要的一类学科， 实际进行的化学实验也就显得尤为重要。 当今工业发 展中化工厂也占据了很大的一部分， 工厂中时时刻刻都在进行实验。 而进行实验就避免不了 需要药品和器材，药品的消耗的器材的损耗也是十分的巨大，有些原材料也是非常的昂贵， 这些损耗都需要消耗钱去解决；并且了解化工的人都知道，化工中最避免不了的就是污染， 无论是对人体还是对环境都会产生一定的影响， 这也是现在很多人对化工类的工作和学科避 之不及的一个主要原因。因此这样一个可以在网络上进行化学实验的 APP 是一个很好的可 以改变现状的工具。 1.2APP所提供的服务 产品简介： 该 APP 会收录现有的化学药品的理化性质、市场上的价格、储存条件、各类反应的反应条 件、反应的化学方程式，实验器材的市场价格、规格、",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-05T15:09:42Z",
+  "risk_flags": [
+    "H10",
+    "H13",
+    "H14",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "H7",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "详细描述了化学实验的高成本、环境污染和操作风险等痛点，有明确的用户场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "没有提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术方案描述较为清晰，但未详细说明技术实现的具体资源需求。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未明确描述客户、价值主张、渠道、营收和成本等商业模型要素。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供市场规模的详细数据，也未进行竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供单位经济分析，也未说明成本和收入的具体情况。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出了虚拟实验的创新点，但未提供可验证的竞争优势或差异化指标。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未描述团队背景和执行能力，也未提供明确的里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 6.0,
+      "reason": "材料结构较为完整，但缺乏具体数据和说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张较为匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体获客渠道，但虚拟实验APP的渠道相对容易触达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "进行实验就避免不了需要药品和器材，药品的消耗的器材的损耗也是十分的巨大，有些原材料也是非常的昂贵，这些损耗都需要消耗钱去解决",
+      "reason": "提到节约成本但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "当今工业发展中化工厂也占据了很大的一部分，工厂中时时刻刻都在进行实验。",
+      "reason": "未提供具体的市场规模数据，口径和计算逻辑不明确。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "学生们首次接触化学都是在初中，可能有的会早一些在初一，有的会晚一些在初三，但是每一个接触过化学的学生都会对化学的实验印象非常深刻",
+      "reason": "缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "因此这样一个可以在网络上进行化学实验的 APP 是一个很好的可以改变现状的工具。",
+      "reason": "未进行竞品分析，声称无竞品或无竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "该 APP 的核心竞争力有以下几点：前期阶段专注于开发能够进行简单化学实验的APP功能。中期阶段引入教学中危险系数较高的实验模拟，用于训练学生的细节操作能力。后期阶段模拟工业上的生产流程与产率收益计算，旨在帮助学生为工业生产发展作出贡献。",
+      "reason": "强调创新点但未提供可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供足够的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "因此这样一个可以在网络上进行化学实验的 APP 是一个很好的可以改变现状的工具。",
+      "reason": "出现“只要拿下 1% 市场”等自上而下估算的逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "前期阶段专注于开发能够进行简单化学实验的APP功能。中期阶段引入教学中危险系数较高的实验模拟，用于训练学生的细节操作能力。后期阶段模拟工业上的生产流程与产率收益计算，旨在帮助学生为工业生产发展作出贡献。",
+      "reason": "时间表和里程碑描述不具体，缺乏可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，无需特别关注合规/伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术方案描述较为清晰，未发现资源不匹配的问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "在虚拟实验结束后，过程中出现的一些错误APP都会一一指出并且会根据实际情况给出最佳的改正方案。",
+      "reason": "提到实验功能但未说明样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "1.1APP的设计 1.2APP所提供的服务",
+      "reason": "叙事结构不完整，缺乏连贯性。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据。"
+    }
+  ]
+}

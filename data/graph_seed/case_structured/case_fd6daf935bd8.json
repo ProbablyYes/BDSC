@@ -1,0 +1,297 @@
+{
+  "case_id": "case_fd6daf935bd8",
+  "document_id": "doc_9e71a8a4c02c",
+  "source": {
+    "file_path": "智能制造/商业计划书-讯海智航——全流程新闻写作AI辅助平台.pdf",
+    "file_name": "商业计划书-讯海智航——全流程新闻写作AI辅助平台.pdf",
+    "category": "智能制造",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 54,
+    "full_text_chars": 46279,
+    "core_text_chars": 24,
+    "appendix_start_index": 2,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 55,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 55,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "商业计划书-讯海智航——全流程新闻写作AI辅助平台",
+    "target_users": [
+      "新闻记者",
+      "编辑人员",
+      "媒体机构"
+    ],
+    "pain_points": [
+      "新闻写作效率低",
+      "缺乏个性化创作工具"
+    ],
+    "solution": [
+      "提供全流程AI辅助写作平台",
+      "提升新闻创作效率和质量"
+    ],
+    "innovation_points": [
+      "基于大语言模型的写作辅助",
+      "个性化内容生成",
+      "多模态数据融合"
+    ],
+    "business_model": [
+      "定制化解决方案",
+      "数据分析服务"
+    ],
+    "market_analysis": [
+      "新闻行业数字化转型加速",
+      "AI辅助写作市场潜力巨大"
+    ],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:智能制造",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "第四届京彩大创北京大学生创新创业大赛 第 1 页",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:28:56Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中明确提到了新闻写作效率低和缺乏个性化创作工具的痛点，并有用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中没有提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "基于大语言模型的写作辅助、个性化内容生成和多模态数据融合的技术路线与资源匹配，但未详细说明具体实现细节。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "文本中提到了定制化解决方案和数据分析服务，但未详细说明客户、价值主张、渠道、营收、成本如何形成闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中提到新闻行业数字化转型加速和AI辅助写作市场潜力巨大，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中未提供具体的财务逻辑，如单位经济、LTV和CAC等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中强调了基于大语言模型的写作辅助、个性化内容生成和多模态数据融合的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中未提供团队背景和执行能力的具体信息，里程碑也不明确。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本结构较为完整，提到了项目的核心内容，但缺乏具体数据和细节支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提到具体的获客渠道，但未表明这些渠道难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提供全流程AI辅助写作平台 提升新闻创作效率和质量",
+      "reason": "文本中提到提供AI辅助写作平台，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未详细说明TAM/SAM/SOM口径，但未出现口径混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "新闻写作效率低 缺乏个性化创作工具",
+      "reason": "文本中提到新闻写作效率低和缺乏个性化创作工具的痛点，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未声称无竞品或无竞争对手，但竞品分析不够详细。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到的创新点较为具体，但未提供可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提供具体的财务逻辑，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现‘只要拿下1%市场’等自上而下估算的情况。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "第四届京彩大创北京大学生创新创业大赛 第 1 页",
+      "reason": "文本中提到参加创新创业大赛，但未提供具体的时间表或里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未涉及隐私、医疗、金融等高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未详细说明技术路线与资源匹配情况，但未表明技术方案要求远超项目现状。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提到具体的实验或测试，但未表明实验设计不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现叙事结构残缺或跳跃的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "",
+      "reason": "多个关键Rubric维度如用户证据强度、商业模式一致性、财务逻辑和团队与执行缺乏支撑证据。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
+  ]
+}

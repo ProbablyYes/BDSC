@@ -1,0 +1,297 @@
+{
+  "case_id": "case_5c7fb9130e91",
+  "document_id": "doc_5a75e959666b",
+  "source": {
+    "file_path": "工业制造/479531-灵嗅智探—氢能厂站 AI智能巡检系统 -项目策划书-86d0cc04.pdf",
+    "file_name": "479531-灵嗅智探—氢能厂站 AI智能巡检系统 -项目策划书-86d0cc04.pdf",
+    "category": "工业制造",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 50,
+    "full_text_chars": 18591,
+    "core_text_chars": 294,
+    "appendix_start_index": 3,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 51,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 51,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "灵嗅智探—氢能厂站 AI智能巡检系统",
+    "target_users": [
+      "加氢站及氢能储运企业",
+      "化工园区及涉氢生产厂站",
+      "能源监管与安全检测机构"
+    ],
+    "pain_points": [
+      "人工巡检在涉氢高危环境下存在人身安全风险",
+      "氢火焰在日光下不可见，传统监控难以有效识别初期火灾"
+    ],
+    "solution": [
+      "研发防爆型AGV+机械臂一体化巡检机器人",
+      "集成红外、紫外、气体泄漏及激光雷达等多传感器融合感知系统",
+      "开发巡检路线自主规划与异常实时预警"
+    ],
+    "innovation_points": [
+      "多模态火灾检测：结合温度、UV光波长及火焰参数构建精准检测方案",
+      "防爆底盘与机械臂协同：基于FAST-LIVO2算法与CAN总线协议，实现复杂厂站的平稳移动与精确采样"
+    ],
+    "business_model": [
+      "系统集成与运维：提供厂站智能化巡检系统整体解决方案及长期技术支持服务",
+      "数据监测服务：通过云平台为企业提供长期的安全监测数据分析报告"
+    ],
+    "market_analysis": [
+      "市场背景：双碳战略下氢能产业爆发式增长，氢能安全成为产业链刚需",
+      "行业现状：目前市面缺乏集“防爆、检测、操作、评估”于一体的高集成度巡检方案"
+    ],
+    "execution_plan": [],
+    "risk_control": [
+      "安全风险：机器人自身必须严格符合防爆标准，防止作业时产生电火花",
+      "耐受度风险：巡检机器人需在厂站极端室外环境下保持核心元器件的稳定工作"
+    ]
+  },
+  "tags": [
+    "category:工业制造",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "灵嗅智探 —氢能厂站 AI 智 能巡检系统 赛道：人工智能+应用赛领域 关键 ppt 内容展示 系统 氢 检 智能巡检 人 ： 氢 检 域 检 巡检 智能巡检 人 用 氢 氢 智能巡检 氢能厂站 智能巡检系统 系统 系统 能 检",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:57:17Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出人工巡检在涉氢高危环境下的安全风险及氢火焰在日光下不可见的问题，有具体用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线包括防爆型AGV、多传感器融合感知系统等，与项目需求匹配，但未详细说明资源情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提供整体解决方案及长期技术支持服务，商业模式较为合理，但未详细说明营收和成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "市场背景清晰，指出双碳战略下氢能产业的爆发式增长，但竞品分析较为简略。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供具体的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了多模态火灾检测、防爆底盘与机械臂协同等创新点，具有差异化优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未详细说明团队背景及执行能力，里程碑也未明确列出。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 6.0,
+      "reason": "PPT 内容展示较为完整，但部分信息重复，缺乏详细数据支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体获客渠道，但未见难以触达目标用户的证据。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "提到提供长期技术支持服务和数据监测服务，但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场背景清晰，未见市场规模口径混乱的证据。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未声称无竞品，但竞品分析较为简略。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "强调了多模态火灾检测、防爆底盘与机械臂协同等创新点，未见不可验证的证据。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "未提供具体的财务数据，无法判断单位经济是否成立。",
+      "reason": "未提供具体的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未见自上而下估算的表述。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
+      "reason": "未详细说明团队背景及执行能力，里程碑也未明确列出。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域的合规/伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与项目现状匹配，未见资源不匹配的证据。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体实验/测试，但未见实验设计不合格的证据。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "PPT 内容展示较为完整，未见叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "用户证据强度、财务逻辑、团队与执行等维度缺乏充分证据。"
+    }
+  ]
+}

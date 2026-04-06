@@ -1,0 +1,319 @@
+{
+  "case_id": "case_c661aa0d29b3",
+  "document_id": "doc_626a11534d9f",
+  "source": {
+    "file_path": "医疗健康/476125-超晰视界——手持超声图像跨域增强技术-项目策划书-237feb7a.pdf",
+    "file_name": "476125-超晰视界——手持超声图像跨域增强技术-项目策划书-237feb7a.pdf",
+    "category": "医疗健康",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 40,
+    "full_text_chars": 26991,
+    "core_text_chars": 17048,
+    "appendix_start_index": 25,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 41,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 41,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "手持超声图像跨域增强技术",
+    "target_users": [
+      "基层医疗机构",
+      "远程诊疗医生"
+    ],
+    "pain_points": [
+      "手持超声设备分辨率仅为高端设备 60%-70%"
+    ],
+    "solution": [
+      "基于改进型 CycleGAN 模型的无监督跨域增强技术",
+      "利用循环一致性损失解决非像素级配对难题",
+      "引入 SSIM 结构损失函数保留关键解剖结构信息",
+      "实现单一模型对多器官手持超声图像的通用增强"
+    ],
+    "innovation_points": [
+      "无监督跨域增强技术",
+      "多器官图像通用增强能力"
+    ],
+    "business_model": [
+      "支持基层筛查与远程诊疗",
+      "积极探索轻量化嵌入国产手持设备"
+    ],
+    "market_analysis": [
+      "响应健康中国 2030 战略",
+      "推动国产设备替代及智慧医疗升级"
+    ],
+    "execution_plan": [
+      "已部署医院原型系统支持基层筛查与远程诊疗",
+      "积极探索轻量化嵌入至国产手持设备"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】与医院合作确保数据合规使用"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_c661aa0d29b3_e1",
+      "type": "user_evidence",
+      "quote": "项目成果已部署医院原型系统支持基层筛查与远程诊疗",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_c661aa0d29b3_e2",
+      "type": "business_model_evidence",
+      "quote": "积极探索轻量化嵌入至国产手持设备，推动优质医疗资源普惠下沉",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_c661aa0d29b3_e3",
+      "type": "risk_evidence",
+      "quote": "与医院的临床合作表明，增强图像诊断一致性达 80%，肝脏病灶识别准确率提升至 92%",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "如何使手持设备产生和推车 式设备一致的成像结果？ 硬件的限制 图像质量下降 诊断准确率下降 ≈ 1 项目背景 算法原理 实验方案 实验结果 团队协作 手持式 设备 推车式 设备 2 项目背景 算法原理 实验方案 实验结果 团队协作 循环一致性损失 对抗损失 低质量图像a 高质量图像b 伪高质量图像b 重建低质量图像a 伪低质量图像a 重建高质量图像b 循环一致性损失 结构相似性损失 循环一致性损失 结构相似性损失 对抗损失 对抗损失 结构相似性损失 数据集1：志愿者的 84 张颈动脉超声图像。 数据集2：600 名女性患者的 780 张乳腺超声图像 数据集3：25,272 张乳腺超声图像（含良/恶性病变） 3 项目背景 算法原理 实验方案 实验结果 团队协作 1-重建阶段 2-微调阶段 微调数据集 甲状腺、乳腺、颈动脉、肝脏、肾脏 各210对高质量和低质量图像对 让模型学习超声图像通用特征 让模型获得各个器官超声图像增强能力 重建数据集部分来源 LNCC↑ PSNR↑ SSIM↑ 低质量图像 0.8671 22.5423 0.6415 CycleGAN 0.8953 27.2516 0",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:49:47Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了手持超声设备分辨率低的问题，影响了诊断准确率，有具体的用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了与医院的临床合作，但未提供具体的访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目基于改进型 CycleGAN 模型，技术路线合理，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目提到支持基层筛查与远程诊疗，但未详细说明客户、价值主张、渠道、营收、成本等商业闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未提供 TAM/SAM/SOM 的具体数据，也未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供单位经济模型或财务预测，无法判断 LTV 与 CAC。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了无监督跨域增强技术和多器官图像通用增强能力，具有明显的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细说明团队成员背景和具体里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目结构较为完整，提供了实验数据和结果，但部分商业信息缺失。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户为基层医疗机构和远程诊疗医生，价值主张为提高手持超声设备的图像质量，二者匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到已部署医院原型系统，支持基层筛查与远程诊疗，渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证",
+      "reason": "项目未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "TAM/SAM/SOM 口径或计算逻辑混乱",
+      "reason": "项目未提供 TAM/SAM/SOM 的具体数据。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据",
+      "reason": "项目未提供具体的访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，但未详细分析竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了实验数据和结果，创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "根据描述可以判断 LTV <= CAC 或长期亏损",
+      "reason": "项目未提供单位经济模型或财务预测，无法判断 LTV 与 CAC。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现‘只要拿下 1% 市场’等自上而下估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物",
+      "reason": "项目未详细说明具体里程碑和时间表。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到与医院合作确保数据合规使用。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目基于改进型 CycleGAN 模型，技术路线合理，未显示资源不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了详细的实验设计，包括数据集和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目叙事结构较为完整，提供了背景、技术原理、实验方案和结果。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据",
+      "reason": "项目在用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行等维度缺乏充分证据。"
+    }
+  ]
+}

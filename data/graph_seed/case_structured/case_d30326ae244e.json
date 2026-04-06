@@ -1,0 +1,360 @@
+{
+  "case_id": "case_d30326ae244e",
+  "document_id": "doc_949104615d4e",
+  "source": {
+    "file_path": "医疗健康/478797-明眸智芯-眼部智能软芯片健康监测开拓者-项目策划书-c1d26af0.pdf",
+    "file_name": "478797-明眸智芯-眼部智能软芯片健康监测开拓者-项目策划书-c1d26af0.pdf",
+    "category": "医疗健康",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 76,
+    "full_text_chars": 46469,
+    "core_text_chars": 1730,
+    "appendix_start_index": 8,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 77,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 77,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "明眸智芯",
+    "target_users": [
+      "青光眼患者"
+    ],
+    "pain_points": [
+      "传统眼压监测设备误差大",
+      "24 小时监测需在医院完成，占用医疗资源",
+      "夜间眼压峰值难以捕捉，导致用药延误"
+    ],
+    "solution": [
+      "研发半植入式智能软芯片",
+      "实现 0.02 mmHg 分辨率，误差大幅降低",
+      "24 小时实时监测眼压，数据上传延迟 50 ms 内"
+    ],
+    "innovation_points": [
+      "采用角膜缘半植入方案，规避全植入手术风险"
+    ],
+    "business_model": [
+      "单个芯片成本控制在 150 元内",
+      "计划 2029 年获批后覆盖 30%青光眼高危人群",
+      "年减少盲症约 5 万例，提供慢性病管理支撑"
+    ],
+    "market_analysis": [
+      "我国青光眼患病人群已超 7000 万",
+      "现有技术体系存在结构性缺陷",
+      "预计 2029 年获批后覆盖 30%青光眼高危人群"
+    ],
+    "execution_plan": [
+      "2024 年进入多中心临床试验阶段",
+      "计划纳入 2000 例样本完成循证医学验证",
+      "预计 2029 年获批后覆盖 30%青光眼高危人群"
+    ],
+    "risk_control": [
+      "【通用风险控制】半植入式方案需严格遵守医疗伦理，确保患者安全"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H11",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_d30326ae244e_e1",
+      "type": "user_evidence",
+      "quote": "我国青光眼患病人群已超 7000 万，作为全球第二大致盲性眼病，其致盲率达 10%，且病程不可逆。",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_d30326ae244e_e2",
+      "type": "pain_points_evidence",
+      "quote": "当前传统眼压监测设备存在显著局限，Goldmann 压平眼压计等单点测量设备受角膜厚度、患者配合度影响，误差达±5 mmHg，24 小时监测需在医院完成，不仅占用医疗资源，更难捕捉夜间眼压峰值。",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_d30326ae244e_e3",
+      "type": "solution_evidence",
+      "quote": "针对上述痛点，团队研发半植入式智能软芯片，构建\"感知-传输-供能-分析\"四位一体技术架构。",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_d30326ae244e_e4",
+      "type": "innovation_points_evidence",
+      "quote": "在人工智能设计理念上，突破了传统可穿戴设备体表附着模式，我们采用角膜缘半植入方案——0.13 mm 厚的柔性芯片在生物质水凝胶支持下紧密附着角膜，既规避全植入手术风险，又克服接触式传感器运动干扰。",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_d30326ae244e_e5",
+      "type": "business_model_evidence",
+      "quote": "成本约 3200 元。生产采用大规模激光直写配合水转印技术，单个芯片成本控制在 150 元内，远低于进口设备（约 2 万元/套） 。",
+      "chunk_id": "C2",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_d30326ae244e_e6",
+      "type": "market_analysis_evidence",
+      "quote": "预计 2029 年获批后覆盖 30%青光眼高危人群，年减少盲症约 5 万例，为\"健康中国 2030\"慢性病管理提供关键支撑，其技术框架亦为帕金森震颤监测等领域提供可复用方案。",
+      "chunk_id": "C2",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_d30326ae244e_e7",
+      "type": "execution_plan_evidence",
+      "quote": "目前项目已进入 2024 年多中心临床试验阶段，计划纳入 2000 例样本完成循证医学验证。",
+      "chunk_id": "C2",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_d30326ae244e_e8",
+      "type": "risk_evidence",
+      "quote": "团队历经 3 年跨学科协作，完成从核心技术突破到临床预试验的全链条开发，50 例原发性开角型青光眼患者预试验显示，24 小时眼压曲线捕捉完整度较传统方法提升 82%，医生调整用药方案的依据充分性评分提高 37 分（百分制）。",
+      "chunk_id": "C2",
+      "source_unit": "page_7"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "明眸智芯——眼部智能软芯片健康监测开拓者 摘要 I 摘 要 我国青光眼患病人群已超 7000 万，作为全球第二大致盲性眼病，其致盲率达 10%，且病程不可逆。当前传统眼压监测设备存在显著局限，Goldmann 压平眼压 计等单点测量设备受角膜厚度、 患者配合度影响， 误差达±5 mmHg，24 小时监测 需在医院完成， 不仅占用医疗资源， 更难捕捉夜间眼压峰值。 然而，研究显示 63% 的青光眼急性发作发生在睡眠时段，这种监测断层导致 30%患者因用药延误加剧 视神经损伤，现有技术体系的结构性缺陷亟待突破。 针对上述痛点， 团队研发半植入式智能软芯片， 构建\"感知-传输-供能-分析\"四 位一体技术架构。核心感知层采用基于惠斯通电桥结构的 MEMS 压力传感器，通 过 3 μm 超薄 P(VDF-TrFE)薄膜实现 0.02 mmHg 分辨率， 较传统设备提升五十个数 量级。传输层集成 BLE 模块，可穿透 8 mm 组织屏障实现数据实时上传，延迟控 制在 50 ms 内。供能系统融合微型固态电容器（1.2 mF）、热电转换单元（Seebeck 系数 28 mV/K）与近场无线充电模块（",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:52:00Z",
+  "risk_flags": [
+    "H10",
+    "H11",
+    "H15",
+    "H3",
+    "H5",
+    "H8",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 9.0,
+      "reason": "详细描述了青光眼患者的需求痛点，包括传统设备的误差大、24小时监测需在医院完成、夜间眼压峰值难以捕捉等。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "提到 63% 的青光眼急性发作发生在睡眠时段，但缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "详细描述了半植入式智能软芯片的技术架构，包括感知、传输、供能、分析四个层面，技术路线清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "描述了客户（青光眼高危人群）、价值主张（24小时实时监测眼压）、渠道（医疗渠道）、营收（单个芯片成本控制在150元内）和成本，但未详细说明具体的商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "提供了我国青光眼患病人群的数据，预计 2029 年获批后覆盖 30%青光眼高危人群，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到单个芯片成本控制在 150 元内，但未提供详细的财务模型和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "强调了半植入式智能软芯片的创新点，包括高分辨率、低延迟、低成本等，具有明显的竞争优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供团队背景和执行能力的具体信息，里程碑描述较为笼统。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "BP/路演结构完整，数据有说服力，但部分技术细节描述较为复杂。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户（青光眼高危人群）与价值主张（24小时实时监测眼压）匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提到具体获客渠道，但预计通过医疗渠道触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "成本约 3200 元。生产采用大规模激光直写配合水转印技术，单个芯片成本控制在 150 元内，远低于进口设备（约 2 万元/套）",
+      "reason": "提到定价为 150 元，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "TAM/SAM/SOM 口径合理，预计 2029 年获批后覆盖 30%青光眼高危人群。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "研究显示 63% 的青光眼急性发作发生在睡眠时段，这种监测断层导致 30%患者因用药延误加剧视神经损伤，现有技术体系的结构性缺陷亟待突破。",
+      "reason": "缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未声称无竞品，但未详细分析竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提供了可验证的创新点，如高分辨率、低延迟、低成本等。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "成本约 3200 元。生产采用大规模激光直写配合水转印技术，单个芯片成本控制在 150 元内，远低于进口设备（约 2 万元/套）",
+      "reason": "提到单个芯片成本控制在 150 元内，但未提供详细的财务模型和单位经济分析，无法判断 LTV > CAC。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "预计 2029 年获批后覆盖 30%青光眼高危人群，年减少盲症约 5 万例，为'健康中国 2030'慢性病管理提供关键支撑。",
+      "reason": "出现‘只要拿下 30% 市场’等自上而下估算，缺乏具体增长路径。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "2024 年进入多中心临床试验阶段，计划纳入 2000 例样本完成循证医学验证，预计 2029 年获批后覆盖 30%青光眼高危人群。",
+      "reason": "时间表和里程碑较为笼统，缺乏具体可交付物和执行细节。"
+    },
+    {
+      "id": "H11",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "【通用风险控制】半植入式方案需严格遵守医疗伦理，确保患者安全。",
+      "reason": "涉及医疗领域，但未详细说明如何遵守医疗伦理和确保患者安全。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配，未显示技术方案对算力/硬件/人才要求远超项目现状。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到多中心临床试验，计划纳入 2000 例样本完成循证医学验证，实验设计合理。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "BP/路演结构完整，数据有说服力，未出现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "",
+      "reason": "多个关键 Rubric 维度（用户证据强度、财务逻辑、团队与执行）缺乏支撑证据。"
+    }
+  ]
+}

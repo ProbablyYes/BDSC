@@ -1,4 +1,45 @@
-关键限制：学生端提供class_id
-能力映射与规则覆盖模块需要class_id生成班级总览
-教学干预模块需要 > 0.4 的触发比例才会返回前5个共性问题
-如果班级学生少，可能没有问题达到40%的阈值
+sk-pgsdwxwaesurkysareigrhiklztiwnqgosqtzhbkiwxsjucg
+
+LLM_FAST_MODEL=Qwen/Qwen2.5-14B-Instruct
+LLM_REASON_MODEL=Qwen/Qwen2.5-72B-Instruct
+
+
+conversation下的json文件中的project_id 对应的就是users.json里面的user_id
+
+
+
+1.下载代码 2.安装需要的依赖 3.自己手动加一个.env文件然后把代码复制进去  4.检查端口 5.登录教师端看neo4j的连接情况 6.用pm持续运行不中断，如果没有就先下载，有的话用这个语句运行在后台
+
+NEXT_PUBLIC_API_BASE
+
+git pull
+remote: Internal Server Error
+fatal: unable to access 'https://github.com/ProbablyYes/BDSC.git/': The requested URL returned error: 500
+
+pip install . -i https://pypi.tuna.tsinghua.edu.cn/simple
+直接按依赖列表手动用 pip 安装
+
+export PATH=/home/inspur/datastore/student_groups/group03/BDSC/node-v18.18.0-linux-x64/bin:$PATH
+服务器ip：121.14.82.109
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8037
+npm run build
+npx next start -p 8033
+只要前端配置的 NEXT_PUBLIC_API_BASE 指向正确的后端地址和端口就行；把请求发到哪台机器、哪个端口的后端；前端在本机，后端在服务器
+
+export PATH=/home/inspur/datastore/student_groups/group03/BDSC/node-v18.18.0-linux-x64/bin:$PATH && cd /home/inspur/datastore/student_groups/group03/BDSC/apps/backend && pm2 -v
+export PATH=/home/inspur/datastore/student_groups/group03/BDSC/node-v18.18.0-linux-x64/bin:$PATH && cd /home/inspur/datastore/student_groups/group03/BDSC/apps/web && pm2 -v
+pm2 start "python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8037" --name backend-8037
+pm2 start "npm run start" --name web-8030
+pm2 delete backend-8037
+pm2 delete web-8030
+
+SECTION_KEYWORDS = {
+    "target_users": ["用户", "客户", "目标群体", "目标人群", "受众", "使用者"],
+    "pain_points": ["痛点", "问题", "需求", "难点", "困境", "现状不足", "矛盾"],
+    "solution": ["解决方案", "本项目", "方案", "产品", "我们提出", "系统", "平台", "产品"],
+    "innovation_points": ["创新", "创新点", "特色", "差异化", "独特", "核心优势"],
+    "business_model": ["商业模式", "盈利", "盈利模式", "收入", "收费", "付费", "变现"],
+    "market_analysis": ["市场", "竞品", "竞争", "份额", "规模", "需求趋势"],
+    "execution_plan": ["里程碑", "计划", "进度", "实施路径", "阶段", "时间表", "步骤"],
+    "risk_control": ["风险", "风控", "隐患", "合规", "伦理", "隐私", "数据安全", "预案", "防范"],
+}

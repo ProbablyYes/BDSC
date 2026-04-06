@@ -1,0 +1,345 @@
+{
+  "case_id": "case_bcf9f7824942",
+  "document_id": "doc_8445d8c442b6",
+  "source": {
+    "file_path": "其他/457623-星眸智析--多模态卫星时空变化与未来推演系统-项目策划书-44ee2220.pdf",
+    "file_name": "457623-星眸智析--多模态卫星时空变化与未来推演系统-项目策划书-44ee2220.pdf",
+    "category": "其他",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 70,
+    "full_text_chars": 44385,
+    "core_text_chars": 1031,
+    "appendix_start_index": 7,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 71,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 71,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "星眸智析--多模态卫星时空变化与未来推演系统",
+    "target_users": [
+      "智慧城市管理者",
+      "生态治理专家",
+      "国防应急部门"
+    ],
+    "pain_points": [
+      "传统遥感图像分析方法难以满足实际需求",
+      "现有技术缺乏对未来变化趋势的预测能力",
+      "多模态数据融合存在模态结构差异大、特征对齐困难等挑战"
+    ],
+    "solution": [
+      "构建端到端的统一处理框架TAMMs",
+      "引入轻量级时间建模模块LTAM",
+      "设计上下文时序提示机制CTP",
+      "将3D ControlNet结构融入扩散生成模型"
+    ],
+    "innovation_points": [
+      "实现不规则时间戳与图像、文本语义信息的融合对齐",
+      "利用历史观测数据增强变化趋势理解能力",
+      "确保生成影像与历史轨迹的一致性"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "智慧城市、生态治理和国防应急等领域对遥感时序数据的依赖日益增加"
+    ],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:其他",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_bcf9f7824942_e1",
+      "type": "pain_points_evidence",
+      "quote": "传统遥感图像分析方法面临难以满足实际需求的瓶颈。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e2",
+      "type": "pain_points_evidence",
+      "quote": "现有技术大多侧重于静态变化检测，只能对已经发生的地物变化进行事后分析，缺乏对未来变化趋势的预测能力。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e3",
+      "type": "pain_points_evidence",
+      "quote": "遥感图像、时间信息与语义描述等多模态数据融合仍存在模态结构差异大、特征对齐困难等挑战。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e4",
+      "type": "solution_evidence",
+      "quote": "本项目提出“星眸智析——多模态卫星时空变化与未来推演系统”，围绕遥感图像的时序建模、语义理解和图像预测三大关键任务，构建了一个端到端的统一处理框架TAMMs。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e5",
+      "type": "innovation_points_evidence",
+      "quote": "引入轻量级时间建模模块LTAM，实现将不规则时间戳编码为结构化特征并与图像、文本语义信息融合对齐。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e6",
+      "type": "innovation_points_evidence",
+      "quote": "设计上下文时序提示机制CTP，利用历史观测数据增强系统对变化趋势的理解能力。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e7",
+      "type": "innovation_points_evidence",
+      "quote": "将3D ControlNet结构融入扩散生成模型，实现对未来场景合成的精细控制，确保生成影像与历史轨迹的一致性。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bcf9f7824942_e8",
+      "type": "market_analysis_evidence",
+      "quote": "随着智慧城市、生态治理和国防应急等领域对遥感时序数据的依赖日益增加，传统遥感图像分析方法面临难以满足实际需求的瓶颈。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "摘要 随着智慧城市、 生态治理和国防应急等领域对遥感时序数据的依赖日益增加，传统遥感图像分析方法面临难以满足实际需求的瓶颈。 现有技术大多侧重于静态变化检测，只能对已经发生的地物变化进行事后分析，缺乏对未来变化趋势的预测能力。同时，遥感图像、时间信息与语义描述等多模态数据融合仍存在模态结构差异大、特征对齐困难等挑战。这导致基于长序列的生成模型常出现时间逻辑混乱和地物演化脱节的现象， 削弱了生成结果在动态监测、 趋势评估中的实用性。例如， 一些扩散模型 （如DiffusionSat） 可以根据元数据生成逼真的单时相图像，但由于缺乏时间建模机制，其生成的多时序结果往往与历史发展趋势不一致，表现为地物突变、结构错乱、时序断裂等问题。再如，一些针对卫星影像的变化描述模型（如SITSCC时序变化描述模型）能生成多时相影像的文字说明，但只支持很短的时间序列，且无法抽象总结变化背后的因果关系。这些局限表明，当前亟需一种能够同时理解历史变化并预测未来演变的统一方法， 来面向复杂多变的地理环境，实现跨时间尺度的遥感影像智能分析与推演。 本项目提出“星眸智析——多模态卫星时空变化与未来推演系统” ，围绕遥",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:39:12Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了传统遥感图像分析方法的局限性，包括难以满足实际需求、缺乏未来变化趋势预测能力以及多模态数据融合的挑战。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了端到端的统一处理框架TAMMs，引入了轻量级时间建模模块LTAM和上下文时序提示机制CTP，技术路线较为清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未详细描述客户、价值主张、渠道、营收和成本等商业模式相关的内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了智慧城市、生态治理和国防应急等领域的市场需求，并指出了现有技术的局限性。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供任何财务逻辑或单位经济的分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了其在多模态数据融合和未来变化趋势预测方面的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供团队背景和执行计划的具体信息。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，描述清晰，但缺乏具体的数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的获客渠道，但未表明这些渠道难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未提供用户支付意愿验证的证据。",
+      "reason": "项目提到定价/收费但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述中未出现TAM/SAM/SOM口径或计算逻辑混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。",
+      "reason": "项目缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了现有技术的局限性，但未声称无竞品或无竞争对手。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目强调了创新点，并提供了一些技术细节来支持这些创新。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供财务逻辑，因此无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现‘只要拿下1%市场’等自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的时间表或里程碑，但未表明这些计划不现实或缺少可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域，如隐私、医疗或金融。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述的技术方案与现有资源匹配度较高，未出现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的实验设计，但未表明实验设计不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未出现叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性和财务逻辑。",
+      "reason": "项目在多个关键 Rubric 维度上缺乏充分的支撑证据。"
+    }
+  ]
+}

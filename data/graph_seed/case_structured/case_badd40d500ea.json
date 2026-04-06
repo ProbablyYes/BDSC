@@ -1,0 +1,364 @@
+{
+  "case_id": "case_badd40d500ea",
+  "document_id": "doc_6a65e1585e58",
+  "source": {
+    "file_path": "工业制造/469906-“仪探究净”基于深度学习的红外无损检测系统-项目策划书-c208324f.pdf",
+    "file_name": "469906-“仪探究净”基于深度学习的红外无损检测系统-项目策划书-c208324f.pdf",
+    "category": "工业制造",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 63,
+    "full_text_chars": 49050,
+    "core_text_chars": 36424,
+    "appendix_start_index": 49,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 64,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 64,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "469906-“仪探究净”基于深度学习的红外无损检测系统",
+    "target_users": [
+      "中高端制造业企业",
+      "汽车制造商"
+    ],
+    "pain_points": [
+      "焊接质量不过关导致召回",
+      "破坏性检测成本高",
+      "无损检测人工参与度高，效率低下"
+    ],
+    "solution": [
+      "基于深度学习的红外无损检测系统",
+      "无损耗评估材料质量，低成本检测微小缺陷"
+    ],
+    "innovation_points": [
+      "深度学习技术提高检测精度",
+      "自动化检测提升效率"
+    ],
+    "business_model": [
+      "为制造业企业提供无损检测服务",
+      "降低企业检测成本，提升产品质量"
+    ],
+    "market_analysis": [
+      "我国已有 200 多个工业品的产业规模达到世界领先水平"
+    ],
+    "execution_plan": [
+      "响应国家智能制造发展规划",
+      "推动中高端制造业产业结构升级"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:工业制造",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H7"
+  ],
+  "evidence": [
+    {
+      "id": "case_badd40d500ea_e1",
+      "type": "user_evidence",
+      "quote": "焊接作为工业制造流程中常用的金属连接工艺，对工业产品的质量及安全性能至关重要。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e2",
+      "type": "pain_points_evidence",
+      "quote": "焊接质量不过关不仅给制造业企业带来数以亿计的经济损失与名誉损失，还会对社会公共设施带来极大的安全隐患。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e3",
+      "type": "solution_evidence",
+      "quote": "无损检测在工业界起着至关重要的作用，它不仅能无损耗地评估材料的质量，还可以相对低成本的检测出制造过程中的微小缺陷，如裂纹、变形、气孔、氧化等。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e4",
+      "type": "innovation_points_evidence",
+      "quote": "质量检测的智能化是提升质量检测水平和提高检测效率的“一剂良药”。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e5",
+      "type": "business_model_evidence",
+      "quote": "无损检测在工业界起着至关重要的作用，它不仅能无损耗地评估材料的质量，还可以相对低成本的检测出制造过程中的微小缺陷，如裂纹、变形、气孔、氧化等。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e6",
+      "type": "market_analysis_evidence",
+      "quote": "目前，我国已有 200 多个工业品（占世界全部工业产品种类的 32%）的产业规模达到了世界领先水平。",
+      "chunk_id": "C3",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_badd40d500ea_e7",
+      "type": "execution_plan_evidence",
+      "quote": "为积极响应国家《“十四五”智能制造发展规划》和《中国制造 2025》规划，近年来，中高端制造业的企业都在致力于各自领域的产业结构升级。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e8",
+      "type": "risk_control_evidence",
+      "quote": "确保检测系统符合国家智能制造标准，提升企业智能化水平。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_badd40d500ea_e9",
+      "type": "risk_control_evidence",
+      "quote": "通过深度学习技术，确保检测系统的准确性和可靠性。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "2025 挑战杯 摘要 作为制造强国建设的主攻方向，智能制造发展水平关乎我国未来制造业的全 球地位。发展智能制造，对于加快发展现代产业体系，巩固壮大实体经济根基， 构建新发展格局，建设数字中国具有重要意义。 在国家《“十四五”智能制造发展规划》和《中国制造 2025》规划中，提出了 全面推动制造业向自动化、智能化方向发展的要求，为响应国家的号召，近年来， 中高端制造业的企业都在致力于各自领域的产业结构升级。焊接作为工业制造流 程中常用的金属连接工艺，对工业产品的质量及安全性能至关重要。例如，在汽 车制造业，多家名牌车企，如捷豹路虎、东风日产、雷克萨斯和奔驰等品牌近几 年都曾因焊接质量不过关而被迫发起召回。焊接质量不过关不仅给制造业企业带 来数以亿计的经济损失与名誉损失，还会对社会公共设施带来极大的安全隐患。 今天，在工业界常见的焊点检测方式主要是破坏性方法。这种破坏性后期生 产测试的性质意味着只能对庞大复杂的工业产品中的少量焊缝进行质量抽样，相 对而言，极大多数的焊点都不会被检查，由于其他加工工艺造成的工业缺陷（如 裂纹，气孔等）也会被忽略。此外，破坏性的检测方法具有非常高的成本。以汽",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:56:03Z",
+  "risk_flags": [
+    "H13",
+    "H15",
+    "H3",
+    "H5",
+    "H7"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "需求真实具体，有用户场景支撑"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "缺乏用户访谈、问卷等原始证据"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线合理，但未详细说明资源匹配情况"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未明确描述客户、价值主张、渠道、营收、成本的闭环"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "市场描述合理，但竞品分析不够详细"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供单位经济模型或财务预测"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了创新点，但未提供具体验证实验"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未详细描述团队能力和执行计划"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "材料展示结构完整，但数据说服力一般"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及主要获客渠道，但假设渠道可达"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证",
+      "reason": "提到降低企业检测成本，但未提供用户支付意愿验证"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场规模口径描述合理"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据",
+      "reason": "未提供用户访谈、问卷等需求验证证据"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未声称无竞品，但竞品分析不够详细"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "强调创新/颠覆但缺少可验证的实验或指标",
+      "reason": "强调了创新点，但未提供具体验证实验或指标"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供财务数据，无法判断单位经济是否成立"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未出现自上而下的增长逻辑估算"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体里程碑，但假设可交付"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域合规/伦理问题"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配情况未详细说明，但假设匹配"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到实验/测试但缺少样本量与评价指标",
+      "reason": "提到提高检测精度和效率，但未提供具体实验设计和评价指标"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "材料展示结构完整，但数据说服力一般"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据",
+      "reason": "用户证据强度、商业模式一致性、财务逻辑、团队与执行等维度缺乏充分证据"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    }
+  ]
+}

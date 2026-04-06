@@ -1,0 +1,308 @@
+{
+  "case_id": "case_2d9dfeac57ca",
+  "document_id": "doc_4e0112e7458a",
+  "source": {
+    "file_path": "农业发展/474266-千帆助农：基于百度千帆平台的农业灾害预警决策助手-项目策划书-92795855.pdf",
+    "file_name": "474266-千帆助农：基于百度千帆平台的农业灾害预警决策助手-项目策划书-92795855.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 50,
+    "full_text_chars": 39985,
+    "core_text_chars": 2,
+    "appendix_start_index": 6,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 51,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 51,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "474266-千帆助农：基于百度千帆平台的农业灾害预警决策助手",
+    "target_users": [
+      "普通农户（特别是对灾害敏感度高的小规模种植者）",
+      "农业合作社及农业生产基地管理者",
+      "基层农技推广人员"
+    ],
+    "pain_points": [
+      "传统灾害响应模式依赖经验，响应时效性差",
+      "农业防灾知识门槛高，普通农户难以理解专业防灾指令",
+      "灾害发生后缺乏个性化的补救和防治方案生成",
+      "方言识别与图像识别在传统农业工具中适配性不足"
+    ],
+    "solution": [
+      "利用百度千帆平台大模型构建数据+知识双驱动的农业灾害助手",
+      "建立三级输出体系：生长周期预测模型、农学防治方案生成、多场景应急预案匹配",
+      "集成多模态交互，支持方言识别与农作物病害图像识别",
+      "构建72类主要农作物的灾害敏感度矩阵，实现精准预警"
+    ],
+    "innovation_points": [
+      "AI工作流动态记忆管理：实现灾害响应闭环流程",
+      "农业生理周期耦合模型：将灾害影响转化为因果链条",
+      "方言与视觉融合技术：解决农业终端的交互难题"
+    ],
+    "business_model": [
+      "B2C模式：为农户提供会员制预警与专家建议服务",
+      "B2B模式：向农业生产基地或合作社出售系统定制化集成服务",
+      "数据增值服务：为保险公司或政府部门提供区域性农业灾害数据报告"
+    ],
+    "market_analysis": [
+      "覆盖种植业、渔业、畜牧业、林业等全农业领域，市场潜力巨大",
+      "本项目更侧重灾害预警的决策闭环与复杂场景的应急预案匹配"
+    ],
+    "execution_plan": [
+      "技术研发阶段：完成72类作物敏感度矩阵构建与模型微调",
+      "产品化阶段：通过百度千帆APPBuilder快速部署智能交互体系",
+      "落地推广阶段：选择特定地区进行MVP测试，验证响应时效与成本效益比"
+    ],
+    "risk_control": [
+      "技术风险：解决高并发场景下的任务执行延迟问题",
+      "合规风险：严格遵守农业数据安全与隐私保护相关规定"
+    ]
+  },
+  "tags": [
+    "category:农业发展",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H9"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "zz",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:44:37Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H6",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了传统灾害响应模式的不足，包括依赖经验、知识门槛高、缺乏个性化方案等，且有具体用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目基于百度千帆平台，构建了数据+知识双驱动的灾害预警决策助手，技术路线清晰，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了B2C和B2B两种商业模式，以及数据增值服务，但未详细说明成本和收益的具体构成。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目提到覆盖全农业领域，市场潜力巨大，但未提供具体的TAM/SAM/SOM数据，也未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV和CAC等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了AI工作流动态记忆管理、农业生理周期耦合模型、方言与视觉融合技术等创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细说明团队背景和执行能力，里程碑较为笼统。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，但部分数据和逻辑需要进一步验证。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目目标用户与价值主张较为匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及主要获客渠道，但未明确表示难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "B2C模式：为农户提供会员制预警与专家建议服务",
+      "reason": "项目提到定价/收费但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的TAM/SAM/SOM数据，但未发现口径或计算逻辑混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "普通农户（特别是对灾害敏感度高的小规模种植者） 农业合作社及农业生产基地管理者 基层农技推广人员",
+      "reason": "项目缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "本项目更侧重灾害预警的决策闭环与复杂场景的应急预案匹配",
+      "reason": "项目声称无竞品或竞品分析明显失真，未提供客观的竞品对比。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目强调了多个创新点，并提供了具体的技术方案。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，但未发现明显的单位经济不成立问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "覆盖种植业、渔业、畜牧业、林业等全农业领域，市场潜力巨大",
+      "reason": "项目出现了‘只要拿下1%市场’等自上而下估算的表述。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "落地推广阶段：选择特定地区进行MVP测试，验证响应时效与成本效益比",
+      "reason": "项目里程碑较为笼统，缺乏具体可交付物的时间表。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到合规风险并表示会遵守相关规定，但未提供具体措施。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目基于百度千帆平台，技术路线与资源匹配度较高。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体实验，但未发现实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未发现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "",
+      "reason": "项目多个关键Rubric维度缺乏支撑证据，如用户证据强度、财务逻辑、团队与执行等。"
+    }
+  ]
+}

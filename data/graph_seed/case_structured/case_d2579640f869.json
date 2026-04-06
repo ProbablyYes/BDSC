@@ -1,0 +1,332 @@
+{
+  "case_id": "case_d2579640f869",
+  "document_id": "doc_1d1dda498339",
+  "source": {
+    "file_path": "农业发展/532015-献计献策：云计策数智农业产品化解决方案-项目策划书-cb4bc081.pdf",
+    "file_name": "532015-献计献策：云计策数智农业产品化解决方案-项目策划书-cb4bc081.pdf",
+    "category": "农业发展",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 56,
+    "full_text_chars": 31905,
+    "core_text_chars": 1367,
+    "appendix_start_index": 31,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 57,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 57,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "云计策数智农产品解决方案",
+    "target_users": [
+      "新疆策勒乡的农民",
+      "基层农业管理者"
+    ],
+    "pain_points": [
+      "产品开发困难",
+      "市场准入难",
+      "品牌建设不足"
+    ],
+    "solution": [
+      "智能品宣运营",
+      "数智供应链管理",
+      "智能客户触达"
+    ],
+    "innovation_points": [
+      "适配性强",
+      "使用门槛低"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "已在试点乡村中落地实施",
+      "可推广到多个类似乡村地区"
+    ],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:农业发展",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_d2579640f869_e1",
+      "type": "user_evidence",
+      "quote": "针对新疆策勒乡 “产品、市场、品牌” 三个痛点问题",
+      "chunk_id": "C1",
+      "source_unit": "page_31"
+    },
+    {
+      "id": "case_d2579640f869_e2",
+      "type": "pain_points",
+      "quote": "产品开发困难、市场准入难、品牌建设不足",
+      "chunk_id": "C1",
+      "source_unit": "page_31"
+    },
+    {
+      "id": "case_d2579640f869_e3",
+      "type": "solution",
+      "quote": "依托自主开发的 “智能品宣运营”、“数智供应链管理”、“智能宏观市场分析”和“智能客户触达”四大模块",
+      "chunk_id": "C1",
+      "source_unit": "page_31"
+    },
+    {
+      "id": "case_d2579640f869_e4",
+      "type": "innovation_points",
+      "quote": "适配性强、使用门槛低",
+      "chunk_id": "C1",
+      "source_unit": "page_31"
+    },
+    {
+      "id": "case_d2579640f869_e5",
+      "type": "market_analysis",
+      "quote": "该方案已在试点乡村中落地实施，并能推广到  \nN 多个类似乡村地区",
+      "chunk_id": "C1",
+      "source_unit": "page_31"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "“青创北京”2025年“挑战杯”首都大学生课外学术科技作品竞赛参赛作品 7 摘要 本项目以自主开发的一套 “云计策”数智农产品解决方案，基于 “高质 量发展、共同富裕”两个核心理念，针对新疆策勒乡 “产品、市场、品牌” 三个痛点问题，依托自主开发的 “智能品宣运营”、“数智供应链管理”、 “智能宏观市场分析”和“智能客户触达”四大模块，构建起一套适配性强、 使用门槛低的数智助农系统。该方案已在试点乡村中落地实施，并能推广到 N 多个类似乡村地区，帮助破解基层农业发展中缺乏数智赋能的困境，防止 返贫致贫，并以数智方式赋能乡村振兴。 关键词：云计策；新疆策勒；数智赋能；乡村振兴；高质量发展 ABSTRACT This project centers on an independently developed “Yun Ji Ce” intelligent agricultural product solution, grounded in the two core concepts of high- quality development and common prosperity. It",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:46:54Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了新疆策勒乡的三个痛点问题：产品开发困难、市场准入难、品牌建设不足。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到已在试点乡村中落地实施，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了四大模块的解决方案，且提到已在试点乡村中落地实施，适配性强、使用门槛低。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细描述客户、价值主张、渠道、营收、成本等商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目提到可推广到多个类似乡村地区，但未提供具体的市场规模数据和竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供单位经济模型或财务逻辑的详细描述。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目强调了自主开发的四大模块，具有一定的创新性和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细描述团队背景和执行计划，里程碑不明确。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，描述清晰，但缺乏具体数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目明确指出了目标用户和价值主张，且二者匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到智能客户触达模块，但未具体描述获客渠道的可达性。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的市场规模数据，但未出现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目提到已在试点乡村中落地实施，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，但未提供具体的竞品分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目强调了自主开发的四大模块，但未提供具体的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供单位经济模型或财务逻辑的详细描述。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "出现“只要拿下 1% 市场”等自上而下估算。",
+      "reason": "项目提到可推广到多个类似乡村地区，但未提供具体的市场占有率或增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
+      "reason": "项目未详细描述团队背景和执行计划，里程碑不明确。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的技术路线与资源匹配情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提到具体的实验或测试。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，描述清晰。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目在用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行等多个维度缺乏具体证据支持。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    }
+  ]
+}

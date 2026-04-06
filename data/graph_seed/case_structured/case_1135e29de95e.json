@@ -1,0 +1,313 @@
+{
+  "case_id": "case_1135e29de95e",
+  "document_id": "doc_5bacb577e272",
+  "source": {
+    "file_path": "科技创新/指导案例——元界创生云上交互空间智能生成技术领跑者_计划书.pdf",
+    "file_name": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书.pdf",
+    "category": "科技创新",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 50,
+    "full_text_chars": 26321,
+    "core_text_chars": 0,
+    "appendix_start_index": 3,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 51,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 51,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书",
+    "target_users": [
+      "文旅机构",
+      "教育机构"
+    ],
+    "pain_points": [
+      "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+      "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+      "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+    ],
+    "solution": [
+      "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+      "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+      "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+    ],
+    "innovation_points": [
+      "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+      "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "随着 Web 3.0 与 5G 普及，沉浸式交互空间市场预计呈指数增长",
+      "不仅是工具提供商，更旨在构建“元宇宙内容生成协议”标准"
+    ],
+    "execution_plan": [
+      "技术研发规划：积累更丰富的模型数据与算法指纹库，提升 GPU 利用率",
+      "市场推广规划：先行在红色文旅与教育培训领域落地"
+    ],
+    "risk_control": [
+      "技术瓶颈风险：超大规模任务需求下，带宽与渲染压力对系统稳定性构成挑战",
+      "算力成本风险：GPU 租赁或采购成本波动可能影响 SaaS 服务的盈利能力"
+    ]
+  },
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H7",
+    "risk_rule:H9"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ..................................................... 5 第一章 项目背景 .......................................... 6 一、项目背景 .......................................... 6 二、行业现状 .......................................... 7 三、痛点分析 ................................",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": false
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:41:31Z",
+  "risk_flags": [
+    "H10",
+    "H13",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H7",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确描述了传统3D空间制作的痛点，包括建模门槛高、交互体验弱、更新成本高等。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供用户访谈、问卷或其他需求验证的具体证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出了云端渲染引擎、AI空间生成、细粒度流水线等技术方案，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到构建元宇宙内容生成协议标准，但未详细说明客户、价值主张、渠道、营收、成本如何形成闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "描述了Web 3.0与5G普及带来的市场增长预期，但未提供具体市场规模数据，竞品分析较为简略。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "提到了算力成本风险，但未提供具体的单位经济模型或LTV/CAC等关键财务指标。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了AI空间生成、实时逻辑重构等创新点，但未提供可验证的实验或指标。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未详细说明团队成员背景与能力，以及具体里程碑和可交付物。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 6.0,
+      "reason": "材料结构较为完整，但部分内容缺乏具体数据支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及主要获客渠道难以有效触达目标用户的问题。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "提到了算力成本风险，但未提供用户支付意愿的具体验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "市场规模口径或计算逻辑混乱。",
+      "reason": "描述了市场增长预期，但未提供具体市场规模数据，口径不明确。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "未提供用户访谈、问卷或其他需求验证的具体证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现声称无竞品或竞品分析明显失真的情况。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "强调创新/颠覆但缺少可验证的实验或指标。",
+      "reason": "强调了AI空间生成、实时逻辑重构等创新点，但未提供可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现明确的单位经济不成立的描述。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "出现‘只要拿下1%市场’等自上而下估算。",
+      "reason": "描述了市场增长预期，但使用了‘只要拿下1%市场’等自上而下估算方式。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
+      "reason": "未详细说明团队成员背景与能力，以及具体里程碑和可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及隐私、医疗、金融等高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现技术方案对算力、硬件、人才要求远超项目现状的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到实验/测试但缺少样本量与评价指标。",
+      "reason": "强调了创新点，但未提供实验设计的具体样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现路演叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键Rubric维度缺乏支撑证据。",
+      "reason": "多个关键维度如用户证据强度、商业模式一致性、财务逻辑、团队与执行等缺乏充分证据。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "互联网+大学生创新创业大赛"
+    },
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
+  ]
+}

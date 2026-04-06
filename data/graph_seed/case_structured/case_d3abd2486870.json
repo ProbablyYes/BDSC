@@ -1,0 +1,319 @@
+{
+  "case_id": "case_d3abd2486870",
+  "document_id": "doc_641a839afae7",
+  "source": {
+    "file_path": "环境保护/528249-碳索未来—智能化CO2捕集技术与装备-项目策划书-7ec902bc.pdf",
+    "file_name": "528249-碳索未来—智能化CO2捕集技术与装备-项目策划书-7ec902bc.pdf",
+    "category": "环境保护",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 72,
+    "full_text_chars": 46297,
+    "core_text_chars": 3919,
+    "appendix_start_index": 7,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 73,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 73,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "智能化CO2捕集技术与装备",
+    "target_users": [
+      "燃煤电厂等高碳排放行业",
+      "环境科技公司"
+    ],
+    "pain_points": [
+      "传统有机胺CO2捕获系统操作不便",
+      "数据误差大",
+      "存在安全隐患"
+    ],
+    "solution": [
+      "研发高效胺分子设计与优化技术",
+      "构建全流程智能化碳捕集设备",
+      "首次碳吸收率达99.5%，能耗降低20%"
+    ],
+    "innovation_points": [
+      "引入HMDA作为添加剂优化溶剂",
+      "结合13C核磁共振技术研究机理",
+      "构建热力学、动力学、传质模型",
+      "使用机器学习模型实现智能调控"
+    ],
+    "business_model": [
+      "与企业签订技术开发合同",
+      "达成装备购买意向",
+      "成立公司推进业务"
+    ],
+    "market_analysis": [
+      "中国碳减排压力大，燃煤电厂占碳排放40%",
+      "政策支持包括国家“双碳”目标等"
+    ],
+    "execution_plan": [
+      "完成实验室装置搭建与联调",
+      "推进中试装置搭建",
+      "与企业合作试点测试"
+    ],
+    "risk_control": [
+      "【通用风险控制】安全隐患 + 传统系统 + 智能监控 + 降低安全风险"
+    ]
+  },
+  "tags": [
+    "category:环境保护",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_d3abd2486870_e1",
+      "type": "pain_points_evidence",
+      "quote": "传统有机胺 CO₂捕获系统存在操作不便、数据误差、安全隐患等问题",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_d3abd2486870_e2",
+      "type": "solution_evidence",
+      "quote": "首次碳吸收率达 99.5%，循环 5 次后仍达 90%以上，能耗较传统设备降低 20%",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_d3abd2486870_e3",
+      "type": "innovation_points_evidence",
+      "quote": "将 HMDA 作为添加剂引入叔胺体系筛选优良溶剂；通过 13C 核磁共振技术研究强化吸收和解吸机理",
+      "chunk_id": "C1",
+      "source_unit": "page_3"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "摘要 全球气候变化加剧，减少大气中 CO₂排放成为应对气候变化的关键。 中国面临巨大碳减排压力，燃煤电厂等行业 CO₂排放量大，约占全国碳 排放总量的 40%。当前，燃烧后 CO₂捕集是工业上应用最广泛的方法， 有机胺吸收法是主要碳捕获技术，但传统有机胺 CO₂捕获系统存在操作 不便、数据误差、安全隐患等问题，且智能化碳捕集系统实际案例缺失， 因此研发智能化 CO₂捕集技术与装备具有重要意义。政策方面，国家“双 碳”目标、《2024—2025 年节能降碳行动方案》及教育部相关人才培养 方案等提供了有力支持。核心技术包括高效胺分子设计与优化，将 HMDA 作为添加剂引入叔胺体系筛选优良溶剂；通过 13C 核磁共振技术 研究强化吸收和解吸机理；构建热力学、动力学、传质模型；以实验数 据训练机器学习模型，构建人工智能网络模型，结合智能采集系统（实 时数据库）和控制系统（PLC、触摸屏），形成全流程智能化碳捕集设 备，可实时监控、智能调控。实验效果显著。中试装置处理量约 2m³/h， 使用 1.5mol/ LDEEA-1.5mol/L HMDA 复配胺溶液，首次碳吸收率达 99.5%，循环 5",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:33:17Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出了传统有机胺CO2捕获系统的操作不便、数据误差、安全隐患等问题，有具体用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "缺乏具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线包括高效胺分子设计与优化、13C核磁共振技术、热力学模型等，较为合理，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未详细描述客户、价值主张、渠道、营收、成本等形成闭环的具体内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提到中国碳减排压力大，燃煤电厂占碳排放40%，并指出智能化碳捕集系统实际案例缺失。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供单位经济数据，无法判断LTV与CAC等财务指标。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了首次碳吸收率99.5%、能耗降低20%等创新点，并有实验数据支持。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未详细描述团队能力和具体里程碑，仅提到与企业合作试点测试。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "BP/路演结构较为完整，数据有说服力，但部分细节描述不足。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，未见明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提到主要获客渠道，但未见难以触达目标用户的证据。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到首次碳吸收率达99.5%，能耗降低20%，但未提供用户支付意愿验证。",
+      "reason": "提到定价/收费但缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "TAM/SAM/SOM口径未见混乱，但未详细说明。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未声称无竞品，但未详细对比竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点有实验数据支持，未见不可验证的情况。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供单位经济数据，无法判断LTV与CAC等财务指标。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未见自上而下估算的增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未见明显不现实或缺少可交付物的里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，未见合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配情况未详细说明，但未见明显不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "实验设计较为合理，有样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "叙事结构较为完整，未见明显断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键Rubric维度缺乏支撑证据，如用户证据强度、商业模式一致性、财务逻辑、团队与执行等。",
+      "reason": "多个关键Rubric维度缺乏支撑证据。"
+    }
+  ]
+}

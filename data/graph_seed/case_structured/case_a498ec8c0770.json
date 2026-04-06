@@ -1,0 +1,328 @@
+{
+  "case_id": "case_a498ec8c0770",
+  "document_id": "doc_3f310c1cbe72",
+  "source": {
+    "file_path": "科技创新/482605-灵枢微创--人体自然腔道复杂环境下变刚度柔性手术机器人-论文_调研报告-b56e9ce7.pdf",
+    "file_name": "482605-灵枢微创--人体自然腔道复杂环境下变刚度柔性手术机器人-论文_调研报告-b56e9ce7.pdf",
+    "category": "科技创新",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 63509,
+    "core_text_chars": 4096,
+    "appendix_start_index": 5,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "灵枢微创--人体自然腔道复杂环境下变刚度柔性手术机器人",
+    "target_users": [
+      "外科医生",
+      "需要进行微创手术的患者"
+    ],
+    "pain_points": [
+      "人体自然腔道弯曲狭长，操作复杂"
+    ],
+    "solution": [
+      "研制小尺寸多自由度手术执行器",
+      "开发基于虚拟现实的主从控制系统",
+      "集成小型化远端驱动机构，减少空间占用"
+    ],
+    "innovation_points": [
+      "基于柔性并联机构的新型末端手术执行器",
+      "结合Cosserat-Rod模型和PINN网络的变刚度理论",
+      "超弹性丝-套管柔性传动系统的小型化远端驱动机构"
+    ],
+    "business_model": [],
+    "market_analysis": [],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6"
+  ],
+  "evidence": [
+    {
+      "id": "case_a498ec8c0770_e1",
+      "type": "user_evidence",
+      "quote": "通过鼻腔、咽喉、胃肠道等腔道实施剥离探查、病灶切除等手术操作，有效地避免了传统开放式手术的体表切口创伤，解决了多孔 /单孔腔镜手术存在的术后疼痛及切口感染等问题， 实现了最小化创伤的无瘢痕治疗。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a498ec8c0770_e2",
+      "type": "pain_points_evidence",
+      "quote": "然而，由于人体自然腔道弯曲狭长、动态柔软、操作复杂，对器械的尺寸、刚度和灵巧性提出了巨大挑战。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a498ec8c0770_e3",
+      "type": "solution_evidence",
+      "quote": "本作品针对以上技术瓶颈， 结合人体自然腔道手术环境和操作任务特点， 研制小尺寸多自由度手术执行器， 开发基于虚拟现实技术的主从控制系统， 集成可快速部署的小型化手术机器人系统， 开展性能和功能实验验证。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a498ec8c0770_e4",
+      "type": "innovation_points_evidence",
+      "quote": "“刚柔并济”的手术执行器机构设计方法： 提出一种基于柔性并联机构的新型末端手术执行器， 结合Cosserat-Rod 精准力学传递模型和基于 PINN 网络的变刚度理论模型，实现机构精准运动与刚度可控；",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a498ec8c0770_e5",
+      "type": "innovation_points_evidence",
+      "quote": "“小型轻量”的本体系统：基于超弹性丝 -套管柔性传动系统开发小型化远端驱动机构， 减少机器人对手术室的空间占用， 实现不同场景下器械快速更换和设备快速部署。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "人体自然腔道复杂环境下 变刚度柔性手术机器人 研究报告 2025 年 6 月 26 日 第十九届“挑战杯”全国大学生课外学术科技作品竞赛 II 摘 要 经人体自然腔道手术 （NOTES） 作为第三代微创外科技术， 通过 鼻腔、咽喉、胃肠道等腔道实施剥离探查、病灶切除等手术操作，有 效地避免了传统开放式手术的体表切口创伤，解决了多孔 /单孔腔镜 手术存在的术后疼痛及切口感染等问题， 实现了最小化创伤的无瘢痕 治疗。然而，由于人体自然腔道弯曲狭长、动态柔软、操作复杂，对 器械的尺寸、刚度和灵巧性提出了巨大挑战。 本作品针对以上技术瓶颈， 结合人体自然腔道手术环境和操作任 务特点， 研制小尺寸多自由度手术执行器， 开发基于虚拟现实技术的 主从控制系统， 集成可快速部署的小型化手术机器人系统， 开展性能 和功能实验验证。具体包括： “刚柔并济”的手术执行器机构设计方法： 提出一种基于柔性并联 机构的新型末端手术执行器， 结合Cosserat-Rod 精准力学传递模型和 基于 PINN 网络的变刚度理论模型，实现机构精准运动与刚度可控； “虚实结合”的主从控制： 提出基于虚拟现实的主从控制框架，",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:37:52Z",
+  "risk_flags": [
+    "H13",
+    "H15",
+    "H3",
+    "H5",
+    "H6"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本详细描述了人体自然腔道复杂环境下的手术挑战，有明确的用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "缺乏具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出了基于柔性并联机构和虚拟现实技术的解决方案，技术路线较为清晰。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本未提及客户、价值主张、渠道、营收、成本等商业模式相关的内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供市场规模（TAM/SAM/SOM）的口径或竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提及单位经济、LTV、CAC 等财务逻辑相关的内容。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "提出了基于柔性并联机构和变刚度理论的创新设计，具有明显的差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提及团队成员背景、能力或具体的执行里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本结构较为完整，技术描述清晰，但缺乏商业模式和市场分析的内容。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及获客渠道，但未出现难以有效触达目标用户的情况。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "文本中提到手术机器人系统，但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及市场规模口径，但未出现口径或计算逻辑混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "文本中未提供具体的用户访谈、问卷或行为数据等需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "声称“无竞品/无竞争对手”或竞品分析明显失真。",
+      "reason": "文本中未提及任何竞品或竞争对手，声称无竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提出了基于柔性并联机构和变刚度理论的创新设计，但未提及实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及单位经济、LTV、CAC 等财务逻辑相关的内容。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现‘只要拿下 1% 市场’等自上而下估算的情况。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及具体的时间表或里程碑，但未出现明显不现实的情况。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未涉及隐私、医疗、金融等高风险领域的合规说明。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到实验/测试但缺少样本量与评价指标。",
+      "reason": "文本中提到开展性能和功能实验验证，但未提供具体的样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本结构较为完整，未出现叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "文本中多个关键 Rubric 维度（如用户证据强度、商业模式一致性、市场与竞争、团队与执行）缺乏支撑证据。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    }
+  ]
+}

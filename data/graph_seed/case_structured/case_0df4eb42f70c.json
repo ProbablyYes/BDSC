@@ -1,0 +1,364 @@
+{
+  "case_id": "case_0df4eb42f70c",
+  "document_id": "doc_36c065b9839e",
+  "source": {
+    "file_path": "政务治理/472908-讯海智航——全流程新闻分析智能人机协作平台-项目策划书-d829a727.pdf",
+    "file_name": "472908-讯海智航——全流程新闻分析智能人机协作平台-项目策划书-d829a727.pdf",
+    "category": "政务治理",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 64647,
+    "core_text_chars": 5817,
+    "appendix_start_index": 13,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "讯海智航——全流程新闻分析智能人机协作平台",
+    "target_users": [
+      "各级政府宣传部门"
+    ],
+    "pain_points": [
+      "舆情传播迅速，需快速响应",
+      "传统人工分析耗时长"
+    ],
+    "solution": [
+      "提供舆情实时监控、快速分析、提前预警功能",
+      "应用于人民日报社的新闻处理分析，提升新闻分析深度与生产效率"
+    ],
+    "innovation_points": [
+      "人机协作提升分析效率",
+      "技术赋能推动媒体深度融合"
+    ],
+    "business_model": [
+      "与中国新闻行业合作，提供智能化工具链",
+      "通过提升编辑人员效率，获得客户认可与合作"
+    ],
+    "market_analysis": [
+      "未来规划逐步覆盖全国政务系统"
+    ],
+    "execution_plan": [
+      "2023年9月，平台基本搭建完成，与人民日报合作验证成果",
+      "2025年4月后，与人民日报定期例会，优化平台"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】合规与伦理风险：涉及政府舆情管理，确保数据安全与隐私保护，获得人民日报高度评价。",
+      "【逻辑自洽与闭环】逻辑自洽性检查：通过与人民日报合作，验证平台功能与效果，确保承诺结果可交付。"
+    ]
+  },
+  "tags": [
+    "category:政务治理",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_0df4eb42f70c_e1",
+      "type": "user_evidence",
+      "quote": "本项目的应用场景广泛，覆盖各级政府宣传部门，可帮助政府实现舆情实时监控、舆情快速分析、舆情提前预警等功能。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e2",
+      "type": "pain_points_evidence",
+      "quote": "在信息爆炸的时代，舆情传播迅速。政府需快速响应。",
+      "chunk_id": "C2",
+      "source_unit": "page_11"
+    },
+    {
+      "id": "case_0df4eb42f70c_e3",
+      "type": "solution_evidence",
+      "quote": "讯海智航平台已经投入使用，团队与人民日报展开合作，将讯海智航应用于人民日报社的新闻处理分析的应用场景。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e4",
+      "type": "innovation_points_evidence",
+      "quote": "本平台通过技术赋能推动媒体深度融合、提升社会信息生态可信度。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e5",
+      "type": "business_model_evidence",
+      "quote": "本平台瞄准国家重大需求，为中国新闻行业提供智能化工具链。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e6",
+      "type": "market_analysis_evidence",
+      "quote": "未来规划逐步覆盖全国政务系统。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e7",
+      "type": "execution_plan_evidence",
+      "quote": "2023年9月，平台基本搭建完成，与人民日报展开合作验证成果；2025年4月以后，与人民日报新闻编辑定期召开例会，反馈平台的优化方向并完善。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e8",
+      "type": "risk_evidence",
+      "quote": "本平台涉及政府舆情管理，确保数据安全与隐私保护，获得人民日报高度评价。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_0df4eb42f70c_e9",
+      "type": "risk_evidence",
+      "quote": "通过与人民日报合作，验证平台功能与效果，确保承诺结果可交付。",
+      "chunk_id": "C1",
+      "source_unit": "page_10"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "第十九届“挑战杯”全国大学生课外学术科技作品竞赛“人工智能+”专项赛 第 10 页 年 9 月，平台基本搭建完成，与人民日报展开合作验证成果；2025 年 4 月以后，与人民日报新闻编辑定期召开例会，反馈平台的优化方 向并完善。 本项目取得丰硕成果，团队形成 CCF-A 类顶会论文 13 篇，其中 团队成员一作 6 篇。本项目荣获 2025 年首都大学生挑战杯“人工智 能+专项赛”特等奖。团队成员来自文理工多个专业，在学业、科研、 竞赛上都出类拔萃，跨学科融合推动项目发展。 本项目的应用场景广泛，覆盖各级政府宣传部门，可帮助政府实 现舆情实时监控、舆情快速分析、舆情提前预警等功能。未来规划逐 步覆盖全国政务系统。本项目的社会价值显著，讯海智航平台已经投 入使用，团队与人民日报展开合作，将讯海智航应用于人民日报社的 新闻处理分析的应用场景，在日本核污水排海国际传播分析以及美国 大选舆情分析等任务中发挥了关键作用，发现了关键的报道方向，显 著提升了编辑人员的新闻分析深度与生产效率，在国际舆论对抗中发 挥重要作用，获得人民日报社的高度评价。本平台瞄准国家重大需求， 为中国新闻行业提供智能化工",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:59:24Z",
+  "risk_flags": [
+    "H13",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中明确描述了舆情传播迅速、需快速响应以及传统人工分析耗时长等痛点，并有具体用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中提到与人民日报合作，但未提供具体的访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中描述了舆情实时监控、快速分析、提前预警等功能，并提到与人民日报合作验证成果，技术路线与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中提到通过提升编辑人员效率获得客户认可与合作，商业模式形成闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "文本中提到应用场景广泛，覆盖各级政府宣传部门，但未详细说明市场规模和竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中未提及任何财务数据或单位经济模型。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中提到通过技术赋能推动媒体深度融合，提升社会信息生态可信度，具有可验证的竞争优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 8.0,
+      "reason": "团队成员来自文理工多个专业，跨学科融合推动项目发展，且有明确的里程碑和可交付物。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "BP/路演结构完整，数据具有说服力，但部分内容较为简略。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到与人民日报合作，验证平台功能与效果，确保承诺结果可交付。",
+      "reason": "目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到与人民日报合作，通过定期例会优化平台。",
+      "reason": "主要获客渠道为政府宣传部门，通过合作验证成果，渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到与人民日报合作，但未提供用户支付意愿验证。",
+      "reason": "提到与人民日报合作，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到应用场景广泛，覆盖各级政府宣传部门。",
+      "reason": "市场规模口径未见混乱，但缺乏详细数据。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到与人民日报合作，但未提供具体的访谈、问卷或行为数据等原始证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到应用场景广泛，覆盖各级政府宣传部门，但未详细说明竞品。",
+      "reason": "未声称无竞品，但竞品分析不够详细。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到通过技术赋能推动媒体深度融合，提升社会信息生态可信度。",
+      "reason": "创新点有具体描述，但未提供详细验证实验。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中未提及任何财务数据或单位经济模型。",
+      "reason": "未提供财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到逐步覆盖全国政务系统，但未出现‘只要拿下 1% 市场’等自上而下估算。",
+      "reason": "增长逻辑未见明显跳跃。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到 2023 年 9 月平台基本搭建完成，2025 年 4 月后定期例会优化平台。",
+      "reason": "里程碑清晰且可交付。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到确保数据安全与隐私保护，获得人民日报高度评价。",
+      "reason": "涉及政府舆情管理，有合规与伦理说明。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到与人民日报合作验证成果，确保技术路线与资源匹配。",
+      "reason": "技术路线与资源匹配，未见明显不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到与人民日报合作验证成果，但未提供样本量与评价指标。",
+      "reason": "提到实验/测试，但缺少样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到与人民日报合作，验证平台功能与效果，确保承诺结果可交付。",
+      "reason": "路演叙事结构完整，未见断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "文本中多个关键 Rubric 维度如用户证据强度、财务逻辑等缺乏支撑证据。",
+      "reason": "多个关键 Rubric 维度缺乏充分证据。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    }
+  ]
+}

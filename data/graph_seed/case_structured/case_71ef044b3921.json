@@ -1,0 +1,333 @@
+{
+  "case_id": "case_71ef044b3921",
+  "document_id": "doc_b3851da845a6",
+  "source": {
+    "file_path": "其他/474460-多场感知，孪生驱动—装备结构实时承载性能AI预报技术-项目策划书-1a45b018.pdf",
+    "file_name": "474460-多场感知，孪生驱动—装备结构实时承载性能AI预报技术-项目策划书-1a45b018.pdf",
+    "category": "其他",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 58901,
+    "core_text_chars": 52739,
+    "appendix_start_index": 1,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "多场感知，孪生驱动—装备结构实时承载性能AI预报技术",
+    "target_users": [
+      "火箭等战略运载工具的制造商和运营商"
+    ],
+    "pain_points": [
+      "复合材料结构状态参量的实时感知与内部损伤的快速、高精度反演挑战巨大",
+      "基于CAD的静态模型无法实时映射损伤动态演化，导致评估误差常超过15%",
+      "传统有限元分析需精细建模与大量迭代，单样本耗时20-30分钟，无法满足实时评估需求"
+    ],
+    "solution": [
+      "多场数据融合AI模型实现损伤类型、位置（精度±0.5mm）与尺寸的定量反演，检测周期缩短70%",
+      "基于CT扫描点云与节点分离法构建数字孪生模型，实现虚拟模型与物理实体损伤状态的分钟级同步"
+    ],
+    "innovation_points": [
+      "多场数据融合AI模型提高损伤反演精度和速度",
+      "数字孪生模型实现损伤状态的实时映射"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "传统无损检测技术如射线检测、超声检测等在航空航天领域应用广泛",
+      "基于 CAD模型的结构力学性能计算无法准确反映结构实时损伤演化和性能衰减。",
+      "随着传感技术发展，振动响应分析、 声发射检测、光纤传感等技术逐渐应用于损伤识别领域，提高了检测精度和实时性。",
+      "2002 年，美国国家航空航天局（ NASA）提出数字孪生概念，用于地球观测、气象学模拟等领域，为结构损伤监测与性能评估提供了新思路。",
+      "近年来， 深度学习技术在图像识别等领域取得显著进展，本项目将其应用于结构损伤监测，能够智能化提取损伤特征，提高了损伤识别精度和效率，利用卷积神经网络分析 DIC"
+    ],
+    "execution_plan": [
+      "本项目提出了一种基于决策树 —人工神经网络（ DTree-ANN）混合模型的含损伤复合材料结构承载性能快速预测方法。",
+      "决策树模型首先根据结构中损伤的类型、尺寸及空间分布特征，判断并选取受损结构采用的损伤解耦及降解分析策略。",
+      "基于决策树模型的判定结果调用 ANN模型，对结构剩余承载能力进行快速预测。"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:其他",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "risk_gap:weak_user_evidence",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_71ef044b3921_e1",
+      "type": "pain_points_evidence",
+      "quote": "复合材料结构状态参量的实时感知与内部损伤的快速、高精度反演挑战巨大，传统无损检测技术（如超声、射线检测）难以实现损伤的精准定位与定量表征",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_71ef044b3921_e2",
+      "type": "pain_points_evidence",
+      "quote": "基于CAD的静态模型无法实时映射损伤动态演化，导致评估误差常超过15%",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_71ef044b3921_e3",
+      "type": "pain_points_evidence",
+      "quote": "传统有限元分析需精细建模与大量迭代，单样本耗时20-30分钟，无法满足实时评估需求",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_71ef044b3921_e4",
+      "type": "solution_evidence",
+      "quote": "多场数据融合AI模型的复合材料损伤智能反演体系：融合数字图像相关技术（DIC）应变场、Lamb波导波及稀疏点应变传感技术，构建多源异构数据采集网络，结合卷积神经网络（CNN）、长短期记忆网络（LSTM）及生成对抗网络（GAN）等深度学习架构，实现损伤类型、位置（精度±0.5mm）与尺寸的定量反演，检测周期缩短70%",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_71ef044b3921_e5",
+      "type": "solution_evidence",
+      "quote": "复合材料结构数字孪生建模与损伤动态更新：基于CT扫描点云与节点分离法构建数字孪生模型，通过缺陷演化建模实现虚拟模型与物理实体损伤状态的分钟级同步，确保虚拟与物理实体的实时映射",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "多场感知，孪生驱动——装备结构实时承载性能 AI 预报技术引领者 PPT重点页节选，完整版见附件 7 多场感知，孪生驱动——装备结构实时承载性能 AI 预报技术引领者 多场感知，孪生驱动——装备结构实时承载性能 AI 预报技术引领者 多场感知，孪生驱动——装备结构实时承载性能 AI 预报技术引领者 摘要 火箭等战略运载工具大量采用复合材料作为关键承载结构，其服役过程中 需基于实时状态与荷载数据开展结构功能可靠性与效能的快速评价，以保障结 构完整性与功能可靠性。制约该领域技术突破的核心瓶颈问题在于：①复合材 料结构状态参量的实时感知与内部损伤的快速、高精度反演挑战巨大，传统无 损检测技术（如超声、射线检测）难以实现损伤的精准定位与定量表征；②复 合材料结构数字孪生体模型的快速重建与内部损伤演化的高效数据迭代技术难 度高，基于 CAD的静态模型无法实时映射损伤动态演化，导致评估误差常超过 15%；③大型复合材料结构在耦合荷载下的损伤演化与失效的快速虚拟评价技 术困难，传统有限元分析需精细建模与大量迭代，单样本耗时 20-30分钟，无法 满足实时评估需求。 针对上述问题，本研究创新性提出“多",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:40:33Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目明确指出了复合材料结构状态参量实时感知与内部损伤反演的挑战，以及传统方法的不足。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供用户访谈、问卷或其他需求验证的原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了多场数据融合AI模型和数字孪生模型，技术路线较为清晰，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未明确描述客户、价值主张、渠道、营收、成本等商业闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了传统无损检测技术的局限性，并引用了NASA的数字孪生概念，但未详细分析市场规模。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供任何财务逻辑或单位经济的分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了基于多场数据融合和数字孪生的创新方法，具有较高的差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供团队背景、能力及执行计划的详细信息。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，但未提供完整的BP或路演内容。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了目标用户（火箭等战略运载工具的制造商和运营商）与价值主张（提高损伤反演精度和速度）的匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体获客渠道，但未表明渠道不可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "多场数据融合AI模型实现损伤类型、位置（精度±0.5mm）与尺寸的定量反演，检测周期缩短70%",
+      "reason": "项目提到了定价/收费但未提供用户支付意愿的验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未详细描述市场规模口径，但未出现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "复合材料结构状态参量的实时感知与内部损伤的快速、高精度反演挑战巨大，传统无损检测技术（如超声、射线检测）难以实现损伤的精准定位与定量表征",
+      "reason": "项目未提供用户访谈、问卷或其他需求验证的原始证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了传统无损检测技术的局限性，并引用了NASA的数字孪生概念，但未声称无竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了基于多场数据融合和数字孪生的创新方法，并有具体的技术实现路径。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "传统有限元分析需精细建模与大量迭代，单样本耗时20-30分钟，无法满足实时评估需求",
+      "reason": "项目未提供财务逻辑或单位经济的分析，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现‘只要拿下1%市场’等自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "本项目提出了一种基于决策树—人工神经网络（DTree-ANN）混合模型的含损伤复合材料结构承载性能快速预测方法。",
+      "reason": "项目未提供具体的时间表或里程碑，无法判断其现实性。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域如隐私、医疗、金融等。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述的技术路线与现有资源匹配情况未详细说明，但未表明技术路线与资源不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体实验设计，但未表明实验设计不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未出现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "复合材料结构状态参量的实时感知与内部损伤的快速、高精度反演挑战巨大，传统无损检测技术（如超声、射线检测）难以实现损伤的精准定位与定量表征",
+      "reason": "多个关键 Rubric 维度（用户证据强度、商业模式一致性、财务逻辑、团队与执行）缺乏支撑证据。"
+    }
+  ]
+}

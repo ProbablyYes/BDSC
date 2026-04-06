@@ -228,7 +228,14 @@ class ConversationStorage:
         path.unlink()
         return True
 
-    def append_message(self, project_id: str, conversation_id: str, message: dict) -> None:
+    def append_message(
+        self,
+        project_id: str,
+        conversation_id: str,
+        message: dict,
+        *,
+        generated_title: str | None = None,
+    ) -> None:
         path = self._conv_dir(project_id) / f"{conversation_id}.json"
         if not path.exists():
             return
@@ -243,25 +250,38 @@ class ConversationStorage:
             next_task = trace.get("next_task", {}) if isinstance(trace, dict) else {}
             kg = trace.get("kg_analysis", {}) if isinstance(trace, dict) else {}
             category = trace.get("category", "") if isinstance(trace, dict) else ""
-            title = (
-                (next_task.get("title", "") if isinstance(next_task, dict) else "")
-                or (diagnosis.get("bottleneck", "") if isinstance(diagnosis, dict) else "")
-                or (kg.get("insight", "") if isinstance(kg, dict) else "")
-                or str(message.get("content", ""))
-            )
+
+            if generated_title:
+                title = generated_title
+            else:
+                title = (
+                    (next_task.get("title", "") if isinstance(next_task, dict) else "")
+                    or (diagnosis.get("bottleneck", "") if isinstance(diagnosis, dict) else "")
+                    or (kg.get("insight", "") if isinstance(kg, dict) else "")
+                    or str(message.get("content", ""))
+                )
+                if category:
+                    title = f"{category} · {title}" if title else category
+                title = str(title).replace("\n", " ").strip()[:24] or "新对话"
+
             summary = (
                 (kg.get("insight", "") if isinstance(kg, dict) else "")
                 or (diagnosis.get("bottleneck", "") if isinstance(diagnosis, dict) else "")
                 or (next_task.get("description", "") if isinstance(next_task, dict) else "")
                 or str(message.get("content", ""))
             )
-            if category:
-                title = f"{category} · {title}" if title else category
-            title = str(title).replace("\n", " ").strip()[:24] or "新对话"
             summary = str(summary).replace("\n", " ").strip()[:60]
             if data.get("title") == "新对话":
                 data["title"] = title
             data["summary"] = summary
+
+            # V2: persist exploration_state for cross-turn slot tracking
+            exploration_state = (
+                trace.get("exploration_state")
+                if isinstance(trace, dict) else None
+            )
+            if isinstance(exploration_state, dict) and exploration_state.get("phase"):
+                data["exploration_state"] = exploration_state
         elif len(data["messages"]) == 1 and data.get("title") == "新对话":
             data["summary"] = str(message.get("content", "")).strip()[:60]
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")

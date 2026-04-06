@@ -297,5 +297,15 @@
       "evidence": "User Evidence Strength, Financial Logic, Team & Execution",
       "reason": "项目在用户证据强度、财务逻辑和团队与执行方面缺乏足够的支撑证据。"
     }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "创青春"
+    },
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
   ]
 }

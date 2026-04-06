@@ -128,6 +128,87 @@ class GraphService:
         except Exception as exc:  # noqa: BLE001
             return {"error": f"dashboard query failed: {exc}"}
 
+    def get_kb_stats(self) -> dict[str, Any]:
+        """Return comprehensive knowledge base statistics from Neo4j."""
+        try:
+            def _query(session):
+                total_nodes = int(session.run("MATCH (n) RETURN count(n) AS c").single()["c"])
+                total_rels = int(session.run("MATCH ()-[r]->() RETURN count(r) AS c").single()["c"])
+
+                label_rows = list(session.run(
+                    "MATCH (n) RETURN labels(n)[0] AS label, count(n) AS cnt ORDER BY cnt DESC"
+                ))
+                node_labels = {r["label"]: int(r["cnt"]) for r in label_rows}
+
+                rel_rows = list(session.run(
+                    "MATCH ()-[r]->() RETURN type(r) AS rtype, count(r) AS cnt ORDER BY cnt DESC"
+                ))
+                rel_types = {r["rtype"]: int(r["cnt"]) for r in rel_rows}
+
+                cat_rows = list(session.run(
+                    "MATCH (c:Category)<-[:BELONGS_TO]-(p:Project) "
+                    "RETURN c.name AS cat, count(p) AS cnt ORDER BY cnt DESC"
+                ))
+                categories = [{"name": r["cat"], "count": int(r["cnt"])} for r in cat_rows]
+
+                dim_rows = list(session.run("""
+                    MATCH (p:Project)
+                    OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+                    OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+                    OPTIONAL MATCH (p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect)
+                    OPTIONAL MATCH (p)-[:HAS_MARKET_ANALYSIS]->(mkt:Market)
+                    OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)
+                    OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(ev:Evidence)
+                    OPTIONAL MATCH (p)-[:HAS_EXECUTION_STEP]->(ex:ExecutionStep)
+                    OPTIONAL MATCH (p)-[:HAS_TARGET_USER]->(st:Stakeholder)
+                    OPTIONAL MATCH (p)-[:HAS_RISK_CONTROL]->(rc:RiskControlPoint)
+                    RETURN
+                        count(DISTINCT pain) AS total_pains,
+                        count(DISTINCT sol) AS total_solutions,
+                        count(DISTINCT bm) AS total_biz_models,
+                        count(DISTINCT mkt) AS total_markets,
+                        count(DISTINCT inn) AS total_innovations,
+                        count(DISTINCT ev) AS total_evidence,
+                        count(DISTINCT ex) AS total_exec_steps,
+                        count(DISTINCT st) AS total_stakeholders,
+                        count(DISTINCT rc) AS total_risk_controls
+                """))
+                dim_data = dim_rows[0] if dim_rows else {}
+
+                hyper_nodes = int(session.run("MATCH (h:HyperNode) RETURN count(h) AS c").single()["c"])
+                hyper_edges = int(session.run("MATCH (h:Hyperedge) RETURN count(h) AS c").single()["c"])
+                onto_nodes = int(session.run("MATCH (o:OntologyNode) RETURN count(o) AS c").single()["c"])
+                risk_rules = int(session.run("MATCH (r:RiskRule) RETURN count(r) AS c").single()["c"])
+                rubric_items = int(session.run("MATCH (r:RubricItem) RETURN count(r) AS c").single()["c"])
+
+                return {
+                    "total_nodes": total_nodes,
+                    "total_relationships": total_rels,
+                    "total_projects": node_labels.get("Project", 0),
+                    "total_categories": node_labels.get("Category", 0),
+                    "node_labels": node_labels,
+                    "relationship_types": rel_types,
+                    "categories": categories,
+                    "dimensions": {
+                        "pain_points": int(dim_data.get("total_pains", 0)),
+                        "solutions": int(dim_data.get("total_solutions", 0)),
+                        "business_models": int(dim_data.get("total_biz_models", 0)),
+                        "markets": int(dim_data.get("total_markets", 0)),
+                        "innovations": int(dim_data.get("total_innovations", 0)),
+                        "evidence": int(dim_data.get("total_evidence", 0)),
+                        "execution_steps": int(dim_data.get("total_exec_steps", 0)),
+                        "stakeholders": int(dim_data.get("total_stakeholders", 0)),
+                        "risk_controls": int(dim_data.get("total_risk_controls", 0)),
+                    },
+                    "hypergraph": {"nodes": hyper_nodes, "edges": hyper_edges},
+                    "ontology_nodes": onto_nodes,
+                    "risk_rules": risk_rules,
+                    "rubric_items": rubric_items,
+                }
+            return self._query_with_fallback(_query)
+        except Exception as exc:
+            return {"error": f"kb_stats query failed: {exc}"}
+
     def project_evidence(self, project_id: str) -> dict[str, Any]:
         try:
             def _query(session):
@@ -368,6 +449,219 @@ class GraphService:
             return self._query_with_fallback(_query)
         except Exception as exc:
             logger.warning("search_cases_by_dimension failed: %s", exc)
+            return []
+
+    _DIM_NODE_MAP: dict[str, tuple[str, str]] = {
+        "pain_point":      ("PainPoint",           "HAS_PAIN"),
+        "solution":        ("Solution",             "HAS_SOLUTION"),
+        "business_model":  ("BusinessModelAspect",  "HAS_BUSINESS_MODEL"),
+        "technology":      ("Solution",             "HAS_SOLUTION"),
+        "market":          ("Market",               "HAS_MARKET_ANALYSIS"),
+        "competitor":      ("Market",               "HAS_MARKET_ANALYSIS"),
+        "innovation":      ("InnovationPoint",      "HAS_INNOVATION"),
+        "evidence":        ("Evidence",             "HAS_EVIDENCE"),
+        "resource":        ("ExecutionStep",        "HAS_EXECUTION_STEP"),
+        "team":            ("ExecutionStep",        "HAS_EXECUTION_STEP"),
+    }
+
+    def search_by_dimension_entities(
+        self,
+        entity_labels: list[str],
+        entity_types: list[str],
+        exclude_ids: list[str] | None = None,
+        limit: int = 4,
+    ) -> list[dict[str, Any]]:
+        """Graph-structural cross-project retrieval (dual-channel #2).
+
+        Three complementary strategies run in one session:
+        1. **Shared-node fan-out** — find projects that share the SAME dimension
+           nodes (e.g. same PainPoint, same BusinessModelAspect) → "who else
+           faces this exact pain?" / "who else uses this revenue model?"
+        2. **Structural-pattern match** — find projects that have the same
+           graph topology (e.g. Project→PainPoint→Solution chain complete)
+           where the student's chain is broken → complementary inspiration.
+        3. **Keyword fallback** — CONTAINS on node names for broader recall.
+
+        Returns projects ranked by structural relevance score.
+        """
+        if not entity_labels:
+            return []
+        _exclude = set(exclude_ids or [])
+        pairs: list[tuple[str, str, str, str]] = []
+        for lbl, etype in zip(entity_labels[:12], entity_types[:12]):
+            mapping = self._DIM_NODE_MAP.get(etype)
+            if not mapping:
+                continue
+            keyword = str(lbl).strip()
+            if len(keyword) < 2:
+                continue
+            node_label, rel_type = mapping
+            pairs.append((keyword, etype, node_label, rel_type))
+        if not pairs:
+            return []
+
+        type_groups: dict[str, list[str]] = {}
+        for kw, etype, nl, rt in pairs:
+            type_groups.setdefault(etype, []).append(kw)
+
+        try:
+            def _query(session):
+                all_hits: dict[str, dict[str, Any]] = {}
+
+                def _add_hit(pid, pname, category, dim_type, node_name, source):
+                    if pid in _exclude:
+                        return
+                    if pid not in all_hits:
+                        all_hits[pid] = {
+                            "project_id": pid,
+                            "project_name": pname or pid,
+                            "category": category or "",
+                            "matched_dimensions": [],
+                            "matched_nodes": [],
+                            "match_sources": [],
+                            "retrieval_channel": "graph",
+                        }
+                    entry = all_hits[pid]
+                    if dim_type and dim_type not in entry["matched_dimensions"]:
+                        entry["matched_dimensions"].append(dim_type)
+                    nd = f"{dim_type}:{node_name}" if node_name else dim_type
+                    if nd not in entry["matched_nodes"]:
+                        entry["matched_nodes"].append(nd)
+                    if source not in entry["match_sources"]:
+                        entry["match_sources"].append(source)
+
+                # Strategy 1: Shared-node fan-out
+                # "Find other projects connected to the SAME dimension node"
+                for keyword, etype, node_label, rel_type in pairs[:6]:
+                    try:
+                        rows = list(session.run(
+                            f"""
+                            MATCH (n:{node_label})<-[:{rel_type}]-(p1:Project)
+                            WHERE toLower(n.name) CONTAINS toLower($kw)
+                            WITH n
+                            MATCH (n)<-[:{rel_type}]-(p2:Project)
+                            OPTIONAL MATCH (p2)-[:BELONGS_TO]->(cat:Category)
+                            RETURN DISTINCT p2.id AS pid, p2.name AS pname,
+                                   cat.name AS category, n.name AS shared_node
+                            LIMIT 6
+                            """,
+                            kw=keyword,
+                        ))
+                        for r in rows:
+                            _add_hit(r["pid"], r["pname"], r["category"],
+                                     etype, r["shared_node"], "shared_node")
+                    except Exception:
+                        pass
+
+                # Strategy 2: Structural-pattern complement
+                # Find projects that have COMPLETE dimension chains where
+                # the student has gaps (e.g. student has PainPoint but no
+                # BusinessModel → find projects with both)
+                student_types = set(type_groups.keys())
+                complement_targets = []
+                if "pain_point" in student_types and "business_model" not in student_types:
+                    complement_targets.append(("HAS_PAIN", "HAS_BUSINESS_MODEL", "business_model"))
+                if "solution" in student_types and "evidence" not in student_types:
+                    complement_targets.append(("HAS_SOLUTION", "HAS_EVIDENCE", "evidence"))
+                if "pain_point" in student_types and "evidence" not in student_types:
+                    complement_targets.append(("HAS_PAIN", "HAS_EVIDENCE", "evidence"))
+                if "market" not in student_types:
+                    complement_targets.append(("HAS_SOLUTION", "HAS_MARKET_ANALYSIS", "market"))
+
+                for has_rel, needs_rel, dim_label in complement_targets[:3]:
+                    try:
+                        rows = list(session.run(
+                            f"""
+                            MATCH (p:Project)-[:{has_rel}]->()
+                            WHERE EXISTS {{ MATCH (p)-[:{needs_rel}]->() }}
+                            OPTIONAL MATCH (p)-[:BELONGS_TO]->(cat:Category)
+                            OPTIONAL MATCH (p)-[:{needs_rel}]->(comp_node)
+                            RETURN DISTINCT p.id AS pid, p.name AS pname,
+                                   cat.name AS category,
+                                   comp_node.name AS comp_name
+                            LIMIT 4
+                            """,
+                        ))
+                        for r in rows:
+                            _add_hit(r["pid"], r["pname"], r["category"],
+                                     dim_label, r["comp_name"], "complement")
+                    except Exception:
+                        pass
+
+                # Strategy 3: Keyword fallback (narrower scope)
+                for keyword, etype, node_label, rel_type in pairs[:4]:
+                    if any(keyword.lower() in " ".join(h.get("matched_nodes", [])).lower()
+                           for h in all_hits.values()):
+                        continue
+                    try:
+                        rows = list(session.run(
+                            f"""
+                            MATCH (p:Project)-[:{rel_type}]->(n:{node_label})
+                            WHERE toLower(n.name) CONTAINS toLower($kw)
+                            OPTIONAL MATCH (p)-[:BELONGS_TO]->(cat:Category)
+                            RETURN DISTINCT p.id AS pid, p.name AS pname,
+                                   cat.name AS category, n.name AS matched_node
+                            LIMIT 5
+                            """,
+                            kw=keyword,
+                        ))
+                        for r in rows:
+                            _add_hit(r["pid"], r["pname"], r["category"],
+                                     etype, r["matched_node"], "keyword")
+                    except Exception:
+                        pass
+
+                # Rank: shared_node > complement > keyword; then by dimension count
+                def _score(h):
+                    sources = h.get("match_sources", [])
+                    s = len(h.get("matched_dimensions", []))
+                    if "shared_node" in sources:
+                        s += 3
+                    if "complement" in sources:
+                        s += 2
+                    return s
+
+                ranked = sorted(all_hits.values(), key=_score, reverse=True)[:limit]
+
+                # Enrich top hits with project context (what they did)
+                for hit in ranked:
+                    pid = hit.get("project_id", "")
+                    if not pid:
+                        continue
+                    try:
+                        ctx_rows = list(session.run(
+                            """
+                            MATCH (p:Project {id: $pid})
+                            OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+                            OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+                            OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)
+                            OPTIONAL MATCH (p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect)
+                            OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(ev:Evidence)
+                            RETURN collect(DISTINCT pain.name) AS pains,
+                                   collect(DISTINCT sol.name) AS solutions,
+                                   collect(DISTINCT inn.name) AS innovations,
+                                   collect(DISTINCT bm.name) AS biz_models,
+                                   collect(DISTINCT ev.name) AS evidences
+                            """,
+                            pid=pid,
+                        ))
+                        if ctx_rows:
+                            r = ctx_rows[0]
+                            hit["context"] = {
+                                "pains": [x for x in (r["pains"] or []) if x][:5],
+                                "solutions": [x for x in (r["solutions"] or []) if x][:5],
+                                "innovations": [x for x in (r["innovations"] or []) if x][:4],
+                                "biz_models": [x for x in (r["biz_models"] or []) if x][:4],
+                                "evidences": [x for x in (r["evidences"] or []) if x][:3],
+                            }
+                    except Exception:
+                        pass
+
+                return ranked
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:
+            logger.warning("search_by_dimension_entities failed: %s", exc)
             return []
 
     def enrich_rag_hits(

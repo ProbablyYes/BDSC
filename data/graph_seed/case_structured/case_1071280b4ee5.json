@@ -1,0 +1,476 @@
+{
+  "case_id": "case_1071280b4ee5",
+  "document_id": "doc_2eb36fb6e065",
+  "source": {
+    "file_path": "科技创新/大连理工大学 创青春 独到科技（北京）有限公司项目运营报告。.pdf",
+    "file_name": "大连理工大学 创青春 独到科技（北京）有限公司项目运营报告。.pdf",
+    "category": "科技创新",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 50,
+    "full_text_chars": 22978,
+    "core_text_chars": 17869,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 51,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 51,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "独到科技",
+    "target_users": [
+      "以线上销售为主的中小型电商客户，包括大品牌的渠道商或地方品牌",
+      "运营体系健全、引领市场变革的大型企业"
+    ],
+    "pain_points": [
+      "传统媒体广告投放无法做到精准，传统网络广告基于用户网络使用习惯投放，无法深入到用户性格、情绪等层次",
+      "中小型企业在线下销售市场竞争力较低，难以承受传统媒体的营销费用，且受众分散难以在同一时间地点开展营销"
+    ],
+    "solution": [
+      "为中小型电商客户提供受众人群分析、营销决策建议、产品定位开发等数据信息服务",
+      "为大型企业客户提供深度人口信息刻画、市场发展趋势、潜力行业调研等大数据支持下的数据信息服务"
+    ],
+    "innovation_points": [
+      "采用自然语言处理算法将海量非结构化数据进行标准化处理，并建立横向跨行业、纵向深度分析的立体数据分析体系",
+      "在单条微博传播分析领域技术独家，是国内最早推出此类产品并占据市场领先地位的公司",
+      "提供抽奖平台等同行竞争者尚未涉及的业务模块，技术成熟且为首创"
+    ],
+    "business_model": [
+      "通过官方网站独到网运营微博传播分析系统，提供免费版、高级版及抽奖平台等产品",
+      "2013年营业额达121万余元，每月保持20万元现金流量，老客户保有率达60%并贡献半数营业额"
+    ],
+    "market_analysis": [
+      "中国社交网络用户规模庞大，但数据的商业价值开发落后，超过80%重视该领域的企业为外企在华公司",
+      "社交网络数据挖掘行业潜力巨大，随着新浪微博商业化进程加快及与阿里集团融合，市场将进入井喷时期",
+      "在微博传播分析细分市场，公司市场占有率达60%，用户数最多且好评率颇佳，领先于知微等竞争者"
+    ],
+    "execution_plan": [
+      "2012年4月发布微博分析产品，5个月后市场出现同类竞争产品，经过一年开拓单条微博传播分析市场逐渐成熟",
+      "在单条微博分析市场成熟后，已开始账号分析的研发并计划近期公测，账号分析完成后将开始话题分析产品的开发"
+    ],
+    "risk_control": [
+      "【通用风险控制】针对技术风险，互联网技术容易被模仿和超越，公司专利容易被盗用，需持续研发保持领先",
+      "【通用风险控制】针对规模风险，市场急剧扩张需保证大量服务供给，若无法满足需求会降低信誉导致客户流失，需提升服务能力维持信誉",
+      "【通用风险控制】针对销售风险，初期客户对新型技术服务接受能力不确定可能导致经营困境，需加强客户教育与市场培育"
+    ]
+  },
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Financial Logic",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_1071280b4ee5_e1",
+      "type": "user_evidence",
+      "quote": "我们将中小型电商客户定位为第一目标客户，将大型企业定位为第二目标客户。",
+      "chunk_id": "C4",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_1071280b4ee5_e2",
+      "type": "user_evidence",
+      "quote": "第一目标客户以线上销售为主的中小型客户。这类客户主要是一些大品牌的渠道商，或地方品牌。",
+      "chunk_id": "C4",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_1071280b4ee5_e3",
+      "type": "user_evidence",
+      "quote": "第二目标客户以大型企业为主。这类客户主要是大型企业，其运营体系健全，具有完备的开发系统，引领市场变革。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_1071280b4ee5_e4",
+      "type": "pain_points_evidence",
+      "quote": "企业对传统媒体广告投放，无法做到精准，而传统网络广告却可以做到相对的精准。传统网络广告基于用户网络使用习惯投放，无法深入到用户性格、情绪等层次。",
+      "chunk_id": "C3",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_1071280b4ee5_e5",
+      "type": "pain_points_evidence",
+      "quote": "在国内线下销售市场上竞争力较低，很难承受传统媒体的营销费用。",
+      "chunk_id": "C4",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_1071280b4ee5_e6",
+      "type": "pain_points_evidence",
+      "quote": "线上推广为主。受众群体较为分散，无法在同一的时间地点开展营销。",
+      "chunk_id": "C4",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_1071280b4ee5_e7",
+      "type": "solution_evidence",
+      "quote": "对于此类用户，提供基本的受众人群分析，营销决策建议，产品定位开发等数据信息服务。",
+      "chunk_id": "C4",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_1071280b4ee5_e8",
+      "type": "solution_evidence",
+      "quote": "对于这类用户，提供深度人口信息刻画，市场发展趋势，潜力行业调研等大范围大数据支持下的数据信息服务。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_1071280b4ee5_e9",
+      "type": "innovation_points_evidence",
+      "quote": "我团队采用自然语言处理算法，可以将海量非结构化数据进行标准化处理。同时在数据服务方面，不仅能根据客户要求提供标准化数据，同时能独立完成横向跨越多行业、纵向深度分析的立体数据分析体系，处于国内领先地位。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_1071280b4ee5_e10",
+      "type": "innovation_points_evidence",
+      "quote": "独到科技目前在单条微博的传播分析上技术独家，是在国内发展项目的先驱，具有独到的市场前瞻眼光，和精准的公司定位及分析，且是与新浪最早合作的大数据分析服务提供者，该市场占有率在60%以上",
+      "chunk_id": "C6",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_1071280b4ee5_e11",
+      "type": "innovation_points_evidence",
+      "quote": "另外独到科技的抽奖平台等服务为知微等同行竞争者尚未涉及的业务模块，在国内首屈一指，技术成熟，为独到科技的主营业务之一。",
+      "chunk_id": "C7",
+      "source_unit": "page_11"
+    },
+    {
+      "id": "case_1071280b4ee5_e12",
+      "type": "business_model_evidence",
+      "quote": "独到科技（北京）有限公司现主要从事社交网络数据挖掘，基于独创的自然语言处理算法、社交网络分析模型及数据观察模型，运用大数据处理技术，开发了一整套微博传播分析系统，目前已在独到科技官方网站——独到网（www.doodod.com）上运营使用。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_1071280b4ee5_e13",
+      "type": "business_model_evidence",
+      "quote": "独到科技（北京）有限公司2013年营业额达1,214,394.00元，缴税41,604.00元。现公司每月保持200,000.00元现金流量。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_1071280b4ee5_e14",
+      "type": "business_model_evidence",
+      "quote": "老客户保有率达60%，占第一季度营业额的50%（258,000元）。",
+      "chunk_id": "C2",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_1071280b4ee5_e15",
+      "type": "market_analysis_evidence",
+      "quote": "无论从社交网络使用人数还是产生的信息量，中国都排在世界前位，但是数据的商业价值一直被雪藏。现阶段重视社交网络数据挖掘的企业，超过80%的是外企设立在中国的公司",
+      "chunk_id": "C3",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_1071280b4ee5_e16",
+      "type": "market_analysis_evidence",
+      "quote": "中国社交网络数据挖掘行业潜力巨大，但商业化进程的落后导致社交网络平台如新浪等亏损。随着阿里集团与新浪的深度融合，微信等移动互联网媒体的发展，社交网络数据挖掘的数据挖掘即将进入井喷时期。",
+      "chunk_id": "C3",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_1071280b4ee5_e17",
+      "type": "market_analysis_evidence",
+      "quote": "独到科技（北京）有限公司是国内最早从事互联网设计网络数据分析的公司，2013年4月，独到科技研发了国内第一款社交网络数据分析系统——独到传播分析之单条微博分析系统（普通版），最早占领国内的微博分析市场，当前市场占有率达60%。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_1071280b4ee5_e18",
+      "type": "market_analysis_evidence",
+      "quote": "在微博传播分析方面，我们用户数最多，使用体验最好，分析层级最深。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_1071280b4ee5_e19",
+      "type": "execution_plan_evidence",
+      "quote": "2012年4月份我公司发布微博分析产品后，5个月后市场才出现如知微等同类竞争产品。我公司经过一年的开拓，单条微博传播分析的市场已经逐渐成熟。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_1071280b4ee5_e20",
+      "type": "execution_plan_evidence",
+      "quote": "我们已经开始账号分析的研发，近期即将公测。同时账号分析完成后，我们将开始话题分析产品的开发，产品创新进度颇快。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_1071280b4ee5_e21",
+      "type": "risk_evidence",
+      "quote": "技术风险主要集中在互联网技术容易被模仿和超越，公司专利容易被盗用等方面。",
+      "chunk_id": "C10",
+      "source_unit": "page_15"
+    },
+    {
+      "id": "case_1071280b4ee5_e22",
+      "type": "risk_evidence",
+      "quote": "相关市场急剧扩张，公司设定的目标市场范围较广，这就意味着公司要保证大量的服务供给，这是维持信誉的关键，由于公司初建，所以一旦出现无法满足客户需求的情况，会降低公司信誉，导致客户大量流失。",
+      "chunk_id": "C10",
+      "source_unit": "page_15"
+    },
+    {
+      "id": "case_1071280b4ee5_e23",
+      "type": "risk_evidence",
+      "quote": "由于公司初期的潜在客户是大型企业及中小型电商，对于新型技术服务的接受能力不能保证，因此容易使经营陷于困境。",
+      "chunk_id": "C10",
+      "source_unit": "page_15"
+    },
+    {
+      "id": "case_1071280b4ee5_e24",
+      "type": "risk_evidence",
+      "quote": "对于中小型电商，由于其分布广，难以高效沟通推销，与目标客户不对应的营销手段和渠道都会导致效率的低下。而对于大型企业，由于公司发展初期人脉不够广，无法以合理的价码与大型公司进行有利的合作和博弈，从而无法再短期内有效开拓市场。",
+      "chunk_id": "C10",
+      "source_unit": "page_15"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": true
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "项目运营报告 独到科技有限公司 - 3 - 1. 公司简介 独到科技创业团队始建于 2011 年，是中国从事社交网络数据挖 掘技术的先驱， 依靠独创的自然语言处理算法与先进的分布式数据处 理技术开创了将信息技术带入传统数据咨询行业的先河。 2012 年 10 月 10 日独到科技（北京）有限公司成立，CEO&创始 人张文浩、 公司技术骨干冯石磊、 王立强、邱孝兵皆毕业于大连理工 大学软件工程专业。 独到科技 （北京）有限公司现主要从事社交网络数据挖掘， 基于 独创的自然语言处理算法、 社交网络分析模型及数据观察模型， 运用 大数据处理技术， 开发了一整套微博传播分析系统，目前已在独到科 技官方网站——独到网 （www.doodod.com） 上运营使用。 该系统累计 服务50000 余家企业用户，市场前景广阔。 目前，独到科技（北京）有限公司现有独到传播分析免费版、独 到传播分析高级版、独到抽奖平台三项产品已获得计算机软件著作 权，并已经运营使用，同时我公司还为多家公关公司、 知名企业提供 数据服务方案，经营前景良好。 - 4 - 2. 经营状况 独到科技（北京）有限公司2013 年营",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-05T15:25:39Z",
+  "risk_flags": [
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了中小型电商客户和大型企业在传统媒体广告投放和线上营销中的痛点，有具体的用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了服务50000余家企业用户，但未提供具体的访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了基于自然语言处理算法和大数据处理技术的解决方案，技术路线清晰，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目通过官方网站提供免费版、高级版及抽奖平台等产品，形成了初步的商业模式闭环，但未详细说明成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目分析了中国社交网络用户规模和数据挖掘行业的潜力，以及在微博传播分析细分市场的领先地位，竞品分析较为客观。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了2013年的营业额和每月现金流量，但未详细说明单位经济模型。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了在单条微博传播分析领域的技术独家性和首创的抽奖平台，具有明显的竞争优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目团队成员背景清晰，具有相关技术背景，但未详细说明里程碑和可交付物。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，提到了具体的数据和市场分析，但部分信息缺乏详细说明。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目明确区分了第一目标客户和第二目标客户，并提供了相应的价值主张。",
+      "reason": "目标用户与价值主张匹配良好。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目通过官方网站提供服务，渠道明确。",
+      "reason": "主要获客渠道明确且合理。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到了定价/收费，但未提供用户支付意愿的验证。",
+      "reason": "提到定价/收费但缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目对市场规模的分析较为合理，未出现口径混乱。",
+      "reason": "市场规模口径合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到了服务50000余家企业用户，但未提供具体的访谈、问卷或其他需求验证证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目对竞品进行了客观分析，提到了知微等竞争者。",
+      "reason": "竞品分析较为客观。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目强调了在单条微博传播分析领域的技术独家性和首创的抽奖平台，并提供了市场占有率和用户好评率等数据。",
+      "reason": "创新点有可验证的实验或指标支撑。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了2013年的营业额和每月现金流量，未出现明显的单位经济不成立问题。",
+      "reason": "单位经济模型未见明显问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未出现‘只要拿下1%市场’等自上而下的估算。",
+      "reason": "增长逻辑未见明显跳跃。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了具体的产品开发计划和时间表。",
+      "reason": "里程碑和时间表较为合理。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未涉及高风险领域，未出现合规/伦理缺口。",
+      "reason": "未涉及高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目描述了基于自然语言处理算法和大数据处理技术的解决方案，技术路线与资源匹配。",
+      "reason": "技术路线与资源匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了具体的产品开发计划和实验设计，但未详细说明样本量与评价指标。",
+      "reason": "实验设计未见明显问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构完整，提到了具体的数据和市场分析。",
+      "reason": "路演叙事结构完整。"
+    },
+    {
+      "id": "H15",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目在多个关键 Rubric 维度提供了较充分的证据。",
+      "reason": "关键 Rubric 维度证据较为充分。"
+    }
+  ],
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "创青春"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ]
+}

@@ -1,0 +1,342 @@
+{
+  "case_id": "case_bf184c6cce86",
+  "document_id": "doc_0947758fb60c",
+  "source": {
+    "file_path": "环境保护/475224-面向湿地生态监测的多源遥感智能解译技术-项目策划书-86619d62.pdf",
+    "file_name": "475224-面向湿地生态监测的多源遥感智能解译技术-项目策划书-86619d62.pdf",
+    "category": "环境保护",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 77,
+    "full_text_chars": 57058,
+    "core_text_chars": 665,
+    "appendix_start_index": 6,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 78,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 78,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "面向湿地生态监测的多源遥感智能解译技术",
+    "target_users": [
+      "自然资源部东海预报减灾中心",
+      "国家海洋局北海海洋环境监测中心站",
+      "青岛罗博飞海洋技术有限公司"
+    ],
+    "pain_points": [
+      "数据信息不完备",
+      "多源异构数据处理效率低",
+      "跨域分类精度不足"
+    ],
+    "solution": [
+      "构建多模态数据质量增强算法",
+      "开发多源特征联合优化模型"
+    ],
+    "innovation_points": [
+      "数据重构-特征优化-协同解译三位一体技术体系",
+      "地物分类精度和监测效率显著提高"
+    ],
+    "business_model": [
+      "为生态监测机构提供关键技术支撑",
+      "为企业新增产值",
+      "通过技术应用获得收入"
+    ],
+    "market_analysis": [
+      "国家加大湿地保护投入",
+      "相关政策推动滨海湿地保护与管理",
+      "技术在典型生态场景中展现显著优势"
+    ],
+    "execution_plan": [
+      "多次前往黄河口湿地等进行实地调查",
+      "构建技术攻关体系",
+      "2025年6月相关政策进一步推动"
+    ],
+    "risk_control": [
+      "【证据覆盖度与可验证性】H5: 针对数据信息不完备，通过多模态数据质量增强算法提高数据完整性，预期效果显著"
+    ]
+  },
+  "tags": [
+    "category:环境保护",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:User Evidence Strength",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H3",
+    "risk_rule:H6",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_bf184c6cce86_e1",
+      "type": "pain_points_evidence",
+      "quote": "针对现有研究中数据信息不完备、多源异构数据处理效率低、跨域分类精度不足等瓶颈问题",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bf184c6cce86_e2",
+      "type": "solution_evidence",
+      "quote": "通过融合人工智能和遥感机理模型，重点突破三大关键技术：构建多模态数据质量增强算法，开发多源特征联合优化模型，建立跨域协同分类框架",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bf184c6cce86_e3",
+      "type": "innovation_points_evidence",
+      "quote": "本技术体系在滨海湿地等典型生态场景中展现出显著优势，地物分类精度和监测效率较传统方法显著提高",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bf184c6cce86_e4",
+      "type": "business_model_evidence",
+      "quote": "相关成果也已在自然资源部东海预报减灾中心、国家海洋局北海海洋环境监测中心站成功应用，为滨海湿地生态监测和保护提供关键技术支撑。此外相关技术在青岛罗博飞海洋技术有限公司的应用为其新增产值4500万元，获得高度评价。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bf184c6cce86_e5",
+      "type": "market_analysis_evidence",
+      "quote": "十四五期间，我国根据《全国重要生态系统保护和修复重大工程总体规划（2021-2035年）》加大湿地保护投入，2025年6月中共中央办公厅、国务院办公厅发布《关于全面推进江河保护治理的意见》进一步推动滨海湿地的全面保护、管理与修复",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    },
+    {
+      "id": "case_bf184c6cce86_e6",
+      "type": "execution_plan_evidence",
+      "quote": "多次前往黄河口湿地等进行实地调查，围绕多源遥感智能解译技术创新，构建\"数据重构-特征优化-协同解译\"三位一体的技术攻关体系。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": true
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "摘要 湿地作为\"地球之肾\"，在国家生态安全格局中承担着重要功能。十四五期间，我国 根据 《全国重要生态系统保护和修复重大工程总体规划 （2021-2035 年） 》加大湿地保护 投入，2025 年 6 月中共中央办公厅、国务院办公厅发布 《关于全面推进江河保护治理的 意见》进一步推动滨海湿地的全面保护、管理与修复，促进生态与经济协调发展，保障 滨海湿地可持续发展， 落实生态文明建设战略需求。本项目以突破湿地生态监测技术瓶 颈为切入点，多次前往黄河口湿地等进行实地调查，围绕多源遥感智能解译技术创新， 构建\"数据重构-特征优化-协同解译\"三位一体的技术攻关体系。针对现有研究中数据信 息不完备、多源异构数据处理效率低、跨域分类精度不足等瓶颈问题，通过融合人工智 能和遥感机理模型，重点突破三大关键技术：构建多模态数据质量增强算法，开发多源 特征联合优化模型， 建立跨域协同分类框架， 最终形成滨海湿地多源遥感智能解译系统。 本技术体系在滨海湿地等典型生态场景中展现出显著优势， 地物分类精度和监测效 率较传统方法显著提高。团队成员于 IEEE TPAMI、TIP、TGRS 等国际顶级期刊以第一 作",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:31:14Z",
+  "risk_flags": [
+    "H3",
+    "H6",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了湿地生态监测中的具体问题，如数据信息不完备、多源异构数据处理效率低、跨域分类精度不足，并提供了实地调查的证据。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到多次前往黄河口湿地等进行实地调查，但未提供具体的访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目详细描述了技术路线，包括构建多模态数据质量增强算法、开发多源特征联合优化模型、建立跨域协同分类框架，且这些技术已经在实际应用中展现优势。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到为生态监测机构提供关键技术支撑，为企业新增产值，但未详细说明具体的商业模式和成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提到了国家政策对湿地保护的推动，以及在典型生态场景中的显著优势，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到为企业新增产值4500万元，但未提供详细的财务逻辑和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目强调了技术创新，如多模态数据质量增强算法、多源特征联合优化模型等，并在实际应用中展现了显著优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目团队成员在国际顶级期刊发表论文，表明团队具有较强的技术能力和执行能力。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目材料结构完整，提供了详细的背景、技术路线和实际应用案例，数据具有说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到为生态监测机构提供关键技术支撑，为企业新增产值，目标用户与价值主张匹配。",
+      "reason": "项目目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到多次前往黄河口湿地等进行实地调查，表明主要获客渠道可达。",
+      "reason": "项目主要获客渠道可达，未发现渠道不可达问题。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到为企业新增产值4500万元，但未提供用户支付意愿验证。",
+      "reason": "项目提到收入但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了国家政策对湿地保护的推动，市场规模口径合理。",
+      "reason": "项目市场规模口径合理，未发现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到多次前往黄河口湿地等进行实地调查，提供了需求验证证据。",
+      "reason": "项目提供了需求验证证据，未发现需求证据不足。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未详细分析竞品，仅提到技术在典型生态场景中展现显著优势。",
+      "reason": "项目未详细分析竞品，存在竞品对比不可比的风险。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目详细描述了技术创新点，并在实际应用中展现了显著优势。",
+      "reason": "项目创新点可验证，未发现创新点不可验证问题。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到为企业新增产值4500万元，但未提供详细的财务逻辑和单位经济分析。",
+      "reason": "项目单位经济不成立，存在长期亏损风险。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未出现自上而下的增长逻辑估算。",
+      "reason": "项目未出现增长逻辑跳跃问题。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到2025年6月相关政策进一步推动，时间表和里程碑合理。",
+      "reason": "项目时间表和里程碑合理，未发现里程碑不可交付问题。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未涉及高风险领域，如隐私、医疗、金融等。",
+      "reason": "项目未涉及高风险领域，未发现合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目详细描述了技术路线，且技术已经在实际应用中展现优势。",
+      "reason": "项目技术路线与资源匹配，未发现技术路线与资源不匹配问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未提到实验/测试，但实际应用中已展现显著优势。",
+      "reason": "项目实际应用中已展现显著优势，未发现实验设计不合格问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构完整，提供了详细的背景、技术路线和实际应用案例。",
+      "reason": "项目路演叙事结构完整，未发现叙事断裂问题。"
+    },
+    {
+      "id": "H15",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目在多个关键 Rubric 维度提供了较充分的证据。",
+      "reason": "项目在多个关键 Rubric 维度提供了较充分的证据，未发现评分项证据覆盖不足问题。"
+    }
+  ]
+}

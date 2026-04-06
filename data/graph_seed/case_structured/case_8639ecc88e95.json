@@ -1,0 +1,317 @@
+{
+  "case_id": "case_8639ecc88e95",
+  "document_id": "doc_3dda78980c17",
+  "source": {
+    "file_path": "教育服务/536350-“声”动学堂——个性化人工智能教学助手项目说明书-项目策划书-630037af.pdf",
+    "file_name": "536350-“声”动学堂——个性化人工智能教学助手项目说明书-项目策划书-630037af.pdf",
+    "category": "教育服务",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 24,
+    "full_text_chars": 18810,
+    "core_text_chars": 2365,
+    "appendix_start_index": 3,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 25,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 25,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "“声”动学堂--个性化人工智能教学助手",
+    "target_users": [
+      "高等教育与科研场景的用户"
+    ],
+    "pain_points": [
+      "学术论文内容晦涩难懂"
+    ],
+    "solution": [
+      "将学术论文转化为生动、可交互的虚拟作者讲解视频"
+    ],
+    "innovation_points": [
+      "三模态全栈智能协同体系",
+      "模型级联替代全能模型开发"
+    ],
+    "business_model": [],
+    "market_analysis": [],
+    "execution_plan": [],
+    "risk_control": [
+      "【合规与伦理意识】系统在获得肖像及语音合法授权的前提下生成视频，确保合规性"
+    ]
+  },
+  "tags": [
+    "category:教育服务",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_8639ecc88e95_e1",
+      "type": "user_evidence",
+      "quote": "本项目旨在打造一款面向高等教育与科研场景的智能化学术传播平台——“声”动学堂：虚拟人论文讲解系统。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_8639ecc88e95_e2",
+      "type": "pain_points",
+      "quote": "通过“文本-语音-视觉”三模态协同架构，将晦涩的学术论文转化为生动、可交互的虚拟作者讲解视频。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_8639ecc88e95_e3",
+      "type": "solution",
+      "quote": "系统在获得肖像及语音合法授权的前提下，可根据论文内容自动抽取关键论点，结合作者本人或用户自定义的人像与声纹，在 3 秒内生成高质量、高同步度的虚拟讲解视频。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_8639ecc88e95_e4",
+      "type": "innovation_points",
+      "quote": "平台具有三模态全栈智能协同体系，采取模型级联替代全能模型开发，利用基于 Flask、langchain 的模型预封装与服务化，对专业性强的学术内容有独特优势，形成了独有的知识壁垒。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_8639ecc88e95_e5",
+      "type": "risk_evidence",
+      "quote": "系统在获得肖像及语音合法授权的前提下，确保合规性。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "“声”动学堂——个性化人工智能教学助手项目说明书 1 / 24 “挑战杯”全国大学生课外学术科技作 品竞赛 人工智能+专项赛 项目说明书 学 校 名 称: ××大学 参 赛 组 别: 人工智能+专项赛 参 赛 类 别: 应用赛 赛 道 名 称: 人工智能+教育教学 项 目 名 称: “声”动学堂--个性化人工智能教学助手 指 导 老 师: M 老师 成 员: 崔琛浩 洪子翔 牟星宇 董顺心 史立彬 陈科宇 “声”动学堂——个性化人工智能教学助手项目说明书 2 / 24 摘要 本项目旨在打造一款面向高等教育与科研场景的智能化学术传播平台—— “声”动学堂：虚拟人论文讲解系统。平台深度融合大语言模型（LLM）、高 保真语音合成（TTS）以及语音驱动的人脸视频生成（Talking Head Generation） 等前沿技术，通过“文本-语音-视觉”三模态协同架构，将晦涩的学术论文转化 为生动、可交互的虚拟作者讲解视频。系统在获得肖像及语音合法授权的前提下， 可根据论文内容自动抽取关键论点，结合作者本人或用户自定义的人像与声纹， 在 3 秒内生成高质量、高同步度的虚拟讲解视频，实现“千人千面",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:05:54Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出学术论文内容晦涩难懂，用户场景具体。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "缺乏用户访谈、问卷等需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线明确，采用三模态协同架构，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未详细描述客户、价值主张、渠道、营收、成本等商业闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供 TAM/SAM/SOM 口径，也未进行竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提及单位经济模型或财务逻辑。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了三模态协同架构和模型级联的独特优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "团队成员列出，但未说明具体能力和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目说明书结构完整，描述清晰。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "面向高等教育与科研场景，明确指出用户需求。",
+      "reason": "目标用户与价值主张匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提及具体获客渠道。",
+      "reason": "未提及获客渠道，但未明确表示渠道不可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未提及定价或收费，也未验证用户支付意愿。",
+      "reason": "缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提及 TAM/SAM/SOM 口径。",
+      "reason": "未提及市场规模口径，但未出现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "未提供用户访谈、问卷等需求验证证据。",
+      "reason": "缺乏需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提及竞品分析。",
+      "reason": "未提及竞品分析，但未声称无竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "强调了三模态协同架构和模型级联的独特优势。",
+      "reason": "创新点有明确描述。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提及单位经济模型或财务逻辑。",
+      "reason": "未提及财务逻辑，但未出现单位经济不成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提及市场占有率估算。",
+      "reason": "未出现市场占有率估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未说明具体时间和里程碑。",
+      "reason": "缺少具体时间和里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "系统在获得肖像及语音合法授权的前提下，确保合规性。",
+      "reason": "有合规性说明。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "技术路线明确，采用三模态协同架构。",
+      "reason": "技术路线与资源匹配情况未详细说明，但未出现明显不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提及具体实验或测试。",
+      "reason": "未提及实验设计，但未出现实验设计不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目说明书结构完整，描述清晰。",
+      "reason": "路演叙事结构完整。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、市场与竞争、财务逻辑。",
+      "reason": "多个关键维度缺乏支撑证据。"
+    }
+  ]
+}

@@ -1,8 +1,11 @@
+import logging
 from dataclasses import dataclass
 from typing import Any
 
 from neo4j import GraphDatabase
 from neo4j.exceptions import Neo4jError
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -301,6 +304,195 @@ class GraphService:
 
             return self._query_with_fallback(_query)
         except Exception:
+            return []
+
+    def search_cases_by_dimension(
+        self,
+        category: str | None = None,
+        risk_rule_ids: list[str] | None = None,
+        rubric_items: list[str] | None = None,
+        limit: int = 5,
+    ) -> list[dict[str, Any]]:
+        """Structured search over the standard case library (Project nodes).
+
+        Unlike ``search_nodes`` (generic substring match), this leverages the
+        graph schema (Project -> Category, Project -> RiskRule, Project -> RubricItem)
+        to perform **precise** filtering and return rich metadata for agent context.
+        """
+        try:
+            def _query(session):
+                conditions: list[str] = []
+                params: dict[str, Any] = {"limit": limit}
+
+                if category:
+                    conditions.append("c.name = $category")
+                    params["category"] = category
+
+                if risk_rule_ids:
+                    conditions.append(
+                        "ANY(rid IN $risk_rule_ids WHERE (p)-[:HITS_RULE]->(:RiskRule {id: rid}))"
+                    )
+                    params["risk_rule_ids"] = list(risk_rule_ids)[:6]
+
+                if rubric_items:
+                    conditions.append(
+                        "ANY(rn IN $rubric_items WHERE (p)-[:EVALUATED_BY]->(:RubricItem {name: rn}))"
+                    )
+                    params["rubric_items"] = list(rubric_items)[:6]
+
+                where_clause = " AND ".join(conditions) if conditions else "true"
+                cypher = f"""
+                    MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
+                    WHERE {where_clause}
+                    OPTIONAL MATCH (p)-[:HITS_RULE]->(rr:RiskRule)
+                    OPTIONAL MATCH (p)-[ev:EVALUATED_BY]->(ri:RubricItem)
+                    WITH p, c,
+                         collect(DISTINCT rr.id) AS rules,
+                         collect(DISTINCT CASE WHEN ev.covered THEN ri.name END) AS covered_rubrics,
+                         collect(DISTINCT CASE WHEN NOT ev.covered THEN ri.name END) AS uncovered_rubrics
+                    RETURN p.id AS project_id,
+                           p.name AS project_name,
+                           c.name AS category,
+                           p.confidence AS confidence,
+                           rules,
+                           covered_rubrics,
+                           uncovered_rubrics,
+                           size(covered_rubrics) AS covered_count,
+                           size(uncovered_rubrics) AS uncovered_count
+                    ORDER BY covered_count DESC
+                    LIMIT $limit
+                """
+                rows = list(session.run(cypher, **params))
+                return [dict(r) for r in rows]
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:
+            logger.warning("search_cases_by_dimension failed: %s", exc)
+            return []
+
+    def enrich_rag_hits(
+        self,
+        case_ids: list[str],
+        student_rule_ids: list[str] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Batch-enrich RAG-retrieved cases with Neo4j graph context.
+
+        Uses case_id === Project.id bridge to pull rich relationships for
+        each RAG hit in a single round-trip, plus rule overlap comparison.
+        """
+        if not case_ids:
+            return {}
+        try:
+            _student_rules = set(student_rule_ids or [])
+
+            def _query(session):
+                rows = list(session.run(
+                    """
+                    UNWIND $ids AS cid
+                    MATCH (p:Project {id: cid})-[:BELONGS_TO]->(cat:Category)
+                    OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+                    OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+                    OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)
+                    OPTIONAL MATCH (p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect)
+                    OPTIONAL MATCH (p)-[:HITS_RULE]->(rr:RiskRule)
+                    OPTIONAL MATCH (p)-[ev:EVALUATED_BY]->(ri:RubricItem)
+                    OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(e:Evidence)
+                    OPTIONAL MATCH (p)-[:HAS_MARKET_ANALYSIS]->(mkt:Market)
+                    OPTIONAL MATCH (p)-[:HAS_EXECUTION_STEP]->(exec:ExecutionStep)
+                    WITH p, cat,
+                         collect(DISTINCT pain.name) AS pains,
+                         collect(DISTINCT sol.name) AS solutions,
+                         collect(DISTINCT inn.name) AS innovations,
+                         collect(DISTINCT bm.name) AS biz_models,
+                         collect(DISTINCT {id: rr.id, name: rr.name, severity: rr.severity}) AS rules,
+                         collect(DISTINCT {item: ri.name, covered: ev.covered, score: ev.score}) AS rubrics,
+                         collect(DISTINCT {type: e.type, quote: e.quote}) AS evidences,
+                         collect(DISTINCT mkt.name) AS markets,
+                         collect(DISTINCT exec.name) AS exec_steps
+                    RETURN p.id AS project_id,
+                           p.name AS project_name,
+                           cat.name AS category,
+                           p.confidence AS confidence,
+                           pains, solutions, innovations, biz_models,
+                           rules, rubrics, evidences, markets, exec_steps
+                    """,
+                    ids=case_ids[:8],
+                ))
+                result: dict[str, dict[str, Any]] = {}
+                for row in rows:
+                    pid = row["project_id"]
+                    case_rule_ids = {r["id"] for r in row["rules"] if r.get("id")}
+                    covered = [r["item"] for r in row["rubrics"] if r.get("covered")]
+                    uncovered = [r["item"] for r in row["rubrics"] if r.get("item") and not r.get("covered")]
+                    real_ev = [e for e in row["evidences"] if e.get("quote") and len(str(e["quote"])) > 10]
+                    result[pid] = {
+                        "neo4j_enriched": True,
+                        "graph_pains": [x for x in row["pains"] if x][:5],
+                        "graph_solutions": [x for x in row["solutions"] if x][:5],
+                        "graph_innovations": [x for x in row["innovations"] if x][:4],
+                        "graph_biz_models": [x for x in row["biz_models"] if x][:4],
+                        "graph_markets": [x for x in row["markets"] if x][:4],
+                        "graph_exec_steps": [x for x in row["exec_steps"] if x][:4],
+                        "graph_rules": [
+                            {"id": r["id"], "name": r.get("name", ""), "severity": r.get("severity", "")}
+                            for r in row["rules"] if r.get("id")
+                        ],
+                        "graph_rubric_covered": covered,
+                        "graph_rubric_uncovered": uncovered,
+                        "graph_evidence_count": len(real_ev),
+                        "graph_evidence_samples": [
+                            {"type": e.get("type", ""), "quote": str(e.get("quote", ""))[:150]}
+                            for e in real_ev[:3]
+                        ],
+                        "rule_overlap": {
+                            "shared": sorted(case_rule_ids & _student_rules),
+                            "only_in_case": sorted(case_rule_ids - _student_rules),
+                            "only_in_student": sorted(_student_rules - case_rule_ids),
+                        },
+                    }
+                return result
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:
+            logger.warning("enrich_rag_hits failed: %s", exc)
+            return {}
+
+    def find_complementary_cases(
+        self,
+        weak_rubric_items: list[str],
+        exclude_ids: list[str] | None = None,
+        limit: int = 3,
+    ) -> list[str]:
+        """Find case_ids whose projects are STRONG in the student's weak dimensions.
+
+        This enables "complementary search": instead of finding similar cases,
+        find cases that excel where the student is weakest.
+        """
+        if not weak_rubric_items:
+            return []
+        try:
+            _excl = exclude_ids or []
+
+            def _query(session):
+                rows = list(session.run(
+                    """
+                    UNWIND $items AS rubric_name
+                    MATCH (p:Project)-[ev:EVALUATED_BY]->(ri:RubricItem {name: rubric_name})
+                    WHERE ev.covered = true AND NOT p.id IN $exclude
+                    WITH p, count(DISTINCT ri) AS covered_count
+                    ORDER BY covered_count DESC
+                    LIMIT $lim
+                    RETURN p.id AS case_id
+                    """,
+                    items=weak_rubric_items[:5],
+                    exclude=_excl,
+                    lim=limit,
+                ))
+                return [row["case_id"] for row in rows if row.get("case_id")]
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:
+            logger.warning("find_complementary_cases failed: %s", exc)
             return []
 
     def persist_hypergraph_records(self, records: list[dict[str, Any]], version: str = "v2") -> dict[str, Any]:

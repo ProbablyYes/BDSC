@@ -1,0 +1,350 @@
+{
+  "case_id": "case_81bd41c4f863",
+  "document_id": "doc_16032f7fe506",
+  "source": {
+    "file_path": "科技创新/482709-千钧问鼎——尖端超高压制造装备核心部件自主化研制-论文_调研报告-846e639b.pdf",
+    "file_name": "482709-千钧问鼎——尖端超高压制造装备核心部件自主化研制-论文_调研报告-846e639b.pdf",
+    "category": "科技创新",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 59139,
+    "core_text_chars": 52672,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "尖端超高压制造装备核心部件自主化研制",
+    "target_users": [
+      "科研机构",
+      "国家战略部门",
+      "工业制造企业"
+    ],
+    "pain_points": [
+      "国际技术垄断",
+      "国内传压结构低效",
+      "核心部件材料空白"
+    ],
+    "solution": [
+      "提出自适应高效二级传压结构",
+      "采用高通量第一性原理计算筛选材料",
+      "设计多阶段致密等静压成型原理与设备"
+    ],
+    "innovation_points": [
+      "自适应传压结构",
+      "多物理场协同调控",
+      "多阶段致密等静压成型原理"
+    ],
+    "business_model": [
+      "为科研机构提供高端超高压制造装备"
+    ],
+    "market_analysis": [
+      "全球科技竞争的战略制高点",
+      "推动万亿级产业升级的潜力"
+    ],
+    "execution_plan": [
+      "2023年完成核心部件研制",
+      "2024年实现30 GPa压力下稳定运行",
+      "2025年推广至科研和工业领域"
+    ],
+    "risk_control": [
+      "【通用风险控制】国际技术封锁风险：通过自主研发突破技术瓶颈，减少对外依赖，提高自主可控性。",
+      "【通用风险控制】材料筛选风险：采用高通量计算与实验验证结合的方式，确保材料性能的可靠性。",
+      "【通用风险控制】技术转化风险：与科研机构和工业制造企业合作，确保技术成果的有效转化和应用。"
+    ]
+  },
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_81bd41c4f863_e1",
+      "type": "user_evidence",
+      "quote": "尖端超高压制造装备不仅是实验室里的研究工具，更是国家核心竞争力的重要体现。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_81bd41c4f863_e2",
+      "type": "pain_points_evidence",
+      "quote": "国际上，以美国为首的西方国家通过多种手段实施全方位压制，形成严密的技术垄断格局；国内超高压制造装备则存在传压结构低效、核心部件材料空白、制造工艺瓶颈难突破等诸多难题。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_81bd41c4f863_e3",
+      "type": "solution_evidence",
+      "quote": "团队提出全新自适应高效二级传压结构，通过本构非线性、几何自适应调节机制与相变增韧效应协同，实现无需外部调节的内禀压力均衡稳定。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_81bd41c4f863_e4",
+      "type": "innovation_points_evidence",
+      "quote": "在理论设计上，团队提出全新自适应高效二级传压结构，通过本构非线性、几何自适应调节机制与相变增韧效应协同，实现无需外部调节的内禀压力均衡稳定。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_81bd41c4f863_e5",
+      "type": "business_model_evidence",
+      "quote": "在产业应用领域，高压合成技术展现出推动万亿级产业升级的巨大潜力。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_81bd41c4f863_e6",
+      "type": "market_analysis_evidence",
+      "quote": "高压合成技术已成为衡量国家科技实力的重要标尺，其发展水平直接关系到未来国际科技治理体系中的话语权分配。",
+      "chunk_id": "C5",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_81bd41c4f863_e7",
+      "type": "execution_plan_evidence",
+      "quote": "团队经过潜心研究，将自主研制的核心部件与全新自适应高效传压模型集成后，在30 GPa压力、2000 ℃条件下稳定运行超2000小时，达世界顶尖水平。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "1 千钧问鼎—— 尖端超高压制造装备 核心部件自主化研制 摘要 本项目围绕尖端超高压制造装备核心部件自主化展开深入研究， 致力于突破 国外技术封锁，推动我国在高压技术领域的创新发展。从基础研究到产业应用， 从民生改善到国防安全，尖端超高压制造装备不仅是实验室里的研究工具，更是 国家核心竞争力的重要体现。 当前，尖端超高压制造装备面临国际垄断和国产技术瓶颈的双重困境：国际 上，以美国为首的西方国家通过多种手段实施全方位压制，形成严密的技术垄断 格局；国内超高压制造装备则存在传压结构低效、核心部件材料空白、制造工艺 瓶颈难突破等诸多难题。 为此，团队依托国家“双一流”建设学科，构建尖端超高压制造装备核心部 件自主化的全新研究体系。在理论设计上，团队提出全新自适应高效二级传压结 构，通过本构非线性、几何自适应调节机制与相变增韧效应协同，实现无需外部 调节的内禀压力均衡稳定；在国产有限元软件（FEPG）中运用自适应网格优化 技术并结合GMRES-ILU算法精准高效模拟了“力—热—电” 多场协同作用与参 数反演优化设计。针对核心部件材料空白的难题，团队采用高通量第一性原理计 算筛选与实验验证结合",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:39:02Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目明确指出了国际技术垄断和国内技术瓶颈的痛点，具体描述了传压结构低效、核心部件材料空白等问题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了自适应高效二级传压结构和高通量第一性原理计算筛选材料的技术路线，与团队的科研背景和资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未明确描述客户、价值主张、渠道、营收和成本等商业模式要素。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了全球科技竞争的背景，提到了国际技术垄断和国内技术空白，但未详细分析具体竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的财务数据或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目提出了自适应高效二级传压结构和高通量第一性原理计算筛选材料，具有明显的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目依托国家‘双一流’建设学科，团队具备相关科研背景，里程碑清晰。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，描述清晰，但缺乏具体的用户证据和财务数据。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了目标用户（科研机构和工业制造企业）与价值主张（提供高端超高压制造装备）的匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了与科研机构和工业制造企业的合作，表明主要获客渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了市场规模的潜力，但未提供具体的 TAM/SAM/SOM 计算逻辑。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了国际技术垄断和国内技术空白，但未声称无竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了可验证的创新点，如自适应高效二级传压结构和高通量第一性原理计算筛选材料。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，但未明确描述单位经济不成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "出现‘只要拿下 1% 市场’等自上而下估算。",
+      "reason": "项目提到‘推动万亿级产业升级的潜力’，但未提供具体的市场占有率和增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了清晰的里程碑，如2023年完成核心部件研制，2024年实现30 GPa压力下稳定运行，2025年推广至科研和工业领域。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及隐私、医疗、金融等高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的技术路线与团队的科研背景和资源匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了实验验证，但未详细描述样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，描述清晰，未出现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目在用户证据强度、商业模式一致性和财务逻辑等维度缺乏充分证据。"
+    }
+  ]
+}

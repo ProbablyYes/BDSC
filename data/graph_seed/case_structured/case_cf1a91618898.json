@@ -1,0 +1,301 @@
+{
+  "case_id": "case_cf1a91618898",
+  "document_id": "doc_97f489ae2fe7",
+  "source": {
+    "file_path": "社会公益/高校正能量联盟项目计划书.pdf",
+    "file_name": "高校正能量联盟项目计划书.pdf",
+    "category": "社会公益",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 71345,
+    "core_text_chars": 24,
+    "appendix_start_index": 6,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "高校正能量联盟项目计划书",
+    "target_users": [
+      "高校大学生（志愿者）",
+      "高校社团",
+      "社会公益组织"
+    ],
+    "pain_points": [
+      "公益碎片化：高校公益项目重复建设，缺乏跨校联动",
+      "资源错配：社团缺乏资金与专业指导，企业缺乏优质公益出口",
+      "传播局限：正能量内容在校园端的传播力及持久性不足"
+    ],
+    "solution": [
+      "建立“一站式”跨校公益平台：实现信息互通与资源共享",
+      "公益沙龙模式：定期举办专家指导与项目路演，提升公益专业性",
+      "品牌化运作：通过明星项目建立社会影响力"
+    ],
+    "innovation_points": [
+      "组织创新：采取“联盟化”运作而非单一社团模式，覆盖面广",
+      "模式创新：引入商业思维运作公益项目，探索可持续的公益创业路",
+      "传播创新：整合主流媒体资源（凤凰、北京日报等）进行立体化宣传"
+    ],
+    "business_model": [
+      "社会捐赠与基金会合作",
+      "企业赞助与冠名"
+    ],
+    "market_analysis": [
+      "市场机遇：国家对青年公益创业的政策支持与社会对公益项目的关注度提升",
+      "行业现状：高校公益项目多为单打独斗，缺乏系统化的资源整合与专业指导"
+    ],
+    "execution_plan": [
+      "扩大联盟成员规模，覆盖更多首都高校",
+      "深化与地方政府及大型公益基金会的官方合作",
+      "推动公益项目从“活动化”向“产品化”转型"
+    ],
+    "risk_control": [
+      "资金风险：通过多元化的资金来源降低单一依赖风险",
+      "运营风险：建立专业团队进行项目管理与风险监控"
+    ]
+  },
+  "tags": [
+    "category:社会公益",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "2014 年“创青春”首都大学生创业大赛参赛作品",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:35:39Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了高校公益项目存在的问题，包括公益碎片化、资源错配和传播局限。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了一站式跨校公益平台、公益沙龙模式和品牌化运作，技术路线与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目提出了社会捐赠、基金会合作和企业赞助等多元化的资金来源，但未详细说明成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目分析了国家政策支持和社会关注度提升的市场机遇，以及高校公益项目现状。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了多元化的资金来源，但未提供具体的财务逻辑和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了组织创新、模式创新和传播创新，具有可验证的竞争优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到建立专业团队进行项目管理与风险监控，但未提供具体团队成员信息和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目计划书结构完整，内容清晰，但缺乏具体数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的价值主张与目标用户（高校大学生、社团、社会公益组织）匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体获客渠道，但考虑到高校公益项目的特性，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "社会捐赠与基金会合作 企业赞助与冠名",
+      "reason": "项目提到了定价/收费（企业赞助与冠名），但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目对市场规模的描述较为合理，未出现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "公益碎片化：高校公益项目重复建设，缺乏跨校联动 资源错配：社团缺乏资金与专业指导，企业缺乏优质公益出口 传播局限：正能量内容在校园端的传播力及持久性不足",
+      "reason": "项目描述了需求，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，且对高校公益项目现状进行了分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出的创新点较为具体，包括组织创新、模式创新和传播创新。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务逻辑，但未出现明显的单位经济不成立问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "扩大联盟成员规模，覆盖更多首都高校 深化与地方政府及大型公益基金会的官方合作 推动公益项目从“活动化”向“产品化”转型",
+      "reason": "项目提出的里程碑较为宏观，缺乏具体可交付物和时间表。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域，如隐私、医疗或金融。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的技术路线与资源匹配，未出现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体实验，因此不存在实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目计划书结构完整，内容清晰，未出现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "User Evidence Strength, Financial Logic, Team & Execution",
+      "reason": "项目在用户证据强度、财务逻辑和团队与执行方面缺乏足够的支撑证据。"
+    }
+  ]
+}

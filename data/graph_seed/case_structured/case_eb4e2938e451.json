@@ -1,0 +1,307 @@
+{
+  "case_id": "case_eb4e2938e451",
+  "document_id": "doc_d29ae40ccab1",
+  "source": {
+    "file_path": "教育服务/475513-人工智能赋能教学解决方案——智能教育平台与教育大模型-项目策划书-050501c7.pdf",
+    "file_name": "475513-人工智能赋能教学解决方案——智能教育平台与教育大模型-项目策划书-050501c7.pdf",
+    "category": "教育服务",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 49591,
+    "core_text_chars": 5502,
+    "appendix_start_index": 8,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "DirectionAI 智能教育平台及教育大模型",
+    "target_users": [
+      "教育工作者"
+    ],
+    "pain_points": [
+      "教育大模型能力评估缺乏标准",
+      "生成内容控制难实现",
+      "推理过程缺乏解释"
+    ],
+    "solution": [
+      "构建 EduBench 多维能力评测体系",
+      "提出融合个性识别与生成控制的一体化生成机制",
+      "实现超长上下文下的个性化信息精准定位与调用"
+    ],
+    "innovation_points": [
+      "覆盖评测、生成、推理三大环节",
+      "支持多维风格参数控制"
+    ],
+    "business_model": [
+      "提供教育大模型评测服务",
+      "提供个性化生成控制解决方案"
+    ],
+    "market_analysis": [
+      "教育大模型市场潜力巨大",
+      "缺乏权威评测基准",
+      "生成控制与推理解释需求强烈"
+    ],
+    "execution_plan": [],
+    "risk_control": []
+  },
+  "tags": [
+    "category:教育服务",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_eb4e2938e451_e2",
+      "type": "user_evidence",
+      "quote": "项目围绕教育任务“风格多样性强、个性化要求高、上下文依赖重”等特点，提出了融合个性识别与生成控制的一体化生成机制，结合注意力稀疏性建模与任务感知缓存共享技术，实现了在超长上下文（>100K tokens）下的个性化信息精准定位与调用，保障了生成内容的上下文连贯性与个体适应性。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_eb4e2938e451_e3",
+      "type": "user_evidence",
+      "quote": "该机制还支持多维风格参数控制（如情感性、口语性、生动性、互动性），可根据任务目标实时调整语言表达方式，生成文本在四项风格维度与教师真实语言平均契合度超过 78%，其中“生动性”和“互动性”表现尤为突出。",
+      "chunk_id": "C2",
+      "source_unit": "page_2"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "人工智能赋能教学解决方案 DirectionAI 智能教育平台及教育大模型 李家伟 董壮志 许滨 孙华山 柏宇 杨毅哲 梁馨月 Salman 李英豪 韩嘉乐 应用赛：人工智能+教育教学 高老师，刘老师 人工智能赋能教学解决方案 摘要 在国家“人工智能+教育”融合发展的战略背景下，本项目聚焦当前教育大 模型应用中普遍存在的能力评估缺标准、生成控制难实现、推理过程缺解释等核 心技术瓶颈，围绕“评测–生成–推理”三大关键环节，提出并实现了一套系统 性、可落地的技术解决方案，形成了从基础理论研究到平台产品落地、再到实际 教学场景应用的闭环路径，支撑了教育大模型从实验室向真实课堂的转化。 在评测环节，项目团队提出并构建了面向教育任务的 EduBench 多维能力 评测体系，通过系统梳理教学任务结构，覆盖了“记忆、理解、推理、泛化、互 动”等十余项能力维度，设计九类典型教学任务下的 4000+教学场景合成数据集， 填补了教育 AI 领域缺乏权威评估基准的空白。EduBench 不仅可用于横向对比 各类大模型在教育任务上的表现，还能在纵向上为模型微调与能力调控提供明确 反馈，被多个研究团队采用用于教",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:03:49Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了教育大模型应用中的核心问题，如能力评估缺乏标准、生成控制难实现、推理过程缺乏解释等。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中未提供用户访谈、问卷或其他需求验证的具体证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了融合个性识别与生成控制的一体化生成机制，并结合了注意力稀疏性建模与任务感知缓存共享技术，技术路线较为合理。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中未详细描述客户、价值主张、渠道、营收、成本等商业模式的闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目指出了教育大模型市场潜力巨大，缺乏权威评测基准，生成控制与推理解释需求强烈。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中未提供任何财务逻辑或单位经济的分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了多维能力评测体系和个性化生成控制解决方案，具有明显的创新点。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "文本中提到了团队成员，但未详细描述团队能力与项目目标的匹配度，也未给出清晰的里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，描述了技术方案和市场潜力，但部分细节缺乏具体数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目明确指出了目标用户（教育工作者）和价值主张（解决教育大模型应用中的核心技术瓶颈），两者匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及具体的获客渠道，但未表明这些渠道难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目提到提供评测服务和个性化生成控制解决方案，但未提供用户支付意愿的具体证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中对市场规模的描述较为合理，指出了教育大模型市场潜力巨大。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "教育大模型能力评估缺乏标准 生成内容控制难实现 推理过程缺乏解释",
+      "reason": "项目虽然指出了问题，但未提供用户访谈、问卷或其他需求验证的具体证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未声称无竞品或无竞争对手，且提到了市场潜力巨大。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了多维能力评测体系和个性化生成控制解决方案，并有具体的技术实现细节。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提供财务逻辑，因此无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现自上而下的市场估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到了团队成员，但未详细描述团队能力与项目目标的匹配度，也未给出清晰的里程碑。",
+      "reason": "项目未提供具体的时间表或里程碑，难以评估其可交付性。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未涉及高风险领域的合规或伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的技术路线与资源匹配度较高，未表现出明显的技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及具体的实验设计，但未表现出实验设计不合格的情况。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构较为完整，未表现出叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、财务逻辑等。",
+      "reason": "项目在多个关键 Rubric 维度上缺乏充分的支撑证据。"
+    }
+  ]
+}

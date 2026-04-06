@@ -1,0 +1,350 @@
+{
+  "case_id": "case_a91542be7113",
+  "document_id": "doc_d67a456c2d31",
+  "source": {
+    "file_path": "交通运输/536238-智慧碳中和——人工智能的充电场站决策优化-项目策划书-5ff06adc.pdf",
+    "file_name": "536238-智慧碳中和——人工智能的充电场站决策优化-项目策划书-5ff06adc.pdf",
+    "category": "交通运输",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 68,
+    "full_text_chars": 49926,
+    "core_text_chars": 14420,
+    "appendix_start_index": 20,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 69,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 69,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "智慧碳中和——人工智能的充电场站决策优化",
+    "target_users": [
+      "新能源汽车充电站运营商",
+      "城市规划部门"
+    ],
+    "pain_points": [
+      "选址决策依据的数据相对单一",
+      "部门独立，数据分离"
+    ],
+    "solution": [
+      "融合多源异构数据，结合随机森林模型与可解释性人工智能技术",
+      "精准量化影响站点效益的核心因素，形成可行的商业洞察",
+      "模型预测精度达0.97，提升投资决策效率与资源配置科学性"
+    ],
+    "innovation_points": [
+      "应用多元异构数据，提高决策科学性",
+      "跨部门数据整合，解决数据孤岛问题",
+      "可解释AI技术，增强决策透明度"
+    ],
+    "business_model": [
+      "核心价值主张：提供科学的充电站选址和运营决策支持",
+      "目标客户：新能源汽车充电站运营商、城市规划部门",
+      "触达渠道：直接合作、行业展会、线上平台",
+      "主要收入来源：咨询服务费、数据分析服务费",
+      "关键成本：数据采集与处理、模型开发与维护"
+    ],
+    "market_analysis": [
+      "中国新能源汽车保有量快速增长，2024年6月达2472万辆，占汽车总量的7.18%",
+      "纯电动汽车保有量占新能源汽车总量的73.35%",
+      "截至2024年年底，全国新能源汽车保有量达3140万辆，占汽车总量的8.90%"
+    ],
+    "execution_plan": [
+      "2024年6月前完成模型开发与测试",
+      "2024年年底前完成首个充电站选址并投入运营"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】确保数据采集和处理符合国家相关法律法规，保护用户隐私"
+    ]
+  },
+  "tags": [
+    "category:交通运输",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_a91542be7113_e1",
+      "type": "pain_points_evidence",
+      "quote": "选址决策依据的数据相对单一；部门独立，数据分离",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a91542be7113_e2",
+      "type": "solution_evidence",
+      "quote": "通过融合多源异构数据，结合随机森林模型与可解释性人工智能技术，精准量化影响站点效益的核心因素，并形成可行动的商业洞察。模型预测精度达0.97，显著提升投资决策效率与资源配置科学性",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a91542be7113_e3",
+      "type": "innovation_points_evidence",
+      "quote": "多元异构数据应用；跨部门数据整合；可解释AI；用户行为分析助力",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a91542be7113_e4",
+      "type": "business_model_evidence",
+      "quote": "本项目构建基于人工智能的充电场站运营决策优化框架，助力广东健怡投资有限公司破解选址科学性不足、运营粗放化等难题。通过融合多源异构数据，结合随机森林模型与可解释性人工智能技术，精准量化影响站点效益的核心因素，并形成可行的商业洞察。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a91542be7113_e5",
+      "type": "market_analysis_evidence",
+      "quote": "公安部数据显示，截至 2024 年 6 月，全国新能源汽车保有量达 2472 万辆，占汽车总量的 7.18%，其中纯电动汽车保有量 1813.4 万辆，占新能源汽车总量的 73.35%[3]；截至 2024 年年底，全国新能源汽车保有量达 3140万辆，占汽车总量的 8.90%",
+      "chunk_id": "C2",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_a91542be7113_e6",
+      "type": "execution_plan_evidence",
+      "quote": "2024年6月前完成模型开发与测试；2024年6月开始与广东健怡投资有限公司合作，提供选址建议；2024年年底前完成首个充电站选址并投入运营",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a91542be7113_e7",
+      "type": "risk_control_evidence",
+      "quote": "确保数据采集和处理符合国家相关法律法规，保护用户隐私；通过多源数据验证模型预测的准确性，确保决策支持的有效性；定期收集和分析充电站运营数据，持续优化模型预测精度",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "项目简介 构建充电行业人工智能分析模型 为特定区域建站提供选址运营决策支持 痛点分析 选址决策依据的数据相对单一； 部门独立，数据分离；用户流失原因未知 痛点攻克 多元异构数据应用；跨部门数据整合； 可解释AI；用户行为分析助力 难点分析 异构数据处理难；数据维度多、体量大、密度低 技术亮点 人流量统计-计算机视觉技术 POI评分-反距离加权算法 随机森林&SHAP综合分析 项目优势 预测准确、分析全面、结果真实 项目应用 商业建议-企业认可；商业规划-长远布局 1 摘要 本项目构建基于人工智能的充电场站运营决策优化框架，助力广东健怡投资有 限公司破解选址科学性不足、运营粗放化等难题。通过融合多源异构数据，结合随机 森林模型与可解释性人工智能技术， 精准量化影响站点效益的核心因素， 并形成可行 动的商业洞察。模型预测精度达0.97，显著提升投资决策效率与资源配置科学性，为 新能源汽车充电服务行业从“粗放扩张”转向“精细化运营”提供可复制的人工智能 解决方案，赋能“双碳”战略落地。 关键词：人工智能；充电场站；数据驱动；决策优化；可解释性 AI 2 第1章 前言 1.1 项目背景与意义 ",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:36:49Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了充电站选址决策依据的数据相对单一、部门独立、数据分离等痛点，并提供了具体用户场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了用户流失原因未知，但没有提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目详细描述了技术路线，包括随机森林模型、可解释性AI技术、计算机视觉和反距离加权算法，且技术方案与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确了目标客户、价值主张、触达渠道、收入来源和关键成本，形成了较为完整的商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了新能源汽车保有量的数据，但未详细分析市场规模（TAM/SAM/SOM）和竞品情况。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了收入来源和关键成本，但没有详细说明单位经济模型或LTV与CAC的关系。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目强调了创新点，如多源异构数据融合、可解释AI技术、用户行为分析等，并提供了模型预测精度达0.97的验证。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了明确的时间表和里程碑，但未详细描述团队能力和具体可交付物。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目材料结构完整，提供了丰富的数据和具体的技术方案，具有较强的说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的目标用户（充电站运营商和城市规划部门）与价值主张（提供科学的选址和运营决策支持）匹配良好。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了直接合作、行业展会和线上平台作为主要获客渠道，这些渠道较为合理。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证",
+      "reason": "项目提到了咨询服务费和数据分析服务费作为收入来源，但没有提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了新能源汽车保有量的数据，但未详细分析TAM/SAM/SOM，不过这并不影响整体逻辑。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据",
+      "reason": "项目提到了用户流失原因未知，但没有提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品或无竞争对手，且提到了跨部门数据整合和可解释AI技术作为竞争优势。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了模型预测精度达0.97的验证，创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供详细的单位经济模型，但没有明确的证据表明LTV <= CAC或长期亏损。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目没有出现‘只要拿下1%市场’等自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了明确的时间表和里程碑，虽然未详细描述具体可交付物，但整体较为合理。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了确保数据采集和处理符合国家相关法律法规，保护用户隐私。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的技术方案与现有资源匹配，没有过度设计。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了模型开发与测试，但没有详细描述实验设计的样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，没有明显的叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据",
+      "reason": "项目在用户证据强度和财务逻辑方面缺乏充分的支撑证据。"
+    }
+  ]
+}

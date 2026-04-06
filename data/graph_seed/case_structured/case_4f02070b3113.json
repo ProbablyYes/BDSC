@@ -1,0 +1,329 @@
+{
+  "case_id": "case_4f02070b3113",
+  "document_id": "doc_7f72a86f72bd",
+  "source": {
+    "file_path": "医疗健康/飞行医院——致力于支医扶贫的多功能移动医疗队计划书年红色筑梦之旅”赛道 创意组.docx",
+    "file_name": "飞行医院——致力于支医扶贫的多功能移动医疗队计划书年红色筑梦之旅”赛道 创意组.docx",
+    "category": "医疗健康",
+    "doc_type": "docx",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 558,
+    "full_text_chars": 37630,
+    "core_text_chars": 31084,
+    "appendix_start_index": 790,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 559,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 559,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "飞行医院——基于应急救援的移动多功能医疗",
+    "target_users": [
+      "农村及医疗资源匮乏地区居民",
+      "一带一路沿线国家民众",
+      "灾害频发地区的受灾群众"
+    ],
+    "pain_points": [
+      "医师资源稀缺",
+      "医疗设备不足",
+      "医疗救治能力不足"
+    ],
+    "solution": [
+      "提供可移动的多功能医院体系",
+      "配备先进医疗设备和远程通信设施",
+      "培训基层卫生工作人员"
+    ],
+    "innovation_points": [
+      "将多种医疗设备融合于飞行背包",
+      "形成便携式优质医疗资源",
+      "建立完善的转诊机制"
+    ],
+    "business_model": [
+      "通过政府渠道、学术会议、公益服务和自媒体进行推广",
+      "提供紧急医疗救援服务",
+      "开展定期医疗援建工作"
+    ],
+    "market_analysis": [
+      "我国农村人口超 9 亿，其中 2 亿贫困人口",
+      "自然灾害频发，2017 年造成 1.4 亿人次受灾",
+      "一带一路成员国多为不发达国家，健康需求巨大"
+    ],
+    "execution_plan": [
+      "12 小时内快速响应并出发",
+      "利用模块化物资运输系统",
+      "在灾害地重新组建可移动帐篷医院"
+    ],
+    "risk_control": [
+      "【合规与伦理意识/证据覆盖度与可验证性】H5：通过 WHO 认证，确保国际标准合规"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:docx",
+    "rubric:Problem Definition",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H12",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H2",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_4f02070b3113_e1",
+      "type": "user_evidence",
+      "quote": "农村问题依然是我国卫生事业的重点。救援队将响应精准扶贫政策，通过共享硬件资源，改善居民受诊、卫生观念，将应急救援体系推广向我国卫生资源匮乏的地区。",
+      "chunk_id": "C1",
+      "source_unit": "paragraph_9"
+    },
+    {
+      "id": "case_4f02070b3113_e2",
+      "type": "business_model_evidence",
+      "quote": "我们将利用政府渠道、紧急救援学术交流会议渠道、公益服务渠道、自媒体渠道进行推广及宣传，提高 EMT（四川）在紧急医疗领域的业内知名度及公众认可度。",
+      "chunk_id": "C4",
+      "source_unit": "paragraph_84"
+    },
+    {
+      "id": "case_4f02070b3113_e3",
+      "type": "risk_evidence",
+      "quote": "绿色：飞行医院团队对垃圾和污水的处理制定了相应方案，以确保对环境的伤害降到最小。",
+      "chunk_id": "C2",
+      "source_unit": "paragraph_51"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "中国“互联网+” 大学生创新创业大赛参赛项目 商业计划书 项目名称：飞行医院——基于应急救援的移动多功能医疗 参赛组别：“青年红色筑梦之旅”赛道 创意组 目 录 全球范围内灾难突发、频发，据瑞士再保险公司发布的最新统计数字， 2017 年全球灾害损失达 3770 亿美元，达到自 2012 年以来的最高值。而绝大部分发展中国家、中低水平国家应急医疗水平有限。 各国无组织地参与国际医疗救援暴露出严重问题，规范和引导各国参与国际医疗救援队伍的建队标准与行动模式势在必行。2015 年，WHO 成立了国际应急医疗队（EMT）认证工作组，并将国际应急医疗队分为三类。三类队伍最本质的界定分别是：Type I 可以提供住院转诊能力、Type II 可以提供手术救治能力，Type III 具有重症监护能力。 自 2008 年的汶川地震以来，华西通过传承既往救援经验，承担西部地区及周边国家的医学救援任务，逐步建立和完善了紧急医学救援队伍。建成了以复杂内陆山地条件下地质灾害救治为特色、秉承“家国情怀、平民情感、休休有容、革故鼎新”精神的华西特色救援体系。 第六次人口普查显示，我国农村人口占全国人数的 50.",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:54:34Z",
+  "risk_flags": [
+    "H10",
+    "H12",
+    "H13",
+    "H15",
+    "H2",
+    "H3",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了农村、一带一路沿线国家、灾害频发地区存在的医疗资源匮乏问题，有具体的用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了农村人口和贫困人口数量，但缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提出了飞行背包和可移动帐篷医院的概念，但未详细说明技术路线和资源匹配情况，存在过度设计的风险。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目提到了通过政府渠道、学术会议、公益服务和自媒体进行推广，但未明确客户、价值主张、渠道、营收、成本之间的闭环关系。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了全球灾害损失数据和 WHO 认证的背景，合理描述了目标市场的规模和竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目提出了飞行背包和可移动帐篷医院的创新概念，并强调了与 WHO 认证的国际标准合规。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了华西特色救援体系，但未详细说明团队能力和具体里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目结构完整，提供了丰富的背景数据和国际标准认证，具有较强的说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目明确提出了针对农村、一带一路沿线国家、灾害频发地区的医疗救援服务。",
+      "reason": "项目目标用户与价值主张匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目主要通过政府渠道、学术会议、公益服务和自媒体进行推广。",
+      "reason": "这些渠道可能难以有效触达农村及医疗资源匮乏地区的居民。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到将提供紧急医疗救援服务，但未提供用户支付意愿的验证。",
+      "reason": "缺乏用户支付意愿的证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了全球灾害损失数据和 WHO 认证的背景，合理描述了目标市场的规模。",
+      "reason": "市场规模口径合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到了农村人口和贫困人口数量，但缺乏具体的用户访谈、问卷或其他需求验证证据。",
+      "reason": "需求证据不足。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了 WHO 认证的国际应急医疗队，进行了合理的竞品分析。",
+      "reason": "竞品对比合理。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了飞行背包和可移动帐篷医院的创新概念，并强调了与 WHO 认证的国际标准合规。",
+      "reason": "创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未提供具体的财务数据，无法判断单位经济是否成立。",
+      "reason": "财务逻辑未提供足够信息。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到 12 小时内快速响应并出发，但未提供具体增长逻辑。",
+      "reason": "增长逻辑存在跳跃。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到了华西特色救援体系，但未详细说明团队能力和具体里程碑。",
+      "reason": "里程碑不可交付。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目通过 WHO 认证，确保国际标准合规。",
+      "reason": "合规/伦理缺口已覆盖。"
+    },
+    {
+      "id": "H12",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提出了飞行背包和可移动帐篷医院的概念，但未详细说明技术路线和资源匹配情况。",
+      "reason": "技术路线与资源不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到 12 小时内快速响应并出发，但未提供实验设计和评价指标。",
+      "reason": "实验设计不合格。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目结构完整，提供了丰富的背景数据和国际标准认证。",
+      "reason": "路演叙事结构完整。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目在多个关键 Rubric 维度（用户证据强度、方案可行性、商业模式一致性、财务逻辑、团队与执行）缺乏支撑证据。",
+      "reason": "评分项证据覆盖不足。"
+    }
+  ]
+}

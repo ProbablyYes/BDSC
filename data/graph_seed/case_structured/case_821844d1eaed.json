@@ -1,0 +1,346 @@
+{
+  "case_id": "case_821844d1eaed",
+  "document_id": "doc_7d1a8b1ec443",
+  "source": {
+    "file_path": "科技创新/402012-精微智控--面向智能精密制造的电子动态闭环调控系统-论文_调研报告-8f106ef5.pdf",
+    "file_name": "402012-精微智控--面向智能精密制造的电子动态闭环调控系统-论文_调研报告-8f106ef5.pdf",
+    "category": "科技创新",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 40991,
+    "core_text_chars": 789,
+    "appendix_start_index": 3,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "飞秒激光电子动态调控闭环观测系统",
+    "target_users": [
+      "科研人员"
+    ],
+    "pain_points": [
+      "电子层面调控机理不明确",
+      "制造工艺优化时间长",
+      "难以闭环优化"
+    ],
+    "solution": [
+      "实现150飞秒时间分辨率",
+      "20纳米空间分辨率",
+      "建立飞秒激光加工数据库",
+      "实现闭环优化"
+    ],
+    "innovation_points": [
+      "首次利用电子能量分布特性",
+      "实现温度等电子层面信息直接获取",
+      "加工效率提高56倍",
+      "深径比提高260倍"
+    ],
+    "business_model": [
+      "为科研和制造业提供高精度加工设备",
+      "通过提高加工效率和精度创造价值"
+    ],
+    "market_analysis": [
+      "全球科研向“四极”前沿发展",
+      "飞秒激光制造市场增长迅速",
+      "工作达到国际领先水平，为37个国家重大科技工程和装备奠定基础"
+    ],
+    "execution_plan": [
+      "开发飞秒激光电子动态调控闭环观测系统",
+      "建立飞秒激光加工数据库",
+      "实现闭环优化并推广应用"
+    ],
+    "risk_control": [
+      "【证据覆盖度与可验证性】H5：利用电子能量分布特性，规避技术实现风险，提高数据获取准确性",
+      "【逻辑自洽与闭环/证据覆盖度与可验证性】R7：通过闭环优化，确保加工精度和效率的提升，形成技术闭环",
+      "【通用风险控制】H11：媒体报道和专家评价，提升项目国际影响力，规避市场认知风险"
+    ]
+  },
+  "tags": [
+    "category:科技创新",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6"
+  ],
+  "evidence": [
+    {
+      "id": "case_821844d1eaed_e1",
+      "type": "pain_points_evidence",
+      "quote": "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_821844d1eaed_e2",
+      "type": "solution_evidence",
+      "quote": "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_821844d1eaed_e3",
+      "type": "innovation_points_evidence",
+      "quote": "项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测系统，可实现150飞秒的超高的时间分辨率、20纳米的超高空间分辨率，并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_821844d1eaed_e4",
+      "type": "business_model_evidence",
+      "quote": "为科研和制造业提供高精度加工设备，通过提高加工效率和精度创造价值。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_821844d1eaed_e5",
+      "type": "market_analysis_evidence",
+      "quote": "Science新闻平台对团队的工作进行了全方位详细报道，认为可以带来革命性的贡献，各国专家也进行了正面评价。《中国教育报》、《人民日报》等主流媒体也进行了报道，认为工作总体达到国际领先水平，为37个国家重大科技工程和国家重大装备奠定了基石。",
+      "chunk_id": "C2",
+      "source_unit": "page_3"
+    },
+    {
+      "id": "case_821844d1eaed_e6",
+      "type": "execution_plan_evidence",
+      "quote": "并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取；另外，项目还创新性的建立飞秒激光加工数据库、实现闭环优化，使加工效率提高了56倍、深径比提高了260倍、可重复加工精度达波长的1/14等，通过闭环优化来指导飞秒激光加工过程。",
+      "chunk_id": "C2",
+      "source_unit": "page_3"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "摘 要 习近平总书记曾多次谈到建设制造强国，并对制造业发展做出重要部 署。激光微纳制造作为先进制造领域产业发展最快、研究最活跃的领域之 一，对加快建设制造强国具有重要意义。 全球科研向“四极”前沿突破人类认知边界，飞秒激光可以向极微观 深入，也可以向极端条件迈进，因为其能够在短于百万亿分之一秒内脉冲 峰值功率超过百万亿瓦，比全世界发电厂的总功率还要高百倍，具有超快、 超强等特性。飞秒激光制造过程均决定于光与电子相互作用，这要求观测 手段应具有高时空分辨能力。 现如今为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1， 电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化 时间周期长且难以进行闭环优化。 本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材 料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础 及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳 米量级，为新一代量子器件和精密结构的制备提供了革命性的工艺装备。 项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测 系统，可实现150飞秒的超高的时间分辨率、20纳米",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:36:30Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H6"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 9.0,
+      "reason": "明确指出了两个具体痛点：电子层面调控机理不明确和制造工艺优化时间长且难以闭环优化。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "提出了飞秒激光电子动态调控闭环观测系统，技术路线清晰，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未详细描述客户、价值主张、渠道、营收、成本等商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提到了飞秒激光制造市场的增长趋势和国际领先水平，但未详细分析竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供单位经济模型或财务预测。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "强调了多个创新点，如150飞秒时间分辨率、20纳米空间分辨率和电子能量分布特性。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未详细描述团队能力和执行里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "材料展示质量较高，有详细的媒体报道和专家评价。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体获客渠道，但未见难以触达目标用户的证据。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "为科研和制造业提供高精度加工设备，通过提高加工效率和精度创造价值。",
+      "reason": "提到定价/收费但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场规模口径描述合理，未见混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "工作达到国际领先水平，为37个国家重大科技工程和装备奠定基础。",
+      "reason": "声称达到国际领先水平，但未详细分析竞品。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点有具体的技术指标支持，可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供财务数据，无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未见自上而下估算的增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "开发飞秒激光电子动态调控闭环观测系统 建立飞秒激光加工数据库 实现闭环优化并推广应用",
+      "reason": "时间表/里程碑描述不具体，缺乏可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，未见合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线描述合理，未见资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提及具体实验，但未见实验设计不合格的情况。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "材料展示结构完整，未见叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "为科研和制造业提供高精度加工设备，通过提高加工效率和精度创造价值。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、团队与执行等。"
+    }
+  ]
+}

@@ -1,0 +1,319 @@
+{
+  "case_id": "case_a8b6b65b6e82",
+  "document_id": "doc_7c8e2665c0c2",
+  "source": {
+    "file_path": "交通运输/514480-稳定不倒——非同轴两轮系统自平衡控制技术-项目策划书-84bcfcb5.pdf",
+    "file_name": "514480-稳定不倒——非同轴两轮系统自平衡控制技术-项目策划书-84bcfcb5.pdf",
+    "category": "交通运输",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 38,
+    "full_text_chars": 26134,
+    "core_text_chars": 17150,
+    "appendix_start_index": 29,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 39,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 39,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "非同轴两轮系统自平衡控制技术",
+    "target_users": [
+      "环境探测人员",
+      "伤员运输人员",
+      "灾区救援人员"
+    ],
+    "pain_points": [
+      "复杂不平路面的运动控制困难",
+      "侧向风等时变干扰下的平衡问题"
+    ],
+    "solution": [
+      "采用查普雷金方程建立动力学模型",
+      "设计分层闭环控制策略",
+      "基于LQR和PID设计自平衡控制器"
+    ],
+    "innovation_points": [
+      "无机械辅助的自平衡控制",
+      "分层闭环控制策略",
+      "抗干扰能力强"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "应用广泛，需求明确",
+      "面临技术挑战，市场潜力大"
+    ],
+    "execution_plan": [],
+    "risk_control": [
+      "【通用风险控制】技术风险：复杂路面和侧向风干扰下的平衡控制，通过数值仿真和试验验证进行控制。"
+    ]
+  },
+  "tags": [
+    "category:交通运输",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H6"
+  ],
+  "evidence": [
+    {
+      "id": "case_a8b6b65b6e82_e1",
+      "type": "pain_points_evidence",
+      "quote": "这些非同轴两轮无人平台具有强非线性、紧耦合、静不定、时变和非完整约束特征，给复杂不平路面、侧向风等时变干扰下的运动控制器设计带来挑战。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_a8b6b65b6e82_e2",
+      "type": "solution_evidence",
+      "quote": "首先采用查普雷金方程建立窄轨非同轴两轮平台动力学模型，针对平台转速及转角控制提出分层闭环控制策略；其次基于动力学模型设计线性二次型调节器(LQR)和比例-积分-微分(PID)自平衡控制器。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_a8b6b65b6e82_e3",
+      "type": "innovation_points_evidence",
+      "quote": "该平台能够稳定保持自主平衡状态且具有一定的抗干扰能力。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_a8b6b65b6e82_e4",
+      "type": "risk_evidence",
+      "quote": "测试结果进一步证实了所提出分层控制策略及方法的有效性。",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "第十九届“挑战杯”全国大学生课外学术科技作品竞赛 摘要 以无人自行车、无人摩托为代表的非同轴两轮无人平台，凭借其机动灵活、通 过性强等特点在山地丛林、地下管廊、城市空间等狭窄空间的环境探测、伤员运输、 灾区救援等方面应用广泛。该类非同轴两轮无人平台具有强非线性、紧耦合、静不 定、时变和非完整约束特征，给复杂不平路面、侧向风等时变干扰下的运动控制器 设计带来挑战。本文以无机械辅助的无人自行车为研究对象，首先采用查普雷金方 程建立窄轨非同轴两轮平台动力学模型，针对平台转速及转角控制提出分层闭环控 制策略；其次基于动力学模型设计线性二次型调节器(LQR)和比例-积分-微分(PID)自 平衡控制器，数值仿真结果表明该平台能够稳定保持自主平衡状态且具有一定的抗 干扰能力。最后基于STM32F407VET6单片机结合惯性测量组件(MPU6050)和驱动 电机，对无人自行车圆周运动平衡控制器进行试验验证，测试结果进一步证实了所 提出分层控制策略及方法的有效性。 关键词：非同轴两轮无人平台；自平衡控制；线性二次型调节器；非完整约束；分 层控制 第十九届“挑战杯”全国大学生课外学术科技作品竞赛 Abst",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:34:54Z",
+  "risk_flags": [
+    "H15",
+    "H4",
+    "H5",
+    "H6"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出在复杂不平路面和侧向风干扰下的运动控制困难，有具体的应用场景如环境探测、伤员运输、灾区救援。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有提供用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目详细描述了采用查普雷金方程建立动力学模型，设计分层闭环控制策略，基于LQR和PID设计自平衡控制器的技术路线，并进行了数值仿真和试验验证。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目文本中没有提及客户、价值主张、渠道、营收、成本等商业模式相关的内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目文本中提到市场潜力大，但没有具体分析市场规模（TAM/SAM/SOM）或竞品情况。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有提及任何财务逻辑，如单位经济、LTV、CAC等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目强调了无机械辅助的自平衡控制和分层闭环控制策略，具有一定的创新性和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目文本中没有提及团队成员背景、能力或执行计划和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目文本结构完整，逻辑清晰，提供了详细的实验验证和测试结果。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有出现目标用户与价值主张不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有提及获客渠道，但也没有证据表明主要获客渠道难以有效触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有提及定价或收费，因此不存在缺少用户支付意愿验证的问题。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "市场规模口径是否合理，竞品分析是否客观。",
+      "reason": "项目文本中提到市场潜力大，但没有具体分析市场规模（TAM/SAM/SOM）或竞品情况，存在口径混乱的风险。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目文本中没有提供用户访谈、问卷或行为数据等原始证据，需求证据不足。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "声称“无竞品/无竞争对手”或竞品分析明显失真。",
+      "reason": "项目文本中提到市场潜力大，但没有具体分析竞品情况，存在竞品对比不可比的风险。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中提到了无机械辅助的自平衡控制和分层闭环控制策略，具有可验证的创新点。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有提及财务逻辑，因此无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有出现‘只要拿下 1% 市场’等自上而下估算的情况。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有提及时间表或里程碑，但也没有证据表明里程碑不可交付。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有涉及隐私、医疗、金融等高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中描述的技术路线与资源匹配，没有过度设计的迹象。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中提到了数值仿真和试验验证，并且测试结果证实了方法的有效性。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本结构完整，逻辑清晰，没有叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目文本中多个关键 Rubric 维度如用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行缺乏支撑证据。"
+    }
+  ]
+}

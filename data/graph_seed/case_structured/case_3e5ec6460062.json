@@ -1,0 +1,326 @@
+{
+  "case_id": "case_3e5ec6460062",
+  "document_id": "doc_1aeb9741643c",
+  "source": {
+    "file_path": "政务治理/510255-图盾智控——图计算赋能的金融风险识别与智能防控系统-项目策划书-2e385988.pdf",
+    "file_name": "510255-图盾智控——图计算赋能的金融风险识别与智能防控系统-项目策划书-2e385988.pdf",
+    "category": "政务治理",
+    "doc_type": "pdf",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 80,
+    "full_text_chars": 55557,
+    "core_text_chars": 8288,
+    "appendix_start_index": 26,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 81,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 81,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "图盾智控——图计算赋能的金融风险识别与智能防控系统",
+    "target_users": [
+      "金融机构的风险管理人员",
+      "中小企业信贷审批人员",
+      "资本市场投资者"
+    ],
+    "pain_points": [
+      "中小企业信息掌握不充分，潜在融资风险高",
+      "金融交易关系复杂，建模难度大",
+      "数据庞大，计算速度慢，难以实时防控"
+    ],
+    "solution": [
+      "基于时序超图的大规模时序交易链路建模",
+      "图计算加速风险模式识别和交易链路挖掘",
+      "基于大模型和GraphRAG的多智能体交互风控应答"
+    ],
+    "innovation_points": [
+      "金融模式感知的时序超图方法，建模更准确",
+      "基于图计算关系采样的社区检测方法，计算更快",
+      "复杂图关联的文档检索与生成方法，交互更易"
+    ],
+    "business_model": [
+      "核心价值主张：提供精准的金融风险识别与防控服务",
+      "目标客户：金融机构、中小企业、资本市场投资者",
+      "触达渠道：通过合作金融机构和在线平台提供服务",
+      "主要收入来源：风险评估服务费、系统订阅费",
+      "关键成本：技术研发投入、数据采集与处理成本"
+    ],
+    "market_analysis": [
+      "中小企业占比62.96%，但贷款总额占比仅37.04%，存在融资难、融资贵问题",
+      "金融风险识别与防控市场潜力大，但现有方法存在建模偏、计算慢、交互难的问题",
+      "项目已应用于深圳证券、交通银行和众邦银行，验证了技术的有效性和市场潜力"
+    ],
+    "execution_plan": [
+      "2021-2024年：完成时序超图模型和图计算算法的研发",
+      "2024-2025年：拓展应用领域，与更多金融机构合作",
+      "2025年：实现系统的大规模商用，覆盖主要金融市场"
+    ],
+    "risk_control": [
+      "【合规与伦理意识】合规与伦理意识：严格遵守金融数据隐私法规，确保数据安全",
+      "【逻辑自洽与闭环】逻辑自洽性检查：通过多源数据汇聚和时序图谱学习模型，确保风险评估的准确性和实时性",
+      "【通用风险控制】证据覆盖度：通过实际应用验证，如深圳证券发债企业风险评估和交通银行票据欺诈风险检测，确保技术的有效性"
+    ]
+  },
+  "tags": [
+    "category:政务治理",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_3e5ec6460062_e1",
+      "type": "user_evidence",
+      "quote": "金融机构的风险管理人员、中小企业信贷审批人员、资本市场投资者",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_3e5ec6460062_e2",
+      "type": "business_model_evidence",
+      "quote": "核心价值主张：提供精准的金融风险识别与防控服务；目标客户：金融机构、中小企业、资本市场投资者；触达渠道：通过合作金融机构和在线平台提供服务；主要收入来源：风险评估服务费、系统订阅费；关键成本：技术研发投入、数据采集与处理成本",
+      "chunk_id": "C9",
+      "source_unit": "page_14"
+    },
+    {
+      "id": "case_3e5ec6460062_e3",
+      "type": "risk_evidence",
+      "quote": "合规与伦理意识：严格遵守金融数据隐私法规，确保数据安全；逻辑自洽性检查：通过多源数据汇聚和时序图谱学习模型，确保风险评估的准确性和实时性；证据覆盖度：通过实际应用验证，如深圳证券发债企业风险评估和交通银行票据欺诈风险检测，确保技术的有效性",
+      "chunk_id": "C9",
+      "source_unit": "page_14"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "图计算赋能的金融风险识别与智能防控系统 汇报人：xxx 图盾智控 项目背景 项目简介 关键技术 应用情况 项目价值 核心团队1 金融工作“首要任务”：服务实体经济 金融是实体经济的血脉，做好新形势下金融工作，必须把服务 实体经济作为根本目的。——习近平 2017年全国金融工作会议 中小企业是实体经济的生力军 中小企业占比 中小企业“融资难，融资贵” 大型 企业 62.96% 中小 企业 37.04% 贷款总额占比 不匹配 税收 GDP 创新成果 就业人口 0% 50% 100% 6050 70 80 本项目聚焦金融风险识别与智能防控， 实现精准风险防控，服务实体经济 中小企业信息掌握不充分、潜在融资风险高： “融资难，融资贵” 图盾智控——图计算赋能的金融风险识别与智能防控系统 存在问题 1 关系复杂导致建模偏 数据庞大导致计算慢 场景多样导致交互难 金融风险识别与智能防控必须解决 建模偏、计算慢、交互难三大难题 如何利用 图建模 理解金融交易图谱 如何利用 图计算 挖掘风险交易链路 如何利用 大模型 实现金融领域问答 多 元 关 系 建 模 时 序 协 同 港交所 中金证券 吉利汽车",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T10:01:19Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了中小企业融资难、融资贵，以及金融交易关系复杂、数据庞大等具体问题，并提供了用户场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了实际应用验证，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了基于时序超图、图计算和大模型的技术方案，与项目目标匹配，但未详细说明资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了客户、价值主张、渠道、营收和成本，形成了较为完整的商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目分析了中小企业融资难、融资贵的问题，以及金融风险识别与防控市场的潜力，但未详细对比竞品。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了收入来源和关键成本，但未提供具体的财务数据和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了基于时序超图、图计算和大模型的创新技术，具有明显的差异化优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未详细描述团队成员背景和执行里程碑的具体内容。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，提供了实际应用案例，但部分数据和逻辑需要进一步验证。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的核心价值主张与目标用户匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目通过合作金融机构和在线平台提供服务，渠道较为明确。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目提到了风险评估服务费和系统订阅费，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目对市场规模的描述较为合理，未发现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品，但竞品分析不够详细。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目强调了创新技术，并提供了实际应用案例验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，但未发现明显的单位经济不成立问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未使用自上而下的估算方法，增长逻辑较为合理。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的时间表和里程碑较为合理，未发现明显不现实的情况。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了严格遵守金融数据隐私法规，确保数据安全。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目的技术方案与资源匹配情况未详细说明，但未发现明显不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了实际应用验证，但未详细描述实验设计。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，逻辑自洽。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目在用户证据强度、财务逻辑、团队与执行等方面缺乏充分的支撑证据。"
+    }
+  ]
+}

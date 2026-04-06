@@ -1,5 +1,6 @@
 {
   "case_id": "case_a0624e5cbc6e",
+  "document_id": "doc_2c160a41a235",
   "source": {
     "file_path": "其他/479874-基于人工智能的雷达微弱目标检测-项目策划书-77a5f70a.pdf",
     "file_name": "479874-基于人工智能的雷达微弱目标检测-项目策划书-77a5f70a.pdf",
@@ -15,91 +16,111 @@
   "document_stats": {
     "segment_count": 13,
     "full_text_chars": 13443,
-    "core_text_chars": 13443,
+    "core_text_chars": 7375,
     "appendix_start_index": null,
-    "has_appendix_evidence": false
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 14,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 14,
+    "hypergraph_hyperedge_count": 1
   },
   "project_profile": {
     "project_name": "基于人工智能的雷达微弱目标检测",
     "target_users": [
-      "公共安全机构",
-      "交通管理部门",
-      "军事部门",
-      "环境监测机构"
+      "低空飞行器监测部门",
+      "公共安全机构"
     ],
     "pain_points": [
-      "低空飞行器的隐蔽性和机动性给其监测和识别带来了挑战",
-      "传统的雷达和光学监测技术对于低空飞行器的监测和识别存在一定的局限性",
-      "高强度噪声也会被分配到目标矩阵中",
-      "云层和森林的快速变化使像素产生了与目标难以区分的灰度变化"
+      "鸟群等干扰目标影响检测准确性",
+      "多径传播环境下的低空慢速目标识别难题"
     ],
     "solution": [
-      "设计了一种基于多模态数据的低空慢速目标检测和跟踪框架",
-      "提出了一种适用于红外序列背景移动或变化场景的低信噪比红外小目标检测算法",
-      "提出了一种基于环境先验信息掩码的检测辅助策略",
-      "提出了一种适用于多径效应环境下的低信噪比雷达检测算法",
-      "提出了一种基于杂波抑制的动目标显示技术"
+      "设计时空域局部对比度方法增强目标检测",
+      "利用目标飞行特性和环境先验信息降低虚警",
+      "通过相参积累和MTI对消技术提高雷达测距准确率"
     ],
     "innovation_points": [
-      "设计了一种基于多模态数据的低空慢速目标检测和跟踪框架",
-      "提出了一种适用于红外序列背景移动或变化场景的低信噪比红外小目标检测算法",
-      "提出了一种基于环境先验信息掩码的检测辅助策略",
-      "提出了一种适用于多径效应环境下的低信噪比雷达检测算法",
-      "提出了一种基于杂波抑制的动目标显示技术"
+      "结合目标与背景的时空特征差异",
+      "利用环境先验数据设计掩码模块",
+      "构建3-D时空域提高适应能力"
     ],
     "business_model": [],
     "market_analysis": [
-      "低空飞行器检测和跟踪算法是目前研究的热点之一，其应用前景十分广阔",
-      "随着无人机的广泛应用，对其进行有效的监测和识别已成为一项重要任务"
+      "雷达测距技术在背景干扰和多径传播环境中展现稳定性",
+      "无人机监测领域对高精度雷达测距需求大",
+      "多种算法被广泛应用于雷达目标距离测量"
     ],
-    "execution_plan": [
-      "设计了一种基于多模态数据的低空慢速目标检测和跟踪框架",
-      "提出了一种适用于红外序列背景移动或变化场景的低信噪比红外小目标检测算法",
-      "提出了一种基于环境先验信息掩码的检测辅助策略",
-      "提出了一种适用于多径效应环境下的低信噪比雷达检测算法",
-      "提出了一种基于杂波抑制的动目标显示技术"
-    ],
-    "risk_control": [
-      "通过长时间的数据积累以提高信噪比",
-      "使用 MTI 方法进行杂波抑制和参数调节等方法，不断对算法进行优化"
-    ]
+    "execution_plan": [],
+    "risk_control": []
   },
-  "risk_flags": [
-    "weak_user_evidence"
+  "tags": [
+    "category:其他",
+    "education_level:unknown",
+    "doc_type:pdf",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
   ],
   "evidence": [
     {
       "id": "case_a0624e5cbc6e_e1",
       "type": "user_evidence",
-      "quote": "低空飞行器的隐蔽性和机动性给其监测和识别带来了挑战",
-      "chunk_id": "C3",
-      "source_unit": "page_3"
+      "quote": "对低空飞行器的监测和识别是保障公共安全和维护社会秩序的重要任务。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
     },
     {
       "id": "case_a0624e5cbc6e_e2",
-      "type": "user_evidence",
-      "quote": "云层和森林的快速变化使像素产生了与目标难以区分的灰度变化",
-      "chunk_id": "C5",
-      "source_unit": "page_6"
+      "type": "pain_points_evidence",
+      "quote": "针对在鸟群等干扰目标和多径传播环境下低空慢速目标识别难题。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
     },
     {
       "id": "case_a0624e5cbc6e_e3",
-      "type": "risk_evidence",
-      "quote": "通过长时间的数据积累以提高信噪比",
-      "chunk_id": "C9",
-      "source_unit": "page_11"
+      "type": "solution_evidence",
+      "quote": "结合目标与背景的时空特征差异，设计了适用于移动背景的时空域局部对比度方法。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
     },
     {
       "id": "case_a0624e5cbc6e_e4",
+      "type": "innovation_points_evidence",
+      "quote": "利用目标飞行特性和环境先验信息设计掩码模块降低虚警。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_a0624e5cbc6e_e5",
+      "type": "market_analysis_evidence",
+      "quote": "在背景干扰和多径传播环境中，雷达测距技术展现出稳定性，为无人机监测提供了独特的优势。",
+      "chunk_id": "C2",
+      "source_unit": "page_4"
+    },
+    {
+      "id": "case_a0624e5cbc6e_e6",
       "type": "risk_evidence",
-      "quote": "使用 MTI 方法进行杂波抑制和参数调节等方法，不断对算法进行优化",
-      "chunk_id": "C9",
-      "source_unit": "page_11"
+      "quote": "但是，高强度噪声也会被分配到目标矩阵中。通过主成分分析求解，减少噪声影响。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
     }
   ],
   "rubric_coverage": [
     {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
       "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
       "covered": true
     },
     {
@@ -107,17 +128,202 @@
       "covered": false
     },
     {
-      "rubric_item": "Risk Control",
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
       "covered": true
     }
   ],
-  "summary": "基于人工智能的雷达微弱目标检测 摘 要：低空飞行器的检测和跟踪是一个备受关注的研究领域，对低空飞行器的监测和识别是 保障公共安全和维护社会秩序的重要任务。针对在鸟群等干扰目标和多径传播环境下低空慢速 目标识别难题，基于赛事主办方提供的地面站获取的雷达和红外数据集以及可能的环境先验数 据，本文提出了低空飞行器检测和跟踪算法框架。在红外数据处理方面，结合目标与背景的空 时特征差异，我们设计了适用于移动背景，由绝对能量测量（Absolute Energy Measurement， AEM）和波动差异测量（Fluctuation Difference Measurement，FDM）的时空域局部对比度方 法；同时，利用目标飞行特性和环境先验信息设计掩码模块降低虚警。在雷达数据处理方面， 通过相参积累提高信噪比分离出信号；利用 MTI 对消技术消除雷达数据中的静态杂波，实现距 离向高分辨率；利用匹配滤波器的原理进行脉冲压缩，得到目标距离信息。在线下测试集的实 验表明，我们的算法在保证实时性的基础上具有良好的检测能力。 关 键 词：低空飞行器；时空域局部对比度；杂波抑制 目 录 1. 概述 ...",
+  "summary": "基于人工智能的雷达微弱目标检测 摘 要：低空飞行器的检测和跟踪是一个备受关注的研究领域，对低空飞行器的监测和识别是 保障公共安全和维护社会秩序的重要任务。针对在鸟群等干扰目标和多径传播环境下低空慢速 目标识别难题，基于赛事主办方提供的地面站获取的雷达和红外数据集以及可能的环境先验数 据，本文提出了低空飞行器检测和跟踪算法框架。在红外数据处理方面，结合目标与背景的空 时特征差异，我们设计了适用于移动背景，由绝对能量测量（Absolute Energy Measurement， AEM）和波动差异测量（Fluctuation Difference Measurement，FDM）的时空域局部对比度方 法；同时，利用目标飞行特性和环境先验信息设计掩码模块降低虚警。在雷达数据处理方面， 通过相参积累提高信噪比分离出信号；利用 MTI 对消技术消除雷达数据中的静态杂波，实现距 离向高分辨率；利用匹配滤波器的原理进行脉冲压缩，得到目标距离信息。在线下测试集的实 验表明，我们的算法在保证实时性的基础上具有良好的检测能力。 关 键 词：低空飞行器；时空域局部对比度；杂波抑制 研究。其基本思想是比较目标",
   "confidence": 0.9,
   "llm": {
     "enabled": true,
     "provider": "qwen",
-    "model": "Qwen/Qwen2.5-32B-Instruct",
+    "model": "Qwen/Qwen2.5-72B-Instruct",
     "used": true
   },
-  "generated_at": "2026-03-08T13:27:32Z"
+  "engine": "hypernetx",
+  "generated_at": "2026-03-29T09:42:22Z",
+  "risk_flags": [
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了低空飞行器检测和跟踪的重要性，以及在鸟群等干扰目标和多径传播环境下的识别难题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了结合时空域局部对比度方法和环境先验信息的算法框架，技术路线较为合理。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未明确描述客户、价值主张、渠道、营收和成本等商业模式相关的内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到无人机监测领域对高精度雷达测距需求大，但未提供具体的市场规模数据和竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供任何财务逻辑或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了时空域局部对比度方法和环境先验信息的掩码模块，具有一定的创新性和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供团队背景和执行计划的具体信息。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目描述较为清晰，但缺乏商业模式和财务逻辑的详细说明。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述中未出现目标用户与价值主张不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的获客渠道，但未表明这些渠道难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未提供用户支付意愿验证。",
+      "reason": "项目未提供任何关于用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体的市场规模口径，但未出现口径混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未提供用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目未提供任何用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品或无竞争对手，也未提供明显失真的竞品分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提出了时空域局部对比度方法和环境先验信息的掩码模块，这些创新点有实验支持。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供财务逻辑，因此无法判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现‘只要拿下 1% 市场’等自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的时间表或里程碑，但未表明这些计划不现实或缺少可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及隐私、医疗、金融等高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述的技术方案与现有资源匹配，未出现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提到了线下测试集的实验，但未详细说明样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述结构较为完整，未出现明显的叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行。",
+      "reason": "项目在多个关键 Rubric 维度上缺乏充分的支撑证据。"
+    }
+  ]
 }

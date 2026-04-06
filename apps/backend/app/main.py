@@ -1433,6 +1433,7 @@ def _build_agent_trace(
         "rag_cases": result.get("rag_cases", []),
         "web_search": result.get("web_search_result", {}),
         "hypergraph_student": result.get("hypergraph_student", {}),
+        "hyper_consistency_issues": result.get("hyper_consistency_issues", []),
         "critic": result.get("critic"),
         "challenge_strategies": result.get("challenge_strategies"),
         "pressure_test_trace": result.get("pressure_test_trace"),
@@ -1440,6 +1441,8 @@ def _build_agent_trace(
         "learning": result.get("learning"),
         "category": result.get("category", ""),
         "matched_teacher_interventions": matched_interventions or [],
+        "kb_utilization": result.get("kb_utilization", {}),
+        "rag_enrichment_insight": result.get("rag_enrichment_insight", ""),
     }
 
 
@@ -2129,6 +2132,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         history_context=history_context,
         conversation_messages=conv_messages,
         teacher_feedback_context=tfb_ctx,
+        competition_type=getattr(payload, "competition_type", "") or "",
     )
 
     diagnosis = result.get("diagnosis", {})
@@ -2230,6 +2234,7 @@ async def dialogue_turn_stream(request: Request):
     student_id = payload.get("student_id", "student")
     initial_conv_id = payload.get("conversation_id", "")
     mode_val = payload.get("mode", "coursework")
+    comp_type_val = payload.get("competition_type", "")
 
     def event_stream():
         conv_id = initial_conv_id
@@ -2255,6 +2260,7 @@ async def dialogue_turn_stream(request: Request):
                 history_context=history_context,
                 conversation_messages=conv_messages,
                 teacher_feedback_context=tfb_ctx,
+                competition_type=comp_type_val,
             )
             logical_project_id = _derive_logical_project_id(project_state, conv_id, msg, project_id)
             project_phase = _infer_project_phase(msg, pre.get("next_task", {}), pre.get("kg_analysis", {}))

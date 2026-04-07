@@ -211,6 +211,33 @@ INTENTS: dict[str, dict] = {
         "need_web": False,
         "focused": True,
     },
+    "funding_investment": {
+        "keywords": ["融资", "投资", "估值", "股权", "BP", "天使轮", "种子轮",
+                      "风投", "VC", "商业计划书", "投资人", "股份",
+                      "融资计划", "拉投资", "找投资", "估值方法"],
+        "desc": "学生咨询融资、投资、估值、股权相关",
+        "agents": ["coach"],
+        "need_web": True, "web_results": 3,
+        "focused": True,
+    },
+    "company_operations": {
+        "keywords": ["开公司", "注册公司", "法务", "股权架构", "税务",
+                      "工商注册", "营业执照", "合伙协议", "公司章程",
+                      "知识产权", "专利", "商标", "法律风险"],
+        "desc": "学生咨询公司注册、法务、股权架构等运营问题",
+        "agents": ["tutor"],
+        "need_web": True, "web_results": 3,
+        "focused": True,
+    },
+    "startup_execution": {
+        "keywords": ["招人", "团队管理", "增长", "上市", "IPO", "并购",
+                      "获客", "留存", "用户增长", "运营", "扩张",
+                      "规模化", "团队搭建", "合伙人"],
+        "desc": "学生咨询创业执行：团队、增长、规模化",
+        "agents": ["coach"],
+        "need_web": True, "web_results": 3,
+        "focused": True,
+    },
     "out_of_scope": {
         "keywords": ["写代码", "编程", "python", "java", "c++", "javascript",
                       "天气", "新闻", "八卦", "娱乐",
@@ -273,6 +300,21 @@ AGENT_MATRIX: dict[str, dict[str, list[str]]] = {
         "simple": ["coach"],
         "medium": ["coach"],
         "complex": ["coach"],
+    },
+    "funding_investment": {
+        "simple": ["coach"],
+        "medium": ["coach", "tutor"],
+        "complex": ["coach", "tutor", "analyst", "planner"],
+    },
+    "company_operations": {
+        "simple": ["tutor"],
+        "medium": ["tutor", "coach"],
+        "complex": ["tutor", "coach", "planner"],
+    },
+    "startup_execution": {
+        "simple": ["coach"],
+        "medium": ["coach", "planner"],
+        "complex": ["coach", "planner", "analyst", "tutor"],
     },
     "out_of_scope": {
         "simple": [],
@@ -1811,7 +1853,10 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
                 "6. **competition_prep**: 学生在讨论竞赛备赛、答辩技巧、路演方法等。\n"
                 "7. **pressure_test**: 学生在测试项目薄弱环节或挑战自己的假设。\n"
                 "8. **idea_brainstorm**: 学生还没有具体方向，在寻求创业灵感或方向建议。\n"
-                "9. **general_chat**: 完全与创业/项目无关的日常对话或寒暄。\n\n"
+                "9. **funding_investment**: 学生在问融资、投资、估值、股权、写BP等问题。\n"
+                "10. **company_operations**: 学生在问开公司、注册、法务、股权架构、知识产权等。\n"
+                "11. **startup_execution**: 学生在问招人、团队管理、增长策略、规模化、上市等执行层面。\n"
+                "12. **general_chat**: 完全与创业/项目无关的日常对话或寒暄。\n\n"
                 "## intent_shape 判断\n"
                 "- single: 消息围绕一个主题\n"
                 "- mixed: 消息同时涉及多个不同主题（如项目介绍+商业模式+推广+竞争）\n\n"
@@ -2204,14 +2249,46 @@ def _merge_historical_entities(
 ) -> tuple[list[dict], list[dict], int]:
     """Accumulate KG entities across conversation turns.
 
-    Deduplicates by (type, normalized_label).  Returns
-    (merged_entities, merged_rels, new_count_this_turn).
+    Deduplicates by (type, normalized_label) and assigns stable IDs so
+    relationships from different turns connect correctly.
+    Returns (merged_entities, merged_rels, new_count_this_turn).
     """
     seen: dict[tuple[str, str], dict] = {}
-    seen_rels: dict[tuple[str, str, str], dict] = {}
+    stable_id_counter = 0
 
     def _norm(label: str) -> str:
         return label.strip().lower().replace(" ", "")
+
+    def _get_stable_id(etype: str, label: str) -> str:
+        nonlocal stable_id_counter
+        key = (etype, _norm(label))
+        if key not in seen:
+            stable_id_counter += 1
+            return f"s{stable_id_counter}"
+        return seen[key]["id"]
+
+    def _process_turn(entities: list[dict], rels: list[dict]) -> dict[str, str]:
+        """Process one turn's entities+rels. Returns orig_id → stable_id map."""
+        nonlocal stable_id_counter
+        id_map: dict[str, str] = {}
+        for ent in entities:
+            if not isinstance(ent, dict) or not ent.get("label"):
+                continue
+            etype = str(ent.get("type", ""))
+            label = str(ent["label"])
+            key = (etype, _norm(label))
+            orig_id = str(ent.get("id", ""))
+            if key not in seen:
+                stable_id_counter += 1
+                sid = f"s{stable_id_counter}"
+                seen[key] = {**ent, "id": sid}
+            else:
+                sid = seen[key]["id"]
+                seen[key] = {**seen[key], **{k: v for k, v in ent.items() if k != "id" and v}}
+            id_map[orig_id] = sid
+        return id_map
+
+    seen_rels: dict[tuple[str, str, str], dict] = {}
 
     for hm in conversation_messages:
         trace = hm.get("agent_trace") if isinstance(hm, dict) else None
@@ -2220,32 +2297,26 @@ def _merge_historical_entities(
         kg = trace.get("kg_analysis")
         if not isinstance(kg, dict):
             continue
-        for ent in kg.get("entities", []):
-            if not isinstance(ent, dict) or not ent.get("label"):
-                continue
-            key = (str(ent.get("type", "")), _norm(str(ent["label"])))
-            if key not in seen:
-                seen[key] = ent
+        id_map = _process_turn(kg.get("entities", []), kg.get("relationships", []))
         for rel in kg.get("relationships", []):
             if not isinstance(rel, dict):
                 continue
-            rk = (str(rel.get("source", "")), str(rel.get("target", "")), str(rel.get("relation", "")))
+            src = id_map.get(str(rel.get("source", "")), str(rel.get("source", "")))
+            tgt = id_map.get(str(rel.get("target", "")), str(rel.get("target", "")))
+            rk = (src, tgt, str(rel.get("relation", "")))
             if rk not in seen_rels:
-                seen_rels[rk] = rel
+                seen_rels[rk] = {**rel, "source": src, "target": tgt}
 
-    new_count = 0
-    for ent in current_entities:
-        if not isinstance(ent, dict) or not ent.get("label"):
-            continue
-        key = (str(ent.get("type", "")), _norm(str(ent["label"])))
-        if key not in seen:
-            new_count += 1
-        seen[key] = ent
+    prev_count = len(seen)
+    cur_id_map = _process_turn(current_entities, current_rels)
+    new_count = len(seen) - prev_count
     for rel in current_rels:
         if not isinstance(rel, dict):
             continue
-        rk = (str(rel.get("source", "")), str(rel.get("target", "")), str(rel.get("relation", "")))
-        seen_rels[rk] = rel
+        src = cur_id_map.get(str(rel.get("source", "")), str(rel.get("source", "")))
+        tgt = cur_id_map.get(str(rel.get("target", "")), str(rel.get("target", "")))
+        rk = (src, tgt, str(rel.get("relation", "")))
+        seen_rels[rk] = {**rel, "source": src, "target": tgt}
 
     return list(seen.values()), list(seen_rels.values()), new_count
 
@@ -2450,10 +2521,15 @@ def gather_context_node(state: WorkflowState) -> dict:
                 logger.warning("Complementary search failed: %s", exc)
         neo4j_enriched = False
         enrichment_count = 0
+        logger.info(
+            "RAG dual-channel: graph_service=%s cases=%d retrieval_mode=%s",
+            _graph_service is not None, len(cases), retrieval_mode,
+        )
         if _graph_service and cases:
             try:
                 hit_ids = [c["case_id"] for c in cases if c.get("case_id")]
                 _student_rules = [r.get("id", "") for r in (diag_data.get("triggered_rules") or []) if isinstance(r, dict) and r.get("id")]
+                logger.info("RAG→Neo4j enrichment: hit_ids=%s student_rules=%s", hit_ids[:4], _student_rules[:4])
                 enriched = _graph_service.enrich_rag_hits(hit_ids, _student_rules)
                 if enriched:
                     neo4j_enriched = True
@@ -2462,8 +2538,13 @@ def gather_context_node(state: WorkflowState) -> dict:
                         if extra:
                             c.update(extra)
                             enrichment_count += 1
+                    logger.info("RAG→Neo4j enrichment success: %d/%d cases enriched", enrichment_count, len(cases))
+                else:
+                    logger.warning("RAG→Neo4j enrichment returned empty (case_ids may not exist as Project.id in Neo4j)")
             except Exception as exc:
                 logger.warning("Neo4j RAG enrichment failed: %s", exc)
+        elif not _graph_service:
+            logger.warning("RAG dual-channel: graph_service is None, skipping Neo4j enrichment")
         ctx = _rag.format_for_llm(cases)
         enrichment_insight = RagEngine.format_enrichment_insight(cases)
         search_trace = [{
@@ -2489,26 +2570,75 @@ def gather_context_node(state: WorkflowState) -> dict:
     def _task_kg():
         if not _llm.enabled or len(msg) < 10:
             return {"kg_analysis": _default_kg()}
+
+        # 构建历史上下文：最近3轮对话 + 已知实体列表
+        _conv = state.get("conversation_messages") or []
+        _hist_ctx_parts: list[str] = []
+        _known_entities: list[dict] = []
+        _known_rels: list[dict] = []
+        for _hm in _conv[-6:]:
+            if not isinstance(_hm, dict):
+                continue
+            _role = "学生" if _hm.get("role") == "user" else "AI"
+            _content = str(_hm.get("content", ""))[:300]
+            if _content.strip():
+                _hist_ctx_parts.append(f"{_role}: {_content}")
+            _htrace = _hm.get("agent_trace") if isinstance(_hm, dict) else None
+            if isinstance(_htrace, dict):
+                _hkg = _htrace.get("kg_analysis")
+                if isinstance(_hkg, dict):
+                    _known_entities.extend(_hkg.get("entities", []))
+                    _known_rels.extend(_hkg.get("relationships", []))
+
+        _known_summary = ""
+        if _known_entities:
+            _known_labels = [f"{e.get('label','')}({e.get('type','')})" for e in _known_entities if isinstance(e, dict) and e.get("label")]
+            _dedup = list(dict.fromkeys(_known_labels))[:20]
+            _known_summary = f"\n\n已从前几轮提取的实体({len(_dedup)}个): {', '.join(_dedup)}\n请不要重复这些，只提取本轮新出现的实体。如果学生修正了之前的说法，可以用新实体替代。"
+
+        _hist_block = ""
+        if _hist_ctx_parts:
+            _hist_block = "\n\n前几轮对话摘要:\n" + "\n".join(_hist_ctx_parts[-6:])
+
         kg = _llm.chat_json(
             system_prompt=(
-                "你是知识图谱抽取引擎。从学生的创业项目描述中提取所有关键实体和关系。\n"
-                + ("学生上传了文件，请逐段分析。\n" if is_file else "")
+                "你是知识图谱抽取引擎。从学生的创业项目描述中**尽可能全面地**提取实体和关系。\n"
+                + ("学生上传了文件，请逐段仔细分析，不要遗漏任何关键信息。\n" if is_file else "")
                 + "实体type必须从以下选择: stakeholder, pain_point, solution, innovation, "
                 "technology, market, competitor, resource, business_model, execution_step, risk_control, team, evidence\n\n"
-                "示例:\n"
-                '{"entities":[{"id":"e1","label":"6-12岁儿童","type":"stakeholder"},'
-                '{"id":"e2","label":"编程学习枯燥","type":"pain_point"},'
-                '{"id":"e3","label":"游戏化编程平台","type":"solution"},'
-                '{"id":"e4","label":"教师访谈原话","type":"evidence"}],'
+                "**提取原则**:\n"
+                "1. 宁多勿少：一句话里可能包含多个实体，每个都要提取\n"
+                "2. 具体化：'大学生' 比 '用户' 好，'AI智能分拣' 比 '技术' 好\n"
+                "3. 关系要完整：每对有逻辑关联的实体都建立关系\n"
+                "4. structural_gaps 要基于13维度检查缺什么：stakeholder/pain_point/solution/innovation/technology/market/competitor/resource/business_model/execution_step/risk_control/team/evidence\n"
+                "5. completeness_score(0-10)：覆盖维度越多分越高\n"
+                "6. section_scores: 对每个已出现的维度打分(0-10)\n\n"
+                "示例(实际应提取更多):\n"
+                '{"entities":[{"id":"e1","label":"6-12岁儿童家长","type":"stakeholder"},'
+                '{"id":"e2","label":"编程学习枯燥无反馈","type":"pain_point"},'
+                '{"id":"e3","label":"游戏化编程闯关平台","type":"solution"},'
+                '{"id":"e4","label":"Scratch积木式编程","type":"technology"},'
+                '{"id":"e5","label":"编程猫","type":"competitor"},'
+                '{"id":"e6","label":"K12编程教育市场","type":"market"},'
+                '{"id":"e7","label":"教师访谈记录","type":"evidence"},'
+                '{"id":"e8","label":"订阅制+学校采购","type":"business_model"}],'
                 '"relationships":[{"source":"e1","target":"e2","relation":"面临"},'
                 '{"source":"e3","target":"e2","relation":"解决"},'
-                '{"source":"e4","target":"e2","relation":"证明"}],'
-                '"structural_gaps":["缺少商业模式","缺少竞品分析","缺少迁移成本说明"],'
-                '"content_strengths":["目标用户清晰"],'
-                '"insight":"项目方向明确但缺少证据支撑"}\n\n'
-                "要求：即使信息很少也要尽力提取，至少提取2-3个实体。"
+                '{"source":"e3","target":"e4","relation":"基于"},'
+                '{"source":"e5","target":"e3","relation":"竞争"},'
+                '{"source":"e7","target":"e2","relation":"验证"}],'
+                '"structural_gaps":["缺少执行步骤","缺少风控措施","缺少团队介绍"],'
+                '"content_strengths":["目标用户清晰","痛点有证据支撑"],'
+                '"completeness_score":5,'
+                '"section_scores":{"stakeholder":8,"pain_point":7,"solution":6,"technology":5,"competitor":4,"market":3,"evidence":6,"business_model":4},'
+                '"insight":"项目方向明确，用户-痛点-方案链条清晰，但缺少执行路径和风控"}\n\n'
+                "要求：尽力提取，目标是完整描绘学生项目的知识图谱。即使信息模糊也要提取，用'(待明确)'标注。"
+                + _known_summary
             ),
-            user_prompt=f"学生内容:\n{msg[:4000]}",
+            user_prompt=(
+                f"学生本轮内容:\n{msg[:4000]}"
+                + _hist_block
+            ),
             model=settings.llm_fast_model,
             temperature=0.15,
         )
@@ -2548,10 +2678,10 @@ def gather_context_node(state: WorkflowState) -> dict:
             if isinstance(_hkg, dict):
                 _prev_entity_count += len(_hkg.get("entities", []))
 
-    _DATA_MATURITY_ENTITY_THRESHOLD = 6
+    _DATA_MATURITY_ENTITY_THRESHOLD = 5
     _DATA_MATURITY_RULE_THRESHOLD = 2
     _data_maturity = (
-        "hot" if _prev_entity_count >= 15 and _prev_rule_count >= 4
+        "hot" if _prev_entity_count >= 12 and _prev_rule_count >= 3
         else "warm" if _prev_entity_count >= _DATA_MATURITY_ENTITY_THRESHOLD or _prev_rule_count >= _DATA_MATURITY_RULE_THRESHOLD
         else "cold"
     )
@@ -2618,7 +2748,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     # INTER-LAYER: Entity merge + maturity refinement (sync, <5ms)
     # ════════════════════════════════════════════════════════════════
     kg = collected.get("kg_analysis", _default_kg())
-    conv_messages = state.get("messages") or []
+    conv_messages = state.get("conversation_messages") or []
     accumulated_entities, accumulated_rels, new_entity_count = _merge_historical_entities(
         current_entities=kg.get("entities", []),
         current_rels=kg.get("relationships", []),
@@ -2628,6 +2758,7 @@ def gather_context_node(state: WorkflowState) -> dict:
         "total_accumulated": len(accumulated_entities),
         "new_this_turn": new_entity_count,
         "total_rels": len(accumulated_rels),
+        "project_maturity": "mature" if len(accumulated_entities) >= 5 else "exploring",
     }
     logger.info(
         "incremental KG: %d total entities (%d new), %d rels",
@@ -2636,28 +2767,48 @@ def gather_context_node(state: WorkflowState) -> dict:
 
     _actual_entity_count = len(accumulated_entities)
     _actual_rule_count = len(rules)
+
+    # ── Progressive complexity: 渐进式引入复杂工具 ──
+    # 超图教学洞察 (hyper_teaching): 只需有规则触发即可 → 基于规则的案例启发
+    # 超图学生分析 (hyper_student):  需要 ≥5 实体 → 需要足够的结构化信息
+    # Neo4j 图搜索:                需要 ≥2 实体 → 早期也能搜到案例启发
+    _PROJECT_MATURITY_THRESHOLD = 5
+
     _hyper_teaching_intents = (
         "project_diagnosis", "evidence_check", "competition_prep",
         "pressure_test", "business_model", "idea_brainstorm",
         "market_competitor", "team_execution", "growth_strategy",
+        "funding_investment", "company_operations", "startup_execution",
     )
 
+    # 超图教学洞察：基于诊断规则和类别，不依赖实体数量
+    # 只要有规则触发或者是项目类intent就可以运行
     _need_hyper_teaching = (
         (is_file or intent in _hyper_teaching_intents)
-        and (_actual_rule_count >= 1 or _actual_entity_count >= 3)
+        and (_actual_rule_count >= 1 or _actual_entity_count >= 2)
     )
-    _need_hyper_student = _actual_entity_count >= 3
+    _need_hyper_student = _actual_entity_count >= _PROJECT_MATURITY_THRESHOLD
+    # Neo4j 图搜索门槛更低：只要有2个实体就触发，不用等成熟期
+    # 探索期也能从案例库的结构化图谱中得到启发
     _need_neo4j_graph = (
         _graph_service is not None
-        and len(kg.get("entities", [])) >= 2
+        and len(kg.get("entities", [])) >= 1
         and is_project_intent
-        and _actual_entity_count >= 4
+        and _actual_entity_count >= 2
     )
 
     # ════════════════════════════════════════════════════════════════
-    # LAYER 1: Conditional heavy ops (parallel, only when mature)
-    #   timeout: 25s — all heavy tasks in parallel
+    # LAYER 1: Conditional heavy ops (parallel, only when mature ≥5 entities)
+    #   探索期: 只用 KG+RAG 轻量引导
+    #   成熟期: 加入超图+Neo4j深度图搜索
     # ════════════════════════════════════════════════════════════════
+    _maturity_label = "mature" if _actual_entity_count >= _PROJECT_MATURITY_THRESHOLD else "exploring"
+    logger.info(
+        "gather progressive: entities=%d rules=%d maturity=%s → hyper_teaching=%s hyper_student=%s neo4j_graph=%s",
+        _actual_entity_count, _actual_rule_count, _maturity_label,
+        _need_hyper_teaching, _need_hyper_student, _need_neo4j_graph,
+    )
+
     l1_tasks: dict[str, Callable] = {}
     if _need_hyper_teaching:
         l1_tasks["hyper_teaching"] = _task_hyper_teaching
@@ -2685,10 +2836,15 @@ def gather_context_node(state: WorkflowState) -> dict:
                 labels = [str(e.get("label", "")) for e in ents if isinstance(e, dict)][:12]
                 types = [str(e.get("type", "")) for e in ents if isinstance(e, dict)][:12]
                 existing_ids = {c.get("case_id", "") for c in (collected.get("rag_cases") or [])}
+                logger.info(
+                    "Neo4j graph search: labels=%s types=%s exclude=%d",
+                    labels[:5], types[:5], len(existing_ids),
+                )
                 hits = _graph_service.search_by_dimension_entities(
                     entity_labels=labels, entity_types=types,
                     exclude_ids=list(existing_ids | (_history_case_ids or set())), limit=4,
                 )
+                logger.info("Neo4j graph search result: %d hits", len(hits))
                 return {"neo4j_graph_hits": hits}
             except Exception as exc:
                 logger.warning("Neo4j graph search failed: %s", exc)
@@ -3111,8 +3267,35 @@ def _fmt_hyper_for_agent(
     Each agent only receives the hypergraph signals relevant to its function,
     keeping prompts focused and avoiding information overload.
     """
-    if not hs or not hs.get("ok"):
+    edges = (hyper_insight or {}).get("edges", []) if isinstance(hyper_insight, dict) else []
+    hi_summary = str((hyper_insight or {}).get("summary", "")).strip() if isinstance(hyper_insight, dict) else ""
+    hi_top_signals = (hyper_insight or {}).get("top_signals", []) if isinstance(hyper_insight, dict) else []
+    hi_key_dims = (hyper_insight or {}).get("key_dimensions", []) if isinstance(hyper_insight, dict) else []
+
+    has_student = hs and hs.get("ok")
+    has_insight = bool(edges) or bool(hi_summary)
+
+    if not has_student and not has_insight:
         return ""
+
+    # 探索期：只有 hyper_insight 没有 hyper_student → 给出纯教学超边启发
+    if not has_student and has_insight:
+        parts: list[str] = ["[超图教学洞察·探索期]"]
+        if incremental_stats and incremental_stats.get("total_accumulated", 0) > 0:
+            parts.append(f"[累积{incremental_stats['total_accumulated']}个实体]")
+        if hi_summary:
+            parts.append(f"超图摘要: {hi_summary[:180]}")
+        for sig in hi_top_signals[:3]:
+            parts.append(f"关键信号: {str(sig)[:100]}")
+        for edge in edges[:4]:
+            if isinstance(edge, dict):
+                note = str(edge.get("teaching_note", "") or "")[:80]
+                family = edge.get("family_label", "") or edge.get("type", "")
+                parts.append(f"教学超边[{family}]: {note}")
+        for dim in hi_key_dims[:3]:
+            parts.append(f"关键维度: {str(dim)[:80]}")
+        return "\n".join(parts)
+
     parts: list[str] = []
     if incremental_stats and incremental_stats.get("total_accumulated", 0) > 0:
         total = incremental_stats["total_accumulated"]
@@ -3125,7 +3308,6 @@ def _fmt_hyper_for_agent(
     issues = hs.get("consistency_issues", [])
     warnings = hs.get("pattern_warnings", [])
     missing = hs.get("missing_dimensions", [])
-    edges = (hyper_insight or {}).get("edges", []) if isinstance(hyper_insight, dict) else []
 
     value_loops = hs.get("value_loops", [])
     llm_insight_text = str(hs.get("llm_insight", "") or "").strip()
@@ -3353,6 +3535,9 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         "competition": "你现在还需要帮学生理解这个概念在竞赛评审中的权重和评委判断标准。",
         "learning": "你现在还需要帮学生理解这个概念在项目实操中如何验证，做完后该看什么信号判断自己学会了。",
     }.get(mode, "")
+    tutor_comp_hint = _get_competition_hint(state.get("competition_type", ""), "tutor")
+    if tutor_comp_hint:
+        _tutor_mode_hint += f"\n{tutor_comp_hint}"
 
     llm_resp = _llm.chat_json(
         system_prompt=(
@@ -3600,6 +3785,42 @@ def _get_competition_ontology_context(comp_type: str) -> str:
     return "本赛事评审要点：\n" + "\n".join(lines)
 
 
+_COMPETITION_AGENT_HINTS: dict[str, dict[str, str]] = {
+    "internet_plus": {
+        "coach": "「互联网+」赛道侧重商业模式创新与盈利可持续性，辅导时引导学生重点论证市场规模(TAM/SAM/SOM)和差异化竞争力。",
+        "analyst": "「互联网+」评审关注数据可信度和用户调研质量，分析时着重检验用户数据的采集方法和样本代表性。",
+        "advisor": "",
+        "grader": "「互联网+」评分标准中商业模式(30%)和市场分析(20%)权重最高，按此侧重评分。",
+        "planner": "「互联网+」备赛需准备商业计划书PPT(12-15页)、路演(8分钟+5分钟答辩)、Demo演示，规划时突出里程碑。",
+        "tutor": "「互联网+」赛道下讲解概念时优先关联商业模式、市场策略、盈利模式等实战场景。",
+    },
+    "challenge_cup": {
+        "coach": "「挑战杯」侧重科技创新含量与学术深度，辅导时引导学生强调技术难度、学术贡献和原型验证。",
+        "analyst": "「挑战杯」评审要求证据链严谨(实验/访谈/数据)，分析时关注方法论的科学性和数据可重复性。",
+        "advisor": "",
+        "grader": "「挑战杯」评分中科技创新(40%)和调研质量(25%)权重最高，按此侧重评分。",
+        "planner": "「挑战杯」需准备详细技术报告、实验记录和原型Demo，规划时突出研究方法和验证步骤。",
+        "tutor": "「挑战杯」赛道下讲解概念时优先关联科研方法论、实验设计、技术可行性分析。",
+    },
+    "dachuang": {
+        "coach": "「大创」侧重方案可行性和实际执行能力，辅导时引导学生做小步快跑的MVP验证。",
+        "analyst": "「大创」评审关注动手能力和阶段性成果，分析时检查是否有实际原型或用户测试数据。",
+        "advisor": "",
+        "grader": "「大创」评分中可行性(30%)和创新性(25%)权重最高，按此侧重评分。",
+        "planner": "「大创」需要完整的训练计划、分工表和阶段性里程碑，规划时注重可操作性。",
+        "tutor": "「大创」赛道下讲解概念时优先关联精益创业、MVP方法论、用户验证等实操技能。",
+    },
+}
+
+
+def _get_competition_hint(comp_type: str, agent_role: str) -> str:
+    """Get competition-type specific hint for a given agent role."""
+    if not comp_type:
+        return ""
+    hints = _COMPETITION_AGENT_HINTS.get(comp_type, {})
+    return hints.get(agent_role, "")
+
+
 def _coach_analyze(state: dict) -> dict:
     msg = state.get("message", "")
     mode = state.get("mode", "coursework")
@@ -3619,6 +3840,10 @@ def _coach_analyze(state: dict) -> dict:
         "competition": "当前是竞赛教练模式，侧重评委视角、证据链完整度和得分影响，语气专业克制。",
         "learning": "当前是项目教练模式，侧重识别当前阶段最关键的瓶颈，用启发式追问推动思考。",
     }.get(mode, "")
+    comp_type = state.get("competition_type", "")
+    coach_comp_hint = _get_competition_hint(comp_type, "coach")
+    if coach_comp_hint:
+        mode_hint += f"\n{coach_comp_hint}"
 
     if mode == "learning" and _is_direct_solution_request(msg):
         return {
@@ -3654,14 +3879,22 @@ def _coach_analyze(state: dict) -> dict:
         try:
             related = _graph_service.find_similar_entities(top_labels, limit=5)
             if related:
-                neo4j_ctx = "; ".join(
-                    f"{r.get('entity','')}→{r.get('related_entity','')}"
-                    for r in related[:5] if r.get("entity")
-                )
+                _inc = state.get("incremental_stats", {})
+                _is_exploring = _inc.get("project_maturity") == "exploring"
+                if _is_exploring:
+                    neo4j_ctx = "知识库中与学生想法相关的线索(用于启发引导): " + "; ".join(
+                        f"「{r.get('entity','')}」在其他项目中与「{r.get('related_entity','')}」有关联"
+                        for r in related[:4] if r.get("entity")
+                    )
+                else:
+                    neo4j_ctx = "知识库案例关联: " + "; ".join(
+                        f"{r.get('entity','')}→{r.get('related_entity','')}"
+                        for r in related[:5] if r.get("entity")
+                    )
         except Exception:
             pass
 
-    # Append dimension-level graph traversal hits (dual-channel #2)
+    # Append dimension-level graph traversal hits (dual-channel #2, only when mature)
     graph_hits = state.get("neo4j_graph_hits") or []
     if graph_hits:
         gh_parts = []
@@ -3701,7 +3934,24 @@ def _coach_analyze(state: dict) -> dict:
     if len(rules) >= 8:
         question_limit = 6
 
+    _inc_stats = state.get("incremental_stats", {})
+    _is_exploring = _inc_stats.get("project_maturity") == "exploring"
+    _entity_total = _inc_stats.get("total_accumulated", 0)
+
     if mode == "coursework":
+        _exploring_hint = ""
+        if _is_exploring:
+            _exploring_hint = (
+                f"\n**当前项目处于探索期（已积累{_entity_total}个实体，不足5个）。**\n"
+                "你的首要任务是引导学生把想法说清楚、想透彻，而不是急于做全面诊断。\n"
+                "策略：\n"
+                "- 先肯定学生的方向感觉，再用追问帮他把模糊的部分具体化\n"
+                "- 重点帮学生厘清：目标用户是谁、核心痛点是什么、为什么是你来做\n"
+                "- 如果知识图谱搜到了相关线索，用'你有没有想过XX方向'的方式启发，而不是直接断言\n"
+                "- 不要过早引入商业模式、竞品矩阵、财务测算等复杂框架\n"
+                "- guiding_questions 应侧重帮学生补全基本信息，而非挑战假设\n"
+            )
+
         coach_json = _llm.chat_json(
             system_prompt=(
                 "你是课程辅导模式下的项目导师。请输出 JSON，字段必须包含："
@@ -3718,10 +3968,12 @@ def _coach_analyze(state: dict) -> dict:
                 "- 如果你建议验证、调研或查资料，必须说清楚具体该验证什么判断、找哪类人、看什么行为信号；不要泛泛说“做问卷”\n"
                 "- 如果学生问的是概念、写法或框架，不要把回答写成大诊断报告，优先讲清楚这一题\n"
                 "- 如果有案例、联网或图谱依据，可在 source_note 里自然交代\n"
+                + _exploring_hint
             ),
             user_prompt=(
                 f"模式提示: {mode_hint}\n"
-                f"学生材料: {msg[:1400]}\n"
+                + (f"项目成熟度: 探索期(实体{_entity_total}个)，以引导为主\n" if _is_exploring else f"项目成熟度: 成熟期(实体{_entity_total}个)，可深入分析\n")
+                + f"学生材料: {msg[:1400]}\n"
                 + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
                 + f"项目阶段: {stage_label}\n"
                 + f"当前瓶颈: {bottleneck}\n"
@@ -3886,15 +4138,49 @@ def _analyst_analyze(state: dict) -> dict:
 
     hyper_analyst_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "analyst", incremental_stats=state.get("incremental_stats"))
 
+    neo4j_similar_ctx = ""
+    if _graph_service and kg.get("entities"):
+        top_labels = [e["label"] for e in kg["entities"][:5] if e.get("label")]
+        try:
+            related = _graph_service.find_similar_entities(top_labels, limit=5)
+            if related:
+                _a_inc = state.get("incremental_stats", {})
+                if _a_inc.get("project_maturity") == "exploring":
+                    neo4j_similar_ctx = "知识库相关线索(供引导参考): " + "; ".join(
+                        f"「{r.get('entity','')}」在其他项目中与「{r.get('related_entity','')}」有关联"
+                        for r in related[:3] if r.get("entity")
+                    )
+                else:
+                    neo4j_similar_ctx = "Neo4j相似实体启发: " + "; ".join(
+                        f"{r.get('entity','')}→{r.get('related_entity','')}"
+                        for r in related[:5] if r.get("entity")
+                    )
+        except Exception:
+            pass
+
     _analyst_mode_hint = {
         "competition": "你同时兼顾评委视角：重点分析风险对获奖概率的影响，指出评委最可能追问的薄弱环节。",
         "coursework": "你同时兼顾教学视角：解释每个风险为什么算风险，帮学生建立风险判断的思维框架。",
         "learning": "你同时兼顾推进视角：按紧迫度排序风险，指出最小可行修复路径。",
     }.get(mode, "")
+    analyst_comp_hint = _get_competition_hint(state.get("competition_type", ""), "analyst")
+    if analyst_comp_hint:
+        _analyst_mode_hint += f"\n{analyst_comp_hint}"
+
+    _analyst_inc = state.get("incremental_stats", {})
+    _analyst_exploring = _analyst_inc.get("project_maturity") == "exploring"
+    _analyst_exploring_hint = ""
+    if _analyst_exploring:
+        _analyst_exploring_hint = (
+            "\n**注意：学生项目仍在探索期，信息量较少。**\n"
+            "你应该：用温和的方式指出1-2个最值得思考的方向，而不是列出大量风险。\n"
+            "帮学生看清'现在最该先搞清楚什么'，而不是批判项目不完善。\n"
+        )
 
     analysis = _llm.chat_text(
         system_prompt=(
             "你是一位经验丰富的投资人，正在对这个创业项目做尽职调查式的风险评估。\n"
+            + _analyst_exploring_hint
             + (f"{_analyst_mode_hint}\n" if _analyst_mode_hint else "")
             + "你的分析必须：\n"
             "1. **先客观评估项目整体质量**：如果项目逻辑基本通顺、商业模式合理，"
@@ -3928,11 +4214,14 @@ def _analyst_analyze(state: dict) -> dict:
             + (f"超图风险诊断:\n{hyper_analyst_ctx}\n" if hyper_analyst_ctx else "")
             + (f"联网事实:\n{ws_ctx[:350]}\n" if ws_ctx else "")
             + (_fmt_graph_hits_ctx(state.get("neo4j_graph_hits") or []))
+            + (f"\n{neo4j_similar_ctx}\n" if neo4j_similar_ctx else "")
         ),
         model=settings.llm_reason_model,
         temperature=0.35,
     )
     tools = ["diagnosis", "kg_analysis", "hypergraph_student", "hypergraph"]
+    if neo4j_similar_ctx:
+        tools.append("neo4j_similar")
     if ws_ctx:
         tools.append("web_search")
     if rag_ctx:
@@ -4107,6 +4396,7 @@ def _grader_analyze(state: dict) -> dict:
     advisor_out = state.get("advisor_output", {})
     hs = state.get("hypergraph_student", {})
     hyper_grader_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "grader", incremental_stats=state.get("incremental_stats"))
+    grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader")
 
     if not rubric or overall is None:
         return {
@@ -4133,7 +4423,8 @@ def _grader_analyze(state: dict) -> dict:
     analysis = _llm.chat_text(
         system_prompt=(
             "你负责按照创业竞赛评审标准给项目打分，是一位评分官，不是竞赛教练。\n"
-            "你的评估必须：\n"
+            + (f"{grader_comp_hint}\n" if grader_comp_hint else "")
+            + "你的评估必须：\n"
             "1. 用评审口吻先给出当前分数区间和总体判断\n"
             "2. 指出最伤分的1-2个维度，解释为什么这些地方会拖低整体分数\n"
             "3. 给出可快速补分的优先项，但不要展开成详细执行步骤或任务清单\n"
@@ -4175,6 +4466,20 @@ def _planner_analyze(state: dict) -> dict:
 
     hyper_insight = state.get("hypergraph_insight", {})
     hs_missing_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "planner", incremental_stats=state.get("incremental_stats"))
+    planner_comp_hint = _get_competition_hint(state.get("competition_type", ""), "planner")
+
+    neo4j_planner_ctx = ""
+    if _graph_service and kg.get("entities"):
+        top_labels = [e["label"] for e in kg["entities"][:5] if e.get("label")]
+        try:
+            related = _graph_service.find_similar_entities(top_labels, limit=4)
+            if related:
+                neo4j_planner_ctx = "图谱类似项目参考: " + "; ".join(
+                    f"{r.get('entity','')}→{r.get('related_entity','')}"
+                    for r in related[:4] if r.get("entity")
+                )
+        except Exception:
+            pass
 
     kg_entities = kg.get("entities", [])
     entity_ctx = ""
@@ -4186,7 +4491,8 @@ def _planner_analyze(state: dict) -> dict:
     plan = _llm.chat_json(
         system_prompt=(
             "你是行动规划师。基于学生具体内容的分析结果，为学生生成具体可执行的行动任务。\n\n"
-            "**核心原则**：\n"
+            + (f"{planner_comp_hint}\n\n" if planner_comp_hint else "")
+            + "**核心原则**：\n"
             "- 每个任务必须紧密结合学生实际描述的内容，引用学生提到的具体产品/人群/技术\n"
             "- 不要给出泛泛的建议如'做调研'，更不要机械重复'访谈/问卷'\n"
             "- 只有当瓶颈真的是“用户痛点未知/支付意愿未知”时，才考虑访谈、问卷或价格对话\n"
@@ -4217,6 +4523,8 @@ def _planner_analyze(state: dict) -> dict:
             + f"内容优势: {kg.get('content_strengths', [])[:2]}\n"
             + (f"教练核心发现: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
             + (f"超图行动线索:\n{hs_missing_ctx}\n" if hs_missing_ctx else "")
+            + (f"{neo4j_planner_ctx}\n" if neo4j_planner_ctx else "")
+            + (f"赛事规划提示: {planner_comp_hint}\n" if planner_comp_hint else "")
         ),
         model=settings.llm_structured_model,
         temperature=0.25,
@@ -4672,6 +4980,36 @@ _FOCUSED_PROMPTS: dict[str, str] = {
         "6. 绝对不要重复上一条自己说过的话\n"
         "7. 如果能联系到创业/商业世界的小知识点或趣事，顺手分享一句\n"
         "用100-350字回复。自然、有温度。"
+    ),
+    "funding_investment": (
+        "学生在问融资/投资/估值/股权相关问题。你的任务：\n"
+        "1. 判断学生项目所处阶段(想法/MVP/增长)，给出对应的融资策略\n"
+        "2. 讲清楚常见融资轮次(种子/天使/Pre-A/A轮)的金额范围和对应里程碑\n"
+        "3. 如果学生问估值，用2-3种常见估值方法(可比交易/DCF/收入倍数)结合学生项目说明\n"
+        "4. 给出BP(商业计划书)核心要包含的8-10个要素\n"
+        "5. 如果搜索到最新融资案例，结合说明；否则用知名创业案例(如拼多多种子轮/字节早期)类比\n"
+        "6. 提醒常见坑：估值过高、股权稀释过快、对赌条款风险\n"
+        "用700-1200字回复。实用、有阶段感、有具体数字参考。"
+    ),
+    "company_operations": (
+        "学生在问公司注册/法务/股权架构等运营问题。你的任务：\n"
+        "1. 根据学生具体问题(注册/股权/知识产权/税务)给出针对性建议\n"
+        "2. 如果是注册公司：说明个体户/有限公司/合伙企业的区别和适用场景\n"
+        "3. 如果是股权：说明创始人股权分配原则、期权池设计、退出机制\n"
+        "4. 如果是知识产权：区分专利/商标/著作权，说明大学生项目最需优先保护的\n"
+        "5. 推荐1-2个可操作的下一步(如用创业工商一站通注册、咨询学校创业孵化器法律顾问)\n"
+        "6. 提醒学生阶段匹配：早期别过度纠结法务细节，但股权要提前约定\n"
+        "用600-1000字回复。务实、有操作步骤、避免过于法律术语化。"
+    ),
+    "startup_execution": (
+        "学生在问创业执行层面的问题(团队/增长/规模化/上市等)。你的任务：\n"
+        "1. 根据学生具体问题给出对应阶段的执行建议\n"
+        "2. 如果是团队搭建：说明早期核心团队3-5人的角色分配、找合伙人的渠道和原则\n"
+        "3. 如果是增长：区分冷启动/PMF验证/规模化三个阶段的不同策略\n"
+        "4. 如果是运营：给出具体的获客渠道、留存策略、核心指标(DAU/MAU/留存率/转化率)\n"
+        "5. 如果问上市/并购：诚实说明这是远期目标，当前应聚焦什么\n"
+        "6. 给出1-2个同类创业公司的执行路径参考\n"
+        "用700-1200字回复。阶段感强、有具体指标、避免空泛建议。"
     ),
     "out_of_scope": (
         "学生问了一个超出你专长范围的问题（如写代码、数学题、翻译等）。\n"

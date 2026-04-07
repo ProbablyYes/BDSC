@@ -9,7 +9,7 @@ echo [0/2] Clean stale listeners on 8037 ^& 8030...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ports=@(8037,8030); foreach($p in $ports){$ids=(Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique); foreach($id in $ids){Stop-Process -Id $id -Force -ErrorAction SilentlyContinue}}"
 
 echo [1/2] Start backend...
-start "BDSC Backend" cmd /k "cd /d %BACKEND% && uv sync && uv run uvicorn app.main:app --host 127.0.0.1 --port 8037"
+start "BDSC Backend" cmd /k "cd /d %BACKEND% && uv sync && uv run uvicorn app.main:app --host 127.0.0.1 --port 8037 --reload"
 
 timeout /t 3 /nobreak >nul
 

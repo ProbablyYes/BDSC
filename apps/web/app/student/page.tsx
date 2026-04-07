@@ -371,9 +371,11 @@ export default function StudentPage() {
     return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
   }
 
-  useEffect(() => {
+  const refreshKbStats = useCallback(() => {
     fetch(`${API_BASE}/api/kb-stats`).then(r => r.json()).then(d => setKbStats(d)).catch(() => {});
   }, []);
+  useEffect(() => { refreshKbStats(); }, [refreshKbStats]);
+  useEffect(() => { if (rightTab === "kg") refreshKbStats(); }, [rightTab, refreshKbStats]);
 
   // apply theme
   useEffect(() => {
@@ -845,22 +847,51 @@ export default function StudentPage() {
     const pick = (r: any) => r?.kg_analysis ?? r?.agent_trace?.kg_analysis ?? null;
     const all = [...resultHistory.map(pick), pick(latestResult)].filter(Boolean);
     if (all.length === 0) return null;
+    // Deduplicate entities by (type, normalized_label) — LLM generates sequential ids
+    // like e1/e2 each turn, so raw id collisions would lose entities across turns
     const entMap = new Map<string, any>();
+    const norm = (s: string) => (s || "").trim().toLowerCase().replace(/\s+/g, "");
+    let idCounter = 0;
     const relSet = new Set<string>();
     const rels: any[] = [];
     const gapSet = new Set<string>();
     const strengthSet = new Set<string>();
     let insight = "", scores: any = {}, completeness = 0;
     for (const kg of all) {
-      for (const e of kg.entities ?? []) entMap.set(e.id, e);
-      for (const r of kg.relationships ?? []) { const k = `${r.source}-${r.relation}-${r.target}`; if (!relSet.has(k)) { relSet.add(k); rels.push(r); } }
+      for (const e of kg.entities ?? []) {
+        const key = `${norm(e.type)}_${norm(e.label)}`;
+        if (!entMap.has(key)) {
+          idCounter++;
+          entMap.set(key, { ...e, _stableId: `s${idCounter}`, _origId: e.id, _turnKey: key });
+        }
+      }
       for (const g of kg.structural_gaps ?? []) gapSet.add(g);
       for (const s of kg.content_strengths ?? []) strengthSet.add(s);
       if (kg.insight) insight = kg.insight;
-      if (kg.section_scores) scores = kg.section_scores;
+      if (kg.section_scores) scores = { ...scores, ...kg.section_scores };
       if (kg.completeness_score != null) completeness = kg.completeness_score;
     }
-    return { entities: Array.from(entMap.values()), relationships: rels, structural_gaps: Array.from(gapSet), content_strengths: Array.from(strengthSet), insight, section_scores: scores, completeness_score: completeness };
+    // Build stable id lookup: origId per turn → stableId
+    const entities = Array.from(entMap.values()).map((e) => ({ ...e, id: e._stableId }));
+    const origToStable = new Map<string, Map<string, string>>();
+    let turnIdx = 0;
+    for (const kg of all) {
+      turnIdx++;
+      const tMap = new Map<string, string>();
+      for (const e of kg.entities ?? []) {
+        const key = `${norm(e.type)}_${norm(e.label)}`;
+        const stable = entMap.get(key);
+        if (stable) tMap.set(e.id, stable._stableId);
+      }
+      origToStable.set(`t${turnIdx}`, tMap);
+      for (const r of kg.relationships ?? []) {
+        const src = tMap.get(r.source) ?? r.source;
+        const tgt = tMap.get(r.target) ?? r.target;
+        const k = `${src}-${r.relation}-${tgt}`;
+        if (!relSet.has(k)) { relSet.add(k); rels.push({ ...r, source: src, target: tgt }); }
+      }
+    }
+    return { entities, relationships: rels, structural_gaps: Array.from(gapSet), content_strengths: Array.from(strengthSet), insight, section_scores: scores, completeness_score: completeness };
   }, [resultHistory, latestResult]);
 
   const hyperStudent = useMemo(() => {
@@ -1249,7 +1280,7 @@ export default function StudentPage() {
 
             {messages.map((m, i) => (
               <div key={m.id} className={`msg-row ${m.role}`} style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}>
-                <div className="msg-avatar">{m.role === "user" ? "你" : "AI"}</div>
+                {m.role === "assistant" && <div className="msg-avatar">AI</div>}
                 <div className="msg-content">
                   <div className="msg-bubble">
                     {m.role === "assistant" ? (
@@ -1718,83 +1749,108 @@ export default function StudentPage() {
               )}
 
               {rightTab === "score" && (
-                <>
-                  <div className="panel-desc">9维度量化评分，对标创业竞赛评审标准。评分取历史最高值，箭头显示本轮变化趋势。</div>
-                  {rubric.length > 0 ? (
-                    <div className="right-section">
-                      {(scoreBand || projectStageLabel || gradingPrinciples.length > 0) && (
-                        <div className="score-meta-card" style={{ marginBottom: 14, padding: 12, borderRadius: 12, border: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: gradingPrinciples.length > 0 ? 10 : 0 }}>
-                            {projectStageLabel && <span className="mini-chip">阶段：{projectStageLabel}</span>}
-                            {scoreBand && <span className="mini-chip">分档：{scoreBand}</span>}
+                <div className="right-section sc-panel">
+                  {rubric.length > 0 ? (() => {
+                    const total = overallScore ?? 0;
+                    const totalColor = total >= 7 ? "var(--accent-green,#22c55e)" : total >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
+                    const circumf = 2 * Math.PI * 42;
+                    const offset = circumf * (1 - total / 10);
+                    const n = rubric.length;
+                    const cx = 120, cy = 120, R = 95;
+                    const angleStep = (2 * Math.PI) / n;
+                    const pt = (i: number, r: number) => {
+                      const a = -Math.PI / 2 + i * angleStep;
+                      return [cx + R * r * Math.cos(a), cy + R * r * Math.sin(a)];
+                    };
+                    const dataPoints = rubric.map((r: any, i: number) => pt(i, Math.min(1, r.score / 10)));
+                    const polygon = dataPoints.map(([x, y]: number[]) => `${x},${y}`).join(" ");
+                    const highDims = rubric.filter((r: any) => r.score >= 7);
+                    const lowDims = rubric.filter((r: any) => r.score < 4);
+                    return (
+                      <>
+                        {/* Hero: Ring + Meta */}
+                        <div className="sc-hero">
+                          <div className="sc-hero-ring-wrap">
+                            <svg width="104" height="104" viewBox="0 0 104 104">
+                              <circle cx="52" cy="52" r="42" fill="none" stroke="var(--border)" strokeWidth="8" />
+                              <circle cx="52" cy="52" r="42" fill="none" stroke={totalColor} strokeWidth="8"
+                                strokeDasharray={circumf} strokeDashoffset={offset}
+                                strokeLinecap="round" transform="rotate(-90 52 52)" style={{transition:"stroke-dashoffset .5s ease"}} />
+                              <text x="52" y="48" textAnchor="middle" fontSize="24" fontWeight="800" fill={totalColor}>{total}</text>
+                              <text x="52" y="64" textAnchor="middle" fontSize="10" fill="var(--text-muted)">/10</text>
+                            </svg>
                           </div>
-                          {gradingPrinciples.length > 0 && (
-                            <div style={{ display: "grid", gap: 6 }}>
-                              {gradingPrinciples.map((item: string, idx: number) => (
-                                <div key={idx} className="panel-desc" style={{ margin: 0 }}>- {item}</div>
-                              ))}
-                            </div>
-                          )}
+                          <div className="sc-hero-meta">
+                            {projectStageLabel && <span className="sc-meta-chip">{projectStageLabel}</span>}
+                            {scoreBand && <span className="sc-meta-chip">{scoreBand}</span>}
+                            {highDims.length > 0 && <div className="sc-meta-row"><span className="sc-meta-good">{highDims.length} 项达标</span></div>}
+                            {lowDims.length > 0 && <div className="sc-meta-row"><span className="sc-meta-warn">{lowDims.length} 项需补强</span></div>}
+                          </div>
                         </div>
-                      )}
-                      {/* ── Radar Chart ── */}
-                      {(() => {
-                        const cx = 130, cy = 130, R = 100;
-                        const n = rubric.length;
-                        const angleStep = (2 * Math.PI) / n;
-                        const tiers = [0.25, 0.5, 0.75, 1.0];
-                        const pt = (i: number, r: number) => {
-                          const a = -Math.PI / 2 + i * angleStep;
-                          return [cx + R * r * Math.cos(a), cy + R * r * Math.sin(a)];
-                        };
-                        const dataPoints = rubric.map((r: any, i: number) => pt(i, Math.min(1, r.score / 10)));
-                        const polygon = dataPoints.map(([x, y]: number[]) => `${x},${y}`).join(" ");
-                        return (
-                          <svg className="radar-svg" viewBox="0 0 260 260">
-                            {tiers.map((t) => (
-                              <polygon key={t} points={Array.from({ length: n }, (_, i) => pt(i, t)).map(([x, y]: number[]) => `${x},${y}`).join(" ")} className="radar-grid" />
+
+                        {/* Radar */}
+                        <div className="sc-radar-wrap">
+                          <svg viewBox="0 0 240 240" className="sc-radar-svg">
+                            {[0.25, 0.5, 0.75, 1.0].map(t => (
+                              <polygon key={t} points={Array.from({length: n}, (_, i) => pt(i, t)).map(([x, y]: number[]) => `${x},${y}`).join(" ")} fill="none" stroke="var(--border)" strokeWidth="0.5" opacity={t === 1 ? 0.6 : 0.3} />
                             ))}
                             {rubric.map((_: any, i: number) => {
                               const [ex, ey] = pt(i, 1);
-                              return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} className="radar-axis" />;
+                              return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} stroke="var(--border)" strokeWidth="0.3" strokeDasharray="2 2" />;
                             })}
-                            <polygon points={polygon} className="radar-area" />
+                            <polygon points={polygon} fill="rgba(99,102,241,.15)" stroke="#6366f1" strokeWidth="1.5" />
                             {dataPoints.map(([x, y]: number[], i: number) => (
-                              <circle key={i} cx={x} cy={y} r="3.5" className="radar-dot" />
+                              <circle key={i} cx={x} cy={y} r="3" fill="#6366f1" stroke="#fff" strokeWidth="1" />
                             ))}
                             {rubric.map((r: any, i: number) => {
-                              const [lx, ly] = pt(i, 1.22);
-                              return <text key={i} x={lx} y={ly} className="radar-label" textAnchor="middle" dominantBaseline="central">{r.item.length > 4 ? r.item.slice(0, 4) : r.item}</text>;
+                              const [lx, ly] = pt(i, 1.18);
+                              const sc = r.score;
+                              const clr = sc >= 7 ? "#22c55e" : sc >= 4 ? "#f59e0b" : "#ef4444";
+                              return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="central" fontSize="8" fontWeight="600" fill={clr}>{r.item.length > 5 ? r.item.slice(0, 4) + ".." : r.item}</text>;
                             })}
                           </svg>
-                        );
-                      })()}
-                      {overallScore !== null && <div className="score-total-ring">
-                        <svg viewBox="0 0 80 80" className="ring-svg">
-                          <circle cx="40" cy="40" r="32" className="ring-bg" />
-                          <circle cx="40" cy="40" r="32" className="ring-fg" strokeDasharray={`${(overallScore / 10) * 201} 201`} />
-                        </svg>
-                        <div className="ring-text"><span className="ring-num">{overallScore}</span><span className="ring-max">/10</span></div>
-                      </div>}
-                      {/* ── Bar rows with trend ── */}
-                      {rubric.map((r: any) => {
-                        const pct = Math.min(100, (r.score / 10) * 100);
-                        const color = pct >= 70 ? "var(--accent-green)" : pct >= 40 ? "var(--accent-yellow)" : "var(--accent-red)";
-                        return (
-                          <details key={r.item} className="score-row-details">
-                            <summary className="score-row">
-                            <span className="score-label">{r.item}</span>
-                            <div className="score-bar-track"><div className="score-bar-fill" style={{ width: `${pct}%`, background: color }} /></div>
-                            <span className="score-value">{r.score}</span>
-                            {r.trend && <span className={`score-trend ${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "="}</span>}
-                            </summary>
-                            {r.reason && <p className="score-reason">{r.reason}</p>}
+                        </div>
+
+                        {/* Dimension Cards */}
+                        <div className="sc-dim-list">
+                          {rubric.map((r: any) => {
+                            const pct = Math.min(100, (r.score / 10) * 100);
+                            const clr = pct >= 70 ? "var(--accent-green,#22c55e)" : pct >= 40 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
+                            const levelLabel = pct >= 70 ? "达标" : pct >= 40 ? "一般" : "薄弱";
+                            return (
+                              <details key={r.item} className="sc-dim-card">
+                                <summary className="sc-dim-head">
+                                  <div className="sc-dim-info">
+                                    <span className="sc-dim-name">{r.item}</span>
+                                    <span className="sc-dim-level" style={{color: clr}}>{levelLabel}</span>
+                                  </div>
+                                  <div className="sc-dim-bar-wrap">
+                                    <div className="sc-dim-bar-track"><div className="sc-dim-bar-fill" style={{width:`${pct}%`, background: clr}} /></div>
+                                    <span className="sc-dim-score" style={{color: clr}}>{r.score}</span>
+                                  </div>
+                                  {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}</span>}
+                                </summary>
+                                {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
+                              </details>
+                            );
+                          })}
+                        </div>
+
+                        {/* Grading Principles */}
+                        {gradingPrinciples.length > 0 && (
+                          <details className="sc-principles">
+                            <summary>评分原则 ({gradingPrinciples.length})</summary>
+                            <div className="sc-principles-list">
+                              {gradingPrinciples.map((item: string, idx: number) => (
+                                <div key={idx} className="sc-principle-item">{item}</div>
+                              ))}
+                            </div>
                           </details>
-                        );
-                      })}
-                    </div>
-                  ) : <p className="right-hint">提交项目描述后显示评分，描述越完整评分越有参考价值</p>}
-                </>
+                        )}
+                      </>
+                    );
+                  })() : <p className="right-hint">提交项目描述后显示评分，描述越完整评分越有参考价值</p>}
+                </div>
               )}
 
               {rightTab === "kg" && (
@@ -2026,83 +2082,102 @@ export default function StudentPage() {
                           </div>
                         )}
 
-                        {/* KB Utilization Dashboard (Module 3c) */}
+                        {/* KB Search Story (Module 3c) */}
                         {(() => {
                           const kbU = latestResult?.agent_trace?.kb_utilization ?? latestResult?.kb_utilization ?? {};
                           const totalKb = kbU.total_kb_cases ?? 0;
                           const ragHits = kbU.hits_count ?? 0;
+                          if (!totalKb && !ragHits) return null;
                           const neoOk = kbU.neo4j_enriched ?? false;
                           const neoCount = kbU.neo4j_enriched_count ?? 0;
-                          const excluded = kbU.excluded_history_count ?? 0;
-                          const rMode = kbU.retrieval_mode ?? "";
-                          const catF = kbU.category_filter ?? "";
-                          if (!totalKb && !ragHits) return null;
-                          const modeName: Record<string, string> = { vector: "向量", keyword: "关键词", hybrid: "混合", auto: "自动(MMR)" };
-
-                          const allTypes = new Set(["stakeholder","pain_point","solution","technology","market","competitor","resource","business_model","evidence","team"]);
-                          const foundTypes = new Set(entities.map((e: any) => e.type));
-                          const missingTypes = [...allTypes].filter(t => !foundTypes.has(t));
-                          const missingNames: Record<string, string> = { stakeholder: "用户/利益相关者", pain_point: "痛点", solution: "解决方案", technology: "技术", market: "市场", competitor: "竞品", resource: "资源", business_model: "商业模式", evidence: "证据", team: "团队" };
-
-                          const hyperDriven = kbU.hyper_driven_search ?? false;
-                          const hyperDims = kbU.hyper_driven_dims ?? [];
-                          const compCount = kbU.complementary_count ?? 0;
-                          const topK = kbU.top_k_requested ?? 4;
+                          const queryPreview = String(kbU.query_preview ?? "").trim();
+                          const searchTrace: any[] = Array.isArray(kbU.search_trace) ? kbU.search_trace : [];
+                          const dc = kbU.dual_channel ?? {};
+                          const gHits: any[] = Array.isArray(dc.graph_details) ? dc.graph_details : [];
+                          const weakDims: string[] = Array.isArray(kbU.weak_dims_for_complementary) ? kbU.weak_dims_for_complementary : [];
+                          const dLabel: Record<string, string> = {
+                            pain_point: "痛点", solution: "方案", innovation: "创新点",
+                            business_model: "商业模式", evidence: "证据", market: "市场",
+                            stakeholder: "用户", risk: "风险", channel: "渠道", technology: "技术", competitor: "竞品",
+                          };
+                          const srcLabel: Record<string, string> = { shared_node: "共享节点", complement: "结构互补", keyword: "关键词" };
                           return (
-                            <div className="kb-overview-module">
-                              <h5>知识库总体状况与调用链路</h5>
-                              <div className="kb-util-grid">
-                                <div className="kb-util-cell"><div className="kb-util-num">{totalKb}</div><div className="kb-util-label">标准案例</div></div>
-                                <div className="kb-util-cell"><div className="kb-util-num">{ragHits}</div><div className="kb-util-label">RAG命中</div></div>
-                                <div className="kb-util-cell"><div className="kb-util-num">{neoCount}</div><div className="kb-util-label">Neo4j增强</div></div>
-                                <div className="kb-util-cell"><div className="kb-util-num">{excluded}</div><div className="kb-util-label">去重过滤</div></div>
-                              </div>
-                              {/* RAG Pipeline Visualization */}
-                              <div className="kb-pipeline">
-                                <div className="kb-pipe-step active"><span>学生输入</span></div>
-                                <div className="kb-pipe-arrow">→</div>
-                                <div className={`kb-pipe-step ${ragHits > 0 ? "active" : ""}`}><span>RAG检索</span><small>{modeName[rMode] ?? rMode} · top{topK}</small></div>
-                                <div className="kb-pipe-arrow">→</div>
-                                <div className={`kb-pipe-step ${neoOk ? "active" : "inactive"}`}><span>Neo4j增强</span><small>{neoOk ? `${neoCount}案例` : "未启用"}</small></div>
-                                <div className="kb-pipe-arrow">→</div>
-                                <div className={`kb-pipe-step ${compCount > 0 ? "active" : ""}`}><span>互补搜索</span><small>{compCount > 0 ? `+${compCount}互补` : "无"}</small></div>
-                                {hyperDriven && <>
-                                  <div className="kb-pipe-arrow">→</div>
-                                  <div className="kb-pipe-step active hyper-driven"><span>超图驱动</span><small>补{hyperDims.join(",")}</small></div>
-                                </>}
-                              </div>
-                              <div className="kb-meta-row">
-                                {catF && <span className="kb-meta-chip">类目: {catF}</span>}
-                                <span className="kb-meta-chip" style={{ borderColor: neoOk ? "#10b981" : "#ef4444" }}>Neo4j: {neoOk ? "已连接" : "离线"}</span>
-                                {hyperDriven && <span className="kb-meta-chip" style={{ borderColor: "var(--accent)" }}>超图驱动补充检索</span>}
-                              </div>
-                              {missingTypes.length > 0 && (
-                                <div className="kb-util-missing">
-                                  <span className="kb-util-missing-label">尚未覆盖:</span>
-                                  {missingTypes.map(t => <span key={t} className="kb-util-missing-chip">{missingNames[t] ?? t}</span>)}
+                            <div className="kbt-section">
+                              <h5>知识库检索路径与启发</h5>
+                              <p className="kbt-summary">
+                                从 <strong>{totalKb}</strong> 个案例库中检索到 <strong>{ragHits}</strong> 个参考
+                                {neoOk && <>，其中 <strong>{neoCount}</strong> 个获得图谱深度增强</>}
+                              </p>
+                              {queryPreview && (
+                                <div className="kbt-query-card">
+                                  <span className="kbt-q-label">检索关键词</span>
+                                  <span className="kbt-q-text">{queryPreview.length > 100 ? queryPreview.slice(0, 100) + "..." : queryPreview}</span>
                                 </div>
                               )}
-                              {/* Structured RAG Search Trace */}
-                              {(kbU.search_trace ?? []).length > 0 && (
-                                <details className="kb-search-trace" open>
-                                  <summary>检索过程详情 ({(kbU.search_trace as any[]).length} 条结果)</summary>
-                                  {kbU.query_preview && <div className="kb-st-query"><strong>检索query:</strong> {kbU.query_preview as string}</div>}
-                                  <div className="kb-st-list">
-                                    {(kbU.search_trace as any[]).map((st: any, si: number) => (
-                                      <div key={si} className={`kb-st-row ${st.neo4j_enriched ? "enriched" : ""} ${st.complementary ? "comp" : ""} ${st.hyper_driven ? "hyper" : ""}`}>
-                                        <span className="kb-st-rank">#{si + 1}</span>
-                                        <span className="kb-st-id">{st.case_id}</span>
-                                        <span className="kb-st-score">相似度 {st.score}</span>
-                                        <div className="kb-st-badges">
-                                          {st.neo4j_enriched && <span className="kb-st-badge neo4j">Neo4j增强</span>}
-                                          {st.complementary && <span className="kb-st-badge comp">互补检索</span>}
-                                          {st.hyper_driven && <span className="kb-st-badge hyper">超图驱动</span>}
+
+                              {gHits.length > 0 && (
+                                <div className="kbt-graph-stories">
+                                  <div className="kbt-sub-title">图谱检索启发</div>
+                                  {gHits.map((gh: any, gi: number) => {
+                                    const matchedDims: string[] = Array.isArray(gh.matched_dimensions) ? gh.matched_dimensions : [];
+                                    const matchedNodes: string[] = Array.isArray(gh.matched_nodes) ? gh.matched_nodes : [];
+                                    const matchSources: string[] = Array.isArray(gh.match_sources) ? gh.match_sources : [];
+                                    const ctx = gh.context ?? {};
+                                    const ctxPains: string[] = Array.isArray(ctx.pains) ? ctx.pains : [];
+                                    const ctxSolutions: string[] = Array.isArray(ctx.solutions) ? ctx.solutions : [];
+                                    const ctxInnovations: string[] = Array.isArray(ctx.innovations) ? ctx.innovations : [];
+                                    const ctxBiz: string[] = Array.isArray(ctx.biz_models) ? ctx.biz_models : [];
+                                    const dimText = matchedDims.map(d => dLabel[d] ?? d).join("、");
+                                    const nodeExamples = matchedNodes.slice(0, 3).map(n => {
+                                      const p = String(n).split(":"); return p.length > 1 ? p.slice(1).join(":") : n;
+                                    });
+                                    const projName = gh.project_name || gh.project_id || "未知案例";
+                                    return (
+                                      <div key={gi} className="kbt-story-card">
+                                        <div className="kbt-story-narrative">
+                                          从你的描述中发现你在 <strong>{dimText || "多个维度"}</strong> 上与 <strong className="kbt-proj-name">{projName}</strong> 高度相关
+                                          {nodeExamples.length > 0 && <>，共享关键概念：{nodeExamples.map((n, i) => <strong key={i} className="kbt-node-hl">{n}</strong>)}</>}
                                         </div>
+                                        {matchSources.length > 0 && (
+                                          <div className="kbt-story-sources">
+                                            {matchSources.map(s => <span key={s} className="kbt-src-chip">{srcLabel[s] ?? s}</span>)}
+                                          </div>
+                                        )}
+                                        {(ctxPains.length > 0 || ctxSolutions.length > 0 || ctxInnovations.length > 0 || ctxBiz.length > 0) && (
+                                          <div className="kbt-story-ctx">
+                                            <span className="kbt-ctx-intro">{projName} 的做法：</span>
+                                            <div className="kbt-ctx-items">
+                                              {ctxPains.map((p, i) => <span key={`p${i}`} className="kbt-ctx-tag kbt-pain">{p}</span>)}
+                                              {ctxSolutions.map((s, i) => <span key={`s${i}`} className="kbt-ctx-tag kbt-sol">{s}</span>)}
+                                              {ctxInnovations.map((n, i) => <span key={`i${i}`} className="kbt-ctx-tag kbt-inn">{n}</span>)}
+                                              {ctxBiz.map((b, i) => <span key={`b${i}`} className="kbt-ctx-tag kbt-biz">{b}</span>)}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {searchTrace.length > 0 && (
+                                <details className="kbt-trace-details">
+                                  <summary>语义检索命中详情 ({searchTrace.length})</summary>
+                                  <div className="kbt-trace-list">
+                                    {searchTrace.map((st: any, si: number) => (
+                                      <div key={si} className="kbt-trace-row">
+                                        <span className="kbt-tr-rank">#{si + 1}</span>
+                                        <span className="kbt-tr-name">{st.case_id || st.snippet}</span>
+                                        {st.category && <span className="kbt-tr-cat">{st.category}</span>}
+                                        <span className="kbt-tr-score">{Math.round(st.score * 100)}%</span>
+                                        {st.neo4j_enriched && <span className="kbt-tr-badge kbt-b-neo">图谱增强</span>}
+                                        {st.complementary && <span className="kbt-tr-badge kbt-b-comp">互补检索</span>}
+                                        {st.hyper_driven && <span className="kbt-tr-badge kbt-b-hyper">超图驱动</span>}
                                       </div>
                                     ))}
                                   </div>
-                                  {(kbU.weak_dims_for_complementary ?? []).length > 0 && (
-                                    <div className="kb-st-weak">触发互补搜索的弱势维度: {(kbU.weak_dims_for_complementary as string[]).join(", ")}</div>
+                                  {weakDims.length > 0 && (
+                                    <div className="kbt-trace-weak">互补搜索弱势维度：{weakDims.join("、")}</div>
                                   )}
                                 </details>
                               )}
@@ -2451,7 +2526,71 @@ export default function StudentPage() {
                         )}
                       </details>
                     </>);
-                  })() : (
+                  })() : hyperEdges.length > 0 ? (
+                    <div className="ht-insight-only">
+                      <h5>超图教学洞察 <span className="ht-title-sub">(探索期)</span></h5>
+                      <p className="ht-explore-note">项目还在初步探索阶段，超图引擎已为你匹配到以下教学启发。随着项目信息完善（≥5个维度实体），将自动开启完整的维度覆盖、逻辑闭环、一致性分析。</p>
+                      {hyperInsight?.summary && (
+                        <div className="ht-insight-summary">{hyperInsight.summary}</div>
+                      )}
+                      <div className="ht-edge-section">
+                        <h6>命中教学超边 ({hyperEdges.length})</h6>
+                        {hyperEdges.slice(0, 6).map((e: any) => (
+                          <div key={e.hyperedge_id} className="ht-edge-row">
+                            <span className="ht-edge-family">{e.family_label || e.type}</span>
+                            <span className="ht-edge-note">{e.teaching_note}</span>
+                            <div className="ht-edge-meta">
+                              <span>支持度 {e.support ?? 0}</span>
+                              {e.severity && <span className="ht-edge-sev">{e.severity}</span>}
+                              {(e.rules ?? []).map((r: string, ri: number) => <span key={ri} className="ht-edge-rule">{r}</span>)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {(() => {
+                        const agentsCalled: string[] = latestResult?.agent_trace?.orchestration?.agents_called ?? [];
+                        const roleAgents: Record<string, any> = latestResult?.agent_trace?.role_agents ?? {};
+                        const activeAgents = agentsCalled.length > 0 ? agentsCalled : Object.keys(roleAgents).filter(k => roleAgents[k]?.analysis);
+                        const agentNames: Record<string, string> = { coach: "教练", analyst: "分析师", advisor: "顾问", grader: "评分官", planner: "规划师", tutor: "导师" };
+                        const anyHyper = activeAgents.some(a => String((roleAgents[a] ?? {}).hyper_context_sent ?? "").trim().length > 0);
+                        if (!anyHyper) return null;
+                        return (
+                          <div className="ht-section">
+                            <h5 className="ht-title">各Agent接收的超图启发</h5>
+                            <div className="ht-agent-bar-chart">
+                              {activeAgents.map(a => {
+                                const ctx = String((roleAgents[a] ?? {}).hyper_context_sent ?? "");
+                                const lines = ctx ? ctx.split("\n").filter((l: string) => l.trim()) : [];
+                                const maxBar = Math.max(...activeAgents.map(ag => {
+                                  const c = String((roleAgents[ag] ?? {}).hyper_context_sent ?? "");
+                                  return c ? c.split("\n").filter((l: string) => l.trim()).length : 0;
+                                }), 1);
+                                return (
+                                  <div key={a} className="ht-agent-bar-row">
+                                    <span className="ht-agent-label">{agentNames[a] ?? a}</span>
+                                    <div className="ht-agent-bar-track">
+                                      <div className="ht-agent-bar-fill" style={{ width: `${Math.round((lines.length / maxBar) * 100)}%` }} />
+                                    </div>
+                                    <span className="ht-agent-bar-num">{lines.length}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      {hyperLibrary?.overview && (
+                        <details className="ht-details-panel">
+                          <summary className="ht-details-head">超图库全局统计</summary>
+                          <div className="ht-library-stats">
+                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 0}</strong></div>
+                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 0}</strong></div>
+                            <div className="ht-lib-row"><span>本轮命中</span><strong>{hyperEdges.length}</strong></div>
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  ) : (
                     <div className="ht-empty-guide">
                       <h5>什么是超图分析？</h5>
                       <p>超图引擎从 <strong>15 个关键维度</strong> 检测你的项目完整度，并与 <strong>89 个历史案例</strong> 的结构模式对比：</p>

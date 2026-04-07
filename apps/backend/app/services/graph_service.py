@@ -271,10 +271,19 @@ class GraphService:
         except Exception as exc:  # noqa: BLE001
             return {"error": f"project evidence query failed: {exc}"}
 
-    def merge_student_entities(self, project_id: str, entities: list[dict], relationships: list[dict]) -> dict[str, Any]:
-        """Write student-extracted KG entities and relationships into Neo4j via MERGE."""
+    def merge_student_entities(
+        self, project_id: str, entities: list[dict], relationships: list[dict],
+        conversation_id: str = "",
+    ) -> dict[str, Any]:
+        """Write student-extracted KG entities into Neo4j with session isolation.
+
+        Student entities use the `StudentEntity` label (NOT `Entity`) so they
+        never pollute the standard case library.  Each node carries
+        `conversation_id` and `source_project` so they can be queried per-session.
+        """
         if not entities:
             return {"ok": True, "merged": 0}
+        conv_id = str(conversation_id or project_id)[:120]
         try:
             def _write(session):
                 merged = 0
@@ -286,11 +295,11 @@ class GraphService:
                         continue
                     session.run(
                         """
-                        MERGE (e:Entity {label: $label})
+                        MERGE (e:StudentEntity {label: $label, conversation_id: $cid})
                         ON CREATE SET e.type = $etype, e.source_project = $pid, e.id = $eid
                         ON MATCH SET e.last_seen_project = $pid
                         """,
-                        label=label, etype=etype, pid=project_id, eid=eid,
+                        label=label, etype=etype, pid=project_id, eid=eid, cid=conv_id,
                     )
                     merged += 1
                 for rel in relationships[:30]:
@@ -303,11 +312,12 @@ class GraphService:
                         continue
                     session.run(
                         """
-                        MATCH (a:Entity {label: $src}), (b:Entity {label: $tgt})
-                        MERGE (a)-[r:RELATES_TO {description: $desc}]->(b)
+                        MATCH (a:StudentEntity {label: $src, conversation_id: $cid}),
+                              (b:StudentEntity {label: $tgt, conversation_id: $cid})
+                        MERGE (a)-[r:STUDENT_RELATES_TO {description: $desc}]->(b)
                         ON CREATE SET r.source_project = $pid
                         """,
-                        src=src_label, tgt=tgt_label, desc=desc, pid=project_id,
+                        src=src_label, tgt=tgt_label, desc=desc, pid=project_id, cid=conv_id,
                     )
                 return merged
 
@@ -317,12 +327,19 @@ class GraphService:
             return {"ok": False, "error": str(exc)}
 
     def find_similar_entities(self, labels: list[str], limit: int = 5) -> list[dict[str, Any]]:
-        """Find entities in Neo4j that match given labels and return their relationships."""
+        """Find entities in Neo4j that match given labels and return their relationships.
+
+        Dual-search: first tries Entity nodes (student-uploaded KG), then falls
+        back to case-library dimension nodes (PainPoint, Solution, etc.) for
+        broader recall.
+        """
         if not labels:
             return []
         try:
             def _query(session):
                 results = []
+                seen: set[str] = set()
+
                 for label in labels[:5]:
                     rows = list(session.run(
                         """
@@ -336,8 +353,41 @@ class GraphService:
                         label=label, limit=limit,
                     ))
                     for row in rows:
-                        results.append(dict(row))
-                return results
+                        key = f"{row.get('entity')}|{row.get('related_entity')}"
+                        if key not in seen:
+                            seen.add(key)
+                            results.append(dict(row))
+
+                if len(results) < limit:
+                    remaining = limit - len(results)
+                    for label in labels[:4]:
+                        if len(label) < 2:
+                            continue
+                        rows = list(session.run(
+                            """
+                            MATCH (dim)<-[r]-(p:Project)
+                            WHERE (dim:PainPoint OR dim:Solution OR dim:InnovationPoint
+                                   OR dim:BusinessModelAspect OR dim:Market OR dim:Evidence)
+                              AND toLower(dim.name) CONTAINS toLower($label)
+                            OPTIONAL MATCH (p)-[:BELONGS_TO]->(cat:Category)
+                            RETURN dim.name AS entity, labels(dim)[0] AS type,
+                                   p.name AS project, type(r) AS rel_type,
+                                   cat.name AS related_entity
+                            LIMIT $limit
+                            """,
+                            label=label, limit=remaining,
+                        ))
+                        for row in rows:
+                            key = f"{row.get('entity')}|{row.get('project')}"
+                            if key not in seen:
+                                seen.add(key)
+                                results.append(dict(row))
+                            if len(results) >= limit:
+                                break
+                        if len(results) >= limit:
+                            break
+
+                return results[:limit]
 
             return self._query_with_fallback(_query)
         except Exception:
@@ -462,6 +512,9 @@ class GraphService:
         "evidence":        ("Evidence",             "HAS_EVIDENCE"),
         "resource":        ("ExecutionStep",        "HAS_EXECUTION_STEP"),
         "team":            ("ExecutionStep",        "HAS_EXECUTION_STEP"),
+        "stakeholder":     ("PainPoint",            "HAS_PAIN"),
+        "execution_step":  ("ExecutionStep",        "HAS_EXECUTION_STEP"),
+        "risk_control":    ("Evidence",             "HAS_EVIDENCE"),
     }
 
     def search_by_dimension_entities(
@@ -488,16 +541,28 @@ class GraphService:
             return []
         _exclude = set(exclude_ids or [])
         pairs: list[tuple[str, str, str, str]] = []
+        _skipped_types: list[str] = []
         for lbl, etype in zip(entity_labels[:12], entity_types[:12]):
             mapping = self._DIM_NODE_MAP.get(etype)
             if not mapping:
+                _skipped_types.append(f"{lbl}({etype})")
                 continue
             keyword = str(lbl).strip()
             if len(keyword) < 2:
                 continue
             node_label, rel_type = mapping
             pairs.append((keyword, etype, node_label, rel_type))
+        if _skipped_types:
+            import logging
+            logging.getLogger(__name__).info(
+                "search_by_dimension_entities: skipped unmapped types: %s", _skipped_types
+            )
         if not pairs:
+            import logging
+            logging.getLogger(__name__).warning(
+                "search_by_dimension_entities: no valid pairs after mapping (input types: %s)",
+                list(zip(entity_labels[:5], entity_types[:5])),
+            )
             return []
 
         type_groups: dict[str, list[str]] = {}
@@ -683,7 +748,8 @@ class GraphService:
                 rows = list(session.run(
                     """
                     UNWIND $ids AS cid
-                    MATCH (p:Project {id: cid})-[:BELONGS_TO]->(cat:Category)
+                    MATCH (p:Project {id: cid})
+                    OPTIONAL MATCH (p)-[:BELONGS_TO]->(cat:Category)
                     OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
                     OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
                     OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)

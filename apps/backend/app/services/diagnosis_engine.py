@@ -90,6 +90,22 @@ RULES = [
      "requires": ["用户价值", "效率", "成本", "体验", "结果"],
      "explanation": "强调了技术或创新性，但没有说明它给用户带来什么可感知价值。",
      "fix_hint": "把创新点翻译成用户价值语言：具体提升了什么、节省了什么、替代了什么。"},
+    {"id": "H24", "name": "融资节奏与业务阶段不匹配", "severity": "medium", "keywords": ["融资", "天使轮", "A轮", "投资"],
+     "requires": ["产品", "收入", "用户", "验证", "MVP"],
+     "explanation": "提到了融资计划，但当前业务阶段可能还不到该轮次的融资条件。投资人会看业务里程碑而非商业计划书。",
+     "fix_hint": "先梳理当前业务里程碑完成度，再匹配对应的融资节奏：种子轮看团队+方向，天使轮看MVP+初步验证，A轮看增长+单位经济。"},
+    {"id": "H25", "name": "股权架构缺失", "severity": "medium", "keywords": ["合伙", "合伙人", "一起做", "团队"],
+     "requires": ["股权", "分配", "协议", "出资"],
+     "explanation": "多人合伙创业但未提及股权分配，这是早期创业最常见的定时炸弹。",
+     "fix_hint": "尽早确定股权架构，建议创始人之间签订合伙协议，明确出资比例、退出机制和决策权。预留10-20%期权池。"},
+    {"id": "H26", "name": "成本结构不透明", "severity": "medium", "keywords": ["收费", "定价", "盈利", "赚钱"],
+     "requires": ["成本", "毛利", "固定成本", "变动成本", "运营成本"],
+     "explanation": "有定价或盈利描述，但没有拆解成本结构。不知道成本就无法判断定价是否合理。",
+     "fix_hint": "列出固定成本（服务器/人力/房租）和变动成本（获客/物流/提成），算出毛利率，确认定价能覆盖成本。"},
+    {"id": "H27", "name": "增长渠道缺乏验证", "severity": "medium", "keywords": ["推广", "获客", "增长", "拉新", "引流"],
+     "requires": ["转化率", "ROI", "测试", "数据", "成本"],
+     "explanation": "提到了获客/推广计划，但缺少渠道验证数据。没有测试过的渠道假设是空中楼阁。",
+     "fix_hint": "选择1-2个核心渠道先做小规模测试，记录获客成本、转化率和留存数据，再决定是否加大投入。"},
 ]
 
 RULE_FALLACY_MAP: dict[str, str] = {
@@ -116,6 +132,10 @@ RULE_FALLACY_MAP: dict[str, str] = {
     "H21": "执行无责任人谬误",
     "H22": "风控口号谬误",
     "H23": "创新-价值脱节谬误",
+    "H24": "融资节奏错配谬误",
+    "H25": "股权架构缺失谬误",
+    "H26": "成本结构不透明谬误",
+    "H27": "增长渠道未验证谬误",
 }
 
 RULE_EDGE_MAP: dict[str, list[str]] = {
@@ -137,6 +157,10 @@ RULE_EDGE_MAP: dict[str, list[str]] = {
     "H16": ["Competitive_Landscape_Edge"],
     "H17": ["Competitive_Landscape_Edge", "Risk_Pattern_Edge"],
     "H18": ["Financial_Logic_Edge"],
+    "H24": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
+    "H25": ["Execution_Dependency_Edge", "Risk_Pattern_Edge"],
+    "H26": ["Financial_Logic_Edge"],
+    "H27": ["Value_Loop_Edge", "Risk_Pattern_Edge"],
     "H19": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
     "H20": ["Evidence_Chain_Edge", "Risk_Pattern_Edge"],
     "H21": ["Execution_Dependency_Edge"],

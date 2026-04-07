@@ -4,7 +4,6 @@ import json
 import logging
 import re
 import time
-import time
 from typing import Any
 
 from openai import OpenAI
@@ -66,8 +65,8 @@ class LlmClient:
             self._client = OpenAI(
                 api_key=settings.llm_api_key,
                 base_url=settings.llm_base_url,
-                timeout=60.0,
-                max_retries=2,
+                timeout=180.0,
+                max_retries=1,
             )
 
     @staticmethod

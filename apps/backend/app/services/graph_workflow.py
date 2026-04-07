@@ -329,8 +329,8 @@ AGENT_MATRIX: dict[str, dict[str, list[str]]] = {
 # ═══════════════════════════════════════════════════════════════════
 
 ANALYSIS_DIMENSIONS: dict[str, dict] = {
-    "status_judgment":     {"label": "项目状态判断",       "required": True,  "desc": "判断项目当前处于什么阶段，整体逻辑是否通顺"},
-    "core_bottleneck":     {"label": "核心瓶颈识别",       "required": True,  "desc": "找到当前最制约项目推进的一到两个瓶颈"},
+    "status_judgment":     {"label": "项目状态判断",       "required": False, "desc": "判断项目当前处于什么阶段，整体逻辑是否通顺"},
+    "core_bottleneck":     {"label": "核心瓶颈识别",       "required": False, "desc": "找到当前最制约项目推进的一到两个瓶颈"},
     "structural_cause":    {"label": "结构层原因",         "required": False, "desc": "解释表层问题背后共同指向的深层结构性断点"},
     "counter_intuitive":   {"label": "反直觉洞察/挑战",    "required": False, "desc": "指出学生可能忽略的盲区、过于乐观的假设、行业反例"},
     "method_bridge":       {"label": "方法论桥接",         "required": False, "desc": "讲清楚一个概念/方法论，并桥接回学生项目"},
@@ -340,6 +340,8 @@ ANALYSIS_DIMENSIONS: dict[str, dict] = {
     "action_plan":         {"label": "细粒度行动方案",     "required": False, "desc": "拆出本周最该做的1-3件事和验收标准"},
     "probing_questions":   {"label": "启发式追问",         "required": True,  "desc": "用苏格拉底式追问帮学生深入思考"},
 }
+
+DIM_ACTIVATION_THRESHOLD = 0.5
 
 DIM_OWNERSHIP: dict[str, dict] = {
     "status_judgment":     {"writer": "coach",        "challengers": []},
@@ -351,7 +353,7 @@ DIM_OWNERSHIP: dict[str, dict] = {
     "external_reference":  {"writer": "advisor",      "challengers": ["tutor"]},
     "strategy_directions": {"writer": "coach",        "challengers": []},
     "action_plan":         {"writer": "planner",      "challengers": []},
-    "probing_questions":   {"writer": "orchestrator", "challengers": []},
+    "probing_questions":   {"writer": "coach",        "challengers": []},
 }
 
 def _derive_agent_capabilities() -> dict[str, dict[str, list[str]]]:
@@ -950,7 +952,7 @@ def _compute_all_dim_activations(
         score = rel * unc * imp
         activations[dim] = {
             "score": round(score, 3),
-            "activated": score > 0.25 or ANALYSIS_DIMENSIONS[dim].get("required", False),
+            "activated": score > DIM_ACTIVATION_THRESHOLD or ANALYSIS_DIMENSIONS[dim].get("required", False),
             "components": {"relevance": round(rel, 2), "uncertainty": round(unc, 2), "impact": round(imp, 2)},
         }
     return activations
@@ -991,7 +993,7 @@ def _refine_dim_activations(
 
     for dim, act in activations.items():
         if not ANALYSIS_DIMENSIONS[dim].get("required"):
-            act["activated"] = act["score"] > 0.25
+            act["activated"] = act["score"] > DIM_ACTIVATION_THRESHOLD
         else:
             act["activated"] = True
 
@@ -4064,6 +4066,184 @@ def _get_competition_hint(comp_type: str, agent_role: str) -> str:
     return hints.get(agent_role, "")
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  V3: Per-dimension LLM call + hyper injection
+# ═══════════════════════════════════════════════════════════════════
+
+_DIM_PROMPT_HINTS: dict[str, str] = {
+    "status_judgment": "判断项目处于什么阶段、整体逻辑是否通顺。简洁直说，不要写报告。",
+    "core_bottleneck": "找到当前最制约项目推进的一到两个瓶颈，解释为什么是瓶颈。",
+    "structural_cause": "解释表层问题背后的深层结构性原因，不要只停在表面。",
+    "counter_intuitive": "指出学生可能忽略的盲区或过于乐观的假设，用反例或数据支撑。",
+    "method_bridge": "讲清楚一个概念或方法论，并桥接回学生的具体项目。",
+    "teacher_criteria": "从评审者/老师的视角说明会怎么判断这部分，给出得分区间参考。",
+    "external_reference": "引用真实竞品、行业数据或案例来做对比分析。",
+    "strategy_directions": "给出2-3条可选策略方向或打法，不要只有一种答案。",
+    "action_plan": "拆出本周最该做的1-3件可执行的事和验收标准。",
+    "probing_questions": "给出2-4个苏格拉底式追问，帮学生深入思考。",
+}
+
+
+def _fmt_hyper_for_dim(dim: str, hyper_insight: dict | None) -> str:
+    """从超图教学超边中筛选与该维度相关的边，返回格式化文本。"""
+    if not isinstance(hyper_insight, dict):
+        return ""
+    edges = hyper_insight.get("edges") or []
+    if not edges:
+        return ""
+    _dim_keywords: dict[str, list[str]] = {
+        "status_judgment": ["阶段", "成熟度", "完整度", "覆盖"],
+        "core_bottleneck": ["瓶颈", "风险", "缺陷", "不足", "薄弱"],
+        "structural_cause": ["结构", "根因", "深层", "系统性"],
+        "counter_intuitive": ["盲区", "假设", "反例", "反直觉", "乐观"],
+        "method_bridge": ["方法", "框架", "模型", "概念", "理论"],
+        "teacher_criteria": ["评分", "评委", "评审", "标准", "得分"],
+        "external_reference": ["案例", "竞品", "行业", "数据", "对比"],
+        "strategy_directions": ["策略", "方向", "路径", "选择", "打法"],
+        "action_plan": ["行动", "执行", "计划", "步骤", "验证"],
+        "probing_questions": ["追问", "思考", "深入", "验证"],
+    }
+    keywords = _dim_keywords.get(dim, [])
+    matched = []
+    for edge in edges:
+        if not isinstance(edge, dict):
+            continue
+        note = str(edge.get("teaching_note") or "")
+        family = str(edge.get("family_label") or edge.get("type") or "")
+        text = f"{family} {note}".lower()
+        if any(kw in text for kw in keywords) or len(matched) < 2:
+            matched.append(f"[{family}] {note[:100]}")
+        if len(matched) >= 3:
+            break
+    if not matched:
+        for edge in edges[:2]:
+            if isinstance(edge, dict) and edge.get("teaching_note"):
+                matched.append(f"[{edge.get('family_label', '')}] {str(edge['teaching_note'])[:100]}")
+    if not matched:
+        return ""
+    return "超图教学启发:\n" + "\n".join(f"- {m}" for m in matched)
+
+
+def _build_dim_context(dim: str, state: dict) -> str:
+    """为单个维度构建丰富的上下文，确保分析有理有据。"""
+    parts: list[str] = []
+    kg = state.get("kg_analysis", {}) if isinstance(state.get("kg_analysis"), dict) else {}
+    diag = state.get("diagnosis", {}) if isinstance(state.get("diagnosis"), dict) else {}
+
+    # ── 通用上下文（所有维度都能看到）──
+    if kg.get("insight"):
+        parts.append(f"KG洞察: {kg['insight'][:300]}")
+    if diag.get("bottleneck"):
+        parts.append(f"诊断瓶颈: {diag['bottleneck'][:200]}")
+    gaps = kg.get("structural_gaps", [])
+    if gaps:
+        parts.append(f"结构缺口: {', '.join(str(g) for g in gaps[:5])}")
+    strengths = kg.get("content_strengths", [])
+    if strengths:
+        parts.append(f"项目优势: {', '.join(str(s) for s in strengths[:4])}")
+
+    # ── RAG案例上下文（所有维度都能参考）──
+    rag_ctx = state.get("rag_context", "")
+    if rag_ctx:
+        parts.append(f"相似案例参考:\n{rag_ctx[:600]}")
+    rag_insight = state.get("rag_enrichment_insight", "")
+    if rag_insight:
+        parts.append(f"案例迁移洞察: {rag_insight[:300]}")
+
+    # ── Neo4j 跨项目图谱启发 ──
+    neo4j_hits = state.get("neo4j_graph_hits", [])
+    if neo4j_hits:
+        neo_parts = []
+        for gh in neo4j_hits[:3]:
+            if isinstance(gh, dict):
+                pname = gh.get("project_name", "")
+                dims = ", ".join(gh.get("matched_dimensions", [])[:3])
+                ctx_obj = gh.get("context", {})
+                solutions = ctx_obj.get("solutions", [])[:2] if isinstance(ctx_obj, dict) else []
+                sol_text = f" 方案:{', '.join(solutions)}" if solutions else ""
+                neo_parts.append(f"  - {pname}(维度:{dims}{sol_text})")
+        if neo_parts:
+            parts.append("图谱跨项目启发:\n" + "\n".join(neo_parts))
+
+    # ── 维度专项上下文 ──
+    if dim in ("teacher_criteria",):
+        rules = diag.get("triggered_rules", []) or []
+        if rules:
+            rule_summary = "; ".join(
+                f"{r.get('name', '')}({r.get('severity', '')})" for r in rules[:5] if isinstance(r, dict)
+            )
+            parts.append(f"触发规则: {rule_summary}")
+
+    if dim in ("external_reference", "counter_intuitive"):
+        web_facts = state.get("web_facts", []) or state.get("web_search_result", {}).get("facts", [])
+        if isinstance(web_facts, list):
+            for wf in web_facts[:3]:
+                if isinstance(wf, dict):
+                    parts.append(f"网络数据: {wf.get('fact', str(wf))[:150]}")
+
+    # ── 对话历史 ──
+    conv = state.get("conversation_messages", [])
+    if conv:
+        recent = conv[-4:]
+        conv_ctx = "\n".join(
+            f"{'学生' if m.get('role') == 'user' else 'AI'}: {str(m.get('content', ''))[:200]}"
+            for m in recent if isinstance(m, dict)
+        )
+        parts.append(f"近期对话:\n{conv_ctx}")
+
+    # ── 超图教学启发 ──
+    hyper_ctx = _fmt_hyper_for_dim(dim, state.get("hypergraph_insight"))
+    if hyper_ctx:
+        parts.append(hyper_ctx)
+
+    return "\n".join(parts)
+
+
+def _write_dimension(dim: str, state: dict) -> dict:
+    """为单个维度生成有深度的分析内容。"""
+    dim_info = ANALYSIS_DIMENSIONS.get(dim, {})
+    hint = _DIM_PROMPT_HINTS.get(dim, dim_info.get("desc", ""))
+    ctx = _build_dim_context(dim, state)
+    msg = state.get("message", "")
+    mode = state.get("mode", "coursework")
+
+    mode_note = {
+        "coursework": "教学引导视角",
+        "competition": "评委/竞赛视角",
+        "learning": "实操推进视角",
+    }.get(mode, "")
+
+    result = _llm.chat_text(
+        system_prompt=(
+            f"你是「{dim_info.get('label', dim)}」分析专家。{mode_note}\n"
+            f"任务：{hint}\n\n"
+            "## 分析要求\n"
+            "- 200-600字的深度分析，有理有据\n"
+            "- 如果上下文中有案例参考或图谱启发，必须引用并对比（'类似项目XX的做法是…'）\n"
+            "- 如果有超图教学启发，自然融入分析\n"
+            "- 给出具体判断，不要泛泛而谈（不要'需要考虑'、'可以尝试'，要说'你的XX存在YY问题，因为ZZ'）\n"
+            "- 不要写标题，不要重复学生原话，不要说'以下是我的分析'\n"
+            "- 直接开始分析内容\n"
+        ),
+        user_prompt=(
+            f"学生说：{msg[:1500]}\n\n"
+            + (f"背景信息：\n{ctx}\n" if ctx else "")
+        ),
+        model=settings.llm_synthesis_model,
+        temperature=0.3,
+    )
+    hyper_ctx_sent = _fmt_hyper_for_dim(dim, state.get("hypergraph_insight"))
+    return {
+        "dim": dim,
+        "value": result or "",
+        "confidence": 0.75 if result else 0.2,
+        "evidence_source": "dim_analysis",
+        "writer": DIM_OWNERSHIP.get(dim, {}).get("writer", "coach"),
+        "challenges": [],
+        "hyper_context_sent": hyper_ctx_sent,
+    }
+
+
 def _coach_analyze(state: dict) -> dict:
     msg = state.get("message", "")
     mode = state.get("mode", "coursework")
@@ -4262,7 +4442,7 @@ def _coach_analyze(state: dict) -> dict:
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
                 + (f"前几轮积累的知识: {history_knowledge}\n" if history_knowledge else "")
             ),
-            model=settings.llm_reason_model,
+            model=settings.llm_fast_model if _is_exploring else settings.llm_reason_model,
             temperature=0.35,
         ) if _llm.enabled else {}
         if not isinstance(coach_json, dict):
@@ -4368,7 +4548,7 @@ def _coach_analyze(state: dict) -> dict:
                 + "\n".join(f"- {item}" for item in evidence_used[:3])
                 + f"\n影响提示: {impact_if_unfixed}\n"
             ),
-            model=settings.llm_reason_model,
+            model=settings.llm_fast_model if _is_exploring else settings.llm_reason_model,
             temperature=0.38,
         ) if _llm.enabled else {}
         if not isinstance(coach_json, dict):
@@ -5025,6 +5205,34 @@ def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
     return ordered, reasoning
 
 
+def _dim_results_to_agent_outputs(dim_results: dict[str, dict]) -> dict:
+    """Convert V3 dim_results to legacy agent output format for frontend display."""
+    writer_groups: dict[str, list[str]] = {}
+    for dim, dr in dim_results.items():
+        writer = dr.get("writer", "coach")
+        text = str(dr.get("value") or "").strip()
+        if not text:
+            continue
+        dim_label = ANALYSIS_DIMENSIONS.get(dim, {}).get("label", dim)
+        writer_groups.setdefault(writer, []).append(f"【{dim_label}】\n{text}")
+
+    outputs: dict[str, dict] = {}
+    for writer, sections in writer_groups.items():
+        display_name = AGENT_DISPLAY.get(writer, writer)
+        analysis = "\n\n".join(sections)
+        hyper_sent = ""
+        for dim, dr in dim_results.items():
+            if dr.get("writer") == writer and dr.get("hyper_context_sent"):
+                hyper_sent += dr["hyper_context_sent"] + "\n"
+        outputs[f"{writer}_output"] = {
+            "agent": display_name,
+            "analysis": analysis,
+            "tools_used": ["dim_analysis"],
+            "hyper_context_sent": hyper_sent.strip(),
+        }
+    return outputs
+
+
 def run_role_agents_node(state: WorkflowState) -> dict:
     intent = state.get("intent", "general_chat")
 
@@ -5046,170 +5254,182 @@ def run_role_agents_node(state: WorkflowState) -> dict:
             "nodes_visited": ["role_agents"],
         }
 
-    # ── V2: Dimension-driven agent selection + topological phased execution ──
+    # ── V3: Dimension-driven execution ──
     activations = state.get("dim_activations", {})
-    agents_to_run, agent_reasoning = _decide_agents_v2(state)
-    fallback_used = agent_reasoning.startswith("[兜底矩阵]")
+    activated_dims = [d for d, a in activations.items() if a.get("activated")]
+    n_activated = len(activated_dims)
 
-    if not agents_to_run:
-        logger.info("agent selection returned empty → orchestrator-only")
-        return {
-            "agents_called": ["[数据不足，直接回复]"],
+    logger.info(
+        "V3 dim check: n_activated=%d dims=%s intent=%s",
+        n_activated, activated_dims, intent,
+    )
+
+    # ── Decide Path A vs Path B based on dims + message complexity ──
+    _GUIDE_DIMS = ["status_judgment", "probing_questions", "strategy_directions"]
+    is_file = "[上传文件:" in state.get("message", "")
+    _msg_for_complexity = state.get("message", "")
+    _conv_for_complexity = state.get("conversation_messages", [])
+    _complexity_score = _message_complexity(_msg_for_complexity, _conv_for_complexity)
+    _tier_for_path = _complexity_tier(_complexity_score, _normalize_intent_shape(state.get("intent_shape", "single")))
+
+    use_path_a = (
+        n_activated <= 2
+        and not is_file
+        and _tier_for_path != "complex"
+        and len(_msg_for_complexity) < 500
+    )
+
+    # ── Path A: Guiding mode with auto-added dimensions ──
+    if use_path_a:
+        effective_dims = list(dict.fromkeys(activated_dims + [
+            d for d in _GUIDE_DIMS if d not in activated_dims
+        ]))
+
+        dim_results: dict[str, dict] = {}
+        agent_hyper_details: list[dict] = []
+
+        with ThreadPoolExecutor(max_workers=min(len(effective_dims), 4)) as pool:
+            future_map = {
+                pool.submit(_write_dimension, dim, dict(state)): dim
+                for dim in effective_dims
+            }
+            try:
+                for future in as_completed(future_map, timeout=45):
+                    dim = future_map[future]
+                    try:
+                        dr = future.result()
+                        dim_results[dim] = dr
+                        if dr.get("hyper_context_sent"):
+                            agent_hyper_details.append({"dim": dim, "hyper": dr["hyper_context_sent"]})
+                    except Exception as exc:
+                        logger.warning("write_dimension %s failed: %s", dim, exc)
+                        dim_results[dim] = {"value": "", "confidence": 0.2, "writer": "coach", "challenges": []}
+            except TimeoutError:
+                logger.warning("path A dim writes timed out (45s)")
+                for f in future_map:
+                    if f.done() and future_map[f] not in dim_results:
+                        try:
+                            dim_results[future_map[f]] = f.result()
+                        except Exception:
+                            pass
+
+        all_missing = [d for d in ANALYSIS_DIMENSIONS
+                       if d not in effective_dims and d != "probing_questions"]
+        missing_labels = [ANALYSIS_DIMENSIONS[d]["label"] for d in all_missing[:4]]
+
+        exploration_phase = (state.get("exploration_state") or {}).get("phase")
+        reply_strategy = "progressive" if exploration_phase in ("direction", "convergence") else "deep_dive"
+
+        agent_outputs = _dim_results_to_agent_outputs(dim_results)
+        logger.info("V3 path A: guiding, effective_dims=%s, missing_hints=%s, strategy=%s, agent_outputs=%s",
+                     effective_dims, missing_labels, reply_strategy, list(agent_outputs.keys()))
+        result_a: dict = {
+            "agents_called": ["coach"],
             "resolved_agents": [],
-            "agent_reasoning": "当前可用上下文不足，未拆分额外角色智能体。",
+            "agent_reasoning": f"激活{n_activated}个维度+自动补充引导维度→共{len(effective_dims)}个({', '.join(effective_dims)})。缺失方向: {', '.join(missing_labels)}",
+            "dim_results": dim_results,
+            "reply_strategy": reply_strategy,
+            "missing_dim_hints": missing_labels,
+            "agent_hyper_details": agent_hyper_details,
             "nodes_visited": ["role_agents"],
         }
+        result_a.update(agent_outputs)
+        return result_a
 
-    # V2: derive execution phases from dimension dependencies
-    context = {
-        "mode": state.get("mode", "coursework"),
-        "complexity": _message_complexity(
-            state.get("message", ""),
-            state.get("conversation_messages", []),
-        ),
-    }
-    if activations and not fallback_used:
-        phases = _derive_execution_phases(agents_to_run, activations, context)
-    else:
-        _P1_SET = {"coach", "tutor"}
-        _P2_SET = {"analyst", "advisor", "planner"}
-        _P3_SET = {"grader"}
-        phases = [
-            [a for a in agents_to_run if a in _P1_SET],
-            [a for a in agents_to_run if a in _P2_SET],
-            [a for a in agents_to_run if a in _P3_SET],
-        ]
-        phases = [p for p in phases if p]
+    # ── Path B: Many dimensions (3+) → per-dim parallel LLM calls ──
+    dim_results = {}
+    agent_hyper_details = []
 
-    logger.info("V2 agent selection: %s phases=%s (intent=%s, fallback=%s)",
-                agents_to_run, phases, intent, fallback_used)
-
-    outputs: dict[str, dict] = {}
-    state_snapshot = dict(state)
-
-    def _run_one(key: str, snapshot: dict) -> tuple[str, dict]:
-        fn = AGENT_FNS.get(key)
-        if not fn:
-            return key, {"agent": key, "analysis": "", "tools_used": []}
+    with ThreadPoolExecutor(max_workers=min(n_activated, 5)) as pool:
+        future_map = {
+            pool.submit(_write_dimension, dim, dict(state)): dim
+            for dim in activated_dims
+        }
         try:
-            return key, fn(snapshot)
-        except Exception as exc:
-            logger.warning("Agent %s failed: %s", key, exc)
-            return key, {"agent": AGENT_DISPLAY.get(key, key), "analysis": "", "tools_used": [], "error": str(exc)}
+            for future in as_completed(future_map, timeout=60):
+                dim = future_map[future]
+                try:
+                    dr = future.result()
+                    dim_results[dim] = dr
+                    if dr.get("hyper_context_sent"):
+                        agent_hyper_details.append({"dim": dim, "hyper": dr["hyper_context_sent"]})
+                except Exception as exc:
+                    logger.warning("write_dimension %s failed: %s", dim, exc)
+                    dim_results[dim] = {"value": "", "confidence": 0.2, "writer": "coach", "challenges": []}
+        except TimeoutError:
+            done_dims = [future_map[f] for f in future_map if f.done()]
+            pending_dims = [future_map[f] for f in future_map if not f.done()]
+            logger.warning("dim writes timed out (60s) — done=%s pending=%s", done_dims, pending_dims)
+            for f in future_map:
+                if f.done():
+                    dim = future_map[f]
+                    if dim not in dim_results:
+                        try:
+                            dim_results[dim] = f.result()
+                        except Exception:
+                            pass
 
-    for phase_agents in phases:
-        if not phase_agents:
+    # Run challengers for high-risk dims (parallel)
+    challenge_tasks: list[tuple[str, dict]] = []
+    for dim in activated_dims:
+        if dim not in dim_results:
             continue
-        if len(phase_agents) == 1:
-            k, result = _run_one(phase_agents[0], state_snapshot)
-            outputs[k] = result
-            state_snapshot[f"{k}_output"] = result
-        else:
-            with ThreadPoolExecutor(max_workers=len(phase_agents)) as pool:
-                futures = {pool.submit(_run_one, k, dict(state_snapshot)): k for k in phase_agents}
-                for future in as_completed(futures):
-                    k, result = future.result()
-                    outputs[k] = result
-                    state_snapshot[f"{k}_output"] = result
+        challengers = DIM_OWNERSHIP.get(dim, {}).get("challengers", [])
+        if challengers and dim_results[dim].get("value"):
+            challenge_tasks.append((dim, dim_results[dim]))
 
-    # V2: build dim_results from agent outputs + run challengers in PARALLEL + resolve
-    dim_results: dict[str, dict] = {}
-    if activations and not fallback_used:
-        challenge_tasks: list[tuple[str, dict]] = []  # (dim, writer_result)
-
-        for dim, act in activations.items():
-            if not act.get("activated"):
-                continue
-            ownership = DIM_OWNERSHIP.get(dim, {})
-            writer = ownership.get("writer", "")
-            if writer == "orchestrator":
-                continue
-            writer_out = outputs.get(writer, {})
-            analysis_text = str(writer_out.get("analysis", ""))
-            dim_results[dim] = {
-                "value": analysis_text[:1500] if analysis_text else "",
-                "confidence": 0.75 if analysis_text else 0.2,
-                "evidence_source": "agent_analysis",
-                "writer": writer,
-                "challenges": [],
-            }
-            for ch_agent in ownership.get("challengers", []):
-                if ch_agent in outputs:
-                    challenge_tasks.append((dim, dim_results[dim]))
-
-        # Run all challengers in parallel (each is a fast_model call)
-        if challenge_tasks:
-            def _do_challenge(item: tuple[str, dict]) -> tuple[str, dict | None]:
-                d, wr = item
-                return d, _run_challenger(d, wr, state_snapshot)
-            with ThreadPoolExecutor(max_workers=min(len(challenge_tasks), 3)) as ch_pool:
-                ch_futures = {ch_pool.submit(_do_challenge, t): t[0] for t in challenge_tasks}
-                for cf in as_completed(ch_futures, timeout=15):
+    if challenge_tasks:
+        def _do_challenge(item: tuple[str, dict]) -> tuple[str, dict | None]:
+            d, wr = item
+            return d, _run_challenger(d, wr, state)
+        with ThreadPoolExecutor(max_workers=min(len(challenge_tasks), 3)) as ch_pool:
+            ch_futures = {ch_pool.submit(_do_challenge, t): t[0] for t in challenge_tasks}
+            try:
+                for cf in as_completed(ch_futures, timeout=20):
                     try:
                         d, ch_res = cf.result()
                         if ch_res and d in dim_results:
-                            dim_results[d]["challenges"].append(ch_res)
+                            dim_results[d].setdefault("challenges", []).append(ch_res)
                     except Exception as _ce:
                         logger.warning("challenger failed: %s", _ce)
+            except TimeoutError:
+                logger.warning("challenger phase timed out")
 
-        dim_results = _resolve_dimension_conflicts(dim_results)
-        dim_results, patched_dims = _patch_low_confidence_dims(dim_results, state_snapshot)
-    else:
-        patched_dims = []
+    dim_results = _resolve_dimension_conflicts(dim_results)
 
-    # V2: select reply strategy (with diagnosis richness upgrade)
+    # Select reply strategy
     exploration_phase = (state.get("exploration_state") or {}).get("phase")
     _msg = state.get("message", "")
     _conv = state.get("conversation_messages", [])
     _complexity = _message_complexity(_msg, _conv)
     _tier = _complexity_tier(_complexity, _normalize_intent_shape(state.get("intent_shape", "single")))
     _is_file = "[上传文件:" in _msg
-
-    # Upgrade tier if diagnosis is rich (many rules/entities/structural gaps)
-    _diag = state.get("diagnosis", {})
-    _n_rules = len(_diag.get("triggered_rules", []) or [])
-    _kg = state.get("kg_analysis", {}) if isinstance(state.get("kg_analysis"), dict) else {}
-    _n_gaps = len(_kg.get("structural_gaps", []) or [])
-    _n_entities = len(_kg.get("entities", []) or [])
-    if _tier == "simple" and (_n_rules >= 2 or _n_entities >= 4 or _n_gaps >= 2):
-        _tier = "medium"
-    if _tier == "medium" and (_n_rules >= 4 or _n_entities >= 8 or _n_gaps >= 3):
-        _tier = "complex"
+    _maturity = (state.get("incremental_stats") or {}).get("project_maturity")
 
     reply_strategy = _select_reply_strategy(
         activations or {}, intent, dim_results, exploration_phase,
-        complexity_tier=_tier, is_file=_is_file,
-        project_maturity=(state.get("incremental_stats") or {}).get("project_maturity"),
+        complexity_tier=_tier, is_file=_is_file, project_maturity=_maturity,
     )
 
-    # V2: build execution trace
-    exec_trace = _build_execution_trace(
-        activations=activations or {},
-        selected_agents=agents_to_run,
-        phases=phases,
-        dim_results=dim_results,
-        patched_dims=patched_dims,
-        reply_strategy=reply_strategy,
-        intent=intent,
-        intent_confidence=state.get("intent_confidence", 0.5),
-        fallback_used=fallback_used,
-        complexity_tier=_tier,
-    )
+    agents_involved = list({dim_results[d].get("writer", "coach") for d in dim_results if dim_results[d].get("value")})
 
-    result_dict: dict[str, Any] = {
-        "agents_called": [AGENT_DISPLAY.get(a, a) for a in agents_to_run],
-        "resolved_agents": list(agents_to_run),
-        "agent_reasoning": agent_reasoning,
+    agent_outputs = _dim_results_to_agent_outputs(dim_results)
+    logger.info("V3 path B: %d dims parallel, agents=%s, strategy=%s, challengers=%d, agent_outputs=%s",
+                n_activated, agents_involved, reply_strategy, len(challenge_tasks), list(agent_outputs.keys()))
+
+    result_b: dict = {
+        "agents_called": agents_involved,
+        "resolved_agents": [],
+        "agent_reasoning": f"V3维度驱动: {n_activated}个维度并行分析，涉及{', '.join(agents_involved)}",
         "dim_results": dim_results,
         "reply_strategy": reply_strategy,
-        "execution_trace": exec_trace,
+        "agent_hyper_details": agent_hyper_details,
         "nodes_visited": ["role_agents"],
     }
-    for key in ("coach", "analyst", "advisor", "tutor", "grader", "planner"):
-        if key in outputs:
-            result_dict[f"{key}_output"] = outputs[key]
+    result_b.update(agent_outputs)
+    return result_b
 
-    return result_dict
+    # (V2 legacy code removed — V3 dim-driven paths above handle all cases)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -5678,7 +5898,9 @@ def orchestrator(state: WorkflowState) -> dict:
             reply, _ = _build_learning_tutor_reply(state, structured=True)
         elif focused_prompt:
             logger.info("Orchestrator: focused mode for intent '%s'", intent)
-            focused_model = settings.llm_fast_model if intent == "general_chat" else settings.llm_reason_model
+            _nsr_inc = state.get("incremental_stats", {})
+            _nsr_exploring = _nsr_inc.get("project_maturity") == "exploring"
+            focused_model = settings.llm_fast_model if (intent == "general_chat" or _nsr_exploring) else settings.llm_reason_model
             reply = _llm.chat_text(
                 system_prompt=(
                     f"{persona}\n{focused_prompt}\n\n"
@@ -5864,6 +6086,95 @@ def stream_orchestrator(state: dict):
         yield _build_clarification_reply(state)
         return
 
+    # ── V3: Dimension-driven orchestration ──
+    dim_results = state.get("dim_results", {})
+    if dim_results and not analyses_ctx:
+        v3_strategy = state.get("reply_strategy", "progressive")
+        missing_hints = state.get("missing_dim_hints", [])
+        n_dims = len([d for d, r in dim_results.items() if r.get("value")])
+
+        dim_content_parts: list[str] = []
+        for dim_key, dr in dim_results.items():
+            val = str(dr.get("value") or "").strip()
+            if not val:
+                continue
+            dim_label = ANALYSIS_DIMENSIONS.get(dim_key, {}).get("label", dim_key)
+            contested = dr.get("contested", False)
+            marker = " [有争议]" if contested else ""
+            dim_content_parts.append(f"**{dim_label}{marker}**:\n{val}")
+
+        dim_content = "\n\n".join(dim_content_parts) if dim_content_parts else ""
+
+        _orch_hyper_insight = state.get("hypergraph_insight", {})
+        _hyper_summary = ""
+        if isinstance(_orch_hyper_insight, dict):
+            _hs = str(_orch_hyper_insight.get("summary", "")).strip()
+            if _hs:
+                _hyper_summary = f"\n超图摘要: {_hs[:200]}"
+            for _he in (_orch_hyper_insight.get("edges") or [])[:3]:
+                if isinstance(_he, dict) and _he.get("teaching_note"):
+                    _hyper_summary += f"\n超图启发[{_he.get('family_label', '')}]: {str(_he['teaching_note'])[:80]}"
+
+        _is_guiding = bool(missing_hints)
+        if _is_guiding:
+            _v3_sys = (
+                f"{persona}\n"
+                "你是一位经验丰富的项目导师，正在和学生一对一聊项目想法。\n"
+                "学生目前还在项目早期/探索阶段，你的核心任务是**带着学生一步步完善想法**，而不是批评。\n\n"
+                "## 回复原则\n"
+                "- 先肯定学生已有想法中值得认可的部分\n"
+                "- 综合下面的多维度分析，帮学生看清当前处在什么阶段、最该先想清楚什么\n"
+                "- 不要把所有维度都堆上去，选最重要的2-3个展开，其余留做追问\n"
+                "- 如果有超图教学启发或案例线索，自然融入（'你有没有想过XX'、'之前有个类似的项目XX'）\n"
+                "- 结尾给出2-3个具体追问，引导学生往缺失方向深入\n"
+                "- 追问要具体、可回答的（不是'你怎么看用户需求'，而是'你身边有多少同学会为这个功能付费？'）\n\n"
+                "## 格式要求\n"
+                "- 像导师面对面聊天的语气（600-1400字）\n"
+                "- 不要套报告模板（现状→策略空间→聚焦→多维洞察）\n"
+                "- 不要列举'缺少XX维度'来批评学生\n"
+                "- 不要提到Agent、分析师等角色\n"
+                "- 可以用 **加粗**、> 引用、```mermaid 流程图\n"
+            )
+            _v3_usr = (
+                f"学生说：{msg[:2000]}\n\n"
+                + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+                + (f"## 多维度分析结果\n{dim_content}\n\n" if dim_content else "")
+                + (f"学生还没聊到的方向（用追问引导，不要直接列出来批评）：{', '.join(missing_hints)}\n" if missing_hints else "")
+                + (_hyper_summary + "\n" if _hyper_summary else "")
+            )
+        else:
+            _v3_sys = (
+                f"{persona}\n"
+                "你拿到了多个维度的深度分析结果，请综合成一份有层次的回复。\n\n"
+                "## 回复要求\n"
+                "- 用你自己的判断决定先说什么、后说什么，不要按固定模板\n"
+                "- 从最重要的发现说起\n"
+                "- 如果某维度标注[有争议]，呈现双方观点\n"
+                "- 有案例/数据支撑的观点充分展开\n"
+                "- 涉及流程/决策时用 ```mermaid 流程图\n"
+                "- 用 **加粗** 强调、> 引用学生原话、表格做对比\n"
+                "- 结尾给2-4个推进追问\n"
+                "- 不要提到Agent、分析师等角色\n"
+                f"- 回复长度：{length_guide}\n"
+            )
+            _v3_usr = (
+                f"学生说：{msg[:3000]}\n\n"
+                + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+                + (f"教师批注: {tfb}\n\n" if tfb else "")
+                + f"## 各维度分析结果\n\n{dim_content}\n\n"
+                + (f"本轮触发规则：{'; '.join(triggered_rules)}\n" if triggered_rules else "")
+                + (_hyper_summary + "\n" if _hyper_summary else "")
+            )
+
+        for chunk in _llm.chat_text_stream(
+            system_prompt=_v3_sys,
+            user_prompt=_v3_usr,
+            model=settings.llm_synthesis_model,
+            temperature=0.5,
+        ):
+            yield chunk
+        return
+
     if not analyses_ctx:
         # ── Focused intent path (no agents ran) ──
         gathered = _build_gathered_context(state)
@@ -5891,7 +6202,9 @@ def stream_orchestrator(state: dict):
                 + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
                 + f"已收集的信息：\n{gathered}\n"
             )
-            focused_model = settings.llm_fast_model if intent == "general_chat" else settings.llm_reason_model
+            _foc_inc = state.get("incremental_stats", {})
+            _foc_exploring = _foc_inc.get("project_maturity") == "exploring"
+            focused_model = settings.llm_fast_model if (intent == "general_chat" or _foc_exploring) else settings.llm_reason_model
             for chunk in _llm.chat_text_stream(
                 system_prompt=_sys, user_prompt=_usr,
                 model=focused_model, temperature=0.45,
@@ -6090,10 +6403,14 @@ def stream_orchestrator(state: dict):
         + (f"以下是行动规划素材（只能在最后一节使用）：\n\n{planner_block}" if has_planner else "本轮没有行动规划素材。")
     )
 
+    _orch_inc = state.get("incremental_stats", {})
+    _orch_exploring = _orch_inc.get("project_maturity") == "exploring"
+    _orch_model = settings.llm_fast_model if _orch_exploring else settings.llm_synthesis_model
+
     for chunk in _llm.chat_text_stream(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
-        model=settings.llm_synthesis_model,
+        model=_orch_model,
         temperature=0.55,
     ):
         yield chunk

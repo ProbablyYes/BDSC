@@ -282,6 +282,7 @@ export default function StudentPage() {
   const [rightTab, setRightTab] = useState<RightTab>("task");
   const [rightOpen, setRightOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [topbarMoreOpen, setTopbarMoreOpen] = useState(false);
   const [teacherFeedback, setTeacherFeedback] = useState<any[]>([]);
   const [teacherAnnotationBoards, setTeacherAnnotationBoards] = useState<any[]>([]);
   const [selectedAnnotationBoardId, setSelectedAnnotationBoardId] = useState("");
@@ -1079,7 +1080,7 @@ export default function StudentPage() {
 
   return (
     <div className={`chat-app ${theme}`}>
-      {/* ── Top Bar ── */}
+      {/* ── Top Bar (Redesigned V2) ── */}
       <header className="chat-topbar">
         <div className="topbar-left">
           <button type="button" className="topbar-icon-btn sidebar-toggle" onClick={() => setConvSidebarOpen((v) => !v)} title="会话列表">
@@ -1089,28 +1090,14 @@ export default function StudentPage() {
             <span className="brand-dot" />
             VentureCheck
           </Link>
-          <span className="topbar-sep" />
-          <span className="topbar-label">双创智能教练</span>
         </div>
+
         <div className="topbar-center">
           <div className="topbar-mode-toggle">
             <button type="button" className={`topbar-mode-opt${mode === "coursework" ? " active" : ""}`} onClick={() => setMode("coursework")}>课程辅导</button>
             <button type="button" className={`topbar-mode-opt${mode === "competition" ? " active" : ""}`} onClick={() => setMode("competition")}>竞赛冲刺</button>
             <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>项目教练</button>
           </div>
-          <div className="topbar-comp-type">
-            <select
-              value={competitionType}
-              onChange={(e) => setCompetitionType(e.target.value as any)}
-              className="comp-type-select"
-            >
-              <option value="">不选赛事</option>
-              <option value="internet_plus">互联网+</option>
-              <option value="challenge_cup">挑战杯</option>
-              <option value="dachuang">大创</option>
-            </select>
-          </div>
-          <div className="topbar-mode-hint">{modeGuide}</div>
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
           {pitchTimerRunning && (
             <div className={`pitch-timer-display ${pitchTimer <= 30 ? "urgent" : pitchTimer <= 60 ? "warning" : ""}`}>
@@ -1122,51 +1109,73 @@ export default function StudentPage() {
                   transform="rotate(-90 18 18)" />
               </svg>
               <span className="pitch-timer-text">{formatTime(pitchTimer)}</span>
-            </div>
-          )}
-        </div>
-        <div className="topbar-right">
-          <button type="button" className="topbar-icon-btn" onClick={() => { setTeamPanelOpen((v) => !v); if (!teamPanelOpen) loadMyTeams(); }} title="我的团队" style={{ position: "relative" }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            {myTeams.length > 0 && <span style={{ position: "absolute", top: 2, right: 2, width: 8, height: 8, borderRadius: "50%", background: "var(--accent)" }} />}
-          </button>
-          <button type="button" className="topbar-icon-btn" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} title={theme === "dark" ? "切换日间模式" : "切换夜间模式"}>
-            {theme === "dark" ? (
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            ) : (
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-            )}
-          </button>
-          <button type="button" className="topbar-icon-btn" onClick={() => setSettingsOpen((v) => !v)} title="设置">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          </button>
-          {mode === "competition" && !pitchTimerRunning && (
-            <div className="pitch-launcher">
-              <select className="pitch-dur-select" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
-                <option value={180}>3 min</option>
-                <option value={300}>5 min</option>
-                <option value={420}>7 min</option>
-                <option value={600}>10 min</option>
-              </select>
-              <button type="button" className="pitch-start-btn" onClick={startPitchTimer}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                路演模拟
+              <button type="button" className="pitch-stop-btn-inline" onClick={stopPitchTimer} title="结束路演">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
               </button>
             </div>
           )}
-          {pitchTimerRunning && (
-            <button type="button" className="pitch-stop-btn" onClick={stopPitchTimer}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-              结束
-            </button>
-          )}
+        </div>
+
+        <div className="topbar-right">
           <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
-            {rightOpen ? "收起面板" : "分析面板"}
+            {rightOpen ? "收起" : "分析面板"}
           </button>
+          <div className="topbar-more-wrap">
+            <button type="button" className="topbar-icon-btn topbar-more-trigger" onClick={() => setTopbarMoreOpen((v) => !v)} title="更多选项">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+            </button>
+            {topbarMoreOpen && (
+              <div className="topbar-more-popup" onClick={() => setTopbarMoreOpen(false)}>
+                <div className="topbar-more-section">
+                  <span className="topbar-more-label">赛事类型</span>
+                  <select value={competitionType} onChange={(e) => setCompetitionType(e.target.value as any)} className="comp-type-select" onClick={(e) => e.stopPropagation()}>
+                    <option value="">不选赛事</option>
+                    <option value="internet_plus">互联网+</option>
+                    <option value="challenge_cup">挑战杯</option>
+                    <option value="dachuang">大创</option>
+                  </select>
+                </div>
+                {mode === "competition" && !pitchTimerRunning && (
+                  <div className="topbar-more-section" onClick={(e) => e.stopPropagation()}>
+                    <span className="topbar-more-label">路演计时</span>
+                    <div className="pitch-launcher">
+                      <select className="pitch-dur-select" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
+                        <option value={180}>3 min</option><option value={300}>5 min</option><option value={420}>7 min</option><option value={600}>10 min</option>
+                      </select>
+                      <button type="button" className="pitch-start-btn" onClick={() => { startPitchTimer(); setTopbarMoreOpen(false); }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        开始
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <div className="topbar-more-section topbar-more-row">
+                  <button type="button" className="topbar-more-item" onClick={() => { setTeamPanelOpen((v) => !v); if (!teamPanelOpen) loadMyTeams(); setTopbarMoreOpen(false); }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>
+                    我的团队{myTeams.length > 0 && <span className="topbar-more-badge">{myTeams.length}</span>}
+                  </button>
+                  <button type="button" className="topbar-more-item" onClick={() => { setSettingsOpen((v) => !v); setTopbarMoreOpen(false); }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    设置
+                  </button>
+                  <button type="button" className="topbar-more-item" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")}>
+                    {theme === "dark" ? (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    ) : (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                    )}
+                    {theme === "dark" ? "日间模式" : "夜间模式"}
+                  </button>
+                </div>
+                <div className="topbar-more-section topbar-more-footer">
+                  <button type="button" className="topbar-more-item topbar-more-logout" onClick={logout}>退出登录</button>
+                </div>
+              </div>
+            )}
+          </div>
           <Link href="/student/profile" className="topbar-avatar" title="个人中心">
             {(currentUser.display_name ?? "S")[0].toUpperCase()}
           </Link>
-          <button type="button" className="topbar-btn" onClick={logout} title="退出登录">退出</button>
         </div>
       </header>
 
@@ -1573,18 +1582,18 @@ export default function StudentPage() {
                           {tasks.map((t: any, ti: number) => {
                             const pri = s(t.priority);
                             return (
-                              <details key={ti} className="task-card-v2" open={ti === 0}>
-                                <summary className="task-card-head">
-                                  <span className="task-num">{ti + 1}</span>
+                            <details key={ti} className="task-card-v2" open={ti === 0}>
+                              <summary className="task-card-head">
+                                <span className="task-num">{ti + 1}</span>
                                   {pri && priLabel[pri] && <span className={`task-pri-tag ${priClass[pri] || ""}`}>{priLabel[pri]}</span>}
-                                  <span className="task-title-v2">{s(t.task)}</span>
-                                </summary>
-                                <div className="task-card-body">
-                                  {s(t.why) && <p className="task-why">{s(t.why)}</p>}
+                                <span className="task-title-v2">{s(t.task)}</span>
+                              </summary>
+                              <div className="task-card-body">
+                                {s(t.why) && <p className="task-why">{s(t.why)}</p>}
                                   {s(t.how) && <div className="task-how"><MarkdownContent content={s(t.how)} theme={theme} /></div>}
                                   {s(t.acceptance) && <div className="task-accept"><span className="task-accept-label">验收标准</span> {s(t.acceptance)}</div>}
-                                </div>
-                              </details>
+                              </div>
+                            </details>
                             );
                           })}
                           {notNow.length > 0 && (
@@ -1668,13 +1677,13 @@ export default function StudentPage() {
                                 <text x="40" y="44" textAnchor="middle" fontSize="16" fontWeight="700" fill={healthColor}>{healthScore}</text>
                               </svg>
                               <div className="risk-health-meta">
-                                <div className="risk-summary-stats">
-                                  <span className="risk-stat high">{high} 高危</span>
-                                  <span className="risk-stat medium">{med} 中等</span>
-                                  <span className="risk-stat low">{low} 轻微</span>
+                            <div className="risk-summary-stats">
+                              <span className="risk-stat high">{high} 高危</span>
+                              <span className="risk-stat medium">{med} 中等</span>
+                              <span className="risk-stat low">{low} 轻微</span>
                                   {resolved.length > 0 && <span className="risk-stat resolved">{resolved.length} 已解决</span>}
-                                </div>
-                                <div className="risk-dist-track">
+                            </div>
+                            <div className="risk-dist-track">
                                   {high > 0 && <div className="risk-dist-seg high" style={{ width: `${(high / Math.max(total, 1)) * 100}%` }} />}
                                   {med > 0 && <div className="risk-dist-seg medium" style={{ width: `${(med / Math.max(total, 1)) * 100}%` }} />}
                                   {low > 0 && <div className="risk-dist-seg low" style={{ width: `${(low / Math.max(total, 1)) * 100}%` }} />}
@@ -1687,16 +1696,16 @@ export default function StudentPage() {
                       {triggeredRules.map((r: any) => {
                         return (
                           <details key={r.id} className={`risk-detail-card ${r.severity}${r.resolved ? " resolved" : ""}`}>
-                            <summary className="risk-detail-header">
-                              <span className="risk-id">{r.id}</span>
-                              <span className="risk-name">{r.name}</span>
+                          <summary className="risk-detail-header">
+                            <span className="risk-id">{r.id}</span>
+                            <span className="risk-name">{r.name}</span>
                               <span className={`risk-badge ${r.resolved ? "resolved" : r.severity}`}>
                                 {r.resolved ? "已解决" : ({ high: "高危", medium: "中等", low: "轻微" } as Record<string, string>)[r.severity] ?? r.severity}
                               </span>
                               {r.turnCount > 1 && !r.resolved && <span className="risk-repeat-badge">持续{r.turnCount}轮</span>}
-                            </summary>
-                            <div className="risk-detail-body">
-                              {r.explanation && <p className="risk-explanation">{r.explanation}</p>}
+                          </summary>
+                          <div className="risk-detail-body">
+                            {r.explanation && <p className="risk-explanation">{r.explanation}</p>}
                               {r.quote && (
                                 <div className="risk-quote-block">
                                   <span className="risk-field-label">触发原文：</span>
@@ -1709,24 +1718,24 @@ export default function StudentPage() {
                                   <p>{r.impact}</p>
                                 </div>
                               )}
-                              {(r.matched_keywords ?? []).length > 0 && (
-                                <div className="risk-matched">
-                                  <span className="risk-field-label">触发关键词：</span>
-                                  {r.matched_keywords.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip triggered">{k}</span>)}
-                                </div>
-                              )}
-                              {(r.missing_requires ?? []).length > 0 && (
-                                <div className="risk-matched">
-                                  <span className="risk-field-label">缺失要素：</span>
-                                  {r.missing_requires.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip missing">{k}</span>)}
-                                </div>
-                              )}
-                              {r.fix_hint && (
-                                <div className="risk-fix">
-                                  <span className="risk-field-label">修复建议：</span>
-                                  <p>{r.fix_hint}</p>
-                                </div>
-                              )}
+                            {(r.matched_keywords ?? []).length > 0 && (
+                              <div className="risk-matched">
+                                <span className="risk-field-label">触发关键词：</span>
+                                {r.matched_keywords.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip triggered">{k}</span>)}
+                              </div>
+                            )}
+                            {(r.missing_requires ?? []).length > 0 && (
+                              <div className="risk-matched">
+                                <span className="risk-field-label">缺失要素：</span>
+                                {r.missing_requires.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip missing">{k}</span>)}
+                              </div>
+                            )}
+                            {r.fix_hint && (
+                              <div className="risk-fix">
+                                <span className="risk-field-label">修复建议：</span>
+                                <p>{r.fix_hint}</p>
+                              </div>
+                            )}
                               {r.linked_task?.title && (
                                 <div className="risk-linked-task">
                                   <span className="risk-field-label">修复行动：</span>
@@ -1743,8 +1752,8 @@ export default function StudentPage() {
                                   <p>{r.competition_context}</p>
                                 </div>
                               )}
-                            </div>
-                          </details>
+                          </div>
+                        </details>
                         );
                       })}
                     </div>
@@ -1759,18 +1768,18 @@ export default function StudentPage() {
                     const totalColor = total >= 7 ? "var(--accent-green,#22c55e)" : total >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
                     const circumf = 2 * Math.PI * 42;
                     const offset = circumf * (1 - total / 10);
-                    const n = rubric.length;
+                        const n = rubric.length;
                     const cx = 120, cy = 120, R = 95;
-                    const angleStep = (2 * Math.PI) / n;
-                    const pt = (i: number, r: number) => {
-                      const a = -Math.PI / 2 + i * angleStep;
-                      return [cx + R * r * Math.cos(a), cy + R * r * Math.sin(a)];
-                    };
-                    const dataPoints = rubric.map((r: any, i: number) => pt(i, Math.min(1, r.score / 10)));
-                    const polygon = dataPoints.map(([x, y]: number[]) => `${x},${y}`).join(" ");
+                        const angleStep = (2 * Math.PI) / n;
+                        const pt = (i: number, r: number) => {
+                          const a = -Math.PI / 2 + i * angleStep;
+                          return [cx + R * r * Math.cos(a), cy + R * r * Math.sin(a)];
+                        };
+                        const dataPoints = rubric.map((r: any, i: number) => pt(i, Math.min(1, r.score / 10)));
+                        const polygon = dataPoints.map(([x, y]: number[]) => `${x},${y}`).join(" ");
                     const highDims = rubric.filter((r: any) => r.score >= 7);
                     const lowDims = rubric.filter((r: any) => r.score < 4);
-                    return (
+                        return (
                       <>
                         {/* Hero: Ring + Meta */}
                         <div className="sc-hero">
@@ -1817,11 +1826,11 @@ export default function StudentPage() {
 
                         {/* Dimension Cards */}
                         <div className="sc-dim-list">
-                          {rubric.map((r: any) => {
-                            const pct = Math.min(100, (r.score / 10) * 100);
+                      {rubric.map((r: any) => {
+                        const pct = Math.min(100, (r.score / 10) * 100);
                             const clr = pct >= 70 ? "var(--accent-green,#22c55e)" : pct >= 40 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
                             const levelLabel = pct >= 70 ? "达标" : pct >= 40 ? "一般" : "薄弱";
-                            return (
+                        return (
                               <details key={r.item} className="sc-dim-card">
                                 <summary className="sc-dim-head">
                                   <div className="sc-dim-info">
@@ -1833,12 +1842,12 @@ export default function StudentPage() {
                                     <span className="sc-dim-score" style={{color: clr}}>{r.score}</span>
                                   </div>
                                   {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}</span>}
-                                </summary>
+                            </summary>
                                 {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
-                              </details>
-                            );
-                          })}
-                        </div>
+                          </details>
+                        );
+                      })}
+                    </div>
 
                         {/* Grading Principles */}
                         {gradingPrinciples.length > 0 && (
@@ -1893,7 +1902,7 @@ export default function StudentPage() {
                         </div>
                         <div className="kg-toolbar">
                           <span className="kg-toolbar-hint">完整度 {kgAnalysis.completeness_score ?? "?"}/10 · 滚轮缩放，拖拽平移，悬停查看详情</span>
-                        </div>
+                          </div>
                         <div ref={kgGraphShellRef} className="kg-force-graph-shell" style={{ height: 380, position: "relative", borderRadius: 8, overflow: "hidden", background: "var(--bg-secondary)" }}>
                           <ForceGraph2D
                             graphData={{
@@ -1996,23 +2005,23 @@ export default function StudentPage() {
                                     const lx = cx + (R + 14) * Math.cos(a);
                                     const ly = cy + (R + 14) * Math.sin(a);
                                     const color = d.score >= 7 ? "#5cbd8a" : d.score >= 4 ? "#e0a84c" : "#e07070";
-                                    return (
+                                return (
                                       <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill={color} fontWeight="600">{d.label}</text>
-                                    );
-                                  })}
-                                </svg>
+                                );
+                              })}
+                          </svg>
                                 <div className="kg-radar-scores">
                                   {dims.map(d => {
                                     const pct = Math.min(100, (d.score / 10) * 100);
-                                    const color = pct >= 70 ? "#5cbd8a" : pct >= 40 ? "#e0a84c" : "#e07070";
-                                    return (
+                              const color = pct >= 70 ? "#5cbd8a" : pct >= 40 ? "#e0a84c" : "#e07070";
+                              return (
                                       <div key={d.key} className="kg-score-row">
                                         <span className="kg-score-name">{d.label}</span>
-                                        <div className="kg-score-bar"><div className="kg-score-fill" style={{ width: `${pct}%`, background: color }} /></div>
+                                  <div className="kg-score-bar"><div className="kg-score-fill" style={{ width: `${pct}%`, background: color }} /></div>
                                         <span className="kg-score-val" style={{ color }}>{d.score}</span>
-                                      </div>
-                                    );
-                                  })}
+                                </div>
+                              );
+                            })}
                                 </div>
                               </div>
                             </div>
@@ -2120,8 +2129,8 @@ export default function StudentPage() {
                               )}
 
                               {gHits.length > 0 && (
-                                <div className="kbt-graph-stories">
-                                  <div className="kbt-sub-title">图谱检索启发</div>
+                                <details className="kbt-graph-stories collapsible-section" open>
+                                  <summary className="kbt-sub-title">图谱检索启发 ({gHits.length})</summary>
                                   {gHits.map((gh: any, gi: number) => {
                                     const matchedDims: string[] = Array.isArray(gh.matched_dimensions) ? gh.matched_dimensions : [];
                                     const matchedNodes: string[] = Array.isArray(gh.matched_nodes) ? gh.matched_nodes : [];
@@ -2161,7 +2170,7 @@ export default function StudentPage() {
                                       </div>
                                     );
                                   })}
-                                </div>
+                                </details>
                               )}
 
                               {searchTrace.length > 0 && (
@@ -2310,14 +2319,14 @@ export default function StudentPage() {
                             strokeLinecap="round" transform="rotate(-90 48 48)" style={{ transition: "stroke-dashoffset 0.6s ease" }} />
                           <text x="48" y="44" textAnchor="middle" fontSize="20" fontWeight="700" fill={covColor}>{covScore}</text>
                           <text x="48" y="58" textAnchor="middle" fontSize="9" fill="var(--text-muted)">/10</text>
-                        </svg>
+                            </svg>
                         <div className="ht-hero-stats">
                           <div className="ht-stat"><span className="ht-stat-val">{hyperStudent.covered_count ?? 0}<small>/{hyperStudent.total_dimensions ?? 15}</small></span><span className="ht-stat-lbl">维度覆盖</span></div>
                           <div className="ht-stat"><span className="ht-stat-val">{hyperTemplateComplete}<small>/{hyperTemplateMatches.length || 20}</small></span><span className="ht-stat-lbl">闭环完成</span></div>
                           <div className="ht-stat"><span className="ht-stat-val ht-warn">{hyperConsistencyIssues.length}</span><span className="ht-stat-lbl">一致性问题</span></div>
                           <div className="ht-stat"><span className="ht-stat-val ht-risk">{(hyperStudent.pattern_warnings ?? []).length}</span><span className="ht-stat-lbl">风险模式</span></div>
-                        </div>
-                      </div>
+                          </div>
+                          </div>
 
                       {/* ── 1b. Insight Overview (summary, signals, key dims) ── */}
                       {(hyperInsight?.summary || (hyperInsight?.top_signals ?? []).length > 0 || (hyperInsight?.key_dimensions ?? []).length > 0) && (
@@ -2329,7 +2338,7 @@ export default function StudentPage() {
                               {(hyperInsight.top_signals ?? []).map((sig: string, si: number) => (
                                 <span key={si} className="ht-tag signal">{sig}</span>
                               ))}
-                            </div>
+                        </div>
                           )}
                           {(hyperInsight?.key_dimensions ?? []).length > 0 && (
                             <div className="ht-tag-group">
@@ -2344,10 +2353,10 @@ export default function StudentPage() {
                               <span className="ht-tag-label">枢纽节点</span>
                               {(hyperInsight.topology.hub_nodes ?? []).map((h: any, hi: number) => (
                                 <span key={hi} className="ht-tag hub" title={h.interpretation}>{h.node} ({h.degree})</span>
-                              ))}
-                            </div>
-                          )}
+                          ))}
                         </div>
+                          )}
+                      </div>
                       )}
 
                       {/* ── 2. Dimension Coverage Matrix ── */}
@@ -2371,8 +2380,8 @@ export default function StudentPage() {
                             {hyperTemplateMatches.map((t: any, ti: number) => (
                               <div key={ti} className={`ht-tmpl-chip ${t.status}`} title={t.name || t.id}>
                                 <span className="ht-tmpl-id">{(t.id ?? `T${ti+1}`).replace(/_.*/, "")}</span>
-                              </div>
-                            ))}
+                            </div>
+                          ))}
                           </div>
                           <div className="ht-tmpl-legend">
                             <span className="ht-legend-item"><span className="ht-legend-dot complete" />完成</span>
@@ -2382,64 +2391,80 @@ export default function StudentPage() {
                         </div>
                       )}
 
-                      {/* ── 4. Agent Hypergraph Signal Dashboard ── */}
-                      {activeAgents.length > 0 && (
-                        <div className="ht-section">
-                          <h5 className="ht-title">各Agent接收的超图启发</h5>
-                          <div className="ht-agent-bar-chart">
-                            {activeAgents.map(a => {
-                              const ad = roleAgents[a] ?? {};
-                              const ctx = String(ad.hyper_context_sent ?? "");
-                              const lines = ctx ? ctx.split("\n").filter((l: string) => l.trim()) : [];
-                              const maxBar = Math.max(...activeAgents.map(ag => {
-                                const c = String((roleAgents[ag] ?? {}).hyper_context_sent ?? "");
-                                return c ? c.split("\n").filter((l: string) => l.trim()).length : 0;
-                              }), 1);
-                              return (
-                                <div key={a} className="ht-agent-bar-row">
-                                  <span className="ht-agent-label">{agentNames[a] ?? a}</span>
-                                  <div className="ht-agent-bar-track">
-                                    <div className="ht-agent-bar-fill" style={{ width: `${Math.round((lines.length / maxBar) * 100)}%` }} />
-                                  </div>
-                                  <span className="ht-agent-bar-num">{lines.length}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          {activeAgents.map(a => {
-                            const ad = roleAgents[a] ?? {};
-                            const ctx = String(ad.hyper_context_sent ?? "");
-                            const lines = ctx ? ctx.split("\n").filter((l: string) => l.trim()) : [];
-                            if (lines.length === 0) return null;
-                            const catPatterns: [string, RegExp][] = [
-                              ["覆盖度", /覆盖|累积|实体/],
-                              ["风险", /风险|一致性|断裂|缺失|问题/],
-                              ["闭环", /闭环|链路|未闭合|价值链/],
-                              ["洞察", /洞察|拓扑|摘要|教学超边/],
-                              ["行动", /追问|行动线索|可推进|待补/],
-                            ];
-                            return (
-                              <details key={a} className="ht-agent-detail">
-                                <summary className="ht-agent-detail-head">
-                                  <span className="ht-agent-detail-name">{agentNames[a] ?? a}</span>
-                                  <span className="ht-agent-detail-count">{lines.length} 条信号</span>
-                                </summary>
-                                <div className="ht-agent-detail-body">
-                                  {lines.map((line: string, li: number) => {
-                                    const cat = catPatterns.find(([, p]) => p.test(line));
-                                    return (
-                                      <div key={li} className="ht-signal-row">
-                                        <span className={`ht-signal-tag ${(cat?.[0] ?? "其它").replace("/", "")}`}>{cat?.[0] ?? "信号"}</span>
-                                        <span className="ht-signal-text">{line.replace(/^[^:：]+[:：]\s*/, "").trim() || line}</span>
+                      {/* ── 4. Agent/Dimension Hypergraph Signal Dashboard (V3) ── */}
+                      {(() => {
+                        const hyperDetails: any[] = latestResult?.agent_trace?.agent_hyper_details ?? [];
+                        const dimLabelsMap: Record<string, string> = {
+                          status_judgment: "项目状态", core_bottleneck: "核心瓶颈", structural_cause: "结构原因",
+                          counter_intuitive: "反直觉洞察", method_bridge: "方法桥接", teacher_criteria: "评审标准",
+                          external_reference: "外部案例", strategy_directions: "策略方向", action_plan: "行动方案",
+                          probing_questions: "启发追问",
+                        };
+                        if (hyperDetails.length > 0) {
+                          return (
+                            <div className="ht-section">
+                              <h5 className="ht-title">各维度接收的超图启发 ({hyperDetails.length})</h5>
+                              <div className="ht-agent-bar-chart">
+                                {hyperDetails.map((hd: any, i: number) => {
+                                  const lines = String(hd.hyper ?? "").split("\n").filter((l: string) => l.trim());
+                                  const maxBar = Math.max(...hyperDetails.map((h: any) => String(h.hyper ?? "").split("\n").filter((l: string) => l.trim()).length), 1);
+                                  return (
+                                    <div key={i} className="ht-agent-bar-row">
+                                      <span className="ht-agent-label">{dimLabelsMap[hd.dim] ?? hd.dim}</span>
+                                      <div className="ht-agent-bar-track">
+                                        <div className="ht-agent-bar-fill" style={{ width: `${Math.round((lines.length / maxBar) * 100)}%` }} />
                                       </div>
-                                    );
-                                  })}
-                                </div>
-                              </details>
-                            );
-                          })}
-                        </div>
-                      )}
+                                      <span className="ht-agent-bar-num">{lines.length}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {hyperDetails.map((hd: any, i: number) => {
+                                const lines = String(hd.hyper ?? "").split("\n").filter((l: string) => l.trim());
+                                if (lines.length === 0) return null;
+                                return (
+                                  <details key={i} className="ht-agent-detail collapsible-section">
+                                    <summary>{dimLabelsMap[hd.dim] ?? hd.dim} ({lines.length} 条)</summary>
+                                    <div className="ht-agent-detail-body">
+                                      {lines.map((line: string, li: number) => (
+                                        <div key={li} className="ht-signal-row">
+                                          <span className="ht-signal-text">{line.replace(/^[^:：]+[:：]\s*/, "").trim() || line}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </details>
+                                );
+                              })}
+                            </div>
+                          );
+                        }
+                        if (activeAgents.length > 0) {
+                          const anyHyper = activeAgents.some(a => String((roleAgents[a] ?? {}).hyper_context_sent ?? "").trim().length > 0);
+                          if (!anyHyper) return null;
+                          return (
+                            <div className="ht-section">
+                              <h5 className="ht-title">各Agent接收的超图启发</h5>
+                              {activeAgents.filter(a => String((roleAgents[a] ?? {}).hyper_context_sent ?? "").trim()).map(a => {
+                                const ctx = String((roleAgents[a] ?? {}).hyper_context_sent ?? "");
+                                const lines = ctx.split("\n").filter((l: string) => l.trim());
+                                return (
+                                  <details key={a} className="ht-agent-detail collapsible-section">
+                                    <summary>{agentNames[a] ?? a} ({lines.length} 条)</summary>
+                                    <div className="ht-agent-detail-body">
+                                      {lines.map((line: string, li: number) => (
+                                        <div key={li} className="ht-signal-row">
+                                          <span className="ht-signal-text">{line.replace(/^[^:：]+[:：]\s*/, "").trim() || line}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </details>
+                                );
+                              })}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
 
                       {/* ── 5. Consistency Issues ── */}
                       {hyperConsistencyIssues.length > 0 && (
@@ -2470,15 +2495,15 @@ export default function StudentPage() {
                             ))}
                           </div>
                         )}
-                        {(hyperStudent.pattern_warnings ?? []).length > 0 && (
+                      {(hyperStudent.pattern_warnings ?? []).length > 0 && (
                           <div className="ht-insight-card ht-card-warn">
                             <h5>风险模式</h5>
                             {(hyperStudent.pattern_warnings ?? []).map((w: any, wi: number) => (
                               <div key={wi} className="ht-insight-item"><p className="ht-insight-desc">{w.warning}</p></div>
-                            ))}
-                          </div>
-                        )}
-                        {(hyperStudent.pattern_strengths ?? []).length > 0 && (
+                          ))}
+                        </div>
+                      )}
+                      {(hyperStudent.pattern_strengths ?? []).length > 0 && (
                           <div className="ht-insight-card ht-card-good">
                             <h5>优势结构</h5>
                             {(hyperStudent.pattern_strengths ?? []).map((s: any, si: number) => (
@@ -2486,9 +2511,9 @@ export default function StudentPage() {
                                 <p className="ht-insight-desc">{s.note}</p>
                                 {s.edge_type && <span className="ht-edge-tag">{s.edge_type}</span>}
                               </div>
-                            ))}
-                          </div>
-                        )}
+                          ))}
+                        </div>
+                      )}
                       </div>
 
                       {/* ── 7. Useful Cards (from project-view) ── */}
@@ -2501,11 +2526,11 @@ export default function StudentPage() {
                                 <strong>{card.title}</strong>
                                 <p>{card.summary}</p>
                                 {card.project_hint && <span className="ht-useful-hint">{card.project_hint}</span>}
-                              </div>
-                            ))}
+                            </div>
+                          ))}
                           </div>
-                        </div>
-                      )}
+                            </div>
+                          )}
 
                       {/* ── 7b. Matched Rules */}
                       {(hyperProjectView?.process_trace?.matched_rules ?? []).length > 0 && (
@@ -2542,11 +2567,11 @@ export default function StudentPage() {
                                 <div key={hi} className="ht-hub-chip"><strong>{h.entity}</strong><span>{h.connections}维</span></div>
                               ))}
                             </div>
-                          </div>
-                        )}
+                        </div>
+                      )}
                         {hyperMatchedEdges.length > 0 && (
-                          <div className="ht-edge-section">
-                            <h6>命中教学超边 ({hyperMatchedEdges.length})</h6>
+                          <details className="ht-edge-section collapsible-section">
+                            <summary>命中教学超边 ({hyperMatchedEdges.length})</summary>
                             {hyperMatchedEdges.map((e: any, idx: number) => (
                               <div key={e.hyperedge_id || `he-${idx}`} className="ht-edge-row">
                                 <span className="ht-edge-family">{e.family_label || e.type}</span>
@@ -2561,7 +2586,7 @@ export default function StudentPage() {
                                 )}
                               </div>
                             ))}
-                          </div>
+                          </details>
                         )}
                         {hyperLibrary?.overview && (
                           <div className="ht-library-stats">
@@ -2613,8 +2638,8 @@ export default function StudentPage() {
                       )}
 
                       {/* Matched edges */}
-                      <div className="ht-edge-section">
-                        <h6>命中教学超边 ({hyperMatchedEdges.length})</h6>
+                      <details className="ht-edge-section collapsible-section" open>
+                        <summary>命中教学超边 ({hyperMatchedEdges.length})</summary>
                         {hyperMatchedEdges.map((e: any, idx: number) => (
                           <div key={e.hyperedge_id || `he-ex-${idx}`} className="ht-edge-row">
                             <span className="ht-edge-family">{e.family_label || e.type}</span>
@@ -2624,12 +2649,12 @@ export default function StudentPage() {
                               {e.severity && <span className="ht-edge-sev">{e.severity}</span>}
                               {(e.rules ?? []).map((r: string, ri: number) => <span key={ri} className="ht-edge-rule">{r}</span>)}
                             </div>
-                            {(e.nodes ?? []).length > 0 && (
+                              {(e.nodes ?? []).length > 0 && (
                               <div className="ht-edge-nodes">{(e.nodes ?? []).map((n: string, ni: number) => <span key={ni} className="ht-edge-node-tag">{n}</span>)}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                              )}
+                            </div>
+                          ))}
+                      </details>
 
                       {/* Useful Cards (from project-view) */}
                       {hyperProjectView && (hyperProjectView?.useful_cards ?? []).length > 0 && (
@@ -2647,63 +2672,58 @@ export default function StudentPage() {
                         </div>
                       )}
 
-                      {/* Agent hyper insights */}
+                      {/* Agent/Dimension hyper insights (V3: from agent_hyper_details) */}
                       {(() => {
-                        const agentsCalled: string[] = latestResult?.agent_trace?.orchestration?.agents_called ?? [];
-                        const roleAgents: Record<string, any> = latestResult?.agent_trace?.role_agents ?? {};
-                        const activeAgents = agentsCalled.length > 0 ? agentsCalled : Object.keys(roleAgents).filter(k => roleAgents[k]?.analysis);
-                        const agentNames: Record<string, string> = { coach: "教练", analyst: "分析师", advisor: "顾问", grader: "评分官", planner: "规划师", tutor: "导师" };
-                        const anyHyper = activeAgents.some(a => String((roleAgents[a] ?? {}).hyper_context_sent ?? "").trim().length > 0);
-                        if (!anyHyper) return null;
-                        const catPatterns: [string, RegExp][] = [
-                          ["覆盖度", /覆盖|累积|实体/],
-                          ["风险", /风险|一致性|断裂|缺失|问题/],
-                          ["闭环", /闭环|链路|未闭合|价值链/],
-                          ["洞察", /洞察|拓扑|摘要|教学超边/],
-                          ["行动", /追问|行动线索|可推进|待补/],
-                        ];
-                        return (
-                          <div className="ht-section">
-                            <h5 className="ht-title">各Agent接收的超图启发</h5>
-                            <div className="ht-agent-bar-chart">
-                              {activeAgents.map(a => {
+                        const hyperDetails: any[] = latestResult?.agent_trace?.agent_hyper_details ?? [];
+                        const dimLabelsMap: Record<string, string> = {
+                          status_judgment: "项目状态", core_bottleneck: "核心瓶颈", structural_cause: "结构原因",
+                          counter_intuitive: "反直觉洞察", method_bridge: "方法桥接", teacher_criteria: "评审标准",
+                          external_reference: "外部案例", strategy_directions: "策略方向", action_plan: "行动方案",
+                          probing_questions: "启发追问",
+                        };
+                        if (hyperDetails.length === 0) {
+                          const roleAgents: Record<string, any> = latestResult?.agent_trace?.role_agents ?? {};
+                          const agentsCalled: string[] = latestResult?.agent_trace?.orchestration?.agents_called ?? [];
+                          const activeAgents = agentsCalled.length > 0 ? agentsCalled : Object.keys(roleAgents).filter(k => roleAgents[k]?.analysis);
+                          const agentNames: Record<string, string> = { coach: "教练", analyst: "分析师", advisor: "顾问", grader: "评分官", planner: "规划师", tutor: "导师" };
+                          const anyHyper = activeAgents.some(a => String((roleAgents[a] ?? {}).hyper_context_sent ?? "").trim().length > 0);
+                          if (!anyHyper) return null;
+                          return (
+                            <div className="ht-section">
+                              <h5 className="ht-title">各Agent接收的超图启发</h5>
+                              {activeAgents.filter(a => String((roleAgents[a] ?? {}).hyper_context_sent ?? "").trim()).map(a => {
                                 const ctx = String((roleAgents[a] ?? {}).hyper_context_sent ?? "");
-                                const lines = ctx ? ctx.split("\n").filter((l: string) => l.trim()) : [];
-                                const maxBar = Math.max(...activeAgents.map(ag => {
-                                  const c = String((roleAgents[ag] ?? {}).hyper_context_sent ?? "");
-                                  return c ? c.split("\n").filter((l: string) => l.trim()).length : 0;
-                                }), 1);
+                                const lines = ctx.split("\n").filter((l: string) => l.trim());
                                 return (
-                                  <div key={a} className="ht-agent-bar-row">
-                                    <span className="ht-agent-label">{agentNames[a] ?? a}</span>
-                                    <div className="ht-agent-bar-track">
-                                      <div className="ht-agent-bar-fill" style={{ width: `${Math.round((lines.length / maxBar) * 100)}%` }} />
+                                  <details key={a} className="ht-agent-detail collapsible-section">
+                                    <summary>{agentNames[a] ?? a} ({lines.length} 条)</summary>
+                                    <div className="ht-agent-detail-body">
+                                      {lines.map((line: string, li: number) => (
+                                        <div key={li} className="ht-signal-row">
+                                          <span className="ht-signal-text">{line.replace(/^[^:：]+[:：]\s*/, "").trim() || line}</span>
+                                        </div>
+                                      ))}
                                     </div>
-                                    <span className="ht-agent-bar-num">{lines.length}</span>
-                                  </div>
+                                  </details>
                                 );
                               })}
                             </div>
-                            {activeAgents.map(a => {
-                              const ctx = String((roleAgents[a] ?? {}).hyper_context_sent ?? "");
-                              const lines = ctx ? ctx.split("\n").filter((l: string) => l.trim()) : [];
-                              if (lines.length === 0) return null;
+                          );
+                        }
+                        return (
+                          <div className="ht-section">
+                            <h5 className="ht-title">各维度接收的超图启发 ({hyperDetails.length})</h5>
+                            {hyperDetails.map((hd: any, i: number) => {
+                              const lines = String(hd.hyper ?? "").split("\n").filter((l: string) => l.trim());
                               return (
-                                <details key={`${a}-explore`} className="ht-agent-detail">
-                                  <summary className="ht-agent-detail-head">
-                                    <span className="ht-agent-detail-name">{agentNames[a] ?? a}</span>
-                                    <span className="ht-agent-detail-count">{lines.length} 条信号</span>
-                                  </summary>
+                                <details key={i} className="ht-agent-detail collapsible-section">
+                                  <summary>{dimLabelsMap[hd.dim] ?? hd.dim} ({lines.length} 条)</summary>
                                   <div className="ht-agent-detail-body">
-                                    {lines.map((line: string, li: number) => {
-                                      const cat = catPatterns.find(([, p]) => p.test(line));
-                                      return (
-                                        <div key={li} className="ht-signal-row">
-                                          <span className={`ht-signal-tag ${(cat?.[0] ?? "其它").replace("/", "")}`}>{cat?.[0] ?? "信号"}</span>
-                                          <span className="ht-signal-text">{line.replace(/^[^:：]+[:：]\s*/, "").trim() || line}</span>
-                                        </div>
-                                      );
-                                    })}
+                                    {lines.map((line: string, li: number) => (
+                                      <div key={li} className="ht-signal-row">
+                                        <span className="ht-signal-text">{line.replace(/^[^:：]+[:：]\s*/, "").trim() || line}</span>
+                                      </div>
+                                    ))}
                                   </div>
                                 </details>
                               );
@@ -2778,8 +2798,8 @@ export default function StudentPage() {
 
                   {/* ── 1. Graph-Based Cross-Project Insights (TOP PRIORITY) ── */}
                   {gHits.length > 0 && (
-                    <div className="cs-graph-section">
-                      <h5 className="cs-sec-title">跨项目图谱启发 ({gCount})</h5>
+                    <details className="cs-graph-section collapsible-section" open>
+                      <summary className="cs-sec-title">跨项目图谱启发 ({gCount})</summary>
                       <p className="cs-sec-desc">基于 Neo4j 知识图谱，发现与你项目在结构维度上相关的案例</p>
                       {gHits.map((gh: any, gi: number) => {
                         const ctx = gh.context ?? {};
@@ -2835,7 +2855,7 @@ export default function StudentPage() {
                           </div>
                         );
                       })}
-                    </div>
+                    </details>
                   )}
 
                   {/* ── 2. AI Insights (if available) ── */}
@@ -2861,8 +2881,8 @@ export default function StudentPage() {
                     <div className="cs-cases-list">
                       <h5 className="cs-sec-title">语义检索案例 ({ragCases.length})</h5>
                       {ragCases.map((c: any, ci: number) => {
-                        const simPct = Math.round((c.similarity ?? 0) * 100);
-                        const simColor = simPct >= 70 ? "var(--accent-green)" : simPct >= 40 ? "var(--accent-yellow)" : "var(--text-muted)";
+                    const simPct = Math.round((c.similarity ?? 0) * 100);
+                    const simColor = simPct >= 70 ? "var(--accent-green)" : simPct >= 40 ? "var(--accent-yellow)" : "var(--text-muted)";
                         const gPains: string[] = Array.isArray(c.graph_pains) ? c.graph_pains : [];
                         const gSols: string[] = Array.isArray(c.graph_solutions) ? c.graph_solutions : [];
                         const gInns: string[] = Array.isArray(c.graph_innovations) ? c.graph_innovations : [];
@@ -2877,22 +2897,22 @@ export default function StudentPage() {
                         const gRubricCov: string[] = Array.isArray(c.graph_rubric_covered) ? c.graph_rubric_covered : [];
                         const gRubricUnc: string[] = Array.isArray(c.graph_rubric_uncovered) ? c.graph_rubric_uncovered : [];
                         const hasGraphDims = gPains.length > 0 || gSols.length > 0 || gInns.length > 0 || gBiz.length > 0;
-                        return (
+                    return (
                           <details key={ci} className="cs-case-card" open={ci === 0}>
                             <summary className="cs-case-head">
                               <div className="cs-case-left">
                                 <span className="cs-case-name">{c.project_name ?? c.case_id}</span>
                                 {c.category && <span className="cs-case-cat">{c.category}</span>}
                                 {hasGraphData && <span className="cs-case-graph-badge">图谱增强</span>}
-                              </div>
+                          </div>
                               <div className="cs-case-sim">
                                 <svg viewBox="0 0 36 36" width="32" height="32">
-                                  <circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" strokeWidth="3" />
-                                  <circle cx="18" cy="18" r="14" fill="none" stroke={simColor} strokeWidth="3" strokeLinecap="round" strokeDasharray={`${simPct * 0.88} 88`} transform="rotate(-90 18 18)" />
-                                </svg>
+                              <circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" strokeWidth="3" />
+                              <circle cx="18" cy="18" r="14" fill="none" stroke={simColor} strokeWidth="3" strokeLinecap="round" strokeDasharray={`${simPct * 0.88} 88`} transform="rotate(-90 18 18)" />
+                            </svg>
                                 <span className="cs-sim-num">{simPct}%</span>
-                              </div>
-                            </summary>
+                          </div>
+                        </summary>
                             <div className="cs-case-body">
                               {c.summary && <p className="cs-case-summary">{c.summary}</p>}
 
@@ -2947,11 +2967,11 @@ export default function StudentPage() {
                               )}
 
                               {Array.isArray(c.risk_flags) && c.risk_flags.length > 0 && <div className="cs-field"><strong>风险标记：</strong>{c.risk_flags.join("、")}</div>}
-                            </div>
-                          </details>
-                        );
+                        </div>
+                      </details>
+                    );
                       })}
-                    </div>
+                </div>
                   ) : <p className="right-hint">发送项目描述后，这里会显示知识库中最相似的参考案例</p>}
                 </div>
                 );

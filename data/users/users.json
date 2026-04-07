@@ -242,5 +242,21 @@
     "password_hash": "aa3f08e31f9b9dd10f7d136a0ac82bb720568d3c9e3d681d94c25f72af1f25b0",
     "created_at": "2026-03-31T16:11:13.274205+08:00",
     "updated_at": "2026-03-31T16:11:13.274205+08:00"
+  },
+  {
+    "user_id": "f2d66084-5486-4395-8abf-81034512ddf4",
+    "role": "student",
+    "display_name": "狒狒",
+    "email": "12345678",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "5f3177ee05c4cd56984c894b0afd2300",
+    "password_hash": "ab3e50db05e7f6fd135e602a9e7e7bb0e83fabd4dbcd98fcc5338b1a1560c515",
+    "status": "active",
+    "last_login": "",
+    "created_at": "2026-04-07T23:13:44.099188+08:00",
+    "updated_at": "2026-04-07T23:13:44.099188+08:00"
   }
 ]

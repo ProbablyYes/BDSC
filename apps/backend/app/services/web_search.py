@@ -17,6 +17,12 @@ _STOPWORDS = {
     "我们", "你们", "项目", "产品", "方向", "问题", "一下", "看看", "分析",
     "怎么", "什么", "是否", "这个", "那个", "目前", "现在", "想要", "希望",
     "可以", "以及", "然后", "因为", "如果", "但是", "一个", "一些", "整体",
+    "帮我", "我想", "我有", "我的", "想法", "比较", "时候", "地方", "觉得",
+    "知道", "需要", "应该", "之类", "的话", "确实", "有没有", "大概", "做到",
+    "不过", "还是", "已经", "真的", "比如", "所以", "而且", "就是", "不是",
+    "不到", "不了", "可能", "关于", "考虑", "打算", "设想", "进行", "介绍",
+    "主要", "其实", "我把", "我再", "我再把", "整个", "完整", "一点", "更好",
+    "阶段", "早期", "先帮", "严格", "角度", "不确定", "尝试", "正在",
 }
 _BLACKLIST_TERMS = {
     "小说", "下载", "破解版", "电影", "成人视频", "博彩", "彩票网站", "游戏攻略",
@@ -35,10 +41,13 @@ def _extract_message_keywords(message: str, limit: int = 5) -> list[str]:
     for hint in _DOMAIN_HINTS:
         if hint.lower() in text.lower() and hint not in keywords:
             keywords.append(hint)
-    for token in re.findall(r"[A-Za-z][A-Za-z0-9\-\+]{1,24}|[\u4e00-\u9fff]{2,8}", text):
+    for token in re.findall(r"[A-Za-z][A-Za-z0-9\-\+]{1,24}|[\u4e00-\u9fff]{2,5}", text):
         word = token.strip()
         if not word or word.lower() in _STOPWORDS or word in _STOPWORDS:
             continue
+        if len(word) > 1 and all("\u4e00" <= c <= "\u9fff" for c in word):
+            if any(sw in word for sw in _STOPWORDS):
+                continue
         if word not in keywords:
             keywords.append(word)
         if len(keywords) >= limit:
@@ -72,12 +81,12 @@ def _build_search_query(message: str, intent: str) -> str | None:
     if not prefix:
         return None
 
-    keywords = _extract_message_keywords(message)
+    keywords = _extract_message_keywords(message, limit=4)
     if not keywords:
-        return prefix[:80]
+        return prefix[:60]
 
-    query = f"{prefix} {' '.join(keywords[:3])}"
-    return query[:80]
+    query = f"{prefix} {' '.join(keywords[:2])}"
+    return query[:60]
 
 
 def _result_relevance(item: dict[str, str], query_keywords: list[str]) -> int:

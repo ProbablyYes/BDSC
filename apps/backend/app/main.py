@@ -1502,6 +1502,8 @@ def _build_agent_trace(
         "rag_enrichment_insight": result.get("rag_enrichment_insight", ""),
         "neo4j_graph_hits": result.get("neo4j_graph_hits", []),
         "incremental_stats": result.get("incremental_stats", {}),
+        "dim_results": result.get("dim_results", {}),
+        "agent_hyper_details": result.get("agent_hyper_details", []),
     }
 
 

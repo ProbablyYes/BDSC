@@ -523,6 +523,7 @@ class GraphService:
         entity_types: list[str],
         exclude_ids: list[str] | None = None,
         limit: int = 4,
+        category: str = "",
     ) -> list[dict[str, Any]]:
         """Graph-structural cross-project retrieval (dual-channel #2).
 
@@ -536,13 +537,15 @@ class GraphService:
         3. **Keyword fallback** — CONTAINS on node names for broader recall.
 
         Returns projects ranked by structural relevance score.
+        ``category`` optionally biases ranking toward same-category projects.
         """
         if not entity_labels:
             return []
         _exclude = set(exclude_ids or [])
+        _category = str(category or "").strip().lower()
         pairs: list[tuple[str, str, str, str]] = []
         _skipped_types: list[str] = []
-        for lbl, etype in zip(entity_labels[:12], entity_types[:12]):
+        for lbl, etype in zip(entity_labels[:16], entity_types[:16]):
             mapping = self._DIM_NODE_MAP.get(etype)
             if not mapping:
                 _skipped_types.append(f"{lbl}({etype})")
@@ -568,6 +571,7 @@ class GraphService:
         type_groups: dict[str, list[str]] = {}
         for kw, etype, nl, rt in pairs:
             type_groups.setdefault(etype, []).append(kw)
+        _student_keywords = {kw.lower() for kw, _, _, _ in pairs}
 
         try:
             def _query(session):
@@ -618,10 +622,10 @@ class GraphService:
                     except Exception:
                         pass
 
-                # Strategy 2: Structural-pattern complement
-                # Find projects that have COMPLETE dimension chains where
-                # the student has gaps (e.g. student has PainPoint but no
-                # BusinessModel → find projects with both)
+                # Strategy 2: Structural complement (scoped by student keywords)
+                # Only pick projects whose complement nodes are textually
+                # relevant to the student, preventing generic "any project
+                # with evidence" results.
                 student_types = set(type_groups.keys())
                 complement_targets = []
                 if "pain_point" in student_types and "business_model" not in student_types:
@@ -637,24 +641,37 @@ class GraphService:
                     try:
                         rows = list(session.run(
                             f"""
-                            MATCH (p:Project)-[:{has_rel}]->()
+                            MATCH (p:Project)-[:{has_rel}]->(src_node)
                             WHERE EXISTS {{ MATCH (p)-[:{needs_rel}]->() }}
                             OPTIONAL MATCH (p)-[:BELONGS_TO]->(cat:Category)
                             OPTIONAL MATCH (p)-[:{needs_rel}]->(comp_node)
                             RETURN DISTINCT p.id AS pid, p.name AS pname,
                                    cat.name AS category,
-                                   comp_node.name AS comp_name
-                            LIMIT 4
+                                   comp_node.name AS comp_name,
+                                   src_node.name AS src_name
+                            LIMIT 12
                             """,
                         ))
                         for r in rows:
-                            _add_hit(r["pid"], r["pname"], r["category"],
-                                     dim_label, r["comp_name"], "complement")
+                            src_name = str(r.get("src_name") or "").lower()
+                            pname = str(r.get("pname") or "").lower()
+                            has_kw_overlap = any(
+                                kw in src_name or kw in pname
+                                for kw in _student_keywords
+                                if len(kw) >= 2
+                            )
+                            cat_match = (
+                                _category
+                                and str(r.get("category") or "").strip().lower() == _category
+                            )
+                            if has_kw_overlap or cat_match:
+                                _add_hit(r["pid"], r["pname"], r["category"],
+                                         dim_label, r["comp_name"], "complement")
                     except Exception:
                         pass
 
                 # Strategy 3: Keyword fallback (narrower scope)
-                for keyword, etype, node_label, rel_type in pairs[:4]:
+                for keyword, etype, node_label, rel_type in pairs[:6]:
                     if any(keyword.lower() in " ".join(h.get("matched_nodes", [])).lower()
                            for h in all_hits.values()):
                         continue
@@ -676,14 +693,27 @@ class GraphService:
                     except Exception:
                         pass
 
-                # Rank: shared_node > complement > keyword; then by dimension count
+                # Rank: keyword relevance first, then category match, then
+                # source quality, then dimension breadth.
                 def _score(h):
+                    s = 0.0
+                    nodes_text = " ".join(
+                        str(n) for n in h.get("matched_nodes", [])
+                    ).lower()
+                    pname_text = str(h.get("project_name", "")).lower()
+                    kw_hits = sum(
+                        1 for kw in _student_keywords
+                        if len(kw) >= 2 and (kw in nodes_text or kw in pname_text)
+                    )
+                    s += kw_hits * 5
+                    if _category and str(h.get("category", "")).strip().lower() == _category:
+                        s += 4
                     sources = h.get("match_sources", [])
-                    s = len(h.get("matched_dimensions", []))
                     if "shared_node" in sources:
                         s += 3
                     if "complement" in sources:
-                        s += 2
+                        s += 1
+                    s += len(h.get("matched_dimensions", []))
                     return s
 
                 ranked = sorted(all_hits.values(), key=_score, reverse=True)[:limit]

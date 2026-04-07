@@ -2251,6 +2251,22 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         },
     )
 
+    # ── merge student identity into project profile (cross-session memory) ──
+    _sid = result.get("_student_identity")
+    if isinstance(_sid, dict) and _sid:
+        try:
+            _proj = json_store.load_project(payload.project_id) or {}
+            _existing_profile = _proj.get("student_profile") or {}
+            _merged_profile = {**_existing_profile}
+            for _pk, _pv in _sid.items():
+                if _pv and str(_pv).strip():
+                    _merged_profile[_pk] = str(_pv).strip()
+            if _merged_profile != _existing_profile:
+                _proj["student_profile"] = _merged_profile
+                json_store.save_project(payload.project_id, _proj)
+        except Exception:
+            pass
+
     # ── persist to conversation ──
     conv_store.append_message(payload.project_id, conv_id, {
         "role": "user", "content": payload.message,
@@ -2385,6 +2401,22 @@ async def dialogue_turn_stream(request: Request):
                 yield f"data: {json.dumps({'type': 'token', 'data': chunk}, ensure_ascii=False)}\n\n"
 
             yield f"data: {json.dumps({'type': 'done', 'data': full_text}, ensure_ascii=False)}\n\n"
+
+            # ── merge student identity (stream path) ──
+            _sid_s = pre.get("_student_identity")
+            if isinstance(_sid_s, dict) and _sid_s:
+                try:
+                    _proj_s = json_store.load_project(project_id) or {}
+                    _ep = _proj_s.get("student_profile") or {}
+                    _mp = {**_ep}
+                    for _k, _v in _sid_s.items():
+                        if _v and str(_v).strip():
+                            _mp[_k] = str(_v).strip()
+                    if _mp != _ep:
+                        _proj_s["student_profile"] = _mp
+                        json_store.save_project(project_id, _proj_s)
+                except Exception:
+                    pass
 
             json_store.append_submission(project_id, {
                 "student_id": student_id,

@@ -513,8 +513,13 @@ class HypergraphService:
             "H4": ["market_size_fallacy", "H9", "H19"],
             "H5": ["weak_user_evidence"],
             "H6": ["no_competitor_claim"],
+            "H7": ["evidence_weak", "evidence_missing", "no_evidence"],
             "H8": ["unit_economics_not_proven", "unit_economics_unsound"],
+            "H10": ["no_execution_plan", "execution_vague"],
             "H11": ["compliance_not_covered"],
+            "H12": ["no_team_info", "team_missing"],
+            "H13": ["no_risk_control", "risk_not_addressed"],
+            "H14": ["no_innovation", "innovation_unclear"],
         }
         # Predefined hyperedge templates for logical loops.
         # These are used when analysing student content and do not
@@ -1704,8 +1709,10 @@ class HypergraphService:
         pattern_warnings = []
         pattern_strengths = []
         if self._records:
-            student_rule_like = set()
+            student_rule_like: set[str] = set()
             if not dim_entities.get("stakeholder"):
+                student_rule_like.add("weak_user_evidence")
+            elif len(dim_entities.get("stakeholder", [])) == 1:
                 student_rule_like.add("weak_user_evidence")
             if not dim_entities.get("competitor"):
                 student_rule_like.add("no_competitor_claim")
@@ -1713,11 +1720,28 @@ class HypergraphService:
                 student_rule_like.add("market_size_fallacy")
             if not dim_entities.get("evidence"):
                 student_rule_like.add("evidence_weak")
+            if not dim_entities.get("execution_step"):
+                student_rule_like.add("no_execution_plan")
+            if not dim_entities.get("team"):
+                student_rule_like.add("no_team_info")
+            if not dim_entities.get("risk_control"):
+                student_rule_like.add("no_risk_control")
+            if not dim_entities.get("innovation"):
+                student_rule_like.add("no_innovation")
+            if not dim_entities.get("business_model"):
+                student_rule_like.add("unit_economics_not_proven")
+
+            _expanded_student = set(self._expand_rule_ids(list(student_rule_like), max_items=24))
+            _gap_keywords = {g.replace("缺少", "").replace("缺", "") for g in (structural_gaps or []) if isinstance(g, str)}
 
             for rec in self._records:
                 if rec.type == "Risk_Pattern_Edge":
-                    overlap = set(self._expand_rule_ids(list(student_rule_like), max_items=12)) & set(rec.rules)
-                    if overlap and (not category or rec.category == category):
+                    overlap = _expanded_student & set(rec.rules)
+                    if not overlap and rec.teaching_note and _gap_keywords:
+                        _note_lower = str(rec.teaching_note).lower()
+                        if any(kw in _note_lower for kw in _gap_keywords if len(kw) >= 2):
+                            overlap = {"keyword_match"}
+                    if overlap and (not category or rec.category == category or not rec.category):
                         pattern_warnings.append({
                             "pattern_id": rec.hyperedge_id,
                             "warning": rec.teaching_note,

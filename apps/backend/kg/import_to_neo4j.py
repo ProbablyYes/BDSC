@@ -83,6 +83,17 @@ RUBRIC_META: dict[str, dict[str, float]] = {
 }
 
 
+def _entrepreneurship_rank(name: str) -> int:
+    """Map entrepreneurship 名称 to priority rank (larger = stronger relevance)."""
+
+    value = (name or "").strip().lower()
+    if value == "high relevance":
+        return 2
+    if value == "relevance":
+        return 1
+    return 0
+
+
 def ensure_ontology(tx) -> None:
     """Materialize OntologyNode definitions into Neo4j.
 
@@ -383,12 +394,71 @@ def upsert_case(tx, case: dict) -> None:
             name=award_level,
         )
 
+    # 赛事 / 创业 分类信息
+    competitions: set[str] = set()
+    entrepreneurship_name: str | None = None
+    best_entre_rank = 0
+
+    classifications = case.get("分类")
+    if isinstance(classifications, list):
+        for item in classifications:
+            if not isinstance(item, dict):
+                continue
+            ctype = str(item.get("类型", "")).strip()
+            cname = str(item.get("名称", "")).strip()
+            if not ctype or not cname:
+                continue
+
+            if ctype == "赛事":
+                competitions.add(cname)
+            elif ctype == "创业":
+                rank = _entrepreneurship_rank(cname)
+                if rank > best_entre_rank:
+                    best_entre_rank = rank
+                    entrepreneurship_name = cname
+
+    # 赛事节点：根节点 "赛事" 下挂三个（或更多）具体赛事节点，并与项目关联
+    for comp_name in sorted(competitions):
+        canonical = comp_name
+        display_name = "互联网+" if canonical.startswith("互联网+") else canonical
+
+        tx.run(
+            """
+            MATCH (p:Project {id: $case_id})
+            MERGE (root:CompetitionDomain {name: "赛事"})
+            MERGE (c:Competition {canonical_name: $canonical})
+            SET c.name = $display_name
+            MERGE (root)-[:HAS_COMPETITION]->(c)
+            MERGE (p)-[:PARTICIPATED_IN]->(c)
+            """,
+            case_id=case["case_id"],
+            canonical=canonical,
+            display_name=display_name,
+        )
+
+    # 创业节点：统一挂到一个“创业”节点上，通过关系属性区分 high / normal relevance
+    if entrepreneurship_name and best_entre_rank > 0:
+        tx.run(
+            """
+            MATCH (p:Project {id: $case_id})
+            MERGE (e:Entrepreneurship {name: "创业"})
+            MERGE (p)-[rel:ENTREPRENEURSHIP]->(e)
+            SET rel.level = $level_name,
+                rel.level_rank = $level_rank
+            """,
+            case_id=case["case_id"],
+            level_name=entrepreneurship_name,
+            level_rank=best_entre_rank,
+        )
+
 
 def main() -> None:
     cases = load_cases()
     if not cases:
         print("no cases found, run ingest pipeline first.")
         return
+
+    total = len(cases)
 
     driver = GraphDatabase.driver(
         settings.neo4j_uri,
@@ -398,10 +468,12 @@ def main() -> None:
     with driver.session(**session_kwargs) as session:
         # 先确保本体节点已写入图中
         session.execute_write(ensure_ontology)
-        for case in cases:
+        for idx, case in enumerate(cases, start=1):
+            case_id = case.get("case_id") or case.get("id") or f"case_{idx}"
+            print(f"[{idx}/{total}] importing {case_id} ...")
             session.execute_write(upsert_case, case)
     driver.close()
-    print(f"imported cases: {len(cases)}")
+    print(f"imported cases: {total}")
 
 
 if __name__ == "__main__":

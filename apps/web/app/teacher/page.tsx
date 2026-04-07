@@ -303,7 +303,7 @@ function BoxPlotChart({ data, width = 300, height = 70 }: { data: { min: number;
 export default function TeacherPage() {
   const currentUser = useAuth("teacher");
   const [tab, setTab] = useState<Tab>("overview");
-  const [assistantView, setAssistantView] = useState<"queue" | "assessment" | "intervention" | "conversation">("queue");
+  const [assistantView, setAssistantView] = useState<"queue" | "assessment" | "intervention" | "conversation" | "impact">("queue");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [projectId, setProjectId] = useState("demo-project-001");
   const [teacherId, setTeacherId] = useState("teacher-001");
@@ -374,6 +374,7 @@ export default function TeacherPage() {
   const [assistantAssessment, setAssistantAssessment] = useState<any>(null);
   const [assistantInterventionData, setAssistantInterventionData] = useState<any>(null);
   const [assistantConversationEval, setAssistantConversationEval] = useState<any>(null);
+  const [assistantImpact, setAssistantImpact] = useState<any>(null);
   const [assistantLastUpdated, setAssistantLastUpdated] = useState("");
   const [assistantSelectedTeamId, setAssistantSelectedTeamId] = useState("");
   const [assistantDraftIntervention, setAssistantDraftIntervention] = useState<any>({
@@ -1634,6 +1635,25 @@ export default function TeacherPage() {
     } catch (error) {
       setErrorMessage(`${error instanceof Error ? error.message : "加载对话过程评估失败"}`);
       setAssistantConversationEval(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadAssistantImpact() {
+    try {
+      setLoadingMessage("正在汇总干预效果");
+      setLoading(true);
+      setErrorMessage("");
+      const tid = currentUser?.user_id || teacherId;
+      const data = await api(`/api/teacher/assistant/intervention-impact?teacher_id=${encodeURIComponent(tid)}`);
+      setAssistantImpact(data);
+      markAssistantUpdated();
+      setAssistantView("impact");
+      setTab("assistant");
+    } catch (error) {
+      setErrorMessage(`${error instanceof Error ? error.message : "加载干预效果看板失败"}`);
+      setAssistantImpact(null);
     } finally {
       setLoading(false);
     }
@@ -5014,6 +5034,13 @@ export default function TeacherPage() {
                       <strong>教学干预中心</strong>
                       <span>审核班级动作</span>
                     </button>
+                    <button className={`assistant-nav-pill ${assistantView === "impact" ? "active" : ""}`} onClick={() => {
+                      if (assistantImpact) setAssistantView("impact");
+                      else loadAssistantImpact();
+                    }}>
+                      <strong>干预效果看板</strong>
+                      <span>看干预前后变化</span>
+                    </button>
                     <button className={`assistant-nav-pill ${assistantView === "conversation" ? "active" : ""}`} onClick={() => {
                       const first = assistantPendingProjectCards[0];
                       if (assistantConversationEval) setAssistantView("conversation");
@@ -5426,6 +5453,144 @@ export default function TeacherPage() {
                           </div>
                         </>
                       )}
+                    </div>
+                  )}
+
+                  {assistantView === "impact" && (
+                    <div className="assistant-workspace">
+                      {(() => {
+                        if (!assistantImpact) {
+                          return <div className="ov-chart-card"><p className="right-hint">先从“教学干预中心”或“今日待处理”下发一些干预任务，系统才有可分析的数据。</p></div>;
+                        }
+                        if (assistantImpact.error) {
+                          return <div className="ov-chart-card"><p className="right-hint">{assistantImpact.error}</p></div>;
+                        }
+
+                        const summary = assistantImpact.summary || {};
+                        const statusCounts = summary.status_counts || {};
+                        const effectSummary = summary.effect_counts || {};
+                        const byPriority = (assistantImpact.by_priority || []) as any[];
+                        const timeline = (assistantImpact.timeline || []) as any[];
+                        const items = (assistantImpact.items || []) as any[];
+
+                        const positiveTotal = (Number(effectSummary.positive || 0) + Number(effectSummary.neutral || 0) + Number(effectSummary.negative || 0));
+                        const positiveRate = Math.round((Number(effectSummary.positive || 0) / Math.max(positiveTotal, 1)) * 100);
+
+                        const positiveCases = [...items]
+                          .filter((it: any) => it.effect === "positive")
+                          .sort((a: any, b: any) => (b.score_delta || 0) - (a.score_delta || 0))
+                          .slice(0, 4);
+                        const negativeCases = [...items]
+                          .filter((it: any) => it.effect === "negative")
+                          .sort((a: any, b: any) => (a.score_delta || 0) - (b.score_delta || 0))
+                          .slice(0, 3);
+                        const timelineSeries = timeline.map((row: any) => ({ label: row.date, value: row.effective || row.total || 0 }));
+
+                        return (
+                          <>
+                            <div className="assistant-hero">
+                              <div>
+                                <div className="tm-project-cover-label">Impact Dashboard</div>
+                                <h2 style={{ marginTop: 6, marginBottom: 6 }}>教学干预效果看板</h2>
+                                <p className="tch-desc" style={{ margin: 0 }}>系统会自动对“发送到学生端”的教师干预任务做事后回看，帮助老师了解哪些动作最有用。</p>
+                              </div>
+                                <div className="assistant-command-kpis">
+                                  <div><span>累计干预</span><strong><AnimatedNumber value={summary.total_interventions || 0} /></strong></div>
+                                  <div><span>已形成闭环</span><strong><AnimatedNumber value={summary.effective_interventions || 0} /></strong></div>
+                                  <div><span>正向占比</span><strong>{positiveRate}%</strong></div>
+                                  <div><span>平均得分提升</span><strong>{Number(summary.avg_score_gain || 0).toFixed(2)}</strong></div>
+                                </div>
+                            </div>
+
+                            <div className="assistant-shell">
+                              <div className="assistant-main-panel">
+                                <div className="assistant-section">
+                                  <div className="assistant-section-title">干预效果分布</div>
+                                  <div className="assistant-insight-grid">
+                                    <div className="assistant-summary-card">
+                                      <span>正向改善</span>
+                                      <strong>{Number(effectSummary.positive || 0)}</strong>
+                                    </div>
+                                    <div className="assistant-summary-card">
+                                      <span>基本持平</span>
+                                      <strong>{Number(effectSummary.neutral || 0)}</strong>
+                                    </div>
+                                    <div className="assistant-summary-card">
+                                      <span>需要复盘</span>
+                                      <strong>{Number(effectSummary.negative || 0)}</strong>
+                                    </div>
+                                    <div className="assistant-summary-card">
+                                      <span>尚无后续数据</span>
+                                      <strong>{Number(effectSummary.no_followup || 0)}</strong>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="assistant-section">
+                                  <div className="assistant-section-title">干预执行时间线</div>
+                                  <div className="ov-chart-card">
+                                    {timelineSeries.length > 1 ? (
+                                      <AreaChart data={timelineSeries} width={360} height={110} color="var(--accent)" />
+                                    ) : (
+                                      <p className="right-hint">当前干预样本还不多，随着更多班级使用会自动补齐时间线。</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="assistant-section">
+                                  <div className="assistant-section-title">典型提升案例</div>
+                                  <div className="assistant-list">
+                                    {positiveCases.length === 0 && <p className="right-hint">暂时还没有显著提升的干预案例。</p>}
+                                    {positiveCases.map((item: any, idx: number) => (
+                                      <div key={item.intervention_id || idx} className="assistant-queue-card compact">
+                                        <div>
+                                          <strong>{item.title || "未命名干预任务"}</strong>
+                                          <div className="tm-case-meta">
+                                            <span>{item.student_id || "学生"}</span>
+                                            <span>{item.class_id || "班级未标注"}</span>
+                                            <span>优先级 {item.priority}</span>
+                                          </div>
+                                          <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>
+                                            干预后综合得分提升 {item.score_delta?.toFixed ? item.score_delta.toFixed(2) : Number(item.score_delta || 0).toFixed(2)} 分，风险等级从
+                                            {item.risk_level_before || "?"} 调整为 {item.risk_level_after || "?"}。
+                                          </div>
+                                        </div>
+                                        <span className="tm-case-badge">正向</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="assistant-side-panel">
+                                <div className="assistant-side-card">
+                                  <div className="assistant-section-title">按优先级回看</div>
+                                  <div className="assistant-note-list">
+                                    {byPriority.length === 0 && <div className="tm-note-row good">还没有足够数据区分不同优先级的效果。</div>}
+                                    {byPriority.map((row: any) => (
+                                      <div key={row.priority} className="tm-note-row good">
+                                        {row.priority === "high" ? "高优" : row.priority === "medium" ? "中优" : "低优"} · {row.count} 条 · 平均提升 {Number(row.avg_score_gain || 0).toFixed(2)} 分，风险变化 {Number(row.avg_risk_delta || 0).toFixed(3)}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="assistant-side-card">
+                                  <div className="assistant-section-title">需要复盘的干预</div>
+                                  <div className="assistant-note-list">
+                                    {negativeCases.length === 0 && <div className="tm-note-row warn">暂时没有明显“效果不佳”的干预，后续可以重点关注这里。</div>}
+                                    {negativeCases.map((item: any, idx: number) => (
+                                      <div key={item.intervention_id || idx} className="tm-note-row warn">
+                                        {item.title || "未命名干预任务"} · 学生 {item.student_id || "学生"} · 分数变化 {item.score_delta?.toFixed ? item.score_delta.toFixed(2) : Number(item.score_delta || 0).toFixed(2)}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   )}
 

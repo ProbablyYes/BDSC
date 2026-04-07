@@ -72,6 +72,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Default uses Qwen/Qwen2.5-72B-Instruct."
         ),
     )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help=(
+            "Resume mode: skip cases that already contain rubric_items_detail "
+            "and risk_rule_details to avoid re-running diagnostics."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -340,6 +348,7 @@ def enrich_cases(argv: list[str] | None = None) -> None:
     processed = 0
     missing = 0
     skipped_text = 0
+    resumed_existing = 0
 
     print(
         f"starting rubric/risk enrichment: {total} metadata rows "
@@ -363,6 +372,24 @@ def enrich_cases(argv: list[str] | None = None) -> None:
         except Exception as exc:  # noqa: BLE001
             print(f"[{idx}/{total}] failed to read {case_path.name}: {exc}", flush=True)
             continue
+
+        # Resume mode: 若该案例已经拥有 rubric_items_detail 和 risk_rule_details，
+        # 视为诊断完成，本次跳过，避免重复调用 LLM。
+        if getattr(args, "resume", False):
+            existing_rubrics = case_data.get("rubric_items_detail")
+            existing_rules = case_data.get("risk_rule_details")
+            if (
+                isinstance(existing_rubrics, list)
+                and existing_rubrics
+                and isinstance(existing_rules, list)
+                and existing_rules
+            ):
+                resumed_existing += 1
+                print(
+                    f"[{idx}/{total}] resume-skip existing diagnostics for {file_path} ({case_id})",
+                    flush=True,
+                )
+                continue
 
         risk_flags, rubric_coverage, rubric_items_full, risk_rules_full = _run_case_diagnosis(
             case_data,
@@ -401,6 +428,7 @@ def enrich_cases(argv: list[str] | None = None) -> None:
     print("cases updated:", processed)
     print("missing case JSON:", missing)
     print("no-text/empty diagnostics:", skipped_text)
+    print("resume-skipped existing diagnostics:", resumed_existing)
 
 
 def main(argv: list[str] | None = None) -> None:  # pragma: no cover - CLI entry

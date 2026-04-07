@@ -808,6 +808,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="rejections.csv",
         help="Rejected records report filename under case_structured directory.",
     )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume mode: skip cases whose output JSON already exists and only extract for new source files.",
+    )
     return parser.parse_args(argv)
 
 
@@ -1253,13 +1258,35 @@ def build_case_record(
         doc_type=hypergraph_doc.doc_type,
         segments=hypergraph_doc.get_segments(),
     )
-    
+    # 使用 HypergraphDocument 生成的分段文本作为全文基准
+    full_text = parsed.full_text
+    detected_doc_type = str(row.get("doc_type", "") or hypergraph_doc.doc_type).strip().lower()
+
     appendix_start = row.get("appendix_start_index", "")
     appendix_idx = int(appendix_start) if appendix_start.isdigit() else detect_appendix_start(parsed)
 
     core = filter_noisy_segments(core_segments(parsed, appendix_idx))
     core_text = text_from_segments(core)
-    full_text = parsed.full_text
+
+    # 保护性回退：当 appendix_start_index 过小导致正文几乎全部被当作附录时，
+    # 退回到“整篇文档作为核心正文”，避免只剩封面/目录这类极短文本。
+    full_len = len(full_text)
+    core_len = len(core_text)
+    if (
+        appendix_idx is not None
+        and detected_doc_type == "pdf"
+        and full_len >= 5000
+        and core_len < 1000
+        and (full_len == 0 or core_len < 0.15 * full_len)
+    ):
+        print(
+            f"  [warn] appendix_start_index={appendix_idx} cuts too much content for {row.get('file_path', '')} "
+            f"(core_chars={core_len}, full_chars={full_len}), fallback to full document as core.",
+            flush=True,
+        )
+        core = filter_noisy_segments(parsed.segments)
+        core_text = text_from_segments(core)
+        appendix_idx = None
 
     project_name = infer_project_name(row.get("file_name", source_path.name), core_text or full_text)
     sections = {name: collect_section(core, kws) for name, kws in SECTION_KEYWORDS.items()}
@@ -1290,7 +1317,13 @@ def build_case_record(
         if llm_values:
             sections[field] = llm_values
 
-    llm_project_name = str(llm_data.get("project_name", "")).strip()
+    # project_name 兼容 LLM 返回 list 的情况，优先取首个非空名称
+    raw_llm_project = llm_data.get("project_name", "")
+    if isinstance(raw_llm_project, list):
+        candidates = _as_clean_str_list(raw_llm_project, limit=1)
+        llm_project_name = candidates[0] if candidates else ""
+    else:
+        llm_project_name = str(raw_llm_project).strip()
     if llm_project_name:
         project_name = llm_project_name
 
@@ -1461,6 +1494,7 @@ def main(argv: list[str] | None = None) -> None:
 
     manifest: list[dict] = []
     skipped = 0
+    resumed_existing = 0
     rejected: list[dict[str, str]] = []
     min_quality_rank = {"A": 2, "B": 1}.get(args.min_quality, 1)
     total = len(included)
@@ -1470,6 +1504,24 @@ def main(argv: list[str] | None = None) -> None:
         flush=True,
     )
     for idx, row in enumerate(included, start=1):
+        # Deterministic case_id/output path so we can support resume mode
+        try:
+            case_id = make_case_id(row["file_path"])
+        except KeyError:
+            skipped += 1
+            print(f"skip (missing file_path) row index={idx}")
+            rejected.append(
+                {
+                    "file_path": row.get("file_path", ""),
+                    "category": row.get("category", ""),
+                    "parse_quality": row.get("parse_quality", ""),
+                    "reason": "missing file_path in metadata row",
+                    "suggestion": "检查 metadata.csv 是否包含 file_path 列。",
+                }
+            )
+            continue
+
+        out_path = out_dir / f"{case_id}.json"
         row_quality = row.get("parse_quality", "C")
         quality_rank = {"A": 2, "B": 1, "C": 0}.get(row_quality, 0)
         if quality_rank < min_quality_rank:
@@ -1485,6 +1537,30 @@ def main(argv: list[str] | None = None) -> None:
             )
             print(
                 f"[{idx}/{total}] skip (low_quality={row_quality}) {row.get('file_path', '')}",
+                flush=True,
+            )
+            continue
+
+        # Resume mode: if对应的 JSON 已经存在，则直接复用，避免重复抽取
+        if getattr(args, "resume", False) and out_path.exists():
+            try:
+                existing_case = json.loads(out_path.read_text(encoding="utf-8"))
+                existing_confidence = float(existing_case.get("confidence", 0.0))
+            except Exception:  # noqa: BLE001
+                existing_confidence = 0.0
+
+            manifest.append(
+                {
+                    "case_id": case_id,
+                    "file_path": row.get("file_path", ""),
+                    "category": row.get("category", "未分类"),
+                    "confidence": existing_confidence,
+                    "output_file": out_path.name,
+                }
+            )
+            resumed_existing += 1
+            print(
+                f"[{idx}/{total}] resume-skip existing {row.get('file_path', '')} -> {out_path.name}",
                 flush=True,
             )
             continue
@@ -1547,6 +1623,7 @@ def main(argv: list[str] | None = None) -> None:
                 "included_rows": len(included),
                 "generated_cases": len(manifest),
                 "skipped": skipped,
+                "resumed_existing": resumed_existing,
                 "manifest": manifest_path.name,
                 "rejections": rejection_path.name,
                 "min_quality": args.min_quality,

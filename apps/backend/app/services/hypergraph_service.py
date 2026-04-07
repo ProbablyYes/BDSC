@@ -1314,7 +1314,7 @@ class HypergraphService:
         category: str | None = None,
         rule_ids: list[str] | None = None,
         preferred_edge_types: list[str] | None = None,
-        limit: int = 5,
+        limit: int = 10,
     ) -> dict[str, Any]:
         if not self._records:
             rebuilt = self.rebuild(min_pattern_support=1, max_edges=80)
@@ -1366,7 +1366,7 @@ class HypergraphService:
         matched.sort(key=lambda item: item[0], reverse=True)
 
         topology = self._get_topology_stats()
-        limited_edges = [item for _, item in matched[:max(1, min(limit, 20))]]
+        limited_edges = [item for _, item in matched[:max(1, min(limit, 30))]]
         summary, top_signals, key_dimensions = self._build_insight_summary(limited_edges, topology, safe_edge_types)
 
         return {
@@ -1472,14 +1472,14 @@ class HypergraphService:
             "fallacy_label": pressure_trace.get("fallacy_label", ""),
             "selected_strategy": pressure_trace.get("selected_strategy", ""),
             "generated_question": pressure_trace.get("generated_question", ""),
-            "edge_families": [str(edge.get("family_label") or edge.get("type") or "") for edge in edges[:4]],
-            "matched_rules": sorted({str(rule) for edge in edges[:4] for rule in (edge.get("rules") or []) if str(rule).strip()})[:8],
+            "edge_families": [str(edge.get("family_label") or edge.get("type") or "") for edge in edges[:12]],
+            "matched_rules": sorted({str(rule) for edge in edges[:12] for rule in (edge.get("rules") or []) if str(rule).strip()})[:16],
         }
         return {
             "summary": (hypergraph_insight or {}).get("summary", ""),
             "process_trace": process_trace,
             "useful_cards": useful_cards[:3],
-            "matched_edges": edges[:6],
+            "matched_edges": edges[:20],
             "library_overview": self.library_snapshot(limit=12).get("overview", {}),
         }
 

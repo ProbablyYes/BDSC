@@ -1196,7 +1196,7 @@ def _safe_hypergraph_insight(hg: Any) -> dict:
     if not isinstance(hg, dict):
         return {}
     edges = []
-    for e in (hg.get("edges") or [])[:8]:
+    for e in (hg.get("edges") or [])[:30]:
         if not isinstance(e, dict):
             continue
         edges.append({
@@ -1219,8 +1219,8 @@ def _safe_hypergraph_insight(hg: Any) -> dict:
         })
     return {
         "summary": _safe_str(hg.get("summary", "")),
-        "top_signals": [_safe_str(x) for x in (hg.get("top_signals") or [])[:5]],
-        "key_dimensions": [_safe_str(x) for x in (hg.get("key_dimensions") or [])[:5]],
+        "top_signals": [_safe_str(x) for x in (hg.get("top_signals") or [])[:10]],
+        "key_dimensions": [_safe_str(x) for x in (hg.get("key_dimensions") or [])[:10]],
         "edges": edges,
         "matched_by": hg.get("matched_by", {}) if isinstance(hg.get("matched_by"), dict) else {},
         "meta": hg.get("meta", {}) if isinstance(hg.get("meta"), dict) else {},

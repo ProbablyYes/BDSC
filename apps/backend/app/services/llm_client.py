@@ -65,8 +65,8 @@ class LlmClient:
             self._client = OpenAI(
                 api_key=settings.llm_api_key,
                 base_url=settings.llm_base_url,
-                timeout=180.0,
-                max_retries=1,
+                timeout=300.0,
+                max_retries=2,
             )
 
     @staticmethod

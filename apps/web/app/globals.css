@@ -6968,6 +6968,93 @@ pre {
   color: var(--text-muted);
 }
 
+/* ── Hyper Overview: summary + tag groups ── */
+.ht-overview-section {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(56,189,248,0.04));
+  border: 1px solid rgba(99,102,241,0.12);
+}
+.ht-overview-summary {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 10px;
+}
+.ht-tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.ht-tag-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 52px;
+}
+.ht-tag {
+  font-size: 10.5px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ht-tag.signal {
+  border-color: rgba(251,191,36,0.25);
+  background: rgba(251,191,36,0.06);
+  color: #fbbf24;
+}
+.ht-tag.dim {
+  border-color: rgba(99,102,241,0.25);
+  background: rgba(99,102,241,0.06);
+  color: #818cf8;
+}
+.ht-tag.hub {
+  border-color: rgba(34,197,94,0.25);
+  background: rgba(34,197,94,0.06);
+  color: #22c55e;
+}
+
+/* ── Matched Rules Chips ── */
+.ht-matched-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ht-rule-chip {
+  font-size: 10.5px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: rgba(244,114,182,0.08);
+  border: 1px solid rgba(244,114,182,0.2);
+  color: #f472b6;
+  font-weight: 500;
+}
+
+/* ── Edge Node Tags ── */
+.ht-edge-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.ht-edge-node-tag {
+  font-size: 9.5px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
 /* rtab-pill without icon — text-only */
 .rtab-pill {
   font-size: 12px;
@@ -9329,9 +9416,10 @@ pre {
 
 .profile-page {
   min-height: 100vh;
-  padding: 0 24px 48px;
+  padding: 0 24px 60px;
   background:
-    radial-gradient(circle at 14% 20%, rgba(107,138,255,0.06), transparent 30%),
+    radial-gradient(ellipse at 14% 20%, rgba(99,102,241,0.07), transparent 35%),
+    radial-gradient(ellipse at 85% 60%, rgba(56,189,248,0.05), transparent 30%),
     linear-gradient(180deg, var(--bg-primary), rgba(10,12,26,1));
 }
 
@@ -9353,7 +9441,6 @@ pre {
   font-size: 13px;
   transition: color 0.2s;
 }
-
 .profile-back:hover { color: var(--text-primary); }
 
 .profile-topbar h1 {
@@ -9371,101 +9458,156 @@ pre {
   border: 1px solid var(--border);
   transition: all 0.2s;
 }
-
 .profile-setting-link:hover {
   color: var(--text-primary);
   border-color: var(--border-strong);
 }
 
+/* Hero */
 .profile-hero {
   display: flex;
   align-items: center;
-  gap: 22px;
+  justify-content: space-between;
+  gap: 24px;
   max-width: 960px;
   margin: 12px auto 28px;
-  padding: 28px;
-  border-radius: 28px;
+  padding: 30px 32px;
+  border-radius: 24px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  background:
+    linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(56,189,248,0.03) 100%),
+    rgba(255,255,255,0.03);
   backdrop-filter: blur(18px);
+}
+.prof-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
 }
 
 .profile-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #5f82ff, #43c6ff);
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #6366f1, #38bdf8);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 28px;
-  font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 8px 28px rgba(67,158,255,0.22);
+  box-shadow: 0 8px 28px rgba(99,102,241,0.25);
+}
+.profile-avatar span {
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.prof-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .profile-info h2 {
-  margin: 0 0 6px;
-  font-size: 26px;
+  margin: 0;
+  font-size: 22px;
   color: var(--heading-color);
+  font-weight: 700;
 }
 
 .profile-role-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent-text);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  margin-right: 8px;
+  letter-spacing: 0.04em;
 }
 
 .profile-meta {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
 .profile-bio {
   margin: 6px 0 0;
   color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
+.prof-join-date {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.prof-hero-rings {
+  display: flex;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.prof-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.prof-ring-label {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+/* KPI Grid */
 .profile-kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
+  gap: 12px;
   max-width: 960px;
   margin: 0 auto 28px;
 }
 
 .profile-kpi {
-  padding: 18px;
-  border-radius: 20px;
+  padding: 16px 14px;
+  border-radius: 18px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.03);
   text-align: center;
   backdrop-filter: blur(14px);
+  transition: border-color 0.25s, transform 0.25s;
+}
+.profile-kpi:hover {
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+.prof-kpi-icon {
+  margin: 0 auto 6px;
+  opacity: 0.85;
 }
 
 .profile-kpi strong {
   display: block;
-  font-size: 28px;
+  font-size: 26px;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
 .profile-kpi span {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
+/* Sections */
 .profile-section {
   max-width: 960px;
   margin: 0 auto 28px;
@@ -9473,14 +9615,26 @@ pre {
 
 .profile-section h3 {
   margin: 0 0 14px;
-  font-size: 18px;
+  font-size: 17px;
   color: var(--heading-color);
+  font-weight: 600;
 }
 
+/* Score Trend */
+.prof-trend-section {
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+}
+.prof-sparkline-wrap { overflow-x: auto; }
+.prof-sparkline { width: 100%; height: 80px; display: block; }
+
+/* Submission List */
 .profile-sub-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .profile-sub-item {
@@ -9488,16 +9642,15 @@ pre {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px;
-  border-radius: 16px;
+  padding: 12px 16px;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.03);
   transition: border-color 0.25s, transform 0.25s;
 }
-
 .profile-sub-item:hover {
-  border-color: rgba(255,255,255,0.12);
-  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-1px);
 }
 
 .profile-sub-left {
@@ -9508,13 +9661,23 @@ pre {
 }
 
 .profile-sub-type {
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 8px;
-  background: var(--accent-soft);
-  color: var(--accent-text);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   flex-shrink: 0;
+}
+.profile-sub-type.file {
+  background: rgba(99,102,241,0.1);
+  color: #818cf8;
+}
+.profile-sub-type.text {
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+}
+.profile-sub-type.intervention {
+  background: rgba(236,72,153,0.1);
+  color: #ec4899;
 }
 
 .profile-sub-preview {
@@ -9534,48 +9697,70 @@ pre {
 
 .profile-sub-score {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-
 .profile-sub-score small {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
+  font-weight: 400;
+}
+
+.prof-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid;
 }
 
 .profile-sub-date {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
+/* Conversations */
 .profile-conv-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .profile-conv-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 18px;
-  border-radius: 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.03);
   text-decoration: none;
   transition: border-color 0.25s, transform 0.25s;
 }
-
 .profile-conv-item:hover {
   border-color: rgba(255,255,255,0.12);
   transform: translateY(-2px);
 }
 
+.prof-conv-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(99,102,241,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #818cf8;
+}
+
+.prof-conv-content { min-width: 0; }
+
 .profile-conv-title {
+  display: block;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -9583,61 +9768,105 @@ pre {
 }
 
 .profile-conv-meta {
+  display: block;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
+  margin-top: 2px;
 }
 
+/* Account Info Grid */
 .profile-info-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .profile-info-grid > div {
   padding: 14px 16px;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.03);
 }
 
 .profile-info-grid span {
   display: block;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .profile-info-grid strong {
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
+/* Empty / Loading */
 .profile-empty {
   text-align: center;
   padding: 80px 20px;
   color: var(--text-secondary);
 }
-
+.prof-empty-icon {
+  margin: 0 auto 16px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .profile-empty h2 {
   color: var(--heading-color);
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  font-size: 20px;
 }
-
-.profile-empty a {
-  color: var(--accent-text);
+.profile-empty p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 16px;
 }
+.prof-login-btn {
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.prof-login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
 .profile-empty-hint {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 12.5px;
+  padding: 18px 0;
 }
 
 .profile-loading {
   text-align: center;
   padding: 60px 0;
   color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
+.prof-loading-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: #6366f1;
+  animation: prof-spin 0.8s linear infinite;
+}
+@keyframes prof-spin { to { transform: rotate(360deg); } }
 
+/* Topbar avatar (shared) */
 .topbar-avatar {
   display: flex;
   align-items: center;
@@ -9651,7 +9880,6 @@ pre {
   text-decoration: none;
   transition: background 0.25s, border-color 0.25s, transform 0.25s;
 }
-
 .topbar-avatar:hover {
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.18);
@@ -9663,6 +9891,8 @@ pre {
   .profile-conv-list { grid-template-columns: 1fr; }
   .profile-info-grid { grid-template-columns: repeat(2, 1fr); }
   .profile-hero { flex-direction: column; text-align: center; }
+  .prof-hero-left { flex-direction: column; }
+  .prof-hero-rings { justify-content: center; }
 }
 
 @media (max-width: 480px) {

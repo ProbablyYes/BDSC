@@ -349,7 +349,7 @@ DIM_OWNERSHIP: dict[str, dict] = {
     "structural_cause":    {"writer": "analyst",      "challengers": []},
     "counter_intuitive":   {"writer": "analyst",      "challengers": []},
     "method_bridge":       {"writer": "tutor",        "challengers": []},
-    "teacher_criteria":    {"writer": "advisor",      "challengers": ["grader"]},
+    "teacher_criteria":    {"writer": "grader",       "challengers": ["advisor"]},
     "external_reference":  {"writer": "advisor",      "challengers": ["tutor"]},
     "strategy_directions": {"writer": "coach",        "challengers": []},
     "action_plan":         {"writer": "planner",      "challengers": []},
@@ -803,6 +803,10 @@ def _message_complexity(message: str, conversation_messages: list | None = None)
         score += 2
     if conv and _infer_prev_intent(conv):
         score += 1
+    if len(conv) >= 4:
+        score += 1
+    if len(conv) >= 8:
+        score += 1
     return score
 
 
@@ -811,6 +815,8 @@ def _should_use_focused_mode(state: WorkflowState) -> bool:
     intent = state.get("intent", "general_chat")
     msg = state.get("message", "")
     if "[上传文件:" in msg:
+        return False
+    if _is_score_request_message(msg) or _is_eval_followup_message(msg):
         return False
     return intent == "general_chat"
 
@@ -879,10 +885,10 @@ _DIM_RELEVANCE_MAP: dict[str, dict[str, float]] = {
     "structural_cause":    {"project_diagnosis": 0.8,  "evidence_check": 0.6, "business_model": 0.6, "pressure_test": 0.7, "competition_prep": 0.5, "idea_brainstorm": 0.1, "learning_concept": 0.05, "market_competitor": 0.1, "general_chat": 0.0},
     "counter_intuitive":   {"project_diagnosis": 0.5,  "pressure_test": 0.9, "business_model": 0.5, "evidence_check": 0.4, "competition_prep": 0.3, "idea_brainstorm": 0.3, "learning_concept": 0.1, "market_competitor": 0.2, "general_chat": 0.0},
     "method_bridge":       {"learning_concept": 0.95, "project_diagnosis": 0.15, "business_model": 0.4, "evidence_check": 0.3, "idea_brainstorm": 0.2, "competition_prep": 0.1, "pressure_test": 0.1, "market_competitor": 0.1, "general_chat": 0.0},
-    "teacher_criteria":    {"competition_prep": 0.95, "project_diagnosis": 0.4, "evidence_check": 0.3, "business_model": 0.2, "pressure_test": 0.2, "idea_brainstorm": 0.05, "learning_concept": 0.05, "market_competitor": 0.1, "general_chat": 0.0},
+    "teacher_criteria":    {"competition_prep": 0.95, "project_diagnosis": 0.7, "evidence_check": 0.6, "business_model": 0.5, "pressure_test": 0.5, "idea_brainstorm": 0.3, "learning_concept": 0.1, "market_competitor": 0.3, "general_chat": 0.0},
     "external_reference":  {"market_competitor": 0.95, "competition_prep": 0.6, "project_diagnosis": 0.4, "business_model": 0.5, "idea_brainstorm": 0.5, "evidence_check": 0.3, "pressure_test": 0.3, "learning_concept": 0.2, "general_chat": 0.0},
     "strategy_directions": {"project_diagnosis": 0.7,  "business_model": 0.7, "idea_brainstorm": 0.6, "evidence_check": 0.5, "competition_prep": 0.5, "pressure_test": 0.4, "learning_concept": 0.1, "market_competitor": 0.2, "general_chat": 0.0},
-    "action_plan":         {"project_diagnosis": 0.5,  "business_model": 0.4, "evidence_check": 0.5, "competition_prep": 0.6, "idea_brainstorm": 0.3, "pressure_test": 0.2, "learning_concept": 0.05, "market_competitor": 0.1, "general_chat": 0.0},
+    "action_plan":         {"project_diagnosis": 0.8,  "business_model": 0.7, "evidence_check": 0.7, "competition_prep": 0.8, "idea_brainstorm": 0.5, "pressure_test": 0.4, "learning_concept": 0.1, "market_competitor": 0.3, "general_chat": 0.0},
     "probing_questions":   {"project_diagnosis": 0.9,  "business_model": 0.8, "evidence_check": 0.8, "pressure_test": 0.8, "competition_prep": 0.7, "idea_brainstorm": 0.7, "learning_concept": 0.5, "market_competitor": 0.4, "general_chat": 0.1},
 }
 
@@ -925,9 +931,9 @@ def _dim_impact(dim: str, intent: str, mode: str, complexity: int) -> float:
     if dim in ("status_judgment", "core_bottleneck", "probing_questions"):
         return 0.9
     if dim == "teacher_criteria":
-        return 0.9 if mode == "competition" else 0.3
+        return 0.9 if mode == "competition" else 0.65
     if dim == "action_plan":
-        return 0.7 if complexity >= 3 else 0.35
+        return 0.8 if complexity >= 3 else 0.6
     if dim == "structural_cause":
         return 0.8 if complexity >= 3 else 0.45
     if dim == "strategy_directions":
@@ -1242,11 +1248,13 @@ def _select_reply_strategy(
     _complex_intents = ("project_diagnosis", "business_model", "competition_prep",
                         "pressure_test", "evidence_check", "market_competitor")
 
-    if project_maturity == "exploring" and intent in _DISCOVERY_INTENTS and not is_file:
+    # direction 阶段（slot ≤1）始终 progressive
+    if exploration_phase == "direction":
         return "progressive"
-    if exploration_phase in ("direction", "convergence"):
+    # convergence（slot 2-3）：只在维度极少时 progressive，否则放行
+    if exploration_phase == "convergence" and n_active <= 2:
         return "progressive"
-    # 即使 slot ≥3，如果实体极少（信息不足）也走 progressive
+    # 即使 slot ≥3，如果实际产出维度极少（信息不足）也走 progressive
     total_ents = sum(1 for r in dim_results.values() if r.get("value"))
     if total_ents <= 2 and n_active <= 2 and not is_file:
         return "progressive"
@@ -1750,7 +1758,7 @@ def _build_chat_system_prompt(state: dict) -> str:
         "如果学生问'吃了吗''中午吃什么'，坦然说自己是 AI 不吃饭，"
         "但可以用幽默方式接住，比如'我不吃饭，不过如果你请我选，我可能会好奇你们食堂最火的是哪个窗口'。\n"
         "- **禁止用 emoji 开头或结尾**。可以偶尔在句中用一个，但不要变成 emoji 堆砌。\n"
-        "- **禁止机械重复**：仔细看上下文里你之前说过什么，绝对不能再说一遍类似的话。\n\n"
+        "- **禁止重复**：看上下文你之前说过什么，换个角度、换个句式、换个话题来回应。\n\n"
         "## 你的原则\n"
         "1. **自然对话**：像一个真人导师那样接住学生说的任何话。"
         "该幽默就幽默，该认真就认真，该吐槽就吐槽。\n"
@@ -1773,7 +1781,7 @@ def _build_chat_user_prompt(state: dict) -> str:
     conv = state.get("conversation_messages", []) or []
     conv_ctx = "\n".join(
         f"{'学生' if m.get('role') == 'user' else 'AI'}: {str(m.get('content') or '')[:200]}"
-        for m in conv[-8:]
+        for m in conv[-6:]
         if isinstance(m, dict) and m.get("content")
     )
     return (
@@ -1790,7 +1798,7 @@ def _general_chat_reply(state: dict) -> str:
             system_prompt=_build_chat_system_prompt(state),
             user_prompt=_build_chat_user_prompt(state),
             model=settings.llm_fast_model,
-            temperature=0.7,
+            temperature=0.85,
         )
         if reply and len(reply.strip()) >= 8:
             return reply.strip()
@@ -1808,7 +1816,7 @@ def _general_chat_reply_stream(state: dict):
             system_prompt=_build_chat_system_prompt(state),
             user_prompt=_build_chat_user_prompt(state),
             model=settings.llm_fast_model,
-            temperature=0.7,
+            temperature=0.85,
         ):
             yield chunk
     except Exception as e:
@@ -2014,6 +2022,16 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
             "intent_shape": "single",
             "intent_reason": _intent_reason_text("rule", "learning_concept", matched=["专业概念辅导/通俗讲解"], shape="single"),
             "agents": list(INTENTS["learning_concept"]["agents"]),
+            "engine": "rule",
+        }
+
+    # ── Fast path: scoring/evaluation request → project_diagnosis ──
+    if _is_score_request_message(message) or _is_eval_followup_message(message):
+        return {
+            "intent": "project_diagnosis", "confidence": 0.9,
+            "intent_shape": "single",
+            "intent_reason": _intent_reason_text("rule", "project_diagnosis", matched=["评分/打分请求"], shape="single"),
+            "agents": list(INTENTS["project_diagnosis"]["agents"]),
             "engine": "rule",
         }
 
@@ -2532,7 +2550,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     mode = state.get("mode", "coursework")
     is_file = "[上传文件:" in msg
 
-    if intent == "general_chat" and len(msg) < 25 and not is_file:
+    if intent == "general_chat" and not is_file and not _is_score_request_message(msg) and not _is_eval_followup_message(msg):
         return {"nodes_visited": ["gather_context"]}
 
     # ────────────────────────────────────────────────────────────────
@@ -2826,13 +2844,15 @@ def gather_context_node(state: WorkflowState) -> dict:
                 "2. 具体化：'大学生' 比 '用户' 好，'AI智能分拣' 比 '技术' 好\n"
                 "3. 关系要完整：每对有逻辑关联的实体都建立关系\n"
                 "4. structural_gaps 要基于13维度检查缺什么：stakeholder/pain_point/solution/innovation/technology/market/competitor/resource/business_model/execution_step/risk_control/team/evidence\n"
-                "5. completeness_score(0-10)：**按已覆盖维度类型数+信息质量打分**\n"
-                "   - 1-2分：仅提到1-2种维度类型，且描述模糊\n"
-                "   - 3-4分：覆盖3-4种维度类型\n"
-                "   - 5-6分：覆盖5-6种维度类型\n"
-                "   - 7-8分：覆盖7-9种维度类型（不要求全部有证据，只要多数维度有具体内容即可给7分）\n"
-                "   - 9-10分：覆盖10种以上且各维度有充分的具体信息和数据\n"
-                "   注意：不要习惯性给5-6分，当学生确实提供了较多维度时必须给到7+\n"
+                "5. completeness_score(0-10)：**综合维度覆盖数 × 信息深度打分**\n"
+                "   评分公式参考：基础分=覆盖维度数×0.7，深度加分=有具体内容的维度数×0.3，上限10\n"
+                "   - 1-2分：仅1-2种维度且非常模糊（如只有一句话的想法）\n"
+                "   - 3-4分：覆盖2-3种维度且内容粗略\n"
+                "   - 5-6分：覆盖3-5种维度，或覆盖2-3种但内容较具体\n"
+                "   - 7分：覆盖4-5种维度且多数有具体描述，或覆盖6+种维度\n"
+                "   - 8分：覆盖5-7种维度且有具体场景/用户/方案描述\n"
+                "   - 9-10分：覆盖8种以上且多数维度有数据、证据或具体案例\n"
+                "   **重要**：只要学生描述了具体的用户+痛点+方案且有一定深度（超过200字），至少给6分；如果还有商业模式或竞品或证据中任一项，至少给7分\n"
                 "6. section_scores: 对每个已出现的维度打分(0-10)，信息越具体越高\n"
                 "7. student_identity: 如果学生提到了自己的身份信息（年级、专业、学校等），提取为对象，如{\"grade\":\"大二\",\"major\":\"计算机\"}\n\n"
                 "示例(实际应提取更多):\n"
@@ -3878,7 +3898,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         user_prompt=(
             f"模式: {mode}\n学生问题:\n{msg}\n\n"
             + (f"最近对话:\n{conv_ctx}\n\n" if conv_ctx else "")
-            + (f"参考案例:\n{rag_ctx[:500]}\n\n" if rag_ctx else "")
+            + (f"参考案例:\n{rag_ctx[:1500]}\n\n" if rag_ctx else "")
             + (f"联网资料:\n{ws_ctx[:500]}\n\n" if ws_ctx else "")
             + (f"{kg_ctx}\n\n" if kg_ctx else "")
             + "请按要求输出JSON。"
@@ -4147,7 +4167,7 @@ _DIM_PROMPT_HINTS: dict[str, str] = {
     "structural_cause": "解释表层问题背后的深层结构性原因，不要只停在表面。",
     "counter_intuitive": "指出学生可能忽略的盲区或过于乐观的假设，用反例或数据支撑。",
     "method_bridge": "讲清楚一个概念或方法论，并桥接回学生的具体项目。",
-    "teacher_criteria": "从评审者/老师的视角说明会怎么判断这部分，给出得分区间参考。",
+    "teacher_criteria": "从评审者/老师的视角，对项目当前维度进行评分和诊断：指出得分亮点和失分风险，给出改进优先级和得分区间参考。",
     "external_reference": "引用真实竞品、行业数据或案例来做对比分析。",
     "strategy_directions": "给出2-3条可选策略方向或打法，不要只有一种答案。",
     "action_plan": "拆出本周最该做的1-3件可执行的事和验收标准。",
@@ -4216,7 +4236,7 @@ def _build_dim_context(dim: str, state: dict) -> str:
     # ── RAG案例上下文（所有维度都能参考）──
     rag_ctx = state.get("rag_context", "")
     if rag_ctx:
-        parts.append(f"相似案例参考:\n{rag_ctx[:600]}")
+        parts.append(f"相似案例参考:\n{rag_ctx[:1500]}")
     rag_insight = state.get("rag_enrichment_insight", "")
     if rag_insight:
         parts.append(f"案例迁移洞察: {rag_insight[:300]}")
@@ -4282,7 +4302,8 @@ def _write_dimension(dim: str, state: dict) -> dict:
             f"任务：{hint}\n\n"
             "## 分析要求\n"
             "- 200-600字的深度分析，有理有据\n"
-            "- 如果上下文中有案例参考或图谱启发，必须引用并对比（'类似项目XX的做法是…'）\n"
+            "- **关键**：如果背景信息中有「知识图谱跨项目启发」，你必须至少引用其中一个案例的具体做法来对比或启发学生（例如'类似的「XX」项目把痛点锁定在YY，你也可以考虑…'），不要无视这些信息\n"
+            "- 如果有案例参考，用具体项目名和做法对比，不要泛泛说'其他项目'\n"
             "- 如果有超图教学启发，自然融入分析\n"
             "- 给出具体判断，不要泛泛而谈（不要'需要考虑'、'可以尝试'，要说'你的XX存在YY问题，因为ZZ'）\n"
             "- 不要写标题，不要重复学生原话，不要说'以下是我的分析'\n"
@@ -4496,7 +4517,7 @@ def _coach_analyze(state: dict) -> dict:
                 + (f"KG洞察: {kg.get('insight','')}\n" if kg.get("insight") else "")
                 + (f"内容优势: {', '.join(kg.get('content_strengths', [])[:3])}\n" if kg.get("content_strengths") else "")
                 + (f"超图诊断:\n{hs_ctx}\n" if hs_ctx else "")
-                + (f"案例参考: {rag_ctx[:800]}\n" if rag_ctx else "")
+                + (f"案例参考: {rag_ctx[:1500]}\n" if rag_ctx else "")
                 + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
                 + (f"联网搜索: {ws_ctx[:300]}\n" if ws_ctx else "")
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
@@ -4599,7 +4620,7 @@ def _coach_analyze(state: dict) -> dict:
                 + f"当前瓶颈: {bottleneck}\n"
                 + (f"KG洞察: {kg.get('insight','')}\n" if kg.get("insight") else "")
                 + (f"超图诊断:\n{hs_ctx}\n" if hs_ctx else "")
-                + (f"案例参考: {rag_ctx[:800]}\n" if rag_ctx else "")
+                + (f"案例参考: {rag_ctx[:1500]}\n" if rag_ctx else "")
                 + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
                 + (f"联网搜索: {ws_ctx[:350]}\n" if ws_ctx else "")
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
@@ -4751,7 +4772,7 @@ def _analyst_analyze(state: dict) -> dict:
             + f"KG结构缺陷: {kg.get('structural_gaps', [])}\n"
             + (f"内容优势: {', '.join(kg.get('content_strengths', [])[:3])}\n" if kg.get("content_strengths") else "")
             + (f"教练分析摘要: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
-            + (f"案例对比参考:\n{rag_ctx[:600]}\n" if rag_ctx else "")
+            + (f"案例对比参考:\n{rag_ctx[:1500]}\n" if rag_ctx else "")
             + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
             + (f"超图风险诊断:\n{hyper_analyst_ctx}\n" if hyper_analyst_ctx else "")
             + (f"联网事实:\n{ws_ctx[:350]}\n" if ws_ctx else "")
@@ -4852,11 +4873,12 @@ def _advisor_analyze(state: dict) -> dict:
         user_prompt=(
             f"学生说:\n{msg[:1200]}\n模式:{mode}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
-            + (f"参考案例:\n{rag_ctx[:900]}\n\n" if rag_ctx else "")
+            + (f"参考案例:\n{rag_ctx[:1500]}\n\n" if rag_ctx else "")
             + (f"案例对比洞察: {rag_insight}\n\n" if rag_insight else "")
             + (f"教练分析摘要:\n{str(coach_out.get('analysis',''))[:400]}\n\n" if coach_out.get('analysis') else "")
             + (f"诊断瓶颈:{diag.get('bottleneck','')}\n\n" if diag.get("bottleneck") else "")
             + (f"超图竞赛准备度:\n{hyper_advisor_ctx}\n\n" if hyper_advisor_ctx else "")
+            + (_fmt_graph_hits_ctx(state.get("neo4j_graph_hits") or []))
             + f"Rubric逐项评分:\n{breakdown_md}"
         ),
         model=settings.llm_reason_model,
@@ -4940,6 +4962,25 @@ def _grader_analyze(state: dict) -> dict:
     hyper_grader_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "grader", incremental_stats=state.get("incremental_stats"))
     grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader")
 
+    # Fallback: if current turn has no rubric, pull from conversation history
+    if (not rubric or overall is None):
+        for _hm in reversed(state.get("conversation_messages", []) or []):
+            _tr = _hm.get("agent_trace") if isinstance(_hm, dict) else None
+            if not isinstance(_tr, dict):
+                continue
+            _prev_diag = _tr.get("diagnosis") or {}
+            _prev_kg = _tr.get("kg_analysis") or {}
+            if _prev_diag.get("rubric") and _prev_diag.get("overall_score") is not None:
+                rubric = _prev_diag["rubric"]
+                overall = _prev_diag["overall_score"]
+                diag = _prev_diag
+                if not sec_scores and _prev_kg.get("section_scores"):
+                    sec_scores = _prev_kg["section_scores"]
+                if not kg.get("entities") and _prev_kg.get("entities"):
+                    kg = _prev_kg
+                logger.info("grader: using historical diagnosis (overall=%s, rubric_items=%d)", overall, len(rubric))
+                break
+
     if not rubric or overall is None:
         return {
             "agent": "评分官",
@@ -4962,6 +5003,8 @@ def _grader_analyze(state: dict) -> dict:
     score_gap = max(0.0, round(8.0 - float(overall or 0), 1))
     advisor_summary = _truncate_text(str(advisor_out.get("analysis") or ""), 360)
 
+    graph_hits_ctx = _fmt_graph_hits_ctx(state.get("neo4j_graph_hits") or [])
+
     analysis = _llm.chat_text(
         system_prompt=(
             "你负责按照创业竞赛评审标准给项目打分，是一位评分官，不是竞赛教练。\n"
@@ -4972,7 +5015,8 @@ def _grader_analyze(state: dict) -> dict:
             "3. 给出可快速补分的优先项，但不要展开成详细执行步骤或任务清单\n"
             "4. 如果同轮已经有竞赛顾问意见，不要重复答辩建议或PPT建议；你只负责分数、扣分机制、补分优先级\n"
             "5. 评分要考虑项目阶段：初步规划但逻辑基本成立的项目，不应被写成接近零分或一无是处\n"
-            "6. 输出尽量像一份简明评审摘要，而不是重复项目全量分析\n"
+            "6. 如果有跨项目图谱启发，可引用类似项目的做法作为对比参照\n"
+            "7. 输出尽量像一份简明评审摘要，而不是重复项目全量分析\n"
             "建议结构：当前分数区间 / 最伤分项 / 快速补分项。"
         ),
         user_prompt=(
@@ -4985,6 +5029,7 @@ def _grader_analyze(state: dict) -> dict:
             + f"KG维度评分: {sec_scores}\n"
             + (f"超图评分信号: {hyper_grader_ctx}\n" if hyper_grader_ctx else "")
             + (f"同轮竞赛顾问摘要: {advisor_summary}\n" if advisor_summary else "")
+            + (f"\n{graph_hits_ctx}" if graph_hits_ctx else "")
         ),
         model=settings.llm_fast_model,
         temperature=0.2,
@@ -5045,15 +5090,21 @@ def _planner_analyze(state: dict) -> dict:
             "- 如果瓶颈是技术或创新可信度，就优先给demo验证、对照实验、关键指标观测\n"
             "- 如果学生上传了文件，任务应该针对文件中具体薄弱的部分给出修改建议\n"
             "- 如果对话上下文显示之前已建议过某些任务，不要重复，给出递进的新任务\n"
-            "- 给出1-3个任务，按优先级排序，第1个最紧急；如果瓶颈单一就只给1个\n"
+            "- 给出1-2个任务，按优先级排序，第1个最紧急；如果瓶颈单一就只给1个\n"
             "- 必须明确告诉学生：这周先做什么，哪些事暂时不要做\n\n"
-            "- 输出尽量短，不要写很长的解释句，尤其不要把 how 写成大段长文\n\n"
+            "**格式要求（极其重要）**：\n"
+            "- task: 不超过20字的任务名\n"
+            "- why: 一句话，不超过30字\n"
+            "- how: 最多3个步骤，每步不超过20字\n"
+            "- acceptance: 一句话验收标准，不超过30字\n"
+            "- milestone: 一句话，不超过25字\n"
+            "- 绝对不要写长段落！每个字段都要精简到一两句话\n\n"
             '输出JSON: {"this_week":['
-            '{"task":"针对XX的具体任务名","why":"为什么这对你的项目关键",'
-            '"how":["步骤1","步骤2","步骤3"],"acceptance":"可衡量的验收标准",'
+            '{"task":"20字以内的任务名","why":"一句话原因",'
+            '"how":["短步骤1","短步骤2"],"acceptance":"一句话验收标准",'
             '"priority":"urgent|important|nice_to_have"}],'
-            '"not_now":["本周先不要做的事1","本周先不要做的事2"],'
-            '"milestone":"本阶段目标(用学生的项目语言描述)"}'
+            '"not_now":["先不做的事"],'
+            '"milestone":"一句话阶段目标"}'
         ),
         user_prompt=(
             f"学生说: {msg[:800]}\n\n"
@@ -5066,6 +5117,7 @@ def _planner_analyze(state: dict) -> dict:
             + (f"教练核心发现: {str(coach_out.get('analysis',''))[:300]}\n" if coach_out.get("analysis") else "")
             + (f"超图行动线索:\n{hs_missing_ctx}\n" if hs_missing_ctx else "")
             + (f"{neo4j_planner_ctx}\n" if neo4j_planner_ctx else "")
+            + (_fmt_graph_hits_ctx(state.get("neo4j_graph_hits") or []))
             + (f"赛事规划提示: {planner_comp_hint}\n" if planner_comp_hint else "")
         ),
         model=settings.llm_structured_model,
@@ -5265,6 +5317,42 @@ def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
     return ordered, reasoning
 
 
+def _extract_planner_next_task(dim_results: dict[str, dict]) -> dict | None:
+    """If action_plan dimension ran, parse its output into a concise next_task dict."""
+    ap = dim_results.get("action_plan")
+    if not ap or not ap.get("value"):
+        return None
+    text = str(ap["value"]).strip()
+    if len(text) < 10:
+        return None
+    lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    title = lines[0][:60] if lines else "当前最优先行动"
+    for prefix in ("1.", "1、", "-", "•", "第一", "首先", "**", "##"):
+        if title.startswith(prefix):
+            title = title[len(prefix):].strip()
+            break
+    if len(title) > 50:
+        title = title[:47] + "…"
+    # Extract short actionable items (not the full analysis text)
+    action_lines = []
+    criteria = []
+    for ln in lines[1:]:
+        stripped = ln.lstrip("-•·1234567890.、） ")
+        if any(kw in ln for kw in ("验收", "标准", "完成标志", "达成条件")):
+            criteria.append(stripped[:80])
+        elif stripped and len(stripped) > 5:
+            action_lines.append(stripped[:80])
+    desc = "；".join(action_lines[:3]) if action_lines else lines[1][:120] if len(lines) > 1 else title
+    if len(desc) > 150:
+        desc = desc[:147] + "…"
+    return {
+        "title": title,
+        "description": desc,
+        "acceptance_criteria": criteria[:3],
+        "source": "planner_agent",
+    }
+
+
 def _dim_results_to_agent_outputs(dim_results: dict[str, dict]) -> dict:
     """Convert V3 dim_results to legacy agent output format for frontend display."""
     writer_groups: dict[str, list[str]] = {}
@@ -5325,19 +5413,30 @@ def run_role_agents_node(state: WorkflowState) -> dict:
     )
 
     # ── Decide Path A vs Path B based on dims + message complexity ──
-    _GUIDE_DIMS = ["status_judgment", "probing_questions", "strategy_directions"]
+    _GUIDE_DIMS = ["status_judgment", "probing_questions", "strategy_directions", "action_plan"]
     is_file = "[上传文件:" in state.get("message", "")
     _msg_for_complexity = state.get("message", "")
     _conv_for_complexity = state.get("conversation_messages", [])
     _complexity_score = _message_complexity(_msg_for_complexity, _conv_for_complexity)
     _tier_for_path = _complexity_tier(_complexity_score, _normalize_intent_shape(state.get("intent_shape", "single")))
 
+    _asks_score = _is_score_request_message(_msg_for_complexity) or _is_eval_followup_message(_msg_for_complexity)
+    _has_rich_context = len(_conv_for_complexity) >= 3
     use_path_a = (
         n_activated <= 2
         and not is_file
         and _tier_for_path != "complex"
         and len(_msg_for_complexity) < 500
+        and not _asks_score
+        and not (_has_rich_context and any(
+            w in _msg_for_complexity for w in ("总结", "综合", "全面", "整体", "深度", "详细", "帮我看看")
+        ))
     )
+    if _asks_score:
+        if "teacher_criteria" not in activated_dims:
+            activated_dims.append("teacher_criteria")
+            n_activated = len(activated_dims)
+        logger.info("Score request detected → forced Path B, added teacher_criteria")
 
     # ── Path A: Guiding mode with auto-added dimensions ──
     if use_path_a:
@@ -5378,13 +5477,20 @@ def run_role_agents_node(state: WorkflowState) -> dict:
         missing_labels = [ANALYSIS_DIMENSIONS[d]["label"] for d in all_missing[:4]]
 
         exploration_phase = (state.get("exploration_state") or {}).get("phase")
-        reply_strategy = "progressive" if exploration_phase in ("direction", "convergence") else "deep_dive"
+        _pa_is_first = not state.get("conversation_messages")
+        if _pa_is_first or exploration_phase == "direction":
+            reply_strategy = "progressive"
+        elif exploration_phase == "convergence":
+            reply_strategy = "deep_dive"
+        else:
+            reply_strategy = "deep_dive"
 
         agent_outputs = _dim_results_to_agent_outputs(dim_results)
+        agents_a = list({dim_results[d].get("writer", "coach") for d in dim_results if dim_results[d].get("value")}) or ["coach"]
         logger.info("V3 path A: guiding, effective_dims=%s, missing_hints=%s, strategy=%s, agent_outputs=%s",
                      effective_dims, missing_labels, reply_strategy, list(agent_outputs.keys()))
         result_a: dict = {
-            "agents_called": ["coach"],
+            "agents_called": agents_a,
             "resolved_agents": [],
             "agent_reasoning": f"激活{n_activated}个维度+自动补充引导维度→共{len(effective_dims)}个({', '.join(effective_dims)})。缺失方向: {', '.join(missing_labels)}",
             "dim_results": dim_results,
@@ -5394,6 +5500,9 @@ def run_role_agents_node(state: WorkflowState) -> dict:
             "nodes_visited": ["role_agents"],
         }
         result_a.update(agent_outputs)
+        _planner_next = _extract_planner_next_task(dim_results)
+        if _planner_next:
+            result_a["next_task"] = _planner_next
         return result_a
 
     # ── Path B: Many dimensions (3+) → per-dim parallel LLM calls ──
@@ -5408,6 +5517,15 @@ def run_role_agents_node(state: WorkflowState) -> dict:
                 n_activated = len(activated_dims)
                 logger.info("Path B: auto-added %s to guarantee coach", _gd)
                 break
+
+    # Score request: ensure grader-related + core analysis dims are present
+    if _asks_score:
+        _score_dims = ["teacher_criteria", "status_judgment", "core_bottleneck"]
+        for _sd in _score_dims:
+            if _sd not in activated_dims:
+                activated_dims.append(_sd)
+        n_activated = len(activated_dims)
+        logger.info("Path B (score request): ensured dims=%s", activated_dims)
 
     dim_results = {}
     agent_hyper_details = []
@@ -5486,6 +5604,19 @@ def run_role_agents_node(state: WorkflowState) -> dict:
     agents_involved = list({dim_results[d].get("writer", "coach") for d in dim_results if dim_results[d].get("value")})
 
     agent_outputs = _dim_results_to_agent_outputs(dim_results)
+
+    # Score request: directly call _grader_analyze for a proper scoring report
+    if _asks_score:
+        try:
+            grader_result = _grader_analyze(dict(state))
+            if grader_result and grader_result.get("analysis"):
+                agent_outputs["grader_output"] = grader_result
+                if "grader" not in agents_involved:
+                    agents_involved.append("grader")
+                logger.info("Score request: _grader_analyze produced %d chars", len(grader_result.get("analysis", "")))
+        except Exception as _ge:
+            logger.warning("_grader_analyze failed for score request: %s", _ge)
+
     logger.info("V3 path B: %d dims parallel, agents=%s, strategy=%s, challengers=%d, agent_outputs=%s",
                 n_activated, agents_involved, reply_strategy, len(challenge_tasks), list(agent_outputs.keys()))
 
@@ -5499,6 +5630,9 @@ def run_role_agents_node(state: WorkflowState) -> dict:
         "nodes_visited": ["role_agents"],
     }
     result_b.update(agent_outputs)
+    _planner_next = _extract_planner_next_task(dim_results)
+    if _planner_next:
+        result_b["next_task"] = _planner_next
     return result_b
 
     # (V2 legacy code removed — V3 dim-driven paths above handle all cases)
@@ -5643,7 +5777,7 @@ def _build_gathered_context(state: WorkflowState) -> str:
     # RAG cases + enrichment insight
     rag_ctx = state.get("rag_context", "")
     if rag_ctx:
-        parts.append(f"\n## 参考案例\n{rag_ctx[:600]}")
+        parts.append(f"\n## 参考案例\n{rag_ctx[:1500]}")
     rag_ei = state.get("rag_enrichment_insight", "")
     if rag_ei:
         parts.append(f"案例对比洞察: {rag_ei}")
@@ -6157,29 +6291,49 @@ def stream_orchestrator(state: dict):
                     _hyper_summary += f"\n超图启发[{_he.get('family_label', '')}]: {str(_he['teaching_note'])[:80]}"
 
         _is_guiding = bool(missing_hints)
+        _v3_is_first_msg = not conv_ctx
+        _v3_has_substance = n_dims >= 3 or len(msg) >= 200
         if _is_guiding:
+            if _v3_is_first_msg:
+                _v3_len_hint = "300-600字"
+            elif _v3_has_substance:
+                _v3_len_hint = "1200-2500字"
+            else:
+                _v3_len_hint = "600-1400字"
             _v3_sys = (
                 f"{persona}\n"
                 "你是一位经验丰富的项目导师，正在和学生一对一聊项目想法。\n"
-                "学生目前还在项目早期/探索阶段，你的核心任务是**带着学生一步步完善想法**，而不是批评。\n\n"
-                "## 回复原则\n"
+                + ("学生刚提出了初步想法，先简短回应。\n\n"
+                   if _v3_is_first_msg else
+                   ("学生已经提供了较详细的项目信息，请给出有深度的分析和具体建议。\n\n"
+                    if _v3_has_substance else
+                    "学生在逐步完善想法，继续引导。\n\n"))
+                + "## 回复原则\n"
                 "- 先肯定学生已有想法中值得认可的部分\n"
-                "- 综合下面的多维度分析，帮学生看清当前处在什么阶段、最该先想清楚什么\n"
-                "- 不要把所有维度都堆上去，选最重要的2-3个展开，其余留做追问\n"
-                "- 如果有超图教学启发或案例线索，自然融入（'你有没有想过XX'、'之前有个类似的项目XX'）\n"
-                "- 结尾给出2-3个具体追问，引导学生往缺失方向深入\n"
+                + ("- 这是学生第一条消息，不要铺开分析，只做简短判断+1-2个追问就够了\n"
+                   "- 严格不超过600字，像朋友聊天一样自然简短\n"
+                   if _v3_is_first_msg else
+                   ("- 综合多维度分析，给出有论据的深度判断，每个关键点要展开分析\n"
+                    "- 如果有案例/数据支撑，充分引用；涉及对比时用表格\n"
+                    "- 不要泛泛而谈，每个建议要具体到可执行的程度\n"
+                    if _v3_has_substance else
+                    "- 综合下面的多维度分析，帮学生看清当前处在什么阶段、最该先想清楚什么\n"
+                    "- 不要把所有维度都堆上去，选最重要的2-3个展开，其余留做追问\n"))
+                + "- 如果有超图教学启发或案例线索，自然融入（'你有没有想过XX'、'之前有个类似的项目XX'）\n"
+                "- 结尾给出1-3个具体追问，引导学生往缺失方向深入\n"
                 "- 追问要具体、可回答的（不是'你怎么看用户需求'，而是'你身边有多少同学会为这个功能付费？'）\n\n"
                 "## 格式要求\n"
-                "- 像导师面对面聊天的语气（600-1400字）\n"
+                f"- 像导师面对面聊天的语气（{_v3_len_hint}）\n"
                 "- 不要套报告模板（现状→策略空间→聚焦→多维洞察）\n"
                 "- 不要列举'缺少XX维度'来批评学生\n"
                 "- 不要提到Agent、分析师等角色\n"
-                "- 可以用 **加粗**、> 引用、```mermaid 流程图\n"
+                "- 可以用 **加粗**、> 引用、```mermaid 流程图、表格\n"
             )
+            _v3_dim_content = dim_content[:1200] if _v3_is_first_msg else dim_content
             _v3_usr = (
                 f"学生说：{msg[:2000]}\n\n"
                 + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
-                + (f"## 多维度分析结果\n{dim_content}\n\n" if dim_content else "")
+                + (f"## 多维度分析结果\n{_v3_dim_content}\n\n" if _v3_dim_content else "")
                 + (f"学生还没聊到的方向（用追问引导，不要直接列出来批评）：{', '.join(missing_hints)}\n" if missing_hints else "")
                 + (_hyper_summary + "\n" if _hyper_summary else "")
             )

@@ -329,8 +329,8 @@ AGENT_MATRIX: dict[str, dict[str, list[str]]] = {
 # ═══════════════════════════════════════════════════════════════════
 
 ANALYSIS_DIMENSIONS: dict[str, dict] = {
-    "status_judgment":     {"label": "项目状态判断",       "required": True,  "desc": "判断项目当前处于什么阶段，整体逻辑是否通顺"},
-    "core_bottleneck":     {"label": "核心瓶颈识别",       "required": True,  "desc": "找到当前最制约项目推进的一到两个瓶颈"},
+    "status_judgment":     {"label": "项目状态判断",       "required": False, "desc": "判断项目当前处于什么阶段，整体逻辑是否通顺"},
+    "core_bottleneck":     {"label": "核心瓶颈识别",       "required": False, "desc": "找到当前最制约项目推进的一到两个瓶颈"},
     "structural_cause":    {"label": "结构层原因",         "required": False, "desc": "解释表层问题背后共同指向的深层结构性断点"},
     "counter_intuitive":   {"label": "反直觉洞察/挑战",    "required": False, "desc": "指出学生可能忽略的盲区、过于乐观的假设、行业反例"},
     "method_bridge":       {"label": "方法论桥接",         "required": False, "desc": "讲清楚一个概念/方法论，并桥接回学生项目"},
@@ -340,6 +340,8 @@ ANALYSIS_DIMENSIONS: dict[str, dict] = {
     "action_plan":         {"label": "细粒度行动方案",     "required": False, "desc": "拆出本周最该做的1-3件事和验收标准"},
     "probing_questions":   {"label": "启发式追问",         "required": True,  "desc": "用苏格拉底式追问帮学生深入思考"},
 }
+
+DIM_ACTIVATION_THRESHOLD = 0.5
 
 DIM_OWNERSHIP: dict[str, dict] = {
     "status_judgment":     {"writer": "coach",        "challengers": []},
@@ -351,7 +353,7 @@ DIM_OWNERSHIP: dict[str, dict] = {
     "external_reference":  {"writer": "advisor",      "challengers": ["tutor"]},
     "strategy_directions": {"writer": "coach",        "challengers": []},
     "action_plan":         {"writer": "planner",      "challengers": []},
-    "probing_questions":   {"writer": "orchestrator", "challengers": []},
+    "probing_questions":   {"writer": "coach",        "challengers": []},
 }
 
 def _derive_agent_capabilities() -> dict[str, dict[str, list[str]]]:
@@ -477,7 +479,14 @@ _DISCOVERY_INTENTS = frozenset([
 
 _VAGUE_PROJECT_SIGNALS = frozenset([
     "有个想法", "一个想法", "大概想做", "还没想好", "还不太确定",
-    "先聊聊", "还在想", "可能做", "初步想法", "暂时没有", "还没明确",
+    "先聊聊", "还在想", "可能做", "初步想法", "暂时没有", "还没明确","模糊的想法"
+])
+
+_CONCRETE_PROJECT_SIGNALS = frozenset([
+    "项目叫", "我们做", "现在做了", "目前做了", "已经做了", "想解决",
+    "面向", "服务", "用户", "场景", "流程", "痛点", "问题", "方案",
+    "系统", "平台", "功能", "验证", "调研", "访谈", "合作社", "商家",
+    "农民", "医院", "学校", "企业", "社区", "市场", "收费", "盈利",
 ])
 
 _USER_SLOT_HINTS = frozenset([
@@ -499,9 +508,185 @@ _PAIN_SLOT_HINTS = frozenset([
 ])
 
 
+def _signal_hit_count(text: str, signals: set[str] | frozenset[str]) -> int:
+    content = str(text or "")
+    return sum(1 for sig in signals if sig and sig in content)
+
+
+def _assess_project_maturity_signals(
+    message: str,
+    exploration_state: dict | None,
+    accumulated_entities: list[dict] | None,
+    conversation_messages: list | None,
+    intent_shape: str = "single",
+) -> dict[str, Any]:
+    text = str(message or "").strip()
+    exp = exploration_state or {}
+    entities = accumulated_entities or []
+    conv = conversation_messages or []
+    n_chars = len(text)
+    n_entities = len(entities)
+    n_slots = int(exp.get("n_filled", 0) or 0)
+    complexity = _message_complexity(text, conv)
+    vague_hits = _signal_hit_count(text, _VAGUE_PROJECT_SIGNALS)
+    concrete_hits = _signal_hit_count(text, _CONCRETE_PROJECT_SIGNALS)
+    followup_hits = _signal_hit_count(text, _FOLLOW_UP_SIGNALS)
+
+    exploring_score = 0
+    mature_score = 0
+
+    if vague_hits:
+        exploring_score += 3
+    if n_chars <= 120:
+        exploring_score += 2
+    elif n_chars <= 220:
+        exploring_score += 1
+    if n_slots <= 1:
+        exploring_score += 2
+    elif n_slots <= 2:
+        exploring_score += 1
+    if complexity <= 1:
+        exploring_score += 1
+    if followup_hits and n_chars <= 180:
+        exploring_score += 1
+
+    if n_entities >= 5:
+        mature_score += 2
+    elif n_entities >= 3:
+        mature_score += 1
+    if n_slots >= 4:
+        mature_score += 3
+    elif n_slots >= 3:
+        mature_score += 2
+    elif n_slots >= 2:
+        mature_score += 1
+    if complexity >= 4:
+        mature_score += 2
+    elif complexity >= 2:
+        mature_score += 1
+    if n_chars >= 280:
+        mature_score += 2
+    elif n_chars >= 180:
+        mature_score += 1
+    if concrete_hits >= 5:
+        mature_score += 2
+    elif concrete_hits >= 3:
+        mature_score += 1
+    if intent_shape == "mixed":
+        mature_score += 1
+
+    label = "exploring" if exploring_score >= mature_score else "mature"
+    reasons: list[str] = []
+    if label == "exploring":
+        if vague_hits:
+            reasons.append("语气仍偏探索/试探")
+        if n_chars <= 220:
+            reasons.append("本轮信息量较少")
+        if n_slots <= 2:
+            reasons.append("关键项目槽位仍未补全")
+    else:
+        if n_slots >= 3:
+            reasons.append("项目关键信息已经较完整")
+        if concrete_hits >= 3:
+            reasons.append("已进入具体场景/方案描述")
+        if n_chars >= 180 or complexity >= 2:
+            reasons.append("表达展开度已支持更深入分析")
+        if n_entities >= 5:
+            reasons.append("跨轮实体积累较充分")
+
+    return {
+        "label": label,
+        "reason": "；".join(reasons[:3]) or ("偏探索交流" if label == "exploring" else "信息较完整"),
+        "exploring_score": exploring_score,
+        "mature_score": mature_score,
+        "char_count": n_chars,
+        "slot_count": n_slots,
+        "entity_count": n_entities,
+        "complexity": complexity,
+        "vague_hits": vague_hits,
+        "concrete_hits": concrete_hits,
+    }
+
+
 def _normalize_intent_shape(shape: Any, default: str = "single") -> str:
     value = str(shape or default).strip().lower()
     return value if value in {"single", "mixed"} else default
+
+
+def _assess_project_maturity(
+    message: str,
+    exploration_state: dict | None,
+    entity_count: int,
+    conversation_messages: list | None = None,
+    intent_shape: str = "single",
+    is_file: bool = False,
+) -> dict[str, Any]:
+    text = (message or "").strip()
+    exp = exploration_state or {}
+    conv = conversation_messages or []
+    signal_info = _assess_project_maturity_signals(
+        message=message,
+        exploration_state=exploration_state,
+        accumulated_entities=[{}] * max(entity_count, 0),
+        conversation_messages=conversation_messages,
+        intent_shape=intent_shape,
+    )
+    n_filled = int(exp.get("n_filled", 0) or 0)
+    char_len = len(text)
+    complexity = _message_complexity(text, conv)
+    vague_hits = int(signal_info.get("vague_hits", 0) or 0)
+    concrete_hits = int(signal_info.get("concrete_hits", 0) or 0)
+    label = str(signal_info.get("label") or "exploring")
+
+    if re.search(r"(项目|产品|方案|系统|平台).{0,10}(叫|是|做)", text):
+        concrete_hits += 1
+    if re.search(r"(用户|面向|服务).{0,18}(学生|老师|农民|企业|商家|家长|医院|合作社|村民)", text):
+        concrete_hits += 1
+    if re.search(r"(痛点|问题|困难|低效|成本|效率|场景|流程|环节|替代方案)", text):
+        concrete_hits += 1
+
+    score = 0
+    if is_file:
+        score += 4
+    if char_len >= 220:
+        score += 2
+    elif char_len >= 120:
+        score += 1
+    if intent_shape == "mixed":
+        score += 1
+    score += min(n_filled, 4)
+    score += min(entity_count // 2, 3)
+    score += min(concrete_hits, 3)
+    score -= min(vague_hits, 2)
+    if complexity >= 3:
+        score += 1
+    if char_len < 80 and n_filled <= 1:
+        score -= 1
+    if label == "mature":
+        score += 1
+
+    phase = str(exp.get("phase") or "")
+    maturity = "mature" if (
+        label == "mature"
+        or score >= 6
+        or (phase in ("validation", "full_analysis") and score >= 5)
+        or (n_filled >= 3 and char_len >= 120)
+    ) else "exploring"
+
+    return {
+        "project_maturity": maturity,
+        "readiness_score": score,
+        "char_len": char_len,
+        "filled_slots": n_filled,
+        "entity_count": entity_count,
+        "vague_hits": vague_hits,
+        "concrete_hits": concrete_hits,
+        "history_turns": len(conv),
+        "complexity": complexity,
+        "maturity_reason": str(signal_info.get("reason") or ""),
+        "exploring_score": signal_info.get("exploring_score", 0),
+        "mature_score": signal_info.get("mature_score", 0),
+    }
 
 
 def _keyword_score_table(text: str) -> dict[str, dict[str, Any]]:
@@ -767,7 +952,7 @@ def _compute_all_dim_activations(
         score = rel * unc * imp
         activations[dim] = {
             "score": round(score, 3),
-            "activated": score > 0.25 or ANALYSIS_DIMENSIONS[dim].get("required", False),
+            "activated": score > DIM_ACTIVATION_THRESHOLD or ANALYSIS_DIMENSIONS[dim].get("required", False),
             "components": {"relevance": round(rel, 2), "uncertainty": round(unc, 2), "impact": round(imp, 2)},
         }
     return activations
@@ -808,7 +993,7 @@ def _refine_dim_activations(
 
     for dim, act in activations.items():
         if not ANALYSIS_DIMENSIONS[dim].get("required"):
-            act["activated"] = act["score"] > 0.25
+            act["activated"] = act["score"] > DIM_ACTIVATION_THRESHOLD
         else:
             act["activated"] = True
 
@@ -1045,6 +1230,7 @@ def _select_reply_strategy(
     exploration_phase: str | None,
     complexity_tier: str = "simple",
     is_file: bool = False,
+    project_maturity: str | None = None,
 ) -> str:
     activated_dims = [d for d, a in activations.items() if a.get("activated")]
     has_contested = any(r.get("contested") for r in dim_results.values())
@@ -1056,7 +1242,13 @@ def _select_reply_strategy(
     _complex_intents = ("project_diagnosis", "business_model", "competition_prep",
                         "pressure_test", "evidence_check", "market_competitor")
 
+    if project_maturity == "exploring" and intent in _DISCOVERY_INTENTS and not is_file:
+        return "progressive"
     if exploration_phase in ("direction", "convergence"):
+        return "progressive"
+    # 即使 slot ≥3，如果实体极少（信息不足）也走 progressive
+    total_ents = sum(1 for r in dim_results.values() if r.get("value"))
+    if total_ents <= 2 and n_active <= 2 and not is_file:
         return "progressive"
     if intent == "learning_concept" and "method_bridge" in activated_dims:
         return "teach_concept"
@@ -2363,15 +2555,38 @@ def gather_context_node(state: WorkflowState) -> dict:
     top_fallacy = str(top_rule.get("fallacy_label") or "")
     preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])
 
-    # Cross-turn RAG dedup: collect case_ids already cited in earlier turns
+    # Cross-turn context reuse: collect case knowledge from earlier turns
     _history_case_ids: set[str] = set()
+    _history_rag_insights: list[str] = []
+    _history_graph_insights: list[str] = []
     for _hm in state.get("conversation_messages", []):
         _trace = _hm.get("agent_trace") if isinstance(_hm, dict) else None
-        if isinstance(_trace, dict):
-            _orch = _trace.get("orchestration") or _trace
-            for _cid in (_orch.get("rag_case_ids") or []):
-                if _cid:
-                    _history_case_ids.add(str(_cid))
+        if not isinstance(_trace, dict):
+            continue
+        _orch = _trace.get("orchestration") or _trace
+        for _cid in (_orch.get("rag_case_ids") or []):
+            if _cid:
+                _history_case_ids.add(str(_cid))
+        # Carry forward RAG enrichment insights from previous turns
+        _prev_enrich = str(_trace.get("rag_enrichment_insight") or "").strip()
+        if _prev_enrich and len(_prev_enrich) > 20:
+            _history_rag_insights.append(_prev_enrich[:300])
+        # Carry forward graph search hits as context
+        for _gh in (_trace.get("neo4j_graph_hits") or [])[:3]:
+            if isinstance(_gh, dict) and _gh.get("project_name"):
+                _dims = ", ".join(_gh.get("matched_dimensions", [])[:3])
+                _history_graph_insights.append(
+                    f"{_gh['project_name']}(维度:{_dims})"
+                )
+    _history_knowledge_ctx = ""
+    if _history_rag_insights or _history_graph_insights:
+        _parts = []
+        if _history_rag_insights:
+            _parts.append("前几轮搜到的案例启发: " + "; ".join(_history_rag_insights[-3:]))
+        if _history_graph_insights:
+            _dedup = list(dict.fromkeys(_history_graph_insights))[:5]
+            _parts.append("前几轮图谱搜到的相关项目: " + ", ".join(_dedup))
+        _history_knowledge_ctx = "\n".join(_parts)
 
     strategies = match_strategies(
         msg,
@@ -2611,8 +2826,15 @@ def gather_context_node(state: WorkflowState) -> dict:
                 "2. 具体化：'大学生' 比 '用户' 好，'AI智能分拣' 比 '技术' 好\n"
                 "3. 关系要完整：每对有逻辑关联的实体都建立关系\n"
                 "4. structural_gaps 要基于13维度检查缺什么：stakeholder/pain_point/solution/innovation/technology/market/competitor/resource/business_model/execution_step/risk_control/team/evidence\n"
-                "5. completeness_score(0-10)：覆盖维度越多分越高\n"
-                "6. section_scores: 对每个已出现的维度打分(0-10)\n\n"
+                "5. completeness_score(0-10)：**按已覆盖维度类型数+信息质量打分**\n"
+                "   - 1-2分：仅提到1-2种维度类型，且描述模糊\n"
+                "   - 3-4分：覆盖3-4种维度类型\n"
+                "   - 5-6分：覆盖5-6种维度类型\n"
+                "   - 7-8分：覆盖7-9种维度类型（不要求全部有证据，只要多数维度有具体内容即可给7分）\n"
+                "   - 9-10分：覆盖10种以上且各维度有充分的具体信息和数据\n"
+                "   注意：不要习惯性给5-6分，当学生确实提供了较多维度时必须给到7+\n"
+                "6. section_scores: 对每个已出现的维度打分(0-10)，信息越具体越高\n"
+                "7. student_identity: 如果学生提到了自己的身份信息（年级、专业、学校等），提取为对象，如{\"grade\":\"大二\",\"major\":\"计算机\"}\n\n"
                 "示例(实际应提取更多):\n"
                 '{"entities":[{"id":"e1","label":"6-12岁儿童家长","type":"stakeholder"},'
                 '{"id":"e2","label":"编程学习枯燥无反馈","type":"pain_point"},'
@@ -2629,8 +2851,9 @@ def gather_context_node(state: WorkflowState) -> dict:
                 '{"source":"e7","target":"e2","relation":"验证"}],'
                 '"structural_gaps":["缺少执行步骤","缺少风控措施","缺少团队介绍"],'
                 '"content_strengths":["目标用户清晰","痛点有证据支撑"],'
-                '"completeness_score":5,'
+                '"completeness_score":8,'
                 '"section_scores":{"stakeholder":8,"pain_point":7,"solution":6,"technology":5,"competitor":4,"market":3,"evidence":6,"business_model":4},'
+                '"student_identity":{"grade":"大二","major":"计算机"},'
                 '"insight":"项目方向明确，用户-痛点-方案链条清晰，但缺少执行路径和风控"}\n\n'
                 "要求：尽力提取，目标是完整描绘学生项目的知识图谱。即使信息模糊也要提取，用'(待明确)'标注。"
                 + _known_summary
@@ -2653,13 +2876,17 @@ def gather_context_node(state: WorkflowState) -> dict:
 
     def _task_hyper_teaching():
         if not _hypergraph_service:
+            logger.info("hyper_teaching: skipped — no hypergraph_service")
             return {"hypergraph_insight": {}}
         try:
             h = _hypergraph_service.insight(
                 category=cat, rule_ids=rule_ids,
                 preferred_edge_types=preferred_edge_types,
-                limit=6 if intent == "pressure_test" else 5,
+                limit=12 if intent == "pressure_test" else 10,
             )
+            _n_edges = len(h.get("edges", [])) if isinstance(h, dict) else 0
+            logger.info("hyper_teaching: ok=%s edges=%d cat=%s rules=%s",
+                        h.get("ok"), _n_edges, cat, rule_ids[:5])
             return {"hypergraph_insight": h}
         except Exception as exc:
             logger.warning("Hypergraph insight failed: %s", exc)
@@ -2730,7 +2957,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     with ThreadPoolExecutor(max_workers=max(1, len(l0_tasks))) as pool:
         future_map = {pool.submit(fn): fn.__name__ for fn in l0_tasks}
         try:
-            for future in as_completed(future_map, timeout=25):
+            for future in as_completed(future_map, timeout=55):
                 name = future_map[future]
                 try:
                     collected.update(future.result())
@@ -2739,7 +2966,7 @@ def gather_context_node(state: WorkflowState) -> dict:
         except TimeoutError:
             done_names = [future_map[f] for f in future_map if f.done()]
             pending_names = [future_map[f] for f in future_map if not f.done()]
-            logger.warning("gather L0 timed out (25s) — done=%s pending=%s", done_names, pending_names)
+            logger.warning("gather L0 timed out (55s) — done=%s pending=%s", done_names, pending_names)
             for f in future_map:
                 if not f.done():
                     f.cancel()
@@ -2754,15 +2981,29 @@ def gather_context_node(state: WorkflowState) -> dict:
         current_rels=kg.get("relationships", []),
         conversation_messages=conv_messages,
     )
+    _maturity_info = _assess_project_maturity(
+        message=state.get("message", ""),
+        exploration_state=state.get("exploration_state"),
+        entity_count=len(accumulated_entities),
+        conversation_messages=conv_messages,
+        intent_shape=_normalize_intent_shape(state.get("intent_shape", "single")),
+        is_file=is_file,
+    )
     incremental_stats = {
         "total_accumulated": len(accumulated_entities),
         "new_this_turn": new_entity_count,
         "total_rels": len(accumulated_rels),
-        "project_maturity": "mature" if len(accumulated_entities) >= 5 else "exploring",
+        "project_maturity": _maturity_info.get("project_maturity", "exploring"),
+        "readiness_score": _maturity_info.get("readiness_score", 0),
+        "message_chars": _maturity_info.get("char_len", 0),
+        "filled_slots": _maturity_info.get("filled_slots", 0),
+        "vague_hits": _maturity_info.get("vague_hits", 0),
+        "concrete_hits": _maturity_info.get("concrete_hits", 0),
     }
     logger.info(
-        "incremental KG: %d total entities (%d new), %d rels",
+        "incremental KG: %d total entities (%d new), %d rels, maturity=%s, readiness=%s",
         len(accumulated_entities), new_entity_count, len(accumulated_rels),
+        incremental_stats.get("project_maturity"), incremental_stats.get("readiness_score"),
     )
 
     _actual_entity_count = len(accumulated_entities)
@@ -2781,13 +3022,24 @@ def gather_context_node(state: WorkflowState) -> dict:
         "funding_investment", "company_operations", "startup_execution",
     )
 
-    # 超图教学洞察：基于诊断规则和类别，不依赖实体数量
-    # 只要有规则触发或者是项目类intent就可以运行
-    _need_hyper_teaching = (
-        (is_file or intent in _hyper_teaching_intents)
-        and (_actual_rule_count >= 1 or _actual_entity_count >= 2)
+    # 超图教学洞察：只要是项目相关intent就运行——insight()本身用category+rules搜索
+    _need_hyper_teaching = bool(
+        _hypergraph_service
+        and (is_file or is_project_intent or intent in _hyper_teaching_intents)
     )
-    _need_hyper_student = _actual_entity_count >= _PROJECT_MATURITY_THRESHOLD
+    _need_hyper_student = bool(
+        _hypergraph_service
+        and is_project_intent
+        and (
+            incremental_stats.get("project_maturity") == "mature"
+            or _actual_entity_count >= 5
+            or (
+                _actual_entity_count >= 3
+                and int(incremental_stats.get("filled_slots", 0) or 0) >= 3
+                and int(incremental_stats.get("concrete_hits", 0) or 0) >= 2
+            )
+        )
+    )
     # Neo4j 图搜索门槛更低：只要有2个实体就触发，不用等成熟期
     # 探索期也能从案例库的结构化图谱中得到启发
     _need_neo4j_graph = (
@@ -2802,7 +3054,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     #   探索期: 只用 KG+RAG 轻量引导
     #   成熟期: 加入超图+Neo4j深度图搜索
     # ════════════════════════════════════════════════════════════════
-    _maturity_label = "mature" if _actual_entity_count >= _PROJECT_MATURITY_THRESHOLD else "exploring"
+    _maturity_label = str(incremental_stats.get("project_maturity") or "exploring")
     logger.info(
         "gather progressive: entities=%d rules=%d maturity=%s → hyper_teaching=%s hyper_student=%s neo4j_graph=%s",
         _actual_entity_count, _actual_rule_count, _maturity_label,
@@ -2832,17 +3084,55 @@ def gather_context_node(state: WorkflowState) -> dict:
     if _need_neo4j_graph:
         def _task_neo4j_graph():
             try:
-                ents = kg.get("entities", [])
-                labels = [str(e.get("label", "")) for e in ents if isinstance(e, dict)][:12]
-                types = [str(e.get("type", "")) for e in ents if isinstance(e, dict)][:12]
+                ents = accumulated_entities if accumulated_entities else kg.get("entities", [])
+                labels = [str(e.get("label", "")) for e in ents if isinstance(e, dict)][:16]
+                types = [str(e.get("type", "")) for e in ents if isinstance(e, dict)][:16]
+
+                _profile = (state.get("project_state") or {}).get("student_profile", {})
+                if isinstance(_profile, dict):
+                    for domain in (_profile.get("interest_domains") or [])[:3]:
+                        if domain and domain not in labels:
+                            labels.append(str(domain))
+                            types.append("market")
+
                 existing_ids = {c.get("case_id", "") for c in (collected.get("rag_cases") or [])}
+
+                # Check if entities changed significantly vs previous turn
+                _prev_graph_labels: set[str] = set()
+                _prev_hits: list[dict] = []
+                for _hm in reversed(conv_messages):
+                    _tr = _hm.get("agent_trace") if isinstance(_hm, dict) else None
+                    if not isinstance(_tr, dict):
+                        continue
+                    _prev_hits = _tr.get("neo4j_graph_hits") or []
+                    _prev_kg = _tr.get("kg_analysis") or {}
+                    for _pe in (_prev_kg.get("entities") or []):
+                        if isinstance(_pe, dict) and _pe.get("label"):
+                            _prev_graph_labels.add(str(_pe["label"]).strip().lower())
+                    break
+
+                _cur_labels_set = {l.strip().lower() for l in labels if l.strip()}
+                _new_labels = _cur_labels_set - _prev_graph_labels
+                _reuse = (
+                    _prev_hits
+                    and len(_new_labels) <= 1
+                    and len(_prev_graph_labels) > 0
+                )
+                if _reuse:
+                    logger.info(
+                        "Neo4j graph search: reusing %d prev hits (new_labels=%s)",
+                        len(_prev_hits), _new_labels,
+                    )
+                    return {"neo4j_graph_hits": _prev_hits}
+
                 logger.info(
-                    "Neo4j graph search: labels=%s types=%s exclude=%d",
-                    labels[:5], types[:5], len(existing_ids),
+                    "Neo4j graph search: labels=%s types=%s cat=%s exclude=%d new_vs_prev=%s",
+                    labels[:5], types[:5], cat, len(existing_ids), _new_labels or "first-turn",
                 )
                 hits = _graph_service.search_by_dimension_entities(
                     entity_labels=labels, entity_types=types,
-                    exclude_ids=list(existing_ids | (_history_case_ids or set())), limit=4,
+                    exclude_ids=list(existing_ids | (_history_case_ids or set())),
+                    limit=5, category=cat,
                 )
                 logger.info("Neo4j graph search result: %d hits", len(hits))
                 return {"neo4j_graph_hits": hits}
@@ -2862,7 +3152,7 @@ def gather_context_node(state: WorkflowState) -> dict:
         with ThreadPoolExecutor(max_workers=max(1, len(l1_tasks))) as pool:
             future_map_l1 = {pool.submit(fn): name for name, fn in l1_tasks.items()}
             try:
-                for future in as_completed(future_map_l1, timeout=25):
+                for future in as_completed(future_map_l1, timeout=45):
                     name = future_map_l1[future]
                     try:
                         result = future.result()
@@ -2877,7 +3167,7 @@ def gather_context_node(state: WorkflowState) -> dict:
             except TimeoutError:
                 done_names = [future_map_l1[f] for f in future_map_l1 if f.done()]
                 pending_names = [future_map_l1[f] for f in future_map_l1 if not f.done()]
-                logger.warning("gather L1 timed out (25s) — done=%s pending=%s", done_names, pending_names)
+                logger.warning("gather L1 timed out (45s) — done=%s pending=%s", done_names, pending_names)
                 for f in future_map_l1:
                     if not f.done():
                         f.cancel()
@@ -3060,7 +3350,7 @@ def gather_context_node(state: WorkflowState) -> dict:
         with ThreadPoolExecutor(max_workers=len(_insight_tasks)) as _ipool:
             _ifutures = {_ipool.submit(fn): label for label, fn in _insight_tasks}
             try:
-                for _if in as_completed(_ifutures, timeout=8):
+                for _if in as_completed(_ifutures, timeout=20):
                     _label = _ifutures[_if]
                     try:
                         _ires = _if.result()
@@ -3073,7 +3363,10 @@ def gather_context_node(state: WorkflowState) -> dict:
                     except Exception as _iexc:
                         logger.warning("insight %s failed: %s", _label, _iexc)
             except TimeoutError:
-                logger.warning("insight engine timed out (8s), skipping remaining")
+                logger.warning("insight engine timed out (20s), skipping remaining")
+
+    # Extract student identity from KG if present
+    _student_identity = kg.get("student_identity") if isinstance(kg, dict) else None
 
     return {
         "diagnosis": diag_data,
@@ -3097,7 +3390,9 @@ def gather_context_node(state: WorkflowState) -> dict:
         "web_facts": web_facts,
         "hyper_narrative": hyper_narrative,
         "case_transfer_insight": case_transfer_insight,
+        "history_knowledge_ctx": _history_knowledge_ctx,
         "_data_maturity": _data_maturity,
+        "_student_identity": _student_identity,
         "_l1_hyper_teaching_ran": _need_hyper_teaching,
         "_l1_hyper_student_ran": _need_hyper_student,
         "_l1_neo4j_graph_ran": _need_neo4j_graph,
@@ -3239,21 +3534,42 @@ def _fmt_hyper_student(hs: dict) -> str:
 
 
 def _fmt_graph_hits_ctx(hits: list[dict]) -> str:
-    """Format neo4j_graph_hits into a concise LLM-readable context string."""
+    """Format neo4j_graph_hits into a rich LLM-readable context string.
+
+    Includes project context (pains, solutions, innovations, biz_models) so
+    agents can actually *use* the cross-project insights in their analysis.
+    """
     if not hits:
         return ""
     _SRC_LABELS = {"shared_node": "共享节点", "complement": "互补结构", "keyword": "关键词"}
     parts = []
     for gh in hits[:4]:
+        pname = gh.get("project_name", "未知")
+        cat = gh.get("category", "")
         dims = ", ".join(gh.get("matched_dimensions", [])[:4])
-        nodes = "; ".join(gh.get("matched_nodes", [])[:4])
         sources = gh.get("match_sources", [])
         src_str = "+".join(_SRC_LABELS.get(s, s) for s in sources) if sources else ""
-        line = f"- {gh.get('project_name', '')}  维度:[{dims}]  节点:[{nodes}]"
+        header = f"■ {pname}"
+        if cat:
+            header += f" [{cat}]"
+        header += f"  (匹配维度:{dims}"
         if src_str:
-            line += f"  来源:{src_str}"
-        parts.append(line)
-    return "知识图谱跨项目关联(图遍历):\n" + "\n".join(parts) + "\n"
+            header += f", 来源:{src_str}"
+        header += ")"
+        ctx = gh.get("context") or {}
+        ctx_lines = []
+        if ctx.get("pains"):
+            ctx_lines.append(f"  痛点: {'; '.join(ctx['pains'][:3])}")
+        if ctx.get("solutions"):
+            ctx_lines.append(f"  方案: {'; '.join(ctx['solutions'][:3])}")
+        if ctx.get("innovations"):
+            ctx_lines.append(f"  创新: {'; '.join(ctx['innovations'][:3])}")
+        if ctx.get("biz_models"):
+            ctx_lines.append(f"  商业: {'; '.join(ctx['biz_models'][:2])}")
+        if ctx.get("evidences"):
+            ctx_lines.append(f"  证据: {'; '.join(ctx['evidences'][:2])}")
+        parts.append(header + ("\n" + "\n".join(ctx_lines) if ctx_lines else ""))
+    return "## 知识图谱跨项目启发（请在回答中引用这些案例的做法来启发学生）\n" + "\n".join(parts) + "\n"
 
 
 def _fmt_hyper_for_agent(
@@ -3821,6 +4137,176 @@ def _get_competition_hint(comp_type: str, agent_role: str) -> str:
     return hints.get(agent_role, "")
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  V3: Per-dimension LLM call + hyper injection
+# ═══════════════════════════════════════════════════════════════════
+
+_DIM_PROMPT_HINTS: dict[str, str] = {
+    "status_judgment": "判断项目处于什么阶段、整体逻辑是否通顺。简洁直说，不要写报告。",
+    "core_bottleneck": "找到当前最制约项目推进的一到两个瓶颈，解释为什么是瓶颈。",
+    "structural_cause": "解释表层问题背后的深层结构性原因，不要只停在表面。",
+    "counter_intuitive": "指出学生可能忽略的盲区或过于乐观的假设，用反例或数据支撑。",
+    "method_bridge": "讲清楚一个概念或方法论，并桥接回学生的具体项目。",
+    "teacher_criteria": "从评审者/老师的视角说明会怎么判断这部分，给出得分区间参考。",
+    "external_reference": "引用真实竞品、行业数据或案例来做对比分析。",
+    "strategy_directions": "给出2-3条可选策略方向或打法，不要只有一种答案。",
+    "action_plan": "拆出本周最该做的1-3件可执行的事和验收标准。",
+    "probing_questions": "给出2-4个苏格拉底式追问，帮学生深入思考。",
+}
+
+
+def _fmt_hyper_for_dim(dim: str, hyper_insight: dict | None) -> str:
+    """从超图教学超边中筛选与该维度相关的边，返回格式化文本。"""
+    if not isinstance(hyper_insight, dict):
+        return ""
+    edges = hyper_insight.get("edges") or []
+    if not edges:
+        return ""
+    _dim_keywords: dict[str, list[str]] = {
+        "status_judgment": ["阶段", "成熟度", "完整度", "覆盖"],
+        "core_bottleneck": ["瓶颈", "风险", "缺陷", "不足", "薄弱"],
+        "structural_cause": ["结构", "根因", "深层", "系统性"],
+        "counter_intuitive": ["盲区", "假设", "反例", "反直觉", "乐观"],
+        "method_bridge": ["方法", "框架", "模型", "概念", "理论"],
+        "teacher_criteria": ["评分", "评委", "评审", "标准", "得分"],
+        "external_reference": ["案例", "竞品", "行业", "数据", "对比"],
+        "strategy_directions": ["策略", "方向", "路径", "选择", "打法"],
+        "action_plan": ["行动", "执行", "计划", "步骤", "验证"],
+        "probing_questions": ["追问", "思考", "深入", "验证"],
+    }
+    keywords = _dim_keywords.get(dim, [])
+    matched = []
+    for edge in edges:
+        if not isinstance(edge, dict):
+            continue
+        note = str(edge.get("teaching_note") or "")
+        family = str(edge.get("family_label") or edge.get("type") or "")
+        text = f"{family} {note}".lower()
+        if any(kw in text for kw in keywords) or len(matched) < 2:
+            matched.append(f"[{family}] {note[:100]}")
+        if len(matched) >= 3:
+            break
+    if not matched:
+        for edge in edges[:2]:
+            if isinstance(edge, dict) and edge.get("teaching_note"):
+                matched.append(f"[{edge.get('family_label', '')}] {str(edge['teaching_note'])[:100]}")
+    if not matched:
+        return ""
+    return "超图教学启发:\n" + "\n".join(f"- {m}" for m in matched)
+
+
+def _build_dim_context(dim: str, state: dict) -> str:
+    """为单个维度构建丰富的上下文，确保分析有理有据。"""
+    parts: list[str] = []
+    kg = state.get("kg_analysis", {}) if isinstance(state.get("kg_analysis"), dict) else {}
+    diag = state.get("diagnosis", {}) if isinstance(state.get("diagnosis"), dict) else {}
+
+    # ── 通用上下文（所有维度都能看到）──
+    if kg.get("insight"):
+        parts.append(f"KG洞察: {kg['insight'][:300]}")
+    if diag.get("bottleneck"):
+        parts.append(f"诊断瓶颈: {diag['bottleneck'][:200]}")
+    gaps = kg.get("structural_gaps", [])
+    if gaps:
+        parts.append(f"结构缺口: {', '.join(str(g) for g in gaps[:5])}")
+    strengths = kg.get("content_strengths", [])
+    if strengths:
+        parts.append(f"项目优势: {', '.join(str(s) for s in strengths[:4])}")
+
+    # ── RAG案例上下文（所有维度都能参考）──
+    rag_ctx = state.get("rag_context", "")
+    if rag_ctx:
+        parts.append(f"相似案例参考:\n{rag_ctx[:600]}")
+    rag_insight = state.get("rag_enrichment_insight", "")
+    if rag_insight:
+        parts.append(f"案例迁移洞察: {rag_insight[:300]}")
+
+    # ── Neo4j 跨项目图谱启发 (rich context) ──
+    neo4j_hits = state.get("neo4j_graph_hits", [])
+    if neo4j_hits:
+        graph_ctx_str = _fmt_graph_hits_ctx(neo4j_hits)
+        if graph_ctx_str:
+            parts.append(graph_ctx_str)
+
+    # ── 维度专项上下文 ──
+    if dim in ("teacher_criteria",):
+        rules = diag.get("triggered_rules", []) or []
+        if rules:
+            rule_summary = "; ".join(
+                f"{r.get('name', '')}({r.get('severity', '')})" for r in rules[:5] if isinstance(r, dict)
+            )
+            parts.append(f"触发规则: {rule_summary}")
+
+    if dim in ("external_reference", "counter_intuitive"):
+        web_facts = state.get("web_facts", []) or state.get("web_search_result", {}).get("facts", [])
+        if isinstance(web_facts, list):
+            for wf in web_facts[:3]:
+                if isinstance(wf, dict):
+                    parts.append(f"网络数据: {wf.get('fact', str(wf))[:150]}")
+
+    # ── 对话历史 ──
+    conv = state.get("conversation_messages", [])
+    if conv:
+        recent = conv[-4:]
+        conv_ctx = "\n".join(
+            f"{'学生' if m.get('role') == 'user' else 'AI'}: {str(m.get('content', ''))[:200]}"
+            for m in recent if isinstance(m, dict)
+        )
+        parts.append(f"近期对话:\n{conv_ctx}")
+
+    # ── 超图教学启发 ──
+    hyper_ctx = _fmt_hyper_for_dim(dim, state.get("hypergraph_insight"))
+    if hyper_ctx:
+        parts.append(hyper_ctx)
+
+    return "\n".join(parts)
+
+
+def _write_dimension(dim: str, state: dict) -> dict:
+    """为单个维度生成有深度的分析内容。"""
+    dim_info = ANALYSIS_DIMENSIONS.get(dim, {})
+    hint = _DIM_PROMPT_HINTS.get(dim, dim_info.get("desc", ""))
+    ctx = _build_dim_context(dim, state)
+    msg = state.get("message", "")
+    mode = state.get("mode", "coursework")
+
+    mode_note = {
+        "coursework": "教学引导视角",
+        "competition": "评委/竞赛视角",
+        "learning": "实操推进视角",
+    }.get(mode, "")
+
+    result = _llm.chat_text(
+        system_prompt=(
+            f"你是「{dim_info.get('label', dim)}」分析专家。{mode_note}\n"
+            f"任务：{hint}\n\n"
+            "## 分析要求\n"
+            "- 200-600字的深度分析，有理有据\n"
+            "- 如果上下文中有案例参考或图谱启发，必须引用并对比（'类似项目XX的做法是…'）\n"
+            "- 如果有超图教学启发，自然融入分析\n"
+            "- 给出具体判断，不要泛泛而谈（不要'需要考虑'、'可以尝试'，要说'你的XX存在YY问题，因为ZZ'）\n"
+            "- 不要写标题，不要重复学生原话，不要说'以下是我的分析'\n"
+            "- 直接开始分析内容\n"
+        ),
+        user_prompt=(
+            f"学生说：{msg[:1500]}\n\n"
+            + (f"背景信息：\n{ctx}\n" if ctx else "")
+        ),
+        model=settings.llm_synthesis_model,
+        temperature=0.3,
+    )
+    hyper_ctx_sent = _fmt_hyper_for_dim(dim, state.get("hypergraph_insight"))
+    return {
+        "dim": dim,
+        "value": result or "",
+        "confidence": 0.75 if result else 0.2,
+        "evidence_source": "dim_analysis",
+        "writer": DIM_OWNERSHIP.get(dim, {}).get("writer", "coach"),
+        "challenges": [],
+        "hyper_context_sent": hyper_ctx_sent,
+    }
+
+
 def _coach_analyze(state: dict) -> dict:
     msg = state.get("message", "")
     mode = state.get("mode", "coursework")
@@ -3831,6 +4317,7 @@ def _coach_analyze(state: dict) -> dict:
     next_task = state.get("next_task", {}) if isinstance(state.get("next_task"), dict) else {}
     ws_ctx = _fmt_ws(ws)
     conv_ctx = _build_conv_ctx(state)
+    history_knowledge = state.get("history_knowledge_ctx", "")
     hs = state.get("hypergraph_student", {})
     hyper_insight = state.get("hypergraph_insight", {})
     hs_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "coach", incremental_stats=state.get("incremental_stats"))
@@ -3894,15 +4381,34 @@ def _coach_analyze(state: dict) -> dict:
         except Exception:
             pass
 
-    # Append dimension-level graph traversal hits (dual-channel #2, only when mature)
+    # Append rich graph traversal context (dual-channel #2)
     graph_hits = state.get("neo4j_graph_hits") or []
     if graph_hits:
-        gh_parts = []
-        for gh in graph_hits[:4]:
-            dims = ", ".join(gh.get("matched_dimensions", [])[:4])
-            nodes = "; ".join(gh.get("matched_nodes", [])[:3])
-            gh_parts.append(f"{gh.get('project_name', '')}(维度命中:{dims}; 节点:{nodes})")
-        neo4j_ctx += ("\n" if neo4j_ctx else "") + "维度级跨项目启发: " + " | ".join(gh_parts)
+        graph_ctx = _fmt_graph_hits_ctx(graph_hits)
+        if graph_ctx:
+            neo4j_ctx += ("\n" if neo4j_ctx else "") + graph_ctx
+
+    cross_project_hints: list[str] = []
+    for ec in enriched_cases[:2]:
+        name = str(ec.get("project_name") or ec.get("case_id") or "相似项目").strip()
+        cov = ec.get("graph_rubric_covered", []) or []
+        uncov = ec.get("graph_rubric_uncovered", []) or []
+        shared_rules = (ec.get("rule_overlap") or {}).get("shared", []) or []
+        if cov:
+            cross_project_hints.append(f"像「{name}」这类案例，通常会先把 {','.join(map(str, cov[:2]))} 讲实，再往后扩展。")
+        elif shared_rules:
+            cross_project_hints.append(f"「{name}」和你碰到过相似追问，说明 {','.join(map(str, shared_rules[:2]))} 这类问题值得你更早补证据。")
+        elif uncov:
+            cross_project_hints.append(f"从「{name}」的经验看，{','.join(map(str, uncov[:2]))} 这些部分如果一直空着，后续会反复被追问。")
+    for gh in graph_hits[:2]:
+        gname = str(gh.get("project_name") or "相关项目").strip()
+        dims = [str(x).strip() for x in (gh.get("matched_dimensions") or []) if str(x).strip()]
+        nodes = [str(x).strip() for x in (gh.get("matched_nodes") or []) if str(x).strip()]
+        if dims:
+            cross_project_hints.append(f"图谱里和你最接近的「{gname}」重点落在 {', '.join(dims[:2])}，你也可以先把这两块说具体。")
+        elif nodes:
+            cross_project_hints.append(f"跨项目图谱显示「{gname}」常把 {', '.join(nodes[:2])} 连起来讲，这对你梳理项目主线也有帮助。")
+    cross_project_hints = list(dict.fromkeys([h for h in cross_project_hints if h]))[:3]
 
     stage_label = _project_stage_label(str(diag.get("project_stage", "")))
     bottleneck = str(diag.get("bottleneck") or "当前材料里最核心的缺口还没有被充分证明。")
@@ -3942,14 +4448,19 @@ def _coach_analyze(state: dict) -> dict:
         _exploring_hint = ""
         if _is_exploring:
             _exploring_hint = (
-                f"\n**当前项目处于探索期（已积累{_entity_total}个实体，不足5个）。**\n"
+                f"\n**当前项目处于探索期（综合信号判定：实体{_entity_total}个，准备度{_inc_stats.get('readiness_score', 0)}）。**\n"
                 "你的首要任务是引导学生把想法说清楚、想透彻，而不是急于做全面诊断。\n"
                 "策略：\n"
-                "- 先肯定学生的方向感觉，再用追问帮他把模糊的部分具体化\n"
-                "- 重点帮学生厘清：目标用户是谁、核心痛点是什么、为什么是你来做\n"
+                "- 先肯定学生的方向感觉，找到他想法中有意思的地方，具体说明为什么有意思\n"
+                "- 用追问帮学生把模糊的部分具体化，而不是直接给结论或框架\n"
+                "- 重点帮学生厘清：目标用户是谁、核心痛点是什么、为什么你来做这件事有优势\n"
                 "- 如果知识图谱搜到了相关线索，用'你有没有想过XX方向'的方式启发，而不是直接断言\n"
+                "- 如果有跨项目启示，至少把1-2条转成对当前项目有用的启发，不要只说'找到了相似案例'\n"
                 "- 不要过早引入商业模式、竞品矩阵、财务测算等复杂框架\n"
-                "- guiding_questions 应侧重帮学生补全基本信息，而非挑战假设\n"
+                "- structural_gaps不要在回答中全部列出，探索期缺东西是正常的\n"
+                "- guiding_questions 应侧重帮学生补全基本信息，用'你觉得'、'你有没有想过'开头\n"
+                "- opening_assessment 不要写成'项目缺少XX、XX、XX'这种批评清单，而是说'你提到了XX这个方向，我觉得有意思的地方是...'这种引导开场\n"
+                "- secondary_insights 不要多于2条，探索期不需要大量洞察\n"
             )
 
         coach_json = _llm.chat_json(
@@ -3963,6 +4474,7 @@ def _coach_analyze(state: dict) -> dict:
                 "- teacher_criteria 说明老师通常会用什么标准判断这部分有没有写清、想清、证据是否够\n"
                 "- secondary_insights 给出按材料复杂度展开的2-6条补充洞察，不要固定三个；可以包含疑点、盲区、替代方案、迁移成本、跨学科视角\n"
                 "- knowledge_extensions 给出0-4条外部延伸视角，可来自案例知识库、行业公开事实、跨学科方法或可借用框架\n"
+                "- 如果输入里已经提供了案例对比、图谱关联、跨项目启示，至少把其中1条改写进 knowledge_extensions 或 secondary_insights，不要只在 source_note 里提到\n"
                 "- next_focus 只给一个最值得先观察的切入点，不要展开成任务清单\n"
                 "- guiding_questions 按材料复杂度给2-6个贴合学生项目的启发式追问；问题少就少给，问题多就多给，不要固定成两个或三个\n"
                 "- 如果你建议验证、调研或查资料，必须说清楚具体该验证什么判断、找哪类人、看什么行为信号；不要泛泛说“做问卷”\n"
@@ -3972,7 +4484,11 @@ def _coach_analyze(state: dict) -> dict:
             ),
             user_prompt=(
                 f"模式提示: {mode_hint}\n"
-                + (f"项目成熟度: 探索期(实体{_entity_total}个)，以引导为主\n" if _is_exploring else f"项目成熟度: 成熟期(实体{_entity_total}个)，可深入分析\n")
+                + (
+                    f"项目成熟度: 探索期(实体{_entity_total}个, 准备度{_inc_stats.get('readiness_score', 0)}), 以引导为主\n"
+                    if _is_exploring else
+                    f"项目成熟度: 成熟期(实体{_entity_total}个, 准备度{_inc_stats.get('readiness_score', 0)}), 可深入分析\n"
+                )
                 + f"学生材料: {msg[:1400]}\n"
                 + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
                 + f"项目阶段: {stage_label}\n"
@@ -3984,8 +4500,9 @@ def _coach_analyze(state: dict) -> dict:
                 + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
                 + (f"联网搜索: {ws_ctx[:300]}\n" if ws_ctx else "")
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
+                + (f"前几轮积累的知识: {history_knowledge}\n" if history_knowledge else "")
             ),
-            model=settings.llm_reason_model,
+            model=settings.llm_fast_model if _is_exploring else settings.llm_reason_model,
             temperature=0.35,
         ) if _llm.enabled else {}
         if not isinstance(coach_json, dict):
@@ -3995,30 +4512,53 @@ def _coach_analyze(state: dict) -> dict:
             coach_questions = default_questions[:question_limit]
         secondary_insights = [str(item).strip() for item in (coach_json.get("secondary_insights") or []) if str(item).strip()]
         knowledge_extensions = [str(item).strip() for item in (coach_json.get("knowledge_extensions") or []) if str(item).strip()]
-        analysis = (
-            "## 我先说判断\n"
-            f"{str(coach_json.get('opening_assessment') or bottleneck).strip()}\n\n"
-            "## 为什么这一步值得先想清楚\n"
-            f"{str(coach_json.get('why_this_matters') or impact_if_unfixed).strip()}\n\n"
-            "## 把它变成你以后也能复用的方法\n"
-            f"{str(coach_json.get('method_bridge') or '你可以把当前问题拆回“用户-场景-证据-动作”四层，先确认自己到底卡在判断、证据还是执行。').strip()}\n\n"
-        )
+        if cross_project_hints:
+            existing_norm = {item.replace(" ", "") for item in knowledge_extensions}
+            for hint in cross_project_hints:
+                if hint.replace(" ", "") not in existing_norm:
+                    knowledge_extensions.append(hint)
+                if len(knowledge_extensions) >= 4:
+                    break
+        if _is_exploring:
+            analysis = (
+                f"{str(coach_json.get('opening_assessment') or bottleneck).strip()}\n\n"
+                f"{str(coach_json.get('why_this_matters') or impact_if_unfixed).strip()}\n\n"
+                "如果把这一步放到以后也能复用的方法里看，"
+                f"{str(coach_json.get('method_bridge') or '你可以先把想法拆成“谁会先用、为什么现在就会用、你凭什么先做出来”这三个问题。').strip()}\n"
+            )
+        else:
+            analysis = (
+                "## 我先说判断\n"
+                f"{str(coach_json.get('opening_assessment') or bottleneck).strip()}\n\n"
+                "## 为什么这一步值得先想清楚\n"
+                f"{str(coach_json.get('why_this_matters') or impact_if_unfixed).strip()}\n\n"
+                "## 把它变成你以后也能复用的方法\n"
+                f"{str(coach_json.get('method_bridge') or '你可以把当前问题拆回“用户-场景-证据-动作”四层，先确认自己到底卡在判断、证据还是执行。').strip()}\n\n"
+            )
         teacher_criteria = str(coach_json.get("teacher_criteria") or "").strip()
-        if teacher_criteria:
+        if teacher_criteria and not _is_exploring:
             analysis += f"## 老师通常会怎么判断这一块有没有想清楚\n{teacher_criteria}\n\n"
         if secondary_insights:
-            analysis += "## 继续往下拆，还会冒出来这些问题\n" + "\n".join(f"- {item}" for item in secondary_insights[:max(question_limit, 3)]) + "\n\n"
+            analysis += (
+                ("继续往下想，你还可以顺手补看这几件事：\n" if _is_exploring else "## 继续往下拆，还会冒出来这些问题\n")
+                + "\n".join(f"- {item}" for item in secondary_insights[:max(question_limit, 3)])
+                + "\n\n"
+            )
         if knowledge_extensions:
-            analysis += "## 你可以顺手借用的外部视角\n" + "\n".join(f"- {item}" for item in knowledge_extensions[:4]) + "\n\n"
+            analysis += (
+                ("如果把外部经验借过来，可以先参考这些启发：\n" if _is_exploring else "## 你可以顺手借用的外部视角\n")
+                + "\n".join(f"- {item}" for item in knowledge_extensions[:4])
+                + "\n\n"
+            )
         analysis += (
-            "## 你现在最该盯住的一个观察点\n"
-            f"{str(coach_json.get('next_focus') or '先盯住最可能决定成败的那个判断，不要急着同时推进所有模块。').strip()}\n\n"
-            "## 你可以先追着自己问的几个问题\n"
+            ("你现在最该先盯住的一个点是：\n" if _is_exploring else "## 你现在最该盯住的一个观察点\n")
+            + f"{str(coach_json.get('next_focus') or '先盯住最可能决定成败的那个判断，不要急着同时推进所有模块。').strip()}\n\n"
+            + ("你可以先顺着这些问题往下想：\n" if _is_exploring else "## 你可以先追着自己问的几个问题\n")
             + "\n".join(f"- {item}" for item in coach_questions[:question_limit])
         )
         source_note = str(coach_json.get("source_note") or "").strip()
         if source_note:
-            analysis += f"\n\n## 这次主要依据\n{source_note}"
+            analysis += f"\n\n{'这次我主要参考了：' if _is_exploring else '## 这次主要依据\n'}{source_note}"
     else:
         _comp_ontology_ctx = _get_competition_ontology_context(state.get("competition_type", "")) if mode == "competition" else ""
         _comp_coach_extra = (
@@ -4063,11 +4603,12 @@ def _coach_analyze(state: dict) -> dict:
                 + (f"案例对比洞察: {rag_insight}\n" if rag_insight else "")
                 + (f"联网搜索: {ws_ctx[:350]}\n" if ws_ctx else "")
                 + (f"图谱关联: {neo4j_ctx}\n" if neo4j_ctx else "")
+                + (f"前几轮积累的知识: {history_knowledge}\n" if history_knowledge else "")
                 + "已有证据:\n"
                 + "\n".join(f"- {item}" for item in evidence_used[:3])
                 + f"\n影响提示: {impact_if_unfixed}\n"
             ),
-            model=settings.llm_reason_model,
+            model=settings.llm_fast_model if _is_exploring else settings.llm_reason_model,
             temperature=0.38,
         ) if _llm.enabled else {}
         if not isinstance(coach_json, dict):
@@ -4173,8 +4714,9 @@ def _analyst_analyze(state: dict) -> dict:
     if _analyst_exploring:
         _analyst_exploring_hint = (
             "\n**注意：学生项目仍在探索期，信息量较少。**\n"
-            "你应该：用温和的方式指出1-2个最值得思考的方向，而不是列出大量风险。\n"
+            "你应该：用温和的方式指出1-2个最值得思考的风险方向，而不是列出大量风险。\n"
             "帮学生看清'现在最该先搞清楚什么'，而不是批判项目不完善。\n"
+            "严禁说'缺少XX分析'、'该项目是空想'之类的措辞，学生还在构思阶段。\n"
         )
 
     analysis = _llm.chat_text(
@@ -4723,6 +5265,34 @@ def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
     return ordered, reasoning
 
 
+def _dim_results_to_agent_outputs(dim_results: dict[str, dict]) -> dict:
+    """Convert V3 dim_results to legacy agent output format for frontend display."""
+    writer_groups: dict[str, list[str]] = {}
+    for dim, dr in dim_results.items():
+        writer = dr.get("writer", "coach")
+        text = str(dr.get("value") or "").strip()
+        if not text:
+            continue
+        dim_label = ANALYSIS_DIMENSIONS.get(dim, {}).get("label", dim)
+        writer_groups.setdefault(writer, []).append(f"【{dim_label}】\n{text}")
+
+    outputs: dict[str, dict] = {}
+    for writer, sections in writer_groups.items():
+        display_name = AGENT_DISPLAY.get(writer, writer)
+        analysis = "\n\n".join(sections)
+        hyper_sent = ""
+        for dim, dr in dim_results.items():
+            if dr.get("writer") == writer and dr.get("hyper_context_sent"):
+                hyper_sent += dr["hyper_context_sent"] + "\n"
+        outputs[f"{writer}_output"] = {
+            "agent": display_name,
+            "analysis": analysis,
+            "tools_used": ["dim_analysis"],
+            "hyper_context_sent": hyper_sent.strip(),
+        }
+    return outputs
+
+
 def run_role_agents_node(state: WorkflowState) -> dict:
     intent = state.get("intent", "general_chat")
 
@@ -4744,169 +5314,194 @@ def run_role_agents_node(state: WorkflowState) -> dict:
             "nodes_visited": ["role_agents"],
         }
 
-    # ── V2: Dimension-driven agent selection + topological phased execution ──
+    # ── V3: Dimension-driven execution ──
     activations = state.get("dim_activations", {})
-    agents_to_run, agent_reasoning = _decide_agents_v2(state)
-    fallback_used = agent_reasoning.startswith("[兜底矩阵]")
+    activated_dims = [d for d, a in activations.items() if a.get("activated")]
+    n_activated = len(activated_dims)
 
-    if not agents_to_run:
-        logger.info("agent selection returned empty → orchestrator-only")
-        return {
-            "agents_called": ["[数据不足，直接回复]"],
+    logger.info(
+        "V3 dim check: n_activated=%d dims=%s intent=%s",
+        n_activated, activated_dims, intent,
+    )
+
+    # ── Decide Path A vs Path B based on dims + message complexity ──
+    _GUIDE_DIMS = ["status_judgment", "probing_questions", "strategy_directions"]
+    is_file = "[上传文件:" in state.get("message", "")
+    _msg_for_complexity = state.get("message", "")
+    _conv_for_complexity = state.get("conversation_messages", [])
+    _complexity_score = _message_complexity(_msg_for_complexity, _conv_for_complexity)
+    _tier_for_path = _complexity_tier(_complexity_score, _normalize_intent_shape(state.get("intent_shape", "single")))
+
+    use_path_a = (
+        n_activated <= 2
+        and not is_file
+        and _tier_for_path != "complex"
+        and len(_msg_for_complexity) < 500
+    )
+
+    # ── Path A: Guiding mode with auto-added dimensions ──
+    if use_path_a:
+        effective_dims = list(dict.fromkeys(activated_dims + [
+            d for d in _GUIDE_DIMS if d not in activated_dims
+        ]))
+
+        dim_results: dict[str, dict] = {}
+        agent_hyper_details: list[dict] = []
+
+        with ThreadPoolExecutor(max_workers=min(len(effective_dims), 4)) as pool:
+            future_map = {
+                pool.submit(_write_dimension, dim, dict(state)): dim
+                for dim in effective_dims
+            }
+            try:
+                for future in as_completed(future_map, timeout=45):
+                    dim = future_map[future]
+                    try:
+                        dr = future.result()
+                        dim_results[dim] = dr
+                        if dr.get("hyper_context_sent"):
+                            agent_hyper_details.append({"dim": dim, "hyper": dr["hyper_context_sent"]})
+                    except Exception as exc:
+                        logger.warning("write_dimension %s failed: %s", dim, exc)
+                        dim_results[dim] = {"value": "", "confidence": 0.2, "writer": "coach", "challenges": []}
+            except TimeoutError:
+                logger.warning("path A dim writes timed out (45s)")
+                for f in future_map:
+                    if f.done() and future_map[f] not in dim_results:
+                        try:
+                            dim_results[future_map[f]] = f.result()
+                        except Exception:
+                            pass
+
+        all_missing = [d for d in ANALYSIS_DIMENSIONS
+                       if d not in effective_dims and d != "probing_questions"]
+        missing_labels = [ANALYSIS_DIMENSIONS[d]["label"] for d in all_missing[:4]]
+
+        exploration_phase = (state.get("exploration_state") or {}).get("phase")
+        reply_strategy = "progressive" if exploration_phase in ("direction", "convergence") else "deep_dive"
+
+        agent_outputs = _dim_results_to_agent_outputs(dim_results)
+        logger.info("V3 path A: guiding, effective_dims=%s, missing_hints=%s, strategy=%s, agent_outputs=%s",
+                     effective_dims, missing_labels, reply_strategy, list(agent_outputs.keys()))
+        result_a: dict = {
+            "agents_called": ["coach"],
             "resolved_agents": [],
-            "agent_reasoning": "当前可用上下文不足，未拆分额外角色智能体。",
+            "agent_reasoning": f"激活{n_activated}个维度+自动补充引导维度→共{len(effective_dims)}个({', '.join(effective_dims)})。缺失方向: {', '.join(missing_labels)}",
+            "dim_results": dim_results,
+            "reply_strategy": reply_strategy,
+            "missing_dim_hints": missing_labels,
+            "agent_hyper_details": agent_hyper_details,
             "nodes_visited": ["role_agents"],
         }
+        result_a.update(agent_outputs)
+        return result_a
 
-    # V2: derive execution phases from dimension dependencies
-    context = {
-        "mode": state.get("mode", "coursework"),
-        "complexity": _message_complexity(
-            state.get("message", ""),
-            state.get("conversation_messages", []),
-        ),
-    }
-    if activations and not fallback_used:
-        phases = _derive_execution_phases(agents_to_run, activations, context)
-    else:
-        _P1_SET = {"coach", "tutor"}
-        _P2_SET = {"analyst", "advisor", "planner"}
-        _P3_SET = {"grader"}
-        phases = [
-            [a for a in agents_to_run if a in _P1_SET],
-            [a for a in agents_to_run if a in _P2_SET],
-            [a for a in agents_to_run if a in _P3_SET],
-        ]
-        phases = [p for p in phases if p]
+    # ── Path B: Many dimensions (3+) → per-dim parallel LLM calls ──
+    # Guarantee coach presence: if no activated dim has writer "coach", add one
+    _has_coach_dim = any(
+        DIM_OWNERSHIP.get(d, {}).get("writer") == "coach" for d in activated_dims
+    )
+    if not _has_coach_dim:
+        for _gd in ("status_judgment", "probing_questions"):
+            if _gd not in activated_dims:
+                activated_dims.append(_gd)
+                n_activated = len(activated_dims)
+                logger.info("Path B: auto-added %s to guarantee coach", _gd)
+                break
 
-    logger.info("V2 agent selection: %s phases=%s (intent=%s, fallback=%s)",
-                agents_to_run, phases, intent, fallback_used)
+    dim_results = {}
+    agent_hyper_details = []
 
-    outputs: dict[str, dict] = {}
-    state_snapshot = dict(state)
-
-    def _run_one(key: str, snapshot: dict) -> tuple[str, dict]:
-        fn = AGENT_FNS.get(key)
-        if not fn:
-            return key, {"agent": key, "analysis": "", "tools_used": []}
+    with ThreadPoolExecutor(max_workers=min(n_activated, 5)) as pool:
+        future_map = {
+            pool.submit(_write_dimension, dim, dict(state)): dim
+            for dim in activated_dims
+        }
         try:
-            return key, fn(snapshot)
-        except Exception as exc:
-            logger.warning("Agent %s failed: %s", key, exc)
-            return key, {"agent": AGENT_DISPLAY.get(key, key), "analysis": "", "tools_used": [], "error": str(exc)}
+            for future in as_completed(future_map, timeout=60):
+                dim = future_map[future]
+                try:
+                    dr = future.result()
+                    dim_results[dim] = dr
+                    if dr.get("hyper_context_sent"):
+                        agent_hyper_details.append({"dim": dim, "hyper": dr["hyper_context_sent"]})
+                except Exception as exc:
+                    logger.warning("write_dimension %s failed: %s", dim, exc)
+                    dim_results[dim] = {"value": "", "confidence": 0.2, "writer": "coach", "challenges": []}
+        except TimeoutError:
+            done_dims = [future_map[f] for f in future_map if f.done()]
+            pending_dims = [future_map[f] for f in future_map if not f.done()]
+            logger.warning("dim writes timed out (60s) — done=%s pending=%s", done_dims, pending_dims)
+            for f in future_map:
+                if f.done():
+                    dim = future_map[f]
+                    if dim not in dim_results:
+                        try:
+                            dim_results[dim] = f.result()
+                        except Exception:
+                            pass
 
-    for phase_agents in phases:
-        if not phase_agents:
+    # Run challengers for high-risk dims (parallel)
+    challenge_tasks: list[tuple[str, dict]] = []
+    for dim in activated_dims:
+        if dim not in dim_results:
             continue
-        if len(phase_agents) == 1:
-            k, result = _run_one(phase_agents[0], state_snapshot)
-            outputs[k] = result
-            state_snapshot[f"{k}_output"] = result
-        else:
-            with ThreadPoolExecutor(max_workers=len(phase_agents)) as pool:
-                futures = {pool.submit(_run_one, k, dict(state_snapshot)): k for k in phase_agents}
-                for future in as_completed(futures):
-                    k, result = future.result()
-                    outputs[k] = result
-                    state_snapshot[f"{k}_output"] = result
+        challengers = DIM_OWNERSHIP.get(dim, {}).get("challengers", [])
+        if challengers and dim_results[dim].get("value"):
+            challenge_tasks.append((dim, dim_results[dim]))
 
-    # V2: build dim_results from agent outputs + run challengers in PARALLEL + resolve
-    dim_results: dict[str, dict] = {}
-    if activations and not fallback_used:
-        challenge_tasks: list[tuple[str, dict]] = []  # (dim, writer_result)
-
-        for dim, act in activations.items():
-            if not act.get("activated"):
-                continue
-            ownership = DIM_OWNERSHIP.get(dim, {})
-            writer = ownership.get("writer", "")
-            if writer == "orchestrator":
-                continue
-            writer_out = outputs.get(writer, {})
-            analysis_text = str(writer_out.get("analysis", ""))
-            dim_results[dim] = {
-                "value": analysis_text[:1500] if analysis_text else "",
-                "confidence": 0.75 if analysis_text else 0.2,
-                "evidence_source": "agent_analysis",
-                "writer": writer,
-                "challenges": [],
-            }
-            for ch_agent in ownership.get("challengers", []):
-                if ch_agent in outputs:
-                    challenge_tasks.append((dim, dim_results[dim]))
-
-        # Run all challengers in parallel (each is a fast_model call)
-        if challenge_tasks:
-            def _do_challenge(item: tuple[str, dict]) -> tuple[str, dict | None]:
-                d, wr = item
-                return d, _run_challenger(d, wr, state_snapshot)
-            with ThreadPoolExecutor(max_workers=min(len(challenge_tasks), 3)) as ch_pool:
-                ch_futures = {ch_pool.submit(_do_challenge, t): t[0] for t in challenge_tasks}
-                for cf in as_completed(ch_futures, timeout=15):
+    if challenge_tasks:
+        def _do_challenge(item: tuple[str, dict]) -> tuple[str, dict | None]:
+            d, wr = item
+            return d, _run_challenger(d, wr, state)
+        with ThreadPoolExecutor(max_workers=min(len(challenge_tasks), 3)) as ch_pool:
+            ch_futures = {ch_pool.submit(_do_challenge, t): t[0] for t in challenge_tasks}
+            try:
+                for cf in as_completed(ch_futures, timeout=20):
                     try:
                         d, ch_res = cf.result()
                         if ch_res and d in dim_results:
-                            dim_results[d]["challenges"].append(ch_res)
+                            dim_results[d].setdefault("challenges", []).append(ch_res)
                     except Exception as _ce:
                         logger.warning("challenger failed: %s", _ce)
+            except TimeoutError:
+                logger.warning("challenger phase timed out")
 
-        dim_results = _resolve_dimension_conflicts(dim_results)
-        dim_results, patched_dims = _patch_low_confidence_dims(dim_results, state_snapshot)
-    else:
-        patched_dims = []
+    dim_results = _resolve_dimension_conflicts(dim_results)
 
-    # V2: select reply strategy (with diagnosis richness upgrade)
+    # Select reply strategy
     exploration_phase = (state.get("exploration_state") or {}).get("phase")
     _msg = state.get("message", "")
     _conv = state.get("conversation_messages", [])
     _complexity = _message_complexity(_msg, _conv)
     _tier = _complexity_tier(_complexity, _normalize_intent_shape(state.get("intent_shape", "single")))
     _is_file = "[上传文件:" in _msg
-
-    # Upgrade tier if diagnosis is rich (many rules/entities/structural gaps)
-    _diag = state.get("diagnosis", {})
-    _n_rules = len(_diag.get("triggered_rules", []) or [])
-    _kg = state.get("kg_analysis", {}) if isinstance(state.get("kg_analysis"), dict) else {}
-    _n_gaps = len(_kg.get("structural_gaps", []) or [])
-    _n_entities = len(_kg.get("entities", []) or [])
-    if _tier == "simple" and (_n_rules >= 2 or _n_entities >= 4 or _n_gaps >= 2):
-        _tier = "medium"
-    if _tier == "medium" and (_n_rules >= 4 or _n_entities >= 8 or _n_gaps >= 3):
-        _tier = "complex"
+    _maturity = (state.get("incremental_stats") or {}).get("project_maturity")
 
     reply_strategy = _select_reply_strategy(
         activations or {}, intent, dim_results, exploration_phase,
-        complexity_tier=_tier, is_file=_is_file,
+        complexity_tier=_tier, is_file=_is_file, project_maturity=_maturity,
     )
 
-    # V2: build execution trace
-    exec_trace = _build_execution_trace(
-        activations=activations or {},
-        selected_agents=agents_to_run,
-        phases=phases,
-        dim_results=dim_results,
-        patched_dims=patched_dims,
-        reply_strategy=reply_strategy,
-        intent=intent,
-        intent_confidence=state.get("intent_confidence", 0.5),
-        fallback_used=fallback_used,
-        complexity_tier=_tier,
-    )
+    agents_involved = list({dim_results[d].get("writer", "coach") for d in dim_results if dim_results[d].get("value")})
 
-    result_dict: dict[str, Any] = {
-        "agents_called": [AGENT_DISPLAY.get(a, a) for a in agents_to_run],
-        "resolved_agents": list(agents_to_run),
-        "agent_reasoning": agent_reasoning,
+    agent_outputs = _dim_results_to_agent_outputs(dim_results)
+    logger.info("V3 path B: %d dims parallel, agents=%s, strategy=%s, challengers=%d, agent_outputs=%s",
+                n_activated, agents_involved, reply_strategy, len(challenge_tasks), list(agent_outputs.keys()))
+
+    result_b: dict = {
+        "agents_called": agents_involved,
+        "resolved_agents": [],
+        "agent_reasoning": f"V3维度驱动: {n_activated}个维度并行分析，涉及{', '.join(agents_involved)}",
         "dim_results": dim_results,
         "reply_strategy": reply_strategy,
-        "execution_trace": exec_trace,
+        "agent_hyper_details": agent_hyper_details,
         "nodes_visited": ["role_agents"],
     }
-    for key in ("coach", "analyst", "advisor", "tutor", "grader", "planner"):
-        if key in outputs:
-            result_dict[f"{key}_output"] = outputs[key]
+    result_b.update(agent_outputs)
+    return result_b
 
-    return result_dict
+    # (V2 legacy code removed — V3 dim-driven paths above handle all cases)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -5056,7 +5651,7 @@ def _build_gathered_context(state: WorkflowState) -> str:
     # Neo4j graph traversal hits (dimension-level cross-project inspiration)
     graph_hits_ctx = _fmt_graph_hits_ctx(state.get("neo4j_graph_hits") or [])
     if graph_hits_ctx:
-        parts.append(f"\n## 跨项目维度启发\n{graph_hits_ctx}")
+        parts.append(f"\n{graph_hits_ctx}")
 
     # Enriched RAG case comparison
     enriched_cases = [c for c in (state.get("rag_cases") or []) if c.get("neo4j_enriched")]
@@ -5195,90 +5790,59 @@ def orchestrator(state: WorkflowState) -> dict:
             dim_ctx_parts.append(f"- {dim_label}(置信度{conf}{marker}): {val_preview}")
         dim_results_ctx = "\n".join(dim_ctx_parts) if dim_ctx_parts else ""
 
-        # V2: strategy-aware structure guidance (replaces rigid 8-step template)
+        # V2: strategy-aware structure guidance — flexible, no rigid numbered template
+        _planner_tail = "行动规划放最后一节" if has_planner else "最后给一个最值得先盯住的观察点"
         if v2_reply_strategy == "comprehensive":
             structure_guide = (
-                "## 回复结构（全面深度分析模式——这是复杂问题，请充分展开）\n"
-                "你需要覆盖以下分析切面（不必用固定标题，但每个切面都要有充分讨论）：\n"
-                "1. **现状判断**：先就事论事回应学生项目当前处于什么阶段，真正卡在哪里\n"
-                "2. **核心问题深挖**：把瓶颈和用户行为、替代方案、竞争格局、执行条件讲透\n"
-                "   - 不要停在表面现象，要解释这些问题为什么会同时出现\n"
-                "   - 如果学生低估竞争或替代方案，用具体的公司名、数据、行业案例来打破直觉\n"
-                "3. **结构性原因**：分析问题的底层结构——为什么这些问题互相关联，共同指向什么断点\n"
-                "4. **可复用的方法/判断框架**：把本次问题上升为学生以后也能用的方法论\n"
-                "5. **多维洞察**：展开 3-6 条补充洞察，包括盲区、替代方案、迁移成本、跨学科视角、行业约束\n"
-                "6. **外部参考**：案例对比、行业事实、跨领域借鉴（如果有 RAG 案例或联网数据，在此引用）\n"
-                "7. **策略空间**：给出 2-4 条方向层面的可选路径，而不是具体任务清单\n"
-                "8. **聚焦追问**：3-5 个真正贴合学生项目的深度追问，推动下一步思考\n\n"
-                "深度要求：\n"
-                "- 每个切面不要只写一两句，要有展开论证\n"
-                "- 涉及流程/步骤时用 mermaid 流程图\n"
-                "- 涉及对比时用表格\n"
-                "- 分析与解释至少占八成篇幅；行动放最后且要具体\n"
-                f"- {'行动规划放最后一节' if has_planner else '最后给一个最值得先盯住的观察点'}\n\n"
+                "## 回复原则（全面深度分析——不要套固定模板，自行组织段落）\n"
+                "- 从最重要的发现说起，用你自己的判断决定先说什么后说什么\n"
+                "- 把核心问题讲透：为什么会出现、结构性原因、被忽视的替代方案\n"
+                "- 如果有案例/数据/行业事实，充分引用，不要空谈\n"
+                "- 给出 2-3 条方向层面的可选路径\n"
+                "- 结尾用 2-4 个贴合项目的深度追问收尾\n"
+                "- 涉及流程/步骤时用 ```mermaid 流程图，涉及对比时用表格\n"
+                f"- {_planner_tail}\n\n"
             )
-        elif v2_reply_strategy == "panorama":
+        elif v2_reply_strategy in ("panorama", "deep_dive"):
             structure_guide = (
-                "## 回复结构（全面多维分析模式）\n"
-                "覆盖以下分析切面（灵活组织，不必死板跟顺序）：\n"
-                "1. 现状判断与核心瓶颈\n"
-                "2. 深层原因分析（为什么会卡在这里，结构性原因是什么）\n"
-                "3. 多维洞察（2-5 条补充观察，覆盖盲区、替代方案、行业对标）\n"
-                "4. 可借鉴的外部视角或案例\n"
-                "5. 策略方向（2-3 条可选路径）\n"
-                "6. 深度追问（2-4 个推动思考的问题）\n\n"
-                "深度要求：每个切面充分展开，不要一笔带过。\n"
-                f"- {'行动规划放最后一节' if has_planner else '最后给一个聚焦点'}\n\n"
-            )
-        elif v2_reply_strategy == "deep_dive":
-            structure_guide = (
-                "## 回复结构（深度单点分析模式）\n"
-                "1. 精准定位核心问题\n"
-                "2. 深度剖析这个问题的根因（不要停在表面，要讲透为什么）\n"
-                "3. 给出反直觉洞察或被忽视的角度\n"
-                "4. 如果有案例参考或行业数据，充分利用\n"
-                "5. 1-2 条策略方向 + 2-3 个深度追问\n\n"
-                "深度要求：宁可把一个点讲透，也不要蜻蜓点水覆盖多个。\n\n"
+                "## 回复原则（深度分析——自行组织，不套模板）\n"
+                "- 抓住最关键的1-3个点深入展开，不要蜻蜓点水罗列\n"
+                "- 每个点要有论据（案例、数据、逻辑推演），不要泛泛而谈\n"
+                "- 如有争议维度，呈现双方观点\n"
+                "- 结尾用 2-3 个追问推动下一步思考\n"
+                f"- {_planner_tail}\n\n"
             )
         elif v2_reply_strategy == "progressive":
             structure_guide = (
-                "## 回复结构（探索引导模式）\n"
-                "1. 先基于学生已说的内容做1-2个有价值的粗判断\n"
-                "2. 指出当前最需要想清楚的一个核心问题\n"
-                "3. 用一个具体的追问帮学生往下推\n"
-                "不要铺开做完整诊断，先帮学生把方向收敛下来。\n\n"
+                "## 回复原则（探索引导）\n"
+                "- 先基于学生已说的做1-2个有价值的判断\n"
+                "- 指出当前最该想清楚的核心问题\n"
+                "- 用具体的追问帮学生往下推，不要铺开完整诊断\n\n"
             )
         elif v2_reply_strategy == "challenge":
             structure_guide = (
-                "## 回复结构（挑战追问模式）\n"
-                "1. 先承认学生想法中合理的部分\n"
-                "2. 用具体数据/案例/逻辑指出最站不住脚的假设\n"
-                "3. 给出另一种可能的解释或判断\n"
-                "4. 深入讨论为什么学生的假设可能是错的（不要泛泛而谈）\n"
-                "5. 用犀利但建设性的追问收尾\n\n"
+                "## 回复原则（挑战追问）\n"
+                "- 先肯定合理部分，再用具体证据指出最站不住脚的假设\n"
+                "- 给出另一种解释或判断，深入讨论为什么原假设可能有误\n"
+                "- 用犀利但建设性的追问收尾\n\n"
             )
         elif v2_reply_strategy == "teach_concept":
             structure_guide = (
-                "## 回复结构（概念教学模式）\n"
-                "1. 用一句话通俗定义这个概念\n"
-                "2. 用1-2个真实案例讲清楚\n"
-                "3. 如果学生有项目背景，落回项目\n"
-                "4. 给一个小练习验证理解\n\n"
+                "## 回复原则（概念教学）\n"
+                "- 用一句话通俗定义，1-2个真实案例讲清楚\n"
+                "- 有项目背景就落回项目，给一个小练习验证理解\n\n"
             )
         elif v2_reply_strategy == "compare":
             structure_guide = (
-                "## 回复结构（对比分析模式）\n"
-                "1. 列出对比维度和对象\n"
-                "2. 用表格呈现核心对比\n"
-                "3. 给出差异化分析和深度解读\n\n"
+                "## 回复原则（对比分析）\n"
+                "- 用表格呈现核心对比，给出差异化深度解读\n\n"
             )
         else:
             structure_guide = (
-                "## 回复结构（自适应——根据内容自行组织，不要套固定模板）\n"
-                "- 如果有多个重要发现，逐一展开讨论，每个发现充分论证\n"
-                "- 如果有争议维度，呈现双方观点\n"
-                "- 结尾给出有深度的追问\n"
-                f"- {'仅在最后一节引用行动规划素材' if has_planner else '最多给一个简短的下一步聚焦点'}\n\n"
+                "## 回复原则（自适应——根据内容自行组织，不要套固定模板）\n"
+                "- 从最重要的发现说起，自行决定详略\n"
+                "- 有争议维度呈现双方观点，结尾给有深度的追问\n"
+                f"- {_planner_tail}\n\n"
             )
 
         reply = _llm.chat_text(
@@ -5297,6 +5861,7 @@ def orchestrator(state: WorkflowState) -> dict:
                 "- 如果某维度标注[有争议]，呈现双方观点而非自行裁决\n"
                 "- 如果某维度标注[低置信]，在措辞上体现不确定性\n"
                 "- 联网搜索结果在合适位置引用来源，结尾整理可点击链接\n\n"
+                "- 如果已有案例对比、图谱关联或跨项目启示，必须把其中1-2条转成对当前项目有用的判断或追问，不能只说'找到了相似项目'\n"
                 + quality_tone
                 + "- 如果这是继续追问，先用1-2句承接上轮，只回答新增问题\n"
                 "- 分析与解释至少占七成篇幅；行动最多放在最后一小节\n\n"
@@ -5374,7 +5939,9 @@ def orchestrator(state: WorkflowState) -> dict:
             reply, _ = _build_learning_tutor_reply(state, structured=True)
         elif focused_prompt:
             logger.info("Orchestrator: focused mode for intent '%s'", intent)
-            focused_model = settings.llm_fast_model if intent == "general_chat" else settings.llm_reason_model
+            _nsr_inc = state.get("incremental_stats", {})
+            _nsr_exploring = _nsr_inc.get("project_maturity") == "exploring"
+            focused_model = settings.llm_fast_model if (intent == "general_chat" or _nsr_exploring) else settings.llm_reason_model
             reply = _llm.chat_text(
                 system_prompt=(
                     f"{persona}\n{focused_prompt}\n\n"
@@ -5560,6 +6127,95 @@ def stream_orchestrator(state: dict):
         yield _build_clarification_reply(state)
         return
 
+    # ── V3: Dimension-driven orchestration ──
+    dim_results = state.get("dim_results", {})
+    if dim_results and not analyses_ctx:
+        v3_strategy = state.get("reply_strategy", "progressive")
+        missing_hints = state.get("missing_dim_hints", [])
+        n_dims = len([d for d, r in dim_results.items() if r.get("value")])
+
+        dim_content_parts: list[str] = []
+        for dim_key, dr in dim_results.items():
+            val = str(dr.get("value") or "").strip()
+            if not val:
+                continue
+            dim_label = ANALYSIS_DIMENSIONS.get(dim_key, {}).get("label", dim_key)
+            contested = dr.get("contested", False)
+            marker = " [有争议]" if contested else ""
+            dim_content_parts.append(f"**{dim_label}{marker}**:\n{val}")
+
+        dim_content = "\n\n".join(dim_content_parts) if dim_content_parts else ""
+
+        _orch_hyper_insight = state.get("hypergraph_insight", {})
+        _hyper_summary = ""
+        if isinstance(_orch_hyper_insight, dict):
+            _hs = str(_orch_hyper_insight.get("summary", "")).strip()
+            if _hs:
+                _hyper_summary = f"\n超图摘要: {_hs[:200]}"
+            for _he in (_orch_hyper_insight.get("edges") or [])[:3]:
+                if isinstance(_he, dict) and _he.get("teaching_note"):
+                    _hyper_summary += f"\n超图启发[{_he.get('family_label', '')}]: {str(_he['teaching_note'])[:80]}"
+
+        _is_guiding = bool(missing_hints)
+        if _is_guiding:
+            _v3_sys = (
+                f"{persona}\n"
+                "你是一位经验丰富的项目导师，正在和学生一对一聊项目想法。\n"
+                "学生目前还在项目早期/探索阶段，你的核心任务是**带着学生一步步完善想法**，而不是批评。\n\n"
+                "## 回复原则\n"
+                "- 先肯定学生已有想法中值得认可的部分\n"
+                "- 综合下面的多维度分析，帮学生看清当前处在什么阶段、最该先想清楚什么\n"
+                "- 不要把所有维度都堆上去，选最重要的2-3个展开，其余留做追问\n"
+                "- 如果有超图教学启发或案例线索，自然融入（'你有没有想过XX'、'之前有个类似的项目XX'）\n"
+                "- 结尾给出2-3个具体追问，引导学生往缺失方向深入\n"
+                "- 追问要具体、可回答的（不是'你怎么看用户需求'，而是'你身边有多少同学会为这个功能付费？'）\n\n"
+                "## 格式要求\n"
+                "- 像导师面对面聊天的语气（600-1400字）\n"
+                "- 不要套报告模板（现状→策略空间→聚焦→多维洞察）\n"
+                "- 不要列举'缺少XX维度'来批评学生\n"
+                "- 不要提到Agent、分析师等角色\n"
+                "- 可以用 **加粗**、> 引用、```mermaid 流程图\n"
+            )
+            _v3_usr = (
+                f"学生说：{msg[:2000]}\n\n"
+                + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+                + (f"## 多维度分析结果\n{dim_content}\n\n" if dim_content else "")
+                + (f"学生还没聊到的方向（用追问引导，不要直接列出来批评）：{', '.join(missing_hints)}\n" if missing_hints else "")
+                + (_hyper_summary + "\n" if _hyper_summary else "")
+            )
+        else:
+            _v3_sys = (
+                f"{persona}\n"
+                "你拿到了多个维度的深度分析结果，请综合成一份有层次的回复。\n\n"
+                "## 回复要求\n"
+                "- 用你自己的判断决定先说什么、后说什么，不要按固定模板\n"
+                "- 从最重要的发现说起\n"
+                "- 如果某维度标注[有争议]，呈现双方观点\n"
+                "- 有案例/数据支撑的观点充分展开\n"
+                "- 涉及流程/决策时用 ```mermaid 流程图\n"
+                "- 用 **加粗** 强调、> 引用学生原话、表格做对比\n"
+                "- 结尾给2-4个推进追问\n"
+                "- 不要提到Agent、分析师等角色\n"
+                f"- 回复长度：{length_guide}\n"
+            )
+            _v3_usr = (
+                f"学生说：{msg[:3000]}\n\n"
+                + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
+                + (f"教师批注: {tfb}\n\n" if tfb else "")
+                + f"## 各维度分析结果\n\n{dim_content}\n\n"
+                + (f"本轮触发规则：{'; '.join(triggered_rules)}\n" if triggered_rules else "")
+                + (_hyper_summary + "\n" if _hyper_summary else "")
+            )
+
+        for chunk in _llm.chat_text_stream(
+            system_prompt=_v3_sys,
+            user_prompt=_v3_usr,
+            model=settings.llm_synthesis_model,
+            temperature=0.5,
+        ):
+            yield chunk
+        return
+
     if not analyses_ctx:
         # ── Focused intent path (no agents ran) ──
         gathered = _build_gathered_context(state)
@@ -5587,7 +6243,9 @@ def stream_orchestrator(state: dict):
                 + (f"对话上下文：\n{conv_ctx}\n\n" if conv_ctx else "")
                 + f"已收集的信息：\n{gathered}\n"
             )
-            focused_model = settings.llm_fast_model if intent == "general_chat" else settings.llm_reason_model
+            _foc_inc = state.get("incremental_stats", {})
+            _foc_exploring = _foc_inc.get("project_maturity") == "exploring"
+            focused_model = settings.llm_fast_model if (intent == "general_chat" or _foc_exploring) else settings.llm_reason_model
             for chunk in _llm.chat_text_stream(
                 system_prompt=_sys, user_prompt=_usr,
                 model=focused_model, temperature=0.45,
@@ -5631,43 +6289,49 @@ def stream_orchestrator(state: dict):
     if v2_reply_strategy == "comprehensive":
         structure_guide = (
             "## 回复结构（全面深度分析——复杂问题，请充分展开）\n"
-            "覆盖以下切面（灵活组织标题和顺序，但每个切面都要有充分论证）：\n"
-            "1. **现状判断**：项目处于什么阶段，真正卡在哪\n"
-            "2. **核心问题深挖**：瓶颈与用户行为、替代方案、竞争、执行条件的关系，不停在表面\n"
-            "3. **结构性原因**：为什么这些问题互相关联，底层断点是什么\n"
-            "4. **可复用方法/框架**：把本次问题上升为以后也能用的判断方法\n"
-            "5. **多维洞察**：3-6 条盲区、替代方案、迁移成本、跨学科视角\n"
-            "6. **外部参考**：案例对比、行业事实（引用 RAG/联网数据）\n"
-            "7. **策略空间**：2-4 条方向级路径\n"
-            "8. **深度追问**：3-5 个贴合项目的推动性问题\n\n"
-            "- 每个切面充分展开，涉及流程用 mermaid，涉及对比用表格\n"
-            "- 分析占八成篇幅，行动最后\n\n"
+            "你有丰富的分析素材，请用**你自己的判断**决定组织方式，以下是可选的切面（不必全用，按相关性选择）：\n"
+            "- 核心判断：项目目前真正卡在哪，为什么卡\n"
+            "- 深层原因：表面问题背后的结构性原因\n"
+            "- 盲区/反直觉洞察：学生可能没想到的角度\n"
+            "- 外部参考：案例对比、行业事实（有就引用，没有不编）\n"
+            "- 策略方向：2-3条可选路径\n"
+            "- 推进追问：3-5个帮学生往前走的问题\n\n"
+            "**要求**：用自然的叙述推进逻辑，不要每段都加一级标题变成报告；该用表格用表格，该用流程图用 mermaid\n"
+            "**禁止**：不要按固定模板（现状→策略空间→聚焦→多维洞察）输出\n\n"
         )
     elif v2_reply_strategy == "panorama":
         structure_guide = (
-            "## 回复结构（全面多维分析）\n"
-            "1. 现状判断与核心瓶颈\n"
-            "2. 深层原因分析\n"
-            "3. 多维洞察（2-5 条盲区/替代方案/行业对标）\n"
-            "4. 外部参考或案例\n"
-            "5. 策略方向 + 深度追问\n"
-            "每个切面充分展开，不一笔带过。\n\n"
+            "## 回复结构（多维分析——灵活组织）\n"
+            "用你自己的判断决定哪些维度值得展开、哪些一笔带过：\n"
+            "- 从最重要的发现说起，不要按模板顺序\n"
+            "- 有数据/案例支撑的观点充分展开\n"
+            "- 结尾给推进追问\n"
+            "**禁止**：不要机械按'现状→原因→洞察→案例→策略'固定顺序\n\n"
         )
     elif v2_reply_strategy == "deep_dive":
         structure_guide = (
-            "## 回复结构（深度单点分析）\n"
-            "1. 精准定位核心问题\n"
-            "2. 深度剖析根因\n"
-            "3. 反直觉洞察或被忽视的角度\n"
-            "4. 策略方向 + 深度追问\n"
-            "宁可把一个点讲透，也不蜻蜓点水。\n\n"
+            "## 回复结构（深度分析——请灵活组织，不要用固定模板）\n"
+            "根据学生的具体问题自然展开，可能的切入角度：\n"
+            "- 如果学生在问方向：帮他理清核心逻辑，给出你的判断和理由\n"
+            "- 如果学生在问执行：聚焦最关键的1-2个执行瓶颈，讲透\n"
+            "- 如果学生给了详细材料：找到最值得深挖的点展开\n"
+            "- 用你自己的判断决定先说什么、后说什么\n"
+            "- 结尾给1-2个推进性追问\n\n"
+            "**禁止**：不要机械按'现状→策略空间→聚焦→多维洞察'这种固定顺序输出\n\n"
         )
     elif v2_reply_strategy == "progressive":
         structure_guide = (
-            "## 回复结构（探索引导模式）\n"
-            "1. 基于学生已说的做1-2个粗判断\n"
-            "2. 指出最需要想清楚的核心问题\n"
-            "3. 一个具体追问帮学生往下推\n\n"
+            "## 回复结构（探索引导模式——学生还在初步构思阶段）\n"
+            "**核心原则：引导 > 诊断，启发 > 批评**\n"
+            "1. 先肯定学生已有的方向感觉或思考亮点（具体说哪里有意思）\n"
+            "2. 帮学生把最模糊的那个点具体化（用追问而非断言）\n"
+            "3. 如果搜到了相关案例或知识库线索，用'你有没有想过XX'的方式自然引入\n"
+            "4. 结尾一个推进性追问，帮学生往下走一步\n\n"
+            "**严禁做的事**：\n"
+            "- 不要列举'缺少XX维度'、'缺少XX分析'，学生还在想，缺东西是正常的\n"
+            "- 不要一次给全套框架（商业模式画布、SWOT、竞品矩阵等）\n"
+            "- 不要用'空想'、'不切实际'之类的措辞\n"
+            "- 不要输出超过800字，保持对话感\n\n"
         )
     elif v2_reply_strategy == "challenge":
         structure_guide = (
@@ -5683,11 +6347,11 @@ def stream_orchestrator(state: dict):
         )
     else:
         structure_guide = (
-            "## 回复结构（自适应）\n"
-            "- 根据内容自行组织，不套固定模板\n"
-            "- 每个发现充分展开论证\n"
-            "- 争议维度呈现双方观点\n"
-            "- 结尾给深度追问\n\n"
+            "## 回复结构（自适应——请像真人导师一样自然对话）\n"
+            "- 根据学生问的具体事情自行组织回复，不套任何固定模板\n"
+            "- 先回应学生最关心的点，再展开你认为重要的补充\n"
+            "- 该深入的深入，该简短的简短\n"
+            "- 结尾给1-2个推进追问\n\n"
         )
 
     system_prompt = (
@@ -5725,9 +6389,32 @@ def stream_orchestrator(state: dict):
         "    主动用 mermaid flowchart 来可视化（graph TD/LR 语法）。\n"
         "    适用场景：验证步骤、用户转化漏斗、商业模式闭环、MVP路线图、决策树等\n"
         "  - `---` 分隔线：分隔大的讨论转折\n"
+        "- 如果已有案例对比、图谱关联或跨项目启示，必须把其中1-2条转成对当前项目有用的判断或追问，不能停留在“找到了相似案例”\n"
         + (f"- 语气风格: {tone_guide}\n" if tone_guide else "")
         + f"- 回复长度: {length_guide}\n"
     )
+
+    # Build orchestrator-level hypergraph context
+    _orch_hyper_insight = state.get("hypergraph_insight", {})
+    _orch_hyper_student = state.get("hypergraph_student", {})
+    _orch_hyper_parts: list[str] = []
+    _hi_edges = (_orch_hyper_insight.get("edges") or []) if isinstance(_orch_hyper_insight, dict) else []
+    _hi_summary_text = str(_orch_hyper_insight.get("summary", "")).strip() if isinstance(_orch_hyper_insight, dict) else ""
+    if _hi_edges or _hi_summary_text:
+        if _hi_summary_text:
+            _orch_hyper_parts.append(f"超图摘要: {_hi_summary_text[:200]}")
+        for _he in _hi_edges[:6]:
+            if isinstance(_he, dict) and _he.get("teaching_note"):
+                _fam = _he.get("family_label", "") or _he.get("type", "")
+                _orch_hyper_parts.append(f"教学超边[{_fam}]: {str(_he['teaching_note'])[:80]}")
+    if isinstance(_orch_hyper_student, dict) and _orch_hyper_student.get("ok"):
+        _cov = _orch_hyper_student.get("coverage_score", 0)
+        _orch_hyper_parts.append(f"维度覆盖度: {_cov}/10")
+        for _pw in (_orch_hyper_student.get("pattern_warnings") or [])[:2]:
+            if isinstance(_pw, dict):
+                _orch_hyper_parts.append(f"风险模式: {str(_pw.get('warning',''))[:80]}")
+    _orch_hyper_ctx = "\n".join(_orch_hyper_parts) if _orch_hyper_parts else ""
+    _orch_hist_knowledge = state.get("history_knowledge_ctx", "")
 
     user_prompt = (
         f"学生说：\n{msg[:3000]}\n\n"
@@ -5739,14 +6426,16 @@ def stream_orchestrator(state: dict):
         + (f"reply_strategy={v2_reply_strategy}\n\n" if v2_reply_strategy else "\n")
         + (f"本轮触发规则：{'; '.join(triggered_rules)}\n\n" if triggered_rules else "")
         + (f"本轮结构缺口：{'; '.join(structural_gaps)}\n\n" if structural_gaps else "")
+        + (f"## 超图分析\n{_orch_hyper_ctx}\n\n" if _orch_hyper_ctx else "")
+        + (f"## 前几轮知识积累\n{_orch_hist_knowledge}\n\n" if _orch_hist_knowledge else "")
         + (f"## 维度分析结果\n{dim_results_ctx}\n\n" if dim_results_ctx else "")
         + (
             "## 深度分析要求\n"
             "这是一个复杂问题，分析素材非常丰富。请务必：\n"
-            "1. 充分利用所有分析素材，不要浪费有价值的洞察\n"
+            "1. 充分利用所有分析素材（包括超图洞察），不要浪费有价值的洞察\n"
             "2. 每个重要观点充分展开论证\n"
             "3. 具体公司名、数据、案例、行业事实全部引用\n"
-            "4. 不同分析之间的互补视角交叉引用\n"
+            "4. 如果超图提供了教学超边或风险模式，将其自然融入你的回复中\n"
             "5. 宁可写长也不遗漏关键洞察\n\n"
             if v2_reply_strategy in ("comprehensive", "panorama")
             else ""
@@ -5755,10 +6444,14 @@ def stream_orchestrator(state: dict):
         + (f"以下是行动规划素材（只能在最后一节使用）：\n\n{planner_block}" if has_planner else "本轮没有行动规划素材。")
     )
 
+    _orch_inc = state.get("incremental_stats", {})
+    _orch_exploring = _orch_inc.get("project_maturity") == "exploring"
+    _orch_model = settings.llm_fast_model if _orch_exploring else settings.llm_synthesis_model
+
     for chunk in _llm.chat_text_stream(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
-        model=settings.llm_synthesis_model,
+        model=_orch_model,
         temperature=0.55,
     ):
         yield chunk

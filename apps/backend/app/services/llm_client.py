@@ -21,15 +21,16 @@ def _strip_think_tags(text: str) -> str:
 _CODE_FENCE_RE = re.compile(r"```(?:json)?\s*\n?([\s\S]*?)```", re.DOTALL)
 
 
-def _extract_json_obj(text: str) -> dict[str, Any]:
+def _extract_json_obj(text: str) -> dict[str, Any] | None:
+    """Extract a JSON object from text. Returns None on failure (not {})."""
     text = _strip_think_tags(text or "")
     if not text:
-        return {}
+        return None
 
     # Try direct parse first
     try:
         parsed = json.loads(text)
-        return parsed if isinstance(parsed, dict) else {}
+        return parsed if isinstance(parsed, dict) else None
     except json.JSONDecodeError:
         pass
 
@@ -38,7 +39,7 @@ def _extract_json_obj(text: str) -> dict[str, Any]:
     if m:
         try:
             parsed = json.loads(m.group(1).strip())
-            return parsed if isinstance(parsed, dict) else {}
+            return parsed if isinstance(parsed, dict) else None
         except json.JSONDecodeError:
             pass
 
@@ -46,13 +47,13 @@ def _extract_json_obj(text: str) -> dict[str, Any]:
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1 or end <= start:
-        return {}
+        return None
     snippet = text[start : end + 1]
     try:
         parsed = json.loads(snippet)
-        return parsed if isinstance(parsed, dict) else {}
+        return parsed if isinstance(parsed, dict) else None
     except json.JSONDecodeError:
-        return {}
+        return None
 
 
 class LlmClient:
@@ -65,7 +66,7 @@ class LlmClient:
             self._client = OpenAI(
                 api_key=settings.llm_api_key,
                 base_url=settings.llm_base_url,
-                timeout=180.0,
+                timeout=200.0,
                 max_retries=1,
             )
 
@@ -140,7 +141,7 @@ class LlmClient:
 
         stream = None
         last_exc: Exception | None = None
-        max_attempts = 2
+        max_attempts = 1
         for attempt in range(1, max_attempts + 1):
             try:
                 stream = _stream_once(client, model_name)
@@ -211,7 +212,7 @@ class LlmClient:
             temperature=temperature,
         )
         result = _extract_json_obj(raw)
-        if not result and raw and self.enabled:
+        if result is None and raw and self.enabled:
             repaired = self.chat_text(
                 system_prompt=(
                     "你是 JSON 修复器。"
@@ -228,24 +229,9 @@ class LlmClient:
                 temperature=0.0,
             )
             result = _extract_json_obj(repaired)
-        if not result and self.enabled:
-            retry_raw = self.chat_text(
-                system_prompt=(
-                    system_prompt
-                    + "\n你上一次返回的内容不是合法 JSON，或者被截断了。"
-                    + "\n这一次请重新输出一个更短、更稳定的 JSON 对象。"
-                    + "\n要求：字段名不要变；字符串尽量简短；数组最多 3 项；不要输出解释文字，不要用 markdown。"
-                ),
-                user_prompt=user_prompt,
-                model=model or settings.llm_structured_model,
-                temperature=0.0,
-            )
-            retry_result = _extract_json_obj(retry_raw)
-            if retry_result:
-                return retry_result
-        if not result and raw:
+        if result is None and raw:
             logger.warning("chat_json: failed to parse JSON from LLM response (len=%d): %.200s", len(raw), raw)
-        return result
+        return result or {}
 
     def chat_text(
         self,
@@ -272,24 +258,19 @@ class LlmClient:
             )
 
         last_exc: Exception | None = None
-        max_attempts = 2
-        for attempt in range(1, max_attempts + 1):
-            try:
-                resp = _call_once(client, model_name)
-                if resp.choices and resp.choices[0].message:
-                    raw = resp.choices[0].message.content or ""
-                    return _strip_think_tags(raw)
-                logger.warning("LLM call returned empty response (model=%s provider=%s attempt=%d)", model_name, provider, attempt)
-            except Exception as exc:
-                last_exc = exc
-                error_kind = self._error_kind(exc)
-                logger.warning(
-                    "LLM call failed (model=%s provider=%s attempt=%d kind=%s): %s",
-                    model_name, provider, attempt, error_kind, exc,
-                )
-                if attempt >= max_attempts or not self._should_retry(error_kind):
-                    break
-                time.sleep(min(1.5, 0.4 * attempt))
+        try:
+            resp = _call_once(client, model_name)
+            if resp.choices and resp.choices[0].message:
+                raw = resp.choices[0].message.content or ""
+                return _strip_think_tags(raw)
+            logger.warning("LLM call returned empty response (model=%s provider=%s)", model_name, provider)
+        except Exception as exc:
+            last_exc = exc
+            error_kind = self._error_kind(exc)
+            logger.warning(
+                "LLM call failed (model=%s provider=%s kind=%s): %s",
+                model_name, provider, error_kind, exc,
+            )
 
         fallback = self._fallback_target(client, model_name)
         if fallback:

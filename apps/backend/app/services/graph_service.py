@@ -209,6 +209,76 @@ class GraphService:
         except Exception as exc:
             return {"error": f"kb_stats query failed: {exc}"}
 
+    def get_kb_insights(self, limit: int = 8) -> dict[str, Any]:
+        """Return top entities across key dimensions + sample project excerpts for teacher overview."""
+        try:
+            def _query(session):
+                results: dict[str, Any] = {}
+                dim_queries = {
+                    "top_pains": ("PainPoint", "HAS_PAIN"),
+                    "top_solutions": ("Solution", "HAS_SOLUTION"),
+                    "top_innovations": ("InnovationPoint", "HAS_INNOVATION"),
+                    "top_biz_models": ("BusinessModelAspect", "HAS_BUSINESS_MODEL"),
+                    "top_markets": ("Market", "HAS_MARKET_ANALYSIS"),
+                    "top_risks": ("RiskControlPoint", "HAS_RISK_CONTROL"),
+                }
+                for key, (node_label, rel_type) in dim_queries.items():
+                    rows = list(session.run(
+                        f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}) "
+                        f"RETURN n.name AS name, count(DISTINCT p) AS projects "
+                        f"ORDER BY projects DESC LIMIT $lim",
+                        lim=limit,
+                    ))
+                    results[key] = [{"name": r["name"], "projects": int(r["projects"])} for r in rows]
+
+                rubric_rows = list(session.run(
+                    "MATCH (r:RubricItem) RETURN r.id AS id, r.weight AS weight, r.description AS desc "
+                    "ORDER BY r.weight DESC LIMIT $lim", lim=limit
+                ))
+                results["rubric_items"] = [
+                    {"id": r["id"], "weight": r["weight"], "description": r["desc"]}
+                    for r in rubric_rows
+                ]
+
+                risk_rule_rows = list(session.run(
+                    "MATCH (r:RiskRule) "
+                    "OPTIONAL MATCH (p:Project)-[:HITS_RULE]->(r) "
+                    "RETURN r.id AS id, r.description AS desc, r.severity AS severity, count(DISTINCT p) AS hits "
+                    "ORDER BY hits DESC LIMIT $lim", lim=limit
+                ))
+                results["risk_rules_detail"] = [
+                    {"id": r["id"], "description": r["desc"], "severity": r["severity"], "hits": int(r["hits"])}
+                    for r in risk_rule_rows
+                ]
+
+                sample_rows = list(session.run(
+                    "MATCH (p:Project)-[:BELONGS_TO]->(c:Category) "
+                    "OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint) "
+                    "OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution) "
+                    "OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint) "
+                    "WITH p, c, collect(DISTINCT pain.name)[..2] AS pains, "
+                    "     collect(DISTINCT sol.name)[..2] AS sols, "
+                    "     collect(DISTINCT inn.name)[..1] AS inns "
+                    "RETURN p.name AS name, c.name AS category, "
+                    "       p.confidence AS confidence, pains, sols, inns "
+                    "ORDER BY p.confidence DESC LIMIT 12"
+                ))
+                results["sample_cases"] = [
+                    {
+                        "name": r["name"], "category": r["category"],
+                        "confidence": r["confidence"],
+                        "pains": list(r["pains"] or []),
+                        "solutions": list(r["sols"] or []),
+                        "innovations": list(r["inns"] or []),
+                    }
+                    for r in sample_rows
+                ]
+
+                return results
+            return self._query_with_fallback(_query)
+        except Exception as exc:
+            return {"error": f"kb_insights query failed: {exc}"}
+
     def project_evidence(self, project_id: str) -> dict[str, Any]:
         try:
             def _query(session):

@@ -128,6 +128,12 @@ def kb_stats() -> dict:
     }
 
 
+@app.get("/api/kb-insights")
+def kb_insights() -> dict:
+    """Return high-frequency entities across dimensions + sample cases for teacher overview."""
+    return graph_service.get_kb_insights(limit=8)
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  Auth APIs: register, login, change-password
 # ═══════════════════════════════════════════════════════════════════
@@ -2225,10 +2231,13 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     )
 
     # ── persist to project state ──
+    _sync_sid = payload.student_id.strip() if payload.student_id and payload.student_id.lower() != "none" else (
+        payload.project_id.replace("project-", "", 1) if payload.project_id.startswith("project-") else "student"
+    )
     json_store.append_submission(
         payload.project_id,
         {
-            "student_id": payload.student_id,
+            "student_id": _sync_sid,
             "conversation_id": conv_id,
             "class_id": payload.class_id,
             "cohort_id": payload.cohort_id,
@@ -2324,7 +2333,10 @@ async def dialogue_turn_stream(request: Request):
     payload = await request.json()
     msg = payload.get("message", "")
     project_id = payload.get("project_id", "demo")
-    student_id = payload.get("student_id", "student")
+    _raw_sid = str(payload.get("student_id") or "").strip()
+    student_id = _raw_sid if _raw_sid and _raw_sid.lower() != "none" else (
+        project_id.replace("project-", "", 1) if project_id.startswith("project-") else "student"
+    )
     initial_conv_id = payload.get("conversation_id", "")
     mode_val = payload.get("mode", "coursework")
     comp_type_val = payload.get("competition_type", "")
@@ -3046,6 +3058,15 @@ def teacher_assistant_project_conversation_eval(project_id: str, logical_project
 def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None = None, limit: int = 50) -> dict:
     projects = json_store.list_projects()
     rows: list[dict[str, Any]] = []
+    _user_name_cache: dict[str, str] = {}
+    def _resolve_student(sid: str, pid: str) -> tuple[str, str]:
+        real_sid = sid if sid and sid.lower() != "none" else (
+            pid.replace("project-", "", 1) if pid.startswith("project-") else ""
+        )
+        if real_sid and real_sid not in _user_name_cache:
+            u = user_store.get_by_id(real_sid)
+            _user_name_cache[real_sid] = (u or {}).get("display_name", "") if u else ""
+        return real_sid, _user_name_cache.get(real_sid, "")
     for project in projects:
         pid = project.get("project_id", "")
         for sub in project.get("submissions", []):
@@ -3054,10 +3075,12 @@ def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None 
             if cohort_id and sub.get("cohort_id") != cohort_id:
                 continue
             diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+            _sid, _sname = _resolve_student(sub.get("student_id", ""), pid)
             rows.append({
                 "project_id": pid,
                 "logical_project_id": _safe_str(sub.get("logical_project_id") or sub.get("project_id") or sub.get("conversation_id", "")),
-                "student_id": sub.get("student_id", ""),
+                "student_id": _sid,
+                "student_name": _sname,
                 "class_id": sub.get("class_id"),
                 "created_at": sub.get("created_at", ""),
                 "source_type": sub.get("source_type", ""),
@@ -3070,6 +3093,10 @@ def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None 
                 "full_text": (sub.get("raw_text") or "")[:4000],
                 "kg_analysis": sub.get("kg_analysis"),
                 "bottleneck": diagnosis.get("bottleneck", ""),
+                "intent": sub.get("intent", ""),
+                "mode": sub.get("mode", ""),
+                "reply_strategy": (sub.get("agent_outputs") or {}).get("reply_strategy", "") if isinstance(sub.get("agent_outputs"), dict) else "",
+                "agents_called": (sub.get("agent_outputs") or {}).get("agents_called", []) if isinstance(sub.get("agent_outputs"), dict) else [],
                 "matched_teacher_interventions": [
                     {
                         "title": _safe_str(item.get("title", "")),
@@ -3420,11 +3447,86 @@ def list_teacher_examples() -> dict:
 @app.get("/api/teacher/dashboard")
 def teacher_dashboard(category: str | None = None, limit: int = 8) -> dict:
     limit = max(1, min(limit, 30))
-    data = graph_service.teacher_dashboard(category=category, limit=limit)
+    neo4j_data = graph_service.teacher_dashboard(category=category, limit=limit)
+
+    projects = json_store.list_projects()
+    all_subs: list[dict] = []
+    unique_projects: set[str] = set()
+    unique_students: set[str] = set()
+    intent_counter: dict[str, int] = {}
+    rule_counter: dict[str, int] = {}
+    scores: list[float] = []
+    total_dims = 0
+    recent_activity: list[dict] = []
+
+    for proj in projects:
+        pid = proj.get("project_id", "")
+        subs = proj.get("submissions", [])
+        if not subs:
+            continue
+        unique_projects.add(pid)
+        for sub in subs:
+            sid = str(sub.get("student_id") or "").strip()
+            if sid and sid.lower() != "none":
+                unique_students.add(sid)
+            elif pid.startswith("project-"):
+                unique_students.add(pid.replace("project-", "", 1))
+            all_subs.append(sub)
+
+            intent = sub.get("intent", "")
+            if intent:
+                _label = {
+                    "project_diagnosis": "项目诊断",
+                    "idea_brainstorm": "想法探索",
+                    "business_model": "商业模式",
+                    "competition_prep": "竞赛准备",
+                    "learning_concept": "概念学习",
+                    "general_chat": "一般咨询",
+                    "pressure_test": "压力测试",
+                    "evidence_check": "证据核查",
+                    "market_competitor": "市场竞品",
+                }.get(intent, intent)
+                intent_counter[_label] = intent_counter.get(_label, 0) + 1
+
+            diag = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+            sc = diag.get("overall_score")
+            if sc and float(sc) > 0:
+                scores.append(float(sc))
+
+            for r in (diag.get("triggered_rules", []) or []):
+                rid = r.get("id", "") if isinstance(r, dict) else str(r)
+                if rid:
+                    rule_counter[rid] = rule_counter.get(rid, 0) + 1
+
+            kg = sub.get("kg_analysis", {}) if isinstance(sub.get("kg_analysis"), dict) else {}
+            total_dims += len(kg.get("entities", []))
+
+            created = sub.get("created_at", "")
+            if created:
+                recent_activity.append({"project_id": pid, "student_id": sid, "created_at": created, "intent": intent})
+
+    recent_activity.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+
+    avg_score = round(sum(scores) / len(scores), 2) if scores else 0
+    intent_dist = sorted(intent_counter.items(), key=lambda x: x[1], reverse=True)
+    rule_dist = sorted(rule_counter.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+    student_overview = {
+        "total_student_projects": len(unique_projects),
+        "total_students": len(unique_students),
+        "total_submissions": len(all_subs),
+        "avg_score": avg_score,
+        "total_dimensions_extracted": total_dims,
+        "intent_distribution": [{"intent": k, "count": v} for k, v in intent_dist],
+        "student_risk_rules": [{"rule": k, "count": v} for k, v in rule_dist],
+        "recent_activity": recent_activity[:20],
+    }
+
     return {
         "category_filter": category,
         "limit": limit,
-        "data": data,
+        "data": neo4j_data,
+        "student_overview": student_overview,
     }
 
 

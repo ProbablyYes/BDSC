@@ -11542,3 +11542,163 @@ pre {
 .collapsible-section > summary::-webkit-details-marker {
   display: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Knowledge-Base Panorama Panel – Teacher Overview
+   ═══════════════════════════════════════════════════════════════════ */
+
+.kb-pano { margin-top: 16px; }
+.kb-pano-header {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;
+}
+.kb-pano-header h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0; }
+.kb-pano-header .kb-pano-sub { font-size: 12px; color: var(--text-muted); }
+
+/* ── summary strip ── */
+.kb-strip {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.kb-strip-item {
+  flex: 1 1 90px; min-width: 80px; text-align: center;
+  padding: 10px 6px; border-radius: 10px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  transition: transform .15s, box-shadow .15s;
+}
+.kb-strip-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.kb-strip-num { font-size: 22px; font-weight: 800; line-height: 1.1; }
+.kb-strip-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; letter-spacing: .3px; }
+
+/* ── radar chart ── */
+.kb-radar-wrap {
+  display: flex; gap: 20px; align-items: flex-start;
+  flex-wrap: wrap; margin-bottom: 16px;
+}
+.kb-radar-svg { flex: 0 0 auto; }
+.kb-radar-legend {
+  display: flex; flex-direction: column; gap: 4px; padding-top: 8px;
+}
+.kb-radar-legend-item {
+  display: flex; align-items: center; gap: 6px; font-size: 12px;
+  color: var(--text-secondary); cursor: default;
+  padding: 3px 8px; border-radius: 6px; transition: background .15s;
+}
+.kb-radar-legend-item:hover { background: var(--bg-secondary); }
+.kb-radar-legend-val { font-weight: 700; color: var(--text-primary); min-width: 28px; text-align: right; }
+
+/* ── insight tabs ── */
+.kb-tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+.kb-tab-btn {
+  padding: 7px 16px; font-size: 12px; font-weight: 500; cursor: pointer;
+  color: var(--text-muted); background: none; border: none;
+  border-bottom: 2px solid transparent; transition: all .15s;
+  white-space: nowrap;
+}
+.kb-tab-btn:hover { color: var(--text-primary); }
+.kb-tab-btn.active {
+  color: var(--accent); border-bottom-color: var(--accent); font-weight: 600;
+}
+
+/* ── tag cloud ── */
+.kb-tag-cloud {
+  display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0;
+}
+.kb-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px; font-size: 12px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-primary); cursor: default;
+  transition: transform .12s, box-shadow .12s, background .12s;
+  position: relative;
+}
+.kb-tag:hover {
+  transform: scale(1.06); box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  background: rgba(107,138,255,.1);
+}
+.kb-tag-count {
+  font-size: 10px; font-weight: 700; color: var(--accent);
+  background: rgba(107,138,255,.12); padding: 1px 6px; border-radius: 10px;
+}
+
+/* ── accordion (rubric / rules) ── */
+.kb-accordion { margin-top: 14px; }
+.kb-accordion-trigger {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 10px 14px; font-size: 13px; font-weight: 600;
+  color: var(--text-primary); background: var(--bg-secondary);
+  border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: background .15s;
+}
+.kb-accordion-trigger:hover { background: rgba(107,138,255,.06); }
+.kb-accordion-trigger .kb-acc-arrow {
+  font-size: 10px; transition: transform .2s;
+}
+.kb-accordion-trigger[data-open="true"] .kb-acc-arrow { transform: rotate(90deg); }
+.kb-accordion-body {
+  overflow: hidden; transition: max-height .3s ease;
+}
+.kb-accordion-body[data-open="false"] { max-height: 0; }
+.kb-accordion-body[data-open="true"] { max-height: 800px; }
+.kb-acc-list { padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+.kb-acc-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 10px; border-radius: 8px;
+  background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.04);
+  transition: background .12s;
+}
+.kb-acc-row:hover { background: rgba(107,138,255,.04); }
+.kb-acc-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+  min-width: 28px; text-align: center; flex-shrink: 0; line-height: 1.4;
+}
+.kb-acc-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.kb-acc-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+/* ── case spotlight ── */
+.kb-cases-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px; margin-top: 10px;
+}
+.kb-case-card {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; cursor: pointer;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+  position: relative; overflow: hidden;
+}
+.kb-case-card::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), rgba(189,147,249,.6));
+  opacity: 0; transition: opacity .2s;
+}
+.kb-case-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.1); border-color: rgba(107,138,255,.3); }
+.kb-case-card:hover::before { opacity: 1; }
+.kb-case-card[data-expanded="true"] { border-color: rgba(107,138,255,.4); }
+.kb-case-card[data-expanded="true"]::before { opacity: 1; }
+.kb-case-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+.kb-case-name {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.kb-case-cat {
+  font-size: 10px; padding: 2px 8px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(107,138,255,.1); color: var(--accent); font-weight: 500;
+}
+.kb-case-details {
+  overflow: hidden; transition: max-height .3s ease, opacity .2s;
+  max-height: 0; opacity: 0; margin-top: 0;
+}
+.kb-case-card[data-expanded="true"] .kb-case-details {
+  max-height: 300px; opacity: 1; margin-top: 10px;
+}
+.kb-case-dim {
+  font-size: 11px; color: var(--text-muted); padding: 3px 0;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.kb-case-dim-label {
+  font-weight: 600; min-width: 36px; flex-shrink: 0;
+}
+.kb-case-hint {
+  font-size: 10px; color: var(--text-muted); margin-top: 6px; text-align: right;
+  opacity: .6;
+}

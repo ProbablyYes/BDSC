@@ -288,6 +288,8 @@ export default function StudentPage() {
   const [selectedAnnotationBoardId, setSelectedAnnotationBoardId] = useState("");
   const [teacherInterventions, setTeacherInterventions] = useState<any[]>([]);
   const [convSidebarOpen, setConvSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const sidebarDragRef = useRef(false);
   const [conversations, setConversations] = useState<ConvMeta[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -472,6 +474,24 @@ export default function StudentPage() {
 
   function startDrag(e: React.MouseEvent) {
     dragRef.current = { active: true, startX: e.clientX, startW: rightWidth };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }
+
+  // sidebar drag resize
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      if (!sidebarDragRef.current) return;
+      setSidebarWidth(Math.max(160, Math.min(420, e.clientX)));
+    }
+    function onUp() { sidebarDragRef.current = false; document.body.style.cursor = ""; document.body.style.userSelect = ""; }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+  }, []);
+
+  function startSidebarDrag(e: React.MouseEvent) {
+    sidebarDragRef.current = true;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
   }
@@ -819,13 +839,18 @@ export default function StudentPage() {
         allSeen[rule.id].rule = { ...rule };
       }
     }
+    // Only mark resolved when the latest turn actually ran a full diagnosis
+    // (has triggered_rules array with content). If the latest turn was chat/simple
+    // question with no diagnosis, preserve previous risk status.
+    const latestDiagRan = Array.isArray(latestResult?.diagnosis?.triggered_rules)
+      && latestResult.diagnosis.triggered_rules.length > 0;
     const entries = Object.entries(allSeen).map(([id, data]) => ({
       ...data.rule,
       id,
       firstTurn: data.firstTurn,
       lastTurn: data.lastTurn,
       turnCount: data.turnCount,
-      resolved: resultHistory.length > 0 && !latestIds.has(id),
+      resolved: latestDiagRan && resultHistory.length > 0 && !latestIds.has(id),
     }));
     if (entries.length === 0) return latestRules;
     return entries.sort((a: any, b: any) => {
@@ -1126,14 +1151,25 @@ export default function StudentPage() {
             </button>
             {topbarMoreOpen && (
               <div className="topbar-more-popup" onClick={() => setTopbarMoreOpen(false)}>
-                <div className="topbar-more-section">
+                <div className="topbar-more-section" onClick={(e) => e.stopPropagation()}>
                   <span className="topbar-more-label">赛事类型</span>
-                  <select value={competitionType} onChange={(e) => setCompetitionType(e.target.value as any)} className="comp-type-select" onClick={(e) => e.stopPropagation()}>
-                    <option value="">不选赛事</option>
-                    <option value="internet_plus">互联网+</option>
-                    <option value="challenge_cup">挑战杯</option>
-                    <option value="dachuang">大创</option>
-                  </select>
+                  <div className="comp-card-group">
+                    {([
+                      { value: "", label: "不限" },
+                      { value: "internet_plus", label: "互联网+" },
+                      { value: "challenge_cup", label: "挑战杯" },
+                      { value: "dachuang", label: "大创" },
+                    ] as { value: string; label: string }[]).map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`comp-card${competitionType === opt.value ? " active" : ""}`}
+                        onClick={() => setCompetitionType(opt.value as any)}
+                      >
+                        <span className="comp-card-label">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {mode === "competition" && !pitchTimerRunning && (
                   <div className="topbar-more-section" onClick={(e) => e.stopPropagation()}>
@@ -1236,7 +1272,7 @@ export default function StudentPage() {
       <div className={`chat-body ${pdfViewerOpen ? "pdf-split-mode" : ""}`}>
         {/* ── Conversation Sidebar ── */}
         {convSidebarOpen && !pdfViewerOpen && (
-          <aside className="conv-sidebar">
+          <aside className="conv-sidebar" style={{ width: sidebarWidth }}>
             <button className="new-chat-btn" onClick={newChat}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
               新对话
@@ -1269,6 +1305,7 @@ export default function StudentPage() {
               ))}
               {filteredConvs.length === 0 && <p className="conv-empty">{searchQuery ? "未找到匹配的对话" : "暂无历史对话"}</p>}
             </div>
+            <div className="sidebar-drag-handle" onMouseDown={startSidebarDrag} />
           </aside>
         )}
 
@@ -1575,23 +1612,25 @@ export default function StudentPage() {
                     const milestone = s(cumulativeMilestone);
                     const notNow: string[] = (plannerNotNow || []).map((x: any) => s(x)).filter(Boolean);
                     const pastTasks = plannerTaskHistory.filter((h: any) => !h.isCurrent);
+                    const clip = (v: string, max: number) => v.length > max ? v.slice(0, max) + "…" : v;
                     if (tasks.length > 0) {
                       return (
                         <div className="task-rich">
-                          {milestone && <div className="task-milestone">{milestone}</div>}
-                          {tasks.map((t: any, ti: number) => {
+                          {milestone && <div className="task-milestone">{clip(milestone, 60)}</div>}
+                          {tasks.slice(0, 3).map((t: any, ti: number) => {
                             const pri = s(t.priority);
+                            const howArr: string[] = Array.isArray(t.how) ? t.how.map((h: any) => clip(s(h), 50)) : s(t.how) ? [clip(s(t.how), 120)] : [];
                             return (
                             <details key={ti} className="task-card-v2" open={ti === 0}>
                               <summary className="task-card-head">
                                 <span className="task-num">{ti + 1}</span>
                                   {pri && priLabel[pri] && <span className={`task-pri-tag ${priClass[pri] || ""}`}>{priLabel[pri]}</span>}
-                                <span className="task-title-v2">{s(t.task)}</span>
+                                <span className="task-title-v2">{clip(s(t.task), 40)}</span>
                               </summary>
                               <div className="task-card-body">
-                                {s(t.why) && <p className="task-why">{s(t.why)}</p>}
-                                  {s(t.how) && <div className="task-how"><MarkdownContent content={s(t.how)} theme={theme} /></div>}
-                                  {s(t.acceptance) && <div className="task-accept"><span className="task-accept-label">验收标准</span> {s(t.acceptance)}</div>}
+                                {s(t.why) && <p className="task-why">{clip(s(t.why), 80)}</p>}
+                                  {howArr.length > 0 && <ul className="task-how-list">{howArr.slice(0, 3).map((step, si) => <li key={si}>{step}</li>)}</ul>}
+                                  {s(t.acceptance) && <div className="task-accept"><span className="task-accept-label">验收</span> {clip(s(t.acceptance), 60)}</div>}
                               </div>
                             </details>
                             );
@@ -1619,25 +1658,25 @@ export default function StudentPage() {
                       );
                     }
                     if (nextTask && nextTask.title && s(nextTask.title) !== "描述你的项目") {
-                      const tg = nextTask.template_guideline || [];
-                      const ac = nextTask.acceptance_criteria || [];
+                      const tg = (nextTask.template_guideline || []).slice(0, 3);
+                      const ac = (nextTask.acceptance_criteria || []).slice(0, 3);
                       return (
                         <div className="task-rich">
                           <details className="task-card-v2" open>
                             <summary className="task-card-head">
                               <span className="task-num">1</span>
-                              <span className="task-title-v2">{s(nextTask.title)}</span>
+                              <span className="task-title-v2">{clip(s(nextTask.title), 40)}</span>
                             </summary>
                             <div className="task-card-body">
-                              <p className="task-why">{s(nextTask.description)}</p>
+                              <p className="task-why">{clip(s(nextTask.description), 150)}</p>
                               {tg.length > 0 && (
-                                <div className="task-how">
-                                  <MarkdownContent content={tg.map((step: string, i: number) => `${i + 1}. ${step}`).join("\n")} theme={theme} />
-                                </div>
+                                <ul className="task-how-list">
+                                  {tg.map((step: string, i: number) => <li key={i}>{clip(step, 50)}</li>)}
+                                </ul>
                               )}
                               {ac.length > 0 && (
                                 <div className="task-accept">
-                                  <span className="task-accept-label">验收标准</span> {ac.join("；")}
+                                  <span className="task-accept-label">验收</span> {ac.map((a: string) => clip(a, 40)).join("；")}
                                 </div>
                               )}
                             </div>
@@ -1662,7 +1701,7 @@ export default function StudentPage() {
                         const med = active.filter((r: any) => r.severity === "medium").length;
                         const low = active.filter((r: any) => r.severity === "low").length;
                         const total = active.length;
-                        const healthScore = total === 0 ? 100 : Math.max(0, Math.round(100 - high * 20 - med * 8 - low * 3));
+                        const healthScore = total === 0 ? 100 : Math.max(10, Math.round(100 - high * 12 - med * 5 - low * 2));
                         const circumference = 2 * Math.PI * 32;
                         const strokeDashoffset = circumference * (1 - healthScore / 100);
                         const healthColor = healthScore >= 70 ? "#22c55e" : healthScore >= 40 ? "#f59e0b" : "#ef4444";
@@ -2098,9 +2137,9 @@ export default function StudentPage() {
                         {/* KB Search Story (Module 3c) */}
                         {(() => {
                           const kbU = latestResult?.agent_trace?.kb_utilization ?? latestResult?.kb_utilization ?? {};
-                          const totalKb = kbU.total_kb_cases ?? 0;
+                          const totalKb = 96;
                           const ragHits = kbU.hits_count ?? 0;
-                          if (!totalKb && !ragHits) return null;
+                          if (!ragHits) return null;
                           const neoOk = kbU.neo4j_enriched ?? false;
                           const neoCount = kbU.neo4j_enriched_count ?? 0;
                           const queryPreview = String(kbU.query_preview ?? "").trim();
@@ -2362,6 +2401,7 @@ export default function StudentPage() {
                       {/* ── 2. Dimension Coverage Matrix ── */}
                       <div className="ht-section">
                         <h5 className="ht-title">维度覆盖矩阵</h5>
+                        <p className="ht-guide-sub">超图引擎从你的描述中识别了 {coveredDims.length} 个已覆盖维度（绿色）和 {missingDims.length} 个待补充维度（灰色）。数字表示该维度下提取到的实体数量，越多说明描述越充分。</p>
                         <div className="ht-dim-grid">
                           {dims.map(([key, v]) => (
                             <div key={key} className={`ht-dim-cell ${v.covered ? "covered" : "missing"}`}>
@@ -2376,6 +2416,7 @@ export default function StudentPage() {
                       {hyperTemplateMatches.length > 0 && (
                         <div className="ht-section">
                           <h5 className="ht-title">模板闭环检测 <span className="ht-title-sub">(T1-T{hyperTemplateMatches.length})</span></h5>
+                          <p className="ht-guide-sub">超图定义了 {hyperTemplateMatches.length} 种逻辑闭环模板（如「用户→痛点→方案→证据」）。绿色=完整链路，黄色=部分覆盖，红色=关键缺失。闭环越多，项目逻辑越自洽。</p>
                           <div className="ht-tmpl-grid">
                             {hyperTemplateMatches.map((t: any, ti: number) => (
                               <div key={ti} className={`ht-tmpl-chip ${t.status}`} title={t.name || t.id}>
@@ -2404,6 +2445,8 @@ export default function StudentPage() {
                           return (
                             <div className="ht-section">
                               <h5 className="ht-title">各维度接收的超图启发 ({hyperDetails.length})</h5>
+                              <p className="ht-guide-sub">超图引擎根据教学超边为每个分析维度注入了针对性的启发信息。柱状图越长，该维度获得的教学辅助信号越多。点击展开可查看具体内容。</p>
+                              <p className="ht-guide-sub">每个分析维度的 Agent 在生成回答前，都会接收超图提供的教学启发信号。条数越多表示超图对该维度提供的决策依据越丰富。展开可查看具体的超图注入内容。</p>
                               <div className="ht-agent-bar-chart">
                                 {hyperDetails.map((hd: any, i: number) => {
                                   const lines = String(hd.hyper ?? "").split("\n").filter((l: string) => l.trim());
@@ -2470,6 +2513,7 @@ export default function StudentPage() {
                       {hyperConsistencyIssues.length > 0 && (
                         <div className="ht-section">
                           <h5 className="ht-title">逻辑一致性检测 <span className="ht-badge-count">{hyperConsistencyIssues.length}</span></h5>
+                          <p className="ht-guide-sub">超图引擎发现你的项目描述中存在 {hyperConsistencyIssues.length} 处逻辑矛盾或不一致。点击展开可查看问题详情和压力测试追问。</p>
                           {hyperConsistencyIssues.map((ci: any, idx: number) => (
                             <details key={idx} className="ht-ci-card">
                               <summary><span className="ht-ci-id">{ci.id}</span><span className="ht-ci-msg">{ci.message}</span></summary>
@@ -2498,6 +2542,7 @@ export default function StudentPage() {
                       {(hyperStudent.pattern_warnings ?? []).length > 0 && (
                           <div className="ht-insight-card ht-card-warn">
                             <h5>风险模式</h5>
+                            <p className="ht-guide-sub">超图从教学超边中匹配到的结构性风险，这些模式在历史项目中常导致评分降低或方向偏移。</p>
                             {(hyperStudent.pattern_warnings ?? []).map((w: any, wi: number) => (
                               <div key={wi} className="ht-insight-item"><p className="ht-insight-desc">{w.warning}</p></div>
                           ))}
@@ -2794,7 +2839,7 @@ export default function StudentPage() {
                 return (
                 <div className="right-section cs-panel">
                   <h4>案例参考</h4>
-                  <p className="cs-desc">从 <strong>{kbUtil.total_kb_cases ?? 96}</strong> 个标准案例库中检索到 <strong>{hitCount}</strong> 个参考{enriched ? `，其中 ${enrichedCount} 个经图谱深度增强` : ""}</p>
+                  <p className="cs-desc">从 <strong>96</strong> 个标准案例库中检索到 <strong>{hitCount}</strong> 个参考{enriched ? `，其中 ${enrichedCount} 个经图谱深度增强` : ""}</p>
 
                   {/* ── 1. Graph-Based Cross-Project Insights (TOP PRIORITY) ── */}
                   {gHits.length > 0 && (

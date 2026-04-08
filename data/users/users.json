@@ -258,5 +258,21 @@
     "last_login": "",
     "created_at": "2026-04-07T23:13:44.099188+08:00",
     "updated_at": "2026-04-07T23:13:44.099188+08:00"
+  },
+  {
+    "user_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+    "role": "student",
+    "display_name": "小猪",
+    "email": "654321",
+    "student_id": "None",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "f209dfdace7a20d0733a84a24b5df135",
+    "password_hash": "d287c45405da5e406b3493f12a20962ef49394d9c5a511837b3331e82e5f108d",
+    "status": "active",
+    "last_login": "",
+    "created_at": "2026-04-08T11:33:50.900316+08:00",
+    "updated_at": "2026-04-08T11:33:50.900316+08:00"
   }
 ]

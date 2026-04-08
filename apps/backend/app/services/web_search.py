@@ -26,6 +26,21 @@ _STOPWORDS = {
 }
 _BLACKLIST_TERMS = {
     "小说", "下载", "破解版", "电影", "成人视频", "博彩", "彩票网站", "游戏攻略",
+    "色情", "赌博", "网赚", "兼职日结", "刷单", "棋牌", "彩票", "黄色",
+    "视频下载", "种子", "torrent", "porn", "casino", "gambling", "bet365",
+    "adult", "xxx", "sex", "slot", "lottery", "贷款", "网贷", "借钱",
+    "代写", "代做", "枪手", "挂机", "外挂", "私服", "传奇", "玄幻",
+    "算命", "风水", "免费领", "抽奖", "中奖", "加微信",
+}
+_BLACKLIST_DOMAINS = {
+    "porn", "xxx", "adult", "casino", "gambling", "bet", "lottery",
+    "torrent", "crack", "warez", "pirate", "onlyfans", "xvideos",
+}
+_QUALITY_DOMAINS = {
+    "zhihu.com", "36kr.com", "jianshu.com", "csdn.net", "mp.weixin.qq.com",
+    "baidu.com", "gov.cn", "edu.cn", "org.cn", "nature.com", "ieee.org",
+    "arxiv.org", "scholar.google", "wikipedia.org", "github.com",
+    "创业邦", "虎嗅", "亿欧", "人民网", "新华网",
 }
 _DOMAIN_HINTS = [
     "AI", "医疗", "教育", "农业", "电商", "论文", "科研", "研究生", "医院", "医生",
@@ -83,22 +98,28 @@ def _build_search_query(message: str, intent: str) -> str | None:
 
     keywords = _extract_message_keywords(message, limit=4)
     if not keywords:
-        return prefix[:60]
+        return prefix[:50]
 
-    query = f"{prefix} {' '.join(keywords[:2])}"
-    return query[:60]
+    good_kw = [kw for kw in keywords[:3] if len(kw) <= 12 and not any(sw in kw for sw in ("我", "你", "他", "她"))]
+    query = f"{prefix} {' '.join(good_kw[:2])}"
+    return query[:55]
 
 
 def _result_relevance(item: dict[str, str], query_keywords: list[str]) -> int:
     text = f"{item.get('title','')} {item.get('body','')} {item.get('href','')}".lower()
+    href = item.get("href", "").lower()
     if any(term in text for term in _BLACKLIST_TERMS):
         return -100
+    if any(bd in href for bd in _BLACKLIST_DOMAINS):
+        return -100
     score = 0
+    if any(qd in href for qd in _QUALITY_DOMAINS):
+        score += 3
     for kw in query_keywords:
         kw_l = kw.lower()
         if kw_l and kw_l in text:
             score += 2
-    if any(sig in text for sig in ("创业", "商业", "竞品", "市场", "ai", "医疗", "行业", "案例")):
+    if any(sig in text for sig in ("创业", "商业", "竞品", "市场", "ai", "医疗", "行业", "案例", "论文", "研究")):
         score += 1
     return score
 
@@ -121,7 +142,7 @@ def web_search(message: str, intent: str, max_results: int = 3) -> dict[str, Any
 
         results: list[dict[str, str]] = []
         for item in ranked:
-            if _result_relevance(item, query_keywords) < 1:
+            if _result_relevance(item, query_keywords) < 2:
                 continue
             results.append({
                 "title": item.get("title", ""),

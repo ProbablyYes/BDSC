@@ -65,10 +65,48 @@ class TeacherAssistantInterventionSendPayload(BaseModel):
     teacher_id: str
 
 
+class TeacherAssistantSmartSelectFilter(BaseModel):
+    """教师端“智能筛选”条件，用于批量选择干预目标项目/学生。
+
+    设计为尽量宽松的可选字段集，前端只需填充用到的条件即可。
+    """
+
+    class_id: str | None = None
+    cohort_id: str | None = None
+    min_overall_score: float | None = None
+    max_overall_score: float | None = None
+    min_risk_count: int | None = None
+    max_risk_count: int | None = None
+    min_progress_rank: int | None = None
+    max_progress_rank: int | None = None
+    require_high_risk_rules: list[str] = Field(default_factory=list)
+    exclude_rules: list[str] = Field(default_factory=list)
+    project_phase_in: list[str] = Field(default_factory=list)
+    limit: int = 30
+
+
 class StudentInterventionViewPayload(BaseModel):
     project_id: str
     student_id: str | None = None
 
+    class TeacherAssistantSmartSelectFilter(BaseModel):
+        """教师端“智能筛选”条件，用于批量选择干预目标项目/学生。
+
+        设计为尽量宽松的可选字段集，前端只需填充用到的条件即可。
+        """
+
+        class_id: str | None = None
+        cohort_id: str | None = None
+        min_overall_score: float | None = None
+        max_overall_score: float | None = None
+        min_risk_count: int | None = None
+        max_risk_count: int | None = None
+        min_progress_rank: int | None = None
+        max_progress_rank: int | None = None
+        require_high_risk_rules: list[str] = Field(default_factory=list)
+        exclude_rules: list[str] = Field(default_factory=list)
+        project_phase_in: list[str] = Field(default_factory=list)
+        limit: int = 30
 
 class ProjectSnapshotResponse(BaseModel):
     project_id: str

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
-type Tab = "overview" | "assistant" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition";
+type Tab = "overview" | "assistant" | "conversation-analytics" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition";
 type TeamView = "comparison" | "team-detail" | "student-detail" | "project-detail";
 
 // 风险规则名称映射
@@ -249,7 +249,7 @@ function AreaChart({ data, width = 340, height = 110, color = "var(--accent)" }:
 }
 
 // ── 散点图组件 ──
-function ScatterPlot({ data, width = 300, height = 200 }: { data: Array<{ id: string; x: number; y: number }>; width?: number; height?: number }) {
+function ScatterPlot({ data, width = 300, height = 200, xLabel = "提交次数", yLabel = "均分" }: { data: Array<{ id: string; x: number; y: number }>; width?: number; height?: number; xLabel?: string; yLabel?: string }) {
   const [hover, setHover] = useState<string | null>(null);
   if (data.length === 0) return null;
   const pad = { t: 14, b: 30, l: 38, r: 14 };
@@ -260,8 +260,8 @@ function ScatterPlot({ data, width = 300, height = 200 }: { data: Array<{ id: st
       {[0, 0.5, 1].map(r => <line key={r} x1={pad.l} y1={pad.t + cH * (1 - r)} x2={pad.l + cW} y2={pad.t + cH * (1 - r)} stroke="var(--border)" strokeWidth="1" opacity="0.35" />)}
       {[0, 0.5, 1].map(r => <text key={`y${r}`} x={pad.l - 6} y={pad.t + cH * (1 - r) + 3} textAnchor="end" fill="var(--text-muted)" fontSize="9">{(maxY * r).toFixed(1)}</text>)}
       {[0, 0.5, 1].map(r => <text key={`x${r}`} x={pad.l + cW * r} y={height - 8} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{Math.round(maxX * r)}</text>)}
-      <text x={pad.l + cW / 2} y={height} textAnchor="middle" fill="var(--text-muted)" fontSize="9">提交次数</text>
-      <text x={8} y={pad.t + cH / 2} textAnchor="middle" fill="var(--text-muted)" fontSize="9" transform={`rotate(-90,8,${pad.t + cH / 2})`}>均分</text>
+      <text x={pad.l + cW / 2} y={height} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{xLabel}</text>
+      <text x={8} y={pad.t + cH / 2} textAnchor="middle" fill="var(--text-muted)" fontSize="9" transform={`rotate(-90,8,${pad.t + cH / 2})`}>{yLabel}</text>
       {data.map(d => {
         const px = pad.l + (d.x / maxX) * cW, py = pad.t + cH - (d.y / maxY) * cH;
         const c = d.y >= 7 ? "rgba(92,189,138,0.85)" : d.y >= 5 ? "rgba(232,168,76,0.85)" : "rgba(224,112,112,0.85)";
@@ -305,7 +305,7 @@ export default function TeacherPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [assistantView, setAssistantView] = useState<"queue" | "assessment" | "intervention" | "conversation" | "impact">("queue");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [projectId, setProjectId] = useState("demo-project-001");
+  const [projectId, setProjectId] = useState("");
   const [teacherId, setTeacherId] = useState("teacher-001");
   const [classId, setClassId] = useState("");
   const [cohortId, setCohortId] = useState("");
@@ -365,9 +365,13 @@ export default function TeacherPage() {
   const [projectDiagnosis, setProjectDiagnosis] = useState<any>(null);
   const [rubricAssessment, setRubricAssessment] = useState<any>(null);
   const [competitionScore, setCompetitionScore] = useState<any>(null);
+  const [projectRuleDashboard, setProjectRuleDashboard] = useState<any>(null);
+  const [projectEvidenceTrace, setProjectEvidenceTrace] = useState<any>(null);
   const [projectWorkbenchSummary, setProjectWorkbenchSummary] = useState<any>(null);
+  const [projectCaseBenchmark, setProjectCaseBenchmark] = useState<any>(null);
   const [projectStructuredReport, setProjectStructuredReport] = useState<any>(null);
   const [hyperLibrary, setHyperLibrary] = useState<any>(null);
+  const [conversationAnalytics, setConversationAnalytics] = useState<any>(null);
   const [projectStructuredReportLoading, setProjectStructuredReportLoading] = useState(false);
   const [teachingInterventions, setTeachingInterventions] = useState<any>(null);
   const [assistantDashboard, setAssistantDashboard] = useState<any>(null);
@@ -390,6 +394,7 @@ export default function TeacherPage() {
     acceptance_criteria: [],
     priority: "medium",
   });
+  const [assistantSmartSelectResult, setAssistantSmartSelectResult] = useState<any>(null);
   const [, setAssistantReviewDraft] = useState<any>({
     title: "",
     summary: "",
@@ -531,6 +536,67 @@ export default function TeacherPage() {
     if (!raw) return "未命名";
     if (raw.length <= keep * 2 + 3) return raw;
     return `${raw.slice(0, keep)}...${raw.slice(-keep)}`;
+  }
+
+  function buildCaseBenchmarkExportText(benchmark: any): string {
+    if (!benchmark) return "";
+    const sp = benchmark.student_project || {};
+    const cases = (benchmark.top_cases || []).slice(0, 3);
+    const studentRisks: string[] = benchmark.student_risks || [];
+
+    const headerLines = [
+      `项目：${sp.project_name || sp.logical_project_id || sp.project_id || "未命名项目"}`,
+      `当前得分：${Number(sp.overall_score || 0).toFixed(1)}，风险水平：${sp.risk_level || "-"}`,
+      studentRisks.length ? `当前主要风险：${studentRisks.join("、")}` : "当前主要风险：暂无明显集中风险",
+      "",
+      "[案例对标推荐]",
+    ];
+
+    const caseLines: string[] = [];
+    cases.forEach((c: any, idx: number) => {
+      const rubric = (c.rubric_coverage || []).filter((r: any) => r && r.covered).map((r: any) => r.rubric_item || r.item).filter(Boolean);
+      const riskFlags: string[] = c.risk_flags || [];
+      const avoided = riskFlags.filter((r) => !studentRisks.includes(r));
+      caseLines.push(
+        `${idx + 1}. ${c.project_name || c.case_id || "案例"}（${c.category || "未分类"}，相似度 ${Number(c.avg_similarity || c.max_similarity || 0).toFixed(2)}）`,
+      );
+      if (rubric.length) {
+        caseLines.push(`   · Rubric 强项：${rubric.join("、")}`);
+      }
+      if (avoided.length) {
+        caseLines.push(`   · 已成功规避的风险：${avoided.join("、")}`);
+      } else if (riskFlags.length) {
+        caseLines.push(`   · 案例风险标签：${riskFlags.join("、")}`);
+      }
+    });
+
+    if (!caseLines.length) {
+      caseLines.push("暂无可用案例对标记录。先让学生与助教对话几轮，再刷新本区块。");
+    }
+
+    return [...headerLines, ...caseLines].join("\n");
+  }
+
+  async function copyCaseBenchmarkToClipboard() {
+    if (!projectCaseBenchmark) {
+      setErrorMessage("请先生成当前项目的案例对标");
+      return;
+    }
+    try {
+      const text = buildCaseBenchmarkExportText(projectCaseBenchmark);
+      if (!text) {
+        setErrorMessage("当前没有可导出的案例对标内容");
+        return;
+      }
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        setSuccessMessage("已复制案例对标摘要，可直接粘贴到PPT或文档中");
+      } else {
+        setErrorMessage("当前环境不支持一键复制，请手动选择文本");
+      }
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "复制案例对标内容失败");
+    }
   }
 
   function feedbackUrgencyScore(item: any): number {
@@ -1370,6 +1436,25 @@ export default function TeacherPage() {
     setLoading(false);
   }
 
+  async function loadConversationAnalytics() {
+    setLoadingMessage("正在分析对话质量");
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const params = new URLSearchParams();
+      if (classId.trim()) params.set("class_id", classId.trim());
+      if (cohortId.trim()) params.set("cohort_id", cohortId.trim());
+      const q = params.toString();
+      const data = await api(`/api/teacher/conversation-analytics${q ? `?${q}` : ""}`);
+      setConversationAnalytics(data);
+    } catch (error) {
+      setErrorMessage(`${error instanceof Error ? error.message : "加载对话质量分析失败"}`);
+      setConversationAnalytics(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function loadProjectDiagnosis() {
     setLoadingMessage("正在进行项目诊断");
     setLoading(true);
@@ -1421,6 +1506,7 @@ export default function TeacherPage() {
       setErrorMessage("");
       setSelectedProject(pid);
       setProjectTabInput(pid);
+      setProjectCaseBenchmark(null);
       const summaryData = await api(`/api/teacher/project/${encodeURIComponent(pid)}/workbench-summary`).catch(() => ({ logical_projects: [] }));
       setProjectWorkbenchSummary(summaryData);
       const resolvedLogicalProjectId = (
@@ -1430,11 +1516,13 @@ export default function TeacherPage() {
       ).trim();
       setSelectedLogicalProjectId(resolvedLogicalProjectId);
       const q = resolvedLogicalProjectId ? `?logical_project_id=${encodeURIComponent(resolvedLogicalProjectId)}` : "";
-      const [assessmentData, diagnosisData, competitionData, evidenceData, feedbackData] = await Promise.all([
+      const [assessmentData, diagnosisData, competitionData, evidenceData, evidenceTraceData, ruleDashboardData, feedbackData] = await Promise.all([
         api(`/api/teacher/assistant/project/${encodeURIComponent(pid)}/assessment${q}`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/deep-diagnosis`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/competition-score`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/evidence`).catch(() => null),
+        api(`/api/teacher/project/${encodeURIComponent(pid)}/evidence-trace${q}`).catch(() => null),
+        api(`/api/teacher/project/${encodeURIComponent(pid)}/rule-dashboard${q}`).catch(() => null),
         api(`/api/project/${encodeURIComponent(pid)}/feedback`).catch(() => ({ feedback: [] })),
       ]);
       setAssistantAssessment(assessmentData);
@@ -1451,6 +1539,8 @@ export default function TeacherPage() {
       }
       setProjectDiagnosis(diagnosisData);
       setCompetitionScore(competitionData);
+      setProjectEvidenceTrace(evidenceTraceData);
+      setProjectRuleDashboard(ruleDashboardData);
       setEvidence(evidenceData?.data || evidenceData || null);
       setProjectFeedbackHistory(
         (feedbackData?.feedback || []).filter((item: any) => {
@@ -1464,6 +1554,30 @@ export default function TeacherPage() {
       setTab("project");
     } catch (error) {
       setErrorMessage(`${error instanceof Error ? error.message : "加载项目工作台失败"}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadProjectCaseBenchmark(targetProjectId?: string, logicalProjectId = "") {
+    const pid = (targetProjectId || selectedProject || projectId).trim();
+    if (!pid) {
+      setErrorMessage("请先输入或选择项目 ID");
+      return;
+    }
+    try {
+      setLoadingMessage("正在汇总案例对标");
+      setLoading(true);
+      setErrorMessage("");
+      const resolvedLogicalId = (logicalProjectId || selectedLogicalProjectId || "").trim();
+      const q = resolvedLogicalId ? `?logical_project_id=${encodeURIComponent(resolvedLogicalId)}` : "";
+      const data = await api(`/api/teacher/project/${encodeURIComponent(pid)}/case-benchmark${q}`);
+      setProjectCaseBenchmark(data);
+      setProjectWorkspaceView("detail");
+      setTab("project");
+    } catch (error) {
+      setErrorMessage(`${error instanceof Error ? error.message : "加载案例对标失败"}`);
+      setProjectCaseBenchmark(null);
     } finally {
       setLoading(false);
     }
@@ -1659,6 +1773,30 @@ export default function TeacherPage() {
     }
   }
 
+  async function handleQuickPlanToIntervention(plan: any, horizon: "24h" | "72h") {
+    if (!assistantAssessment) return;
+    if (!assistantInterventionData) {
+      await loadAssistantInterventions();
+    }
+    const horizonLabel = horizon === "24h" ? "24 小时紧急修正" : "72 小时深度优化";
+    setAssistantDraftIntervention((prev: any) => ({
+      ...prev,
+      source_type: horizon === "24h" ? "quick_plan_24h" : "quick_plan_72h",
+      target_student_id: assistantAssessment.student_id || prev.target_student_id || "",
+      project_id: assistantAssessment.project_id || prev.project_id || "",
+      logical_project_id: assistantAssessment.logical_project_id || prev.logical_project_id || "",
+      title: plan.title || `${horizonLabel}：${plan.rubric_item || assistantAssessment.project_name || ""}`,
+      reason_summary: plan.description || prev.reason_summary || `基于当前 Rubric 与竞赛预测的${horizon === "24h" ? "紧急修正" : "深度优化"}建议。`,
+      action_items: plan.description ? asLines(plan.description) : prev.action_items,
+      acceptance_criteria: prev.acceptance_criteria && prev.acceptance_criteria.length > 0
+        ? prev.acceptance_criteria
+        : ["学生根据该计划完成一轮修改，并在提交后由老师复查。"],
+      priority: horizon === "24h" ? "high" : (prev.priority || "medium"),
+    }));
+    setAssistantView("intervention");
+    setTab("assistant");
+  }
+
   async function saveAssistantIntervention(sendImmediately = false) {
     try {
       setLoading(true);
@@ -1703,6 +1841,48 @@ export default function TeacherPage() {
     }
   }
 
+  async function runAssistantSmartSelect() {
+    try {
+      setLoading(true);
+      setLoadingMessage("正在根据条件筛选适合干预的项目");
+      setErrorMessage("");
+      const body: any = {
+        class_id: classId.trim() || undefined,
+        cohort_id: cohortId.trim() || undefined,
+      };
+      // 简化版：根据当前草稿里的优先级和 scope 推导一个默认筛选条件
+      if ((assistantDraftIntervention.priority || "medium") === "high") {
+        body.min_risk_count = 2;
+        body.max_overall_score = 7;
+      }
+      const res = await api("/api/teacher/assistant/smart-select", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      setAssistantSmartSelectResult(res);
+      const items: any[] = res.items || [];
+      if (items.length > 0) {
+        const scopeIds = Array.from(new Set(items.map((it) => it.project_id)));
+        // 将筛选结果映射到按项目的批量干预草稿（scope_type=project）
+        setAssistantDraftIntervention((prev: any) => ({
+          ...prev,
+          scope_type: "project",
+          scope_id: scopeIds[0] || prev.scope_id,
+          project_id: scopeIds[0] || prev.project_id,
+          target_student_id: "",
+        }));
+      }
+      setAssistantView("intervention");
+      setTab("assistant");
+    } catch (error) {
+      setErrorMessage(`${error instanceof Error ? error.message : "智能筛选失败"}`);
+      setAssistantSmartSelectResult(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function submitFeedback(e: FormEvent) {
     e.preventDefault();
     if (!feedbackText.trim() || feedbackText.trim().length < 5) {
@@ -1712,7 +1892,11 @@ export default function TeacherPage() {
     
     try {
       setErrorMessage("");
-      const targetPid = selectedProject || projectId;
+      const targetPid = (selectedProject || projectId || "").trim();
+      if (!targetPid) {
+        setErrorMessage("请先选择一个项目后再提交反馈");
+        return;
+      }
       const data = await api("/api/teacher-feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1987,8 +2171,12 @@ export default function TeacherPage() {
     }
     
     try {
-      const targetPid = selectedProject || projectId;
-      setErrorMessage("");
+        const targetPid = (selectedProject || projectId || "").trim();
+        if (!targetPid) {
+          setErrorMessage("请先选择项目后再保存批注");
+          return;
+        }
+        setErrorMessage("");
       const payload = {
         project_id: targetPid,
         submission_id: selectedFile.submission_id,
@@ -2033,8 +2221,12 @@ export default function TeacherPage() {
     }
     
     try {
-      setErrorMessage("");
-      const targetPid = selectedProject || projectId;
+        setErrorMessage("");
+        const targetPid = (selectedProject || projectId || "").trim();
+        if (!targetPid) {
+          setErrorMessage("请先选择项目后再上传反馈文件");
+          return;
+        }
       const formData = new FormData();
       formData.append("project_id", targetPid);
       formData.append("submission_id", selectedFile.submission_id);
@@ -2061,8 +2253,11 @@ export default function TeacherPage() {
 
   async function loadDocumentEdits() {
     if (!selectedFile) return;
-    
-    const targetPid = selectedProject || projectId;
+      const targetPid = (selectedProject || projectId || "").trim();
+      if (!targetPid) {
+        setErrorMessage("请先选择项目后再查看编辑历史");
+        return;
+      }
     const editsData = await api(`/api/teacher/document-edits/${encodeURIComponent(targetPid)}/${encodeURIComponent(selectedFile.submission_id)}`);
     setDocumentEdits(editsData.edits || []);
   }
@@ -2074,8 +2269,12 @@ export default function TeacherPage() {
     }
     
     try {
-      setErrorMessage("");
-      const targetPid = selectedProject || projectId;
+        setErrorMessage("");
+        const targetPid = (selectedProject || projectId || "").trim();
+        if (!targetPid) {
+          setErrorMessage("请先选择项目后再保存编辑内容");
+          return;
+        }
       const payload = {
         project_id: targetPid,
         submission_id: selectedFile.submission_id,
@@ -2108,8 +2307,12 @@ export default function TeacherPage() {
     }
     
     try {
-      setErrorMessage("");
-      const targetPid = selectedProject || projectId;
+        setErrorMessage("");
+        const targetPid = (selectedProject || projectId || "").trim();
+        if (!targetPid) {
+          setErrorMessage("请先选择项目后再导出文档");
+          return;
+        }
       const filename = `反馈_${selectedFile.student_id || 'student'}_export`;
       
       const payload = {
@@ -2291,6 +2494,7 @@ export default function TeacherPage() {
   const TABS: { id: Tab; label: string }[] = [
     { id: "overview", label: "总览" },
     { id: "assistant", label: "教学助理" },
+    { id: "conversation-analytics", label: "对话质量" },
     { id: "class", label: "团队" },
     { id: "project", label: "项目" },
     { id: "submissions", label: "学生提交" },
@@ -2343,6 +2547,25 @@ export default function TeacherPage() {
       };
     });
   }, [teamData]);
+
+  useEffect(() => {
+    if (projectId && projectId.trim()) return;
+
+    const subs = overviewSubmissions || [];
+    const preferred = subs.find((s: any) => String(s.project_id || "").startsWith("project-"));
+    const fallback = subs[0];
+    const nextPid = String((preferred?.project_id || fallback?.project_id || "")).trim();
+
+    if (nextPid) {
+      setProjectId(nextPid);
+      return;
+    }
+
+    if (teacherProjectCatalog.length > 0) {
+      const firstRoot = String(teacherProjectCatalog[0]?.root_project_id || "").trim();
+      if (firstRoot) setProjectId(firstRoot);
+    }
+  }, [projectId, overviewSubmissions, teacherProjectCatalog]);
 
   const projectBoardCategories = useMemo(() => {
     const groups = new Map<string, any>();
@@ -2592,6 +2815,7 @@ export default function TeacherPage() {
                 if (t.id === "compare") loadCompare();
                 if (t.id === "capability") loadCapabilityMap();
                 if (t.id === "rule-coverage") loadRuleCoverage();
+                if (t.id === "conversation-analytics") loadConversationAnalytics();
                 if (t.id === "rubric") loadRubricAssessment();
                 if (t.id === "competition") loadCompetitionScore();
                 if (t.id === "interventions") loadTeachingInterventions();
@@ -2915,6 +3139,205 @@ export default function TeacherPage() {
                   </div>
                 </>
               )}
+            </div>
+          )}
+
+          {/* ── 对话质量 ── */}
+          {tab === "conversation-analytics" && !loading && (
+            <div className="tch-panel fade-up">
+              <h2>🧠 对话质量分析</h2>
+              <p className="tch-desc">基于多轮对话的提问密度、高阶对话占比、证据意识趋势，以及班级共性谬误与提问热点。</p>
+              {!conversationAnalytics ? (
+                <SkeletonLoader rows={3} type="card" />
+              ) : (() => {
+                const ca = conversationAnalytics as any;
+                const summary = ca.summary || {};
+                const scatter = (ca.scatter || []) as any[];
+                const box = ca.high_order_ratio_box || { min: 0, q1: 0, median: 0, q3: 0, max: 0, avg: 0 };
+                const topics = (ca.topics || []) as any[];
+                const fallacies = (ca.fallacies || []) as any[];
+                const scatterQuestion = scatter.map((row: any) => ({
+                  id: row.student_id || "?",
+                  x: Number(row.turn_count || 0),
+                  y: Math.max(0, Math.min(10, Number(row.question_density || 0) * 10)),
+                }));
+                const scatterEvidence = scatter.map((row: any) => {
+                  const raw = Number(row.evidence_awareness_trend || 0);
+                  const score = Math.max(0, Math.min(10, 5 + raw));
+                  return {
+                    id: row.student_id || "?",
+                    x: Number(row.turn_count || 0),
+                    y: score,
+                  };
+                });
+                const students = (ca.students || []) as any[];
+                return (
+                  <>
+                    <div className="kpi-grid" style={{ marginBottom: 16 }}>
+                      <div className="kpi">
+                        <span>活跃学生</span>
+                        <strong>{summary.student_count ?? 0}</strong>
+                        <em className="kpi-hint">有对话记录的学生人数</em>
+                      </div>
+                      <div className="kpi">
+                        <span>总对话轮数</span>
+                        <strong>{summary.conversation_count ?? 0}</strong>
+                        <em className="kpi-hint">按 conversation_id 聚合的轮数总和</em>
+                      </div>
+                      <div className="kpi">
+                        <span>人均轮数</span>
+                        <strong>{Number(summary.avg_turn_count || 0).toFixed(1)}</strong>
+                        <em className="kpi-hint">平均每名学生的对话轮数</em>
+                      </div>
+                      <div className="kpi">
+                        <span>平均提问密度</span>
+                        <strong>{Number(summary.avg_question_density || 0).toFixed(2)}</strong>
+                        <em className="kpi-hint">每轮对话中 AI 关键追问条数</em>
+                      </div>
+                    </div>
+
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>提问密度 vs 对话轮数</h3>
+                        <p className="tch-desc">横轴=对话轮数 纵轴=提问密度(0-10)，颜色代表得分高低。</p>
+                        {scatterQuestion.length > 0 ? (
+                          <ScatterPlot data={scatterQuestion} xLabel="对话轮数" yLabel="提问密度(0-10)" />
+                        ) : (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无对话记录</p>
+                        )}
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>证据意识进步度</h3>
+                        <p className="tch-desc">横轴=对话轮数 纵轴=证据意识分数(0-10)，高于5表示缺失证据在减少。</p>
+                        {scatterEvidence.length > 0 ? (
+                          <ScatterPlot data={scatterEvidence} xLabel="对话轮数" yLabel="证据意识(0-10)" />
+                        ) : (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无对话记录</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="ov-chart-grid">
+                      <div className="ov-chart-card">
+                        <h3>高阶对话占比（班级分布）</h3>
+                        <p className="tch-desc">统计每名学生高阶意图对话（学习/诊断/方案/路演）的占比，0-10 代表 0%-100%。</p>
+                        <BoxPlotChart data={box} />
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>学生对话画像</h3>
+                        <p className="tch-desc">快速识别“话很多但进步小”的学生，点击可跳转到对话复盘。</p>
+                        {students.length === 0 ? (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无对话记录</p>
+                        ) : (
+                          <div className="ov-stu-table">
+                            <div className="ov-stu-header">
+                              <span>学生</span>
+                              <span>对话轮数</span>
+                              <span>提问密度</span>
+                              <span>高阶对话占比</span>
+                              <span>画像</span>
+                              <span>操作</span>
+                            </div>
+                            {students.map((stu: any, idx: number) => {
+                              const highOrderPct = Math.round(Number(stu.high_order_ratio || 0) * 100);
+                              const qd = Number(stu.question_density || 0);
+                              const persona = String(stu.persona || "直觉表达型");
+                              const personaStyle = persona === "证据敏感型"
+                                ? { color: "var(--tch-success)", background: "var(--tch-success-soft)" }
+                                : persona === "被动应答型"
+                                  ? { color: "var(--tch-danger)", background: "var(--tch-danger-soft)" }
+                                  : { color: "var(--accent)", background: "rgba(107,138,255,0.15)" };
+                              return (
+                                <div key={stu.student_id} className="ov-stu-row" style={{ animationDelay: `${idx * 0.03}s` }}>
+                                  <span className="ov-stu-name">
+                                    <span className="ov-stu-av">{(stu.student_id as string)[0]?.toUpperCase()}</span>
+                                    {stu.student_id}
+                                  </span>
+                                  <span>{stu.turn_count}</span>
+                                  <span>{qd.toFixed(2)}</span>
+                                  <span>{highOrderPct}%</span>
+                                  <span>
+                                    <span className="ov-status-badge" style={personaStyle}>{persona}</span>
+                                  </span>
+                                  <span>
+                                    <button
+                                      type="button"
+                                      className="tch-sm-btn"
+                                      onClick={() => loadAssistantConversationEval(`project-${stu.student_id}`)}
+                                    >
+                                      对话复盘
+                                    </button>
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="ov-chart-grid" style={{ marginTop: 12 }}>
+                      <div className="ov-chart-card">
+                        <h3>提问热点 Top 主题</h3>
+                        <p className="tch-desc">横向比较学生最常追问/求助的主题，以及对应的高频红线规则。</p>
+                        {topics.length === 0 ? (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无可统计的对话主题。</p>
+                        ) : (
+                          <div className="ov-stu-table">
+                            <div className="ov-stu-header">
+                              <span>主题</span>
+                              <span>覆盖学生占比</span>
+                              <span>轮次占比</span>
+                              <span>相关规则</span>
+                            </div>
+                            {topics.map((t: any, idx: number) => (
+                              <div key={t.topic || idx} className="ov-stu-row" style={{ animationDelay: `${idx * 0.03}s` }}>
+                                <span>{t.topic || "未标注"}</span>
+                                <span>{Math.round(Number(t.students_ratio || 0) * 100)}%</span>
+                                <span>{Math.round(Number(t.turn_ratio || 0) * 100)}%</span>
+                                <span>
+                                  {(t.related_rules || []).slice(0, 4).map((r: any) => (
+                                    <span key={r.rule_id} className="tm-smart-chip">{getRuleDisplayName(r.rule_id)}</span>
+                                  ))}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ov-chart-card">
+                        <h3>班级共性谬误（对话视角）</h3>
+                        <p className="tch-desc">聚焦在多轮对话中频繁被触发的 H 规则，辅助老师设计集中讲解。</p>
+                        {fallacies.length === 0 ? (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无明显的共性谬误。</p>
+                        ) : (
+                          <div className="ov-stu-table">
+                            <div className="ov-stu-header">
+                              <span>规则</span>
+                              <span>触发次数</span>
+                              <span>覆盖学生占比</span>
+                              <span>谬误/超图族</span>
+                            </div>
+                            {fallacies.map((f: any, idx: number) => (
+                              <div key={f.rule_id || idx} className="ov-stu-row" style={{ animationDelay: `${idx * 0.03}s` }}>
+                                <span>{getRuleDisplayName(f.rule_id)}</span>
+                                <span>{f.hit_count ?? 0}</span>
+                                <span>{Math.round(Number(f.students_ratio || 0) * 100)}%</span>
+                                <span>
+                                  <span className="tm-smart-chip">{f.fallacy || "-"}</span>
+                                  {(f.edge_families || []).slice(0, 3).map((fam: string) => (
+                                    <span key={fam} className="tm-smart-chip">{fam}</span>
+                                  ))}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 
@@ -4820,6 +5243,7 @@ export default function TeacherPage() {
                             <button className="tch-sm-btn" onClick={() => loadAssistantAssessment(selectedProject, selectedLogicalProjectId)}>去批改与溯源</button>
                             <button className="tch-sm-btn" onClick={() => loadAssistantConversationEval(selectedProject, selectedLogicalProjectId)}>看过程评估</button>
                             <button className="tch-sm-btn" onClick={() => loadFeedbackWorkspace(selectedProject || projectId, selectedLogicalProjectId || "")}>打开材料反馈</button>
+                            <button className="tch-sm-btn" onClick={() => loadProjectCaseBenchmark(selectedProject, selectedLogicalProjectId)}>刷新案例对标</button>
                             <button onClick={() => { setProjectIdConfirmed(false); setSelectedProject(""); setSelectedLogicalProjectId(""); setProjectWorkbenchSummary(null); setProjectWorkspaceView("library"); }} className="tch-back-btn">返回项目库</button>
                           </div>
 
@@ -4901,6 +5325,176 @@ export default function TeacherPage() {
                                   <div className="assistant-note-list" style={{ marginTop: 12 }}>
                                     {projectDiagnosis.fix_strategies.slice(0, 3).map((fix: any) => <div key={fix.rule_id} className="tm-note-row good">{fix.rule_name}：{fix.fix_strategy}</div>)}
                                   </div>
+                                )}
+                              </div>
+
+                              {projectRuleDashboard && !projectRuleDashboard.error && (
+                                <div className="assistant-section">
+                                  <div className="assistant-section-title">规则触发雷达 & 红线看板</div>
+                                  <div className="assistant-insight-grid">
+                                    <div className="assistant-summary-card" style={{ minWidth: 0 }}>
+                                      <div className="assistant-section-title" style={{ marginBottom: 8 }}>本项目规则雷达</div>
+                                      {Array.isArray(projectRuleDashboard.radar) && projectRuleDashboard.radar.length >= 3 ? (
+                                        <RadarChart
+                                          data={projectRuleDashboard.radar.map((row: any) => ({
+                                            label: getRuleDisplayName(row.label || row.rule || row.rule_id || "规则"),
+                                            value: Number(row.value ?? row.raw_hits ?? 0),
+                                            max: 10,
+                                          }))}
+                                          size={230}
+                                        />
+                                      ) : (
+                                        <p className="right-hint">当前项目的规则触发样本还不多。</p>
+                                      )}
+                                    </div>
+                                    <div className="assistant-summary-card" style={{ minWidth: 0 }}>
+                                      <div className="assistant-section-title" style={{ marginBottom: 8 }}>高频红线规则</div>
+                                      <div className="assistant-note-list">
+                                        {(projectRuleDashboard.rules || []).slice(0, 5).map((rule: any) => (
+                                          <div
+                                            key={rule.rule_id}
+                                            className={`tm-note-row ${rule.severity && rule.severity !== "low" ? "warn" : "good"}`}
+                                          >
+                                            <strong>{rule.rule_id}</strong> · {rule.rule_name || getRuleDisplayName(rule.rule_id)}
+                                            <div className="assistant-inline-note">
+                                              命中 {rule.hit_count} 次 · {rule.fallacy || "未归类"}
+                                              {Array.isArray(rule.edge_families) && rule.edge_families.length > 0 && (
+                                                <span> · {(rule.edge_families || []).slice(0, 2).join(" / ")}</span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                        {(!projectRuleDashboard.rules || projectRuleDashboard.rules.length === 0) && (
+                                          <p className="right-hint">当前项目还没有明显的规则触发集中区。</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {projectEvidenceTrace && !projectEvidenceTrace.error && (
+                                <div className="assistant-section">
+                                  <div className="assistant-section-title">Rubric × 证据链追溯</div>
+                                  <div className="assistant-note-list">
+                                    {(projectEvidenceTrace.rubric_summary || []).slice(0, 4).map((row: any) => (
+                                      <div key={row.rubric_item} className="tm-note-row warn">
+                                        {row.rubric_item} · {row.evidence_count} 条证据 · 关联规则
+                                        {" "}
+                                        {(row.rule_ids || []).slice(0, 3).map((rid: string) => getRuleDisplayName(rid)).join(" / ") || "未标注"}
+                                      </div>
+                                    ))}
+                                    {(projectEvidenceTrace.rubric_summary || []).length === 0 && (
+                                      <p className="right-hint">暂未在当前项目下找到可追溯的 Rubric 证据链。</p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="assistant-section">
+                                <div className="assistant-section-title">案例对标推荐板</div>
+                                {projectCaseBenchmark && !projectCaseBenchmark.error ? (
+                                  <div className="project-benchmark-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0,1.2fr) minmax(0,1.5fr)", gap: 16 }}>
+                                    {(() => {
+                                      const bench = projectCaseBenchmark;
+                                      const sp = bench.student_project || {};
+                                      const studentRisks: string[] = bench.student_risks || [];
+                                      const topCases: any[] = (bench.top_cases || []).slice(0, 3);
+                                      return (
+                                        <>
+                                          <div className="project-benchmark-card" style={{ borderRadius: 10, padding: 14, border: "1px solid var(--border)", background: "var(--bg-card)" }}>
+                                            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 6 }}>当前项目画像 · 案例对标视角</div>
+                                            <h3 style={{ margin: "2px 0 6px 0", fontSize: 16 }}>{sp.project_name || activeProjectCard?.project_name || selectedProject}</h3>
+                                            <div className="tm-case-meta">
+                                              {sp.student_id && <span>{sp.student_id}</span>}
+                                              {sp.class_id && <span>{sp.class_id}</span>}
+                                              {sp.cohort_id && <span>{sp.cohort_id}</span>}
+                                            </div>
+                                            <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
+                                              <div>
+                                                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>最新得分</div>
+                                                <div style={{ fontSize: 24, fontWeight: 700 }}>
+                                                  <AnimatedNumber value={Number(sp.overall_score || activeProjectCard?.latest_score || 0)} duration={800} decimals={1} />
+                                                </div>
+                                              </div>
+                                              <div>
+                                                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>风险标签数</div>
+                                                <div style={{ fontSize: 22, fontWeight: 700 }}>{studentRisks.length}</div>
+                                              </div>
+                                              <div>
+                                                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>rag 命中轮次</div>
+                                                <div style={{ fontSize: 22, fontWeight: 700 }}>{bench.similarity?.rag_turn_count ?? 0}</div>
+                                              </div>
+                                            </div>
+                                            <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
+                                              {studentRisks.slice(0, 4).map((risk) => (
+                                                <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>
+                                              ))}
+                                              {studentRisks.length === 0 && <span className="right-hint">当前项目尚未触发集中风险规则。</span>}
+                                            </div>
+                                            <button
+                                              className="tch-sm-btn"
+                                              style={{ marginTop: 12 }}
+                                              onClick={copyCaseBenchmarkToClipboard}
+                                            >
+                                              复制为教学对比表
+                                            </button>
+                                          </div>
+
+                                          <div className="project-benchmark-card" style={{ borderRadius: 10, padding: 14, border: "1px solid var(--border)", background: "var(--bg-card)" }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                              <div>
+                                                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>最相近的参考案例</div>
+                                                <strong>按相似度与出现频次排序的 1-3 个案例</strong>
+                                              </div>
+                                              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                                                平均相似度 {Number(bench.similarity?.avg_top_similarity || 0).toFixed(2)}
+                                              </div>
+                                            </div>
+                                            {topCases.length > 0 ? (
+                                              <div className="project-benchmark-case-list" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                                {topCases.map((c: any, idx: number) => {
+                                                  const rubric = (c.rubric_coverage || []).filter((r: any) => r && r.covered).map((r: any) => r.rubric_item || r.item).filter(Boolean);
+                                                  const riskFlags: string[] = c.risk_flags || [];
+                                                  const avoided = riskFlags.filter((r) => !studentRisks.includes(r));
+                                                  return (
+                                                    <div key={c.case_id || c.project_name || idx} className="project-benchmark-case" style={{ padding: 10, borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
+                                                      <div className="tm-case-meta" style={{ marginBottom: 4 }}>
+                                                        <span>{serialLabel("案例", idx + 1)}</span>
+                                                        {c.category && <span>{c.category}</span>}
+                                                        <span>相似度 {Number(c.avg_similarity || c.max_similarity || 0).toFixed(2)}</span>
+                                                      </div>
+                                                      <strong>{c.project_name || c.case_id || "推荐案例"}</strong>
+                                                      {c.summary && (
+                                                        <p className="project-board-summary" style={{ marginTop: 4 }}>{c.summary}</p>
+                                                      )}
+                                                      <div className="tm-corridor-tags" style={{ marginTop: 6 }}>
+                                                        {rubric.slice(0, 4).map((r: string) => (
+                                                          <span key={r} className="tm-smart-chip">Rubric：{r}</span>
+                                                        ))}
+                                                      </div>
+                                                      <div className="tm-corridor-tags" style={{ marginTop: 4 }}>
+                                                        {avoided.slice(0, 4).map((r) => (
+                                                          <span key={r} className="tm-smart-chip">已规避：{getRuleDisplayName(r)}</span>
+                                                        ))}
+                                                        {avoided.length === 0 && riskFlags.slice(0, 3).map((r) => (
+                                                          <span key={r} className="tm-smart-chip">案例风险：{getRuleDisplayName(r)}</span>
+                                                        ))}
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                })}
+                                              </div>
+                                            ) : (
+                                              <p className="right-hint">当前项目的对话记录中还没有触发带有案例检索的轮次。先引导学生与助教围绕具体竞赛案例进行几轮对话，再刷新本区块。</p>
+                                            )}
+                                          </div>
+                                        </>
+                                      );
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <p className="right-hint">点击上方“刷新案例对标”后，这里会展示“你的项目目前更像哪些典型案例 / 差在哪些 Rubric 或风险上”。</p>
                                 )}
                               </div>
                             </div>
@@ -5238,6 +5832,51 @@ export default function TeacherPage() {
                                 </div>
                               </div>
 
+                              {(assistantAssessment?.quick_plan_24h?.length || assistantAssessment?.quick_plan_72h?.length) ? (
+                                <div className="assistant-preview-grid">
+                                  <div className="assistant-preview-card">
+                                    <div className="assistant-section-title">24 小时紧急修正</div>
+                                    <div className="assistant-note-list">
+                                      {(assistantAssessment.quick_plan_24h || []).slice(0, 4).map((plan: any, idx: number) => (
+                                        <div key={idx} className="tm-note-row warn">
+                                          <strong>{plan.title || `紧急修正 ${idx + 1}`}</strong>
+                                          {plan.rubric_item && <span style={{ marginLeft: 6 }}>· {plan.rubric_item}</span>}
+                                          {plan.description && <div className="assistant-inline-note">{plan.description}</div>}
+                                          <button
+                                            className="tch-sm-btn"
+                                            style={{ marginTop: 6 }}
+                                            onClick={() => { void handleQuickPlanToIntervention(plan, "24h"); }}
+                                          >
+                                            转为干预任务
+                                          </button>
+                                        </div>
+                                      ))}
+                                      {(assistantAssessment.quick_plan_24h || []).length === 0 && <p className="right-hint">暂无 24 小时修正建议。</p>}
+                                    </div>
+                                  </div>
+                                  <div className="assistant-preview-card">
+                                    <div className="assistant-section-title">72 小时深度优化</div>
+                                    <div className="assistant-note-list">
+                                      {(assistantAssessment.quick_plan_72h || []).slice(0, 4).map((plan: any, idx: number) => (
+                                        <div key={idx} className="tm-note-row good">
+                                          <strong>{plan.title || `深度优化 ${idx + 1}`}</strong>
+                                          {plan.rubric_item && <span style={{ marginLeft: 6 }}>· {plan.rubric_item}</span>}
+                                          {plan.description && <div className="assistant-inline-note">{plan.description}</div>}
+                                          <button
+                                            className="tch-sm-btn"
+                                            style={{ marginTop: 6 }}
+                                            onClick={() => { void handleQuickPlanToIntervention(plan, "72h"); }}
+                                          >
+                                            转为干预任务
+                                          </button>
+                                        </div>
+                                      ))}
+                                      {(assistantAssessment.quick_plan_72h || []).length === 0 && <p className="right-hint">暂无 72 小时优化建议。</p>}
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : null}
+
                               <div className="assistant-routing-grid">
                                 <button className="assistant-route-card" onClick={() => loadFeedbackWorkspace(assistantAssessment.project_id, assistantAssessment.logical_project_id || "")}>
                                   <div className="assistant-route-top">
@@ -5391,6 +6030,56 @@ export default function TeacherPage() {
                                     </div>
                                   ))}
                                 </div>
+                              </div>
+                              <div className="assistant-section">
+                                <div className="assistant-section-title">条件筛选 & 智能批量干预</div>
+                                <p className="tch-desc">可先输入班级/届别，再点击“智能筛选”自动挑选落后且高风险的项目，作为本次干预范围。</p>
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                                  <input
+                                    className="tm-input"
+                                    style={{ maxWidth: 180 }}
+                                    placeholder="班级 ID（可选）"
+                                    value={classId}
+                                    onChange={(e) => setClassId(e.target.value)}
+                                  />
+                                  <input
+                                    className="tm-input"
+                                    style={{ maxWidth: 180 }}
+                                    placeholder="届别/期数（可选）"
+                                    value={cohortId}
+                                    onChange={(e) => setCohortId(e.target.value)}
+                                  />
+                                  <select
+                                    className="tm-input"
+                                    style={{ maxWidth: 160 }}
+                                    value={assistantDraftIntervention.priority || "medium"}
+                                    onChange={(e) => setAssistantDraftIntervention((v: any) => ({ ...v, priority: e.target.value }))}
+                                  >
+                                    <option value="high">优先筛选高风险项目</option>
+                                    <option value="medium">一般优先级</option>
+                                    <option value="low">较低优先级</option>
+                                  </select>
+                                  <button className="tch-sm-btn" onClick={runAssistantSmartSelect}>智能筛选候选项目</button>
+                                </div>
+                                {assistantSmartSelectResult && (
+                                  <div className="assistant-list compact">
+                                    <div className="tm-note-row good">共找到 {assistantSmartSelectResult.total_candidates ?? 0} 个候选项目，当前选中 {assistantSmartSelectResult.selected_count ?? 0} 个。</div>
+                                    {(assistantSmartSelectResult.items || []).slice(0, 8).map((item: any, idx: number) => (
+                                      <div key={`${item.project_id}-${idx}`} className="assistant-queue-card compact">
+                                        <div>
+                                          <strong>{item.project_id}</strong>
+                                          <div className="tm-case-meta">
+                                            <span>{item.student_id}</span>
+                                            <span>分数 {Number(item.overall_score || 0).toFixed(1)}</span>
+                                            <span>风险 {item.risk_count}</span>
+                                            <span>{item.project_stage}</span>
+                                          </div>
+                                          {item.latest_bottleneck && <div className="tm-case-inline-summary" style={{ marginTop: 4 }}>{item.latest_bottleneck}</div>}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div className="assistant-side-panel">

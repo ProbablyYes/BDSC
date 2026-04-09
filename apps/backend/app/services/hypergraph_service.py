@@ -218,6 +218,134 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "pattern_type": "ideal",
         "linked_rules": ["H6", "H9", "H12"],
     },
+    {
+        "id": "T21_team_capability_gap",
+        "name": "团队能力缺口",
+        "dimensions": ["team", "technology", "execution_step"],
+        "description": "团队现有能力与技术/执行要求之间的差距",
+        "pattern_type": "risk",
+        "linked_rules": ["H9", "H10"],
+    },
+    {
+        "id": "T22_user_journey",
+        "name": "用户旅程闭环",
+        "dimensions": ["stakeholder", "channel", "pain_point", "solution"],
+        "description": "从触达到留存的完整用户旅程",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H2"],
+    },
+    {
+        "id": "T23_social_impact",
+        "name": "社会价值链",
+        "dimensions": ["stakeholder", "pain_point", "evidence", "market"],
+        "description": "公益/ESG维度的社会影响评估",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5"],
+    },
+    {
+        "id": "T24_data_flywheel",
+        "name": "数据飞轮",
+        "dimensions": ["solution", "stakeholder", "technology", "business_model"],
+        "description": "数据积累驱动产品壁垒和用户价值提升",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7", "H12"],
+    },
+    {
+        "id": "T25_scalability_bottleneck",
+        "name": "规模化瓶颈",
+        "dimensions": ["market", "resource", "team", "risk"],
+        "description": "从MVP到规模化的关键约束分析",
+        "pattern_type": "risk",
+        "linked_rules": ["H9", "H14"],
+    },
+    {
+        "id": "T26_ip_moat",
+        "name": "知识产权护城河",
+        "dimensions": ["technology", "resource", "competitor"],
+        "description": "专利/算法/数据等不可复制壁垒",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7", "H12"],
+    },
+    {
+        "id": "T27_pivot_signal",
+        "name": "转型信号",
+        "dimensions": ["evidence", "stakeholder", "pain_point", "market"],
+        "description": "用户反馈与市场信号暗示需要调整方向",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T28_cost_structure",
+        "name": "成本结构",
+        "dimensions": ["business_model", "resource", "technology"],
+        "description": "固定成本、变动成本与技术基础设施的关系",
+        "pattern_type": "risk",
+        "linked_rules": ["H8", "H10"],
+    },
+    {
+        "id": "T29_ecosystem_dependency",
+        "name": "生态依赖",
+        "dimensions": ["solution", "technology", "risk"],
+        "description": "对平台/供应商/API的依赖与锁定风险",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H14"],
+    },
+    {
+        "id": "T30_mvp_scope",
+        "name": "MVP边界",
+        "dimensions": ["solution", "stakeholder", "execution_step", "evidence"],
+        "description": "最小可行产品的范围划定与验证策略",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H10"],
+    },
+    {
+        "id": "T31_stakeholder_conflict",
+        "name": "利益相关方冲突",
+        "dimensions": ["stakeholder", "business_model", "risk"],
+        "description": "多方利益不一致时的平衡机制",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H3"],
+    },
+    {
+        "id": "T32_channel_conversion",
+        "name": "渠道转化漏斗",
+        "dimensions": ["channel", "stakeholder", "evidence", "business_model"],
+        "description": "获客渠道的转化率、成本与LTV关系",
+        "pattern_type": "ideal",
+        "linked_rules": ["H2", "H8"],
+    },
+    {
+        "id": "T33_regulatory_landscape",
+        "name": "政策法规环境",
+        "dimensions": ["risk", "market", "evidence"],
+        "description": "行业法规对商业模式和市场准入的影响",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H15"],
+    },
+    {
+        "id": "T34_presentation_narrative",
+        "name": "路演叙事线",
+        "dimensions": ["stakeholder", "pain_point", "solution", "evidence"],
+        "description": "从故事到数据再到方案的路演逻辑链",
+        "pattern_type": "ideal",
+        "linked_rules": ["H13"],
+    },
+    {
+        "id": "T35_resource_leverage",
+        "name": "资源杠杆",
+        "dimensions": ["resource", "team", "business_model"],
+        "description": "用有限资源撬动最大价值的策略",
+        "pattern_type": "ideal",
+        "linked_rules": ["H9", "H14"],
+    },
+    {
+        "id": "T36_timing_window",
+        "name": "时机窗口",
+        "dimensions": ["market", "technology", "competitor"],
+        "description": "市场时机与技术成熟度的匹配判断",
+        "pattern_type": "risk",
+        "linked_rules": ["H4", "H6"],
+    },
 ]
 
 
@@ -458,6 +586,22 @@ EDGE_FAMILY_LABELS: dict[str, str] = {
     "Retention_Workflow_Embed_Edge": "工作流嵌入超边",
     "Stage_Goal_Fit_Edge": "阶段目标匹配超边",
     "Rule_Rubric_Tension_Edge": "规则评分张力超边",
+    "Team_Capability_Gap_Edge": "团队能力缺口超边",
+    "User_Journey_Edge": "用户旅程闭环超边",
+    "Social_Impact_Edge": "社会价值链超边",
+    "Data_Flywheel_Edge": "数据飞轮超边",
+    "Scalability_Bottleneck_Edge": "规模化瓶颈超边",
+    "IP_Moat_Edge": "知识产权护城河超边",
+    "Pivot_Signal_Edge": "转型信号超边",
+    "Cost_Structure_Edge": "成本结构超边",
+    "Ecosystem_Dependency_Edge": "生态依赖超边",
+    "MVP_Scope_Edge": "MVP边界超边",
+    "Stakeholder_Conflict_Edge": "利益方冲突超边",
+    "Channel_Conversion_Edge": "渠道转化漏斗超边",
+    "Regulatory_Landscape_Edge": "政策法规环境超边",
+    "Presentation_Narrative_Edge": "路演叙事线超边",
+    "Resource_Leverage_Edge": "资源杠杆超边",
+    "Timing_Window_Edge": "时机窗口超边",
 }
 
 EDGE_PREFIX: dict[str, str] = {
@@ -476,6 +620,22 @@ EDGE_PREFIX: dict[str, str] = {
     "Retention_Workflow_Embed_Edge": "he_retention_",
     "Stage_Goal_Fit_Edge": "he_stage_",
     "Rule_Rubric_Tension_Edge": "he_tension_",
+    "Team_Capability_Gap_Edge": "he_teamgap_",
+    "User_Journey_Edge": "he_journey_",
+    "Social_Impact_Edge": "he_social_",
+    "Data_Flywheel_Edge": "he_flywheel_",
+    "Scalability_Bottleneck_Edge": "he_scale_",
+    "IP_Moat_Edge": "he_ipmoat_",
+    "Pivot_Signal_Edge": "he_pivot_",
+    "Cost_Structure_Edge": "he_cost_",
+    "Ecosystem_Dependency_Edge": "he_ecosystem_",
+    "MVP_Scope_Edge": "he_mvp_",
+    "Stakeholder_Conflict_Edge": "he_conflict_",
+    "Channel_Conversion_Edge": "he_channel_",
+    "Regulatory_Landscape_Edge": "he_regulatory_",
+    "Presentation_Narrative_Edge": "he_narrative_",
+    "Resource_Leverage_Edge": "he_leverage_",
+    "Timing_Window_Edge": "he_timing_",
 }
 
 EDGE_TARGET_COUNTS: dict[str, int] = {
@@ -494,6 +654,22 @@ EDGE_TARGET_COUNTS: dict[str, int] = {
     "Stage_Goal_Fit_Edge": 8,
     "Rule_Rubric_Tension_Edge": 10,
     "Ontology_Grounded_Edge": 6,
+    "Team_Capability_Gap_Edge": 8,
+    "User_Journey_Edge": 10,
+    "Social_Impact_Edge": 6,
+    "Data_Flywheel_Edge": 8,
+    "Scalability_Bottleneck_Edge": 8,
+    "IP_Moat_Edge": 6,
+    "Pivot_Signal_Edge": 6,
+    "Cost_Structure_Edge": 8,
+    "Ecosystem_Dependency_Edge": 6,
+    "MVP_Scope_Edge": 8,
+    "Stakeholder_Conflict_Edge": 6,
+    "Channel_Conversion_Edge": 8,
+    "Regulatory_Landscape_Edge": 6,
+    "Presentation_Narrative_Edge": 8,
+    "Resource_Leverage_Edge": 6,
+    "Timing_Window_Edge": 6,
 }
 
 
@@ -1223,6 +1399,205 @@ class HypergraphService:
                         "retrieval_reason": "阶段、证据与评分焦点可对齐，适合解释当前阶段应该优先证明什么。",
                     },
                 )
+
+            # ── New families (T21-T36) ──
+
+            if stakeholders and solutions and execution_steps:
+                team_member = execution_steps[0]
+                tech = solutions[0]
+                key = (category, team_member, tech)
+                self._register_pattern(families["Team_Capability_Gap_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"ExecutionStep::{team_member}", f"Solution::{tech}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H9", "H10"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Team & Execution"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的团队能力是否匹配技术和执行要求，是评委重点考察的维度。",
+                    "retrieval_reason": "团队执行步骤与技术方案共现，适合做团队能力差距分析。",
+                })
+
+            if stakeholders and pains and solutions:
+                stakeholder = stakeholders[0]
+                pain = pains[0]
+                solution = solutions[0]
+                key = (category, stakeholder, pain, solution, "journey")
+                self._register_pattern(families["User_Journey_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholder}", f"PainPoint::{pain}", f"Solution::{solution}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H1", "H2"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"User Evidence Strength", "Problem Definition"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的用户旅程是否完整（触达→认知→试用→留存→推荐）决定了增长飞轮能否转起来。",
+                    "retrieval_reason": "用户、痛点与方案构成旅程闭环。",
+                })
+
+            if stakeholders and pains and evidence_types:
+                key = (category, stakeholders[0], pains[0], "social")
+                self._register_pattern(families["Social_Impact_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"PainPoint::{pains[0]}", f"EvidenceType::{evidence_types[0] if evidence_types else '社会效果待量化'}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H5"}][:4],
+                    "rubrics": covered_rubrics[:2],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的社会价值需要量化——不是说'帮助了很多人'，而是用数据证明影响范围和深度。",
+                    "retrieval_reason": "社会影响维度的用户与证据共现。",
+                })
+
+            if solutions and stakeholders and business_models:
+                key = (category, solutions[0], stakeholders[0], "flywheel")
+                self._register_pattern(families["Data_Flywheel_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Solution::{solutions[0]}", f"Stakeholder::{stakeholders[0]}", f"BusinessModelAspect::{business_models[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H7", "H12"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Innovation & Differentiation", "Solution Feasibility"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目能否形成数据飞轮（更多用户→更多数据→更好产品→更多用户），是长期壁垒的关键。",
+                    "retrieval_reason": "方案、用户与商业模式的飞轮结构。",
+                })
+
+            if markets and risk_controls:
+                key = (category, markets[0], risk_controls[0], "scale")
+                self._register_pattern(families["Scalability_Bottleneck_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Market::{markets[0]}", f"RiskControlPoint::{risk_controls[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H9", "H14"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Team & Execution", "Market & Competition"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目从MVP到规模化最容易卡在哪？不是技术，往往是运营成本随规模非线性增长。",
+                    "retrieval_reason": "市场与风控节点共现，适合做规模化瓶颈分析。",
+                })
+
+            if innovations and solutions:
+                key = (category, innovations[0], solutions[0], "ip")
+                self._register_pattern(families["IP_Moat_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"InnovationPoint::{innovations[0]}", f"Solution::{solutions[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H7", "H12"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Innovation & Differentiation"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的壁垒是什么？是算法、数据、专利还是网络效应？评委会追问这个壁垒能撑多久。",
+                    "retrieval_reason": "创新点与方案共现，适合做护城河分析。",
+                })
+
+            if evidence_types and stakeholders and pains:
+                key = (category, evidence_types[0], stakeholders[0], "pivot")
+                self._register_pattern(families["Pivot_Signal_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"EvidenceType::{evidence_types[0]}", f"Stakeholder::{stakeholders[0]}", f"PainPoint::{pains[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H1", "H5"}][:4],
+                    "rubrics": covered_rubrics[:2],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目如果调研数据和预期不符，不要恐慌——这恰恰是最有价值的信号，说明你该调整方向了。",
+                    "retrieval_reason": "证据与用户痛点出现偏差信号。",
+                })
+
+            if business_models and solutions:
+                key = (category, business_models[0], solutions[0], "cost")
+                self._register_pattern(families["Cost_Structure_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"BusinessModelAspect::{business_models[0]}", f"Solution::{solutions[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H8", "H10"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Financial Logic", "Business Model Consistency"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的成本结构是否可持续？固定成本和边际成本的比例决定了盈亏平衡点。",
+                    "retrieval_reason": "商业模式与方案的成本结构分析。",
+                })
+
+            if solutions and risk_controls:
+                key = (category, solutions[0], risk_controls[0] if risk_controls else "平台依赖待评估", "eco")
+                self._register_pattern(families["Ecosystem_Dependency_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Solution::{solutions[0]}", f"RiskControlPoint::{risk_controls[0] if risk_controls else '平台依赖待评估'}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H11", "H14"}][:4],
+                    "rubrics": covered_rubrics[:2],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目是否依赖某个平台/API/供应链？如果对方改规则或涨价，你的B方案是什么？",
+                    "retrieval_reason": "方案与风控的生态依赖分析。",
+                })
+
+            if solutions and stakeholders and execution_steps:
+                key = (category, solutions[0], stakeholders[0], execution_steps[0], "mvp")
+                self._register_pattern(families["MVP_Scope_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Solution::{solutions[0]}", f"Stakeholder::{stakeholders[0]}", f"ExecutionStep::{execution_steps[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H5", "H10"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Solution Feasibility", "User Evidence Strength"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的MVP应该只包含一个核心假设的最小验证——不要贪多，先证明最关键的那一个。",
+                    "retrieval_reason": "方案、用户与执行步骤构成MVP边界。",
+                })
+
+            if stakeholders and business_models and risk_controls:
+                key = (category, stakeholders[0], business_models[0], "conflict")
+                self._register_pattern(families["Stakeholder_Conflict_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"BusinessModelAspect::{business_models[0]}", f"RiskControlPoint::{risk_controls[0] if risk_controls else '利益平衡待设计'}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H1", "H3"}][:4],
+                    "rubrics": covered_rubrics[:2],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目如果有多方利益相关者，要说清楚谁付费、谁受益、谁可能反对——以及你如何平衡。",
+                    "retrieval_reason": "多方利益相关者与商业模式冲突分析。",
+                })
+
+            if stakeholders and evidence_types and business_models:
+                key = (category, stakeholders[0], evidence_types[0] if evidence_types else "渠道证据待补充", "channel")
+                self._register_pattern(families["Channel_Conversion_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"EvidenceType::{evidence_types[0] if evidence_types else '渠道证据待补充'}", f"BusinessModelAspect::{business_models[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H2", "H8"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Market & Competition", "Financial Logic"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的获客不只是'在哪推广'，还要说清楚每一步的转化率假设和数据来源。",
+                    "retrieval_reason": "用户、证据与商业模式的渠道转化分析。",
+                })
+
+            if risk_controls and markets:
+                key = (category, risk_controls[0], markets[0], "regulatory")
+                self._register_pattern(families["Regulatory_Landscape_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"RiskControlPoint::{risk_controls[0]}", f"Market::{markets[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H11", "H15"}][:4],
+                    "rubrics": covered_rubrics[:2],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目所在行业有哪些法规红线？政策风向可能如何变化？这决定了你的天花板。",
+                    "retrieval_reason": "风控与市场的政策法规环境分析。",
+                })
+
+            if stakeholders and pains and solutions and evidence_types:
+                key = (category, stakeholders[0], pains[0], solutions[0], "narrative")
+                self._register_pattern(families["Presentation_Narrative_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"PainPoint::{pains[0]}", f"Solution::{solutions[0]}", f"EvidenceType::{evidence_types[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H13"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Presentation Quality"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目路演的最佳叙事线：先讲一个真实用户故事→引出痛点→展示数据→方案→差异化→团队→展望。",
+                    "retrieval_reason": "用户、痛点、方案与证据构成路演叙事线。",
+                })
+
+            if business_models and execution_steps:
+                key = (category, business_models[0], execution_steps[0], "leverage")
+                self._register_pattern(families["Resource_Leverage_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"BusinessModelAspect::{business_models[0]}", f"ExecutionStep::{execution_steps[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H9", "H14"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Team & Execution", "Business Model Consistency"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目资源有限时，要学会做减法——把80%的资源集中在最关键的一个验证点上。",
+                    "retrieval_reason": "商业模式与执行步骤的资源杠杆分析。",
+                })
+
+            if markets and innovations:
+                key = (category, markets[0], innovations[0], "timing")
+                self._register_pattern(families["Timing_Window_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Market::{markets[0]}", f"InnovationPoint::{innovations[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H4", "H6"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Market & Competition", "Innovation & Differentiation"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的时机判断——太早了市场教育成本高，太晚了巨头已入场。你如何证明现在是最佳窗口期？",
+                    "retrieval_reason": "市场与创新的时机窗口分析。",
+                })
 
         for row in ontology_rows:
             ontology_name = str(row.get("ontology_name") or "未知本体")

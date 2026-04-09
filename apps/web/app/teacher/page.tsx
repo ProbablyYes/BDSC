@@ -2977,7 +2977,7 @@ export default function TeacherPage() {
                       { v: 96, l: "标准案例" }, { v: 13, l: "领域类别" },
                       { v: 9, l: "评分维度" }, { v: 15, l: "风险规则" },
                       { v: 96, l: "RAG 语料" }, { v: 7403, l: "知识关系" },
-                      { v: 136, l: "超图节点" }, { v: 154, l: "超图超边" },
+                      { v: 31, l: "超边家族" }, { v: 136, l: "超图节点" }, { v: 154, l: "超图超边" },
                     ];
                     const dimItems = [
                       { label: "痛点", val: 252 }, { label: "方案", val: 252 },
@@ -3041,7 +3041,7 @@ export default function TeacherPage() {
                     <div className="ov-section kb-pano">
                       <div className="kb-pano-header">
                         <h3>知识库全景</h3>
-                        <span className="kb-pano-sub">AI 助手以 96 个标准案例、7403 条知识关系、154 条超图超边为底座，为学生提供精准引导</span>
+                        <span className="kb-pano-sub">AI 助手以 96 个标准案例、7403 条知识关系、31 个超边家族、154 条超图超边为底座，为学生提供精准引导</span>
                       </div>
 
                       {/* ── 1. 指标条 ── */}

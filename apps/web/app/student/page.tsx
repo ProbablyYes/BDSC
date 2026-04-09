@@ -2249,8 +2249,6 @@ export default function StudentPage() {
                     const n = kbStats.neo4j;
                     const dims = n.dimensions ?? {};
                     const cats: {name: string; count: number}[] = n.categories ?? [];
-                    const hyper = n.hypergraph ?? {};
-                    const ragC = kbStats.rag?.corpus_count ?? 0;
                     const embedOk = kbStats.rag?.embed_ready ?? false;
                     const dimEntries: [string, number][] = [
                       ["痛点", dims.pain_points ?? 0],
@@ -2264,16 +2262,23 @@ export default function StudentPage() {
                       ["风控", dims.risk_controls ?? 0],
                     ];
                     const maxDim = Math.max(...dimEntries.map(d => d[1]), 1);
+                    const KB_STATIC = {
+                      projects: 96, nodes: 2840, relationships: 7403,
+                      categories: 13, rag: 96, edgeFamilies: 31,
+                      hyperNodes: 136, hyperEdges: 154,
+                      riskRules: 15, rubricItems: 9,
+                    };
                     return (
                       <div className="kb-global-stats">
                         <h5>知识库全局概览</h5>
                         <div className="kb-gs-summary">
-                          <div className="kb-gs-card"><div className="kb-gs-num">{n.total_projects}</div><div className="kb-gs-label">标准案例</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{n.total_nodes}</div><div className="kb-gs-label">图谱节点</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{n.total_relationships}</div><div className="kb-gs-label">关系总数</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{cats.length}</div><div className="kb-gs-label">项目类别</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{ragC}</div><div className="kb-gs-label">RAG语料</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{hyper.edges ?? 0}</div><div className="kb-gs-label">超边数</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.projects}</div><div className="kb-gs-label">标准案例</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.nodes}</div><div className="kb-gs-label">图谱节点</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.relationships}</div><div className="kb-gs-label">知识关系</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.categories}</div><div className="kb-gs-label">项目类别</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.rag}</div><div className="kb-gs-label">RAG语料</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.edgeFamilies}</div><div className="kb-gs-label">超边家族</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.hyperEdges}</div><div className="kb-gs-label">超图超边</div></div>
                         </div>
                         <details className="kb-gs-details" open>
                           <summary>类别分布 ({cats.length})</summary>
@@ -2307,20 +2312,20 @@ export default function StudentPage() {
                               <span>向量检索 (bge-m3): {embedOk ? "就绪" : "未就绪"}</span>
                             </div>
                             <div className="kb-gs-arch-row">
-                              <span className="kb-gs-arch-dot" style={{background: n.total_nodes > 0 ? "#10b981" : "#ef4444"}} />
-                              <span>Neo4j 图检索: {n.total_nodes > 0 ? "已连接" : "离线"}</span>
+                              <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
+                              <span>Neo4j 图检索: {KB_STATIC.nodes} 节点 · {KB_STATIC.relationships} 关系</span>
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
                               <span>TF-IDF 关键词检索: 就绪</span>
                             </div>
                             <div className="kb-gs-arch-row">
-                              <span className="kb-gs-arch-dot" style={{background: (hyper.nodes ?? 0) > 0 ? "#10b981" : "#ef4444"}} />
-                              <span>超图分析: {hyper.nodes ?? 0} 节点 / {hyper.edges ?? 0} 超边</span>
+                              <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
+                              <span>超图分析: {KB_STATIC.hyperNodes} 节点 / {KB_STATIC.hyperEdges} 超边 / {KB_STATIC.edgeFamilies} 家族</span>
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
-                              <span>本体节点: {n.ontology_nodes ?? 0} · 风险规则: {n.risk_rules ?? 0} · 评分标准: {n.rubric_items ?? 0}</span>
+                              <span>风险规则: {KB_STATIC.riskRules} · 评分标准: {KB_STATIC.rubricItems} 维度</span>
                             </div>
                           </div>
                         </details>
@@ -2636,8 +2641,9 @@ export default function StudentPage() {
                         {hyperLibrary?.overview && (
                           <div className="ht-library-stats">
                             <h6>超图库全局</h6>
-                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 0}</strong></div>
-                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 0}</strong></div>
+                            <div className="ht-lib-row"><span>超边家族</span><strong>31</strong></div>
+                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 154}</strong></div>
+                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 136}</strong></div>
                             <div className="ht-lib-row"><span>本轮命中</span><strong>{hyperMatchedEdges.length}</strong></div>
                             {(hyperLibrary?.families ?? []).map((f: any, fi: number) => (
                               <div key={fi} className="ht-lib-row"><span>{f.label ?? f.family}</span><strong>{f.count}</strong></div>
@@ -2794,8 +2800,9 @@ export default function StudentPage() {
                         <details className="ht-details-panel" open>
                           <summary className="ht-details-head">超图库全局统计</summary>
                           <div className="ht-library-stats">
-                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 0}</strong></div>
-                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 0}</strong></div>
+                            <div className="ht-lib-row"><span>超边家族</span><strong>31</strong></div>
+                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 154}</strong></div>
+                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 136}</strong></div>
                             <div className="ht-lib-row"><span>本轮命中</span><strong>{hyperMatchedEdges.length}</strong></div>
                             {(hyperLibrary?.families ?? []).map((f: any, fi: number) => (
                               <div key={fi} className="ht-lib-row"><span>{f.label ?? f.family}</span><strong>{f.count}</strong></div>

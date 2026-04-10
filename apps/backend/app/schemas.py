@@ -224,6 +224,35 @@ class AdminChangePasswordPayload(BaseModel):
     new_password: str = Field(min_length=6, max_length=64)
 
 
+class AdminBatchCreateUsersPayload(BaseModel):
+    """Payload for admin-side batch user creation.
+
+    Supports creating multiple student/teacher accounts with a shared
+    account prefix and predictable default passwords.
+
+    Password rule (backend side):
+    - if password_suffix is provided: password = account + password_suffix
+    - otherwise: password = account + "123"
+    """
+
+    role: Literal["student", "teacher"] = "student"
+    prefix: str = Field(min_length=1, max_length=32)
+    start_index: int = Field(default=1, ge=1, le=100000)
+    count: int = Field(default=1, ge=1, le=500)
+    password_suffix: str = Field(default="123", max_length=64)
+
+    # 学生批量加入团队的邀请码（对应已有 team.invite_code）
+    invite_code: Optional[str] = None
+
+    # 教师批量创建团队时的基础信息（可选）
+    # 若提供，则会为每个教师创建一个团队：
+    # - team_name: 多个教师时自动追加序号后缀
+    # - team_invite_code: 单教师时可直接使用，自定义邀请码；
+    #                      多个教师时若提供则仅对第一个教师生效
+    team_name: Optional[str] = None
+    team_invite_code: Optional[str] = None
+
+
 class SmsSendPayload(BaseModel):
     phone: str = Field(min_length=1, max_length=100)
 
@@ -243,6 +272,8 @@ class TeamCreatePayload(BaseModel):
     teacher_id: str
     teacher_name: str = ""
     team_name: str = Field(min_length=1, max_length=100)
+    # 可选邀请码：若提供则需满足 4-10 位，并保持唯一
+    invite_code: Optional[str] = None
 
 
 class TeamJoinPayload(BaseModel):

@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.schemas import (
+    AdminBatchCreateUsersPayload,
     AdminChangePasswordPayload,
     AdminUserCreatePayload,
     AdminUserUpdatePayload,
@@ -276,6 +277,118 @@ def admin_create_user(payload: AdminUserCreatePayload) -> dict:
         "team_names": team_names,
     }
     return {"user": user_out, "temp_password": temp_password}
+
+
+@app.post("/api/admin/users/batch")
+def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
+    """Batch creation of student/teacher accounts for admin console.
+
+    Business rules (aligned with admin UI requirements):
+    - account (登录账号) uses pattern: prefix + zero-padded sequence
+    - default password: account + (password_suffix or "123")
+    - for students: optional invite_code to join an existing team
+    - for teachers: optional team_name / team_invite_code to create teams
+    """
+
+    role = payload.role
+    prefix = payload.prefix.strip()
+    if not prefix:
+        raise HTTPException(status_code=400, detail="账号前缀不能为空")
+
+    start_index = int(payload.start_index or 1)
+    count = int(payload.count or 1)
+    if count <= 0:
+        raise HTTPException(status_code=400, detail="创建数量必须大于 0")
+
+    password_suffix = str(payload.password_suffix or "123")
+    invite_code = (payload.invite_code or "").strip().upper()
+    team_name = (payload.team_name or "").strip()
+    team_invite_code = (payload.team_invite_code or "").strip().upper() or None
+
+    # If student invite_code is provided, validate it once up-front.
+    target_team: dict[str, Any] | None = None
+    if role == "student" and invite_code:
+        target_team = team_store.find_by_invite_code(invite_code)  # type: ignore[assignment]
+        if not target_team:
+            raise HTTPException(status_code=400, detail="邀请码无效或团队不存在")
+
+    created_users: list[dict[str, Any]] = []
+    password_list: list[dict[str, str]] = []
+
+    for i in range(count):
+        seq = start_index + i
+        account = f"{prefix}{seq:03d}"
+        email = account  # 现有系统以 email 字段作为登录账号
+
+        # Avoid partial success: if any account already exists, abort.
+        if user_store.get_by_email(email):
+            raise HTTPException(status_code=400, detail=f"账号 {account} 已存在，批量创建已取消")
+
+        raw_password = f"{account}{password_suffix or '123'}"
+        payload_single = {
+            "role": role,
+            "display_name": account,
+            "email": email,
+            "student_id": account if role == "student" else None,
+            "password": raw_password,
+        }
+
+        try:
+            user, _temp_password = user_store.admin_create_user(payload_single)
+        except ValueError as e:  # pragma: no cover - defensive
+            raise HTTPException(status_code=400, detail=str(e))
+
+        uid = str(user.get("user_id", ""))
+        if role == "student" and uid:
+            stats = _aggregate_student_data(uid, include_detail=False)
+        else:
+            stats = {"project_count": 0, "last_active": ""}
+
+        teams = []
+        if uid:
+            teams.extend(team_store.list_by_member(uid))
+            teams.extend(team_store.list_by_teacher(uid))
+        team_names = [_safe_str(t.get("team_name", "")) for t in teams if _safe_str(t.get("team_name", ""))]
+
+        user_out = {
+            **user,
+            "project_count": stats.get("project_count", 0),
+            "last_login": user.get("last_login") or stats.get("last_active", ""),
+            "team_names": team_names,
+        }
+        created_users.append(user_out)
+        password_list.append({
+            "user_id": uid,
+            "email": email,
+            "password": raw_password,
+        })
+
+        # For students, add them to the target team if invite_code provided.
+        if role == "student" and target_team and uid:
+            team_store.add_member(target_team["team_id"], uid)
+
+        # For teachers, create teams when requested.
+        if role == "teacher" and team_name and uid:
+            # 多个教师时自动在团队名称后追加序号，避免完全重复
+            final_team_name = team_name
+            if count > 1:
+                final_team_name = f"{team_name}-{i + 1}"
+            try:
+                team_store.create_team_with_custom_code(
+                    teacher_id=uid,
+                    teacher_name=user.get("display_name") or user.get("email") or uid,
+                    team_name=final_team_name,
+                    invite_code=team_invite_code if i == 0 else None,
+                )
+            except ValueError as e:  # pragma: no cover - validation
+                raise HTTPException(status_code=400, detail=str(e))
+
+    return {
+        "status": "ok",
+        "count": len(created_users),
+        "users": created_users,
+        "passwords": password_list,
+    }
 
 
 @app.patch("/api/admin/users/{user_id}")
@@ -971,6 +1084,62 @@ def admin_logs() -> dict:
     return _load_access_logs()
 
 
+@app.post("/api/admin/logs/unauthorized")
+async def admin_log_unauthorized(request: Request) -> dict[str, Any]:
+    """Record an unauthorized access attempt and return 403.
+
+    This endpoint is intended to be called by the frontend when a user
+    without sufficient privileges attempts to access an admin-only
+    view. It appends a structured entry into access_logs.json so that
+    the admin console can display and aggregate these security events.
+    """
+    try:
+        payload = await request.json()
+    except Exception:  # noqa: BLE001
+        payload = {}
+
+    if not isinstance(payload, dict):
+        payload = {}
+
+    role = str(payload.get("role") or "")
+    display_name = str(payload.get("display_name") or "")
+    user_id = payload.get("user_id")
+    reason = str(payload.get("reason") or "")
+
+    role_label = {"student": "学生", "teacher": "教师", "admin": "管理员"}.get(role, "用户")
+    user_label = display_name or str(payload.get("user")) or ""
+    if user_label:
+        user_label = f"{role_label}:{user_label}"
+    else:
+        user_label = role_label or "anonymous"
+
+    path = str(payload.get("path") or request.headers.get("X-Original-Path") or request.url.path)
+
+    detail = "Unauthorized Access Attempt"
+    if reason:
+        detail = f"{detail}: {reason}"
+
+    _append_access_log(
+        {
+            "time": datetime.utcnow().isoformat() + "Z",
+            "user": user_label,
+            "user_id": user_id,
+            "role": role,
+            "display_name": display_name or None,
+            "action": "UNAUTHORIZED",
+            "detail": detail,
+            "status": "BLOCKED",
+            "method": request.method,
+            "path": path,
+            "status_code": 403,
+            "duration_ms": 0,
+        }
+    )
+
+    # Always respond with 403 so that security tests see a hard block.
+    raise HTTPException(status_code=403, detail="Forbidden")
+
+
 # ── SMS verification (dev mode: code returned in response) ──
 
 _sms_codes: dict[str, tuple[str, float]] = {}
@@ -1069,10 +1238,11 @@ def create_team(payload: TeamCreatePayload) -> TeamResponse:
     user = user_store.get_by_id(payload.teacher_id)
     if not user or user.get("role") != "teacher":
         raise HTTPException(status_code=403, detail="仅教师可创建团队")
-    team = team_store.create_team(
+    team = team_store.create_team_with_custom_code(
         teacher_id=payload.teacher_id,
         teacher_name=payload.teacher_name or user.get("display_name", ""),
         team_name=payload.team_name,
+        invite_code=payload.invite_code,
     )
     return TeamResponse(team=team)
 

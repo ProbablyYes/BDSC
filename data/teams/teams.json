@@ -99,5 +99,89 @@
     "teacher_name": "贪吃蛇",
     "members": [],
     "created_at": "2026-03-30T14:00:25.234171+08:00"
+  },
+  {
+    "team_id": "986d4071-fd37-4cb0-b09c-1a7bdd928ae0",
+    "team_name": "erst",
+    "invite_code": "ERST123",
+    "teacher_id": "81bf0d7f-b536-4d04-be59-eea4d1751960",
+    "teacher_name": "tea001",
+    "members": [
+      {
+        "user_id": "ef138e0b-248b-4dd5-8899-a0e25268adca",
+        "joined_at": "2026-04-09T17:47:05.959817+08:00"
+      },
+      {
+        "user_id": "76b5f2af-b845-4fc0-8fb5-ef2796befe34",
+        "joined_at": "2026-04-09T17:47:06.173946+08:00"
+      },
+      {
+        "user_id": "c80096fd-5102-4a00-a4be-0e64f253b6bf",
+        "joined_at": "2026-04-09T17:47:06.419751+08:00"
+      }
+    ],
+    "created_at": "2026-04-09T17:29:45.024879+08:00"
+  },
+  {
+    "team_id": "14fbbfae-f0ca-42e1-9fe9-9cf5969c4ce7",
+    "team_name": "zwei",
+    "invite_code": "ZWEI123",
+    "teacher_id": "276368a5-6780-44e8-8a1a-cccffda08a73",
+    "teacher_name": "tea002",
+    "members": [
+      {
+        "user_id": "affeb0bf-bf77-4aa7-8c9b-4483c7e2520d",
+        "joined_at": "2026-04-09T17:48:07.392376+08:00"
+      },
+      {
+        "user_id": "5a6fe3ea-50b4-49a3-a95d-f107d40dd89d",
+        "joined_at": "2026-04-09T17:48:07.594924+08:00"
+      },
+      {
+        "user_id": "deb7918a-3b46-4af9-b7a5-5ef2e0a1a12d",
+        "joined_at": "2026-04-09T17:48:07.777174+08:00"
+      }
+    ],
+    "created_at": "2026-04-09T17:29:57.925994+08:00"
+  },
+  {
+    "team_id": "31cc38c2-f69e-4c54-9bfd-85aa1340bc94",
+    "team_name": "drei",
+    "invite_code": "DREI123",
+    "teacher_id": "4252eaba-4981-408d-9b39-918d870e66d6",
+    "teacher_name": "tea003",
+    "members": [
+      {
+        "user_id": "f360b842-6b9a-4d85-8a69-8c9abec00427",
+        "joined_at": "2026-04-09T18:01:26.623353+08:00"
+      },
+      {
+        "user_id": "47cfe9f9-2d8d-4d95-b764-119d856df52d",
+        "joined_at": "2026-04-09T18:01:26.833697+08:00"
+      },
+      {
+        "user_id": "53cecbdb-59e1-4c5d-b420-b2c8ee84622c",
+        "joined_at": "2026-04-09T18:01:27.028087+08:00"
+      }
+    ],
+    "created_at": "2026-04-09T17:39:10.486024+08:00"
+  },
+  {
+    "team_id": "b6572300-694b-49c0-9a83-0935d11ac82f",
+    "team_name": "funf",
+    "invite_code": "FUNF123",
+    "teacher_id": "52e1be62-54ff-45b2-9649-f3621fbd8426",
+    "teacher_name": "tea005",
+    "members": [],
+    "created_at": "2026-04-09T17:39:36.994224+08:00"
+  },
+  {
+    "team_id": "dd645f09-24e7-4cdb-9158-da7cb56990f7",
+    "team_name": "vier",
+    "invite_code": "VIER123",
+    "teacher_id": "a01410bd-0de3-4f03-b053-ee0bd530b495",
+    "teacher_name": "tea004",
+    "members": [],
+    "created_at": "2026-04-09T17:42:17.804762+08:00"
   }
 ]

@@ -316,6 +316,12 @@ export default function TeacherPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [dashboard, setDashboard] = useState<any>(null);
+  const [studentOverview, setStudentOverview] = useState<any>(null);
+  const [kbStats, setKbStats] = useState<any>(null);
+  const [kbInsightTab, setKbInsightTab] = useState<string>("pains");
+  const [kbExpandedCase, setKbExpandedCase] = useState<number>(-1);
+  const [kbRulesOpen, setKbRulesOpen] = useState(false);
+  const [kbRubricOpen, setKbRubricOpen] = useState(false);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [compareData, setCompareData] = useState<any>(null);
   const [evidence, setEvidence] = useState<any>(null);
@@ -1266,14 +1272,21 @@ export default function TeacherPage() {
       setLoading(true);
       setErrorMessage("");
       const q = categoryFilter ? `?category=${encodeURIComponent(categoryFilter)}` : "";
-      const [dashData, subsData] = await Promise.all([
+      const [dashData, subsData, kbData, kbInsightData] = await Promise.all([
         api(`/api/teacher/dashboard${q}`).catch(() => null),
         api("/api/teacher/submissions?limit=50").catch(() => ({ submissions: [] })),
+        api("/api/kb-stats").catch(() => null),
+        api("/api/kb-insights").catch(() => null),
       ]);
       if (dashData && !dashData.error) {
         setDashboard(dashData.data);
+        setStudentOverview(dashData.student_overview ?? null);
       }
       setOverviewSubmissions(subsData?.submissions ?? []);
+      if (kbData) {
+        if (kbInsightData && !kbInsightData.error) Object.assign(kbData, { insights: kbInsightData });
+        setKbStats(kbData);
+      }
     } catch (error) {
       setErrorMessage(`${error instanceof Error ? error.message : "加载总览数据失败"}`);
       setDashboard(null);
@@ -2507,9 +2520,12 @@ export default function TeacherPage() {
       ...((teamData?.other_teams || []) as any[]),
     ];
     const rows: any[] = [];
+    const seenProjectIds = new Set<string>();
     teams.forEach((team: any) => {
       (team.students || []).forEach((stu: any) => {
         (stu.projects || []).forEach((proj: any) => {
+          const key = `project-${stu.student_id}::${proj.project_id}`;
+          seenProjectIds.add(key);
           rows.push({
             root_project_id: `project-${stu.student_id}`,
             logical_project_id: proj.project_id,
@@ -2531,6 +2547,43 @@ export default function TeacherPage() {
         });
       });
     });
+
+    const subs = overviewSubmissions || [];
+    const subsByProject = new Map<string, any[]>();
+    subs.forEach((s: any) => {
+      const pid = s.project_id || "";
+      if (!subsByProject.has(pid)) subsByProject.set(pid, []);
+      subsByProject.get(pid)!.push(s);
+    });
+    subsByProject.forEach((projSubs, pid) => {
+      const logicalId = projSubs[0]?.logical_project_id || pid;
+      const key = `${pid}::${logicalId}`;
+      if (seenProjectIds.has(key)) return;
+      const scores = projSubs.map((s: any) => Number(s.overall_score || 0)).filter((v: number) => v > 0);
+      const latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
+      const avgScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+      const risks = projSubs.flatMap((s: any) => (s.triggered_rules || []).map((r: string) => ({ id: r })));
+      const latestSub = projSubs[projSubs.length - 1] || {};
+      rows.push({
+        root_project_id: pid,
+        logical_project_id: logicalId,
+        project_name: latestSub.student_name || latestSub.student_id || pid,
+        student_id: latestSub.student_id || "",
+        student_name: latestSub.student_name || latestSub.student_id || "",
+        team_id: "",
+        team_name: "未分组",
+        is_mine: false,
+        latest_score: latestScore,
+        avg_score: avgScore,
+        improvement: 0,
+        submission_count: projSubs.length,
+        project_phase: latestSub.project_phase || "持续迭代",
+        top_risks: risks.slice(0, 5),
+        summary: latestSub.bottleneck || latestSub.text_preview || "暂无项目摘要",
+        dominant_intent: latestSub.intent || "",
+      });
+    });
+
     rows.sort((a, b) => {
       if (a.is_mine !== b.is_mine) return a.is_mine ? -1 : 1;
       if ((b.submission_count || 0) !== (a.submission_count || 0)) return (b.submission_count || 0) - (a.submission_count || 0);
@@ -2546,7 +2599,7 @@ export default function TeacherPage() {
         risk_priority: feedbackUrgencyScore(item),
       };
     });
-  }, [teamData]);
+  }, [teamData, overviewSubmissions]);
 
   useEffect(() => {
     if (projectId && projectId.trim()) return;
@@ -2898,11 +2951,11 @@ export default function TeacherPage() {
                   {/* ── KPI 统计卡片 ── */}
                   <div className="ov-kpi-grid">
                     {[
-                      { key: "projects", icon: "📁", iconBg: "rgba(107,138,255,0.15)", iconColor: "var(--accent)", value: dashboard?.overview?.total_projects ?? 0, label: "项目总数", decimals: 0, tip: "Neo4j 图数据库中 Project 节点总数", formula: `COUNT(Project) = ${dashboard?.overview?.total_projects ?? 0}` },
-                      { key: "students", icon: "👥", iconBg: "rgba(115,204,255,0.15)", iconColor: "#73ccff", value: overviewStats?.uniqueStudents ?? 0, label: "活跃学生", decimals: 0, tip: "提交记录中去重后的 student_id 数量", formula: `DISTINCT(student_id) = ${overviewStats?.uniqueStudents ?? 0}` },
-                      { key: "submissions", icon: "📝", iconBg: "rgba(92,189,138,0.15)", iconColor: "var(--tch-success)", value: overviewStats?.totalSubmissions ?? 0, label: "总提交数", decimals: 0, tip: "所有项目的提交记录总数（含对话和文件）", formula: overviewStats?.sourceTypes ? Object.entries(overviewStats.sourceTypes).map(([k,v]) => `${k}: ${v}`).join(" + ") : "" },
-                      { key: "score", icon: "⭐", iconBg: "rgba(232,168,76,0.15)", iconColor: "var(--tch-warning)", value: overviewStats?.avgScore ?? 0, label: "平均评分", decimals: 1, tip: "所有提交的 overall_score 平均值（满分10）", formula: `SUM(score) / COUNT = ${(overviewStats?.avgScore ?? 0).toFixed(1)}`, valueColor: (overviewStats?.avgScore ?? 0) >= 7 ? "var(--tch-success)" : (overviewStats?.avgScore ?? 0) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" },
-                      { key: "evidence", icon: "🔗", iconBg: "rgba(189,147,249,0.15)", iconColor: "#bd93f9", value: dashboard?.overview?.total_evidence ?? 0, label: "证据链", decimals: 0, tip: "Neo4j 中 Evidence 节点总数", formula: `COUNT(Evidence) = ${dashboard?.overview?.total_evidence ?? 0}` },
+                      { key: "projects", icon: "📁", iconBg: "rgba(107,138,255,0.15)", iconColor: "var(--accent)", value: studentOverview?.total_student_projects ?? overviewStats?.uniqueStudents ?? 0, label: "学生项目数", decimals: 0, tip: "有提交记录的学生项目数", formula: `已激活项目 = ${studentOverview?.total_student_projects ?? 0}` },
+                      { key: "students", icon: "👥", iconBg: "rgba(115,204,255,0.15)", iconColor: "#73ccff", value: studentOverview?.total_students ?? overviewStats?.uniqueStudents ?? 0, label: "活跃学生", decimals: 0, tip: "提交记录中去重后的学生数量", formula: `活跃学生 = ${studentOverview?.total_students ?? overviewStats?.uniqueStudents ?? 0}` },
+                      { key: "submissions", icon: "📝", iconBg: "rgba(92,189,138,0.15)", iconColor: "var(--tch-success)", value: studentOverview?.total_submissions ?? overviewStats?.totalSubmissions ?? 0, label: "总对话轮次", decimals: 0, tip: "所有学生与AI助手的对话总轮数", formula: overviewStats?.sourceTypes ? Object.entries(overviewStats.sourceTypes).map(([k,v]) => `${k}: ${v}`).join(" + ") : "" },
+                      { key: "score", icon: "⭐", iconBg: "rgba(232,168,76,0.15)", iconColor: "var(--tch-warning)", value: studentOverview?.avg_score ?? overviewStats?.avgScore ?? 0, label: "平均评分", decimals: 1, tip: "所有提交的项目成熟度评分平均值（满分10）", formula: `平均分 = ${(studentOverview?.avg_score ?? overviewStats?.avgScore ?? 0).toFixed?.(1) ?? 0}`, valueColor: (studentOverview?.avg_score ?? overviewStats?.avgScore ?? 0) >= 7 ? "var(--tch-success)" : (studentOverview?.avg_score ?? overviewStats?.avgScore ?? 0) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" },
+                      { key: "dimensions", icon: "🔗", iconBg: "rgba(189,147,249,0.15)", iconColor: "#bd93f9", value: studentOverview?.total_dimensions_extracted ?? 0, label: "提取实体数", decimals: 0, tip: "从学生项目中提取的知识图谱实体总数", formula: `累计实体 = ${studentOverview?.total_dimensions_extracted ?? 0}` },
                       { key: "risk", icon: "⚠️", iconBg: "rgba(224,112,112,0.15)", iconColor: "var(--tch-danger)", value: overviewStats?.riskRate ?? 0, label: "风险触发率", decimals: 1, suffix: "%", tip: "触发至少一条风险规则的提交占总提交比", formula: `${overviewStats?.withRules ?? 0} / ${overviewStats?.totalSubmissions ?? 0} = ${(overviewStats?.riskRate ?? 0).toFixed(1)}%`, valueColor: (overviewStats?.riskRate ?? 0) > 50 ? "var(--tch-danger)" : (overviewStats?.riskRate ?? 0) > 30 ? "var(--tch-warning)" : "var(--tch-success)" },
                     ].map((kpi: any) => (
                       <div key={kpi.key} className="ov-kpi-card" onMouseEnter={() => setHoveredKpi(kpi.key)} onMouseLeave={() => setHoveredKpi(null)}>
@@ -2926,25 +2979,29 @@ export default function TeacherPage() {
                   {/* ── ROW 2: 类别分布 + 风险雷达 ── */}
                   <div className="ov-chart-grid">
                     <div className="ov-chart-card">
-                      <h3>类别分布</h3>
-                      <p className="tch-desc">学生项目的领域分类，点击可筛选</p>
-                      {(dashboard?.category_distribution ?? []).length === 0 ? (
-                        <p style={{ color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: 20 }}>暂无类别数据</p>
-                      ) : (
-                        <div className="ov-bar-list">
-                          {(dashboard?.category_distribution ?? []).map((row: any, idx: number) => {
-                            const pct = maxCat > 0 ? (Number(row.projects || 0) / maxCat) * 100 : 0;
-                            const colors = ["rgba(107,138,255,0.65)","rgba(115,204,255,0.65)","rgba(92,189,138,0.65)","rgba(232,168,76,0.65)","rgba(189,147,249,0.65)","rgba(129,199,212,0.65)","rgba(255,183,197,0.65)","rgba(255,209,102,0.65)"];
-                            return (
-                              <div key={row.category} className="ov-bar-item" onClick={() => setCategoryFilter(row.category)} style={{ animationDelay: `${idx * 0.06}s` }}>
-                                <div className="ov-bar-label"><span className="ov-bar-dot" style={{ background: colors[idx % colors.length] }} /><span>{row.category}</span></div>
-                                <div className="ov-bar-track"><div className="ov-bar-fill" style={{ width: `${pct}%`, background: colors[idx % colors.length] }} /></div>
-                                <span className="ov-bar-val">{row.projects}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <h3>对话意图分布</h3>
+                      <p className="tch-desc">学生与AI助手交流的意图类型统计</p>
+                      {(() => {
+                        const intentDist = studentOverview?.intent_distribution ?? [];
+                        const maxIntent = Math.max(1, ...intentDist.map((r: any) => Number(r.count || 0)));
+                        return intentDist.length === 0 ? (
+                          <p style={{ color: "var(--text-muted)", fontSize: 13, textAlign: "center", padding: 20 }}>暂无学生对话数据</p>
+                        ) : (
+                          <div className="ov-bar-list">
+                            {intentDist.slice(0, 8).map((row: any, idx: number) => {
+                              const pct = maxIntent > 0 ? (Number(row.count || 0) / maxIntent) * 100 : 0;
+                              const colors = ["rgba(107,138,255,0.65)","rgba(115,204,255,0.65)","rgba(92,189,138,0.65)","rgba(232,168,76,0.65)","rgba(189,147,249,0.65)","rgba(129,199,212,0.65)","rgba(255,183,197,0.65)","rgba(255,209,102,0.65)"];
+                              return (
+                                <div key={row.intent} className="ov-bar-item" style={{ animationDelay: `${idx * 0.06}s` }}>
+                                  <div className="ov-bar-label"><span className="ov-bar-dot" style={{ background: colors[idx % colors.length] }} /><span>{row.intent}</span></div>
+                                  <div className="ov-bar-track"><div className="ov-bar-fill" style={{ width: `${pct}%`, background: colors[idx % colors.length] }} /></div>
+                                  <span className="ov-bar-val">{row.count}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="ov-chart-card">
@@ -3137,6 +3194,216 @@ export default function TeacherPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* ── 知识库全景 (静态数据 + 交互设计) ── */}
+                  {(() => {
+                    const KB_STRIP = [
+                      { v: 96, l: "标准案例" }, { v: 13, l: "领域类别" },
+                      { v: 9, l: "评分维度" }, { v: 15, l: "风险规则" },
+                      { v: 96, l: "RAG 语料" }, { v: 7403, l: "知识关系" },
+                      { v: 136, l: "超图节点" }, { v: 154, l: "超图超边" },
+                    ];
+                    const dimItems = [
+                      { label: "痛点", val: 252 }, { label: "方案", val: 252 },
+                      { label: "创新", val: 241 }, { label: "商模", val: 235 },
+                      { label: "市场", val: 233 }, { label: "用户", val: 210 },
+                      { label: "执行", val: 209 }, { label: "风控", val: 121 },
+                      { label: "证据", val: 496 },
+                    ];
+                    const KB_CATEGORIES: Array<{ name: string; count: number }> = [
+                      { name: "科技创新", count: 17 }, { name: "医疗健康", count: 13 },
+                      { name: "工业制造", count: 10 }, { name: "教育服务", count: 9 },
+                      { name: "其他", count: 8 }, { name: "交通运输", count: 7 },
+                      { name: "环境保护", count: 7 }, { name: "政务治理", count: 6 },
+                      { name: "智能制造", count: 6 }, { name: "农业发展", count: 6 },
+                      { name: "文旅文创", count: 3 }, { name: "社会公益", count: 2 },
+                      { name: "金融经济", count: 2 },
+                    ];
+                    const KB_RUBRIC = [
+                      { id: "Problem Definition", w: 1, desc: "问题定义的清晰度与痛点真实性" },
+                      { id: "User Evidence", w: 1, desc: "用户调研证据的强度与说服力" },
+                      { id: "Solution Feasibility", w: 1, desc: "解决方案的技术可行性与完整度" },
+                      { id: "Business Model", w: 1, desc: "商业模式的一致性与可持续性" },
+                      { id: "Market & Competition", w: 1, desc: "市场分析与竞品对比的深度" },
+                      { id: "Financial Logic", w: 1, desc: "财务逻辑与盈利模型的合理性" },
+                      { id: "Innovation", w: 1, desc: "创新点与差异化的清晰度" },
+                      { id: "Team & Execution", w: 1, desc: "团队能力与执行路径的可信度" },
+                      { id: "Presentation", w: 1, desc: "材料呈现质量与表达逻辑" },
+                    ];
+                    const KB_RISK_RULES = [
+                      { id: "H1", sev: "high", desc: "目标用户画像缺失或模糊" },
+                      { id: "H2", sev: "high", desc: "解决方案与痛点不匹配" },
+                      { id: "H3", sev: "medium", desc: "用户支付意愿证据不足" },
+                      { id: "H4", sev: "medium", desc: "市场规模缺少数据支撑" },
+                      { id: "H5", sev: "high", desc: "需求证据严重不足" },
+                      { id: "H6", sev: "medium", desc: "竞品分析缺失或过于简略" },
+                      { id: "H7", sev: "medium", desc: "商业模式不可持续" },
+                      { id: "H8", sev: "low", desc: "执行路径不清晰" },
+                      { id: "H9", sev: "low", desc: "团队能力与项目要求不匹配" },
+                      { id: "H10", sev: "medium", desc: "财务预测缺少依据" },
+                      { id: "H11", sev: "low", desc: "创新点表述不清" },
+                      { id: "H12", sev: "medium", desc: "技术壁垒不足" },
+                      { id: "H13", sev: "low", desc: "材料呈现质量有待提升" },
+                      { id: "H14", sev: "high", desc: "资源不足以支撑项目规模" },
+                      { id: "H15", sev: "low", desc: "风险管控措施缺失" },
+                    ];
+                    const dimVals = dimItems.map(d => d.val);
+                    const maxDim = Math.max(1, ...dimVals);
+                    const ins = kbStats?.insights ?? {};
+
+                    const insightTabs = [
+                      { id: "pains", label: "痛点", dataKey: "top_pains" },
+                      { id: "solutions", label: "方案", dataKey: "top_solutions" },
+                      { id: "innovations", label: "创新", dataKey: "top_innovations" },
+                      { id: "biz", label: "商模", dataKey: "top_biz_models" },
+                      { id: "markets", label: "市场", dataKey: "top_markets" },
+                      { id: "risks", label: "风控", dataKey: "top_risks" },
+                    ].filter(t => (ins[t.dataKey] ?? []).length > 0);
+                    const activeTabData: any[] = ins[insightTabs.find(t => t.id === kbInsightTab)?.dataKey ?? ""] ?? [];
+
+                    return (
+                    <div className="ov-section kb-pano">
+                      <div className="kb-pano-header">
+                        <h3>知识库全景</h3>
+                        <span className="kb-pano-sub">AI 助手以 96 个标准案例、7403 条知识关系、154 条超图超边为底座，为学生提供精准引导</span>
+                      </div>
+
+                      {/* ── 1. 指标条 ── */}
+                      <div className="kb-strip">
+                        {KB_STRIP.map(s => (
+                          <div key={s.l} className="kb-strip-item">
+                            <div className="kb-strip-num" style={{ color: "var(--accent)" }}>{s.v}</div>
+                            <div className="kb-strip-label">{s.l}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* ── 2. 雷达图 + 领域分布 ── */}
+                      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 16, alignItems: "flex-start" }}>
+                        <div style={{ flex: "0 0 auto" }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 6 }}>知识维度覆盖</div>
+                          <RadarChart size={250} data={dimItems.map(d => ({ label: d.label, value: d.val, max: maxDim }))} />
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 12px", justifyContent: "center", marginTop: 4 }}>
+                            {dimItems.map(d => (
+                              <span key={d.label} style={{ fontSize: 11, color: "var(--text-muted)" }}>{d.label} <strong style={{ color: "var(--text-primary)" }}>{d.val}</strong></span>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 220 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 8 }}>领域分布（{KB_CATEGORIES.length} 个类别）</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                            {KB_CATEGORIES.map((cat, idx) => {
+                              const maxC = KB_CATEGORIES[0].count;
+                              const pct = (cat.count / maxC) * 100;
+                              return (
+                                <div key={cat.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                  <span style={{ fontSize: 12, color: "var(--text-secondary)", minWidth: 56, textAlign: "right" }}>{cat.name}</span>
+                                  <div style={{ flex: 1, height: 7, borderRadius: 4, background: "var(--bg-secondary)", overflow: "hidden" }}>
+                                    <div style={{ height: "100%", borderRadius: 4, background: "var(--accent)", opacity: 0.55 + 0.45 * (cat.count / maxC), width: `${Math.max(pct, 4)}%`, transition: "width 0.5s" }} />
+                                  </div>
+                                  <span style={{ fontSize: 11, color: "var(--text-muted)", minWidth: 20, textAlign: "right" }}>{cat.count}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── 3. 知识实体标签云（Tab 切换） ── */}
+                      {insightTabs.length > 0 && (
+                        <>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 6, marginTop: 4 }}>知识实体洞察</div>
+                          <div className="kb-tabs">
+                            {insightTabs.map(t => (
+                              <button key={t.id} className={`kb-tab-btn${kbInsightTab === t.id ? " active" : ""}`} onClick={() => setKbInsightTab(t.id)}>{t.label}</button>
+                            ))}
+                          </div>
+                          <div className="kb-tag-cloud">
+                            {activeTabData.slice(0, 12).map((item: any, idx: number) => {
+                              const base = 12; const scale = Math.max(0.8, 1 + (item.projects || 1) / Math.max(1, activeTabData[0]?.projects || 1) * 0.4);
+                              return (
+                                <span key={idx} className="kb-tag" style={{ fontSize: base * scale }} title={`出现在 ${item.projects} 个案例中`}>
+                                  {item.name}
+                                  <span className="kb-tag-count">{item.projects}</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+
+                      {/* ── 4. 评分量表 + 风险规则（手风琴，静态数据） ── */}
+                      <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+                        <div className="kb-accordion" style={{ flex: "1 1 45%", minWidth: 280 }}>
+                          <button className="kb-accordion-trigger" data-open={kbRubricOpen} onClick={() => setKbRubricOpen(!kbRubricOpen)}>
+                            <span>评分量表 · AI 打分依据 <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 400, marginLeft: 6 }}>{KB_RUBRIC.length} 项</span></span>
+                            <span className="kb-acc-arrow">▶</span>
+                          </button>
+                          <div className="kb-accordion-body" data-open={kbRubricOpen}>
+                            <div className="kb-acc-list">
+                              {KB_RUBRIC.map((r, i) => (
+                                <div key={r.id} className="kb-acc-row">
+                                  <span className="kb-acc-badge" style={{ color: "var(--accent)", background: "rgba(107,138,255,.12)" }}>×{r.w}</span>
+                                  <div>
+                                    <div className="kb-acc-title">{r.id}</div>
+                                    <div className="kb-acc-desc">{r.desc}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="kb-accordion" style={{ flex: "1 1 45%", minWidth: 280 }}>
+                          <button className="kb-accordion-trigger" data-open={kbRulesOpen} onClick={() => setKbRulesOpen(!kbRulesOpen)}>
+                            <span>风险规则库 · AI 诊断依据 <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 400, marginLeft: 6 }}>{KB_RISK_RULES.length} 条</span></span>
+                            <span className="kb-acc-arrow">▶</span>
+                          </button>
+                          <div className="kb-accordion-body" data-open={kbRulesOpen}>
+                            <div className="kb-acc-list">
+                              {KB_RISK_RULES.map((r) => {
+                                const sc = r.sev === "high" ? "var(--tch-danger)" : r.sev === "medium" ? "var(--tch-warning)" : "var(--text-muted)";
+                                const bg = r.sev === "high" ? "rgba(220,80,80,.12)" : r.sev === "medium" ? "rgba(232,168,76,.12)" : "rgba(148,163,184,.1)";
+                                return (
+                                  <div key={r.id} className="kb-acc-row">
+                                    <span className="kb-acc-badge" style={{ color: sc, background: bg }}>{r.sev === "high" ? "高" : r.sev === "medium" ? "中" : "低"}</span>
+                                    <div style={{ flex: 1 }}>
+                                      <span className="kb-acc-title">{r.id}</span>
+                                      <div className="kb-acc-desc">{r.desc}</div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── 5. 典型案例（点击展开详情） ── */}
+                      {(ins.sample_cases ?? []).length > 0 && (
+                        <>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginTop: 18, marginBottom: 2 }}>典型案例巡览</div>
+                          <p className="tch-desc" style={{ marginBottom: 8 }}>点击卡片展开查看案例的痛点、方案与创新亮点</p>
+                          <div className="kb-cases-grid">
+                            {(ins.sample_cases as any[]).slice(0, 12).map((c: any, idx: number) => (
+                              <div key={idx} className="kb-case-card" data-expanded={kbExpandedCase === idx} onClick={() => setKbExpandedCase(kbExpandedCase === idx ? -1 : idx)}>
+                                <div className="kb-case-head">
+                                  <span className="kb-case-name">{c.name}</span>
+                                  <span className="kb-case-cat">{c.category}</span>
+                                </div>
+                                <div className="kb-case-details">
+                                  {(c.pains ?? []).length > 0 && <div className="kb-case-dim"><span className="kb-case-dim-label" style={{ color: "var(--tch-danger)" }}>痛点</span><span>{(c.pains as string[]).join("、")}</span></div>}
+                                  {(c.solutions ?? []).length > 0 && <div className="kb-case-dim"><span className="kb-case-dim-label" style={{ color: "var(--tch-success)" }}>方案</span><span>{(c.solutions as string[]).join("、")}</span></div>}
+                                  {(c.innovations ?? []).length > 0 && <div className="kb-case-dim"><span className="kb-case-dim-label" style={{ color: "var(--accent)" }}>创新</span><span>{(c.innovations as string[]).join("、")}</span></div>}
+                                </div>
+                                {kbExpandedCase !== idx && <div className="kb-case-hint">点击展开</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    );
+                  })()}
                 </>
               )}
             </div>
@@ -3407,13 +3674,14 @@ export default function TeacherPage() {
                                   <div className="submission-card-top">
                                     <div>
                                       <div className="submission-card-meta">{formatBJTime(s.created_at)}</div>
-                                      <strong>{s.filename || s.project_id}</strong>
+                                      <strong>{s.student_name || s.student_id || s.project_id}</strong>
                                     </div>
                                     <div className="submission-score-pill" style={{ color: scoreColor, borderColor: `${scoreColor}55` }}>{score.toFixed(1)}</div>
                                   </div>
                                   <div className="tm-case-meta">
-                                    <span>{s.student_id}</span>
-                                    {s.logical_project_id && <span>{s.logical_project_id}</span>}
+                                    {s.student_name && <span>{s.student_name}</span>}
+                                    {s.intent && <span>{s.intent}</span>}
+                                    {s.mode && <span>{s.mode}</span>}
                                     {s.project_phase && <span>{s.project_phase}</span>}
                                     <span>{s.source_type}{s.filename ? ` · ${s.filename}` : ""}</span>
                                   </div>

@@ -2562,7 +2562,8 @@ export default function TeacherPage() {
       const scores = projSubs.map((s: any) => Number(s.overall_score || 0)).filter((v: number) => v > 0);
       const latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
       const avgScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
-      const risks = projSubs.flatMap((s: any) => (s.triggered_rules || []).map((r: string) => ({ id: r })));
+      // 使用规则ID字符串而不是对象，避免在渲染时传入 { id: ... } 导致 React 报错
+      const risks = projSubs.flatMap((s: any) => (s.triggered_rules || []));
       const latestSub = projSubs[projSubs.length - 1] || {};
       rows.push({
         root_project_id: pid,

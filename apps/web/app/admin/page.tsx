@@ -1004,14 +1004,14 @@ export default function AdminPage() {
     }
   }
 
-  const TABS: { id: AdminTab; label: string; icon: string }[] = [
-    { id: "dashboard", label: "全局大盘", icon: "📊" },
-    { id: "teachers", label: "教师表现", icon: "🏅" },
-    { id: "interventions", label: "教学干预", icon: "🧭" },
-    { id: "users", label: "用户管理", icon: "👥" },
-    { id: "projects", label: "项目总览", icon: "📋" },
-    { id: "vulnerabilities", label: "漏洞看板", icon: "🔍" },
-    { id: "logs", label: "访问日志", icon: "📝" },
+  const TABS: { id: AdminTab; label: string }[] = [
+    { id: "dashboard", label: "全局大盘" },
+    { id: "teachers", label: "教师表现" },
+    { id: "interventions", label: "教学干预" },
+    { id: "users", label: "用户管理" },
+    { id: "projects", label: "项目总览" },
+    { id: "vulnerabilities", label: "漏洞看板" },
+    { id: "logs", label: "访问日志" },
   ];
 
   return (
@@ -1055,7 +1055,6 @@ export default function AdminPage() {
               className={`admin-nav-btn ${tab === t.id ? "active" : ""}`}
               onClick={() => setTab(t.id)}
             >
-              <span className="admin-nav-icon">{t.icon}</span>
               {t.label}
             </button>
           ))}

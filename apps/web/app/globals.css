@@ -148,6 +148,19 @@ select {
   padding: 10px 12px;
 }
 
+/* Admin 用户管理 - 团队筛选下拉框主题适配 */
+.admin-filter-group select {
+  background-color: #000000;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+[data-theme="light"] .admin-filter-group select {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
 textarea {
   min-height: 110px;
   resize: vertical;
@@ -7683,7 +7696,8 @@ pre {
   padding: 16px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--bg-card);
+  background-color: #000000;
+  color: #ffffff;
   margin-bottom: 16px;
 }
 .admin-add-form h4 { margin: 0 0 12px; font-size: 14px; color: var(--text-primary); }
@@ -7699,6 +7713,26 @@ pre {
   padding: 6px 8px;
   border-radius: 6px;
   margin-top: 4px;
+}
+
+[data-theme="light"] .admin-add-form {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Admin add-form inputs & selects theme-aware colors */
+.admin-add-form input,
+.admin-add-form select {
+  background-color: #000000;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+[data-theme="light"] .admin-add-form input,
+[data-theme="light"] .admin-add-form select {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.25);
 }
 .admin-form-actions { display: flex; gap: 8px; }
 .admin-btn-primary {
@@ -7812,6 +7846,7 @@ pre {
 .admin-log-action.danger { background: rgba(224,112,112,0.12); color: #e07070; }
 .admin-log-blocked { color: #e07070; font-weight: 600; font-size: 11px; }
 .admin-log-ok { color: #5cbd8a; font-size: 11px; }
+.admin-log-error { color: #e0a84c; font-size: 11px; }
 .admin-log-summary {
   display: flex;
   gap: 16px;

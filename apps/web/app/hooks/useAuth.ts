@@ -24,21 +24,53 @@ export function useAuth(requiredRole?: string): VaUser | null {
   const [user, setUser] = useState<VaUser | null>(null);
   const [checked, setChecked] = useState(false);
 
+  const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
+
+  function logUnauthorizedAttempt(currentUser: VaUser | null, reason: string) {
+    try {
+      if (!requiredRole) return;
+      const payload: any = {
+        reason,
+        role: currentUser?.role ?? undefined,
+        user_id: currentUser?.user_id ?? undefined,
+        display_name: currentUser?.display_name ?? undefined,
+        path: typeof window !== "undefined" ? window.location.pathname : undefined,
+      };
+      // Fire-and-forget; logging failures must not block navigation.
+      fetch(`${API_BASE}/api/admin/logs/unauthorized`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    } catch {
+      // Swallow any logging errors to avoid breaking UX.
+    }
+  }
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem("va_user");
       if (raw) {
         const u: VaUser = JSON.parse(raw);
         if (requiredRole && u.role !== requiredRole) {
+          logUnauthorizedAttempt(u, "role_mismatch");
           router.replace("/auth/login");
           return;
         }
         setUser(u);
       } else {
+        if (requiredRole) {
+          logUnauthorizedAttempt(null, "no_user");
+        }
         router.replace("/auth/login");
+        return;
       }
     } catch {
+      if (requiredRole) {
+        logUnauthorizedAttempt(null, "parse_error");
+      }
       router.replace("/auth/login");
+      return;
     }
     setChecked(true);
   }, [requiredRole, router]);

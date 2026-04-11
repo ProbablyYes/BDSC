@@ -598,6 +598,49 @@ class TeamStorage:
         self._save(teams)
         return team
 
+    def create_team_with_custom_code(
+        self,
+        teacher_id: str,
+        teacher_name: str,
+        team_name: str,
+        invite_code: str | None = None,
+    ) -> dict:
+        """Create a team while allowing an optional custom invite_code.
+
+        When invite_code is provided, it must be unique and within a
+        reasonable length range. If omitted, a random code is
+        generated in the same way as create_team.
+        """
+
+        teams = self._load()
+        name = team_name.strip()
+        if not name:
+            raise ValueError("team_name 不能为空")
+
+        if invite_code:
+            code = invite_code.strip().upper()
+            if len(code) < 4 or len(code) > 10:
+                raise ValueError("邀请码长度需在 4-10 位之间")
+            if any(t.get("invite_code") == code for t in teams):
+                raise ValueError("邀请码已存在，请更换")
+        else:
+            code = self._gen_invite_code()
+            while any(t.get("invite_code") == code for t in teams):
+                code = self._gen_invite_code()
+
+        team = {
+            "team_id": str(uuid4()),
+            "team_name": name,
+            "invite_code": code,
+            "teacher_id": teacher_id,
+            "teacher_name": teacher_name,
+            "members": [],
+            "created_at": _now_iso(),
+        }
+        teams.append(team)
+        self._save(teams)
+        return team
+
     def get_team(self, team_id: str) -> dict | None:
         for t in self._load():
             if t.get("team_id") == team_id:

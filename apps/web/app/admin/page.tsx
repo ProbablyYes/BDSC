@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useAuth, logout } from "../hooks/useAuth";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
@@ -23,6 +24,7 @@ type TeamInfo = {
   team_name: string;
   teacher_id: string;
   teacher_name: string;
+  invite_code?: string;
   members: { user_id: string; joined_at: string }[];
 };
 
@@ -137,6 +139,7 @@ function getUserIdFromProjectId(projectId: string | undefined | null): string {
 }
 
 export default function AdminPage() {
+  const currentUser = useAuth("admin");
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [loading, setLoading] = useState(false);
@@ -155,6 +158,19 @@ export default function AdminPage() {
   const [editRole, setEditRole] = useState<UserRole>("student");
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUser, setNewUser] = useState({ id: "", name: "", role: "student" as UserRole, email: "", password: "" });
+
+  // Batch user creation
+  const [showBatchCreate, setShowBatchCreate] = useState(false);
+  const [batchRole, setBatchRole] = useState<UserRole>("student");
+  const [batchPrefix, setBatchPrefix] = useState<string>("stu");
+  const [batchStartIndex, setBatchStartIndex] = useState<number>(1);
+  const [batchCount, setBatchCount] = useState<number>(10);
+  const [batchPasswordSuffix, setBatchPasswordSuffix] = useState<string>("123");
+  const [batchInviteCode, setBatchInviteCode] = useState<string>("");
+  const [batchTeamName, setBatchTeamName] = useState<string>("");
+  const [batchTeamInviteCode, setBatchTeamInviteCode] = useState<string>("");
+  const [batchSubmitting, setBatchSubmitting] = useState(false);
+  const [batchResult, setBatchResult] = useState<any>(null);
 
   // Teacher performance
   const [teachers, setTeachers] = useState<TeacherStat[]>([]);
@@ -229,6 +245,7 @@ export default function AdminPage() {
         team_name: t.team_name,
         teacher_id: t.teacher_id,
         teacher_name: t.teacher_name ?? "",
+        invite_code: t.invite_code ?? "",
         members: Array.isArray(t.members)
           ? t.members.map((m: any) => ({ user_id: m.user_id, joined_at: m.joined_at ?? "" }))
           : [],
@@ -397,6 +414,15 @@ export default function AdminPage() {
   }
 
   const [teams, setTeams] = useState<TeamInfo[]>([]);
+  const [manageTeacherId, setManageTeacherId] = useState<string | null>(null);
+  const [manageTeacherName, setManageTeacherName] = useState<string>("");
+  const [showTeamManager, setShowTeamManager] = useState(false);
+  const [newTeamName, setNewTeamName] = useState<string>("");
+  const [newTeamInviteCode, setNewTeamInviteCode] = useState<string>("");
+  const [teamSubmitting, setTeamSubmitting] = useState(false);
+  const [editTeamId, setEditTeamId] = useState<string | null>(null);
+  const [newMemberUserId, setNewMemberUserId] = useState<string>("");
+  const [memberSubmitting, setMemberSubmitting] = useState(false);
 
   const studentNameByUserId = useMemo(() => {
     const map: Record<string, string> = {};
@@ -519,6 +545,151 @@ export default function AdminPage() {
     return list;
   }, [teachers, teacherSortKey]);
 
+  function openTeacherTeamManager(teacherId: string, teacherName: string) {
+    setManageTeacherId(teacherId);
+    setManageTeacherName(teacherName || teacherId);
+    setShowTeamManager(true);
+  }
+
+  function closeTeacherTeamManager() {
+    setShowTeamManager(false);
+    setManageTeacherId(null);
+    setManageTeacherName("");
+    setNewTeamName("");
+    setNewTeamInviteCode("");
+  }
+
+  function openTeamMemberManager(teamId: string) {
+    setEditTeamId(teamId);
+    setNewMemberUserId("");
+  }
+
+  function closeTeamMemberManager() {
+    setEditTeamId(null);
+    setNewMemberUserId("");
+  }
+
+  async function createTeacherTeam() {
+    if (!manageTeacherId) {
+      window.alert("请选择要管理的教师");
+      return;
+    }
+    const name = newTeamName.trim();
+    if (!name) {
+      window.alert("请输入团队名称");
+      return;
+    }
+
+    const payload: any = {
+      teacher_id: manageTeacherId,
+      teacher_name: manageTeacherName || manageTeacherId,
+      team_name: name,
+    };
+    if (newTeamInviteCode.trim()) {
+      payload.invite_code = newTeamInviteCode.trim().toUpperCase();
+    }
+
+    setTeamSubmitting(true);
+    try {
+      const r = await fetch(`${API}/api/teams`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) {
+        let msg = "创建团队失败";
+        try {
+          const err = await r.json();
+          if (err && err.detail) msg = String(err.detail);
+        } catch {
+          /* noop */
+        }
+        window.alert(msg);
+        return;
+      }
+      await Promise.all([loadTeams(), loadUsers()]);
+      setNewTeamName("");
+      setNewTeamInviteCode("");
+    } catch {
+      window.alert("创建团队失败，请稍后再试");
+    } finally {
+      setTeamSubmitting(false);
+    }
+  }
+
+  async function deleteTeacherTeam(teamId: string, teacherId: string) {
+    if (!window.confirm("确定要删除该团队吗？此操作不可恢复。")) return;
+    try {
+      const url = `${API}/api/teams/${teamId}?teacher_id=${encodeURIComponent(teacherId)}`;
+      const r = await fetch(url, { method: "DELETE" });
+      if (!r.ok) {
+        let msg = "删除团队失败";
+        try {
+          const err = await r.json();
+          if (err && err.detail) msg = String(err.detail);
+        } catch {
+          /* noop */
+        }
+        window.alert(msg);
+        return;
+      }
+      await Promise.all([loadTeams(), loadUsers()]);
+    } catch {
+      window.alert("删除团队失败，请稍后再试");
+    }
+  }
+
+   async function addMemberToTeam() {
+    if (!editTeamId) {
+      window.alert("请选择要编辑的团队");
+      return;
+    }
+    const userId = newMemberUserId.trim();
+    if (!userId) {
+      window.alert("请输入成员的用户ID");
+      return;
+    }
+    const team = teams.find((t) => t.team_id === editTeamId);
+    if (!team) {
+      window.alert("团队不存在或已被删除");
+      return;
+    }
+    if (!team.invite_code) {
+      window.alert("该团队暂无邀请码，暂无法通过后台直接添加成员");
+      return;
+    }
+
+    setMemberSubmitting(true);
+    try {
+      const payload = {
+        user_id: userId,
+        invite_code: String(team.invite_code).toUpperCase(),
+      };
+      const r = await fetch(`${API}/api/teams/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) {
+        let msg = "添加成员失败";
+        try {
+          const err = await r.json();
+          if (err && err.detail) msg = String(err.detail);
+        } catch {
+          /* noop */
+        }
+        window.alert(msg);
+        return;
+      }
+      await Promise.all([loadTeams(), loadUsers()]);
+      setNewMemberUserId("");
+    } catch {
+      window.alert("添加成员失败，请稍后再试");
+    } finally {
+      setMemberSubmitting(false);
+    }
+  }
+
   function renderUserRow(u: UserRecord, team?: TeamInfo) {
     const inThisTeam = team && (team.teacher_id === u.id || team.members.some((m) => m.user_id === u.id));
     const canKick = !!(team && inThisTeam && team.teacher_id !== u.id);
@@ -585,6 +756,15 @@ export default function AdminPage() {
           </button>
           {u.id !== "admin-001" && (
             <>
+              {u.role === "teacher" && (
+                <button
+                  className="admin-sm-btn"
+                  onClick={() => openTeacherTeamManager(u.id, u.name)}
+                  title="管理该教师的团队"
+                >
+                  团队
+                </button>
+              )}
               <button
                 className="admin-sm-btn"
                 onClick={() => resetPassword(u.id)}
@@ -748,14 +928,90 @@ export default function AdminPage() {
     }
   }
 
-  const TABS: { id: AdminTab; label: string; icon: string }[] = [
-    { id: "dashboard", label: "全局大盘", icon: "📊" },
-    { id: "teachers", label: "教师表现", icon: "🏅" },
-    { id: "interventions", label: "教学干预", icon: "🧭" },
-    { id: "users", label: "用户管理", icon: "👥" },
-    { id: "projects", label: "项目总览", icon: "📋" },
-    { id: "vulnerabilities", label: "漏洞看板", icon: "🔍" },
-    { id: "logs", label: "访问日志", icon: "📝" },
+  async function batchCreateUsers() {
+    if (!batchPrefix.trim()) {
+      window.alert("账号前缀不能为空");
+      return;
+    }
+    if (batchCount <= 0) {
+      window.alert("创建数量必须大于 0");
+      return;
+    }
+
+    const payload: any = {
+      role: batchRole === "admin" ? "student" : batchRole,
+      prefix: batchPrefix.trim(),
+      start_index: batchStartIndex || 1,
+      count: batchCount,
+      password_suffix: batchPasswordSuffix || "123",
+    };
+
+    if (payload.role === "student" && batchInviteCode.trim()) {
+      payload.invite_code = batchInviteCode.trim().toUpperCase();
+    }
+    if (payload.role === "teacher") {
+      if (batchTeamName.trim()) {
+        payload.team_name = batchTeamName.trim();
+      }
+      if (batchTeamInviteCode.trim()) {
+        payload.team_invite_code = batchTeamInviteCode.trim().toUpperCase();
+      }
+    }
+
+    setBatchSubmitting(true);
+    setBatchResult(null);
+    try {
+      const r = await fetch(`${API}/api/admin/users/batch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) {
+        let msg = "批量创建失败";
+        try {
+          const err = await r.json();
+          if (err && err.detail) msg = String(err.detail);
+        } catch {
+          /* noop */
+        }
+        window.alert(msg);
+        return;
+      }
+      const d = await r.json();
+      const created = (d.users ?? []) as any[];
+      const mapped: UserRecord[] = created.map((u: any): UserRecord => ({
+        id: u.user_id,
+        name: u.display_name ?? u.email ?? u.user_id,
+        role: u.role as UserRole,
+        email: u.email,
+        teams: Array.isArray(u.team_names) ? (u.team_names as string[]).filter(Boolean) : [],
+        status: (u.status as "active" | "disabled") ?? "active",
+        last_login: u.last_login || "",
+        project_count: typeof u.project_count === "number" ? u.project_count : 0,
+      }));
+      if (mapped.length) {
+        setUsers((prev) => [...prev, ...mapped]);
+      }
+      setBatchResult({
+        count: Number(d.count ?? mapped.length),
+        passwords: Array.isArray(d.passwords) ? d.passwords : [],
+      });
+      window.alert(`已创建 ${mapped.length} 个账号`);
+    } catch {
+      window.alert("批量创建失败，请稍后再试");
+    } finally {
+      setBatchSubmitting(false);
+    }
+  }
+
+  const TABS: { id: AdminTab; label: string }[] = [
+    { id: "dashboard", label: "全局大盘" },
+    { id: "teachers", label: "教师表现" },
+    { id: "interventions", label: "教学干预" },
+    { id: "users", label: "用户管理" },
+    { id: "projects", label: "项目总览" },
+    { id: "vulnerabilities", label: "漏洞看板" },
+    { id: "logs", label: "访问日志" },
   ];
 
   return (
@@ -799,7 +1055,6 @@ export default function AdminPage() {
               className={`admin-nav-btn ${tab === t.id ? "active" : ""}`}
               onClick={() => setTab(t.id)}
             >
-              <span className="admin-nav-icon">{t.icon}</span>
               {t.label}
             </button>
           ))}
@@ -970,6 +1225,10 @@ export default function AdminPage() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
                   添加用户
                 </button>
+                <button className="admin-add-btn" onClick={() => setShowBatchCreate(true)}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+                  批量创建
+                </button>
               </div>
 
               {/* Add user form */}
@@ -992,6 +1251,128 @@ export default function AdminPage() {
                   <div className="admin-form-actions">
                     <button className="admin-btn-primary" onClick={addUser}>确认添加</button>
                     <button className="admin-btn-secondary" onClick={() => setShowAddUser(false)}>取消</button>
+                  </div>
+                </div>
+              )}
+
+              {showBatchCreate && (
+                <div className="admin-add-form">
+                  <h4>批量创建用户</h4>
+                  <div className="admin-form-grid">
+                    <label>用户身份
+                      <select
+                        value={batchRole}
+                        onChange={(e) => {
+                          const role = e.target.value as UserRole;
+                          setBatchRole(role);
+                          setBatchPrefix(role === "teacher" ? "tea" : "stu");
+                        }}
+                      >
+                        <option value="student">学生</option>
+                        <option value="teacher">教师</option>
+                      </select>
+                    </label>
+                    <label>账号前缀
+                      <input
+                        value={batchPrefix}
+                        onChange={(e) => setBatchPrefix(e.target.value)}
+                        placeholder={batchRole === "teacher" ? "tea" : "stu"}
+                      />
+                    </label>
+                    <label>起始序号
+                      <input
+                        type="number"
+                        min={1}
+                        value={batchStartIndex}
+                        onChange={(e) => setBatchStartIndex(Number(e.target.value) || 1)}
+                      />
+                    </label>
+                    <label>创建数量
+                      <input
+                        type="number"
+                        min={1}
+                        max={500}
+                        value={batchCount}
+                        onChange={(e) => setBatchCount(Number(e.target.value) || 1)}
+                      />
+                    </label>
+                    <label>默认密码后缀
+                      <input
+                        value={batchPasswordSuffix}
+                        onChange={(e) => setBatchPasswordSuffix(e.target.value)}
+                        placeholder="默认 123（实际密码 = 账号 + 后缀)"
+                      />
+                    </label>
+                    {batchRole === "student" && (
+                      <label>加入团队邀请码（可选）
+                        <input
+                          value={batchInviteCode}
+                          onChange={(e) => setBatchInviteCode(e.target.value.toUpperCase())}
+                          placeholder="如 7EISTH，留空则不自动加入团队"
+                        />
+                      </label>
+                    )}
+                    {batchRole === "teacher" && (
+                      <>
+                        <label>新建团队名称（可选）
+                          <input
+                            value={batchTeamName}
+                            onChange={(e) => setBatchTeamName(e.target.value)}
+                            placeholder="如 挑战杯指导一组"
+                          />
+                        </label>
+                        <label>团队邀请码（可选）
+                          <input
+                            value={batchTeamInviteCode}
+                            onChange={(e) => setBatchTeamInviteCode(e.target.value.toUpperCase())}
+                            placeholder="如 ABC123；留空则自动生成"
+                          />
+                        </label>
+                      </>
+                    )}
+                  </div>
+                  <div className="admin-form-preview" style={{ marginTop: 8, fontSize: 12 }}>
+                    <span>账号预览：</span>
+                    <span style={{ fontFamily: "monospace" }}>{`${batchPrefix}${String(batchStartIndex).padStart(3, "0")}`}</span>
+                    {batchCount > 1 && (
+                      <>
+                        <span style={{ margin: "0 4px" }}> ~ </span>
+                        <span style={{ fontFamily: "monospace" }}>{`${batchPrefix}${String(batchStartIndex + batchCount - 1).padStart(3, "0")}`}</span>
+                      </>
+                    )}
+                    <span style={{ marginLeft: 12 }}>
+                      密码示例：
+                      <span style={{ fontFamily: "monospace" }}>{`${batchPrefix}${String(batchStartIndex).padStart(3, "0")}${batchPasswordSuffix || "123"}`}</span>
+                    </span>
+                  </div>
+                  {batchResult && (
+                    <div className="admin-form-result" style={{ marginTop: 8, fontSize: 12 }}>
+                      <strong>已创建 {batchResult.count} 个账号</strong>
+                      {Array.isArray(batchResult.passwords) && batchResult.passwords.length > 0 && (
+                        <ul style={{ marginTop: 4 }}>
+                          {batchResult.passwords.slice(0, 10).map((row: any) => (
+                            <li key={row.user_id || row.email}>{row.email} / {row.password}</li>
+                          ))}
+                          {batchResult.passwords.length > 10 && (
+                            <li>… 共 {batchResult.passwords.length} 条，只展示前 10 条</li>
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                  <div className="admin-form-actions">
+                    <button className="admin-btn-primary" onClick={batchCreateUsers} disabled={batchSubmitting}>
+                      {batchSubmitting ? "创建中…" : "开始批量创建"}
+                    </button>
+                    <button
+                      className="admin-btn-secondary"
+                      onClick={() => {
+                        setShowBatchCreate(false);
+                        setBatchResult(null);
+                      }}
+                    >
+                      关闭
+                    </button>
                   </div>
                 </div>
               )}
@@ -1565,8 +1946,16 @@ export default function AdminPage() {
                     "";
                   const userLabel = roleLabel && name ? `${roleLabel} · ${name}` : name || log.user || "-";
 
+                  const rawCode = (log as any).status_code;
+                  const statusCode =
+                    typeof rawCode === "number" ? rawCode : parseInt(String(rawCode ?? "0"), 10) || 0;
+                  const statusStr = String(log.status || "").toUpperCase();
+                  const isBlocked = statusStr === "BLOCKED" || statusCode === 403;
+                  const isSuccess = !isBlocked && statusCode >= 200 && statusCode < 400 && statusStr === "OK";
+                  const isError = !isBlocked && !isSuccess;
+
                   return (
-                    <div key={i} className={`admin-table-row ${log.status === "BLOCKED" ? "blocked" : ""}`}>
+                    <div key={i} className={`admin-table-row ${isBlocked ? "blocked" : ""}`}>
                       <span className="admin-cell-muted">{log.time}</span>
                       <span className="admin-cell-primary">{userLabel}</span>
                       <span>
@@ -1577,10 +1966,12 @@ export default function AdminPage() {
                       <span>{log.path || "-"}</span>
                       <span>{log.detail}</span>
                       <span>
-                        {log.status === "BLOCKED" ? (
-                          <span className="admin-log-blocked">🚫 已拦截 (403)</span>
+                        {isBlocked ? (
+                          <span className="admin-log-blocked">🚫 已拦截{statusCode ? ` (${statusCode})` : ""}</span>
+                        ) : isError ? (
+                          <span className="admin-log-error">⚠ 错误{statusCode ? ` (${statusCode})` : ""}</span>
                         ) : (
-                          <span className="admin-log-ok">✓ 正常</span>
+                          <span className="admin-log-ok">✓ 正常{statusCode ? ` (${statusCode})` : ""}</span>
                         )}
                       </span>
                     </div>
@@ -1590,7 +1981,15 @@ export default function AdminPage() {
 
               <div className="admin-log-summary">
                 <span>总操作 {accessLogs.length} 条</span>
-                <span className="admin-log-blocked-count">越权拦截 {accessLogs.filter((l) => l.status === "BLOCKED").length} 次</span>
+                <span className="admin-log-blocked-count">
+                  越权拦截 {accessLogs.filter((l) => {
+                    const rawCode = (l as any).status_code;
+                    const statusCode =
+                      typeof rawCode === "number" ? rawCode : parseInt(String(rawCode ?? "0"), 10) || 0;
+                    const statusStr = String(l.status || "").toUpperCase();
+                    return statusStr === "BLOCKED" || statusCode === 403;
+                  }).length} 次
+                </span>
               </div>
 
               {logStats && logStats.top_paths.length > 0 && (
@@ -1616,6 +2015,259 @@ export default function AdminPage() {
             </div>
           )}
         </main>
+
+        {showTeamManager && manageTeacherId && (() => {
+          const teacherTeams = teams.filter((t) => t.teacher_id === manageTeacherId);
+          return (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.45)",
+                zIndex: 50,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <div
+                className="admin-panel fade-up"
+                style={{
+                  maxWidth: 720,
+                  width: "90%",
+                  maxHeight: "80vh",
+                  overflow: "auto",
+                  background: "var(--bg, #111)",
+                  borderRadius: 8,
+                  boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+                  padding: 20,
+                }}
+              >
+                <div className="admin-panel-header" style={{ marginBottom: 8 }}>
+                  <h3>教师团队管理：{manageTeacherName || manageTeacherId}</h3>
+                  <button
+                    type="button"
+                    className="admin-sm-btn"
+                    onClick={closeTeacherTeamManager}
+                  >
+                    关闭
+                  </button>
+                </div>
+
+                <div className="admin-add-form">
+                  <h4>为该教师新建团队</h4>
+                  <div className="admin-form-grid">
+                    <label>团队名称
+                      <input
+                        value={newTeamName}
+                        onChange={(e) => setNewTeamName(e.target.value)}
+                        placeholder="如 挑战杯指导一组"
+                      />
+                    </label>
+                    <label>团队邀请码（可选）
+                      <input
+                        value={newTeamInviteCode}
+                        onChange={(e) => setNewTeamInviteCode(e.target.value.toUpperCase())}
+                        placeholder="如 ABC123；留空则自动生成"
+                      />
+                    </label>
+                  </div>
+                  <div className="admin-form-actions">
+                    <button
+                      className="admin-btn-primary"
+                      onClick={createTeacherTeam}
+                      disabled={teamSubmitting}
+                    >
+                      {teamSubmitting ? "创建中…" : "创建团队"}
+                    </button>
+                    <button
+                      className="admin-btn-secondary"
+                      onClick={closeTeacherTeamManager}
+                    >
+                      关闭
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-section" style={{ marginTop: 12 }}>
+                  <h4>该教师负责的团队</h4>
+                  {teacherTeams.length > 0 ? (
+                    <div className="admin-table">
+                      <div className="admin-table-header">
+                        <span>团队名称</span>
+                        <span>邀请码</span>
+                        <span>成员数</span>
+                        <span>操作</span>
+                      </div>
+                      {teacherTeams.map((t) => (
+                        <div key={t.team_id} className="admin-table-row">
+                          <span className="admin-cell-primary">{t.team_name}</span>
+                          <span className="admin-cell-muted">{t.invite_code || "—"}</span>
+                          <span>{t.members.length}</span>
+                          <span className="admin-action-group">
+                            <button
+                              type="button"
+                              className="admin-sm-btn"
+                              onClick={() => openTeamMemberManager(t.team_id)}
+                              title="编辑成员"
+                            >
+                              成员
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-sm-btn danger"
+                              onClick={() => deleteTeacherTeam(t.team_id, t.teacher_id)}
+                            >
+                              删除
+                            </button>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="admin-empty">
+                      <div className="admin-empty-icon">👥</div>
+                      <p>该教师当前还没有负责的团队。</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {editTeamId && (() => {
+          const team = teams.find((t) => t.team_id === editTeamId);
+          if (!team) return null;
+          const members = team.members ?? [];
+          return (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.45)",
+                zIndex: 60,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <div
+                className="admin-panel fade-up"
+                style={{
+                  maxWidth: 720,
+                  width: "90%",
+                  maxHeight: "80vh",
+                  overflow: "auto",
+                  background: "var(--bg, #111)",
+                  borderRadius: 8,
+                  boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
+                  padding: 20,
+                }}
+              >
+                <div className="admin-panel-header" style={{ marginBottom: 8 }}>
+                  <h3>团队成员管理：{team.team_name}</h3>
+                  <button
+                    type="button"
+                    className="admin-sm-btn"
+                    onClick={closeTeamMemberManager}
+                  >
+                    关闭
+                  </button>
+                </div>
+
+                <div className="admin-add-form">
+                  <h4>添加团队成员</h4>
+                  <div className="admin-form-grid">
+                    <label>成员用户ID
+                      <input
+                        value={newMemberUserId}
+                        onChange={(e) => setNewMemberUserId(e.target.value)}
+                        placeholder="如 student-001 或 stu001"
+                      />
+                    </label>
+                    <label>当前团队邀请码
+                      <input
+                        value={team.invite_code || "—"}
+                        readOnly
+                      />
+                    </label>
+                  </div>
+                  {newMemberUserId.trim() && (
+                    <div style={{ fontSize: 12, marginTop: 4 }}>
+                      {(() => {
+                        const uid = newMemberUserId.trim();
+                        const candidate = users.find((u) => u.id === uid);
+                        if (!candidate) {
+                          return <span className="admin-cell-muted">未在当前用户列表中找到该ID，对应用户需已存在。</span>;
+                        }
+                        return (
+                          <span className="admin-cell-muted">
+                            将添加：{candidate.name || candidate.email}（{candidate.id}）
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  )}
+                  <div className="admin-form-actions">
+                    <button
+                      className="admin-btn-primary"
+                      onClick={addMemberToTeam}
+                      disabled={memberSubmitting}
+                    >
+                      {memberSubmitting ? "添加中…" : "添加成员"}
+                    </button>
+                    <button
+                      className="admin-btn-secondary"
+                      onClick={closeTeamMemberManager}
+                    >
+                      关闭
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-section" style={{ marginTop: 12 }}>
+                  <h4>现有成员</h4>
+                  {members.length > 0 ? (
+                    <div className="admin-table">
+                      <div className="admin-table-header">
+                        <span>用户ID</span>
+                        <span>姓名</span>
+                        <span>加入时间</span>
+                        <span>操作</span>
+                      </div>
+                      {members.map((m) => {
+                        const name = studentNameByUserId[m.user_id] || m.user_id;
+                        const joined = (m.joined_at || "").slice(0, 19);
+                        return (
+                          <div key={m.user_id} className="admin-table-row">
+                            <span className="admin-cell-primary">{m.user_id}</span>
+                            <span>{name}</span>
+                            <span className="admin-cell-muted">{joined || "—"}</span>
+                            <span>
+                              <button
+                                type="button"
+                                className="admin-sm-btn danger"
+                                onClick={() => removeMemberFromTeam(team.team_id, team.teacher_id, m.user_id)}
+                              >
+                                移除
+                              </button>
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="admin-empty">
+                      <div className="admin-empty-icon">👥</div>
+                      <p>当前团队还没有成员。</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       <div className="admin-footer-disclaimer">

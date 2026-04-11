@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.schemas import (
+    AdminBatchCreateUsersPayload,
     AdminChangePasswordPayload,
     AdminUserCreatePayload,
     AdminUserUpdatePayload,
@@ -47,11 +48,13 @@ from app.schemas import (
     TeacherAssistantAssessmentReviewPayload,
     TeacherAssistantInterventionPayload,
     TeacherAssistantInterventionSendPayload,
+    TeacherAssistantSmartSelectFilter,
     TeacherFeedbackRequest,
     TeacherFeedbackResponse,
     TeamUpdatePayload,
     UploadAnalysisResponse,
 )
+from app.services.diagnosis_engine import RULE_FALLACY_MAP, RULE_EDGE_MAP
 from app.services.agent_router import run_agents
 from app.services.case_knowledge import infer_category
 from app.services.document_parser import extract_text
@@ -310,6 +313,118 @@ def admin_create_user(payload: AdminUserCreatePayload) -> dict:
         "team_names": team_names,
     }
     return {"user": user_out, "temp_password": temp_password}
+
+
+@app.post("/api/admin/users/batch")
+def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
+    """Batch creation of student/teacher accounts for admin console.
+
+    Business rules (aligned with admin UI requirements):
+    - account (登录账号) uses pattern: prefix + zero-padded sequence
+    - default password: account + (password_suffix or "123")
+    - for students: optional invite_code to join an existing team
+    - for teachers: optional team_name / team_invite_code to create teams
+    """
+
+    role = payload.role
+    prefix = payload.prefix.strip()
+    if not prefix:
+        raise HTTPException(status_code=400, detail="账号前缀不能为空")
+
+    start_index = int(payload.start_index or 1)
+    count = int(payload.count or 1)
+    if count <= 0:
+        raise HTTPException(status_code=400, detail="创建数量必须大于 0")
+
+    password_suffix = str(payload.password_suffix or "123")
+    invite_code = (payload.invite_code or "").strip().upper()
+    team_name = (payload.team_name or "").strip()
+    team_invite_code = (payload.team_invite_code or "").strip().upper() or None
+
+    # If student invite_code is provided, validate it once up-front.
+    target_team: dict[str, Any] | None = None
+    if role == "student" and invite_code:
+        target_team = team_store.find_by_invite_code(invite_code)  # type: ignore[assignment]
+        if not target_team:
+            raise HTTPException(status_code=400, detail="邀请码无效或团队不存在")
+
+    created_users: list[dict[str, Any]] = []
+    password_list: list[dict[str, str]] = []
+
+    for i in range(count):
+        seq = start_index + i
+        account = f"{prefix}{seq:03d}"
+        email = account  # 现有系统以 email 字段作为登录账号
+
+        # Avoid partial success: if any account already exists, abort.
+        if user_store.get_by_email(email):
+            raise HTTPException(status_code=400, detail=f"账号 {account} 已存在，批量创建已取消")
+
+        raw_password = f"{account}{password_suffix or '123'}"
+        payload_single = {
+            "role": role,
+            "display_name": account,
+            "email": email,
+            "student_id": account if role == "student" else None,
+            "password": raw_password,
+        }
+
+        try:
+            user, _temp_password = user_store.admin_create_user(payload_single)
+        except ValueError as e:  # pragma: no cover - defensive
+            raise HTTPException(status_code=400, detail=str(e))
+
+        uid = str(user.get("user_id", ""))
+        if role == "student" and uid:
+            stats = _aggregate_student_data(uid, include_detail=False)
+        else:
+            stats = {"project_count": 0, "last_active": ""}
+
+        teams = []
+        if uid:
+            teams.extend(team_store.list_by_member(uid))
+            teams.extend(team_store.list_by_teacher(uid))
+        team_names = [_safe_str(t.get("team_name", "")) for t in teams if _safe_str(t.get("team_name", ""))]
+
+        user_out = {
+            **user,
+            "project_count": stats.get("project_count", 0),
+            "last_login": user.get("last_login") or stats.get("last_active", ""),
+            "team_names": team_names,
+        }
+        created_users.append(user_out)
+        password_list.append({
+            "user_id": uid,
+            "email": email,
+            "password": raw_password,
+        })
+
+        # For students, add them to the target team if invite_code provided.
+        if role == "student" and target_team and uid:
+            team_store.add_member(target_team["team_id"], uid)
+
+        # For teachers, create teams when requested.
+        if role == "teacher" and team_name and uid:
+            # 多个教师时自动在团队名称后追加序号，避免完全重复
+            final_team_name = team_name
+            if count > 1:
+                final_team_name = f"{team_name}-{i + 1}"
+            try:
+                team_store.create_team_with_custom_code(
+                    teacher_id=uid,
+                    teacher_name=user.get("display_name") or user.get("email") or uid,
+                    team_name=final_team_name,
+                    invite_code=team_invite_code if i == 0 else None,
+                )
+            except ValueError as e:  # pragma: no cover - validation
+                raise HTTPException(status_code=400, detail=str(e))
+
+    return {
+        "status": "ok",
+        "count": len(created_users),
+        "users": created_users,
+        "passwords": password_list,
+    }
 
 
 @app.patch("/api/admin/users/{user_id}")
@@ -1005,6 +1120,62 @@ def admin_logs() -> dict:
     return _load_access_logs()
 
 
+@app.post("/api/admin/logs/unauthorized")
+async def admin_log_unauthorized(request: Request) -> dict[str, Any]:
+    """Record an unauthorized access attempt and return 403.
+
+    This endpoint is intended to be called by the frontend when a user
+    without sufficient privileges attempts to access an admin-only
+    view. It appends a structured entry into access_logs.json so that
+    the admin console can display and aggregate these security events.
+    """
+    try:
+        payload = await request.json()
+    except Exception:  # noqa: BLE001
+        payload = {}
+
+    if not isinstance(payload, dict):
+        payload = {}
+
+    role = str(payload.get("role") or "")
+    display_name = str(payload.get("display_name") or "")
+    user_id = payload.get("user_id")
+    reason = str(payload.get("reason") or "")
+
+    role_label = {"student": "学生", "teacher": "教师", "admin": "管理员"}.get(role, "用户")
+    user_label = display_name or str(payload.get("user")) or ""
+    if user_label:
+        user_label = f"{role_label}:{user_label}"
+    else:
+        user_label = role_label or "anonymous"
+
+    path = str(payload.get("path") or request.headers.get("X-Original-Path") or request.url.path)
+
+    detail = "Unauthorized Access Attempt"
+    if reason:
+        detail = f"{detail}: {reason}"
+
+    _append_access_log(
+        {
+            "time": datetime.utcnow().isoformat() + "Z",
+            "user": user_label,
+            "user_id": user_id,
+            "role": role,
+            "display_name": display_name or None,
+            "action": "UNAUTHORIZED",
+            "detail": detail,
+            "status": "BLOCKED",
+            "method": request.method,
+            "path": path,
+            "status_code": 403,
+            "duration_ms": 0,
+        }
+    )
+
+    # Always respond with 403 so that security tests see a hard block.
+    raise HTTPException(status_code=403, detail="Forbidden")
+
+
 # ── SMS verification (dev mode: code returned in response) ──
 
 _sms_codes: dict[str, tuple[str, float]] = {}
@@ -1103,10 +1274,11 @@ def create_team(payload: TeamCreatePayload) -> TeamResponse:
     user = user_store.get_by_id(payload.teacher_id)
     if not user or user.get("role") != "teacher":
         raise HTTPException(status_code=403, detail="仅教师可创建团队")
-    team = team_store.create_team(
+    team = team_store.create_team_with_custom_code(
         teacher_id=payload.teacher_id,
         teacher_name=payload.teacher_name or user.get("display_name", ""),
         team_name=payload.team_name,
+        invite_code=payload.invite_code,
     )
     return TeamResponse(team=team)
 
@@ -3030,6 +3202,97 @@ def teacher_assistant_create_intervention(payload: TeacherAssistantInterventionP
     }
 
 
+@app.post("/api/teacher/assistant/smart-select")
+def teacher_assistant_smart_select(filter: TeacherAssistantSmartSelectFilter) -> dict:
+    """根据筛选条件，帮助教师批量选择适合干预的项目列表。
+
+    该接口不会直接创建干预任务，只返回候选项目/学生，
+    前端可据此填充 TeacherAssistantInterventionPayload 并复用原有创建逻辑。
+    """
+    projects = json_store.list_projects()
+    rows: list[dict[str, Any]] = []
+    class_id = _safe_str(filter.class_id or "") or None
+    cohort_id = _safe_str(filter.cohort_id or "") or None
+
+    for project in projects:
+        pid = _safe_str(project.get("project_id", ""))
+        submissions = list(project.get("submissions", []) or [])
+        if not submissions:
+            continue
+        latest = submissions[-1]
+        if class_id and latest.get("class_id") != class_id:
+            continue
+        if cohort_id and latest.get("cohort_id") != cohort_id:
+            continue
+        diagnosis = _safe_diagnosis(latest.get("diagnosis", {}))
+        overall_score = _safe_float(diagnosis.get("overall_score", latest.get("overall_score", 0)))
+        triggered_raw = diagnosis.get("triggered_rules", []) or latest.get("triggered_rules", []) or []
+        rule_ids = _normalize_rules(triggered_raw)
+        high_risk_rules = [
+            _safe_str(r.get("id"))
+            for r in triggered_raw
+            if isinstance(r, dict) and _safe_str(r.get("severity", "")) == "high"
+        ]
+        risk_count = len(rule_ids)
+        phase = _safe_str(diagnosis.get("project_stage", latest.get("project_phase", ""))) or "持续迭代"
+
+        # 基础数值过滤
+        if filter.min_overall_score is not None and overall_score < filter.min_overall_score:
+            continue
+        if filter.max_overall_score is not None and overall_score > filter.max_overall_score:
+            continue
+        if filter.min_risk_count is not None and risk_count < filter.min_risk_count:
+            continue
+        if filter.max_risk_count is not None and risk_count > filter.max_risk_count:
+            continue
+
+        # 规则包含/排除
+        norm_required = {(_safe_str(rid).upper()) for rid in (filter.require_high_risk_rules or []) if _safe_str(rid)}
+        norm_exclude = {(_safe_str(rid).upper()) for rid in (filter.exclude_rules or []) if _safe_str(rid)}
+        pid_rules = {(_safe_str(r).upper()) for r in rule_ids if _safe_str(r)}
+        if norm_required and not norm_required.issubset(pid_rules.union({(_safe_str(r).upper()) for r in high_risk_rules if _safe_str(r)})):
+            continue
+        if norm_exclude and pid_rules.intersection(norm_exclude):
+            continue
+
+        # 项目阶段过滤
+        phase_in = [p for p in (filter.project_phase_in or []) if _safe_str(p)]
+        if phase_in and phase not in phase_in:
+            continue
+
+        rows.append(
+            {
+                "project_id": pid,
+                "student_id": _safe_str(latest.get("student_id", "")),
+                "class_id": latest.get("class_id"),
+                "cohort_id": latest.get("cohort_id"),
+                "overall_score": overall_score,
+                "risk_count": risk_count,
+                "high_risk_rules": high_risk_rules,
+                "project_stage": phase,
+                "latest_bottleneck": _safe_str(diagnosis.get("bottleneck", "")),
+            }
+        )
+
+    # 进度排序：默认按整体得分升序 + 风险数降序，让“落后&高风险”靠前
+    rows.sort(key=lambda r: (_safe_float(r.get("overall_score", 0)), -int(r.get("risk_count", 0) or 0)))
+
+    # 进度名次区间过滤（基于排序后的 index）
+    total = len(rows)
+    if total and (filter.min_progress_rank is not None or filter.max_progress_rank is not None):
+        start = max(0, int((filter.min_progress_rank or 1) - 1))
+        end = int((filter.max_progress_rank or total))
+        rows = rows[start:end]
+
+    limit = max(1, min(int(filter.limit or 30), 200))
+    selected = rows[:limit]
+    return {
+        "total_candidates": total,
+        "selected_count": len(selected),
+        "items": selected,
+    }
+
+
 @app.post("/api/teacher/assistant/interventions/{intervention_id}/send")
 def teacher_assistant_send_intervention(intervention_id: str, payload: TeacherAssistantInterventionSendPayload) -> dict:
     sent_count = 0
@@ -3082,6 +3345,37 @@ def student_view_intervention(intervention_id: str, payload: StudentIntervention
 @app.get("/api/teacher/assistant/project/{project_id}/conversation-eval")
 def teacher_assistant_project_conversation_eval(project_id: str, logical_project_id: str = "") -> dict:
     return _build_conversation_eval_payload(project_id, logical_project_id)
+
+
+@app.get("/api/teacher/conversation-analytics")
+def teacher_conversation_analytics(class_id: str | None = None, cohort_id: str | None = None) -> dict[str, Any]:
+    """Aggregate dialogue-based conversation quality metrics at class/cohort level.
+
+    This endpoint only looks at submissions whose source_type starts with
+    "dialogue_turn" and aggregates per-student conversation behaviour such as
+    turn count, question density and evidence-awareness trend.
+    """
+    return _build_conversation_analytics(class_id=class_id, cohort_id=cohort_id)
+
+
+@app.get("/api/teacher/case-benchmark")
+def teacher_case_benchmark(class_id: str | None = None, cohort_id: str | None = None) -> dict[str, Any]:
+    """Class-level overview: benchmark student projects against retrieved cases.
+
+    Aggregates per (project, logical_project_id) using dialogue history rag_cases
+    and latest diagnosis rubric / triggered_rules.
+    """
+    return _build_case_benchmark_overview(class_id=class_id, cohort_id=cohort_id)
+
+
+@app.get("/api/teacher/project/{project_id}/case-benchmark")
+def teacher_project_case_benchmark(project_id: str, logical_project_id: str = "") -> dict[str, Any]:
+    """Per-project case benchmarking payload for teacher project workbench.
+
+    Compares a student project with its most frequently retrieved cases across
+    dialogue history, exposing rubric and risk contrasts for visualization.
+    """
+    return _build_case_benchmark_for_project(project_id, logical_project_id)
 
 
 @app.get("/api/teacher/submissions")
@@ -3782,6 +4076,442 @@ def _build_class_snapshot(class_id: str | None = None, cohort_id: str | None = N
     }
 
 
+def _build_conversation_analytics(class_id: str | None = None, cohort_id: str | None = None) -> dict[str, Any]:
+    """Compute class-level conversation quality metrics from dialogue_turn submissions.
+
+    Metrics are aggregated per student and derived only from submissions whose
+    source_type starts with "dialogue_turn".
+    """
+    projects = json_store.list_projects()
+    students: dict[str, dict[str, Any]] = {}
+    topics: dict[str, dict[str, Any]] = {}
+    fallacies: dict[str, dict[str, Any]] = {}
+
+    for project in projects:
+        pid = _safe_str(project.get("project_id", ""))
+        for sub in project.get("submissions", []) or []:
+            source_type = str(sub.get("source_type", ""))
+            if not source_type.startswith("dialogue_turn"):
+                continue
+            if class_id and sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+
+            sid = _safe_str(sub.get("student_id", ""))
+            if not sid:
+                continue
+
+            student = students.setdefault(
+                sid,
+                {
+                    "student_id": sid,
+                    "project_ids": set(),
+                    "conversation_ids": set(),
+                    "turns": [],
+                    "turn_count": 0,
+                    "effective_turn_count": 0,
+                    "challenge_questions_total": 0,
+                    "missing_evidence_total": 0,
+                    "intent_counts": {},
+                    "high_intent_turns": 0,
+                    "intent_turns": 0,
+                    "score_sum": 0.0,
+                    "score_count": 0,
+                    "latest_bottleneck": "",
+                },
+            )
+
+            student["project_ids"].add(pid)
+            conv_id = _safe_str(sub.get("conversation_id", ""))
+            if conv_id:
+                student["conversation_ids"].add(conv_id)
+            student["turn_count"] += 1
+            student["effective_turn_count"] += 1
+
+            ao = sub.get("agent_outputs", {}) if isinstance(sub.get("agent_outputs"), dict) else {}
+            critic = ao.get("critic", {}) if isinstance(ao.get("critic"), dict) else {}
+            cq_list = critic.get("counterfactual_questions") or critic.get("challenge_points") or []
+            if isinstance(cq_list, list):
+                cq_count = len(cq_list)
+            else:
+                cq_count = 0
+            me_list = critic.get("missing_evidence") or []
+            if isinstance(me_list, list):
+                me_count = len(me_list)
+            else:
+                me_count = 0
+            student["challenge_questions_total"] += cq_count
+            student["missing_evidence_total"] += me_count
+
+            diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+            score = _safe_float(diagnosis.get("overall_score", sub.get("overall_score", 0)))
+            if score > 0:
+                student["score_sum"] += score
+                student["score_count"] += 1
+
+            orch = ao.get("orchestration", {}) if isinstance(ao.get("orchestration"), dict) else {}
+            raw_text = _safe_str(sub.get("raw_text", ""))
+            intent = _normalize_intent(
+                orch.get("intent", "") or sub.get("intent", ""),
+                raw_text,
+            )
+            intent_counts: dict[str, int] = student["intent_counts"]
+            intent_counts[intent] = intent_counts.get(intent, 0) + 1
+            student["intent_turns"] += 1
+            if intent in {"学习理解", "商业诊断", "方案设计", "路演表达"}:
+                student["high_intent_turns"] += 1
+
+            created_at = _safe_str(sub.get("created_at", ""))
+            student["turns"].append(
+                {
+                    "created_at": created_at,
+                    "missing_evidence": me_count,
+                }
+            )
+
+            # 话题热点与共性谬误聚合（基于意图 + 触发规则）
+            topic_key = intent or "综合咨询"
+            t_bucket = topics.setdefault(
+                topic_key,
+                {
+                    "topic": topic_key,
+                    "turn_count": 0,
+                    "student_ids": set(),
+                    "rule_hits": {},
+                },
+            )
+            t_bucket["turn_count"] += 1
+            t_bucket["student_ids"].add(sid)
+
+            triggered_raw = diagnosis.get("triggered_rules", []) or sub.get("triggered_rules", []) or []
+            rule_ids = _normalize_rules(triggered_raw)
+            for rid in rule_ids:
+                rid_u = _safe_str(rid).upper()
+                if not rid_u:
+                    continue
+                # 话题-规则共现
+                rh = t_bucket["rule_hits"]
+                rh[rid_u] = rh.get(rid_u, 0) + 1
+                # 班级层面的对话谬误统计
+                f_bucket = fallacies.setdefault(
+                    rid_u,
+                    {
+                        "rule_id": rid_u,
+                        "rule_name": get_rule_name(rid_u),
+                        "fallacy": RULE_FALLACY_MAP.get(rid_u, ""),
+                        "edge_families": RULE_EDGE_MAP.get(rid_u, []),
+                        "hit_count": 0,
+                        "student_ids": set(),
+                    },
+                )
+                f_bucket["hit_count"] += 1
+                f_bucket["student_ids"].add(sid)
+
+            if diagnosis.get("bottleneck"):
+                student["latest_bottleneck"] = _safe_str(diagnosis.get("bottleneck"))
+
+    if not students:
+        empty_box = {"min": 0.0, "q1": 0.0, "median": 0.0, "q3": 0.0, "max": 0.0, "avg": 0.0}
+        return {
+            "class_id": class_id,
+            "cohort_id": cohort_id,
+            "summary": {
+                "student_count": 0,
+                "conversation_count": 0,
+                "avg_turn_count": 0.0,
+                "avg_question_density": 0.0,
+                "avg_evidence_awareness_trend": 0.0,
+                "avg_high_order_ratio": 0.0,
+            },
+            "scatter": [],
+            "high_order_ratio_box": empty_box,
+            "students": [],
+            "topics": [],
+            "fallacies": [],
+        }
+
+    scatter_rows: list[dict[str, Any]] = []
+    hor_values: list[float] = []
+    students_out: list[dict[str, Any]] = []
+    total_turns = 0
+
+    for sid, sdata in students.items():
+        turns = sorted(sdata["turns"], key=lambda r: r.get("created_at", ""))
+        missing_counts = [int(t.get("missing_evidence", 0) or 0) for t in turns]
+        evidence_trend = 0.0
+        if len(missing_counts) >= 2:
+            evidence_trend = (missing_counts[0] - missing_counts[-1]) / max(len(missing_counts) - 1, 1)
+
+        question_density = (
+            float(sdata["challenge_questions_total"]) / max(int(sdata["effective_turn_count"] or 0), 1)
+        )
+        high_order_ratio = (
+            float(sdata["high_intent_turns"]) / max(int(sdata["intent_turns"] or 0), 1)
+            if sdata["intent_turns"]
+            else 0.0
+        )
+        avg_score = (
+            float(sdata["score_sum"]) / max(int(sdata["score_count"] or 0), 1)
+            if sdata["score_count"]
+            else 0.0
+        )
+
+        hor_values.append(high_order_ratio * 10.0)
+        intent_counts = sdata["intent_counts"]
+        dominant_intent = (
+            max(intent_counts.items(), key=lambda kv: kv[1])[0] if intent_counts else "综合咨询"
+        )
+
+        # Persona: coarse clustering based on density and trend
+        persona = "直觉表达型"
+        if question_density >= 0.7 and evidence_trend > 0:
+            persona = "证据敏感型"
+        elif question_density < 0.35 and high_order_ratio < 0.4:
+            persona = "被动应答型"
+
+        students_out.append(
+            {
+                "student_id": sid,
+                "project_count": len(sdata["project_ids"]),
+                "conversation_count": len(sdata["conversation_ids"]),
+                "turn_count": int(sdata["turn_count"] or 0),
+                "effective_turn_count": int(sdata["effective_turn_count"] or 0),
+                "question_density": round(question_density, 3),
+                "evidence_awareness_trend": round(evidence_trend, 3),
+                "high_order_ratio": round(high_order_ratio, 3),
+                "avg_score": round(avg_score, 2),
+                "dominant_intent": dominant_intent,
+                "total_challenge_questions": int(sdata["challenge_questions_total"] or 0),
+                "total_missing_evidence": int(sdata["missing_evidence_total"] or 0),
+                "latest_risk_summary": sdata["latest_bottleneck"],
+                "persona": persona,
+            }
+        )
+
+        scatter_rows.append(
+            {
+                "student_id": sid,
+                "turn_count": int(sdata["turn_count"] or 0),
+                "question_density": round(question_density, 3),
+                "evidence_awareness_trend": round(evidence_trend, 3),
+                "avg_score": round(avg_score, 2),
+            }
+        )
+
+        total_turns += int(sdata.get("turn_count", 0) or 0)
+
+    def _pct(values: list[float], p: float) -> float:
+        if not values:
+            return 0.0
+        vals = sorted(values)
+        idx = (p / 100.0) * (len(vals) - 1)
+        lo = int(math.floor(idx))
+        hi = int(math.ceil(idx))
+        if lo == hi:
+            return vals[lo]
+        frac = idx - lo
+        return vals[lo] + (vals[hi] - vals[lo]) * frac
+
+    high_order_box = {
+        "min": min(hor_values) if hor_values else 0.0,
+        "q1": _pct(hor_values, 25.0),
+        "median": _pct(hor_values, 50.0),
+        "q3": _pct(hor_values, 75.0),
+        "max": max(hor_values) if hor_values else 0.0,
+        "avg": (sum(hor_values) / len(hor_values)) if hor_values else 0.0,
+    }
+
+    summary = {
+        "student_count": len(students_out),
+        "conversation_count": sum(len(s.get("conversation_ids", [])) for s in students.values()),
+        "avg_turn_count": round(
+            sum(int(s.get("turn_count", 0) or 0) for s in students.values()) / max(len(students), 1), 2
+        ),
+        "avg_question_density": round(
+            sum(row["question_density"] for row in students_out) / max(len(students_out), 1), 3
+        ),
+        "avg_evidence_awareness_trend": round(
+            sum(row["evidence_awareness_trend"] for row in students_out) / max(len(students_out), 1), 3
+        ),
+        "avg_high_order_ratio": round(
+            sum(row["high_order_ratio"] for row in students_out) / max(len(students_out), 1), 3
+        ),
+    }
+
+    # 话题热点（Top N，带规则与学生覆盖率）
+    topics_out: list[dict[str, Any]] = []
+    total_students = max(len(students_out), 1)
+    total_turns = max(total_turns, 1)
+    for topic_key, bucket in topics.items():
+        rule_hits = bucket.get("rule_hits", {}) or {}
+        related_rules: list[dict[str, Any]] = []
+        for rid, cnt in sorted(rule_hits.items(), key=lambda kv: kv[1], reverse=True)[:6]:
+            rid_u = _safe_str(rid).upper()
+            related_rules.append(
+                {
+                    "rule_id": rid_u,
+                    "rule_name": get_rule_name(rid_u),
+                    "fallacy": RULE_FALLACY_MAP.get(rid_u, ""),
+                    "edge_families": RULE_EDGE_MAP.get(rid_u, []),
+                    "hit_count": int(cnt),
+                }
+            )
+        topics_out.append(
+            {
+                "topic": topic_key,
+                "turn_count": int(bucket.get("turn_count", 0) or 0),
+                "students_ratio": round(len(bucket.get("student_ids", set())) / total_students, 3),
+                "turn_ratio": round((bucket.get("turn_count", 0) or 0) / total_turns, 3),
+                "related_rules": related_rules,
+            }
+        )
+    topics_out.sort(key=lambda row: row["turn_count"], reverse=True)
+    topics_out = topics_out[:8]
+
+    # 班级共性谬误（按触发频次排序）
+    fallacies_out: list[dict[str, Any]] = []
+    for rid, fb in fallacies.items():
+        fallacies_out.append(
+            {
+                "rule_id": fb.get("rule_id", rid),
+                "rule_name": fb.get("rule_name", get_rule_name(rid)),
+                "fallacy": fb.get("fallacy", RULE_FALLACY_MAP.get(rid, "")),
+                "edge_families": fb.get("edge_families", RULE_EDGE_MAP.get(rid, [])),
+                "hit_count": int(fb.get("hit_count", 0) or 0),
+                "students_ratio": round(len(fb.get("student_ids", set())) / total_students, 3),
+            }
+        )
+    fallacies_out.sort(key=lambda row: row["hit_count"], reverse=True)
+
+    return {
+        "class_id": class_id,
+        "cohort_id": cohort_id,
+        "summary": summary,
+        "scatter": scatter_rows,
+        "high_order_ratio_box": high_order_box,
+        "students": students_out,
+        "topics": topics_out,
+        "fallacies": fallacies_out,
+    }
+
+
+@app.get("/api/teacher/student/{student_id}/capability")
+def teacher_student_capability(student_id: str, class_id: str | None = None, cohort_id: str | None = None) -> dict:
+    """单个学生的五维能力画像 + 最近提交趋势。
+
+    该接口复用班级能力映射的维度定义，基于该学生的文件提交
+    （source_type in ["file", "file_in_chat"]）聚合 Empathy/Ideation/Business/Execution/Pitching
+    五个维度的平均能力值，并给出最近 3 次提交的整体能力走势。
+    """
+    student_id = _safe_str(student_id)
+    if not student_id:
+        return {
+            "student_id": "",
+            "class_id": class_id,
+            "submission_count": 0,
+            "dimensions": [],
+            "radar": [],
+            "trend": [],
+        }
+
+    projects = json_store.list_projects()
+    submissions: list[dict] = []
+    for project in projects:
+        for sub in project.get("submissions", []) or []:
+            source_type = sub.get("source_type", "")
+            if source_type not in ["file", "file_in_chat"]:
+                continue
+            if _safe_str(sub.get("student_id", "")) != student_id:
+                continue
+            if class_id and sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+            submissions.append(sub)
+
+    if not submissions:
+        return {
+            "student_id": student_id,
+            "class_id": class_id,
+            "submission_count": 0,
+            "dimensions": [
+                {"name": "痛点发现 (Empathy)", "score": 0.0, "max": 5.0},
+                {"name": "方案策划 (Ideation)", "score": 0.0, "max": 5.0},
+                {"name": "商业建模 (Business)", "score": 0.0, "max": 5.0},
+                {"name": "资源杠杆 (Execution)", "score": 0.0, "max": 5.0},
+                {"name": "路演表达 (Pitching)", "score": 0.0, "max": 5.0},
+            ],
+            "radar": [0.0] * 5,
+            "trend": [],
+        }
+
+    diagnosis_keywords = {
+        "empathy": ["痛点", "需求", "用户", "验证"],
+        "ideation": ["方案", "设计", "创新", "功能"],
+        "business": ["盈利", "商业模式", "定价", "收入"],
+        "execution": ["资源", "团队", "执行", "里程碑"],
+        "pitching": ["路演", "表达", "叙事", "数据"],
+    }
+
+    dim_acc: dict[str, list[float]] = {k: [] for k in diagnosis_keywords.keys()}
+    # 为趋势图按时间记录每次提交的整体能力均值
+    timeline_points: list[dict[str, Any]] = []
+
+    for sub in sorted(submissions, key=lambda r: _safe_str(r.get("created_at", ""))):
+        diagnosis = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+        overall_score = _safe_float(diagnosis.get("overall_score", 0))
+        raw_text = _safe_str(sub.get("raw_text") or "").lower()
+        per_dim_scores: list[float] = []
+        for dim, keywords in diagnosis_keywords.items():
+            keyword_hit_count = sum(1 for kw in keywords if kw in raw_text)
+            base = 1.2 + min(keyword_hit_count, 4) * 0.8
+            if overall_score >= 7:
+                base += 0.5
+            elif overall_score <= 5.5:
+                base -= 0.3
+            score = max(0.0, min(5.0, round(base, 1)))
+            dim_acc[dim].append(score)
+            per_dim_scores.append(score)
+        if per_dim_scores:
+            capability_index = round(sum(per_dim_scores) / len(per_dim_scores), 2)
+            timeline_points.append(
+                {
+                    "created_at": _safe_str(sub.get("created_at", "")),
+                    "capability_index": capability_index,
+                    "overall_score": overall_score,
+                }
+            )
+
+    dim_order = [
+        ("痛点发现 (Empathy)", "empathy"),
+        ("方案策划 (Ideation)", "ideation"),
+        ("商业建模 (Business)", "business"),
+        ("资源杠杆 (Execution)", "execution"),
+        ("路演表达 (Pitching)", "pitching"),
+    ]
+    dimensions: list[dict[str, Any]] = []
+    radar: list[float] = []
+    for name, key in dim_order:
+        scores = dim_acc.get(key, [])
+        avg_score = round(sum(scores) / len(scores), 2) if scores else 0.0
+        dimensions.append({"name": name, "score": avg_score, "max": 5.0})
+        radar.append(avg_score)
+
+    # 仅返回最近 3 次提交的能力走势，供前端绘制 sparkline
+    timeline_points.sort(key=lambda r: r.get("created_at", ""))
+    recent_trend = timeline_points[-3:]
+
+    return {
+        "student_id": student_id,
+        "class_id": class_id,
+        "submission_count": len(submissions),
+        "dimensions": dimensions,
+        "radar": radar,
+        "trend": recent_trend,
+    }
+
+
 def _build_compare_recommendations(
     baseline: dict[str, Any],
     current: dict[str, Any],
@@ -3813,6 +4543,264 @@ def _project_submissions_by_logical_id(project_state: dict, logical_project_id: 
         s for s in submissions
         if _safe_str(s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id", "")) == logical_project_id
     ]
+
+
+def _extract_rag_cases(sub: dict) -> list[dict[str, Any]]:
+    """Safely extract rag_cases list from a submission.
+
+    rag_cases are stored inside agent_outputs.rag_cases for dialogue_turn
+    submissions; fall back to top-level rag_cases if present.
+    """
+    if not isinstance(sub, dict):
+        return []
+    ao = sub.get("agent_outputs", {}) if isinstance(sub.get("agent_outputs"), dict) else {}
+    rag = ao.get("rag_cases") or sub.get("rag_cases") or []
+    if not isinstance(rag, list):
+        return []
+    return [item for item in rag if isinstance(item, dict)]
+
+
+def _build_case_benchmark_from_submissions(
+    project_id: str,
+    logical_project_id: str,
+    submissions: list[dict],
+) -> dict[str, Any]:
+    """Core aggregator: build case-benchmark payload from a list of submissions.
+
+    This function is shared by both the per-project endpoint and the
+    class-level overview builder.
+    """
+    if not submissions:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "error": "该项目还没有任何可用于案例对标的提交记录",
+            "top_cases": [],
+        }
+
+    submissions_sorted = sorted(submissions, key=lambda row: _safe_str(row.get("created_at", "")))
+    latest = submissions_sorted[-1]
+
+    diagnosis = latest.get("diagnosis", {}) if isinstance(latest.get("diagnosis"), dict) else {}
+    overall_score = _safe_float(diagnosis.get("overall_score", latest.get("overall_score", 0)))
+    triggered_rules_raw = diagnosis.get("triggered_rules", []) or latest.get("triggered_rules", []) or []
+    student_risks = _normalize_rules(triggered_rules_raw)
+    risk_level = _risk_level(overall_score, triggered_rules_raw)
+    diagnosis_rubric = diagnosis.get("rubric", []) if isinstance(diagnosis.get("rubric"), list) else []
+
+    student_id = _safe_str(latest.get("student_id", ""))
+    class_id = _safe_str(latest.get("class_id", ""))
+    cohort_id = _safe_str(latest.get("cohort_id", ""))
+    project_label = _project_label(logical_project_id or project_id, submissions_sorted)
+
+    # Aggregate rag_cases across submissions
+    case_stats: dict[str, dict[str, Any]] = {}
+    case_risk_counts: dict[str, int] = {}
+    case_rubric_map: dict[str, dict[str, Any]] = {}
+    rag_turn_count = 0
+    rag_case_hits = 0
+
+    for sub in submissions_sorted:
+        rag_list = _extract_rag_cases(sub)
+        if not rag_list:
+            continue
+        rag_turn_count += 1
+        for case in rag_list:
+            case_id = _safe_str(case.get("case_id") or case.get("project_name") or case.get("id") or "")
+            if not case_id:
+                continue
+
+            stats = case_stats.setdefault(
+                case_id,
+                {
+                    "case_id": case_id,
+                    "project_name": _safe_str(case.get("project_name", "")),
+                    "category": _safe_str(case.get("category", "")),
+                    "hit_count": 0,
+                    "similarity_sum": 0.0,
+                    "max_similarity": 0.0,
+                    "rubric_coverage": case.get("rubric_coverage") if isinstance(case.get("rubric_coverage"), list) else [],
+                    "risk_flags": [],
+                    "summary": _safe_str(case.get("summary", ""))[:400],
+                },
+            )
+
+            stats["hit_count"] += 1
+            rag_case_hits += 1
+
+            sim = _safe_float(case.get("similarity", 0.0))
+            stats["similarity_sum"] += sim
+            if sim > stats["max_similarity"]:
+                stats["max_similarity"] = sim
+
+            # Aggregate risk flags per case and globally
+            flags = [
+                _safe_str(f)
+                for f in (case.get("risk_flags") or [])
+                if _safe_str(f)
+            ]
+            if flags:
+                existing_flags = set(stats.get("risk_flags", []))
+                for rf in flags:
+                    if rf not in existing_flags:
+                        stats.setdefault("risk_flags", []).append(rf)
+                        existing_flags.add(rf)
+                    case_risk_counts[rf] = case_risk_counts.get(rf, 0) + 1
+
+            # Aggregate rubric coverage across cases
+            rc_list = case.get("rubric_coverage") or []
+            if isinstance(rc_list, list):
+                for entry in rc_list:
+                    if not isinstance(entry, dict):
+                        continue
+                    rubric_item = _safe_str(entry.get("rubric_item") or entry.get("item") or "")
+                    if not rubric_item:
+                        continue
+                    bucket = case_rubric_map.setdefault(
+                        rubric_item,
+                        {"rubric_item": rubric_item, "covered_count": 0, "total_count": 0},
+                    )
+                    bucket["total_count"] += 1
+                    if bool(entry.get("covered")):
+                        bucket["covered_count"] += 1
+
+    # Finalize case stats
+    for stats in case_stats.values():
+        hits = max(1, int(stats.get("hit_count", 0) or 0))
+        stats["avg_similarity"] = round(float(stats.get("similarity_sum", 0.0)) / hits, 4)
+
+    top_cases = sorted(
+        case_stats.values(),
+        key=lambda row: (int(row.get("hit_count", 0) or 0), float(row.get("max_similarity", 0.0) or 0.0)),
+        reverse=True,
+    )
+
+    case_risks = [
+        {"risk_id": rid, "count": count}
+        for rid, count in sorted(case_risk_counts.items(), key=lambda kv: kv[1], reverse=True)
+    ]
+
+    case_rubric = sorted(
+        case_rubric_map.values(),
+        key=lambda row: (float(row.get("covered_count", 0) or 0) / max(int(row.get("total_count", 0) or 0), 1)),
+        reverse=True,
+    )
+
+    if not top_cases:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "student_project": {
+                "project_id": project_id,
+                "logical_project_id": logical_project_id,
+                "student_id": student_id,
+                "class_id": class_id,
+                "cohort_id": cohort_id,
+                "project_name": project_label,
+                "overall_score": overall_score,
+                "risk_level": risk_level,
+            },
+            "top_cases": [],
+            "similarity": {
+                "rag_turn_count": rag_turn_count,
+                "rag_case_hits": rag_case_hits,
+                "avg_top_similarity": 0.0,
+                "max_top_similarity": 0.0,
+            },
+            "student_rubric": diagnosis_rubric,
+            "case_rubric": [],
+            "student_risks": student_risks,
+            "case_risks": [],
+        }
+
+    top_k = top_cases[:3]
+    avg_top_similarity = sum(c.get("avg_similarity", 0.0) for c in top_k) / max(len(top_k), 1)
+    max_top_similarity = max(c.get("max_similarity", 0.0) for c in top_k)
+
+    return {
+        "project_id": project_id,
+        "logical_project_id": logical_project_id,
+        "student_project": {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "student_id": student_id,
+            "class_id": class_id,
+            "cohort_id": cohort_id,
+            "project_name": project_label,
+            "overall_score": overall_score,
+            "risk_level": risk_level,
+        },
+        "top_cases": top_k,
+        "similarity": {
+            "rag_turn_count": rag_turn_count,
+            "rag_case_hits": rag_case_hits,
+            "avg_top_similarity": round(avg_top_similarity, 4),
+            "max_top_similarity": round(max_top_similarity, 4),
+        },
+        "student_rubric": diagnosis_rubric,
+        "case_rubric": case_rubric,
+        "student_risks": student_risks,
+        "case_risks": case_risks,
+    }
+
+
+def _build_case_benchmark_for_project(project_id: str, logical_project_id: str = "") -> dict[str, Any]:
+    """Public builder for a single project/logical project case benchmark."""
+    project_state = json_store.load_project(project_id)
+    submissions = _project_submissions_by_logical_id(project_state, logical_project_id)
+    return _build_case_benchmark_from_submissions(project_id, logical_project_id or project_id, submissions)
+
+
+def _build_case_benchmark_overview(class_id: str | None = None, cohort_id: str | None = None) -> dict[str, Any]:
+    """Class-level overview of case benchmarking for teacher dashboard.
+
+    Groups submissions by (project_id, logical_project_id) filtered by
+    class_id / cohort_id, then runs the per-project builder and keeps
+    items that have at least one retrieved case.
+    """
+    projects = json_store.list_projects()
+    grouped: dict[tuple[str, str], list[dict]] = {}
+
+    for project in projects:
+        pid = _safe_str(project.get("project_id", ""))
+        state = json_store.load_project(pid)
+        for sub in state.get("submissions", []) or []:
+            if class_id and sub.get("class_id") != class_id:
+                continue
+            if cohort_id and sub.get("cohort_id") != cohort_id:
+                continue
+            logical_id = _safe_str(sub.get("logical_project_id") or sub.get("project_id") or sub.get("conversation_id") or pid)
+            grouped.setdefault((pid, logical_id), []).append(sub)
+
+    items: list[dict[str, Any]] = []
+    for (pid, logical_id), subs in grouped.items():
+        benchmark = _build_case_benchmark_from_submissions(pid, logical_id, subs)
+        if benchmark.get("top_cases"):
+            # For class overview we only keep a light-weight representative
+            rep_cases = benchmark["top_cases"][:2]
+            items.append(
+                {
+                    "student_project": benchmark.get("student_project", {}),
+                    "representative_cases": rep_cases,
+                    "similarity": benchmark.get("similarity", {}),
+                    "student_risks": benchmark.get("student_risks", []),
+                    "case_risks": benchmark.get("case_risks", []),
+                }
+            )
+
+    items.sort(
+        key=lambda row: (
+            -len(row.get("student_risks", []) or []),
+            -float(row.get("similarity", {}).get("avg_top_similarity", 0.0) or 0.0),
+        ),
+    )
+
+    return {
+        "class_id": class_id,
+        "cohort_id": cohort_id,
+        "project_count": len(items),
+        "items": items,
+    }
 
 
 def _review_score_band(score: float) -> str:
@@ -3849,12 +4837,26 @@ def _assessment_evidence_chain(filtered_subs: list[dict]) -> list[dict]:
                     "risk_name": get_rule_name(fallback_risks[0]) if fallback_risks else "原文片段",
                     "source": "dialogue",
                 }]
+        # Try to infer rubric items linked to this submission from diagnosis rubric
+        diag = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+        diagnosis_rubric = diag.get("rubric", []) if isinstance(diag.get("rubric"), list) else []
+        rubric_names = [
+            str(item.get("item", ""))
+            for item in diagnosis_rubric
+            if isinstance(item, dict) and _safe_float(item.get("score", 0)) < 8
+        ]
+        # Normalized rule ids on this submission
+        rule_ids = _normalize_rules(diag.get("triggered_rules", []) or sub.get("triggered_rules", []))
         for quote in quotes[:4]:
             rows.append({
                 **quote,
                 "created_at": sub.get("created_at", ""),
                 "project_phase": _safe_str(sub.get("project_phase", "")),
                 "source_type": _safe_str(sub.get("source_type", "")),
+                "submission_id": _safe_str(sub.get("submission_id", "")),
+                # Optional richer context for evidence-trace views
+                "rubric_items": rubric_names,
+                "rule_ids": rule_ids,
             })
     if len(rows) < 2:
         extra_rows: list[dict] = []
@@ -3869,6 +4871,9 @@ def _assessment_evidence_chain(filtered_subs: list[dict]) -> list[dict]:
                     "created_at": sub.get("created_at", ""),
                     "project_phase": _safe_str(sub.get("project_phase", "")),
                     "source_type": _safe_str(sub.get("source_type", "")),
+                    "submission_id": _safe_str(sub.get("submission_id", "")),
+                    "rubric_items": [],
+                    "rule_ids": [],
                 })
         rows.extend(extra_rows)
     return rows[-12:]
@@ -4260,6 +5265,67 @@ def _build_assessment_payload(project_id: str, logical_project_id: str = "") -> 
             continue
         current_review = item
         break
+    # Build quick 24h/72h layered plans from competition advisor + competition score helpers
+    quick_plan_24h: list[dict] = []
+    quick_plan_72h: list[dict] = []
+    agent_outputs = latest_sub.get("agent_outputs", {}) if isinstance(latest_sub.get("agent_outputs"), dict) else {}
+    comp_adv = agent_outputs.get("competition_advisor", {}) if isinstance(agent_outputs.get("competition_advisor"), dict) else {}
+    rubric_advice = comp_adv.get("rubric_advice", []) if isinstance(comp_adv.get("rubric_advice"), list) else []
+    for row in rubric_advice:
+        if not isinstance(row, dict):
+            continue
+        item_name = _safe_str(row.get("item", ""))
+        fix24 = _safe_str(row.get("minimal_fix_24h", ""))
+        fix72 = _safe_str(row.get("minimal_fix_72h", ""))
+        if fix24:
+            quick_plan_24h.append({
+                "source": "competition_advisor",
+                "rubric_item": item_name,
+                "title": f"补强 {item_name}",
+                "description": fix24,
+            })
+        if fix72:
+            quick_plan_72h.append({
+                "source": "competition_advisor",
+                "rubric_item": item_name,
+                "title": f"深度优化 {item_name}",
+                "description": fix72,
+            })
+    # Augment with generic quick fixes derived from competition-score helper
+    try:
+        comp_score = teacher_competition_score_predict(project_id)
+    except Exception:
+        comp_score = {}
+    for text in (comp_score.get("quick_fixes_24h") or [])[:6]:
+        quick_plan_24h.append({
+            "source": "competition_score",
+            "rubric_item": "",
+            "title": _safe_str(text)[:40],
+            "description": _safe_str(text),
+        })
+    for text in (comp_score.get("quick_fixes_72h") or [])[:8]:
+        quick_plan_72h.append({
+            "source": "competition_score",
+            "rubric_item": "",
+            "title": _safe_str(text)[:40],
+            "description": _safe_str(text),
+        })
+    # Deduplicate by (title, description)
+    def _dedup_plan(items: list[dict]) -> list[dict]:
+        seen: set[tuple[str, str]] = set()
+        out: list[dict] = []
+        for it in items:
+            key = (_safe_str(it.get("title", "")), _safe_str(it.get("description", "")))
+            if not key[0] and not key[1]:
+                continue
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(it)
+        return out[:10]
+
+    quick_plan_24h = _dedup_plan(quick_plan_24h)
+    quick_plan_72h = _dedup_plan(quick_plan_72h)
     return {
         "project_id": project_id,
         "logical_project_id": logical_project_id or _safe_str(latest_sub.get("logical_project_id") or latest_sub.get("project_id") or latest_sub.get("conversation_id", "")),
@@ -4282,6 +5348,8 @@ def _build_assessment_payload(project_id: str, logical_project_id: str = "") -> 
         "rubric_items": rubric_items,
         "overall_weighted_score": weighted_score,
         "evidence_chain": evidence_chain,
+        "quick_plan_24h": quick_plan_24h,
+        "quick_plan_72h": quick_plan_72h,
         "existing_review": current_review or {},
         "instructor_review_notes": _safe_str((current_review or {}).get("summary", "")),
         "workflow_trace": {
@@ -4885,6 +5953,156 @@ def teacher_competition_score_predict(project_id: str) -> dict:
             {"rule": r.get("id"), "name": r.get("name"), "priority": "高"}
             for r in triggered_rules[:3]
         ] if triggered_rules else [],
+    }
+
+
+@app.get("/api/teacher/project/{project_id}/evidence-trace")
+def teacher_project_evidence_trace(project_id: str, logical_project_id: str = "") -> dict:
+    """证据链追溯视图：按项目聚合最近提交的证据片段与规则/评分维度关联。
+
+    该接口在 `_build_assessment_payload` 的 evidence_chain 基础上，补充
+    submission_id、rubric_items、rule_ids 等上下文，供前端追溯到材料与规则。
+    """
+    project_state = json_store.load_project(project_id)
+    filtered_subs = _project_submissions_by_logical_id(project_state, logical_project_id)
+    if not filtered_subs:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "error": "该项目暂无可用于证据溯源的提交记录",
+        }
+    evidence_chain = _assessment_evidence_chain(filtered_subs)
+    # 计算每条Rubric的证据数量与风险规则聚合
+    rubric_stats: dict[str, dict] = {}
+    rule_stats: dict[str, dict] = {}
+    for row in evidence_chain:
+        rubric_items = row.get("rubric_items") or []
+        rule_ids = row.get("rule_ids") or ([] if not row.get("risk_id") else [row.get("risk_id")])
+        for rid in rule_ids:
+            rid_s = _safe_str(rid).upper()
+            if not rid_s:
+                continue
+            bucket = rule_stats.setdefault(
+                rid_s,
+                {
+                    "rule_id": rid_s,
+                    "rule_name": get_rule_name(rid_s),
+                    "fallacy": RULE_FALLACY_MAP.get(rid_s, ""),
+                    "edge_families": RULE_EDGE_MAP.get(rid_s, []),
+                    "hit_count": 0,
+                },
+            )
+            bucket["hit_count"] += 1
+        for item in rubric_items:
+            name = _safe_str(item)
+            if not name:
+                continue
+            b = rubric_stats.setdefault(
+                name,
+                {
+                    "rubric_item": name,
+                    "evidence_count": 0,
+                    "rule_ids": set(),
+                },
+            )
+            b["evidence_count"] += 1
+            for rid in rule_ids:
+                if not rid:
+                    continue
+                b["rule_ids"].add(_safe_str(rid).upper())
+    rubric_rows = []
+    for name, b in rubric_stats.items():
+        rule_list = sorted(list(b.get("rule_ids", set())))
+        rubric_rows.append(
+            {
+                "rubric_item": name,
+                "evidence_count": int(b.get("evidence_count", 0) or 0),
+                "rule_ids": rule_list,
+            }
+        )
+    rubric_rows.sort(key=lambda r: (-int(r["evidence_count"]), r["rubric_item"]))
+    rule_rows = sorted(
+        rule_stats.values(),
+        key=lambda r: (-int(r.get("hit_count", 0) or 0), r["rule_id"]),
+    )
+    return {
+        "project_id": project_id,
+        "logical_project_id": logical_project_id,
+        "evidence_chain": evidence_chain,
+        "rubric_summary": rubric_rows,
+        "rule_summary": rule_rows,
+    }
+
+
+@app.get("/api/teacher/project/{project_id}/rule-dashboard")
+def teacher_project_rule_dashboard(project_id: str, logical_project_id: str = "") -> dict:
+    """规则触发雷达 & 红线看板（项目级）。
+
+    聚合指定项目/逻辑项目下所有提交中的规则触发情况，输出：
+    - radar: H 规则在该项目中的触发频度（0-10）
+    - timeline: 按时间的规则命中时间线
+    - summary: 每条规则的谬误名称、超图族等
+    """
+    project_state = json_store.load_project(project_id)
+    submissions = _project_submissions_by_logical_id(project_state, logical_project_id)
+    if not submissions:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "error": "该项目暂无可用于规则分析的提交记录",
+        }
+    submissions_sorted = sorted(submissions, key=lambda row: _safe_str(row.get("created_at", "")))
+    rule_counts: dict[str, int] = {}
+    timeline: list[dict] = []
+    for sub in submissions_sorted:
+        created_at = _safe_str(sub.get("created_at", ""))
+        diag = sub.get("diagnosis", {}) if isinstance(sub.get("diagnosis"), dict) else {}
+        triggered_raw = diag.get("triggered_rules", []) or sub.get("triggered_rules", []) or []
+        rule_ids = _normalize_rules(triggered_raw)
+        unique_rules = set(rid.upper() for rid in rule_ids if rid)
+        if unique_rules:
+            timeline.append({
+                "created_at": created_at,
+                "project_phase": _safe_str(sub.get("project_phase", "")),
+                "rule_ids": sorted(unique_rules),
+            })
+        for rid in unique_rules:
+            rule_counts[rid] = rule_counts.get(rid, 0) + 1
+    if not rule_counts:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "radar": [],
+            "timeline": timeline,
+            "rules": [],
+        }
+    max_hits = max(rule_counts.values()) or 1
+    radar = []
+    summary_rows = []
+    for rid, count in sorted(rule_counts.items(), key=lambda kv: (-kv[1], kv[0])):
+        rid_u = _safe_str(rid).upper()
+        severity = "high" if count >= 4 else "medium" if count >= 2 else "low"
+        radar.append({
+            "rule": rid_u,
+            "label": get_rule_name(rid_u),
+            "value": round((count / max_hits) * 10, 2),
+            "raw_hits": count,
+            "severity": severity,
+        })
+        summary_rows.append({
+            "rule_id": rid_u,
+            "rule_name": get_rule_name(rid_u),
+            "fallacy": RULE_FALLACY_MAP.get(rid_u, ""),
+            "edge_families": RULE_EDGE_MAP.get(rid_u, []),
+            "hit_count": count,
+            "severity": severity,
+        })
+    return {
+        "project_id": project_id,
+        "logical_project_id": logical_project_id,
+        "radar": radar,
+        "timeline": timeline,
+        "rules": summary_rows,
     }
 
 

@@ -1,0 +1,1614 @@
+{
+  "generated_at": "2026-04-11T20:25:02.575095",
+  "total_cases": 96,
+  "neo4j_stats": {
+    "total_nodes": 3018,
+    "total_relationships": 8758,
+    "node_labels": {
+      "Evidence": 496,
+      "Hyperedge": 360,
+      "PainPoint": 252,
+      "Solution": 252,
+      "InnovationPoint": 241,
+      "BusinessModelAspect": 235,
+      "Market": 233,
+      "ExecutionStep": 209,
+      "Stakeholder": 204,
+      "HyperNode": 166,
+      "RiskControlPoint": 120,
+      "OntologyNode": 97,
+      "Project": 96,
+      "Entity": 15,
+      "RiskRule": 14,
+      "Category": 13,
+      "RubricItem": 10,
+      "Competition": 3,
+      "CompetitionDomain": 1,
+      "Entrepreneurship": 1
+    },
+    "relationship_types": {
+      "INSTANCE_OF": 1738,
+      "HAS_MEMBER": 1614,
+      "EVALUATED_BY": 949,
+      "ALIGNS_WITH": 709,
+      "HAS_EVIDENCE": 496,
+      "HITS_RULE": 453,
+      "SUPPORTED_BY": 424,
+      "TRIGGERS_RULE": 372,
+      "HAS_PAIN": 252,
+      "HAS_SOLUTION": 252,
+      "HAS_INNOVATION": 241,
+      "HAS_BUSINESS_MODEL": 235,
+      "HAS_MARKET_ANALYSIS": 233,
+      "HAS_TARGET_USER": 210,
+      "HAS_EXECUTION_STEP": 209,
+      "HAS_RISK_CONTROL": 121,
+      "BELONGS_TO": 96,
+      "REQUIRES_EVIDENCE_FROM": 45,
+      "TARGETS_CONCEPT": 37,
+      "PARTICIPATED_IN": 30,
+      "ENTREPRENEURSHIP": 23,
+      "RELATES_TO": 13,
+      "RECOMMENDS_TASK": 3,
+      "HAS_COMPETITION": 3
+    },
+    "hypergraph": {
+      "Hyperedge": 360,
+      "HyperNode": 166,
+      "RiskRule": 14,
+      "RubricItem": 10,
+      "HAS_MEMBER": 1614,
+      "TRIGGERS_RULE": 372,
+      "ALIGNS_WITH": 709
+    },
+    "kg_nodes": 2492,
+    "kg_relationships": 7144,
+    "kg_node_labels": {
+      "Evidence": 496,
+      "PainPoint": 252,
+      "Solution": 252,
+      "InnovationPoint": 241,
+      "BusinessModelAspect": 235,
+      "Market": 233,
+      "ExecutionStep": 209,
+      "Stakeholder": 204,
+      "RiskControlPoint": 120,
+      "OntologyNode": 97,
+      "Project": 96,
+      "Entity": 15,
+      "RiskRule": 14,
+      "Category": 13,
+      "RubricItem": 10,
+      "Competition": 3,
+      "CompetitionDomain": 1,
+      "Entrepreneurship": 1
+    },
+    "kg_relationship_types": {
+      "INSTANCE_OF": 1738,
+      "EVALUATED_BY": 949,
+      "ALIGNS_WITH": 709,
+      "HAS_EVIDENCE": 496,
+      "HITS_RULE": 453,
+      "SUPPORTED_BY": 424,
+      "TRIGGERS_RULE": 372,
+      "HAS_PAIN": 252,
+      "HAS_SOLUTION": 252,
+      "HAS_INNOVATION": 241,
+      "HAS_BUSINESS_MODEL": 235,
+      "HAS_MARKET_ANALYSIS": 233,
+      "HAS_TARGET_USER": 210,
+      "HAS_EXECUTION_STEP": 209,
+      "HAS_RISK_CONTROL": 121,
+      "BELONGS_TO": 96,
+      "REQUIRES_EVIDENCE_FROM": 45,
+      "TARGETS_CONCEPT": 37,
+      "PARTICIPATED_IN": 30,
+      "ENTREPRENEURSHIP": 23,
+      "RELATES_TO": 13,
+      "RECOMMENDS_TASK": 3,
+      "HAS_COMPETITION": 3
+    }
+  },
+  "overall_score": 95.4,
+  "overall_grade": "A+",
+  "dimensions": [
+    {
+      "id": "extraction_accuracy",
+      "label": "抽取准确率",
+      "label_en": "Extraction Accuracy",
+      "description": "评估LLM从原始文档中抽取的结构化知识是否完整、准确。通过抽样检查每个案例的8个关键画像字段（痛点、方案、创新点等）是否被正确填充，并检查是否有源文本证据支持。",
+      "score": 90.6,
+      "grade": "A",
+      "summary": "抽样 20 个案例，共 160 项字段检查，145 项已填充（90.6%）。",
+      "detail": {
+        "sample_size": 20,
+        "total_checks": 160,
+        "passed_checks": 145,
+        "field_fill_rates": {},
+        "samples": [
+          {
+            "case_id": "case_81bd41c4f863",
+            "project_name": "尖端超高压制造装备核心部件自主化研制",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_efd7e6d150e3",
+            "project_name": "基于YOLO的AI视觉检测与热态反演的船舶智能感知系统",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_67c30fba3729",
+            "project_name": "528229-深海幽灵-面向海洋强国战略的新一代仿生蝠鲼_AI智能自反馈水下无人航行器",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_e3020c0304f9",
+            "project_name": "众晟实业",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 4,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "innovation_points",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 4,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_4b4d1263c081",
+            "project_name": "467876-广寒天工——月基装备多机智能协同无人作业系统",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 5,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_c1e2597b715d",
+            "project_name": "慧心晰影—智能数字神经放射科医生诊断系统",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_d30326ae244e",
+            "project_name": "明眸智芯",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_d4159d1901f0",
+            "project_name": "AGRO-AI OS: Intelligent Agricultural Weed Automatic Recognition System",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_2ae706584324",
+            "project_name": "535591-EvoRobo：下一代自学习自演进的智能机器人",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": true
+              },
+              {
+                "field": "business_model",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": true,
+                "item_count": 6,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "execution_plan",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": true,
+                "item_count": 1,
+                "has_evidence_hint": false
+              }
+            ]
+          },
+          {
+            "case_id": "case_43210f67ee34",
+            "project_name": "元界创生——云上交互空间智能生成技术领跑者_计划书",
+            "fields": [
+              {
+                "field": "target_users",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "pain_points",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "solution",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "innovation_points",
+                "filled": true,
+                "item_count": 2,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "business_model",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "market_analysis",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "execution_plan",
+                "filled": true,
+                "item_count": 3,
+                "has_evidence_hint": false
+              },
+              {
+                "field": "risk_control",
+                "filled": false,
+                "item_count": 0,
+                "has_evidence_hint": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "ontology_coverage",
+      "label": "知识覆盖率",
+      "label_en": "Ontology Coverage",
+      "description": "衡量抽取的知识对预定义本体模型的覆盖程度。本体定义了创业项目分析所需的核心概念（如问题定义、用户画像、商业模式等）和方法论（如精益画布、MVP验证等），覆盖率越高说明知识图谱的知识体系越完整。",
+      "score": 100.0,
+      "grade": "A+",
+      "summary": "定义了 20 个本体概念，其中 20 个在案例库中有实例化（100.0%）。",
+      "detail": {
+        "total_concepts": 20,
+        "covered_concepts": 20,
+        "heatmap": [
+          {
+            "concept_id": "C_problem",
+            "label": "C_problem",
+            "instance_count": 95,
+            "covered": true
+          },
+          {
+            "concept_id": "C_user_segment",
+            "label": "C_user_segment",
+            "instance_count": 94,
+            "covered": true
+          },
+          {
+            "concept_id": "C_value_proposition",
+            "label": "C_value_proposition",
+            "instance_count": 95,
+            "covered": true
+          },
+          {
+            "concept_id": "C_solution",
+            "label": "C_solution",
+            "instance_count": 96,
+            "covered": true
+          },
+          {
+            "concept_id": "C_business_model",
+            "label": "C_business_model",
+            "instance_count": 78,
+            "covered": true
+          },
+          {
+            "concept_id": "C_market_size",
+            "label": "C_market_size",
+            "instance_count": 91,
+            "covered": true
+          },
+          {
+            "concept_id": "C_competition",
+            "label": "C_competition",
+            "instance_count": 91,
+            "covered": true
+          },
+          {
+            "concept_id": "C_team",
+            "label": "C_team",
+            "instance_count": 78,
+            "covered": true
+          },
+          {
+            "concept_id": "C_roadmap",
+            "label": "C_roadmap",
+            "instance_count": 78,
+            "covered": true
+          },
+          {
+            "concept_id": "C_risk_control",
+            "label": "C_risk_control",
+            "instance_count": 67,
+            "covered": true
+          },
+          {
+            "concept_id": "M_user_interview",
+            "label": "M_user_interview",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_survey",
+            "label": "M_survey",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_competitor_matrix",
+            "label": "M_competitor_matrix",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_leancanvas",
+            "label": "M_leancanvas",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_mvp",
+            "label": "M_mvp",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_ab_test",
+            "label": "M_ab_test",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_unit_economics",
+            "label": "M_unit_economics",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_tam_sam_som",
+            "label": "M_tam_sam_som",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_risk_register",
+            "label": "M_risk_register",
+            "instance_count": 24,
+            "covered": true
+          },
+          {
+            "concept_id": "M_competition_mapping",
+            "label": "M_competition_mapping",
+            "instance_count": 24,
+            "covered": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "traceability",
+      "label": "证据可溯源性",
+      "label_en": "Traceability",
+      "description": "评估知识图谱中每条知识是否都能追溯到原始文档中的具体文本。高可溯源性意味着抽取结果可信、可验证，而非LLM凭空生成。检查两个指标：有证据引用的案例占比，以及引用文本的非空率。",
+      "score": 89.4,
+      "grade": "A",
+      "summary": "79/96 个案例有证据引用（82.3%），引用文本非空率 100.0%。",
+      "detail": {
+        "cases_with_evidence": 79,
+        "total_cases": 96,
+        "trace_rate": 82.3,
+        "total_quotes": 496,
+        "non_empty_quotes": 496,
+        "quote_rate": 100.0,
+        "avg_evidence_per_case": 5.17,
+        "histogram": [
+          {
+            "evidence_count": 0,
+            "cases": 17
+          },
+          {
+            "evidence_count": 1,
+            "cases": 1
+          },
+          {
+            "evidence_count": 2,
+            "cases": 1
+          },
+          {
+            "evidence_count": 3,
+            "cases": 21
+          },
+          {
+            "evidence_count": 4,
+            "cases": 3
+          },
+          {
+            "evidence_count": 5,
+            "cases": 11
+          },
+          {
+            "evidence_count": 6,
+            "cases": 7
+          },
+          {
+            "evidence_count": 7,
+            "cases": 9
+          },
+          {
+            "evidence_count": 8,
+            "cases": 13
+          },
+          {
+            "evidence_count": 9,
+            "cases": 5
+          },
+          {
+            "evidence_count": 10,
+            "cases": 2
+          },
+          {
+            "evidence_count": 11,
+            "cases": 1
+          },
+          {
+            "evidence_count": 12,
+            "cases": 2
+          },
+          {
+            "evidence_count": 14,
+            "cases": 1
+          },
+          {
+            "evidence_count": 16,
+            "cases": 1
+          },
+          {
+            "evidence_count": 24,
+            "cases": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "connectivity",
+      "label": "结构连通性",
+      "label_en": "Structural Connectivity",
+      "description": "基于 Neo4j 图数据库的真实拓扑结构评估知识图谱的连通性。检查节点类型多样性、关系类型丰富度、关系密度、维度覆盖度等指标。知识图谱采用 Project 为中心的星型结构，每个项目通过不同关系连接到9个维度的实体节点。",
+      "score": 98.0,
+      "grade": "A+",
+      "summary": "2492 个 KG 节点，7144 条关系，18 种节点类型，23 种关系类型，平均度 5.73，关系密度 2.87。",
+      "detail": {
+        "total_nodes": 2492,
+        "total_edges": 7144,
+        "node_label_types": 18,
+        "relationship_types": 23,
+        "avg_degree": 5.73,
+        "density": 2.87,
+        "total_projects": 96,
+        "node_labels": {
+          "Evidence": 496,
+          "PainPoint": 252,
+          "Solution": 252,
+          "InnovationPoint": 241,
+          "BusinessModelAspect": 235,
+          "Market": 233,
+          "ExecutionStep": 209,
+          "Stakeholder": 204,
+          "RiskControlPoint": 120,
+          "OntologyNode": 97,
+          "Project": 96,
+          "Entity": 15,
+          "RiskRule": 14,
+          "Category": 13,
+          "RubricItem": 10,
+          "Competition": 3,
+          "CompetitionDomain": 1,
+          "Entrepreneurship": 1
+        },
+        "relationship_type_counts": {
+          "INSTANCE_OF": 1738,
+          "EVALUATED_BY": 949,
+          "ALIGNS_WITH": 709,
+          "HAS_EVIDENCE": 496,
+          "HITS_RULE": 453,
+          "SUPPORTED_BY": 424,
+          "TRIGGERS_RULE": 372,
+          "HAS_PAIN": 252,
+          "HAS_SOLUTION": 252,
+          "HAS_INNOVATION": 241,
+          "HAS_BUSINESS_MODEL": 235,
+          "HAS_MARKET_ANALYSIS": 233,
+          "HAS_TARGET_USER": 210,
+          "HAS_EXECUTION_STEP": 209,
+          "HAS_RISK_CONTROL": 121,
+          "BELONGS_TO": 96,
+          "REQUIRES_EVIDENCE_FROM": 45,
+          "TARGETS_CONCEPT": 37,
+          "PARTICIPATED_IN": 30,
+          "ENTREPRENEURSHIP": 23,
+          "RELATES_TO": 13,
+          "RECOMMENDS_TASK": 3,
+          "HAS_COMPETITION": 3
+        },
+        "dimension_stats": {
+          "痛点": {
+            "node_count": 252,
+            "label": "PainPoint"
+          },
+          "方案": {
+            "node_count": 252,
+            "label": "Solution"
+          },
+          "创新点": {
+            "node_count": 241,
+            "label": "InnovationPoint"
+          },
+          "商业模式": {
+            "node_count": 235,
+            "label": "BusinessModelAspect"
+          },
+          "市场分析": {
+            "node_count": 233,
+            "label": "Market"
+          },
+          "执行计划": {
+            "node_count": 209,
+            "label": "ExecutionStep"
+          },
+          "风控": {
+            "node_count": 120,
+            "label": "RiskControlPoint"
+          },
+          "证据": {
+            "node_count": 496,
+            "label": "Evidence"
+          },
+          "利益方": {
+            "node_count": 204,
+            "label": "Stakeholder"
+          }
+        }
+      }
+    },
+    {
+      "id": "category_balance",
+      "label": "类别均衡度",
+      "label_en": "Category Balance",
+      "description": "衡量知识库中案例的行业分布是否均衡。过度集中于某一行业会导致知识偏差，均衡的分布有助于系统对不同类型创业项目提供公平的诊断和建议。使用基尼系数和变异系数综合评估。",
+      "score": 96.4,
+      "grade": "A+",
+      "summary": "共 13 个行业类别，96 个案例。基尼系数 0.3，变异系数 0.576。",
+      "detail": {
+        "total_categories": 13,
+        "total_cases": 96,
+        "gini_coefficient": 0.3,
+        "coefficient_of_variation": 0.576,
+        "distribution": [
+          {
+            "category": "科技创新",
+            "count": 17,
+            "percentage": 17.7
+          },
+          {
+            "category": "医疗健康",
+            "count": 13,
+            "percentage": 13.5
+          },
+          {
+            "category": "工业制造",
+            "count": 10,
+            "percentage": 10.4
+          },
+          {
+            "category": "教育服务",
+            "count": 9,
+            "percentage": 9.4
+          },
+          {
+            "category": "其他",
+            "count": 8,
+            "percentage": 8.3
+          },
+          {
+            "category": "交通运输",
+            "count": 7,
+            "percentage": 7.3
+          },
+          {
+            "category": "环境保护",
+            "count": 7,
+            "percentage": 7.3
+          },
+          {
+            "category": "农业发展",
+            "count": 6,
+            "percentage": 6.2
+          },
+          {
+            "category": "政务治理",
+            "count": 6,
+            "percentage": 6.2
+          },
+          {
+            "category": "智能制造",
+            "count": 6,
+            "percentage": 6.2
+          },
+          {
+            "category": "文旅文创",
+            "count": 3,
+            "percentage": 3.1
+          },
+          {
+            "category": "社会公益",
+            "count": 2,
+            "percentage": 2.1
+          },
+          {
+            "category": "金融经济",
+            "count": 2,
+            "percentage": 2.1
+          }
+        ]
+      }
+    },
+    {
+      "id": "rubric_coverage",
+      "label": "评审覆盖度",
+      "label_en": "Rubric Coverage",
+      "description": "检测知识图谱对评审量表（Rubric）各维度的覆盖情况。评审量表定义了创业项目评估的9个核心维度（问题定义、方案可行性、商业模式一致性等），覆盖率越高说明知识图谱能支撑更全面的自动化评估。",
+      "score": 91.8,
+      "grade": "B",
+      "summary": "9 项评审维度，平均覆盖率 61.0%。覆盖最弱项需重点关注。",
+      "detail": {
+        "total_cases": 96,
+        "rubric_count": 9,
+        "overall_coverage_rate": 61.0,
+        "heatmap": [
+          {
+            "rubric_item": "Problem Definition",
+            "covered_count": 96,
+            "coverage_rate": 100.0,
+            "avg_score": 8.1,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "User Evidence Strength",
+            "covered_count": 5,
+            "coverage_rate": 5.2,
+            "avg_score": 2.7,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Solution Feasibility",
+            "covered_count": 93,
+            "coverage_rate": 96.9,
+            "avg_score": 7.1,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Business Model Consistency",
+            "covered_count": 48,
+            "coverage_rate": 50.0,
+            "avg_score": 5.2,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Market & Competition",
+            "covered_count": 70,
+            "coverage_rate": 72.9,
+            "avg_score": 6.2,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Financial Logic",
+            "covered_count": 6,
+            "coverage_rate": 6.2,
+            "avg_score": 3.2,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Innovation & Differentiation",
+            "covered_count": 93,
+            "coverage_rate": 96.9,
+            "avg_score": 7.8,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Team & Execution",
+            "covered_count": 25,
+            "coverage_rate": 26.0,
+            "avg_score": 4.5,
+            "score_samples": 96
+          },
+          {
+            "rubric_item": "Presentation Quality",
+            "covered_count": 91,
+            "coverage_rate": 94.8,
+            "avg_score": 7.0,
+            "score_samples": 96
+          }
+        ]
+      }
+    },
+    {
+      "id": "risk_rule_distribution",
+      "label": "风险规则命中分布",
+      "label_en": "Risk Rule Distribution",
+      "description": "分析15条风险规则（H1-H15）在案例库中的触发频率和分布均匀性。理想状态下每条规则都应该有适当的触发率（既不是万能规则也不是沉默规则），这说明风险检测体系设计合理、无冗余。",
+      "score": 94.8,
+      "grade": "A+",
+      "summary": "15 条规则，96/96 个案例触发了风险。万能规则: H3, H5, H15。沉默规则: H1。",
+      "detail": {
+        "total_rules": 15,
+        "cases_with_rules": 96,
+        "coefficient_of_variation": 1.102,
+        "universal_rules": [
+          "H3",
+          "H5",
+          "H15"
+        ],
+        "silent_rules": [
+          "H1"
+        ],
+        "distribution": [
+          {
+            "rule_id": "H1",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H2",
+            "hit_count": 2,
+            "hit_rate": 2.1
+          },
+          {
+            "rule_id": "H3",
+            "hit_count": 91,
+            "hit_rate": 94.8
+          },
+          {
+            "rule_id": "H4",
+            "hit_count": 14,
+            "hit_rate": 14.6
+          },
+          {
+            "rule_id": "H5",
+            "hit_count": 90,
+            "hit_rate": 93.8
+          },
+          {
+            "rule_id": "H6",
+            "hit_count": 26,
+            "hit_rate": 27.1
+          },
+          {
+            "rule_id": "H7",
+            "hit_count": 10,
+            "hit_rate": 10.4
+          },
+          {
+            "rule_id": "H8",
+            "hit_count": 14,
+            "hit_rate": 14.6
+          },
+          {
+            "rule_id": "H9",
+            "hit_count": 28,
+            "hit_rate": 29.2
+          },
+          {
+            "rule_id": "H10",
+            "hit_count": 56,
+            "hit_rate": 58.3
+          },
+          {
+            "rule_id": "H11",
+            "hit_count": 5,
+            "hit_rate": 5.2
+          },
+          {
+            "rule_id": "H12",
+            "hit_count": 2,
+            "hit_rate": 2.1
+          },
+          {
+            "rule_id": "H13",
+            "hit_count": 24,
+            "hit_rate": 25.0
+          },
+          {
+            "rule_id": "H14",
+            "hit_count": 7,
+            "hit_rate": 7.3
+          },
+          {
+            "rule_id": "H15",
+            "hit_count": 84,
+            "hit_rate": 87.5
+          }
+        ]
+      }
+    }
+  ],
+  "hypergraph_quality": [
+    {
+      "id": "hypergraph_completeness",
+      "label": "超图完整性",
+      "label_en": "Hypergraph Completeness",
+      "description": "评估超图（Hypergraph）的构建完整性。系统设计了45个超边家族（分为10个功能组），用于捕获创业项目文档中的高阶语义模式。每条超边连接多个语义片段（HyperNode），形成传统三元组无法表达的N元关系。评估超边的实例化率、成员连接密度、以及与风险规则和评审量表的对齐程度。",
+      "score": 97.5,
+      "grade": "A+",
+      "summary": "45 个超边家族，10 个功能组，实例化 360 条超边（目标 362，实现率 99.4%），连接 166 个超节点，平均 4.5 个成员/超边。关联 14 条风险规则（372 次触发）、10 个评审项（709 次对齐）。",
+      "detail": {
+        "total_families": 45,
+        "total_groups": 10,
+        "target_total_edges": 362,
+        "total_hyperedges": 360,
+        "total_hypernodes": 166,
+        "total_risk_rules": 14,
+        "total_rubric_items": 10,
+        "has_member_links": 1614,
+        "triggers_rule_links": 372,
+        "aligns_with_links": 709,
+        "realization_rate": 99.4,
+        "edges_per_case": 3.8,
+        "avg_members_per_edge": 4.5,
+        "rule_alignment_rate": 103.3,
+        "rubric_alignment_rate": 196.9
+      }
+    },
+    {
+      "id": "template_rationale",
+      "label": "模板选取合理性",
+      "label_en": "Template Selection Rationale",
+      "description": "系统设计了 45 个超边家族模板，归入 10 个功能组。评估模板体系的设计合理性：是否覆盖了创业项目分析的所有关键维度，每个家族是否有明确的教学诊断价值，以及模板与风险规则/评审量表的对齐度。",
+      "score": 99.7,
+      "grade": "A+",
+      "summary": "45 个超边家族 / 10 个功能组，风险规则对齐率 100%，评审量表对齐率 100%，实例化 360 条超边。",
+      "detail": {
+        "rationale": "超图模板体系共设计 45 个超边家族，归入 10 个功能组，覆盖创业项目分析的全部关键维度。设计原则如下：\n\n1. 全维度覆盖：10个功能组分别对应价值叙事、用户市场、风险证据、执行团队、合规伦理、财务结构、产品竞争、增长规模、生态利益和社会ESG，确保不遗漏任何创业项目评估的关键视角。\n\n2. 高阶关联捕获：每个超边家族定义了一种跨维度的语义模式。例如\"价值闭环超边\"连接用户痛点、解决方案、商业模式和市场分析，验证从问题到变现的完整逻辑链；\"规则评分张力超边\"关联风险规则和评审量表，识别两套评估体系之间的矛盾信号。\n\n3. 教学导向设计：每个超边家族都映射到具体的教学诊断场景。教师可以通过超边快速定位学生项目中\"哪些分散的证据共同指向某个薄弱环节\"，而非逐页翻阅文档。\n\n4. 渐进实例化：系统在处理每份文档时自动匹配适用的超边家族模板，目前 96 个案例已实例化 360 条超边，覆盖多个家族类型。",
+        "total_families": 45,
+        "total_groups": 10,
+        "groups": [
+          {
+            "group_id": "value_narrative",
+            "group_name": "价值叙事与一致性",
+            "purpose": "验证项目的价值主张从用户痛点到商业变现的叙事一致性，检测\"说了什么\"与\"做了什么\"是否自洽",
+            "family_count": 5,
+            "target_edges": 48,
+            "families": [
+              {
+                "id": "Value_Loop_Edge",
+                "label": "价值闭环超边",
+                "target": 16
+              },
+              {
+                "id": "User_Journey_Edge",
+                "label": "用户旅程闭环超边",
+                "target": 10
+              },
+              {
+                "id": "Presentation_Narrative_Edge",
+                "label": "路演叙事线超边",
+                "target": 8
+              },
+              {
+                "id": "Cross_Dimension_Coherence_Edge",
+                "label": "跨维度一致性超边",
+                "target": 6
+              },
+              {
+                "id": "Stage_Goal_Fit_Edge",
+                "label": "阶段目标匹配超边",
+                "target": 8
+              }
+            ]
+          },
+          {
+            "group_id": "user_market",
+            "group_name": "用户-市场-需求",
+            "purpose": "评估用户画像与市场分析的匹配度，检测需求验证的充分性和市场定位的合理性",
+            "family_count": 4,
+            "target_edges": 38,
+            "families": [
+              {
+                "id": "User_Pain_Fit_Edge",
+                "label": "用户痛点匹配超边",
+                "target": 12
+              },
+              {
+                "id": "Market_Segmentation_Edge",
+                "label": "市场细分超边",
+                "target": 8
+              },
+              {
+                "id": "Demand_Supply_Match_Edge",
+                "label": "供需匹配超边",
+                "target": 8
+              },
+              {
+                "id": "Market_Competition_Edge",
+                "label": "市场竞争超边",
+                "target": 10
+              }
+            ]
+          },
+          {
+            "group_id": "risk_evidence",
+            "group_name": "风险、证据与评分",
+            "purpose": "将风险信号、证据链和评分依据三者关联，支撑自动化风险检测与评审追溯",
+            "family_count": 5,
+            "target_edges": 54,
+            "families": [
+              {
+                "id": "Risk_Pattern_Edge",
+                "label": "风险模式超边",
+                "target": 18
+              },
+              {
+                "id": "Evidence_Grounding_Edge",
+                "label": "证据锚定超边",
+                "target": 12
+              },
+              {
+                "id": "Rule_Rubric_Tension_Edge",
+                "label": "规则评分张力超边",
+                "target": 10
+              },
+              {
+                "id": "Assumption_Stack_Edge",
+                "label": "假设堆叠超边",
+                "target": 8
+              },
+              {
+                "id": "Metric_Definition_Edge",
+                "label": "指标定义超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "execution_team",
+            "group_name": "执行、团队与里程碑",
+            "purpose": "追踪从方案到落地的执行链路，识别团队能力与任务需求的缺口",
+            "family_count": 5,
+            "target_edges": 38,
+            "families": [
+              {
+                "id": "Execution_Gap_Edge",
+                "label": "执行断裂超边",
+                "target": 10
+              },
+              {
+                "id": "Team_Capability_Gap_Edge",
+                "label": "团队能力缺口超边",
+                "target": 8
+              },
+              {
+                "id": "Milestone_Dependency_Edge",
+                "label": "里程碑依赖超边",
+                "target": 6
+              },
+              {
+                "id": "MVP_Scope_Edge",
+                "label": "MVP边界超边",
+                "target": 8
+              },
+              {
+                "id": "Founder_Risk_Edge",
+                "label": "创始人风险超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "compliance_ethics",
+            "group_name": "合规、监管与伦理",
+            "purpose": "检测项目在法规合规性、监管适应性和伦理公平性方面的潜在盲区",
+            "family_count": 3,
+            "target_edges": 20,
+            "families": [
+              {
+                "id": "Compliance_Safety_Edge",
+                "label": "合规安全超边",
+                "target": 8
+              },
+              {
+                "id": "Regulatory_Landscape_Edge",
+                "label": "政策法规环境超边",
+                "target": 6
+              },
+              {
+                "id": "Ethical_Bias_Edge",
+                "label": "伦理偏见超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "financial_structure",
+            "group_name": "单位经济与财务结构",
+            "purpose": "分析定价逻辑、成本结构与收入模式的一致性，判断商业模式的财务可行性",
+            "family_count": 5,
+            "target_edges": 38,
+            "families": [
+              {
+                "id": "Pricing_Unit_Economics_Edge",
+                "label": "定价单元经济超边",
+                "target": 10
+              },
+              {
+                "id": "Cost_Structure_Edge",
+                "label": "成本结构超边",
+                "target": 8
+              },
+              {
+                "id": "Revenue_Sustainability_Edge",
+                "label": "收入可持续性超边",
+                "target": 8
+              },
+              {
+                "id": "Resource_Leverage_Edge",
+                "label": "资源杠杆超边",
+                "target": 6
+              },
+              {
+                "id": "Funding_Stage_Fit_Edge",
+                "label": "融资阶段匹配超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "product_competition",
+            "group_name": "产品差异化与竞争动态",
+            "purpose": "评估产品的竞争壁垒、创新验证和市场差异化程度",
+            "family_count": 7,
+            "target_edges": 50,
+            "families": [
+              {
+                "id": "Innovation_Validation_Edge",
+                "label": "创新验证超边",
+                "target": 8
+              },
+              {
+                "id": "Substitute_Migration_Edge",
+                "label": "替代迁移超边",
+                "target": 10
+              },
+              {
+                "id": "Competitive_Response_Edge",
+                "label": "竞品反应超边",
+                "target": 6
+              },
+              {
+                "id": "IP_Moat_Edge",
+                "label": "知识产权护城河超边",
+                "target": 6
+              },
+              {
+                "id": "Switching_Cost_Edge",
+                "label": "用户切换成本超边",
+                "target": 6
+              },
+              {
+                "id": "Network_Effect_Edge",
+                "label": "网络效应超边",
+                "target": 8
+              },
+              {
+                "id": "Pivot_Signal_Edge",
+                "label": "转型信号超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "growth_scale",
+            "group_name": "增长、渠道与规模化",
+            "purpose": "追踪从获客到留存的增长路径，识别规模化过程中的瓶颈",
+            "family_count": 6,
+            "target_edges": 46,
+            "families": [
+              {
+                "id": "Trust_Adoption_Edge",
+                "label": "信任采纳超边",
+                "target": 8
+              },
+              {
+                "id": "Retention_Workflow_Embed_Edge",
+                "label": "工作流嵌入超边",
+                "target": 8
+              },
+              {
+                "id": "Channel_Conversion_Edge",
+                "label": "渠道转化漏斗超边",
+                "target": 8
+              },
+              {
+                "id": "Scalability_Bottleneck_Edge",
+                "label": "规模化瓶颈超边",
+                "target": 8
+              },
+              {
+                "id": "Data_Flywheel_Edge",
+                "label": "数据飞轮超边",
+                "target": 8
+              },
+              {
+                "id": "Timing_Window_Edge",
+                "label": "时机窗口超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "ecosystem",
+            "group_name": "生态与多方利益",
+            "purpose": "分析项目对外部生态的依赖度和多方利益相关者之间的潜在冲突",
+            "family_count": 3,
+            "target_edges": 18,
+            "families": [
+              {
+                "id": "Ecosystem_Dependency_Edge",
+                "label": "生态依赖超边",
+                "target": 6
+              },
+              {
+                "id": "Stakeholder_Conflict_Edge",
+                "label": "利益方冲突超边",
+                "target": 6
+              },
+              {
+                "id": "Ontology_Grounded_Edge",
+                "label": "本体落地超边",
+                "target": 6
+              }
+            ]
+          },
+          {
+            "group_id": "social_esg",
+            "group_name": "社会与ESG",
+            "purpose": "衡量项目的社会价值和ESG（环境、社会、治理）目标的可量化程度",
+            "family_count": 2,
+            "target_edges": 12,
+            "families": [
+              {
+                "id": "Social_Impact_Edge",
+                "label": "社会价值链超边",
+                "target": 6
+              },
+              {
+                "id": "ESG_Measurability_Edge",
+                "label": "ESG可量化超边",
+                "target": 6
+              }
+            ]
+          }
+        ],
+        "rule_coverage_pct": 100,
+        "rubric_coverage_pct": 100
+      }
+    }
+  ]
+}

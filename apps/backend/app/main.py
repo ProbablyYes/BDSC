@@ -1999,6 +1999,64 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
         result["teacher_intervention"] = _teacher_intervention_hint(student_intent_mix, result["latest_phase"], [])
         result["project_snapshots"] = project_snapshot_cards
 
+        # ── Student portrait enrichment ──
+        rubric_scores_all: dict[str, list[float]] = {}
+        growth_points: list[dict] = []
+        submission_dates: list[str] = []
+        for proj in proj_list:
+            for sub in (proj.get("submissions") or []):
+                diag = sub.get("diagnosis", {})
+                if isinstance(diag, dict):
+                    for r_item in (diag.get("rubric_scores") or []):
+                        if isinstance(r_item, dict) and r_item.get("item"):
+                            rubric_scores_all.setdefault(r_item["item"], []).append(float(r_item.get("score", 0) or 0))
+                created = sub.get("created_at", "")
+                sc = float(sub.get("overall_score", 0) or 0)
+                if created:
+                    submission_dates.append(created)
+                if sc > 0 and created:
+                    growth_points.append({"date": created, "score": sc})
+
+        rubric_heatmap = []
+        strength_dims: list[str] = []
+        weakness_dims: list[str] = []
+        for rname, rscores in rubric_scores_all.items():
+            avg_rs = round(sum(rscores) / len(rscores), 1) if rscores else 0
+            rubric_heatmap.append({"item": rname, "avg_score": avg_rs, "count": len(rscores)})
+            if avg_rs >= 7:
+                strength_dims.append(rname)
+            elif avg_rs < 5:
+                weakness_dims.append(rname)
+
+        submission_dates.sort()
+        submit_interval_days = 0.0
+        if len(submission_dates) >= 2:
+            try:
+                from datetime import datetime as _dt
+                first_d = _dt.fromisoformat(submission_dates[0].replace("Z", "+00:00"))
+                last_d = _dt.fromisoformat(submission_dates[-1].replace("Z", "+00:00"))
+                span = (last_d - first_d).total_seconds() / 86400
+                submit_interval_days = round(span / max(len(submission_dates) - 1, 1), 1)
+            except Exception:
+                pass
+
+        improvement_rate = 0.0
+        if growth_points and len(growth_points) >= 2:
+            improvement_rate = round(growth_points[-1]["score"] - growth_points[0]["score"], 1)
+
+        result["portrait"] = {
+            "strength_dimensions": strength_dims,
+            "weakness_dimensions": weakness_dims,
+            "growth_trajectory": growth_points[-20:],
+            "rubric_heatmap": rubric_heatmap,
+            "behavioral_pattern": {
+                "total_submissions": len(subs),
+                "avg_submit_interval_days": submit_interval_days,
+                "improvement_rate": improvement_rate,
+                "active_days_span": submit_interval_days * max(len(submission_dates) - 1, 1),
+            },
+        }
+
     return result
 
 
@@ -6872,3 +6930,179 @@ def _now_iso() -> str:
 
 
 from uuid import uuid4
+
+
+# ── KG Explorer panel endpoints ─────────────────────────────
+
+@app.get("/api/kg/subgraphs")
+def kg_subgraphs() -> dict:
+    """Return entire KG organized into dimension-based logical subgraphs for force-graph rendering."""
+    return graph_service.get_subgraph_data()
+
+
+@app.get("/api/kg/subgraph-overview")
+def kg_subgraph_overview() -> dict:
+    """Return meta-level overview: one node per subgraph + cross-subgraph links."""
+    return graph_service.get_subgraph_overview()
+
+
+@app.get("/api/kg/subgraph-detail/{sg_id}")
+def kg_subgraph_detail(sg_id: str) -> dict:
+    """Return all nodes and project connections for a single subgraph dimension."""
+    return graph_service.get_single_subgraph(sg_id)
+
+
+@app.get("/api/kg/hypergraph-viz")
+def kg_hypergraph_viz() -> dict:
+    """Return Hyperedge/HyperNode graph data from in-memory hypergraph (no Neo4j dependency)."""
+    return hypergraph_service.get_viz_data()
+
+
+@app.get("/api/kg/search")
+def kg_search(q: str = "", subgraph: str = "", category: str = "", limit: int = 30) -> dict:
+    """Search KG nodes by keyword with optional subgraph/category filters."""
+    return graph_service.search_kg(q, subgraph_filter=subgraph, category_filter=category, limit=limit)
+
+
+@app.get("/api/kg/quality")
+def kg_quality() -> dict:
+    """Return pre-computed KG quality evaluation report."""
+    import json as _json
+    quality_path = settings.data_root / "kg_quality" / "quality_report.json"
+    if not quality_path.exists():
+        return {"error": "quality report not generated yet", "dimensions": []}
+    try:
+        return _json.loads(quality_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {"error": f"failed to read quality report: {exc}"}
+
+
+# ── Team Diagnosis endpoint ─────────────────────────────────
+
+@app.get("/api/teacher/team-diagnosis")
+def teacher_team_diagnosis(teacher_id: str = "") -> dict:
+    """Generate intervention-priority diagnosis cards for each team."""
+    if not teacher_id:
+        return {"teams": []}
+
+    teams_raw = team_store.list_by_teacher(teacher_id)
+    diagnosis_cards: list[dict] = []
+
+    for team in teams_raw:
+        tid = _safe_str(team.get("team_id", ""))
+        tname = _safe_str(team.get("team_name", ""))
+        members = list(team.get("members", []) or [])
+        if not members:
+            continue
+
+        team_scores: list[float] = []
+        team_risks = 0
+        active_count = 0
+        at_risk_students: list[dict] = []
+        strength_pool: dict[str, int] = {}
+        weakness_pool: dict[str, int] = {}
+
+        student_portraits: list[dict] = []
+
+        for member in members:
+            uid = _safe_str(member.get("user_id", ""))
+            if not uid:
+                continue
+            info = user_store.find_by_id(uid)
+            display_name = _safe_str((info or {}).get("display_name", uid[:8]))
+
+            stats = _aggregate_student_data(uid, include_detail=True)
+            avg_sc = float(stats.get("avg_score", 0) or 0)
+            risk_c = int(stats.get("risk_count", 0) or 0)
+            total_sub = int(stats.get("total_submissions", 0) or 0)
+
+            if avg_sc > 0:
+                team_scores.append(avg_sc)
+            if total_sub > 0:
+                active_count += 1
+            team_risks += risk_c
+
+            portrait = stats.get("portrait", {})
+            for s in (portrait.get("strength_dimensions") or []):
+                strength_pool[s] = strength_pool.get(s, 0) + 1
+            for w in (portrait.get("weakness_dimensions") or []):
+                weakness_pool[w] = weakness_pool.get(w, 0) + 1
+
+            stu_card = {
+                "student_id": uid,
+                "display_name": display_name,
+                "avg_score": avg_sc,
+                "risk_count": risk_c,
+                "total_submissions": total_sub,
+                "latest_phase": stats.get("latest_phase", ""),
+                "trend": stats.get("trend", 0),
+                "portrait": portrait,
+                "project_snapshots": stats.get("project_snapshots", [])[:3],
+            }
+            student_portraits.append(stu_card)
+
+            if avg_sc > 0 and (avg_sc < 5.5 or risk_c >= 2):
+                # Specific intervention reason
+                weak = portrait.get("weakness_dimensions", [])
+                reason_parts = []
+                if avg_sc < 5.5:
+                    reason_parts.append(f"均分仅 {avg_sc}")
+                if risk_c >= 2:
+                    reason_parts.append(f"触发 {risk_c} 次风险")
+                if weak:
+                    reason_parts.append(f"薄弱: {', '.join(weak[:3])}")
+                at_risk_students.append({
+                    "student_id": uid,
+                    "display_name": display_name,
+                    "avg_score": avg_sc,
+                    "risk_count": risk_c,
+                    "reason": "；".join(reason_parts),
+                    "weakness_dimensions": weak[:3],
+                })
+
+        team_avg = round(sum(team_scores) / len(team_scores), 1) if team_scores else 0
+        health = _compute_team_health(team_avg, team_risks, active_count, len(members))
+
+        top_weaknesses = sorted(weakness_pool.items(), key=lambda kv: kv[1], reverse=True)[:3]
+        top_strengths = sorted(strength_pool.items(), key=lambda kv: kv[1], reverse=True)[:3]
+
+        diagnosis_cards.append({
+            "team_id": tid,
+            "team_name": tname,
+            "member_count": len(members),
+            "active_count": active_count,
+            "team_avg_score": team_avg,
+            "team_risk_count": team_risks,
+            "health_score": health["score"],
+            "health_level": health["level"],
+            "health_summary": health["summary"],
+            "at_risk_students": at_risk_students,
+            "top_weaknesses": [{"dim": w[0], "count": w[1]} for w in top_weaknesses],
+            "top_strengths": [{"dim": s[0], "count": s[1]} for s in top_strengths],
+            "student_portraits": student_portraits,
+        })
+
+    diagnosis_cards.sort(key=lambda c: c["health_score"])
+    return {"teams": diagnosis_cards}
+
+
+def _compute_team_health(avg_score: float, risk_count: int, active: int, total: int) -> dict:
+    """Compute a 0-100 health score for a team."""
+    score = 50.0
+    if avg_score > 0:
+        score = min(40, avg_score * 5)
+    active_ratio = (active / max(total, 1))
+    score += active_ratio * 30
+    risk_penalty = min(30, risk_count * 3)
+    score = max(0, min(100, score - risk_penalty + 20))
+    score = round(score, 1)
+    if score >= 75:
+        level = "healthy"
+        summary = "团队整体状态良好，继续保持。"
+    elif score >= 50:
+        level = "warning"
+        summary = "部分学生需要关注，建议针对性辅导。"
+    else:
+        level = "critical"
+        summary = "团队需要紧急干预，多名学生存在风险。"
+    return {"score": score, "level": level, "summary": summary}

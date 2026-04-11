@@ -350,6 +350,7 @@ export default function TeacherPage() {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("");
   const [teamView, setTeamView] = useState<TeamView>("comparison");
   const [selectedTeamStudentId, setSelectedTeamStudentId] = useState("");
+  const [diagnosisCards, setDiagnosisCards] = useState<any[]>([]);
   const [selectedTeamProjectId, setSelectedTeamProjectId] = useState("");
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
@@ -1343,6 +1344,9 @@ export default function TeacherPage() {
       setSelectedTeamId("");
       setSelectedTeamStudentId("");
       setSelectedTeamProjectId("");
+      api(`/api/teacher/team-diagnosis?teacher_id=${encodeURIComponent(tid)}`).then((d: any) => {
+        if (d?.teams) setDiagnosisCards(d.teams);
+      }).catch(() => {});
     } catch (err: any) {
       setErrorMessage(err?.message ?? "加载团队数据失败");
       setTeamData(null);
@@ -7065,6 +7069,58 @@ export default function TeacherPage() {
                         })}
                       </div>
                     </div>
+
+                    {/* ── Intervention Priority Diagnosis Cards ── */}
+                    {diagnosisCards.length > 0 && (
+                      <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                        <h3>干预优先级诊断</h3>
+                        <p className="tch-desc">按紧急程度排序，红色需要立即干预，黄色需要关注，绿色状态良好。</p>
+                        <div className="tm-diag-grid">
+                          {diagnosisCards.map((card: any) => (
+                            <div
+                              key={card.team_id}
+                              className={`tm-diag-card tm-diag-${card.health_level}`}
+                              onClick={() => { setSelectedTeamId(card.team_id); setTeamView("team-detail"); }}
+                            >
+                              <div className="tm-diag-header">
+                                <div className="tm-diag-indicator" />
+                                <div className="tm-diag-title">{card.team_name}</div>
+                                <div className="tm-diag-score">{card.health_score}</div>
+                              </div>
+                              <div className="tm-diag-bar-track">
+                                <div className="tm-diag-bar-fill" style={{ width: `${card.health_score}%` }} />
+                              </div>
+                              <div className="tm-diag-meta">
+                                <span>{card.member_count} 人</span>
+                                <span>{card.active_count} 活跃</span>
+                                <span>均分 {card.team_avg_score}</span>
+                                <span>风险 {card.team_risk_count} 次</span>
+                              </div>
+                              <p className="tm-diag-summary">{card.health_summary}</p>
+                              {card.at_risk_students.length > 0 && (
+                                <div className="tm-diag-risk-list">
+                                  <div className="tm-diag-risk-title">需关注学生 ({card.at_risk_students.length})</div>
+                                  {card.at_risk_students.slice(0, 3).map((s: any) => (
+                                    <div key={s.student_id} className="tm-diag-risk-item">
+                                      <span className="tm-diag-risk-name">{s.display_name}</span>
+                                      <span className="tm-diag-risk-reason">{s.reason}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {card.top_weaknesses.length > 0 && (
+                                <div className="tm-diag-tags">
+                                  {card.top_weaknesses.map((w: any) => (
+                                    <span key={w.dim} className="tm-diag-weak-tag">{w.dim} ({w.count})</span>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="tm-diag-foot">查看详情 →</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </>
                 );
               })()}
@@ -7326,6 +7382,101 @@ export default function TeacherPage() {
                         </div>
                       ))}
                     </div>
+
+                    {/* ── Student Portrait Section ── */}
+                    {(() => {
+                      const diagCard = diagnosisCards.find((c: any) => c.team_id === selectedTeamId);
+                      const stuPortrait = diagCard?.student_portraits?.find((s: any) => s.student_id === selectedTeamStudentId);
+                      const portrait = stuPortrait?.portrait || {};
+                      const strengths: string[] = portrait.strength_dimensions || [];
+                      const weaknesses: string[] = portrait.weakness_dimensions || [];
+                      const growth: any[] = portrait.growth_trajectory || [];
+                      const rubricHeat: any[] = portrait.rubric_heatmap || [];
+                      const behavior = portrait.behavioral_pattern || {};
+                      if (!rubricHeat.length && !growth.length && !strengths.length && !weaknesses.length) return null;
+                      const maxRubric = Math.max(10, ...rubricHeat.map((r: any) => r.avg_score || 0));
+                      return (
+                        <div className="ov-chart-card tm-portrait-section">
+                          <h3>学生能力画像</h3>
+                          <p className="tch-desc">基于历史提交数据的多维度能力分析，揭示学生的优势与薄弱领域。</p>
+                          <div className="tm-portrait-grid">
+                            <div className="tm-portrait-col">
+                              <div className="tm-portrait-label">优势维度</div>
+                              <div className="tm-portrait-tags">
+                                {strengths.length > 0 ? strengths.map((s: string) => (
+                                  <span key={s} className="tm-portrait-tag strength">{s}</span>
+                                )) : <span className="tm-portrait-empty">数据不足</span>}
+                              </div>
+                              <div className="tm-portrait-label" style={{ marginTop: 12 }}>薄弱维度</div>
+                              <div className="tm-portrait-tags">
+                                {weaknesses.length > 0 ? weaknesses.map((w: string) => (
+                                  <span key={w} className="tm-portrait-tag weakness">{w}</span>
+                                )) : <span className="tm-portrait-empty">暂无明显薄弱项</span>}
+                              </div>
+                              {behavior.total_submissions > 0 && (
+                                <div className="tm-portrait-behavior">
+                                  <div className="tm-portrait-label" style={{ marginTop: 12 }}>行为洞察</div>
+                                  <div className="tm-portrait-behav-grid">
+                                    <div><strong>{behavior.total_submissions}</strong><span>总提交</span></div>
+                                    <div><strong>{behavior.avg_submit_interval_days}d</strong><span>提交间隔</span></div>
+                                    <div><strong>{behavior.improvement_rate > 0 ? "+" : ""}{behavior.improvement_rate}</strong><span>成长幅度</span></div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="tm-portrait-col">
+                              <div className="tm-portrait-label">评审维度热力图</div>
+                              <div className="tm-rubric-heat">
+                                {rubricHeat.map((r: any) => (
+                                  <div key={r.item} className="tm-rubric-heat-row">
+                                    <span className="tm-rubric-heat-name">{r.item}</span>
+                                    <div className="tm-rubric-heat-bar-track">
+                                      <div
+                                        className="tm-rubric-heat-bar"
+                                        style={{
+                                          width: `${(r.avg_score / maxRubric) * 100}%`,
+                                          background: r.avg_score >= 7 ? "#22c55e" : r.avg_score >= 5 ? "#eab308" : "#ef4444",
+                                        }}
+                                      />
+                                    </div>
+                                    <span className="tm-rubric-heat-val">{r.avg_score}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            {growth.length >= 2 && (
+                              <div className="tm-portrait-col">
+                                <div className="tm-portrait-label">成长轨迹</div>
+                                <div className="tm-growth-chart">
+                                  <svg viewBox="0 0 300 120" preserveAspectRatio="none" style={{ width: "100%", height: 120 }}>
+                                    {(() => {
+                                      const maxS = Math.max(10, ...growth.map((g: any) => g.score));
+                                      const minS = Math.min(0, ...growth.map((g: any) => g.score));
+                                      const range = maxS - minS || 1;
+                                      const pts = growth.map((g: any, i: number) => {
+                                        const x = (i / Math.max(growth.length - 1, 1)) * 290 + 5;
+                                        const y = 110 - ((g.score - minS) / range) * 100 + 5;
+                                        return `${x},${y}`;
+                                      }).join(" ");
+                                      return (
+                                        <>
+                                          <polyline points={pts} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                          {growth.map((g: any, i: number) => {
+                                            const x = (i / Math.max(growth.length - 1, 1)) * 290 + 5;
+                                            const y = 110 - ((g.score - minS) / range) * 100 + 5;
+                                            return <circle key={i} cx={x} cy={y} r="3" fill="#3b82f6" stroke="#1e293b" strokeWidth="1.5" />;
+                                          })}
+                                        </>
+                                      );
+                                    })()}
+                                  </svg>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <div className="ov-chart-grid">
                       <div className="ov-chart-card">

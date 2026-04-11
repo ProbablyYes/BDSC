@@ -9,6 +9,7 @@ const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false 
 import remarkGfm from "remark-gfm";
 import { useAuth, logout } from "../hooks/useAuth";
 import BudgetPanel from "../budget/BudgetPanel";
+import KBGraphPanel from "../knowledge/KBGraphPanel";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
@@ -286,6 +287,7 @@ export default function StudentPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [topbarMoreOpen, setTopbarMoreOpen] = useState(false);
   const [budgetPanelOpen, setBudgetPanelOpen] = useState(false);
+  const [kbPanelOpen, setKbPanelOpen] = useState(false);
   const [dockCompOpen, setDockCompOpen] = useState(false);
   const [teacherFeedback, setTeacherFeedback] = useState<any[]>([]);
   const [teacherAnnotationBoards, setTeacherAnnotationBoards] = useState<any[]>([]);
@@ -1219,6 +1221,12 @@ export default function StudentPage() {
               )}
             </div>
 
+            {/* Knowledge Graph */}
+            <button type="button" className={`dock-item${kbPanelOpen ? " active" : ""}`} onClick={() => setKbPanelOpen(v => !v)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M9 14l-2.5 3M15 14l2.5 3"/><circle cx="12" cy="12" r="1.5"/></svg>
+              <span className="dock-tooltip">知识图谱</span>
+            </button>
+
             {/* Team */}
             <button type="button" className="dock-item" onClick={() => { setTeamPanelOpen((v) => !v); if (!teamPanelOpen) loadMyTeams(); }}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
@@ -1315,6 +1323,15 @@ export default function StudentPage() {
         <div className="budget-panel-overlay">
           <div className="budget-panel-container">
             <BudgetPanel userId={currentUser.user_id} onClose={() => setBudgetPanelOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* ── KG Explorer Panel (slides in below TopBar) ── */}
+      {kbPanelOpen && (
+        <div className="kb-panel-overlay">
+          <div className="kb-panel-container">
+            <KBGraphPanel onClose={() => setKbPanelOpen(false)} />
           </div>
         </div>
       )}

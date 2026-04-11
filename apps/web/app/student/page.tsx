@@ -4,6 +4,7 @@ import { Children, FormEvent, useCallback, useEffect, useMemo, useRef, useState 
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
+import PosterPreview, { type PosterDesign } from "./PosterPreview";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
 import remarkGfm from "remark-gfm";
@@ -12,7 +13,7 @@ import { useAuth, logout } from "../hooks/useAuth";
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
-type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "interventions" | "debug";
+type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "interventions" | "poster" | "debug";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
 
 let _msgId = 0;
@@ -325,6 +326,11 @@ export default function StudentPage() {
   const [hyperLibrary, setHyperLibrary] = useState<any>(null);
   const [hyperProjectView, setHyperProjectView] = useState<any>(null);
   const [kbStats, setKbStats] = useState<any>(null);
+  const [posterDesign, setPosterDesign] = useState<PosterDesign | null>(null);
+  const [posterLoading, setPosterLoading] = useState(false);
+  const [posterError, setPosterError] = useState("");
+  const [posterImageLoading, setPosterImageLoading] = useState(false);
+  const [posterImageError, setPosterImageError] = useState("");
   const modeWelcome = MODE_WELCOME[mode] ?? MODE_WELCOME.coursework;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -795,6 +801,103 @@ export default function StudentPage() {
   }, [conversations, searchQuery]);
 
   const [resultHistory, setResultHistory] = useState<any[]>([]);
+
+  async function generatePosterFromCurrentProject() {
+    if (!projectId || !studentId) return;
+    if (!latestResult) {
+      alert("请先在左侧对话中用一两段话描述你的项目，或上传一份计划书，再生成海报。");
+      return;
+    }
+    setPosterLoading(true);
+    setPosterError("");
+    try {
+      const resp = await fetch(`${API_BASE}/api/poster/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_id: projectId,
+          student_id: studentId,
+          mode,
+          competition_type: competitionType || "",
+          use_latest_context: true,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data?.detail || "生成海报失败，请稍后重试");
+      }
+      if (!data?.poster) {
+        throw new Error("后端未返回有效的 PosterDesign 结构");
+      }
+      setPosterDesign(data.poster as PosterDesign);
+      setRightTab("poster");
+    } catch (err: any) {
+      setPosterError(err?.message || "生成海报失败");
+    } finally {
+      setPosterLoading(false);
+    }
+  }
+
+  async function generatePosterIllustration() {
+    if (!projectId || !studentId) {
+      alert("请先在顶部选择项目与学生身份");
+      return;
+    }
+    if (!posterDesign) {
+      alert("请先生成海报文案，然后再生成插图");
+      return;
+    }
+    if (posterImageLoading) return;
+
+    setPosterImageLoading(true);
+    setPosterImageError("");
+
+    try {
+      const basePrompt = (() => {
+        const prompts = posterDesign.image_prompts || [];
+        if (prompts.length > 0 && prompts[0]) return prompts[0];
+        const title = (posterDesign.title || "").slice(0, 40);
+        const subtitle = (posterDesign.subtitle || "").slice(0, 60);
+        return `${title} | ${subtitle || "中文学生创新项目路演海报插图"}`;
+      })();
+
+      const orientation = posterDesign.layout?.orientation === "landscape" ? "landscape" : "portrait";
+      const size = orientation === "landscape" ? "1280x720" : "1024x576";
+
+      const resp = await fetch(`${API_BASE}/api/poster/generate-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_id: projectId,
+          student_id: studentId,
+          prompt: basePrompt,
+          orientation,
+          size,
+        }),
+      });
+
+      if (!resp.ok) {
+        let msg = "生成插图失败";
+        try {
+          const errJson = await resp.json();
+          msg = errJson?.detail || msg;
+        } catch {/* ignore */}
+        throw new Error(msg);
+      }
+
+      const data = await resp.json();
+      if (!data?.image_url) {
+        throw new Error("后端未返回 image_url");
+      }
+      const url: string = data.image_url.startsWith("http") ? data.image_url : `${API_BASE}${data.image_url}`;
+
+      setPosterDesign((prev) => (prev ? { ...prev, hero_image_url: url } : prev));
+    } catch (err: any) {
+      setPosterImageError(err?.message || "生成插图失败");
+    } finally {
+      setPosterImageLoading(false);
+    }
+  }
 
   const rubric = useMemo(() => {
     if (resultHistory.length === 0) return latestResult?.diagnosis?.rubric ?? [];
@@ -1513,6 +1616,7 @@ export default function StudentPage() {
                 { id: "cases",  label: "案例" },
                 { id: "feedback", label: "批注" },
                 { id: "interventions", label: "教师任务" },
+                { id: "poster", label: "海报" },
                 { id: "debug",  label: "调试" },
               ] as { id: RightTab; label: string }[]).map((t) => (
                 <button key={t.id} className={`rtab-pill ${rightTab === t.id ? "active" : ""}`} onClick={() => { setRightTab(t.id); if (t.id === "feedback") loadFeedback(); if (t.id === "interventions") loadInterventions(); }}>
@@ -1604,6 +1708,16 @@ export default function StudentPage() {
               {rightTab === "task" && (
                 <div className="right-section">
                   <div className="panel-desc">基于你的全部对话累积生成的行动建议，不会因追问而丢失。</div>
+                  <div style={{ margin: "6px 0 10px", display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      type="button"
+                      className="tch-sm-btn"
+                      onClick={generatePosterFromCurrentProject}
+                      disabled={posterLoading}
+                    >
+                      {posterLoading ? "正在生成海报…" : "根据当前项目生成路演海报"}
+                    </button>
+                  </div>
                   {(() => {
                     const s = (v: any): string => (v == null ? "" : typeof v === "string" ? v : JSON.stringify(v));
                     const priLabel: Record<string, string> = { urgent: "紧急", important: "重要", nice_to_have: "建议" };
@@ -1802,6 +1916,16 @@ export default function StudentPage() {
 
               {rightTab === "score" && (
                 <div className="right-section sc-panel">
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                    <button
+                      type="button"
+                      className="tch-sm-btn"
+                      onClick={generatePosterFromCurrentProject}
+                      disabled={posterLoading}
+                    >
+                      {posterLoading ? "正在生成海报…" : "根据当前项目生成路演海报"}
+                    </button>
+                  </div>
                   {rubric.length > 0 ? (() => {
                     const total = overallScore ?? 0;
                     const totalColor = total >= 7 ? "var(--accent-green,#22c55e)" : total >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
@@ -3116,6 +3240,41 @@ export default function StudentPage() {
                       )}
                     </div>
                   )) : <p className="right-hint">暂无教师下发任务。老师审核并发送后会显示在这里。</p>}
+                </div>
+              )}
+
+              {rightTab === "poster" && (
+                <div className="right-section">
+                  <h4>项目路演海报</h4>
+                  <div className="panel-desc">基于当前项目诊断和知识图谱自动生成的一页式海报草稿，你可以在这里微调标题和要点文案，然后复制或打印导出。</div>
+                  <div style={{ margin: "8px 0 10px", display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <button
+                      type="button"
+                      className="tch-sm-btn"
+                      onClick={generatePosterFromCurrentProject}
+                      disabled={posterLoading}
+                    >
+                      {posterLoading ? "正在生成海报…" : "根据当前项目生成路演海报"}
+                    </button>
+                    <button
+                      type="button"
+                      className="tch-sm-btn secondary"
+                      onClick={generatePosterIllustration}
+                      disabled={posterImageLoading || !posterDesign}
+                    >
+                      {posterImageLoading ? "正在生成插图…" : "为海报生成插图"}
+                    </button>
+                  </div>
+                  {latestResult && !posterDesign && !posterLoading && (
+                    <p className="right-hint">已检测到诊断结果，可先一键生成海报文案，然后再生成插图。</p>
+                  )}
+                  {posterError && <p className="right-hint" style={{ color: "#e07070" }}>{posterError}</p>}
+                  {posterImageError && <p className="right-hint" style={{ color: "#e07070" }}>{posterImageError}</p>}
+                  {posterDesign ? (
+                    <PosterPreview design={posterDesign} onChange={setPosterDesign} />
+                  ) : !posterLoading ? (
+                    <p className="right-hint">先在左侧描述你的项目或上传计划书，然后点击上方按钮生成第一版路演海报。</p>
+                  ) : null}
                 </div>
               )}
 

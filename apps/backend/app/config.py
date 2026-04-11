@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     llm_structured_model: str = "Qwen/Qwen3-32B"
     llm_reason_model: str = "deepseek-ai/DeepSeek-V3.2"
     llm_synthesis_model: str = "deepseek-ai/DeepSeek-V3.2"
+    # 可选：用于生成海报插图等的视觉/图像模型（OpenAI/SiliconFlow 兼容接口）
+    llm_image_model: str = ""
 
     # RAG 检索配置：多路检索与混合权重
     rag_retrieval_mode: str = "auto"  # "auto" | "keyword" | "vector" | "hybrid"

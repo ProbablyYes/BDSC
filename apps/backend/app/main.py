@@ -29,6 +29,8 @@ from app.schemas import (
     DialogueTurnPayload,
     DialogueTurnResponse,
     HealthResponse,
+    PosterGeneratePayload,
+    PosterGenerateResponse,
     ProjectSnapshotResponse,
     SmsLoginPayload,
     SmsSendPayload,
@@ -45,6 +47,8 @@ from app.schemas import (
     TeacherFeedbackResponse,
     TeamUpdatePayload,
     UploadAnalysisResponse,
+    PosterImageGeneratePayload,
+    PosterImageGenerateResponse,
 )
 from app.services.diagnosis_engine import RULE_FALLACY_MAP, RULE_EDGE_MAP
 from app.services.agent_router import run_agents
@@ -54,6 +58,7 @@ from app.services.graph_service import GraphService
 from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
+from app.services.image_client import ImageClient
 from app.services.rag_engine import RagEngine
 from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
@@ -86,6 +91,7 @@ graph_service = GraphService(
 )
 hypergraph_service = HypergraphService(graph_service=graph_service)
 composer_llm = LlmClient()
+image_client = ImageClient()
 rag_engine = RagEngine()
 rag_engine.initialize()
 init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
@@ -2879,6 +2885,292 @@ def document_review(payload: dict):
 
     annotations = (result or {}).get("annotations", [])
     return {"annotations": annotations}
+
+
+def _summarize_latest_diagnosis_for_poster(project_state: dict) -> tuple[str, dict]:
+    """Build a compact text summary of the latest diagnosis context for poster generation.
+
+    Returns (summary_text, latest_submission_dict).
+    """
+
+    submissions = list(project_state.get("submissions", []) or [])
+    latest: dict[str, Any] | None = submissions[-1] if submissions else None
+    if not latest:
+        return "", {}
+
+    diagnosis = latest.get("diagnosis", {}) if isinstance(latest.get("diagnosis"), dict) else {}
+    kg = latest.get("kg_analysis", {}) if isinstance(latest.get("kg_analysis"), dict) else {}
+    hyper = latest.get("hypergraph_insight", {}) if isinstance(latest.get("hypergraph_insight"), dict) else {}
+
+    lines: list[str] = []
+    overall = diagnosis.get("overall_score")
+    if overall is not None:
+        lines.append(f"总体评分: {overall}/10")
+    bottleneck = diagnosis.get("bottleneck")
+    if bottleneck:
+        lines.append(f"主要瓶颈: {bottleneck}")
+    rubric = diagnosis.get("rubric") or []
+    if isinstance(rubric, list) and rubric:
+        top_dims: list[str] = []
+        for row in rubric[:8]:
+            try:
+                item = str(row.get("item") or "")
+                score = row.get("score")
+                if item and score is not None:
+                    top_dims.append(f"{item}:{score}")
+            except Exception:
+                continue
+        if top_dims:
+            lines.append("Rubric 维度: " + "；".join(top_dims))
+    rules = diagnosis.get("triggered_rules") or []
+    if isinstance(rules, list) and rules:
+        rule_texts: list[str] = []
+        for r in rules[:8]:
+            try:
+                rid = str(r.get("id") or "")
+                name = str(r.get("name") or "")
+                if rid or name:
+                    rule_texts.append(f"{rid}:{name}")
+            except Exception:
+                continue
+        if rule_texts:
+            lines.append("风险规则: " + "；".join(rule_texts))
+
+    if isinstance(kg, dict):
+        insight = str(kg.get("insight") or "").strip()
+        gaps = kg.get("structural_gaps") or []
+        strengths = kg.get("content_strengths") or []
+        if insight:
+            lines.append("知识图谱洞察: " + insight[:280])
+        if isinstance(gaps, list) and gaps:
+            lines.append("结构缺口: " + "；".join(str(x) for x in gaps[:5]))
+        if isinstance(strengths, list) and strengths:
+            lines.append("内容亮点: " + "；".join(str(x) for x in strengths[:5]))
+
+    if isinstance(hyper, dict):
+        h_sum = str(hyper.get("summary") or "").strip()
+        if h_sum:
+            lines.append("超图总结: " + h_sum[:280])
+        top_signals = hyper.get("top_signals") or []
+        if isinstance(top_signals, list) and top_signals:
+            lines.append("关键信号: " + "；".join(str(x) for x in top_signals[:6]))
+
+    return "\n".join(lines), latest
+
+
+def _get_latest_user_message(project_id: str) -> str:
+    """Fetch the latest user message content from ConversationStorage (best-effort)."""
+
+    try:
+        convs = conv_store.list_conversations(project_id)
+        if not convs:
+            return ""
+        latest_conv_id = str(convs[0].get("conversation_id"))
+        conv = conv_store.get(project_id, latest_conv_id)
+        if not conv:
+            return ""
+        msgs = conv.get("messages") or []
+        for m in reversed(msgs):
+            if isinstance(m, dict) and m.get("role") == "user":
+                text = str(m.get("content") or "").strip()
+                if text:
+                    return text
+    except Exception:
+        return ""
+    return ""
+
+
+@app.post("/api/poster/generate", response_model=PosterGenerateResponse)
+def generate_poster(payload: PosterGeneratePayload) -> PosterGenerateResponse:
+    """Generate a structured poster design plan from project text + latest diagnosis.
+
+    This endpoint is intentionally *single-shot* and does **not** run the
+    multi-agent workflow. It reuses the latest project_state / conversation
+    context and asks LLM to return a PosterDesign JSON object.
+    """
+
+    llm = LlmClient()
+    if not llm.enabled:
+        raise HTTPException(status_code=503, detail="LLM 未启用，无法生成海报设计方案")
+
+    project_id = payload.project_id.strip()
+    student_id = payload.student_id.strip()
+    if not project_id or not student_id:
+        raise HTTPException(status_code=400, detail="project_id 和 student_id 不能为空")
+
+    project_state = json_store.load_project(project_id)
+
+    # ── collect text sources ──
+    base_text = (payload.source_text or "").strip()
+    diag_summary, latest_sub = _summarize_latest_diagnosis_for_poster(project_state)
+    latest_raw = str(latest_sub.get("raw_text") or "").strip() if latest_sub else ""
+
+    if payload.use_latest_context and not base_text and latest_raw:
+        base_text = latest_raw
+
+    latest_user_msg = _get_latest_user_message(project_id)
+
+    if not base_text and not diag_summary and not latest_user_msg:
+        raise HTTPException(status_code=400, detail="暂无可用项目上下文，请先在对话中描述一下你的项目或完成一次诊断")
+
+    # ── build LLM prompts ──
+    mode_label = {"coursework": "课程辅导", "competition": "竞赛冲刺", "learning": "项目教练"}.get(payload.mode, payload.mode)
+    comp_label = {
+        "": "不限",
+        "internet_plus": "互联网+",
+        "challenge_cup": "挑战杯",
+        "dachuang": "大创",
+    }.get(payload.competition_type or "", payload.competition_type or "")
+
+    system_prompt = (
+        "你是一名资深的创业路演海报设计师，擅长为学生项目做一页式中文项目海报设计。\n"
+        "现在需要你根据项目文本和最近一次诊断结果，给出一份 *结构化* 的海报设计方案 PosterDesign。\n\n"
+        "必须严格输出一个 JSON 对象，字段如下（不要额外增加顶层字段）：\n"
+        "{\n"
+        '  "title": 项目海报主标题（不超过 18 字，适合路演现场海报顶部）,\n'
+        '  "subtitle": 副标题 / 一句话电梯陈述（不超过 40 字）,\n'
+        '  "sections": [\n'
+        '    { "id": "hero" | 自定义ID, "title": 分区标题, "bullets": [精炼要点...], "highlight": true/false },\n'
+        '    ...\n'
+        '  ],\n'
+        '  "layout": {\n'
+        '    "orientation": "portrait" | "landscape",  // 竖版或横版\n'
+        '    "grid": 如 "3x3"、"2x4"，表示大致分区网格结构,\n'
+        '    "accent_area": 建议突出区域，例如 "top_left"、"center"、"right_column" 等\n'
+        '  },\n'
+        '  "theme": 配色/风格标签，如 "tech_blue"、"youthful_gradient"、"minimal_black",\n'
+        '  "image_prompts": [若干用于背景图/插画的英文或中文 prompt],\n'
+        '  "export_hint": 推荐纸张/分辨率，例如 "A3 纵向，适合现场展板" 或 "1080x1920 竖屏海报"\n'
+        "}\n\n"
+        "要求：\n"
+        "1. 文案要简短有力，适合印在 A3 一页纸海报上，优先使用 3-6 字的小标题 + 10-18 字要点。\n"
+        "2. 至少包含这些分区：项目概览/亮点、目标用户与痛点、解决方案与关键功能、商业或成果亮点（视模式而定）、比赛/路演加分点。\n"
+        "3. 如果诊断里有评分/风险/知识图谱/超图洞察，请把【优势】转成亮点分区，把【风险和缺口】转成提醒或 TODO 分区，但文案保持积极建设性。\n"
+        "4. theme 字段尽量从语义上贴合项目气质，例如校园公益可以用 \"warm_orange\"，前沿技术可以用 \"tech_blue\" 或 \"deep_navy\"。\n"
+        "5. 禁止在 JSON 外输出任何说明文字、注释或 markdown，只能返回上述结构的 JSON。\n"
+    )
+
+    parts: list[str] = []
+    if base_text:
+        parts.append("【项目原始描述或材料节选】\n" + base_text[:1500])
+    if diag_summary:
+        parts.append("【最近一次诊断 / 评分摘要】\n" + diag_summary)
+    if latest_user_msg:
+        parts.append("【学生在最近一轮对话中的自述/问题】\n" + latest_user_msg[:800])
+    if latest_sub:
+        stage = str(latest_sub.get("project_phase") or "")
+        intent = str(latest_sub.get("intent") or "")
+        if stage or intent:
+            meta_line = "【项目阶段与意图】" + (f" 阶段={stage}" if stage else "") + (f"；意图={intent}" if intent else "")
+            parts.append(meta_line)
+
+    user_prompt = (
+        f"教学模式: {mode_label}\n"  # e.g. 课程辅导/竞赛冲刺
+        f"参赛类型: {comp_label}\n"
+        f"project_id: {project_id} / student_id: {student_id}\n\n"
+        + "\n\n".join(parts)
+        + "\n\n请基于以上信息，生成一份适合中文路演现场的一页式海报设计 PosterDesign(JSON)。"
+    )
+
+    raw = llm.chat_json(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=settings.llm_structured_model or settings.llm_reason_model or None,
+        temperature=0.25,
+    )
+
+    # The model might either return the design directly or wrap it under a
+    # top-level "poster" key; support both forms.
+    from app.schemas import PosterDesign as _PosterDesign  # local import to avoid circular hints
+
+    data = raw or {}
+    if not isinstance(data, dict):
+        data = {}
+    poster_raw = data.get("poster") if isinstance(data.get("poster"), dict) else data
+
+    try:
+        poster = _PosterDesign.model_validate(poster_raw)
+    except Exception:
+        # Fallback: build a minimal PosterDesign from available text so the
+        # frontend always has something usable.
+        fallback_title = "项目海报草稿"
+        if base_text:
+            first_line = base_text.strip().splitlines()[0][:30]
+            if first_line:
+                fallback_title = first_line
+        poster = _PosterDesign(
+            title=fallback_title,
+            subtitle=f"模式：{mode_label}；类型：{comp_label or '普通项目'}",
+            sections=[
+                {
+                    "id": "overview",
+                    "title": "项目概览",
+                    "bullets": [
+                        "请在这里补充一句话项目介绍",
+                        "添加 2-3 个最想让评委记住的亮点",
+                    ],
+                    "highlight": True,
+                }
+            ],
+            layout={"orientation": "portrait", "grid": "3x4", "accent_area": "top_left"},
+            theme="tech_blue",
+            image_prompts=[],
+            export_hint="A3 纵向，适合课堂或路演展板",
+        )
+
+    return PosterGenerateResponse(poster=poster)
+
+
+@app.post("/api/poster/generate-image", response_model=PosterImageGenerateResponse)
+def generate_poster_image(payload: PosterImageGeneratePayload) -> PosterImageGenerateResponse:
+    """Generate an illustration image for the poster using a visual model.
+
+    Frontend is expected to pass a prompt derived from PosterDesign.image_prompts
+    or from the poster title/subtitle. The generated image is stored under
+    upload_root/poster_images and served via the existing /uploads mount.
+    """
+
+    if not image_client.enabled:
+        raise HTTPException(status_code=503, detail="图像生成未启用，请联系管理员在 .env 中配置 LLM_IMAGE_MODEL 和 LLM_API_KEY")
+
+    project_id = payload.project_id.strip()
+    student_id = payload.student_id.strip()
+    if not project_id or not student_id:
+        raise HTTPException(status_code=400, detail="project_id 和 student_id 不能为空")
+
+    prompt = (payload.prompt or "").strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="prompt 不能为空")
+
+    # Use orientation/size hints if provided, otherwise choose a sensible default.
+    if payload.size:
+        size = payload.size.strip() or "1024x576"
+    else:
+        if payload.orientation == "landscape":
+            size = "1280x720"
+        else:
+            size = "1024x576"
+
+    try:
+        image_url = image_client.generate_poster_image(
+            prompt=prompt,
+            project_id=project_id,
+            size=size,
+            out_root=settings.upload_root / "poster_images",
+        )
+    except RuntimeError as exc:
+        # Configuration issue, surface as 503 for frontend
+        raise HTTPException(status_code=503, detail=str(exc))
+    except Exception:
+        logger.warning(
+            "poster image generation failed (project_id=%s, student_id=%s)",
+            project_id,
+            student_id,
+            exc_info=True,
+        )
+        raise HTTPException(status_code=503, detail="生成海报插图失败，请稍后重试")
+
+    return PosterImageGenerateResponse(image_url=image_url)
 
 
 @app.post("/api/teacher-feedback", response_model=TeacherFeedbackResponse)

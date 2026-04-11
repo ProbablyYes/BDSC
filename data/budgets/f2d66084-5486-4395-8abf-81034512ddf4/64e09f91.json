@@ -1,0 +1,886 @@
+{
+  "plan_id": "64e09f91",
+  "user_id": "f2d66084-5486-4395-8abf-81034512ddf4",
+  "name": "创业基础课财务分析报告",
+  "purpose": "coursework",
+  "visible_tabs": [
+    "cost",
+    "biz",
+    "compare"
+  ],
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-11T11:38:27.902310+08:00",
+  "updated_at": "2026-04-11T11:57:44.740327+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "云服务器",
+            "unit_price": 100,
+            "quantity": 6,
+            "total": 600.0,
+            "note": "学生优惠",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "域名注册",
+            "unit_price": 59,
+            "quantity": 1,
+            "total": 59.0,
+            "note": ".cn域名",
+            "cost_type": "once"
+          },
+          {
+            "name": "AI接口费用",
+            "unit_price": 100,
+            "quantity": 6,
+            "total": 600.0,
+            "note": "DeepSeek API",
+            "cost_type": "monthly"
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "校内宣传",
+            "unit_price": 100,
+            "quantity": 1,
+            "total": 100.0,
+            "note": "打印+传单",
+            "cost_type": "once"
+          },
+          {
+            "name": "线上推广",
+            "unit_price": 200,
+            "quantity": 1,
+            "total": 200.0,
+            "note": "朋友圈广告",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "人力成本",
+        "items": [
+          {
+            "name": "UI设计(同学帮忙)",
+            "unit_price": 500,
+            "quantity": 1,
+            "total": 500.0,
+            "note": "请客吃饭",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": [
+          {
+            "name": "软件著作权",
+            "unit_price": 300,
+            "quantity": 1,
+            "total": 300.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [
+      {
+        "name": "基础会员",
+        "monthly_users": 1000,
+        "price": 9.9,
+        "conversion_rate": 0.05,
+        "monthly_revenue": 495.0
+      },
+      {
+        "name": "广告收入",
+        "monthly_users": 1000,
+        "price": 0.5,
+        "conversion_rate": 0.3,
+        "monthly_revenue": 150.0
+      }
+    ],
+    "fixed_costs_monthly": 300,
+    "variable_cost_per_user": 0.2,
+    "growth_rate_monthly": 0.08,
+    "scenario_models": {
+      "conservative": {
+        "label": "悲观",
+        "revenue_multiplier": 0.5,
+        "conversion_multiplier": 0.6,
+        "growth_rate_monthly": 0.03,
+        "fixed_costs_monthly": 350.0,
+        "variable_cost_per_user": 0.3,
+        "note": "用户增长缓慢"
+      },
+      "baseline": {
+        "label": "基准",
+        "revenue_multiplier": 1.0,
+        "conversion_multiplier": 1.0,
+        "growth_rate_monthly": 0.08,
+        "fixed_costs_monthly": 300.0,
+        "variable_cost_per_user": 0.2,
+        "note": "正常发展"
+      },
+      "optimistic": {
+        "label": "乐观",
+        "revenue_multiplier": 1.5,
+        "conversion_multiplier": 1.4,
+        "growth_rate_monthly": 0.15,
+        "fixed_costs_monthly": 400.0,
+        "variable_cost_per_user": 0.15,
+        "note": "口碑传播效果好"
+      }
+    },
+    "months_to_breakeven": 7,
+    "cash_flow_projection": [
+      {
+        "month": 1,
+        "revenue": 645.0,
+        "cost": 700.0,
+        "net": -55.0,
+        "cumulative": -55.0
+      },
+      {
+        "month": 2,
+        "revenue": 696.6,
+        "cost": 732.0,
+        "net": -35.4,
+        "cumulative": -90.4
+      },
+      {
+        "month": 3,
+        "revenue": 752.33,
+        "cost": 766.4,
+        "net": -14.07,
+        "cumulative": -104.47
+      },
+      {
+        "month": 4,
+        "revenue": 812.51,
+        "cost": 803.8,
+        "net": 8.71,
+        "cumulative": -95.76
+      },
+      {
+        "month": 5,
+        "revenue": 877.52,
+        "cost": 844.0,
+        "net": 33.52,
+        "cumulative": -62.24
+      },
+      {
+        "month": 6,
+        "revenue": 947.72,
+        "cost": 887.6,
+        "net": 60.12,
+        "cumulative": -2.12
+      },
+      {
+        "month": 7,
+        "revenue": 1023.53,
+        "cost": 934.6,
+        "net": 88.93,
+        "cumulative": 86.81
+      },
+      {
+        "month": 8,
+        "revenue": 1105.42,
+        "cost": 985.4,
+        "net": 120.02,
+        "cumulative": 206.83
+      },
+      {
+        "month": 9,
+        "revenue": 1193.85,
+        "cost": 1040.2,
+        "net": 153.65,
+        "cumulative": 360.48
+      },
+      {
+        "month": 10,
+        "revenue": 1289.36,
+        "cost": 1099.6,
+        "net": 189.76,
+        "cumulative": 550.24
+      },
+      {
+        "month": 11,
+        "revenue": 1392.51,
+        "cost": 1163.4,
+        "net": 229.11,
+        "cumulative": 779.35
+      },
+      {
+        "month": 12,
+        "revenue": 1503.91,
+        "cost": 1232.6,
+        "net": 271.31,
+        "cumulative": 1050.66
+      }
+    ],
+    "scenario_results": {
+      "conservative": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 193.5,
+            "cost": 710.0,
+            "net": -516.5,
+            "cumulative": -516.5
+          },
+          {
+            "month": 2,
+            "revenue": 199.31,
+            "cost": 720.8,
+            "net": -521.49,
+            "cumulative": -1037.99
+          },
+          {
+            "month": 3,
+            "revenue": 205.28,
+            "cost": 731.9,
+            "net": -526.62,
+            "cumulative": -1564.61
+          },
+          {
+            "month": 4,
+            "revenue": 211.44,
+            "cost": 743.3,
+            "net": -531.86,
+            "cumulative": -2096.47
+          },
+          {
+            "month": 5,
+            "revenue": 217.79,
+            "cost": 755.0,
+            "net": -537.21,
+            "cumulative": -2633.68
+          },
+          {
+            "month": 6,
+            "revenue": 224.32,
+            "cost": 767.3,
+            "net": -542.98,
+            "cumulative": -3176.66
+          },
+          {
+            "month": 7,
+            "revenue": 231.05,
+            "cost": 779.6,
+            "net": -548.55,
+            "cumulative": -3725.21
+          },
+          {
+            "month": 8,
+            "revenue": 237.98,
+            "cost": 792.5,
+            "net": -554.52,
+            "cumulative": -4279.73
+          },
+          {
+            "month": 9,
+            "revenue": 245.12,
+            "cost": 806.0,
+            "net": -560.88,
+            "cumulative": -4840.61
+          },
+          {
+            "month": 10,
+            "revenue": 252.47,
+            "cost": 819.5,
+            "net": -567.03,
+            "cumulative": -5407.64
+          },
+          {
+            "month": 11,
+            "revenue": 260.05,
+            "cost": 833.6,
+            "net": -573.55,
+            "cumulative": -5981.19
+          },
+          {
+            "month": 12,
+            "revenue": 267.85,
+            "cost": 848.3,
+            "net": -580.45,
+            "cumulative": -6561.64
+          }
+        ],
+        "months_to_breakeven": null,
+        "annual_revenue": 2746.16,
+        "annual_cost": 9307.8,
+        "annual_net": -6561.64,
+        "monthly_revenue_base": 193.5
+      },
+      "baseline": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 645.0,
+            "cost": 700.0,
+            "net": -55.0,
+            "cumulative": -55.0
+          },
+          {
+            "month": 2,
+            "revenue": 696.6,
+            "cost": 732.0,
+            "net": -35.4,
+            "cumulative": -90.4
+          },
+          {
+            "month": 3,
+            "revenue": 752.33,
+            "cost": 766.4,
+            "net": -14.07,
+            "cumulative": -104.47
+          },
+          {
+            "month": 4,
+            "revenue": 812.51,
+            "cost": 803.8,
+            "net": 8.71,
+            "cumulative": -95.76
+          },
+          {
+            "month": 5,
+            "revenue": 877.52,
+            "cost": 844.0,
+            "net": 33.52,
+            "cumulative": -62.24
+          },
+          {
+            "month": 6,
+            "revenue": 947.72,
+            "cost": 887.6,
+            "net": 60.12,
+            "cumulative": -2.12
+          },
+          {
+            "month": 7,
+            "revenue": 1023.53,
+            "cost": 934.6,
+            "net": 88.93,
+            "cumulative": 86.81
+          },
+          {
+            "month": 8,
+            "revenue": 1105.42,
+            "cost": 985.4,
+            "net": 120.02,
+            "cumulative": 206.83
+          },
+          {
+            "month": 9,
+            "revenue": 1193.85,
+            "cost": 1040.2,
+            "net": 153.65,
+            "cumulative": 360.48
+          },
+          {
+            "month": 10,
+            "revenue": 1289.36,
+            "cost": 1099.6,
+            "net": 189.76,
+            "cumulative": 550.24
+          },
+          {
+            "month": 11,
+            "revenue": 1392.51,
+            "cost": 1163.4,
+            "net": 229.11,
+            "cumulative": 779.35
+          },
+          {
+            "month": 12,
+            "revenue": 1503.91,
+            "cost": 1232.6,
+            "net": 271.31,
+            "cumulative": 1050.66
+          }
+        ],
+        "months_to_breakeven": 7,
+        "annual_revenue": 12240.26,
+        "annual_cost": 11189.6,
+        "annual_net": 1050.66,
+        "monthly_revenue_base": 645.0
+      },
+      "optimistic": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 1354.5,
+            "cost": 820.0,
+            "net": 534.5,
+            "cumulative": 534.5
+          },
+          {
+            "month": 2,
+            "revenue": 1557.67,
+            "cost": 882.85,
+            "net": 674.82,
+            "cumulative": 1209.32
+          },
+          {
+            "month": 3,
+            "revenue": 1791.33,
+            "cost": 955.3,
+            "net": 836.03,
+            "cumulative": 2045.35
+          },
+          {
+            "month": 4,
+            "revenue": 2060.03,
+            "cost": 1038.7,
+            "net": 1021.33,
+            "cumulative": 3066.68
+          },
+          {
+            "month": 5,
+            "revenue": 2369.03,
+            "cost": 1134.55,
+            "net": 1234.48,
+            "cumulative": 4301.16
+          },
+          {
+            "month": 6,
+            "revenue": 2724.38,
+            "cost": 1244.65,
+            "net": 1479.73,
+            "cumulative": 5780.89
+          },
+          {
+            "month": 7,
+            "revenue": 3133.04,
+            "cost": 1371.4,
+            "net": 1761.64,
+            "cumulative": 7542.53
+          },
+          {
+            "month": 8,
+            "revenue": 3603.0,
+            "cost": 1517.2,
+            "net": 2085.8,
+            "cumulative": 9628.33
+          },
+          {
+            "month": 9,
+            "revenue": 4143.45,
+            "cost": 1684.75,
+            "net": 2458.7,
+            "cumulative": 12087.03
+          },
+          {
+            "month": 10,
+            "revenue": 4764.96,
+            "cost": 1877.5,
+            "net": 2887.46,
+            "cumulative": 14974.49
+          },
+          {
+            "month": 11,
+            "revenue": 5479.71,
+            "cost": 2099.05,
+            "net": 3380.66,
+            "cumulative": 18355.15
+          },
+          {
+            "month": 12,
+            "revenue": 6301.66,
+            "cost": 2353.9,
+            "net": 3947.76,
+            "cumulative": 22302.91
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 39282.76,
+        "annual_cost": 16979.85,
+        "annual_net": 22302.91,
+        "monthly_revenue_base": 1354.5
+      }
+    }
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "参赛报名费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "差旅交通",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "住宿",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "材料打印/展板",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "原型开发费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "样品制作",
+        "amount": 0.0,
+        "note": ""
+      }
+    ],
+    "stages": [
+      {
+        "name": "筹备期",
+        "items": []
+      },
+      {
+        "name": "初赛",
+        "items": []
+      },
+      {
+        "name": "复赛",
+        "items": []
+      },
+      {
+        "name": "决赛",
+        "items": []
+      }
+    ],
+    "funding_sources": [
+      {
+        "name": "自筹",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "学校资助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "企业赞助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "赛事奖金",
+        "amount": 0,
+        "note": ""
+      }
+    ]
+  },
+  "funding_plan": {
+    "startup_capital_needed": 2359,
+    "sources": [],
+    "monthly_gap": [],
+    "fundraising_notes": "初始资金由团队成员自筹，总计约2500元。如项目发展良好，后续可申请学校大学生创新创业训练计划(SRTP)经费支持，额度5000-10000元。"
+  },
+  "ai_suggestions": [
+    {
+      "timestamp": "2026-04-11T11:45:52.008468+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "法律顾问费用",
+            "营销活动",
+            "技术支持"
+          ],
+          "unreasonable_flags": [
+            "线上推广费用过高",
+            "基准月收入过低"
+          ],
+          "risk_warnings": [
+            "资金缺口较大",
+            "收入来源单一",
+            "未考虑潜在的法律风险",
+            "技术支持和维护成本未计算"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥500",
+              "category": "市场"
+            },
+            {
+              "name": "法律顾问费用",
+              "estimated": "¥1000",
+              "category": "法律"
+            },
+            {
+              "name": "营销活动",
+              "estimated": "¥1500",
+              "category": "营销"
+            },
+            {
+              "name": "技术支持",
+              "estimated": "¥2000",
+              "category": "技术"
+            }
+          ],
+          "revenue_model": "多元化收入模式，增加会员服务和广告合作",
+          "scenario_advice": "乐观情景：月收入增长至¥1000；中性情景：保持当前月收入水平；悲观情景：月收入降至¥400"
+        },
+        "pitch_summary": "我们的项目预算主要用于云服务器、域名注册、AI接口费用、校内宣传、线上推广和UI设计。我们计划通过增加会员服务和广告合作来提高收入，同时进行市场调研和营销活动，以扩大用户基础。尽管目前存在资金缺口，但我们相信通过优化成本结构和增加收入来源，项目将能够实现盈利。",
+        "faq": [
+          {
+            "question": "为什么线上推广费用较高？",
+            "suggested_answer": "我们计划通过社交媒体和校园活动进行推广，以提高项目知名度和用户参与度，从而吸引更多用户。"
+          },
+          {
+            "question": "如何解决资金缺口问题？",
+            "suggested_answer": "我们正在寻找潜在的投资人和合作伙伴，同时计划通过增加收入来源来填补资金缺口。"
+          },
+          {
+            "question": "项目的风险管理措施是什么？",
+            "suggested_answer": "我们已经制定了详细的市场调研和营销计划，并将定期评估项目进展和市场反馈，以便及时调整策略。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:51:03.487233+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "技术支持",
+            "法律咨询",
+            "员工工资"
+          ],
+          "unreasonable_flags": [
+            "线上推广费用过高",
+            "基准月收入过低"
+          ],
+          "risk_warnings": [
+            "资金缺口较大",
+            "收入来源单一",
+            "缺乏市场调研可能导致产品定位不准",
+            "技术与法律支持不足可能影响项目进展"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥1000",
+              "category": "市场"
+            },
+            {
+              "name": "技术支持",
+              "estimated": "¥2000",
+              "category": "技术"
+            },
+            {
+              "name": "法律咨询",
+              "estimated": "¥1500",
+              "category": "法律"
+            },
+            {
+              "name": "员工工资",
+              "estimated": "¥3000",
+              "category": "人力"
+            }
+          ],
+          "revenue_model": "多元化收入模式，包括但不限于课程销售、会员订阅、企业合作",
+          "scenario_advice": "建议制定乐观、中性和悲观三种情景参数，以应对市场变化和不确定性"
+        },
+        "pitch_summary": "本项目旨在通过创业基础课程帮助学生掌握创业知识和技能。预算主要用于云服务器、域名注册、AI接口费用、校内宣传、线上推广、UI设计等。其中，线上推广费用较高，但考虑到课程的市场推广需求，这是必要的。我们还计划增加市场调研、技术支持、法律咨询和员工工资等成本项，以确保项目的顺利进行。我们预计通过课程销售、会员订阅和企业合作等多种方式获得收入，实现项目的盈利。",
+        "faq": [
+          {
+            "question": "线上推广费用为何如此高？",
+            "suggested_answer": "线上推广费用较高是因为我们需要通过多种渠道进行推广，以确保课程能够被更多学生和潜在客户所了解。虽然这增加了成本，但长远来看，这将有助于扩大我们的市场份额和提高品牌知名度。"
+          },
+          {
+            "question": "为何基准月收入较低？",
+            "suggested_answer": "基准月收入较低是因为我们正在起步阶段，市场知名度尚未建立。我们计划通过增加市场推广力度和优化课程内容来提高收入。"
+          },
+          {
+            "question": "资金缺口如何填补？",
+            "suggested_answer": "我们计划通过增加收入来源、优化成本结构和寻求外部投资来填补资金缺口。我们相信通过我们的努力，项目将能够实现盈利并获得成功。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:57:26.966672+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "员工薪酬",
+            "办公场地租赁",
+            "法律咨询",
+            "市场推广"
+          ],
+          "unreasonable_flags": [
+            "线上推广成本过高",
+            "基准月收入过低"
+          ],
+          "risk_warnings": [
+            "资金缺口较大",
+            "缺乏详细收入来源描述",
+            "未考虑长期运营成本",
+            "未预留应急资金"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": 5000,
+              "category": "市场"
+            },
+            {
+              "name": "员工薪酬",
+              "estimated": 10000,
+              "category": "人力"
+            },
+            {
+              "name": "办公场地租赁",
+              "estimated": 3000,
+              "category": "场地"
+            },
+            {
+              "name": "法律咨询",
+              "estimated": 2000,
+              "category": "法律"
+            },
+            {
+              "name": "市场推广",
+              "estimated": 8000,
+              "category": "推广"
+            }
+          ],
+          "revenue_model": "多元化收入模式，包括课程销售、会员订阅、企业合作等",
+          "scenario_advice": "建议准备低、中、高三种情景参数，低情景下收入减少30%，中情景下收入稳定，高情景下收入增加50%"
+        },
+        "pitch_summary": "本项目旨在通过创业基础课程帮助学生掌握创业技能。预算主要用于课程开发、市场推广和运营支持。虽然当前资金缺口较大，但通过多元化收入模式和有效的市场推广策略，我们预期在一年内实现盈亏平衡，并在两年内实现盈利。投资本项目将获得稳定的回报。",
+        "faq": [
+          {
+            "question": "请问基准月收入是如何计算的？",
+            "suggested_answer": "基准月收入是基于课程销售和会员订阅的预期收入，以及企业合作的潜在收入。我们预计在项目启动后的前三个月内实现这一目标。"
+          },
+          {
+            "question": "项目的资金缺口如何解决？",
+            "suggested_answer": "我们计划通过增加课程销售、会员订阅和企业合作收入来填补资金缺口。同时，我们也会考虑申请政府补助和寻求外部投资。"
+          },
+          {
+            "question": "项目的长期运营成本如何考虑？",
+            "suggested_answer": "在预算中，我们已经预留了长期运营成本，包括员工薪酬、办公场地租赁和市场推广等。我们还会定期评估运营成本，并根据实际情况进行调整。"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "project_cost_total": 2359.0,
+    "competition_cost_total": 0.0,
+    "total_investment": 2359.0,
+    "baseline_monthly_revenue": 645.0,
+    "baseline_annual_net": 1050.66,
+    "funding_gap": 1308.34,
+    "health_score": 82,
+    "breakeven_fastest": 2,
+    "breakeven_baseline": 7,
+    "breakeven_slowest": null
+  },
+  "ai_result": {
+    "diagnosis": {
+      "missing_items": [
+        "市场调研",
+        "员工薪酬",
+        "办公场地租赁",
+        "法律咨询",
+        "市场推广"
+      ],
+      "unreasonable_flags": [
+        "线上推广成本过高",
+        "基准月收入过低"
+      ],
+      "risk_warnings": [
+        "资金缺口较大",
+        "缺乏详细收入来源描述",
+        "未考虑长期运营成本",
+        "未预留应急资金"
+      ]
+    },
+    "template": {
+      "suggested_costs": [
+        {
+          "name": "市场调研",
+          "estimated": 5000,
+          "category": "市场"
+        },
+        {
+          "name": "员工薪酬",
+          "estimated": 10000,
+          "category": "人力"
+        },
+        {
+          "name": "办公场地租赁",
+          "estimated": 3000,
+          "category": "场地"
+        },
+        {
+          "name": "法律咨询",
+          "estimated": 2000,
+          "category": "法律"
+        },
+        {
+          "name": "市场推广",
+          "estimated": 8000,
+          "category": "推广"
+        }
+      ],
+      "revenue_model": "多元化收入模式，包括课程销售、会员订阅、企业合作等",
+      "scenario_advice": "建议准备低、中、高三种情景参数，低情景下收入减少30%，中情景下收入稳定，高情景下收入增加50%"
+    },
+    "pitch_summary": "本项目旨在通过创业基础课程帮助学生掌握创业技能。预算主要用于课程开发、市场推广和运营支持。虽然当前资金缺口较大，但通过多元化收入模式和有效的市场推广策略，我们预期在一年内实现盈亏平衡，并在两年内实现盈利。投资本项目将获得稳定的回报。",
+    "faq": [
+      {
+        "question": "请问基准月收入是如何计算的？",
+        "suggested_answer": "基准月收入是基于课程销售和会员订阅的预期收入，以及企业合作的潜在收入。我们预计在项目启动后的前三个月内实现这一目标。"
+      },
+      {
+        "question": "项目的资金缺口如何解决？",
+        "suggested_answer": "我们计划通过增加课程销售、会员订阅和企业合作收入来填补资金缺口。同时，我们也会考虑申请政府补助和寻求外部投资。"
+      },
+      {
+        "question": "项目的长期运营成本如何考虑？",
+        "suggested_answer": "在预算中，我们已经预留了长期运营成本，包括员工薪酬、办公场地租赁和市场推广等。我们还会定期评估运营成本，并根据实际情况进行调整。"
+      }
+    ]
+  },
+  "ai_chat_history": [
+    {
+      "q": "作为课程作业，我的财务分析还需要补充哪些内容？",
+      "a": "为了使你的财务分析报告更加全面和深入，你可以考虑补充以下内容：\n\n1. **成本结构分析**：\n   - 固定成本：如场地租金、员工工资等。\n   - 变动成本：如教材费、营销费用等。\n   - 混合成本：如水电费、网络费等。\n\n2. **收入来源分析**：\n   - 不同课程的收入占比。\n   - 增值服务（如证书、辅导服务）的收入贡献。\n\n3. **敏感性分析**：\n   - 分析关键参数（如月收入、成本）的波动对盈亏平衡时间的影响。\n\n4. **现金流分析**：\n   - 短期现金流预测，确保资金链的健康。\n   - 长期现金流预测，评估项目可持续性。\n\n5. **财务比率分析**：\n   - 杠杆比率（如负债权益比率）。\n   - 流动比率（短期偿债能力）。\n   - 营运效率比率（如存货周转率）。\n\n6. **风险分析**：\n   - 市场风险：如竞争对手增加、市场需求变化。\n   - 政策风险：如教育政策调整。\n   - 操作风险：如课程质量控制、教师流失等。\n\n7. **财务预测**：\n   - 长期财务预测，包括收入、成本、利润和现金流。\n   - 未来几年的财务健康度预测。\n\n8. **投资回报分析**：\n   - 投资回收期。\n   - 内部收益率（IRR）。\n   - 净现值（NPV）。\n\n通过以上补充内容，你的财务分析报告将更加全面，有助于更好地理解项目的财务健康状况和潜在风险。"
+    },
+    {
+      "q": "老师可能会问哪些关于财务的问题？我该怎么回答？",
+      "a": "老师可能会问以下几个关于财务的问题，你可以这样回答：\n\n1. **项目总投入是多少？**\n   - 答：项目的总投入为¥2359.0。\n\n2. **基准月收入是多少？**\n   - 答：基准月收入为¥645.0。\n\n3. **盈亏平衡点是多少个月？**\n   - 答：根据财务分析，盈亏平衡点为7个月。\n\n4. **项目的健康度如何评估的？**\n   - 答：根据财务健康度模型评估，项目的健康度为82/100，处于较为健康的水平。\n\n5. **如何保证项目的财务健康度？**\n   - 答：通过优化成本结构、提高收入和控制开支，同时定期进行财务健康度评估，确保项目的持续健康发展。\n\n6. **项目有哪些潜在的风险？**\n   - 答：主要风险包括市场竞争加剧、收入增长不及预期、成本超支等，需要通过市场调研和风险评估来提前识别并制定应对策略。\n\n7. **项目未来的发展计划是什么？**\n   - 答：未来计划包括扩大市场覆盖范围、推出新产品或服务、优化运营效率等，以持续提升收入和盈利能力。\n\n确保回答时简明扼要，同时提供具体的数据支持你的观点。"
+    },
+    {
+      "q": "盈亏平衡分析怎么写比较专业？",
+      "a": "撰写盈亏平衡分析时，可以遵循以下结构和内容，使其更加专业：\n\n1. **定义盈亏平衡点**：\n   - 描述盈亏平衡点的定义：即收入等于总成本（固定成本+变动成本）的点。\n   \n2. **计算盈亏平衡点**：\n   - **公式**：盈亏平衡点（单位：月数） = 总固定成本 / (月收入 - 变动成本)\n   - **具体计算**：例如，假设总固定成本为¥1651.5（2359*0.7），变动成本为¥0（简化假设），月收入为¥645，则盈亏平衡月数 = 1651.5 / 645 ≈ 2.56个月，但根据实际情况为7个月，可能需要进一步详细分析。\n\n3. **分析盈亏平衡点的影响因素**：\n   - **固定成本**：详细列出固定成本的构成和金额。\n   - **变动成本**：详细列出变动成本的构成和金额。\n   - **收入**：详细列出收入的构成和金额，并分析收入的稳定性。\n\n4. **敏感性分析**：\n   - 分析固定成本、变动成本和收入的变化对盈亏平衡点的影响。\n\n5. **结论与建议**：\n   - 基于盈亏平衡分析的结果，给出对项目的财务健康度的评价。\n   - 提出具体的优化建议，比如减少固定成本、提高收入等。\n\n示例文本：\n```\n盈亏平衡分析\n\n1. **定义盈亏平衡点**\n   盈亏平衡点是企业在收入等于总成本（固定成本+变动成本）时的点。\n\n2. **计算盈亏平衡点**\n   根据当前数据，总固定成本为¥1651.5，月收入为¥645，变动成本假设为0，则盈亏平衡月数 = 1651.5 / 645 ≈ 2.56个月。但实际盈亏平衡点为7个月，可能需要进一步详细分析。\n\n3. **分析盈亏平衡点的影响因素**\n   - **固定成本**：包括房租、员工工资等，总计¥1651.5。\n   - **变动成本**：包括材料成本等，假设为0。\n   - **收入**：月收入为¥645，相对稳定。\n\n4. **敏感性分析**\n   分析固定成本、变动成本和收入的变化对盈亏平衡点的影响。\n\n5. **结论与建议**\n   - 项目健康度为82/100，总体表现良好。\n   - 建议进一步优化成本结构，提高收入稳定性，以加快盈亏平衡点的到来。\n```\n\n希望这些建议对你有帮助！如果有其他需要解答的问题，请随时提问。"
+    }
+  ]
+}

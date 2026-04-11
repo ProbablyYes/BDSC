@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +25,14 @@ from app.schemas import (
     AuthPasswordChangePayload,
     AuthRegisterPayload,
     AuthUserResponse,
+    BudgetAIChatPayload,
+    BudgetAISuggestPayload,
+    BudgetCreatePayload,
+    BudgetSavePayload,
+    ChatMessageSendPayload,
+    ChatReactionPayload,
+    ChatRoomAddMemberPayload,
+    ChatRoomCreatePayload,
     DialogueTurnPayload,
     DialogueTurnResponse,
     HealthResponse,
@@ -52,6 +60,8 @@ from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
 from app.services.rag_engine import RagEngine
+from app.services.budget_storage import BudgetStorage
+from app.services.chat_storage import ChatStorage
 from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
@@ -75,6 +85,17 @@ json_store = JsonStorage(settings.data_root / "project_state")
 conv_store = ConversationStorage(settings.data_root / "conversations")
 user_store = UserStorage(settings.data_root / "users")
 team_store = TeamStorage(settings.data_root / "teams")
+chat_store = ChatStorage(settings.data_root / "chat")
+budget_store = BudgetStorage(settings.data_root / "budgets")
+
+chat_files_root = settings.data_root / "chat_files"
+chat_files_root.mkdir(parents=True, exist_ok=True)
+app.mount("/chat_files", StaticFiles(directory=str(chat_files_root)), name="chat_files")
+
+# WebSocket connection manager for chat
+_ws_rooms: dict[str, dict[str, WebSocket]] = {}
+_main_loop = None  # captured on first WebSocket connect
+
 graph_service = GraphService(
     uri=settings.neo4j_uri,
     username=settings.neo4j_username,
@@ -92,7 +113,7 @@ def _background_hyper_rebuild():
     import threading
     def _do():
         try:
-            result = hypergraph_service.rebuild(min_pattern_support=1, max_edges=200)
+            result = hypergraph_service.rebuild(min_pattern_support=1, max_edges=400)
             logger.info("Hypergraph background rebuild done: %s edges, %s nodes",
                         result.get("total_edges"), result.get("total_nodes"))
         except Exception as exc:
@@ -101,6 +122,15 @@ def _background_hyper_rebuild():
     t.start()
 
 _background_hyper_rebuild()
+
+
+@app.on_event("startup")
+async def _capture_event_loop():
+    """Capture the main asyncio loop so background threads can broadcast via WebSocket."""
+    import asyncio as _aio
+    global _main_loop
+    _main_loop = _aio.get_running_loop()
+
 
 # Setup teacher file feedback routes
 setup_teacher_file_feedback_routes(app, json_store, settings)
@@ -3621,7 +3651,7 @@ def teacher_project_evidence(project_id: str) -> dict:
 
 
 @app.post("/api/hypergraph/rebuild")
-def rebuild_hypergraph(min_pattern_support: int = 1, max_edges: int = 200) -> dict:
+def rebuild_hypergraph(min_pattern_support: int = 1, max_edges: int = 400) -> dict:
     data = hypergraph_service.rebuild(min_pattern_support=min_pattern_support, max_edges=max_edges)
     return {
         "min_pattern_support": min_pattern_support,
@@ -3646,6 +3676,11 @@ def hypergraph_insight(category: str | None = None, rule_ids: str = "", limit: i
 def hypergraph_library(limit: int = 24) -> dict:
     data = hypergraph_service.library_snapshot(limit=limit)
     return {"limit": limit, "data": data}
+
+
+@app.get("/api/hypergraph/catalog")
+def hypergraph_catalog() -> dict:
+    return hypergraph_service.catalog()
 
 
 @app.post("/api/hypergraph/project-view")
@@ -4910,6 +4945,712 @@ def teacher_teaching_interventions(class_id: str, cohort_id: str | None = None) 
         "class_id": class_id,
         "student_count": student_count,
         "total_shared_problems": len(shared_problems),
-        "shared_problems": shared_problems[:5],  # Top 5问题
+        "shared_problems": shared_problems[:5],
         "recommended_next_class_focus": "针对Top 2-3的共性问题设计专项讲解与练习",
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Chat — Contacts (auto-aggregate teammates + teachers)
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.get("/api/chat/contacts")
+def chat_contacts(user_id: str = "") -> dict:
+    if not user_id:
+        raise HTTPException(400, "需要 user_id")
+    seen: set[str] = {user_id}
+    contacts: list[dict] = []
+    my_teams_member = team_store.list_by_member(user_id)
+    my_teams_teacher = team_store.list_by_teacher(user_id)
+    seen_team_ids: set[str] = set()
+    my_teams: list[dict] = []
+    for t in my_teams_member + my_teams_teacher:
+        tid = t.get("team_id", "")
+        if tid not in seen_team_ids:
+            seen_team_ids.add(tid)
+            my_teams.append(t)
+    team_infos: list[dict] = []
+    for t in my_teams:
+        tid = t.get("team_id", "")
+        tname = _safe_str(t.get("team_name", ""))
+        members_info: list[dict] = []
+        for m_entry in t.get("members", []):
+            mid = m_entry.get("user_id", "") if isinstance(m_entry, dict) else str(m_entry)
+            if not mid:
+                continue
+            u = user_store.get_by_id(mid)
+            if u:
+                members_info.append({"user_id": mid, "display_name": _safe_str(u.get("display_name", "")), "role": u.get("role", "student")})
+                if mid not in seen:
+                    seen.add(mid)
+                    contacts.append({"user_id": mid, "display_name": _safe_str(u.get("display_name", "")), "role": u.get("role", "student"), "source": "team", "team_name": tname})
+        teacher_id = t.get("teacher_id", "")
+        if teacher_id and teacher_id not in seen:
+            tu = user_store.get_by_id(teacher_id)
+            if tu:
+                seen.add(teacher_id)
+                contacts.append({"user_id": teacher_id, "display_name": _safe_str(tu.get("display_name", "")), "role": "teacher", "source": "teacher"})
+                members_info.append({"user_id": teacher_id, "display_name": _safe_str(tu.get("display_name", "")), "role": "teacher"})
+        team_infos.append({"team_id": tid, "team_name": tname, "members": members_info})
+    current_user = user_store.get_by_id(user_id)
+    current_role = (current_user or {}).get("role", "student")
+    if current_role != "teacher":
+        all_teachers = user_store.list_users(role="teacher")
+        for tc in all_teachers:
+            tcid = tc.get("user_id", "")
+            if tcid and tcid not in seen:
+                seen.add(tcid)
+                contacts.append({"user_id": tcid, "display_name": _safe_str(tc.get("display_name", "")), "role": "teacher", "source": "teacher"})
+    else:
+        all_students = user_store.list_users(role="student")
+        for st in all_students:
+            stid = st.get("user_id", "")
+            if stid and stid not in seen:
+                seen.add(stid)
+                contacts.append({"user_id": stid, "display_name": _safe_str(st.get("display_name", "")), "role": "student", "source": "student"})
+    contacts.append({"user_id": "ai_xiaowen", "display_name": "小文 AI", "role": "ai", "source": "system"})
+    return {"contacts": contacts, "teams": team_infos}
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Chat Room — REST API + WebSocket
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.post("/api/chat/rooms")
+def chat_create_room(payload: ChatRoomCreatePayload) -> dict:
+    room = chat_store.create_room(
+        name=payload.name,
+        room_type=payload.room_type,
+        members=payload.members,
+        admin_ids=payload.admin_ids or None,
+        team_id=payload.team_id,
+        project_id=payload.project_id,
+    )
+    return {"status": "ok", "room": room}
+
+
+@app.get("/api/chat/rooms")
+def chat_list_rooms(user_id: str = "") -> dict:
+    if not user_id:
+        raise HTTPException(400, "需要 user_id")
+    rooms = chat_store.list_rooms_for_user(user_id)
+    rooms.sort(key=lambda r: r.get("last_message_at") or r.get("created_at") or "", reverse=True)
+    return {"rooms": rooms}
+
+
+@app.get("/api/chat/rooms/{room_id}")
+def chat_get_room(room_id: str) -> dict:
+    room = chat_store.get_room(room_id)
+    if not room:
+        raise HTTPException(404, "聊天室不存在")
+    return {"room": room}
+
+
+@app.delete("/api/chat/rooms/{room_id}")
+def chat_delete_room(room_id: str) -> dict:
+    ok = chat_store.delete_room(room_id)
+    if not ok:
+        raise HTTPException(404, "聊天室不存在")
+    return {"status": "ok"}
+
+
+@app.post("/api/chat/rooms/{room_id}/members")
+def chat_add_member(room_id: str, payload: ChatRoomAddMemberPayload) -> dict:
+    room = chat_store.add_member(room_id, payload.user_id)
+    if not room:
+        raise HTTPException(404, "聊天室不存在")
+    return {"status": "ok", "room": room}
+
+
+@app.delete("/api/chat/rooms/{room_id}/members/{user_id}")
+def chat_remove_member(room_id: str, user_id: str) -> dict:
+    room = chat_store.remove_member(room_id, user_id)
+    if not room:
+        raise HTTPException(404, "聊天室不存在")
+    return {"status": "ok", "room": room}
+
+
+@app.get("/api/chat/rooms/{room_id}/messages")
+def chat_get_messages(room_id: str, limit: int = 50, before: str = "") -> dict:
+    msgs = chat_store.get_messages(room_id, limit=limit, before=before or None)
+    return {"messages": msgs}
+
+
+@app.post("/api/chat/rooms/{room_id}/messages")
+def chat_send_message(room_id: str, payload: ChatMessageSendPayload) -> dict:
+    room = chat_store.get_room(room_id)
+    if not room:
+        raise HTTPException(404, "聊天室不存在")
+    msg = chat_store.add_message(
+        room_id=room_id,
+        sender_id=payload.sender_id,
+        sender_name=payload.sender_name,
+        msg_type=payload.msg_type,
+        content=payload.content,
+        mentions=payload.mentions,
+        reply_to=payload.reply_to,
+    )
+    _broadcast_to_room(room_id, {"type": "new_message", "message": msg})
+    should_trigger_ai = (
+        "ai_xiaowen" in (payload.mentions or [])
+        or "@小文" in payload.content
+        or "ai_xiaowen" in room.get("members", [])
+    )
+    if should_trigger_ai:
+        import threading
+        threading.Thread(
+            target=_handle_xiaowen_mention,
+            args=(room_id, room.get("project_id"), payload.content, payload.sender_name),
+            daemon=True,
+        ).start()
+    return {"status": "ok", "message": msg}
+
+
+@app.post("/api/chat/rooms/{room_id}/reactions")
+def chat_toggle_reaction(room_id: str, payload: ChatReactionPayload) -> dict:
+    msg_id = ""
+    return {"status": "ok"}
+
+
+@app.post("/api/chat/rooms/{room_id}/files")
+async def chat_upload_file(
+    room_id: str,
+    sender_id: str = Form(""),
+    sender_name: str = Form(""),
+    file: UploadFile = File(...),
+) -> dict:
+    room = chat_store.get_room(room_id)
+    if not room:
+        raise HTTPException(404, "聊天室不存在")
+    room_dir = chat_files_root / room_id
+    room_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = f"{uuid4().hex[:8]}_{file.filename}"
+    target = room_dir / safe_name
+    content = await file.read()
+    target.write_bytes(content)
+
+    file_meta = {
+        "filename": file.filename,
+        "stored_name": safe_name,
+        "size": len(content),
+        "content_type": file.content_type or "",
+        "url": f"/chat_files/{room_id}/{safe_name}",
+    }
+    is_image = (file.content_type or "").startswith("image/")
+    msg = chat_store.add_message(
+        room_id=room_id,
+        sender_id=sender_id,
+        sender_name=sender_name,
+        msg_type="image" if is_image else "file",
+        content=file.filename or "文件",
+        file_meta=file_meta,
+    )
+    _broadcast_to_room(room_id, {"type": "new_message", "message": msg})
+    return {"status": "ok", "message": msg}
+
+
+@app.get("/api/chat/rooms/{room_id}/files")
+def chat_list_files(room_id: str) -> dict:
+    files = chat_store.list_files(room_id)
+    return {"files": files}
+
+
+@app.get("/api/chat/rooms/{room_id}/ai-history")
+def chat_ai_history(room_id: str) -> dict:
+    """Return persisted AI analysis entries for the shared AI panel."""
+    entries = chat_store.get_ai_analyses(room_id)
+    return {"entries": entries}
+
+
+@app.delete("/api/chat/rooms/{room_id}/ai-history/{entry_id}")
+def chat_delete_ai_entry(room_id: str, entry_id: str) -> dict:
+    ok = chat_store.delete_ai_analysis(room_id, entry_id)
+    return {"ok": ok}
+
+
+def _broadcast_to_room(room_id: str, data: dict) -> None:
+    """Thread-safe broadcast to all WebSocket connections in a room."""
+    import asyncio
+    conns = _ws_rooms.get(room_id, {})
+    if not conns:
+        return
+    payload = json.dumps(data, ensure_ascii=False)
+
+    async def _send_all():
+        for uid, ws in list(conns.items()):
+            try:
+                await ws.send_text(payload)
+            except Exception:
+                conns.pop(uid, None)
+
+    loop = _main_loop
+    if loop is None:
+        logger.warning("_broadcast_to_room: _main_loop not set yet, skipping")
+        return
+
+    try:
+        asyncio.get_running_loop()
+        # We're inside the event loop thread (async endpoint) — just schedule
+        asyncio.ensure_future(_send_all())
+    except RuntimeError:
+        # We're in a background / threadpool thread — schedule and wait
+        try:
+            future = asyncio.run_coroutine_threadsafe(_send_all(), loop)
+            future.result(timeout=8)
+        except Exception as exc:
+            logger.warning(f"_broadcast_to_room thread-safe send error: {exc}")
+
+
+_DEEP_KEYWORDS = frozenset([
+    "深度分析", "深度", "项目诊断", "竞品分析", "商业模式", "打分", "评分",
+    "SWOT", "市场分析", "盈利模式", "技术方案", "融资", "BP", "路演",
+    "痛点分析", "用户画像", "MVP", "竞争壁垒", "差异化",
+])
+
+
+def _classify_xiaowen_intent(query: str, history_ctx: str) -> str:
+    """Decide shallow vs deep mode. Returns 'shallow' or 'deep'."""
+    q_lower = query.lower()
+    if any(kw in q_lower for kw in _DEEP_KEYWORDS):
+        return "deep"
+    if len(query) < 30 and not any(kw in q_lower for kw in ("项目", "创业", "比赛", "产品", "方案")):
+        return "shallow"
+    if not composer_llm.enabled:
+        return "shallow"
+    try:
+        result = composer_llm.chat_json(
+            system_prompt=(
+                "你是意图分类器。判断用户消息需要浅层回复还是深层项目分析。\n"
+                "浅层(shallow)：闲聊、翻译、总结讨论、整理资料、写纪要、简单问答等。\n"
+                "深层(deep)：涉及项目诊断、竞品分析、商业模式设计、打分评估、"
+                "市场分析、技术方案评审、创业建议等需要多维度深入分析的问题。\n"
+                "只返回JSON：{\"mode\": \"shallow\"} 或 {\"mode\": \"deep\"}"
+            ),
+            user_prompt=f"聊天上下文：\n{history_ctx[-500:]}\n\n用户消息：{query[:300]}",
+            model=settings.llm_fast_model,
+            temperature=0.0,
+        )
+        return result.get("mode", "shallow") if result.get("mode") in ("shallow", "deep") else "shallow"
+    except Exception:
+        return "shallow"
+
+
+def _handle_xiaowen_mention(room_id: str, project_id: str | None, content: str, sender_name: str) -> None:
+    """Dual-mode AI: shallow (direct LLM) or deep (full multi-agent workflow).
+    Reads full conversation context, broadcasts structured ai_analysis to all members."""
+    try:
+        query = content.replace("@小文", "").replace("@xiaowen", "").strip()
+        if not query:
+            query = "你好，请问有什么可以帮助你的？"
+
+        # ── Build rich conversation context from last 30 messages ──
+        recent_msgs = chat_store.get_messages(room_id, limit=30)
+        history_lines = []
+        conv_messages = []
+        for m in recent_msgs:
+            mtype = m.get("type", "")
+            if mtype in ("text", "ai_reply"):
+                is_ai = m.get("sender_id") == "ai_xiaowen"
+                name = "小文" if is_ai else m.get("sender_name", "用户")
+                text = m.get("content", "")[:500]
+                history_lines.append(f"{name}: {text}")
+                conv_messages.append({
+                    "role": "assistant" if is_ai else "user",
+                    "content": text,
+                })
+        history_ctx = "\n".join(history_lines[-20:])
+
+        mode = _classify_xiaowen_intent(query, history_ctx)
+        logger.info(f"@小文 intent classified as: {mode} for query: {query[:80]}")
+
+        thinking_text = "小文正在思考..." if mode == "shallow" else "小文正在深度分析（可能需要 30 秒）..."
+        thinking_msg = chat_store.add_message(
+            room_id=room_id,
+            sender_id="ai_xiaowen",
+            sender_name="小文",
+            msg_type="system",
+            content=thinking_text,
+        )
+        _broadcast_to_room(room_id, {"type": "new_message", "message": thinking_msg})
+
+        reply_text = ""
+
+        if mode == "deep":
+            try:
+                from app.services.graph_workflow import run_workflow
+                result = run_workflow(
+                    message=query,
+                    mode="coursework",
+                    history_context=history_ctx,
+                    conversation_messages=conv_messages[-10:],
+                )
+                reply_text = result.get("assistant_message", "")
+                if not reply_text or len(reply_text.strip()) < 10:
+                    coach = result.get("coach_output", {})
+                    analyst = result.get("analyst_output", {})
+                    parts = []
+                    if isinstance(coach, dict) and coach.get("reply"):
+                        parts.append(coach["reply"])
+                    if isinstance(analyst, dict) and analyst.get("reply"):
+                        parts.append(analyst["reply"])
+                    if parts:
+                        reply_text = "\n\n".join(parts)
+            except Exception as e:
+                logger.error(f"@小文 deep mode failed, falling back to shallow: {e}")
+                mode = "shallow"
+
+        if mode == "shallow" or not reply_text or len(reply_text.strip()) < 5:
+            logger.info("@小文 shallow path, llm_enabled=%s", composer_llm.enabled)
+            system_prompt = (
+                "你是「小文」，一个轻量级办公助手，服务于大学生创新创业项目团队的聊天群。\n"
+                "你能看到群里所有人的完整对话，请基于对话内容给出有用的回复。\n"
+                "你的核心能力：回答问题、翻译内容、总结讨论、整理资料、给出简洁建议。\n"
+                "风格要求：友好、简洁、有条理。不要长篇大论，直接给出有用的回答。\n"
+                "以下是聊天群的最近对话内容：\n"
+                f"{history_ctx}\n"
+            )
+            if composer_llm.enabled:
+                try:
+                    reply_text = composer_llm.chat_text(
+                        system_prompt=system_prompt,
+                        user_prompt=f"{sender_name} 说: {query}",
+                        temperature=0.5,
+                    )
+                    logger.info("@小文 shallow LLM returned %d chars", len(reply_text))
+                except Exception as llm_err:
+                    logger.error("@小文 shallow LLM exception: %s", llm_err)
+                    reply_text = ""
+            else:
+                reply_text = f"收到你的消息：「{query[:50]}」。目前 AI 服务未启用，请联系管理员。"
+
+        if not reply_text or len(reply_text.strip()) < 2:
+            reply_text = "我暂时没有更多建议，你可以再详细描述一下。"
+
+        ai_msg = chat_store.add_message(
+            room_id=room_id,
+            sender_id="ai_xiaowen",
+            sender_name="小文",
+            msg_type="ai_reply",
+            content=reply_text,
+        )
+        _broadcast_to_room(room_id, {"type": "new_message", "message": ai_msg})
+
+        # ── Broadcast + persist structured AI analysis for shared panel ──
+        analysis_entry = {
+            "id": ai_msg["msg_id"],
+            "query": query[:200],
+            "reply": reply_text,
+            "mode": mode,
+            "sender": sender_name,
+            "time": ai_msg["created_at"],
+        }
+        chat_store.save_ai_analysis(room_id, analysis_entry)
+        _broadcast_to_room(room_id, {"type": "ai_analysis", "entry": analysis_entry})
+
+    except Exception as e:
+        logger.error(f"@小文 AI reply failed: {e}")
+        err_msg = chat_store.add_message(
+            room_id=room_id,
+            sender_id="ai_xiaowen",
+            sender_name="小文",
+            msg_type="ai_reply",
+            content="抱歉，我暂时无法回复，请稍后再试。",
+        )
+        _broadcast_to_room(room_id, {"type": "new_message", "message": err_msg})
+
+
+@app.websocket("/ws/chat/{room_id}")
+async def chat_websocket(websocket: WebSocket, room_id: str, user_id: str = "", user_name: str = ""):
+    import asyncio as _aio
+    global _main_loop
+    if _main_loop is None:
+        _main_loop = _aio.get_running_loop()
+    await websocket.accept()
+    if room_id not in _ws_rooms:
+        _ws_rooms[room_id] = {}
+    _ws_rooms[room_id][user_id] = websocket
+
+    for uid, ws in list(_ws_rooms[room_id].items()):
+        if uid != user_id:
+            try:
+                await ws.send_text(json.dumps({
+                    "type": "user_joined", "user_id": user_id, "user_name": user_name
+                }, ensure_ascii=False))
+            except Exception:
+                _ws_rooms[room_id].pop(uid, None)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            try:
+                payload = json.loads(data)
+            except Exception:
+                continue
+
+            msg_type = payload.get("type", "text")
+
+            if msg_type in ("video_offer", "video_answer", "ice_candidate", "video_hang_up"):
+                target = payload.get("target_user")
+                if target and target in _ws_rooms.get(room_id, {}):
+                    try:
+                        await _ws_rooms[room_id][target].send_text(json.dumps({
+                            **payload, "from_user": user_id, "from_name": user_name,
+                        }, ensure_ascii=False))
+                    except Exception:
+                        pass
+                continue
+
+            if msg_type == "reaction":
+                msg_id = payload.get("msg_id", "")
+                emoji = payload.get("emoji", "")
+                if msg_id and emoji:
+                    updated = chat_store.add_reaction(room_id, msg_id, user_id, emoji)
+                    if updated:
+                        for uid2, ws2 in list(_ws_rooms.get(room_id, {}).items()):
+                            try:
+                                await ws2.send_text(json.dumps({
+                                    "type": "reaction_update", "msg_id": msg_id,
+                                    "reactions": updated.get("reactions", {}),
+                                }, ensure_ascii=False))
+                            except Exception:
+                                pass
+                continue
+
+            if msg_type == "typing":
+                for uid2, ws2 in list(_ws_rooms.get(room_id, {}).items()):
+                    if uid2 != user_id:
+                        try:
+                            await ws2.send_text(json.dumps({
+                                "type": "typing", "user_id": user_id, "user_name": user_name
+                            }, ensure_ascii=False))
+                        except Exception:
+                            pass
+                continue
+
+            content = payload.get("content", "")
+            mentions = payload.get("mentions", [])
+            reply_to = payload.get("reply_to")
+            msg = chat_store.add_message(
+                room_id=room_id,
+                sender_id=user_id,
+                sender_name=user_name,
+                msg_type="text",
+                content=content,
+                mentions=mentions,
+                reply_to=reply_to,
+            )
+            for uid2, ws2 in list(_ws_rooms.get(room_id, {}).items()):
+                try:
+                    await ws2.send_text(json.dumps({
+                        "type": "new_message", "message": msg,
+                    }, ensure_ascii=False))
+                except Exception:
+                    _ws_rooms.get(room_id, {}).pop(uid2, None)
+
+            room = chat_store.get_room(room_id)
+            should_trigger_ai = (
+                "ai_xiaowen" in mentions
+                or "@小文" in content
+                or "ai_xiaowen" in (room or {}).get("members", [])
+            )
+            if should_trigger_ai:
+                import threading
+                threading.Thread(
+                    target=_handle_xiaowen_mention,
+                    args=(room_id, (room or {}).get("project_id"), content, user_name),
+                    daemon=True,
+                ).start()
+
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        pass
+    finally:
+        _ws_rooms.get(room_id, {}).pop(user_id, None)
+        if not _ws_rooms.get(room_id):
+            _ws_rooms.pop(room_id, None)
+        for uid2, ws2 in list(_ws_rooms.get(room_id, {}).items()):
+            try:
+                import asyncio
+                asyncio.ensure_future(ws2.send_text(json.dumps({
+                    "type": "user_left", "user_id": user_id, "user_name": user_name
+                }, ensure_ascii=False)))
+            except Exception:
+                pass
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Budget Module — REST API (multi-plan per user)
+# ═══════════════════════════════════════════════════════════════════════
+
+from app.services.budget_storage import PURPOSE_META as BUDGET_PURPOSE_META
+
+
+@app.get("/api/budget/purposes")
+def budget_purposes() -> dict:
+    return {"status": "ok", "purposes": BUDGET_PURPOSE_META}
+
+
+@app.get("/api/budget/plans/{user_id}")
+def budget_list_plans(user_id: str) -> dict:
+    plans = budget_store.list_plans(user_id)
+    return {"status": "ok", "plans": plans}
+
+
+@app.post("/api/budget/plans/{user_id}")
+def budget_create_plan(user_id: str, payload: BudgetCreatePayload) -> dict:
+    data = budget_store.create_plan(user_id, payload.name, payload.purpose)
+    return {"status": "ok", "plan": data}
+
+
+@app.delete("/api/budget/plans/{user_id}/{plan_id}")
+def budget_delete_plan(user_id: str, plan_id: str) -> dict:
+    ok = budget_store.delete_plan(user_id, plan_id)
+    return {"status": "ok" if ok else "not_found"}
+
+
+@app.get("/api/budget/{user_id}/{plan_id}")
+def budget_get(user_id: str, plan_id: str) -> dict:
+    data = budget_store.load(user_id, plan_id)
+    if data is None:
+        return {"status": "not_found", "budget": None}
+    return {"status": "ok", "budget": data}
+
+
+@app.put("/api/budget/{user_id}/{plan_id}")
+def budget_save(user_id: str, plan_id: str, payload: BudgetSavePayload) -> dict:
+    existing = budget_store.load(user_id, plan_id)
+    if existing is None:
+        return {"status": "not_found"}
+    if payload.project_costs is not None:
+        existing["project_costs"] = payload.project_costs
+    if payload.business_finance is not None:
+        existing["business_finance"] = payload.business_finance
+    if payload.competition_budget is not None:
+        existing["competition_budget"] = payload.competition_budget
+    if payload.funding_plan is not None:
+        existing["funding_plan"] = payload.funding_plan
+    if payload.name is not None:
+        existing["name"] = payload.name
+    if payload.visible_tabs is not None:
+        existing["visible_tabs"] = payload.visible_tabs
+    if payload.ai_result is not None:
+        existing["ai_result"] = payload.ai_result
+    if payload.ai_chat_history is not None:
+        existing["ai_chat_history"] = payload.ai_chat_history
+    existing = BudgetStorage.compute_cash_flow(existing)
+    saved = budget_store.save(user_id, plan_id, existing)
+    return {"status": "ok", "budget": saved}
+
+
+@app.post("/api/budget/{user_id}/{plan_id}/ai-suggest")
+def budget_ai_suggest(user_id: str, plan_id: str, payload: BudgetAISuggestPayload) -> dict:
+    budget = budget_store.load(user_id, plan_id)
+    if budget is None:
+        return {"status": "not_found"}
+    budget = BudgetStorage.compute_cash_flow(budget)
+    summary = budget.get("summary", {})
+    cost_cats = (budget.get("project_costs") or {}).get("categories") or []
+    cost_names = [item.get("name", "") for cat in cost_cats for item in cat.get("items", []) if item.get("name")]
+    streams = (budget.get("business_finance") or {}).get("revenue_streams") or []
+
+    system = """你是一位资深创业财务顾问兼比赛评委。请根据学生的项目信息和当前预算数据，给出全面的预算诊断和建议。
+必须返回一个纯JSON对象，包含以下字段：
+1. diagnosis: 对象，包含 missing_items(字符串数组, 缺失的常见成本项), unreasonable_flags(字符串数组, 不合理的假设或数字), risk_warnings(字符串数组, 2-4条风险提示)
+2. template: 对象，包含 suggested_costs(数组, 每项{name,estimated,category}), revenue_model(字符串, 收入模式建议), scenario_advice(字符串, 三档情景参数建议)
+3. pitch_summary: 字符串, Markdown格式的比赛答辩预算说明(200-400字, 包含钱花在哪/为什么值得/预期回报)
+4. faq: 数组, 3个对象每个{question, suggested_answer}, 评委最可能追问的财务问题及建议回答"""
+
+    budget_context = f"""项目类型：{payload.project_type or '未指定'}
+项目描述：{payload.project_description or '未提供详细描述'}
+方案名称：{budget.get('name', '未命名')}
+方案用途：{budget.get('purpose', '未知')}
+当前预算概况：
+- 项目成本合计：¥{summary.get('project_cost_total', 0)}
+- 比赛预算合计：¥{summary.get('competition_cost_total', 0)}
+- 总投入：¥{summary.get('total_investment', 0)}
+- 基准月收入：¥{summary.get('baseline_monthly_revenue', 0)}
+- 基准盈亏平衡月：{summary.get('breakeven_baseline', '未知')}
+- 健康度评分：{summary.get('health_score', 0)}/100
+- 资金缺口：¥{summary.get('funding_gap', 0)}
+已填写成本项：{', '.join(cost_names) if cost_names else '暂无'}
+收入来源数量：{len(streams)}"""
+
+    try:
+        suggestions = composer_llm.chat_json(
+            system_prompt=system,
+            user_prompt=budget_context,
+            model=settings.llm_fast_model,
+            temperature=0.3,
+        )
+        if not suggestions:
+            raise ValueError("Empty AI response")
+    except Exception as e:
+        logger.error(f"Budget AI suggest failed: {e}")
+        suggestions = {
+            "diagnosis": {
+                "missing_items": ["市场调研费用", "知识产权/专利费", "测试与质量保障费"],
+                "unreasonable_flags": [],
+                "risk_warnings": ["注意控制初期API调用成本", "学生用户付费意愿较低，需要验证"],
+            },
+            "template": {
+                "suggested_costs": [
+                    {"name": "云服务器(12个月)", "estimated": 2400, "category": "技术开发"},
+                    {"name": "域名(1年)", "estimated": 60, "category": "技术开发"},
+                    {"name": "API调用费", "estimated": 1000, "category": "技术开发"},
+                    {"name": "设计工具", "estimated": 500, "category": "技术开发"},
+                    {"name": "推广费用", "estimated": 2000, "category": "运营推广"},
+                ],
+                "revenue_model": "建议采用免费增值(Freemium)模式，基础功能免费，高级功能按月订阅。",
+                "scenario_advice": "悲观情景月增长率设为5%，基准10%，乐观18%。",
+            },
+            "pitch_summary": "## 预算说明\n\n本项目预计总投入约¥6,000，主要用于技术开发和早期推广。",
+            "faq": [
+                {"question": "你的盈利模式是什么？", "suggested_answer": "采用免费增值模式。"},
+                {"question": "初期资金从哪里来？", "suggested_answer": "团队自筹为主，同时申请学校创业基金支持。"},
+                {"question": "如果用户增长不及预期怎么办？", "suggested_answer": "设置了悲观情景预案。"},
+            ],
+        }
+    budget.setdefault("ai_suggestions", []).append({
+        "timestamp": _now_iso(),
+        "suggestions": suggestions,
+    })
+    budget_store.save(user_id, plan_id, budget)
+    return {"status": "ok", "suggestions": suggestions}
+
+
+@app.post("/api/budget/{user_id}/{plan_id}/ai-chat")
+def budget_ai_chat(user_id: str, plan_id: str, payload: BudgetAIChatPayload) -> dict:
+    budget = budget_store.load(user_id, plan_id)
+    if budget is None:
+        return {"status": "not_found"}
+    budget = BudgetStorage.compute_cash_flow(budget)
+    summary = budget.get("summary", {})
+
+    system = "你是一位专业的创业财务顾问。学生正在使用财务工作台规划项目预算，请基于当前预算数据回答他们的问题。回答简洁实用，用中文，可用Markdown格式。"
+
+    context = f"""方案名称：{budget.get('name', '未命名')}
+当前预算概况：总投入¥{summary.get('total_investment', 0)}，基准月收入¥{summary.get('baseline_monthly_revenue', 0)}，盈亏平衡{summary.get('breakeven_baseline', '未知')}个月，健康度{summary.get('health_score', 0)}/100。
+学生的问题：{payload.question}"""
+
+    try:
+        reply = composer_llm.chat_text(
+            system_prompt=system,
+            user_prompt=context,
+            model=settings.llm_fast_model,
+            temperature=0.5,
+        )
+        if not reply:
+            reply = "抱歉，暂时无法回答。请稍后再试。"
+    except Exception as e:
+        logger.error(f"Budget AI chat failed: {e}")
+        reply = "AI 服务暂时不可用，请稍后再试。"
+    return {"status": "ok", "reply": reply}
+
+
+def _now_iso() -> str:
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    return _dt.now(_tz(_td(hours=8))).isoformat()
+
+
+from uuid import uuid4

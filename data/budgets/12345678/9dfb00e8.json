@@ -1,0 +1,1016 @@
+{
+  "plan_id": "9dfb00e8",
+  "user_id": "12345678",
+  "name": "NoteMind 商业计划书财务模型",
+  "purpose": "business",
+  "visible_tabs": [
+    "cost",
+    "biz",
+    "comp",
+    "compare",
+    "fund"
+  ],
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-11T11:38:23.345308+08:00",
+  "updated_at": "2026-04-11T11:57:17.388997+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "阿里云ECS 4核8G",
+            "unit_price": 298,
+            "quantity": 12,
+            "total": 3576.0,
+            "note": "生产环境×12月",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "阿里云RDS MySQL",
+            "unit_price": 180,
+            "quantity": 12,
+            "total": 2160.0,
+            "note": "数据库×12月",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "Redis缓存实例",
+            "unit_price": 80,
+            "quantity": 12,
+            "total": 960.0,
+            "note": "session缓存",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "OSS对象存储",
+            "unit_price": 50,
+            "quantity": 12,
+            "total": 600.0,
+            "note": "文件/图片存储",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "CDN流量包",
+            "unit_price": 100,
+            "quantity": 4,
+            "total": 400.0,
+            "note": "季度购买",
+            "cost_type": "once"
+          },
+          {
+            "name": "域名 + SSL",
+            "unit_price": 69,
+            "quantity": 1,
+            "total": 69.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "OpenAI GPT-4o API",
+            "unit_price": 400,
+            "quantity": 12,
+            "total": 4800.0,
+            "note": "核心AI功能",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "开发工具许可证",
+            "unit_price": 200,
+            "quantity": 1,
+            "total": 200.0,
+            "note": "JetBrains + Figma",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "人力成本",
+        "items": [
+          {
+            "name": "全栈开发(兼职)",
+            "unit_price": 4000,
+            "quantity": 6,
+            "total": 24000.0,
+            "note": "前6月密集开发",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "UI/UX设计师(外包)",
+            "unit_price": 5000,
+            "quantity": 2,
+            "total": 10000.0,
+            "note": "2轮设计迭代",
+            "cost_type": "once"
+          },
+          {
+            "name": "运营实习生",
+            "unit_price": 2000,
+            "quantity": 6,
+            "total": 12000.0,
+            "note": "后6月运营期",
+            "cost_type": "monthly"
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "校园大使计划",
+            "unit_price": 200,
+            "quantity": 10,
+            "total": 2000.0,
+            "note": "10所高校×200/校",
+            "cost_type": "once"
+          },
+          {
+            "name": "KOL合作",
+            "unit_price": 1500,
+            "quantity": 3,
+            "total": 4500.0,
+            "note": "B站/小红书学习类KOL",
+            "cost_type": "once"
+          },
+          {
+            "name": "SEM投放",
+            "unit_price": 1000,
+            "quantity": 6,
+            "total": 6000.0,
+            "note": "百度+知乎 6个月",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "线下活动",
+            "unit_price": 800,
+            "quantity": 4,
+            "total": 3200.0,
+            "note": "4场校园分享会",
+            "cost_type": "once"
+          },
+          {
+            "name": "内容营销",
+            "unit_price": 500,
+            "quantity": 12,
+            "total": 6000.0,
+            "note": "公众号+知乎 12月",
+            "cost_type": "monthly"
+          }
+        ]
+      },
+      {
+        "name": "法务与知识产权",
+        "items": [
+          {
+            "name": "公司注册",
+            "unit_price": 1500,
+            "quantity": 1,
+            "total": 1500.0,
+            "note": "代理费+刻章",
+            "cost_type": "once"
+          },
+          {
+            "name": "商标注册",
+            "unit_price": 800,
+            "quantity": 2,
+            "total": 1600.0,
+            "note": "2个类别",
+            "cost_type": "once"
+          },
+          {
+            "name": "软件著作权×3",
+            "unit_price": 500,
+            "quantity": 3,
+            "total": 1500.0,
+            "note": "前端+后端+AI模块",
+            "cost_type": "once"
+          },
+          {
+            "name": "法律顾问",
+            "unit_price": 500,
+            "quantity": 12,
+            "total": 6000.0,
+            "note": "合同审核/隐私合规",
+            "cost_type": "monthly"
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": [
+          {
+            "name": "办公场地(孵化器)",
+            "unit_price": 0,
+            "quantity": 12,
+            "total": 0.0,
+            "note": "学校免费提供",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "差旅/会议",
+            "unit_price": 500,
+            "quantity": 4,
+            "total": 2000.0,
+            "note": "季度投资人见面",
+            "cost_type": "once"
+          },
+          {
+            "name": "应急备用金",
+            "unit_price": 3000,
+            "quantity": 1,
+            "total": 3000.0,
+            "note": "不可预见支出",
+            "cost_type": "once"
+          }
+        ]
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [
+      {
+        "name": "个人Pro会员",
+        "monthly_users": 5000,
+        "price": 19.9,
+        "conversion_rate": 0.06,
+        "monthly_revenue": 5970.0
+      },
+      {
+        "name": "团队协作订阅",
+        "monthly_users": 200,
+        "price": 99,
+        "conversion_rate": 0.12,
+        "monthly_revenue": 2376.0
+      },
+      {
+        "name": "AI高级功能包",
+        "monthly_users": 5000,
+        "price": 9.9,
+        "conversion_rate": 0.08,
+        "monthly_revenue": 3960.0
+      },
+      {
+        "name": "B端定制(高校)",
+        "monthly_users": 3,
+        "price": 5000,
+        "conversion_rate": 1.0,
+        "monthly_revenue": 15000.0
+      }
+    ],
+    "fixed_costs_monthly": 8500,
+    "variable_cost_per_user": 0.8,
+    "growth_rate_monthly": 0.12,
+    "scenario_models": {
+      "conservative": {
+        "label": "悲观",
+        "revenue_multiplier": 0.6,
+        "conversion_multiplier": 0.7,
+        "growth_rate_monthly": 0.05,
+        "fixed_costs_monthly": 9000.0,
+        "variable_cost_per_user": 1.0,
+        "note": "市场推广效果不佳，转化率低于预期"
+      },
+      "baseline": {
+        "label": "基准",
+        "revenue_multiplier": 1.0,
+        "conversion_multiplier": 1.0,
+        "growth_rate_monthly": 0.12,
+        "fixed_costs_monthly": 8500.0,
+        "variable_cost_per_user": 0.8,
+        "note": "按照当前增长趋势稳步发展"
+      },
+      "optimistic": {
+        "label": "乐观",
+        "revenue_multiplier": 1.4,
+        "conversion_multiplier": 1.3,
+        "growth_rate_monthly": 0.22,
+        "fixed_costs_monthly": 10000.0,
+        "variable_cost_per_user": 0.6,
+        "note": "获得爆款传播，高校批量采购"
+      }
+    },
+    "months_to_breakeven": 2,
+    "cash_flow_projection": [
+      {
+        "month": 1,
+        "revenue": 27306.0,
+        "cost": 16662.4,
+        "net": 10643.6,
+        "cumulative": 10643.6
+      },
+      {
+        "month": 2,
+        "revenue": 30582.72,
+        "cost": 17641.6,
+        "net": 12941.12,
+        "cumulative": 23584.72
+      },
+      {
+        "month": 3,
+        "revenue": 34252.65,
+        "cost": 18738.4,
+        "net": 15514.25,
+        "cumulative": 39098.97
+      },
+      {
+        "month": 4,
+        "revenue": 38362.96,
+        "cost": 19967.2,
+        "net": 18395.76,
+        "cumulative": 57494.73
+      },
+      {
+        "month": 5,
+        "revenue": 42966.52,
+        "cost": 21343.2,
+        "net": 21623.32,
+        "cumulative": 79118.05
+      },
+      {
+        "month": 6,
+        "revenue": 48122.5,
+        "cost": 22884.8,
+        "net": 25237.7,
+        "cumulative": 104355.75
+      },
+      {
+        "month": 7,
+        "revenue": 53897.2,
+        "cost": 24610.4,
+        "net": 29286.8,
+        "cumulative": 133642.55
+      },
+      {
+        "month": 8,
+        "revenue": 60364.87,
+        "cost": 26544.0,
+        "net": 33820.87,
+        "cumulative": 167463.42
+      },
+      {
+        "month": 9,
+        "revenue": 67608.65,
+        "cost": 28709.6,
+        "net": 38899.05,
+        "cumulative": 206362.47
+      },
+      {
+        "month": 10,
+        "revenue": 75721.69,
+        "cost": 31134.4,
+        "net": 44587.29,
+        "cumulative": 250949.76
+      },
+      {
+        "month": 11,
+        "revenue": 84808.29,
+        "cost": 33850.4,
+        "net": 50957.89,
+        "cumulative": 301907.65
+      },
+      {
+        "month": 12,
+        "revenue": 94985.29,
+        "cost": 36892.8,
+        "net": 58092.49,
+        "cumulative": 360000.14
+      }
+    ],
+    "scenario_results": {
+      "conservative": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 11468.52,
+            "cost": 16142.0,
+            "net": -4673.48,
+            "cumulative": -4673.48
+          },
+          {
+            "month": 2,
+            "revenue": 12041.95,
+            "cost": 16499.0,
+            "net": -4457.05,
+            "cumulative": -9130.53
+          },
+          {
+            "month": 3,
+            "revenue": 12644.04,
+            "cost": 16874.0,
+            "net": -4229.96,
+            "cumulative": -13360.49
+          },
+          {
+            "month": 4,
+            "revenue": 13276.25,
+            "cost": 17267.0,
+            "net": -3990.75,
+            "cumulative": -17351.24
+          },
+          {
+            "month": 5,
+            "revenue": 13940.06,
+            "cost": 17681.0,
+            "net": -3740.94,
+            "cumulative": -21092.18
+          },
+          {
+            "month": 6,
+            "revenue": 14637.06,
+            "cost": 18115.0,
+            "net": -3477.94,
+            "cumulative": -24570.12
+          },
+          {
+            "month": 7,
+            "revenue": 15368.91,
+            "cost": 18570.0,
+            "net": -3201.09,
+            "cumulative": -27771.21
+          },
+          {
+            "month": 8,
+            "revenue": 16137.36,
+            "cost": 19049.0,
+            "net": -2911.64,
+            "cumulative": -30682.85
+          },
+          {
+            "month": 9,
+            "revenue": 16944.23,
+            "cost": 19551.0,
+            "net": -2606.77,
+            "cumulative": -33289.62
+          },
+          {
+            "month": 10,
+            "revenue": 17791.44,
+            "cost": 20079.0,
+            "net": -2287.56,
+            "cumulative": -35577.18
+          },
+          {
+            "month": 11,
+            "revenue": 18681.01,
+            "cost": 20633.0,
+            "net": -1951.99,
+            "cumulative": -37529.17
+          },
+          {
+            "month": 12,
+            "revenue": 19615.06,
+            "cost": 21215.0,
+            "net": -1599.94,
+            "cumulative": -39129.11
+          }
+        ],
+        "months_to_breakeven": null,
+        "annual_revenue": 182545.89,
+        "annual_cost": 221675.0,
+        "annual_net": -39129.11,
+        "monthly_revenue_base": 11468.52
+      },
+      "baseline": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 27306.0,
+            "cost": 16662.4,
+            "net": 10643.6,
+            "cumulative": 10643.6
+          },
+          {
+            "month": 2,
+            "revenue": 30582.72,
+            "cost": 17641.6,
+            "net": 12941.12,
+            "cumulative": 23584.72
+          },
+          {
+            "month": 3,
+            "revenue": 34252.65,
+            "cost": 18738.4,
+            "net": 15514.25,
+            "cumulative": 39098.97
+          },
+          {
+            "month": 4,
+            "revenue": 38362.96,
+            "cost": 19967.2,
+            "net": 18395.76,
+            "cumulative": 57494.73
+          },
+          {
+            "month": 5,
+            "revenue": 42966.52,
+            "cost": 21343.2,
+            "net": 21623.32,
+            "cumulative": 79118.05
+          },
+          {
+            "month": 6,
+            "revenue": 48122.5,
+            "cost": 22884.8,
+            "net": 25237.7,
+            "cumulative": 104355.75
+          },
+          {
+            "month": 7,
+            "revenue": 53897.2,
+            "cost": 24610.4,
+            "net": 29286.8,
+            "cumulative": 133642.55
+          },
+          {
+            "month": 8,
+            "revenue": 60364.87,
+            "cost": 26544.0,
+            "net": 33820.87,
+            "cumulative": 167463.42
+          },
+          {
+            "month": 9,
+            "revenue": 67608.65,
+            "cost": 28709.6,
+            "net": 38899.05,
+            "cumulative": 206362.47
+          },
+          {
+            "month": 10,
+            "revenue": 75721.69,
+            "cost": 31134.4,
+            "net": 44587.29,
+            "cumulative": 250949.76
+          },
+          {
+            "month": 11,
+            "revenue": 84808.29,
+            "cost": 33850.4,
+            "net": 50957.89,
+            "cumulative": 301907.65
+          },
+          {
+            "month": 12,
+            "revenue": 94985.29,
+            "cost": 36892.8,
+            "net": 58092.49,
+            "cumulative": 360000.14
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 658979.34,
+        "annual_cost": 298979.2,
+        "annual_net": 360000.14,
+        "monthly_revenue_base": 27306.0
+      },
+      "optimistic": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 49696.92,
+            "cost": 17957.8,
+            "net": 31739.12,
+            "cumulative": 31739.12
+          },
+          {
+            "month": 2,
+            "revenue": 60630.24,
+            "cost": 19708.0,
+            "net": 40922.24,
+            "cumulative": 72661.36
+          },
+          {
+            "month": 3,
+            "revenue": 73968.9,
+            "cost": 21844.0,
+            "net": 52124.9,
+            "cumulative": 124786.26
+          },
+          {
+            "month": 4,
+            "revenue": 90242.05,
+            "cost": 24449.8,
+            "net": 65792.25,
+            "cumulative": 190578.51
+          },
+          {
+            "month": 5,
+            "revenue": 110095.3,
+            "cost": 27628.6,
+            "net": 82466.7,
+            "cumulative": 273045.21
+          },
+          {
+            "month": 6,
+            "revenue": 134316.27,
+            "cost": 31507.6,
+            "net": 102808.67,
+            "cumulative": 375853.88
+          },
+          {
+            "month": 7,
+            "revenue": 163865.85,
+            "cost": 36239.2,
+            "net": 127626.65,
+            "cumulative": 503480.53
+          },
+          {
+            "month": 8,
+            "revenue": 199916.34,
+            "cost": 42011.8,
+            "net": 157904.54,
+            "cumulative": 661385.07
+          },
+          {
+            "month": 9,
+            "revenue": 243897.93,
+            "cost": 49054.0,
+            "net": 194843.93,
+            "cumulative": 856229.0
+          },
+          {
+            "month": 10,
+            "revenue": 297555.48,
+            "cost": 57646.0,
+            "net": 239909.48,
+            "cumulative": 1096138.48
+          },
+          {
+            "month": 11,
+            "revenue": 363017.68,
+            "cost": 68128.6,
+            "net": 294889.08,
+            "cumulative": 1391027.56
+          },
+          {
+            "month": 12,
+            "revenue": 442881.57,
+            "cost": 80917.0,
+            "net": 361964.57,
+            "cumulative": 1752992.13
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 2230084.53,
+        "annual_cost": 477092.4,
+        "annual_net": 1752992.13,
+        "monthly_revenue_base": 49696.92
+      }
+    }
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "互联网+报名",
+        "amount": 0.0,
+        "note": "免费"
+      },
+      {
+        "name": "省赛差旅",
+        "amount": 1500.0,
+        "note": ""
+      },
+      {
+        "name": "国赛差旅",
+        "amount": 5000.0,
+        "note": "预留"
+      },
+      {
+        "name": "路演视频",
+        "amount": 2000.0,
+        "note": "专业团队"
+      },
+      {
+        "name": "展示物料",
+        "amount": 800.0,
+        "note": ""
+      }
+    ],
+    "funding_sources": [
+      {
+        "name": "创始团队自筹",
+        "amount": 30000,
+        "note": "4人×7500"
+      },
+      {
+        "name": "学校创业孵化基金",
+        "amount": 20000,
+        "note": "通过入驻评审"
+      },
+      {
+        "name": "天使投资意向",
+        "amount": 50000,
+        "note": "创新工场pre-seed"
+      },
+      {
+        "name": "政府双创补贴",
+        "amount": 10000,
+        "note": "大学生创业补贴"
+      }
+    ]
+  },
+  "funding_plan": {
+    "startup_capital_needed": 96065,
+    "sources": [],
+    "monthly_gap": [],
+    "fundraising_notes": "第一阶段(前6月)以自筹+学校基金为主，控制在5万以内完成MVP上线。第二阶段(7-12月)争取天使投资5万元，用于规模化推广。如B端高校合同落地，可实现第8-9月盈亏平衡。融资节奏：种子轮50万目标，计划在产品上线3个月后启动。"
+  },
+  "ai_suggestions": [
+    {
+      "timestamp": "2026-04-11T11:45:25.384370+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "客户获取成本",
+            "技术支持成本",
+            "售后服务成本"
+          ],
+          "unreasonable_flags": [
+            "基准盈亏平衡月为2个月，对于初创项目来说可能过于乐观",
+            "应急备用金金额较低"
+          ],
+          "risk_warnings": [
+            "市场竞争加剧",
+            "技术更新迭代速度过快",
+            "用户留存率低",
+            "收入来源单一"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥10000.0",
+              "category": "市场"
+            },
+            {
+              "name": "客户获取成本",
+              "estimated": "¥15000.0",
+              "category": "营销"
+            },
+            {
+              "name": "技术支持成本",
+              "estimated": "¥5000.0",
+              "category": "运营"
+            },
+            {
+              "name": "售后服务成本",
+              "estimated": "¥3000.0",
+              "category": "运营"
+            }
+          ],
+          "revenue_model": "多元化收入模式，包括订阅费、广告费、增值服务费和数据服务费",
+          "scenario_advice": "建议设置三档情景参数：乐观情景（收入增长50%）、中性情景（收入增长30%）、悲观情景（收入增长10%）"
+        },
+        "pitch_summary": "NoteMind 商业计划书财务模型旨在通过全面的成本预算和收入预测，确保项目在初期能够稳健发展。预算中详细列出了各项成本，包括技术、人力、市场推广等。我们预计通过多元化收入模式，能够在2个月内实现盈亏平衡。尽管预算健康度评分较高，但我们也意识到市场竞争和技术更新的挑战，因此设置了充足的应急备用金，并建议设置三档情景参数以应对不同市场情况。",
+        "faq": [
+          {
+            "question": "你们的盈利模式是什么？",
+            "suggested_answer": "我们的盈利模式是多元化收入模式，包括订阅费、广告费、增值服务费和数据服务费。"
+          },
+          {
+            "question": "你们的预算中是否考虑了市场调研和客户获取成本？",
+            "suggested_answer": "是的，我们的预算中已经考虑了市场调研和客户获取成本，以确保项目的成功。"
+          },
+          {
+            "question": "你们如何应对市场竞争和技术更新的挑战？",
+            "suggested_answer": "我们已经设置了充足的应急备用金，并建议设置三档情景参数以应对不同市场情况。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:50:35.849754+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "用户获取成本",
+            "技术支持成本",
+            "维护成本"
+          ],
+          "unreasonable_flags": [
+            "基准盈亏平衡月过短",
+            "应急备用金过低"
+          ],
+          "risk_warnings": [
+            "市场竞争加剧可能导致收入下降",
+            "技术更新迭代速度过快",
+            "用户获取成本可能高于预期",
+            "缺乏长期财务规划可能导致资金链断裂"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": 10000,
+              "category": "市场"
+            },
+            {
+              "name": "用户获取成本",
+              "estimated": 20000,
+              "category": "营销"
+            },
+            {
+              "name": "技术支持成本",
+              "estimated": 5000,
+              "category": "技术"
+            },
+            {
+              "name": "维护成本",
+              "estimated": 3000,
+              "category": "运营"
+            }
+          ],
+          "revenue_model": "多元化收入模式，包括订阅服务、广告收入、增值服务和企业合作。",
+          "scenario_advice": "建议设定三档情景参数：乐观情景下月收入为基准收入的120%，悲观情景下月收入为基准收入的80%，正常情景下维持当前基准收入。"
+        },
+        "pitch_summary": "NoteMind 商业计划书财务模型涵盖了从技术开发到市场推广的全方位成本。我们投入大量资金在云服务、开发人员和营销活动上，以确保产品稳定运行并快速获取用户。预期回报包括稳定的订阅收入、广告收入和企业合作收益，这些都将为公司带来持续的现金流和利润。我们建议增加市场调研和用户获取成本的预算，以应对潜在的市场变化和技术挑战。",
+        "faq": [
+          {
+            "question": "你们的盈亏平衡点是如何计算的？",
+            "suggested_answer": "我们的盈亏平衡点是基于当前的收入和成本结构计算得出的。我们预计在第二个月实现盈亏平衡，但考虑到市场和技术的不确定性，我们建议设定更保守的盈亏平衡目标。"
+          },
+          {
+            "question": "你们如何确保资金链的稳定性？",
+            "suggested_answer": "我们已经预留了应急备用金，并且制定了多元化的收入模式。此外，我们还计划通过优化成本结构和提高运营效率来增强资金链的稳定性。"
+          },
+          {
+            "question": "你们的市场调研预算如何分配？",
+            "suggested_answer": "市场调研预算将用于了解目标市场的需求、竞争对手分析和用户反馈。我们将通过在线调查、焦点小组和行业报告等方式进行市场调研。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:57:02.641408+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "用户获取成本",
+            "技术支持成本",
+            "维护成本",
+            "营销活动成本"
+          ],
+          "unreasonable_flags": [
+            "基准盈亏平衡月为2个月，可能过于乐观",
+            "应急备用金金额较低"
+          ],
+          "risk_warnings": [
+            "市场竞争激烈，需考虑竞争对手的动态",
+            "用户获取成本可能高于预期",
+            "技术更新迅速，需持续投入研发",
+            "收入模式单一，需多元化收入来源"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥5000",
+              "category": "市场"
+            },
+            {
+              "name": "用户获取成本",
+              "estimated": "¥10000",
+              "category": "用户"
+            },
+            {
+              "name": "技术支持成本",
+              "estimated": "¥8000",
+              "category": "技术"
+            },
+            {
+              "name": "维护成本",
+              "estimated": "¥3000",
+              "category": "运营"
+            },
+            {
+              "name": "营销活动成本",
+              "estimated": "¥7000",
+              "category": "营销"
+            }
+          ],
+          "revenue_model": "建议增加订阅模式和广告模式，以提高收入稳定性",
+          "scenario_advice": "建议准备低、中、高三种情景参数，低情景假设收入增长缓慢，中情景为当前预测，高情景假设市场快速扩张"
+        },
+        "pitch_summary": "NoteMind 商业计划书财务模型旨在通过优化成本结构和收入模式，实现快速盈利。项目成本包括阿里云服务、开发人员和营销活动等，预计基准月收入为¥27306。我们建议增加订阅模式和广告模式，以提高收入稳定性。同时，我们准备了低、中、高三种情景参数，以应对市场变化。NoteMind 的目标是通过高效的资金使用和合理的收入模式，实现可持续发展。",
+        "faq": [
+          {
+            "question": "为什么基准盈亏平衡月为2个月？",
+            "suggested_answer": "我们基于当前的收入预测和成本结构，预计在2个月内实现盈亏平衡。但是，我们也会准备低、中、高三种情景参数，以应对市场变化。"
+          },
+          {
+            "question": "如何确保用户获取成本不会过高？",
+            "suggested_answer": "我们将通过多种渠道获取用户，包括社交媒体、内容营销和合作伙伴关系。同时，我们也会定期评估用户获取成本，以确保其合理性。"
+          },
+          {
+            "question": "如何应对技术更新迅速的问题？",
+            "suggested_answer": "我们将持续投入研发，以保持技术领先。同时，我们也会与技术合作伙伴保持紧密联系，以获取最新的技术动态。"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "project_cost_total": 96065.0,
+    "competition_cost_total": 9300.0,
+    "total_investment": 105365.0,
+    "baseline_monthly_revenue": 27306.0,
+    "baseline_annual_net": 360000.14,
+    "funding_gap": 0.0,
+    "health_score": 82,
+    "breakeven_fastest": 2,
+    "breakeven_baseline": 2,
+    "breakeven_slowest": null
+  },
+  "ai_result": {
+    "diagnosis": {
+      "missing_items": [
+        "市场调研",
+        "用户获取成本",
+        "技术支持成本",
+        "维护成本",
+        "营销活动成本"
+      ],
+      "unreasonable_flags": [
+        "基准盈亏平衡月为2个月，可能过于乐观",
+        "应急备用金金额较低"
+      ],
+      "risk_warnings": [
+        "市场竞争激烈，需考虑竞争对手的动态",
+        "用户获取成本可能高于预期",
+        "技术更新迅速，需持续投入研发",
+        "收入模式单一，需多元化收入来源"
+      ]
+    },
+    "template": {
+      "suggested_costs": [
+        {
+          "name": "市场调研",
+          "estimated": "¥5000",
+          "category": "市场"
+        },
+        {
+          "name": "用户获取成本",
+          "estimated": "¥10000",
+          "category": "用户"
+        },
+        {
+          "name": "技术支持成本",
+          "estimated": "¥8000",
+          "category": "技术"
+        },
+        {
+          "name": "维护成本",
+          "estimated": "¥3000",
+          "category": "运营"
+        },
+        {
+          "name": "营销活动成本",
+          "estimated": "¥7000",
+          "category": "营销"
+        }
+      ],
+      "revenue_model": "建议增加订阅模式和广告模式，以提高收入稳定性",
+      "scenario_advice": "建议准备低、中、高三种情景参数，低情景假设收入增长缓慢，中情景为当前预测，高情景假设市场快速扩张"
+    },
+    "pitch_summary": "NoteMind 商业计划书财务模型旨在通过优化成本结构和收入模式，实现快速盈利。项目成本包括阿里云服务、开发人员和营销活动等，预计基准月收入为¥27306。我们建议增加订阅模式和广告模式，以提高收入稳定性。同时，我们准备了低、中、高三种情景参数，以应对市场变化。NoteMind 的目标是通过高效的资金使用和合理的收入模式，实现可持续发展。",
+    "faq": [
+      {
+        "question": "为什么基准盈亏平衡月为2个月？",
+        "suggested_answer": "我们基于当前的收入预测和成本结构，预计在2个月内实现盈亏平衡。但是，我们也会准备低、中、高三种情景参数，以应对市场变化。"
+      },
+      {
+        "question": "如何确保用户获取成本不会过高？",
+        "suggested_answer": "我们将通过多种渠道获取用户，包括社交媒体、内容营销和合作伙伴关系。同时，我们也会定期评估用户获取成本，以确保其合理性。"
+      },
+      {
+        "question": "如何应对技术更新迅速的问题？",
+        "suggested_answer": "我们将持续投入研发，以保持技术领先。同时，我们也会与技术合作伙伴保持紧密联系，以获取最新的技术动态。"
+      }
+    ]
+  },
+  "ai_chat_history": [
+    {
+      "q": "我的收入模型是否合理？个人Pro会员6%的付费转化率高不高？",
+      "a": "根据你提供的数据，我们可以对你的收入模型和付费转化率进行一些分析。\n\n### 收入模型合理性\n- **基准月收入**：¥27,306.0\n- **总投入**：¥105,365.0\n- **盈亏平衡时间**：2个月\n\n从盈亏平衡时间来看，2个月的盈亏平衡时间在初创项目中算是比较快的，这表明你的收入模型在短期内有较强的盈利能力。不过，这还需要结合实际市场情况和运营效率来看。\n\n### 付费转化率\n- **个人Pro会员付费转化率**：6%\n\n6%的付费转化率在互联网产品中属于中等偏上水平。以下是一些参考数据：\n- 行业内，SaaS产品的平均付费转化率大约在1%到5%之间。\n- 在一些特定领域，如教育和专业服务，付费转化率可能会更高。\n\n### 建议\n1. **市场调研**：进一步了解目标用户群体的支付意愿和习惯，确保付费转化率预估是准确的。\n2. **优化产品**：提高用户对产品的满意度和忠诚度，从而提升付费转化率。\n3. **营销策略**：制定有效的营销策略，吸引更多潜在付费用户。\n\n综上所述，你的收入模型在短期内具备较强的盈利能力，而6%的付费转化率在互联网产品中是合理的。但还需要结合具体市场情况和运营策略进行优化。"
+    },
+    {
+      "q": "如果要向投资人路演，我的财务数据有哪些薄弱点需要加强？",
+      "a": "根据你提供的财务数据，以下是几个需要加强的方面：\n\n1. **收入增长率**：基准月收入为¥27306.0，但没有提供收入增长率的数据。投资人通常会关注收入的增长趋势，这可以展示业务的增长潜力。\n\n2. **利润率**：虽然已经达到了2个月的盈亏平衡，但利润率未提及。利润率越高，说明单位收入带来的利润越多，这可以增强投资人的信心。\n\n3. **成本结构**：详细的成本结构可以帮助投资人更好地理解你的商业模式。例如，固定成本和变动成本的比例，以及是否有可优化的空间。\n\n4. **现金流预测**：现金流是企业生存的关键，提供详细的现金流预测可以帮助投资人了解企业的资金流动情况，确认是否有足够的现金流来支持业务的持续发展。\n\n5. **敏感性分析**：进行敏感性分析，展示关键假设变化对财务预测的影响，这可以展示你对市场变化的应对能力。\n\n6. **未来规划**：提供未来几年的财务预测，包括收入、利润和现金流，这可以展示你的长期规划和业务扩展计划。\n\n通过加强以上几点，可以提升财务数据的完整性和说服力，从而更好地吸引投资人的注意。"
+    },
+    {
+      "q": "B端高校定制这条收入线风险大吗？如何降低依赖？",
+      "a": "根据当前的预算数据，B端高校定制收入线的风险主要体现在收入来源单一，依赖度较高。降低依赖度的方法包括：\n\n1. **拓展收入来源**：开发新的收入来源，如C端用户市场或企业市场。\n2. **多元化产品或服务**：提供更多样化的产品或服务，吸引不同类型的客户。\n3. **市场调研**：深入了解客户需求，开发满足不同客户群体的产品或服务。\n4. **建立合作伙伴关系**：与其他企业或机构合作，共同开发市场，降低单一客户或市场带来的风险。\n5. **提升产品竞争力**：确保产品或服务的竞争力，提高市场占有率。\n\n通过这些措施，可以有效降低对B端高校定制收入的依赖，提高项目的整体稳定性。"
+    },
+    {
+      "q": "三档情景分析的参数设置是否合理？如何向评委解释？",
+      "a": "### 三档情景分析参数合理性评估\n\n#### 乐观情景\n- **月收入增长**：增加10%（即29,936.6元/月）\n- **成本**：减少5%\n- **解释**：这代表了业务在最佳条件下运行，市场接受度高，成本控制得当。\n\n#### 中性情景\n- **月收入增长**：保持基准（即27,306元/月）\n- **成本**：保持不变\n- **解释**：这是基于当前的市场预测和运营效率，代表了最可能的业务发展情况。\n\n#### 悲观情景\n- **月收入增长**：减少10%（即24,675.4元/月）\n- **成本**：增加5%\n- **解释**：这代表了业务面临的最差情况，市场需求低，成本增加。\n\n### 向评委解释\n1. **情景选择依据**：基于市场调研、历史数据和行业趋势。\n2. **风险与机会**：展示不同情景下的风险和机会，帮助评委理解项目的稳健性和适应性。\n3. **财务健康度**：强调即使在最差情况下，项目也能在较短时间内达到盈亏平衡，说明项目具有较强的抗风险能力。\n4. **预算灵活性**：说明在不同情景下，预算如何调整以应对市场变化，确保项目的可持续性。\n\n以上解释能够全面展示项目的财务稳健性和灵活性，有助于评委更好地理解项目的风险和机会。"
+    }
+  ]
+}

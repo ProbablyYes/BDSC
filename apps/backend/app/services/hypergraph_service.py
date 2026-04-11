@@ -346,6 +346,118 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "pattern_type": "risk",
         "linked_rules": ["H4", "H6"],
     },
+    {
+        "id": "T37_revenue_sustainability",
+        "name": "收入可持续性",
+        "dimensions": ["business_model", "market", "evidence"],
+        "description": "收入模型是否可持续而非一次性",
+        "pattern_type": "risk",
+        "linked_rules": ["H8", "H26"],
+    },
+    {
+        "id": "T38_demand_supply_match",
+        "name": "供需匹配",
+        "dimensions": ["stakeholder", "pain_point", "market", "solution"],
+        "description": "用户需求与产品供给是否真正匹配",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T39_founder_risk",
+        "name": "创始人风险",
+        "dimensions": ["team", "execution_step", "risk"],
+        "description": "关键人物依赖与单点故障风险",
+        "pattern_type": "risk",
+        "linked_rules": ["H10", "H21", "H25"],
+    },
+    {
+        "id": "T40_ethical_bias",
+        "name": "伦理偏见",
+        "dimensions": ["solution", "stakeholder", "risk"],
+        "description": "AI/算法类项目的公平性与伦理风险",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H22"],
+    },
+    {
+        "id": "T41_assumption_stack",
+        "name": "假设堆叠",
+        "dimensions": ["pain_point", "solution", "evidence", "business_model"],
+        "description": "项目建立在多少层未验证假设之上",
+        "pattern_type": "risk",
+        "linked_rules": ["H5", "H7", "H20"],
+    },
+    {
+        "id": "T42_metric_definition",
+        "name": "指标定义",
+        "dimensions": ["evidence", "solution", "business_model"],
+        "description": "成功指标是否清晰可衡量",
+        "pattern_type": "ideal",
+        "linked_rules": ["H13", "H20"],
+    },
+    {
+        "id": "T43_market_segmentation",
+        "name": "市场细分",
+        "dimensions": ["stakeholder", "market", "pain_point"],
+        "description": "目标市场是否过于笼统缺乏聚焦",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H4", "H19"],
+    },
+    {
+        "id": "T44_competitive_response",
+        "name": "竞品反应",
+        "dimensions": ["innovation", "market", "solution"],
+        "description": "竞品或巨头的模仿与反制风险",
+        "pattern_type": "risk",
+        "linked_rules": ["H6", "H7", "H16"],
+    },
+    {
+        "id": "T45_milestone_dependency",
+        "name": "里程碑依赖",
+        "dimensions": ["execution_step", "solution", "business_model"],
+        "description": "里程碑之间的依赖关系与容错空间",
+        "pattern_type": "risk",
+        "linked_rules": ["H10", "H21"],
+    },
+    {
+        "id": "T46_funding_stage_fit",
+        "name": "融资阶段匹配",
+        "dimensions": ["business_model", "market", "evidence"],
+        "description": "融资节奏与业务阶段是否匹配",
+        "pattern_type": "risk",
+        "linked_rules": ["H9", "H24"],
+    },
+    {
+        "id": "T47_switching_cost",
+        "name": "用户切换成本",
+        "dimensions": ["stakeholder", "solution", "innovation"],
+        "description": "用户从现有方案迁移到新方案的成本",
+        "pattern_type": "risk",
+        "linked_rules": ["H16", "H17"],
+    },
+    {
+        "id": "T48_network_effect",
+        "name": "网络效应",
+        "dimensions": ["stakeholder", "solution", "market", "business_model"],
+        "description": "产品是否具备真正的网络效应增长逻辑",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7", "H9"],
+    },
+    {
+        "id": "T49_cross_dimension_coherence",
+        "name": "跨维度一致性",
+        "dimensions": ["stakeholder", "solution", "business_model", "market"],
+        "description": "项目各维度之间叙述是否自洽连贯",
+        "pattern_type": "ideal",
+        "linked_rules": ["H14"],
+    },
+    {
+        "id": "T50_esg_measurability",
+        "name": "ESG可量化",
+        "dimensions": ["stakeholder", "pain_point", "evidence"],
+        "description": "社会影响是否可量化可验证",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H13"],
+    },
 ]
 
 
@@ -565,11 +677,193 @@ _CONSISTENCY_RULES: list[dict[str, Any]] = [
             "请列出3个最可能让项目失败的风险，并给出各自的一条缓解措施。",
         ],
     },
+    {
+        "id": "G21_revenue_not_sustainable",
+        "description": "有商业模式但无持续收入逻辑",
+        "predicate": lambda dims, ents: dims.get("business_model") and not any(k in " ".join(ents.get("text", [])) for k in ["复购", "续费", "订阅", "持续", "年费", "月费", "续约"]),
+        "message": "商业模式中未提及用户如何持续付费，收入可能是一次性的。",
+        "pressure": [
+            "用户第一次付费之后，什么机制能让他们持续付费或再次购买？",
+            "如果用户只用一次就走了，你的LTV能覆盖CAC吗？",
+        ],
+    },
+    {
+        "id": "G22_demand_supply_mismatch",
+        "description": "痛点与方案之间存在错位迹象",
+        "predicate": lambda dims, ents: dims.get("pain_point") and dims.get("solution") and not dims.get("evidence"),
+        "message": "有痛点有方案但缺少验证两者匹配的证据，可能存在需求-供给错位。",
+        "pressure": [
+            "你的用户真的需要你提供的这种解决方式吗？有没有直接问过他们？",
+            "如果用户的核心诉求是省钱，但你的方案是省时间，这算匹配吗？",
+        ],
+    },
+    {
+        "id": "G23_founder_dependency",
+        "description": "执行步骤中只出现单一角色",
+        "predicate": lambda dims, ents: dims.get("team") and not any(k in " ".join(ents.get("text", [])) for k in ["分工", "负责人", "谁来", "各自", "团队成员"]),
+        "message": "执行计划中缺少明确的分工，可能存在创始人单点依赖风险。",
+        "pressure": [
+            "如果你（创始人）明天生病住院一周，项目还能按计划推进吗？",
+            "请画出团队分工图，标出每个里程碑的负责人。",
+        ],
+    },
+    {
+        "id": "G24_ai_ethics_missing",
+        "description": "使用AI/算法但未讨论伦理公平性",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])).lower() for k in ["ai", "算法", "推荐", "机器学习", "深度学习"]) and not any(k in " ".join(ents.get("text", [])) for k in ["公平", "偏见", "伦理", "歧视", "透明"]),
+        "message": "项目使用AI/算法决策但未讨论公平性与伦理风险。",
+        "pressure": [
+            "你的算法对不同用户群体（性别、年龄、地域）是否同等公平？",
+            "如果算法出错导致用户利益受损，责任归谁？有什么纠错机制？",
+        ],
+    },
+    {
+        "id": "G25_assumption_unverified",
+        "description": "有方案和商业模式但缺少验证证据",
+        "predicate": lambda dims, ents: dims.get("solution") and dims.get("business_model") and not dims.get("evidence"),
+        "message": "方案和商业模式都有了但建立在未验证的假设之上，评委会追问依据。",
+        "pressure": [
+            "从'用户有这个痛点'到'他们愿意为你的方案付钱'，中间有几个假设？每个验证了吗？",
+            "请列出你项目的前三个核心假设，并说明各自的验证状态。",
+        ],
+    },
+    {
+        "id": "G26_no_success_metric",
+        "description": "声称效果好但缺少具体量化指标",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["效果好", "提升了", "改善了", "显著", "大幅"]) and not any(k in " ".join(ents.get("text", [])) for k in ["%", "倍", "分钟", "小时", "元", "人次", "万"]),
+        "message": "存在定性描述但缺少量化指标，评委无法判断效果。",
+        "pressure": [
+            "你说'效果好'，请给出一个具体数字：好多少？跟谁比？怎么测量的？",
+        ],
+    },
+    {
+        "id": "G27_market_too_broad",
+        "description": "目标市场描述过于笼统",
+        "predicate": lambda dims, ents: dims.get("market") and dims.get("stakeholder") and any(k in " ".join(ents.get("text", [])) for k in ["所有", "全国", "千万", "亿", "大学生", "所有人", "白领"]) and not any(k in " ".join(ents.get("text", [])) for k in ["细分", "聚焦", "首批", "种子用户", "第一批"]),
+        "message": "目标市场描述过于笼统，缺少细分聚焦策略。",
+        "pressure": [
+            "如果只能服务100个人，你会选哪100个？为什么是他们？",
+            "请把'面向大学生'具体到：什么大学、什么专业、什么年级、什么场景。",
+        ],
+    },
+    {
+        "id": "G28_no_competitive_defense",
+        "description": "有创新点但未考虑竞品模仿风险",
+        "predicate": lambda dims, ents: dims.get("innovation") and not dims.get("competitor"),
+        "message": "有创新主张但未分析竞品可能的模仿或反制策略。",
+        "pressure": [
+            "如果字节跳动/腾讯明天决定做同样的事，你的应对方案是什么？",
+            "你的创新点能撑多久不被抄？6个月？1年？依据是什么？",
+        ],
+    },
+    {
+        "id": "G29_milestone_no_dependency",
+        "description": "有执行步骤但未说明依赖关系",
+        "predicate": lambda dims, ents: dims.get("execution_step") and not any(k in " ".join(ents.get("text", [])) for k in ["依赖", "前置", "之后才", "完成后", "基于上一步"]),
+        "message": "列出了里程碑但未说明相互依赖关系和容错路径。",
+        "pressure": [
+            "你的第二步是否依赖第一步的结果？如果第一步失败了怎么办？",
+        ],
+    },
+    {
+        "id": "G30_funding_without_evidence",
+        "description": "提到融资但缺少业务验证",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["融资", "天使轮", "A轮", "投资", "风投"]) and not dims.get("evidence"),
+        "message": "谈到融资计划但缺少产品市场匹配(PMF)的验证证据。",
+        "pressure": [
+            "在种子期就谈融资，投资人第一个问题会是：你有多少付费用户？",
+            "你的产品有PMF的证据吗？如果没有，融资计划就是空中楼阁。",
+        ],
+    },
+    {
+        "id": "G31_no_switching_cost_analysis",
+        "description": "有方案但未分析用户切换成本",
+        "predicate": lambda dims, ents: dims.get("solution") and dims.get("stakeholder") and not any(k in " ".join(ents.get("text", [])) for k in ["替代", "迁移", "切换", "改用", "取代", "习惯"]),
+        "message": "提出了新方案但未分析用户从现有方案切换过来的成本。",
+        "pressure": [
+            "用户现在用什么解决这个问题？虽然不完美但免费/习惯了。你凭什么让他们换？",
+        ],
+    },
+    {
+        "id": "G32_network_effect_unproven",
+        "description": "声称网络效应但缺少增长数据",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["网络效应", "飞轮", "越多越好", "规模效应"]) and not dims.get("evidence"),
+        "message": "声称存在网络效应但缺少实际增长数据支撑。",
+        "pressure": [
+            "真正的网络效应是'用户越多产品越好用'。你的产品是这样吗？还是只是'数据越多'？",
+        ],
+    },
+    {
+        "id": "G33_cross_dim_incoherence",
+        "description": "多维度齐全但叙事不一致",
+        "predicate": lambda dims, ents: sum(1 for v in dims.values() if v) >= 4 and dims.get("business_model") and dims.get("stakeholder") and not dims.get("evidence"),
+        "message": "项目维度较全但缺少贯穿各维度的证据链，叙事一致性可能不足。",
+        "pressure": [
+            "你的目标用户、解决方案、商业模式和市场定位讲的是同一个故事吗？",
+            "请用一句话串起你的'用户→痛点→方案→收费→增长'逻辑链。",
+        ],
+    },
+    {
+        "id": "G34_esg_not_measurable",
+        "description": "涉及社会影响但未量化",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["公益", "社会", "ESG", "乡村", "扶贫", "助农", "环保"]) and not any(k in " ".join(ents.get("text", [])) for k in ["%", "人次", "万", "覆盖", "减少", "降低"]),
+        "message": "涉及社会影响但缺少可量化指标，评委无法评估实际效果。",
+        "pressure": [
+            "你说'帮助了很多人'——具体帮助了多少人？改善了多少？用什么指标衡量？",
+            "请给出一个社会影响的量化目标，比如'第一年覆盖XX个村/XX户'。",
+        ],
+    },
 ]
 
 
 _OVERRIDES = _load_teacher_overrides()
 _HYPEREDGE_TEMPLATES = _apply_template_overrides(_HYPEREDGE_TEMPLATES, _OVERRIDES.get("hyperedge_templates"))
+EDGE_FAMILY_GROUPS: dict[str, list[str]] = {
+    "价值叙事与一致性": [
+        "Value_Loop_Edge", "User_Journey_Edge", "Presentation_Narrative_Edge",
+        "Cross_Dimension_Coherence_Edge", "Stage_Goal_Fit_Edge",
+    ],
+    "用户-市场-需求": [
+        "User_Pain_Fit_Edge", "Market_Segmentation_Edge",
+        "Demand_Supply_Match_Edge", "Market_Competition_Edge",
+    ],
+    "风险、证据与评分": [
+        "Risk_Pattern_Edge", "Evidence_Grounding_Edge",
+        "Rule_Rubric_Tension_Edge", "Assumption_Stack_Edge", "Metric_Definition_Edge",
+    ],
+    "执行、团队与里程碑": [
+        "Execution_Gap_Edge", "Team_Capability_Gap_Edge",
+        "Milestone_Dependency_Edge", "MVP_Scope_Edge", "Founder_Risk_Edge",
+    ],
+    "合规、监管与伦理": [
+        "Compliance_Safety_Edge", "Regulatory_Landscape_Edge", "Ethical_Bias_Edge",
+    ],
+    "单位经济与财务结构": [
+        "Pricing_Unit_Economics_Edge", "Cost_Structure_Edge",
+        "Revenue_Sustainability_Edge", "Resource_Leverage_Edge", "Funding_Stage_Fit_Edge",
+    ],
+    "产品差异化与竞争动态": [
+        "Innovation_Validation_Edge", "Substitute_Migration_Edge",
+        "Competitive_Response_Edge", "IP_Moat_Edge", "Switching_Cost_Edge",
+        "Network_Effect_Edge", "Pivot_Signal_Edge",
+    ],
+    "增长、渠道与规模化": [
+        "Trust_Adoption_Edge", "Retention_Workflow_Embed_Edge",
+        "Channel_Conversion_Edge", "Scalability_Bottleneck_Edge",
+        "Data_Flywheel_Edge", "Timing_Window_Edge",
+    ],
+    "生态与多方利益": [
+        "Ecosystem_Dependency_Edge", "Stakeholder_Conflict_Edge", "Ontology_Grounded_Edge",
+    ],
+    "社会与ESG": [
+        "Social_Impact_Edge", "ESG_Measurability_Edge",
+    ],
+}
+
+_FAMILY_TO_GROUP: dict[str, str] = {
+    fam: grp for grp, fams in EDGE_FAMILY_GROUPS.items() for fam in fams
+}
+
 EDGE_FAMILY_LABELS: dict[str, str] = {
     "Value_Loop_Edge": "价值闭环超边",
     "User_Pain_Fit_Edge": "用户痛点匹配超边",
@@ -602,6 +896,20 @@ EDGE_FAMILY_LABELS: dict[str, str] = {
     "Presentation_Narrative_Edge": "路演叙事线超边",
     "Resource_Leverage_Edge": "资源杠杆超边",
     "Timing_Window_Edge": "时机窗口超边",
+    "Revenue_Sustainability_Edge": "收入可持续性超边",
+    "Demand_Supply_Match_Edge": "供需匹配超边",
+    "Founder_Risk_Edge": "创始人风险超边",
+    "Ethical_Bias_Edge": "伦理偏见超边",
+    "Assumption_Stack_Edge": "假设堆叠超边",
+    "Metric_Definition_Edge": "指标定义超边",
+    "Market_Segmentation_Edge": "市场细分超边",
+    "Competitive_Response_Edge": "竞品反应超边",
+    "Milestone_Dependency_Edge": "里程碑依赖超边",
+    "Funding_Stage_Fit_Edge": "融资阶段匹配超边",
+    "Switching_Cost_Edge": "用户切换成本超边",
+    "Network_Effect_Edge": "网络效应超边",
+    "Cross_Dimension_Coherence_Edge": "跨维度一致性超边",
+    "ESG_Measurability_Edge": "ESG可量化超边",
 }
 
 EDGE_PREFIX: dict[str, str] = {
@@ -636,6 +944,20 @@ EDGE_PREFIX: dict[str, str] = {
     "Presentation_Narrative_Edge": "he_narrative_",
     "Resource_Leverage_Edge": "he_leverage_",
     "Timing_Window_Edge": "he_timing_",
+    "Revenue_Sustainability_Edge": "he_revenue_",
+    "Demand_Supply_Match_Edge": "he_demsup_",
+    "Founder_Risk_Edge": "he_founder_",
+    "Ethical_Bias_Edge": "he_ethics_",
+    "Assumption_Stack_Edge": "he_assume_",
+    "Metric_Definition_Edge": "he_metric_",
+    "Market_Segmentation_Edge": "he_segment_",
+    "Competitive_Response_Edge": "he_compresp_",
+    "Milestone_Dependency_Edge": "he_milestone_",
+    "Funding_Stage_Fit_Edge": "he_funding_",
+    "Switching_Cost_Edge": "he_switch_",
+    "Network_Effect_Edge": "he_neteffect_",
+    "Cross_Dimension_Coherence_Edge": "he_coherence_",
+    "ESG_Measurability_Edge": "he_esg_",
 }
 
 EDGE_TARGET_COUNTS: dict[str, int] = {
@@ -670,6 +992,20 @@ EDGE_TARGET_COUNTS: dict[str, int] = {
     "Presentation_Narrative_Edge": 8,
     "Resource_Leverage_Edge": 6,
     "Timing_Window_Edge": 6,
+    "Revenue_Sustainability_Edge": 8,
+    "Demand_Supply_Match_Edge": 8,
+    "Founder_Risk_Edge": 6,
+    "Ethical_Bias_Edge": 6,
+    "Assumption_Stack_Edge": 8,
+    "Metric_Definition_Edge": 6,
+    "Market_Segmentation_Edge": 8,
+    "Competitive_Response_Edge": 6,
+    "Milestone_Dependency_Edge": 6,
+    "Funding_Stage_Fit_Edge": 6,
+    "Switching_Cost_Edge": 6,
+    "Network_Effect_Edge": 8,
+    "Cross_Dimension_Coherence_Edge": 6,
+    "ESG_Measurability_Edge": 6,
 }
 
 
@@ -1007,9 +1343,9 @@ class HypergraphService:
     #  1. Rebuild global teaching hypergraph from Neo4j
     # ═══════════════════════════════════════════════════
 
-    def rebuild(self, min_pattern_support: int = 1, max_edges: int = 200) -> dict[str, Any]:
+    def rebuild(self, min_pattern_support: int = 1, max_edges: int = 400) -> dict[str, Any]:
         min_pattern_support = max(1, min(min_pattern_support, 10))
-        max_edges = max(5, min(max_edges, 300))
+        max_edges = max(5, min(max_edges, 600))
         rows = self._load_project_rows()
         ontology_rows = self._load_ontology_rows()
         edge_to_nodes: dict[str, set[str]] = {}
@@ -1599,6 +1935,184 @@ class HypergraphService:
                     "retrieval_reason": "市场与创新的时机窗口分析。",
                 })
 
+            # ── Batch 2 families (T37-T50) ──
+
+            if business_models and markets and evidence_types:
+                key = (category, business_models[0], markets[0], "revenue")
+                self._register_pattern(families["Revenue_Sustainability_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"BusinessModelAspect::{business_models[0]}", f"Market::{markets[0]}", f"EvidenceType::{evidence_types[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H8", "H26"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Financial Logic", "Business Model Consistency"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目的收入是一次性的还是持续的？如果是订阅制，用户续费率假设来自哪里？",
+                    "retrieval_reason": "商业模式与市场证据的收入可持续性分析。",
+                })
+
+            if stakeholders and pains and markets and solutions:
+                key = (category, stakeholders[0], pains[0], solutions[0], "demsup")
+                self._register_pattern(families["Demand_Supply_Match_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"PainPoint::{pains[0]}", f"Solution::{solutions[0]}", f"Market::{markets[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H1", "H5"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Problem Definition", "User Evidence Strength"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目最容易犯的错误是需求是真的但解决方案不匹配——用户要的是止痛药，你给了维生素。",
+                    "retrieval_reason": "用户需求与产品供给的匹配度分析。",
+                })
+
+            if execution_steps and risk_controls:
+                key = (category, execution_steps[0], risk_controls[0] if risk_controls else "单点依赖待评估", "founder")
+                self._register_pattern(families["Founder_Risk_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"ExecutionStep::{execution_steps[0]}", f"RiskControlPoint::{risk_controls[0] if risk_controls else '单点依赖待评估'}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H10", "H21", "H25"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Team & Execution"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目如果核心技术或关键资源完全依赖一个人，那个人离开怎么办？评委一定会问这个。",
+                    "retrieval_reason": "执行步骤与风控的关键人物依赖分析。",
+                })
+
+            if solutions and stakeholders and risk_controls:
+                _has_ai_keyword = any(k in " ".join([str(s) for s in solutions + pains]) for k in ["AI", "算法", "推荐", "机器学习", "深度学习", "模型"])
+                if _has_ai_keyword:
+                    key = (category, solutions[0], stakeholders[0], "ethics")
+                    self._register_pattern(families["Ethical_Bias_Edge"], key, {
+                        **base_pattern_meta, "category": category,
+                        "node_set": {f"Category::{category}", f"Solution::{solutions[0]}", f"Stakeholder::{stakeholders[0]}", f"RiskControlPoint::{risk_controls[0]}"},
+                        "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H11", "H22"}][:4],
+                        "rubrics": covered_rubrics[:2],
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目使用AI决策时，你考虑过算法偏见和公平性问题吗？不同用户群体是否被平等对待？",
+                        "retrieval_reason": "AI/算法方案的伦理偏见与公平性分析。",
+                    })
+
+            if pains and solutions and business_models:
+                ev_anchor = evidence_types[0] if evidence_types else "假设待验证"
+                key = (category, pains[0], solutions[0], business_models[0], "assume")
+                self._register_pattern(families["Assumption_Stack_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"PainPoint::{pains[0]}", f"Solution::{solutions[0]}", f"BusinessModelAspect::{business_models[0]}", f"EvidenceType::{ev_anchor}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H5", "H7", "H20"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"User Evidence Strength", "Solution Feasibility"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目从'用户有这个痛点'到'他们愿意为你的方案付钱'，中间有几个假设？每个假设你验证了几个？",
+                    "retrieval_reason": "痛点、方案与商业模式之间的假设链分析。",
+                })
+
+            if evidence_types and solutions and business_models:
+                key = (category, evidence_types[0], solutions[0], "metric")
+                self._register_pattern(families["Metric_Definition_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"EvidenceType::{evidence_types[0]}", f"Solution::{solutions[0]}", f"BusinessModelAspect::{business_models[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H13", "H20"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Solution Feasibility", "User Evidence Strength"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目你说'效果好'，好的标准是什么？请给出一个具体数字和衡量方法。",
+                    "retrieval_reason": "证据与方案的成功指标定义分析。",
+                })
+
+            if stakeholders and markets and pains:
+                key = (category, stakeholders[0], markets[0], pains[0], "segment")
+                self._register_pattern(families["Market_Segmentation_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"Market::{markets[0]}", f"PainPoint::{pains[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H1", "H4", "H19"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Problem Definition", "Market & Competition"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目说'面向所有用户'太宽了——哪个细分群体？什么场景？请把用户画像收窄到一个具体的人。",
+                    "retrieval_reason": "用户、市场与痛点的细分聚焦分析。",
+                })
+
+            if innovations and markets and solutions:
+                key = (category, innovations[0], markets[0], "compresp")
+                self._register_pattern(families["Competitive_Response_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"InnovationPoint::{innovations[0]}", f"Market::{markets[0]}", f"Solution::{solutions[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H6", "H7", "H16"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Innovation & Differentiation", "Market & Competition"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目如果你的方案有效，巨头三个月就能抄。你的护城河不是功能本身，而是什么？",
+                    "retrieval_reason": "创新点与市场的竞品反制风险分析。",
+                })
+
+            if execution_steps and solutions and business_models:
+                key = (category, execution_steps[0], solutions[0], "milestone")
+                self._register_pattern(families["Milestone_Dependency_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"ExecutionStep::{execution_steps[0]}", f"Solution::{solutions[0]}", f"BusinessModelAspect::{business_models[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H10", "H21"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Team & Execution"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目你的第二个里程碑依赖第一个的结果吗？如果第一步失败，后面的计划是否全部作废？需要设计容错路径。",
+                    "retrieval_reason": "执行步骤之间的依赖与容错分析。",
+                })
+
+            funding_targets = {"H9", "H24"}
+            funding_rule_hit = self._has_rule(rule_ids, funding_targets)
+            if (business_models and markets and evidence_types) or funding_rule_hit:
+                key = (category, business_models[0] if business_models else "融资计划待明确", markets[0] if markets else "市场阶段待定", "funding")
+                self._register_pattern(families["Funding_Stage_Fit_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"BusinessModelAspect::{business_models[0] if business_models else '融资计划待明确'}", f"Market::{markets[0] if markets else '市场阶段待定'}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in funding_targets][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Financial Logic", "Business Model Consistency"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目在种子期就画A轮的饼，评委只会觉得你不落地。先证明PMF再谈融资。",
+                    "retrieval_reason": "商业模式与市场阶段的融资节奏分析。",
+                })
+
+            if stakeholders and solutions and innovations:
+                key = (category, stakeholders[0], solutions[0], innovations[0], "switch")
+                self._register_pattern(families["Switching_Cost_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"Solution::{solutions[0]}", f"InnovationPoint::{innovations[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H16", "H17"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Innovation & Differentiation", "User Evidence Strength"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目用户现在的做法虽然不完美但免费或已习惯。你凭什么让他们花时间学你的新工具？切换成本是多少？",
+                    "retrieval_reason": "用户、方案与创新的切换成本分析。",
+                })
+
+            if stakeholders and solutions and markets and business_models:
+                key = (category, stakeholders[0], solutions[0], markets[0], "neteffect")
+                self._register_pattern(families["Network_Effect_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"Solution::{solutions[0]}", f"Market::{markets[0]}", f"BusinessModelAspect::{business_models[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H7", "H9"}][:4],
+                    "rubrics": [rb for rb in covered_rubrics if rb in {"Innovation & Differentiation", "Market & Competition"}],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目声称有网络效应——但真正的网络效应是用户越多产品越好用，不是用户越多数据越多。请证明因果链。",
+                    "retrieval_reason": "用户、方案与市场的网络效应增长逻辑分析。",
+                })
+
+            if solutions and stakeholders and business_models and markets:
+                key = (category, solutions[0], stakeholders[0], business_models[0], markets[0], "coherence")
+                self._register_pattern(families["Cross_Dimension_Coherence_Edge"], key, {
+                    **base_pattern_meta, "category": category,
+                    "node_set": {f"Category::{category}", f"Solution::{solutions[0]}", f"Stakeholder::{stakeholders[0]}", f"BusinessModelAspect::{business_models[0]}", f"Market::{markets[0]}"},
+                    "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H14"}][:4],
+                    "rubrics": covered_rubrics[:3],
+                    "evidence_quotes": evidence_quotes[:2],
+                    "teaching_note": f"{category}类项目你的目标用户、解决方案、商业模式和市场定位之间讲的是同一个故事吗？评委会检查叙事一致性。",
+                    "retrieval_reason": "多维度之间叙事一致性与逻辑自洽分析。",
+                })
+
+            if stakeholders and pains and evidence_types:
+                _text_blob = " ".join([str(s) for s in pains + solutions + (markets or [])])
+                _has_social = any(k in _text_blob for k in ["公益", "社会", "ESG", "乡村", "扶贫", "助农", "环保", "可持续发展"])
+                if _has_social:
+                    key = (category, stakeholders[0], pains[0], "esg")
+                    self._register_pattern(families["ESG_Measurability_Edge"], key, {
+                        **base_pattern_meta, "category": category,
+                        "node_set": {f"Category::{category}", f"Stakeholder::{stakeholders[0]}", f"PainPoint::{pains[0]}", f"EvidenceType::{evidence_types[0]}"},
+                        "rules": [rid for rid in rule_ids if self._canonical_rule_id(rid) in {"H5", "H13"}][:4],
+                        "rubrics": covered_rubrics[:2],
+                        "evidence_quotes": evidence_quotes[:2],
+                        "teaching_note": f"{category}类项目说'帮助了很多人'不够——评委要看'帮助了多少人、改善了多少、用什么指标衡量'。",
+                        "retrieval_reason": "社会影响的可量化与可验证分析。",
+                    })
+
         for row in ontology_rows:
             ontology_name = str(row.get("ontology_name") or "未知本体")
             ontology_id = str(row.get("ontology_id") or ontology_name)
@@ -1811,43 +2325,208 @@ class HypergraphService:
             "edges": [self._record_to_dict(rec) for rec in sorted(self._records, key=lambda item: (-item.support, item.type))[:limit]],
         }
 
+    _FAMILY_META: dict[str, dict[str, Any]] = {
+        "Value_Loop_Edge": {"desc": "用户→痛点→方案→商业模式形成完整闭环", "type": "ideal", "rules": ["H1", "H2", "H3"]},
+        "User_Pain_Fit_Edge": {"desc": "用户群体与痛点的匹配深度", "type": "risk", "rules": ["H1", "H5"]},
+        "Risk_Pattern_Edge": {"desc": "跨类别通用的风险模式聚合", "type": "risk", "rules": ["H2", "H3", "H11"]},
+        "Evidence_Grounding_Edge": {"desc": "核心主张是否有充分证据支撑", "type": "ideal", "rules": ["H5"]},
+        "Market_Competition_Edge": {"desc": "市场定位与竞争格局分析", "type": "risk", "rules": ["H4", "H6"]},
+        "Execution_Gap_Edge": {"desc": "执行计划与资源之间的断裂检测", "type": "risk", "rules": ["H10"]},
+        "Compliance_Safety_Edge": {"desc": "合规、安全与法律风险检测", "type": "risk", "rules": ["H11"]},
+        "Ontology_Grounded_Edge": {"desc": "知识本体概念的实例落地情况", "type": "ideal", "rules": ["H14"]},
+        "Innovation_Validation_Edge": {"desc": "创新点是否经过验证而非空想", "type": "ideal", "rules": ["H7"]},
+        "Pricing_Unit_Economics_Edge": {"desc": "定价策略与单元经济模型合理性", "type": "risk", "rules": ["H8", "H9"]},
+        "Substitute_Migration_Edge": {"desc": "替代方案对用户迁移的影响", "type": "risk", "rules": ["H4", "H17"]},
+        "Trust_Adoption_Edge": {"desc": "目标用户的信任建立与采纳路径", "type": "ideal", "rules": ["H16", "H17"]},
+        "Retention_Workflow_Embed_Edge": {"desc": "产品嵌入用户工作流的深度", "type": "ideal", "rules": ["H16"]},
+        "Stage_Goal_Fit_Edge": {"desc": "当前阶段目标与行动是否一致", "type": "risk", "rules": ["H10", "H13"]},
+        "Rule_Rubric_Tension_Edge": {"desc": "风险规则与评分标准之间的张力", "type": "risk", "rules": ["H14"]},
+        "Team_Capability_Gap_Edge": {"desc": "团队能力是否匹配技术和执行要求", "type": "risk", "rules": ["H9", "H10"]},
+        "User_Journey_Edge": {"desc": "用户旅程从接触到留存的完整闭环", "type": "ideal", "rules": ["H1", "H16"]},
+        "Social_Impact_Edge": {"desc": "项目的社会价值链与影响评估", "type": "ideal", "rules": ["H5", "H13"]},
+        "Data_Flywheel_Edge": {"desc": "数据驱动的增长飞轮效应", "type": "ideal", "rules": ["H7", "H9"]},
+        "Scalability_Bottleneck_Edge": {"desc": "规模化过程中的瓶颈识别", "type": "risk", "rules": ["H9", "H10"]},
+        "IP_Moat_Edge": {"desc": "知识产权与技术壁垒的护城河", "type": "ideal", "rules": ["H7"]},
+        "Pivot_Signal_Edge": {"desc": "需要转型调整的信号识别", "type": "risk", "rules": ["H5", "H6"]},
+        "Cost_Structure_Edge": {"desc": "成本结构的合理性与可持续性", "type": "risk", "rules": ["H8", "H9"]},
+        "Ecosystem_Dependency_Edge": {"desc": "对外部生态系统的依赖程度", "type": "risk", "rules": ["H11", "H6"]},
+        "MVP_Scope_Edge": {"desc": "最小可行产品的边界与聚焦度", "type": "ideal", "rules": ["H10", "H13"]},
+        "Stakeholder_Conflict_Edge": {"desc": "多方利益相关者的冲突检测", "type": "risk", "rules": ["H3", "H11"]},
+        "Channel_Conversion_Edge": {"desc": "渠道到转化的漏斗效率分析", "type": "risk", "rules": ["H8", "H16"]},
+        "Regulatory_Landscape_Edge": {"desc": "政策法规环境对项目的影响", "type": "risk", "rules": ["H11"]},
+        "Presentation_Narrative_Edge": {"desc": "路演叙事线的结构与说服力", "type": "ideal", "rules": ["H14"]},
+        "Resource_Leverage_Edge": {"desc": "现有资源的杠杆利用效率", "type": "ideal", "rules": ["H9", "H10"]},
+        "Timing_Window_Edge": {"desc": "市场时机与技术成熟度匹配", "type": "risk", "rules": ["H4", "H6"]},
+        "Revenue_Sustainability_Edge": {"desc": "收入模型的可持续性而非一次性", "type": "risk", "rules": ["H8", "H26"]},
+        "Demand_Supply_Match_Edge": {"desc": "用户需求与产品供给的匹配度", "type": "ideal", "rules": ["H1", "H5"]},
+        "Founder_Risk_Edge": {"desc": "关键人物依赖与单点故障风险", "type": "risk", "rules": ["H10", "H21", "H25"]},
+        "Ethical_Bias_Edge": {"desc": "AI/算法的公平性与伦理风险", "type": "risk", "rules": ["H11", "H22"]},
+        "Assumption_Stack_Edge": {"desc": "项目建立在多少层未验证假设之上", "type": "risk", "rules": ["H5", "H7", "H20"]},
+        "Metric_Definition_Edge": {"desc": "成功指标是否清晰可衡量", "type": "ideal", "rules": ["H13", "H20"]},
+        "Market_Segmentation_Edge": {"desc": "目标市场的细分聚焦程度", "type": "risk", "rules": ["H1", "H4", "H19"]},
+        "Competitive_Response_Edge": {"desc": "竞品或巨头的模仿与反制风险", "type": "risk", "rules": ["H6", "H7", "H16"]},
+        "Milestone_Dependency_Edge": {"desc": "里程碑之间的依赖关系与容错空间", "type": "risk", "rules": ["H10", "H21"]},
+        "Funding_Stage_Fit_Edge": {"desc": "融资节奏与业务阶段是否匹配", "type": "risk", "rules": ["H9", "H24"]},
+        "Switching_Cost_Edge": {"desc": "用户从现有方案迁移的成本", "type": "risk", "rules": ["H16", "H17"]},
+        "Network_Effect_Edge": {"desc": "产品是否具备真正的网络效应逻辑", "type": "ideal", "rules": ["H7", "H9"]},
+        "Cross_Dimension_Coherence_Edge": {"desc": "项目各维度之间叙述的自洽连贯性", "type": "ideal", "rules": ["H14"]},
+        "ESG_Measurability_Edge": {"desc": "社会影响的可量化与可验证程度", "type": "ideal", "rules": ["H5", "H13"]},
+    }
+
+    def catalog(self) -> dict[str, Any]:
+        """Return the full hypergraph design catalog for visualization."""
+        from collections import Counter
+        family_counts = Counter(rec.type for rec in self._records) if self._records else Counter()
+
+        families_out = []
+        for fam_key, label in EDGE_FAMILY_LABELS.items():
+            meta = self._FAMILY_META.get(fam_key, {})
+            families_out.append({
+                "family": fam_key,
+                "label": label,
+                "group": _FAMILY_TO_GROUP.get(fam_key, "其他"),
+                "pattern_type": meta.get("type", "risk"),
+                "description": meta.get("desc", label),
+                "linked_rules": meta.get("rules", []),
+                "instance_count": family_counts.get(fam_key, 0),
+            })
+
+        groups_out = []
+        for grp_name, grp_fams in EDGE_FAMILY_GROUPS.items():
+            edge_sum = sum(family_counts.get(f, 0) for f in grp_fams)
+            groups_out.append({
+                "name": grp_name,
+                "families": len(grp_fams),
+                "edges": edge_sum,
+            })
+
+        rules_out = []
+        for r in _CONSISTENCY_RULES:
+            rules_out.append({
+                "id": r["id"],
+                "description": r["description"],
+                "message": r.get("message", ""),
+                "pressure_count": len(r.get("pressure", [])),
+            })
+
+        return {
+            "families": families_out,
+            "groups": groups_out,
+            "rules": rules_out,
+            "rules_count": len(_CONSISTENCY_RULES),
+            "templates_count": len(_HYPEREDGE_TEMPLATES),
+            "total_edges": len(self._records) if self._records else 0,
+            "total_nodes": len(self._hypergraph.nodes) if self._hypergraph else 0,
+            "total_families": len(EDGE_FAMILY_LABELS),
+        }
+
     def project_match_view(self, hypergraph_insight: dict[str, Any], hypergraph_student: dict[str, Any], pressure_trace: dict[str, Any] | None = None) -> dict[str, Any]:
         edges = list((hypergraph_insight or {}).get("edges") or [])
         warnings = list((hypergraph_student or {}).get("pattern_warnings") or [])
         strengths = list((hypergraph_student or {}).get("pattern_strengths") or [])
         missing = list((hypergraph_student or {}).get("missing_dimensions") or [])
+        dims_detail = (hypergraph_student or {}).get("dimensions") or {}
         pressure_trace = pressure_trace or {}
-        useful_cards = []
+
+        covered_ents: dict[str, list[str]] = {}
+        for dim_key, dim_info in dims_detail.items():
+            if isinstance(dim_info, dict) and dim_info.get("entities"):
+                covered_ents[dim_key] = [str(e) for e in dim_info["entities"][:4]]
+
+        def _ent_summary(dim_key: str) -> str:
+            ents = covered_ents.get(dim_key, [])
+            if ents:
+                return "、".join(ents[:3])
+            return ""
+
+        useful_cards: list[dict[str, Any]] = []
         if missing:
             first = missing[0]
+            dim_name = first.get("dimension", "")
+            reason = first.get("recommendation", "")
+            existing = []
+            for dk, ev in covered_ents.items():
+                if ev:
+                    existing.append(f"{dk}({', '.join(ev[:2])})")
+            existing_hint = "、".join(existing[:3]) if existing else "暂无"
             useful_cards.append({
-                "title": "现在最容易卡住你的地方",
-                "summary": f"你还没有把「{first.get('dimension', '')}」讲清楚",
-                "reason": first.get("recommendation", ""),
-                "project_hint": f"如果这一块继续空着，老师或评委会很难判断你的项目到底能不能成立。",
+                "title": f"优先补充：{dim_name}",
+                "summary": reason if reason else f"你的项目目前还缺少「{dim_name}」方面的信息",
+                "reason": f"你已经提到了 {existing_hint}，但「{dim_name}」这个维度还是空白。评委通常会在这里追问。" if existing else reason,
+                "project_hint": f"建议接下来聊一聊{dim_name}相关的内容，让项目的这个环节也能立住。",
                 "importance": first.get("importance", ""),
                 "tone": "gap",
             })
         if warnings:
             first = warnings[0]
+            warn_text = first.get("warning", "")
+            matched_rules = first.get("matched_rules", [])
+            rules_hint = "、".join(str(r) for r in matched_rules[:3]) if matched_rules else ""
             useful_cards.append({
-                "title": "历史项目里最像你的风险",
-                "summary": first.get("warning", ""),
-                "reason": f"命中 {first.get('edge_type', '')}，支持度 {first.get('support', 0)}",
-                "project_hint": "这不是说你的项目一定失败，而是说明这类问题在类似项目里很容易被追问。",
+                "title": "需要留意的风险模式",
+                "summary": warn_text,
+                "reason": f"在 96 个标准案例中，有 {first.get('support', 0)} 个类似项目也触发了同类风险" + (f"（规则 {rules_hint}）" if rules_hint else "") + "。这意味着评委很可能会在这个方向追问。",
+                "project_hint": "不必紧张，这说明你的项目已经进入到需要回答深层问题的阶段了。提前准备好这个方向的回应就好。",
                 "importance": "高",
                 "tone": "risk",
             })
         if strengths:
             first = strengths[0]
+            note = first.get("note", "")
+            edge_type = first.get("edge_type", "")
+            type_labels = {
+                "Value_Loop_Edge": "价值闭环", "User_Pain_Fit_Edge": "用户-痛点匹配",
+                "Evidence_Grounding_Edge": "证据支撑", "Market_Competition_Edge": "市场竞争分析",
+                "Execution_Gap_Edge": "执行路径", "Compliance_Safety_Edge": "合规安全",
+                "Innovation_Validation_Edge": "创新验证",
+            }
+            type_label = type_labels.get(edge_type, edge_type)
             useful_cards.append({
-                "title": "你现在最值得放大的优势",
-                "summary": first.get("note", ""),
-                "reason": f"来自 {first.get('edge_type', '')} 模式，支持度 {first.get('support', 0)}",
-                "project_hint": "这一块可以继续保留，并在答辩或计划书里主动强化，不要被别的问题盖住。",
+                "title": f"优势结构：{type_label}",
+                "summary": note,
+                "reason": f"你的项目在「{type_label}」维度上与 {first.get('support', 0)} 个优秀案例呈现相似的结构特征，这是评委看重的亮点。",
+                "project_hint": "答辩或计划书中可以主动强调这一点，让评委看到你在这方面的深度思考。",
                 "importance": "中",
                 "tone": "strength",
             })
+        consistency = list((hypergraph_student or {}).get("consistency_issues") or [])
+        if consistency and len(useful_cards) < 4:
+            ci = consistency[0]
+            ci_questions = ci.get("pressure_questions", [])
+            useful_cards.append({
+                "title": f"一致性检查：{ci.get('description', '逻辑矛盾')}",
+                "summary": ci.get("message", ""),
+                "reason": f"评委可能会追问：{ci_questions[0]}" if ci_questions else "",
+                "project_hint": "检查你在这几个维度之间的描述是否前后一致，确保逻辑链条能自圆其说。",
+                "importance": "高",
+                "tone": "risk",
+            })
+
+        tmpl_matches = list((hypergraph_student or {}).get("template_matches") or [])
+        complete_tmpls = [t for t in tmpl_matches if t.get("status") == "complete"]
+        partial_tmpls = [t for t in tmpl_matches if t.get("status") == "partial"]
+        if complete_tmpls and len(useful_cards) < 5:
+            ct = complete_tmpls[0]
+            useful_cards.append({
+                "title": f"闭环已形成：{ct.get('name', '')}",
+                "summary": ct.get("description", ""),
+                "reason": f"你的项目已经覆盖了 {', '.join(ct.get('dimensions', []))} 这几个维度，形成了完整的分析闭环。",
+                "project_hint": "这是你项目中一个完整的论证链条，答辩时可以沿着这条线展开。",
+                "importance": "中",
+                "tone": "strength",
+            })
+        elif partial_tmpls and len(useful_cards) < 5:
+            pt = partial_tmpls[0]
+            m_dims = pt.get("missing_dimensions", [])
+            useful_cards.append({
+                "title": f"即将闭环：{pt.get('name', '')}",
+                "summary": f"只差 {', '.join(m_dims)} 就能形成完整闭环",
+                "reason": pt.get("description", ""),
+                "project_hint": f"补上这{'几个' if len(m_dims) > 1 else '一个'}维度，这条论证链就完整了。",
+                "importance": "高",
+                "tone": "gap",
+            })
+
         process_trace = {
             "fallacy_label": pressure_trace.get("fallacy_label", ""),
             "selected_strategy": pressure_trace.get("selected_strategy", ""),
@@ -1858,7 +2537,7 @@ class HypergraphService:
         return {
             "summary": (hypergraph_insight or {}).get("summary", ""),
             "process_trace": process_trace,
-            "useful_cards": useful_cards[:3],
+            "useful_cards": useful_cards[:5],
             "matched_edges": edges[:20],
             "library_overview": self.library_snapshot(limit=12).get("overview", {}),
         }
@@ -2109,6 +2788,21 @@ class HypergraphService:
             _expanded_student = set(self._expand_rule_ids(list(student_rule_like), max_items=24))
             _gap_keywords = {g.replace("缺少", "").replace("缺", "") for g in (structural_gaps or []) if isinstance(g, str)}
 
+            _dim_label_map = {
+                "stakeholder": "目标用户", "pain_point": "痛点问题", "solution": "解决方案",
+                "innovation": "创新点", "market": "目标市场", "competitor": "竞争格局",
+                "business_model": "商业模式", "execution_step": "执行步骤",
+                "risk_control": "风控合规", "evidence": "证据支撑",
+                "technology": "技术路线", "resource": "资源优势", "team": "团队能力",
+            }
+            _present_dims_text = "、".join(
+                f"{_dim_label_map.get(k, k)}({', '.join(v[:2])})"
+                for k, v in dim_entities.items() if v
+            )
+            _missing_dims_text = "、".join(
+                _dim_label_map.get(d, d) for d in missing_dims[:4]
+            )
+
             for rec in self._records:
                 if rec.type == "Risk_Pattern_Edge":
                     overlap = _expanded_student & set(rec.rules)
@@ -2117,50 +2811,86 @@ class HypergraphService:
                         if any(kw in _note_lower for kw in _gap_keywords if len(kw) >= 2):
                             overlap = {"keyword_match"}
                     if overlap and (not category or rec.category == category or not rec.category):
+                        ctx_parts = []
+                        if _missing_dims_text:
+                            ctx_parts.append(f"你的项目目前缺少 {_missing_dims_text}")
+                        if _present_dims_text:
+                            ctx_parts.append(f"已有 {_present_dims_text}")
                         pattern_warnings.append({
                             "pattern_id": rec.hyperedge_id,
                             "warning": rec.teaching_note,
                             "matched_rules": sorted(overlap),
                             "support": rec.support,
                             "edge_type": rec.type,
+                            "project_context": "；".join(ctx_parts) if ctx_parts else "",
+                            "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
                         })
                 elif rec.type in {"Value_Loop_Edge", "User_Pain_Fit_Edge", "Evidence_Grounding_Edge"}:
                     if category and rec.category == category and coverage_score >= 6:
+                        related_ents = []
+                        for d in ["stakeholder", "pain_point", "solution", "evidence"]:
+                            related_ents.extend(dim_entities.get(d, [])[:2])
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
                             "support": rec.support,
                             "edge_type": rec.type,
+                            "related_entities": related_ents[:4],
+                            "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
                         })
                 elif rec.type in {"Market_Competition_Edge", "Execution_Gap_Edge", "Compliance_Safety_Edge", "Innovation_Validation_Edge"}:
                     if (not category or rec.category == category):
+                        related_ents = []
+                        for d in dim_entities:
+                            related_ents.extend(dim_entities[d][:1])
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
                             "support": rec.support,
                             "edge_type": rec.type,
+                            "related_entities": related_ents[:4],
+                            "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
                         })
 
-        # ── Missing dimension recommendations ──
+        # ── Missing dimension recommendations (with project-specific hints) ──
         missing_recommendations = []
-        gap_importance = {
-            "stakeholder": ("极高", "缺少明确的目标用户画像，评委会质疑'你为谁解决问题'"),
-            "pain_point": ("极高", "没有清晰的痛点描述，项目缺乏存在的理由"),
-            "solution": ("高", "缺少具体的解决方案描述"),
-            "market": ("高", "没有市场分析，无法评估商业可行性"),
-            "competitor": ("中", "缺少竞争分析，评委会问'为什么是你'"),
-            "business_model": ("中", "商业模式不清晰，盈利路径不明"),
-            "technology": ("中", "技术路线未说明，可行性存疑"),
-            "resource": ("低", "未提及资源优势，但可后续补充"),
-            "team": ("低", "团队信息缺失，但非必须一开始就有"),
+        _covered_summary = [
+            f"{DIMENSIONS.get(k, k)}（{', '.join(v[:2])}）"
+            for k, v in dim_entities.items() if v
+        ]
+        _covered_text = "、".join(_covered_summary[:4]) if _covered_summary else ""
+
+        gap_importance: dict[str, tuple[str, str, str]] = {
+            "stakeholder": ("极高", "缺少明确的目标用户画像，评委会质疑'你为谁解决问题'",
+                            "试着描述一下：你想帮谁？他们是谁？在什么场景下遇到了什么困难？"),
+            "pain_point": ("极高", "没有清晰的痛点描述，项目缺乏存在的理由",
+                           "能不能用一两句话说清楚：用户最头疼的问题是什么？现在他们怎么解决？"),
+            "solution": ("高", "缺少具体的解决方案描述",
+                         "用户的问题你打算怎么解决？核心功能是什么？和现有方案有什么不同？"),
+            "market": ("高", "没有市场分析，无法评估商业可行性",
+                       "你的目标市场有多大？用户群体的规模大致是多少？可以引用公开数据。"),
+            "competitor": ("中", "缺少竞争分析，评委会问'为什么是你'",
+                           "市面上有没有类似的产品？它们做得好的地方和不足分别是什么？"),
+            "business_model": ("中", "商业模式不清晰，盈利路径不明",
+                               "你打算怎么赚钱？（订阅、交易抽成、广告、SaaS…）定价逻辑是什么？"),
+            "technology": ("中", "技术路线未说明，可行性存疑",
+                           "用什么技术栈？核心算法或架构是怎样的？有没有技术壁垒？"),
+            "resource": ("低", "未提及资源优势，但可后续补充",
+                         "你有没有独特的资源？比如数据、导师支持、行业人脉等。"),
+            "team": ("低", "团队信息缺失，但非必须一开始就有",
+                     "团队成员有谁？各自负责什么？有没有互补的能力？"),
         }
         for dim in missing_dims:
             if dim in gap_importance:
-                importance, reason = gap_importance[dim]
+                importance, reason, hint = gap_importance[dim]
+                rec_text = reason
+                if _covered_text:
+                    rec_text += f"。你已经提到了 {_covered_text}，但「{DIMENSIONS.get(dim, dim)}」还需要补上。"
                 missing_recommendations.append({
                     "dimension": DIMENSIONS.get(dim, dim),
                     "importance": importance,
-                    "recommendation": reason,
+                    "recommendation": rec_text,
+                    "action_hint": hint,
                 })
         if structural_gaps:
             for gap in structural_gaps[:3]:
@@ -2168,6 +2898,7 @@ class HypergraphService:
                     "dimension": "结构性",
                     "importance": "高",
                     "recommendation": gap,
+                    "action_hint": "检查项目中相关维度之间的逻辑连接是否完整。",
                 })
         missing_recommendations.sort(
             key=lambda x: {"极高": 0, "高": 1, "中": 2, "低": 3}.get(x["importance"], 4)

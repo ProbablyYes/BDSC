@@ -1,0 +1,744 @@
+{
+  "plan_id": "09e3935c",
+  "user_id": "f2d66084-5486-4395-8abf-81034512ddf4",
+  "name": "NoteMind",
+  "purpose": "business",
+  "visible_tabs": [
+    "cost",
+    "biz",
+    "comp",
+    "compare",
+    "fund"
+  ],
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-11T11:31:52.531703+08:00",
+  "updated_at": "2026-04-11T11:38:56.173406+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "云服务器",
+            "unit_price": 0,
+            "quantity": 12,
+            "total": 0.0,
+            "note": "按月计费×12",
+            "cost_type": "once"
+          },
+          {
+            "name": "域名",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "API / 模型调用",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "开发工具 / 许可证",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "线上推广",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "线下活动",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "内容制作",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "人力成本",
+        "items": [
+          {
+            "name": "兼职开发",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "设计外包",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": []
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [],
+    "fixed_costs_monthly": 0,
+    "variable_cost_per_user": 0,
+    "growth_rate_monthly": 0.1,
+    "months_to_breakeven": 2,
+    "cash_flow_projection": [
+      {
+        "month": 1,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 2,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 3,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 4,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 5,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 6,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 7,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 8,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 9,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 10,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 11,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 12,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      }
+    ],
+    "scenario_models": {
+      "conservative": {
+        "label": "悲观",
+        "revenue_multiplier": 0.75,
+        "conversion_multiplier": 0.85,
+        "growth_rate_monthly": 0.05,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "更保守地估计增长与转化，适合答辩时说明风险边界。"
+      },
+      "baseline": {
+        "label": "基准",
+        "revenue_multiplier": 1.0,
+        "conversion_multiplier": 1.0,
+        "growth_rate_monthly": 0.1,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "当前最可信的执行版本，用于常规预算讨论。"
+      },
+      "optimistic": {
+        "label": "乐观",
+        "revenue_multiplier": 1.25,
+        "conversion_multiplier": 1.15,
+        "growth_rate_monthly": 0.18,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "假设推广与口碑扩散顺利，用于展示潜在上限。"
+      }
+    },
+    "scenario_results": {
+      "conservative": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      },
+      "baseline": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      },
+      "optimistic": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      }
+    }
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "参赛报名费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "差旅交通",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "住宿",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "材料打印/展板",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "原型开发费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "样品制作",
+        "amount": 0.0,
+        "note": ""
+      }
+    ],
+    "stages": [
+      {
+        "name": "筹备期",
+        "items": []
+      },
+      {
+        "name": "初赛",
+        "items": []
+      },
+      {
+        "name": "复赛",
+        "items": []
+      },
+      {
+        "name": "决赛",
+        "items": []
+      }
+    ],
+    "funding_sources": [
+      {
+        "name": "自筹",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "学校资助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "企业赞助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "赛事奖金",
+        "amount": 0,
+        "note": ""
+      }
+    ]
+  },
+  "funding_plan": {
+    "startup_capital_needed": 0,
+    "sources": [],
+    "monthly_gap": [],
+    "fundraising_notes": ""
+  },
+  "ai_suggestions": [
+    {
+      "timestamp": "2026-04-11T11:32:24.978260+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "员工薪酬",
+            "办公场地租赁",
+            "法律咨询费",
+            "市场推广"
+          ],
+          "unreasonable_flags": [
+            "基准盈亏平衡月为2个月",
+            "健康度评分仅为54/100",
+            "总投入为0元"
+          ],
+          "risk_warnings": [
+            "项目成本和收入均未详细说明",
+            "没有明确的收入来源",
+            "健康度评分较低",
+            "缺乏市场调研可能导致产品定位不准确"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥50,000",
+              "category": "市场"
+            },
+            {
+              "name": "员工薪酬",
+              "estimated": "¥150,000",
+              "category": "人力资源"
+            },
+            {
+              "name": "办公场地租赁",
+              "estimated": "¥30,000",
+              "category": "运营"
+            },
+            {
+              "name": "法律咨询费",
+              "estimated": "¥10,000",
+              "category": "法律"
+            },
+            {
+              "name": "市场推广",
+              "estimated": "¥100,000",
+              "category": "市场"
+            }
+          ],
+          "revenue_model": "基于订阅模式的收入模型，结合广告收入和增值服务",
+          "scenario_advice": "建议设定乐观、中性和悲观三种情景参数，分别对应不同市场接受度和竞争强度下的收入预测"
+        },
+        "pitch_summary": "NoteMind项目旨在通过先进的技术手段，为用户提供高效便捷的笔记管理解决方案。我们的预算将主要用于市场调研、产品开发、市场推广和团队建设，确保产品能够精准满足用户需求。尽管当前预算为零，但我们相信通过合理的市场策略和团队协作，NoteMind将能够迅速占领市场，实现盈利。我们预计在项目启动后的12个月内实现盈亏平衡。",
+        "faq": [
+          {
+            "question": "请问项目的盈亏平衡点是多少？",
+            "suggested_answer": "我们预计在项目启动后的12个月内实现盈亏平衡，这基于我们的收入模型和成本控制策略。"
+          },
+          {
+            "question": "项目预算中是否包括了市场推广费用？",
+            "suggested_answer": "是的，我们已经预留了市场推广费用，预计为¥100,000，用于提升品牌知名度和吸引用户。"
+          },
+          {
+            "question": "项目的收入来源有哪些？",
+            "suggested_answer": "我们的收入来源包括订阅服务、广告收入和增值服务。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:37:11.704627+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "人力资源",
+            "技术支持",
+            "法律咨询"
+          ],
+          "unreasonable_flags": [
+            "基准盈亏平衡月为2个月，但没有收入来源",
+            "总投入为0元，但有成本项"
+          ],
+          "risk_warnings": [
+            "没有明确的收入来源，难以实现盈亏平衡",
+            "预算中未包含市场调研，可能导致产品定位不准",
+            "缺乏技术支持预算，可能影响项目进度",
+            "没有法律咨询费用，可能面临法律风险"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥20,000",
+              "category": "市场"
+            },
+            {
+              "name": "人力资源",
+              "estimated": "¥100,000",
+              "category": "人力"
+            },
+            {
+              "name": "技术支持",
+              "estimated": "¥50,000",
+              "category": "技术"
+            },
+            {
+              "name": "法律咨询",
+              "estimated": "¥10,000",
+              "category": "法律"
+            }
+          ],
+          "revenue_model": "通过提供高级功能订阅和企业解决方案实现收入",
+          "scenario_advice": "建议在第一年内设定保守、中等和乐观三种情景参数，以应对不同市场情况"
+        },
+        "pitch_summary": "NoteMind项目旨在通过提供高级功能订阅和企业解决方案实现收入。我们计划将资金用于市场调研、人力资源、技术支持和法律咨询，以确保产品定位准确、项目进度顺利并规避法律风险。我们预计在第一年内实现盈亏平衡，并在第二年实现显著增长。",
+        "faq": [
+          {
+            "question": "为什么需要市场调研？",
+            "suggested_answer": "市场调研有助于我们了解目标用户的需求和偏好，从而更好地定位产品。"
+          },
+          {
+            "question": "技术支持预算如何使用？",
+            "suggested_answer": "技术支持预算主要用于解决开发过程中遇到的技术难题，确保项目顺利进行。"
+          },
+          {
+            "question": "法律咨询费用包括哪些方面？",
+            "suggested_answer": "法律咨询费用主要用于确保产品合规，包括但不限于知识产权保护、合同审查等。"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "project_cost_total": 0.0,
+    "competition_cost_total": 0.0,
+    "total_investment": 0.0,
+    "baseline_monthly_revenue": 0.0,
+    "baseline_annual_net": 0.0,
+    "funding_gap": 0.0,
+    "health_score": 54,
+    "breakeven_fastest": 2,
+    "breakeven_baseline": 2,
+    "breakeven_slowest": 2
+  }
+}

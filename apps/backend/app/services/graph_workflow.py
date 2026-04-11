@@ -4579,7 +4579,8 @@ def _coach_analyze(state: dict) -> dict:
         )
         source_note = str(coach_json.get("source_note") or "").strip()
         if source_note:
-            analysis += f"\n\n{'这次我主要参考了：' if _is_exploring else '## 这次主要依据\n'}{source_note}"
+            _src_header = "这次我主要参考了：" if _is_exploring else "## 这次主要依据\n"
+            analysis += f"\n\n{_src_header}{source_note}"
     else:
         _comp_ontology_ctx = _get_competition_ontology_context(state.get("competition_type", "")) if mode == "competition" else ""
         _comp_coach_extra = (

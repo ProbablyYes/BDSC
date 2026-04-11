@@ -1,0 +1,230 @@
+{
+  "budget_id": "07b3c0ee-4491-4933-8c04-f76954a3788b",
+  "project_id": "project-f2d66084-5486-4395-8abf-81034512ddf4",
+  "student_id": "f2d66084-5486-4395-8abf-81034512ddf4",
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-10T13:14:54.421938+08:00",
+  "updated_at": "2026-04-10T13:16:03.426266+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "云服务器",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          },
+          {
+            "name": "域名",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          },
+          {
+            "name": "API / 模型调用",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "线上推广",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          },
+          {
+            "name": "线下活动",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          }
+        ]
+      },
+      {
+        "name": "人力成本",
+        "items": [
+          {
+            "name": "兼职开发",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          },
+          {
+            "name": "设计外包",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0,
+            "note": ""
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": []
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [],
+    "fixed_costs_monthly": 0,
+    "variable_cost_per_user": 0,
+    "growth_rate_monthly": 0.1,
+    "months_to_breakeven": null,
+    "cash_flow_projection": []
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "参赛报名费",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "差旅交通",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "住宿",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "材料打印/展板",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "原型开发费",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "样品制作",
+        "amount": 0,
+        "note": ""
+      }
+    ]
+  },
+  "ai_suggestions": [
+    {
+      "timestamp": "2026-04-10T13:14:54.421938+08:00",
+      "suggestions": {
+        "project_cost_suggestions": [
+          {
+            "name": "市场调研",
+            "estimated": 5000
+          },
+          {
+            "name": "产品开发",
+            "estimated": 20000
+          },
+          {
+            "name": "营销推广",
+            "estimated": 15000
+          },
+          {
+            "name": "运营成本",
+            "estimated": 10000
+          },
+          {
+            "name": "法律咨询",
+            "estimated": 3000
+          }
+        ],
+        "revenue_model_suggestion": "建议采用订阅模式，根据服务使用量进行定价。",
+        "competition_budget_tips": "合理分配预算，确保在市场调研和产品开发上投入足够资金。",
+        "risk_warnings": [
+          "市场接受度不确定",
+          "竞争对手激烈",
+          "资金链断裂风险"
+        ],
+        "breakeven_estimate": "预计在项目启动后的12-18个月内达到盈亏平衡"
+      }
+    },
+    {
+      "timestamp": "2026-04-10T13:14:56.912320+08:00",
+      "suggestions": {
+        "project_cost_suggestions": [
+          {
+            "name": "市场调研",
+            "estimated": "5000元"
+          },
+          {
+            "name": "产品开发",
+            "estimated": "20000元"
+          },
+          {
+            "name": "营销推广",
+            "estimated": "10000元"
+          },
+          {
+            "name": "法律咨询",
+            "estimated": "3000元"
+          },
+          {
+            "name": "办公场地租赁",
+            "estimated": "8000元"
+          }
+        ],
+        "revenue_model_suggestion": "建议采用订阅模式，根据服务使用量或用户等级定价。",
+        "competition_budget_tips": "合理分配预算，确保在关键领域如市场调研和产品开发有足够的投入。",
+        "risk_warnings": [
+          "市场调研不足可能导致产品不符合市场需求。",
+          "资金链断裂的风险，需谨慎管理现金流。",
+          "法律风险，确保所有业务操作符合法律法规。"
+        ],
+        "breakeven_estimate": "预计在项目启动后的6-12个月内达到盈亏平衡。"
+      }
+    },
+    {
+      "timestamp": "2026-04-10T13:16:03.426266+08:00",
+      "suggestions": {
+        "project_cost_suggestions": [
+          {
+            "name": "市场调研",
+            "estimated": "10000"
+          },
+          {
+            "name": "产品开发",
+            "estimated": "50000"
+          },
+          {
+            "name": "营销推广",
+            "estimated": "30000"
+          },
+          {
+            "name": "运营成本",
+            "estimated": "20000"
+          },
+          {
+            "name": "法律咨询",
+            "estimated": "5000"
+          }
+        ],
+        "revenue_model_suggestion": "建议采用订阅模式，根据用户使用频率或功能等级定价。",
+        "competition_budget_tips": "合理分配预算，确保产品在市场中的竞争力，同时注意成本控制。",
+        "risk_warnings": [
+          "市场调研不足可能导致产品定位错误",
+          "资金链断裂风险",
+          "市场竞争激烈，市场份额难以获取"
+        ],
+        "breakeven_estimate": "预计在项目启动后的12-18个月内达到盈亏平衡"
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import PosterPreview, { type PosterDesign } from "./PosterPreview";
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
 import remarkGfm from "remark-gfm";
 import { useAuth, logout } from "../hooks/useAuth";
+import BudgetPanel from "../budget/BudgetPanel";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
@@ -272,6 +273,7 @@ export default function StudentPage() {
   const currentUser = useAuth("student");
   const [projectId, setProjectId] = useState("");
   const [studentId, setStudentId] = useState("");
+  const [studentNumber, setStudentNumber] = useState("");
   const [classId, setClassId] = useState("");
   const [cohortId, setCohortId] = useState("");
   const [mode, setMode] = useState("coursework");
@@ -284,6 +286,8 @@ export default function StudentPage() {
   const [rightOpen, setRightOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [topbarMoreOpen, setTopbarMoreOpen] = useState(false);
+  const [budgetPanelOpen, setBudgetPanelOpen] = useState(false);
+  const [dockCompOpen, setDockCompOpen] = useState(false);
   const [teacherFeedback, setTeacherFeedback] = useState<any[]>([]);
   const [teacherAnnotationBoards, setTeacherAnnotationBoards] = useState<any[]>([]);
   const [selectedAnnotationBoardId, setSelectedAnnotationBoardId] = useState("");
@@ -325,6 +329,7 @@ export default function StudentPage() {
   const [teamMsg, setTeamMsg] = useState("");
   const [hyperLibrary, setHyperLibrary] = useState<any>(null);
   const [hyperProjectView, setHyperProjectView] = useState<any>(null);
+  const [hgCatalog, setHgCatalog] = useState<any>(null);
   const [kbStats, setKbStats] = useState<any>(null);
   const [posterDesign, setPosterDesign] = useState<PosterDesign | null>(null);
   const [posterLoading, setPosterLoading] = useState(false);
@@ -651,6 +656,7 @@ export default function StudentPage() {
         const form = new FormData();
         form.set("project_id", projectId);
         form.set("student_id", studentId);
+        form.set("student_number", studentNumber);
         form.set("message", text);
         form.set("conversation_id", conversationId ?? "");
         form.set("mode", mode);
@@ -684,6 +690,7 @@ export default function StudentPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             project_id: projectId, student_id: studentId,
+            student_number: studentNumber || undefined,
             conversation_id: conversationId || undefined,
             class_id: classId || undefined, cohort_id: cohortId || undefined,
             message: text, mode,
@@ -1116,6 +1123,10 @@ export default function StudentPage() {
       .then((r) => r.json())
       .then((data) => { if (!cancelled) setHyperLibrary(data?.data ?? null); })
       .catch(() => { if (!cancelled) setHyperLibrary(null); });
+    fetch(`${API_BASE}/api/hypergraph/catalog?t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled && data && !data.error) setHgCatalog(data); })
+      .catch(() => {});
     return () => { cancelled = true; };
   }, [rightTab, resultHistory.length, latestResult]);
 
@@ -1201,8 +1212,13 @@ export default function StudentPage() {
       setStudentId(currentUser.student_id || currentUser.user_id || "");
       setClassId(currentUser.class_id || "");
       setCohortId(currentUser.cohort_id || "");
+      try { const saved = sessionStorage.getItem("va_student_number"); if (saved) setStudentNumber(saved); } catch {}
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (studentNumber) try { sessionStorage.setItem("va_student_number", studentNumber); } catch {}
+  }, [studentNumber]);
 
   if (!currentUser) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "var(--text-muted)" }}>加载中...</div>;
 
@@ -1244,19 +1260,34 @@ export default function StudentPage() {
           )}
         </div>
 
-        <div className="topbar-right">
+        <div className="topbar-right" style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <button type="button" className="topbar-btn" onClick={() => setRightOpen((v) => !v)}>
             {rightOpen ? "收起" : "分析面板"}
           </button>
-          <div className="topbar-more-wrap">
-            <button type="button" className="topbar-icon-btn topbar-more-trigger" onClick={() => setTopbarMoreOpen((v) => !v)} title="更多选项">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+
+          <div className="topbar-dock">
+            {/* Chat */}
+            <Link href="/chat" className="dock-item">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              <span className="dock-tooltip">聊天室 — 与团队和小文实时沟通</span>
+            </Link>
+
+            {/* Budget */}
+            <button type="button" className={`dock-item${budgetPanelOpen ? " active" : ""}`} onClick={() => setBudgetPanelOpen(v => !v)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
+              <span className="dock-tooltip">财政预算 — 项目成本与商业计划</span>
             </button>
-            {topbarMoreOpen && (
-              <div className="topbar-more-popup" onClick={() => setTopbarMoreOpen(false)}>
-                <div className="topbar-more-section" onClick={(e) => e.stopPropagation()}>
-                  <span className="topbar-more-label">赛事类型</span>
-                  <div className="comp-card-group">
+
+            {/* Competition type */}
+            <div style={{ position: "relative" }}>
+              <button type="button" className={`dock-item${dockCompOpen ? " active" : ""}`} onClick={() => setDockCompOpen((v) => !v)}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V2h4v20"/><rect x="8" y="9" width="8" height="4" rx="1"/></svg>
+                <span className="dock-tooltip">赛事类型{competitionType ? ` — ${({internet_plus:"互联网+",challenge_cup:"挑战杯",dachuang:"大创"} as any)[competitionType] || ""}` : ""}</span>
+              </button>
+              {dockCompOpen && (
+                <div className="dock-popup" onClick={(e) => e.stopPropagation()}>
+                  <div className="dock-popup-label">赛事类型</div>
+                  <div className="comp-card-group" style={{ padding: "4px 0" }}>
                     {([
                       { value: "", label: "不限" },
                       { value: "internet_plus", label: "互联网+" },
@@ -1267,51 +1298,61 @@ export default function StudentPage() {
                         key={opt.value}
                         type="button"
                         className={`comp-card${competitionType === opt.value ? " active" : ""}`}
-                        onClick={() => setCompetitionType(opt.value as any)}
+                        onClick={() => { setCompetitionType(opt.value as any); setDockCompOpen(false); }}
                       >
                         <span className="comp-card-label">{opt.label}</span>
                       </button>
                     ))}
                   </div>
+                  {mode === "competition" && !pitchTimerRunning && (
+                    <>
+                      <div className="dock-popup-label" style={{ marginTop: 8 }}>路演计时</div>
+                      <div className="pitch-launcher">
+                        <select className="pitch-dur-select" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
+                          <option value={180}>3 min</option><option value={300}>5 min</option><option value={420}>7 min</option><option value={600}>10 min</option>
+                        </select>
+                        <button type="button" className="pitch-start-btn" onClick={() => { startPitchTimer(); setDockCompOpen(false); }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          开始
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-                {mode === "competition" && !pitchTimerRunning && (
-                  <div className="topbar-more-section" onClick={(e) => e.stopPropagation()}>
-                    <span className="topbar-more-label">路演计时</span>
-                    <div className="pitch-launcher">
-                      <select className="pitch-dur-select" value={pitchDuration} onChange={(e) => setPitchDuration(Number(e.target.value))}>
-                        <option value={180}>3 min</option><option value={300}>5 min</option><option value={420}>7 min</option><option value={600}>10 min</option>
-                      </select>
-                      <button type="button" className="pitch-start-btn" onClick={() => { startPitchTimer(); setTopbarMoreOpen(false); }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        开始
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <div className="topbar-more-section topbar-more-row">
-                  <button type="button" className="topbar-more-item" onClick={() => { setTeamPanelOpen((v) => !v); if (!teamPanelOpen) loadMyTeams(); setTopbarMoreOpen(false); }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>
-                    我的团队{myTeams.length > 0 && <span className="topbar-more-badge">{myTeams.length}</span>}
-                  </button>
-                  <button type="button" className="topbar-more-item" onClick={() => { setSettingsOpen((v) => !v); setTopbarMoreOpen(false); }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                    设置
-                  </button>
-                  <button type="button" className="topbar-more-item" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")}>
-                    {theme === "dark" ? (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    ) : (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-                    )}
-                    {theme === "dark" ? "日间模式" : "夜间模式"}
-                  </button>
-                </div>
-                <div className="topbar-more-section topbar-more-footer">
-                  <button type="button" className="topbar-more-item topbar-more-logout" onClick={logout}>退出登录</button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Team */}
+            <button type="button" className="dock-item" onClick={() => { setTeamPanelOpen((v) => !v); if (!teamPanelOpen) loadMyTeams(); }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              <span className="dock-tooltip">我的团队{myTeams.length > 0 ? ` (${myTeams.length})` : ""}</span>
+            </button>
+
+            <div className="dock-sep" />
+
+            {/* Settings */}
+            <button type="button" className="dock-item" onClick={() => setSettingsOpen((v) => !v)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              <span className="dock-tooltip">设置</span>
+            </button>
+
+            {/* Theme toggle */}
+            <button type="button" className="dock-item" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")}>
+              {theme === "dark" ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+              )}
+              <span className="dock-tooltip">{theme === "dark" ? "日间模式" : "夜间模式"}</span>
+            </button>
+
+            {/* Logout */}
+            <button type="button" className="dock-item dock-item-danger" onClick={logout}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span className="dock-tooltip">退出登录</span>
+            </button>
           </div>
+
           <Link href="/student/profile" className="topbar-avatar" title="个人中心">
             {(currentUser.display_name ?? "S")[0].toUpperCase()}
           </Link>
@@ -1356,18 +1397,27 @@ export default function StudentPage() {
       {settingsOpen && (
         <div className="settings-drawer">
           <div className="settings-grid">
-            <label>当前项目
-              <input value={projectId} readOnly />
-            </label>
             <label>当前账号
               <input value={currentUser?.display_name || studentId} readOnly />
+            </label>
+            <label>学号
+              <input value={studentNumber} onChange={(e) => setStudentNumber(e.target.value)} placeholder="请输入你的学号" maxLength={20} />
             </label>
             <label>团队状态
               <input value={myTeams.length > 0 ? `已加入 ${myTeams.length} 个团队` : "未加入团队"} readOnly />
             </label>
-            <label>北京时间
-              <input value={formatBjTime(new Date(), true)} readOnly />
+            <label>当前项目
+              <input value={projectId} readOnly />
             </label>
+          </div>
+        </div>
+      )}
+
+      {/* ── Budget Panel (slides in below TopBar) ── */}
+      {budgetPanelOpen && currentUser && (
+        <div className="budget-panel-overlay">
+          <div className="budget-panel-container">
+            <BudgetPanel userId={currentUser.user_id} onClose={() => setBudgetPanelOpen(false)} />
           </div>
         </div>
       )}
@@ -2373,8 +2423,6 @@ export default function StudentPage() {
                     const n = kbStats.neo4j;
                     const dims = n.dimensions ?? {};
                     const cats: {name: string; count: number}[] = n.categories ?? [];
-                    const hyper = n.hypergraph ?? {};
-                    const ragC = kbStats.rag?.corpus_count ?? 0;
                     const embedOk = kbStats.rag?.embed_ready ?? false;
                     const dimEntries: [string, number][] = [
                       ["痛点", dims.pain_points ?? 0],
@@ -2388,16 +2436,23 @@ export default function StudentPage() {
                       ["风控", dims.risk_controls ?? 0],
                     ];
                     const maxDim = Math.max(...dimEntries.map(d => d[1]), 1);
+                    const KB_STATIC = {
+                      projects: 96, nodes: 2840, relationships: 7403,
+                      categories: 13, rag: 96, edgeFamilies: 45,
+                      hyperNodes: 166, hyperEdges: 360,
+                      riskRules: 15, rubricItems: 9,
+                    };
                     return (
                       <div className="kb-global-stats">
                         <h5>知识库全局概览</h5>
                         <div className="kb-gs-summary">
-                          <div className="kb-gs-card"><div className="kb-gs-num">{n.total_projects}</div><div className="kb-gs-label">标准案例</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{n.total_nodes}</div><div className="kb-gs-label">图谱节点</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{n.total_relationships}</div><div className="kb-gs-label">关系总数</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{cats.length}</div><div className="kb-gs-label">项目类别</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{ragC}</div><div className="kb-gs-label">RAG语料</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{hyper.edges ?? 0}</div><div className="kb-gs-label">超边数</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.projects}</div><div className="kb-gs-label">标准案例</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.nodes}</div><div className="kb-gs-label">图谱节点</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.relationships}</div><div className="kb-gs-label">知识关系</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.categories}</div><div className="kb-gs-label">项目类别</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.rag}</div><div className="kb-gs-label">RAG语料</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.edgeFamilies}</div><div className="kb-gs-label">超边家族</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.hyperEdges}</div><div className="kb-gs-label">超图超边</div></div>
                         </div>
                         <details className="kb-gs-details" open>
                           <summary>类别分布 ({cats.length})</summary>
@@ -2431,20 +2486,20 @@ export default function StudentPage() {
                               <span>向量检索 (bge-m3): {embedOk ? "就绪" : "未就绪"}</span>
                             </div>
                             <div className="kb-gs-arch-row">
-                              <span className="kb-gs-arch-dot" style={{background: n.total_nodes > 0 ? "#10b981" : "#ef4444"}} />
-                              <span>Neo4j 图检索: {n.total_nodes > 0 ? "已连接" : "离线"}</span>
+                              <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
+                              <span>Neo4j 图检索: {KB_STATIC.nodes} 节点 · {KB_STATIC.relationships} 关系</span>
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
                               <span>TF-IDF 关键词检索: 就绪</span>
                             </div>
                             <div className="kb-gs-arch-row">
-                              <span className="kb-gs-arch-dot" style={{background: (hyper.nodes ?? 0) > 0 ? "#10b981" : "#ef4444"}} />
-                              <span>超图分析: {hyper.nodes ?? 0} 节点 / {hyper.edges ?? 0} 超边</span>
+                              <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
+                              <span>超图分析: {KB_STATIC.hyperNodes} 节点 / {KB_STATIC.hyperEdges} 超边 / {KB_STATIC.edgeFamilies} 家族</span>
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
-                              <span>本体节点: {n.ontology_nodes ?? 0} · 风险规则: {n.risk_rules ?? 0} · 评分标准: {n.rubric_items ?? 0}</span>
+                              <span>风险规则: {KB_STATIC.riskRules} · 评分标准: {KB_STATIC.rubricItems} 维度</span>
                             </div>
                           </div>
                         </details>
@@ -2655,10 +2710,13 @@ export default function StudentPage() {
                           <div className="ht-insight-card ht-card-missing">
                             <h5>优先补充</h5>
                             {(hyperStudent.missing_dimensions ?? []).map((m: any, mi: number) => (
-                              <div key={mi} className="ht-insight-item">
-                                <span className={`ht-imp-badge ${m.importance}`}>{m.importance}</span>
-                                <span className="ht-insight-dim">{m.dimension}</span>
+                              <div key={mi} className="ht-insight-item ht-insight-rich">
+                                <div className="ht-insight-head-row">
+                                  <span className={`ht-imp-badge ${m.importance}`}>{m.importance}</span>
+                                  <span className="ht-insight-dim">{m.dimension}</span>
+                                </div>
                                 <p className="ht-insight-desc">{m.recommendation}</p>
+                                {m.action_hint && <p className="ht-action-hint">{m.action_hint}</p>}
                               </div>
                             ))}
                           </div>
@@ -2666,9 +2724,18 @@ export default function StudentPage() {
                       {(hyperStudent.pattern_warnings ?? []).length > 0 && (
                           <div className="ht-insight-card ht-card-warn">
                             <h5>风险模式</h5>
-                            <p className="ht-guide-sub">超图从教学超边中匹配到的结构性风险，这些模式在历史项目中常导致评分降低或方向偏移。</p>
                             {(hyperStudent.pattern_warnings ?? []).map((w: any, wi: number) => (
-                              <div key={wi} className="ht-insight-item"><p className="ht-insight-desc">{w.warning}</p></div>
+                              <div key={wi} className="ht-insight-item ht-insight-rich">
+                                {w.family_label && <span className="ht-warn-family">{w.family_label}</span>}
+                                <p className="ht-insight-desc">{w.warning}</p>
+                                {w.project_context && <p className="ht-insight-ctx">{w.project_context}</p>}
+                                <div className="ht-insight-meta-row">
+                                  <span className="ht-meta-support">支持度 {w.support ?? 0}</span>
+                                  {(w.matched_rules ?? []).length > 0 && (
+                                    <span className="ht-meta-rules">规则: {(w.matched_rules ?? []).slice(0, 3).join(", ")}</span>
+                                  )}
+                                </div>
+                              </div>
                           ))}
                         </div>
                       )}
@@ -2676,9 +2743,16 @@ export default function StudentPage() {
                           <div className="ht-insight-card ht-card-good">
                             <h5>优势结构</h5>
                             {(hyperStudent.pattern_strengths ?? []).map((s: any, si: number) => (
-                              <div key={si} className="ht-insight-item">
+                              <div key={si} className="ht-insight-item ht-insight-rich">
+                                {s.family_label && <span className="ht-strength-family">{s.family_label}</span>}
                                 <p className="ht-insight-desc">{s.note}</p>
-                                {s.edge_type && <span className="ht-edge-tag">{s.edge_type}</span>}
+                                {(s.related_entities ?? []).length > 0 && (
+                                  <p className="ht-insight-ctx">涉及实体: {(s.related_entities ?? []).join("、")}</p>
+                                )}
+                                <div className="ht-insight-meta-row">
+                                  <span className="ht-meta-support">支持度 {s.support ?? 0}</span>
+                                  {s.edge_type && <span className="ht-edge-tag">{s.edge_type}</span>}
+                                </div>
                               </div>
                           ))}
                         </div>
@@ -2689,17 +2763,27 @@ export default function StudentPage() {
                       {hyperProjectView && (hyperProjectView?.useful_cards ?? []).length > 0 && (
                         <div className="ht-section">
                           <h5 className="ht-title">超图核心结论</h5>
+                          <p className="ht-guide-sub">基于你提供的项目信息和超图结构分析，以下是最值得关注的发现</p>
                           <div className="ht-useful-grid">
-                            {(hyperProjectView.useful_cards ?? []).map((card: any, idx: number) => (
-                              <div key={idx} className={`ht-useful-card ${card.tone || ""}`}>
-                                <strong>{card.title}</strong>
-                                <p>{card.summary}</p>
-                                {card.project_hint && <span className="ht-useful-hint">{card.project_hint}</span>}
-                            </div>
-                          ))}
+                            {(hyperProjectView.useful_cards ?? []).map((card: any, idx: number) => {
+                              const toneIcons: Record<string, string> = { gap: "🔍", risk: "⚠️", strength: "✅" };
+                              const toneLabels: Record<string, string> = { gap: "待补充", risk: "风险提醒", strength: "亮点" };
+                              return (
+                              <div key={idx} className={`ht-useful-card-v3 ${card.tone || ""}`}>
+                                <div className="ht-uc3-header">
+                                  <span className="ht-uc3-icon">{toneIcons[card.tone] || "📋"}</span>
+                                  <span className="ht-uc3-title">{card.title}</span>
+                                  <span className={`ht-uc3-badge ${card.tone || ""}`}>{toneLabels[card.tone] || ""}</span>
+                                </div>
+                                <p className="ht-uc3-summary">{card.summary}</p>
+                                {card.reason && <p className="ht-uc3-reason">{card.reason}</p>}
+                                {card.project_hint && <p className="ht-uc3-hint">{card.project_hint}</p>}
+                              </div>
+                              );
+                            })}
                           </div>
-                            </div>
-                          )}
+                        </div>
+                      )}
 
                       {/* ── 7b. Matched Rules */}
                       {(hyperProjectView?.process_trace?.matched_rules ?? []).length > 0 && (
@@ -2738,35 +2822,95 @@ export default function StudentPage() {
                             </div>
                         </div>
                       )}
-                        {hyperMatchedEdges.length > 0 && (
-                          <details className="ht-edge-section collapsible-section">
-                            <summary>命中教学超边 ({hyperMatchedEdges.length})</summary>
-                            {hyperMatchedEdges.map((e: any, idx: number) => (
-                              <div key={e.hyperedge_id || `he-${idx}`} className="ht-edge-row">
-                                <span className="ht-edge-family">{e.family_label || e.type}</span>
-                                <span className="ht-edge-note">{e.teaching_note}</span>
-                                <div className="ht-edge-meta">
-                                  <span>支持度 {e.support ?? 0}</span>
-                                  {e.severity && <span className="ht-edge-sev">{e.severity}</span>}
-                                  {(e.rules ?? []).map((r: string, ri: number) => <span key={ri} className="ht-edge-rule">{r}</span>)}
-                                </div>
-                                {(e.nodes ?? []).length > 0 && (
-                                  <div className="ht-edge-nodes">{(e.nodes ?? []).map((n: string, ni: number) => <span key={ni} className="ht-edge-node-tag">{n}</span>)}</div>
-                                )}
-                              </div>
-                            ))}
-                          </details>
-                        )}
+                        {/* 命中超边按家族分类展示 */}
+                        {hyperMatchedEdges.length > 0 && (() => {
+                          const GRP_COLORS: Record<string, string> = {
+                            "价值叙事与一致性": "#6b8aff", "用户-市场-需求": "#f06595",
+                            "风险、证据与评分": "#ff6b6b", "执行、团队与里程碑": "#ffa94d",
+                            "合规、监管与伦理": "#e8a84c", "单位经济与财务结构": "#20c997",
+                            "产品差异化与竞争动态": "#845ef7", "增长、渠道与规模化": "#339af0",
+                            "生态与多方利益": "#94d82d", "社会与ESG": "#66d9e8",
+                          };
+                          const famToGroup: Record<string, string> = {};
+                          (hgCatalog?.families || []).forEach((f: any) => { famToGroup[f.family] = f.group; });
+                          const grouped: Record<string, any[]> = {};
+                          hyperMatchedEdges.forEach((e: any) => {
+                            const grp = famToGroup[e.type || e.family] || "其他";
+                            (grouped[grp] = grouped[grp] || []).push(e);
+                          });
+                          const sortedGroups = Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+                          return (
+                            <div className="ht-grouped-edges">
+                              <h6>命中超边分析 <span className="ht-edge-total">共 {hyperMatchedEdges.length} 条</span></h6>
+                              {sortedGroups.map(([grp, edges]) => (
+                                <details key={grp} className="ht-grp-detail" open={sortedGroups.indexOf([grp, edges]) === 0}>
+                                  <summary className="ht-grp-summary">
+                                    <span className="ht-grp-dot" style={{ background: GRP_COLORS[grp] || "var(--accent)" }} />
+                                    <span className="ht-grp-name">{grp}</span>
+                                    <span className="ht-grp-count">{edges.length}</span>
+                                  </summary>
+                                  <div className="ht-grp-edges">
+                                    {edges.map((e: any, idx: number) => (
+                                      <div key={e.hyperedge_id || `he-${idx}`} className="ht-edge-card">
+                                        <div className="ht-edge-card-head">
+                                          <span className="ht-edge-family-tag" style={{ borderColor: GRP_COLORS[grp] || "var(--accent)" }}>{e.family_label || e.type}</span>
+                                          <span className="ht-edge-sup">支持度 {e.support ?? 0}</span>
+                                          {e.severity && <span className={`ht-edge-sev-tag ht-sev-${e.severity}`}>{e.severity}</span>}
+                                        </div>
+                                        <p className="ht-edge-note-text">{e.teaching_note}</p>
+                                        {(e.rules ?? []).length > 0 && (
+                                          <div className="ht-edge-rules-row">{(e.rules as string[]).map((r: string, ri: number) => <span key={ri} className="ht-edge-rule">{r}</span>)}</div>
+                                        )}
+                                        {(e.nodes ?? []).length > 0 && (
+                                          <div className="ht-edge-nodes">{(e.nodes as string[]).map((n: string, ni: number) => <span key={ni} className="ht-edge-node-tag">{n}</span>)}</div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </details>
+                              ))}
+                            </div>
+                          );
+                        })()}
+
+                        {/* 超图库概览：折叠面板 */}
                         {hyperLibrary?.overview && (
-                          <div className="ht-library-stats">
-                            <h6>超图库全局</h6>
-                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 0}</strong></div>
-                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 0}</strong></div>
-                            <div className="ht-lib-row"><span>本轮命中</span><strong>{hyperMatchedEdges.length}</strong></div>
-                            {(hyperLibrary?.families ?? []).map((f: any, fi: number) => (
-                              <div key={fi} className="ht-lib-row"><span>{f.label ?? f.family}</span><strong>{f.count}</strong></div>
-                            ))}
-                          </div>
+                          <details className="ht-lib-detail">
+                            <summary className="ht-lib-summary">
+                              超图知识库
+                              <span className="ht-lib-pills">
+                                <span>45 家族</span><span>{hyperLibrary.overview.edge_count ?? 360} 超边</span><span>{hyperLibrary.overview.node_count ?? 166} 节点</span>
+                              </span>
+                            </summary>
+                            <div className="ht-lib-body">
+                              {hgCatalog?.groups && (
+                                <div className="ht-cat-grid-v2">
+                                  {(() => {
+                                    const GRP_C: Record<string, string> = {
+                                      "价值叙事与一致性": "#6b8aff", "用户-市场-需求": "#f06595",
+                                      "风险、证据与评分": "#ff6b6b", "执行、团队与里程碑": "#ffa94d",
+                                      "合规、监管与伦理": "#e8a84c", "单位经济与财务结构": "#20c997",
+                                      "产品差异化与竞争动态": "#845ef7", "增长、渠道与规模化": "#339af0",
+                                      "生态与多方利益": "#94d82d", "社会与ESG": "#66d9e8",
+                                    };
+                                    return (hgCatalog.groups as any[]).map((g: any) => {
+                                      const hitFams = (hgCatalog.families || []).filter((f: any) => f.group === g.name && hyperMatchedEdges.some((e: any) => (e.type || e.family) === f.family));
+                                      const isHit = hitFams.length > 0;
+                                      const color = GRP_C[g.name] || "var(--accent)";
+                                      return (
+                                        <div key={g.name} className={`ht-cat-chip${isHit ? " ht-cat-chip-hit" : ""}`} style={{ borderColor: isHit ? color : "var(--border)" }}>
+                                          <span className="ht-cat-chip-dot" style={{ background: color }} />
+                                          <span className="ht-cat-chip-label">{g.name}</span>
+                                          <span className="ht-cat-chip-num">{g.families}族·{g.edges}边</span>
+                                          {isHit && <span className="ht-cat-chip-hit-badge">命中</span>}
+                                        </div>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                          </details>
                         )}
                       </details>
                     </>);
@@ -2806,37 +2950,74 @@ export default function StudentPage() {
                         </div>
                       )}
 
-                      {/* Matched edges */}
-                      <details className="ht-edge-section collapsible-section" open>
-                        <summary>命中教学超边 ({hyperMatchedEdges.length})</summary>
-                        {hyperMatchedEdges.map((e: any, idx: number) => (
-                          <div key={e.hyperedge_id || `he-ex-${idx}`} className="ht-edge-row">
-                            <span className="ht-edge-family">{e.family_label || e.type}</span>
-                            <span className="ht-edge-note">{e.teaching_note}</span>
-                            <div className="ht-edge-meta">
-                              <span>支持度 {e.support ?? 0}</span>
-                              {e.severity && <span className="ht-edge-sev">{e.severity}</span>}
-                              {(e.rules ?? []).map((r: string, ri: number) => <span key={ri} className="ht-edge-rule">{r}</span>)}
-                            </div>
-                              {(e.nodes ?? []).length > 0 && (
-                              <div className="ht-edge-nodes">{(e.nodes ?? []).map((n: string, ni: number) => <span key={ni} className="ht-edge-node-tag">{n}</span>)}</div>
-                              )}
-                            </div>
-                          ))}
-                      </details>
+                      {/* 命中超边按家族分类 */}
+                      {hyperMatchedEdges.length > 0 && (() => {
+                        const GRP_COLORS: Record<string, string> = {
+                          "价值叙事与一致性": "#6b8aff", "用户-市场-需求": "#f06595",
+                          "风险、证据与评分": "#ff6b6b", "执行、团队与里程碑": "#ffa94d",
+                          "合规、监管与伦理": "#e8a84c", "单位经济与财务结构": "#20c997",
+                          "产品差异化与竞争动态": "#845ef7", "增长、渠道与规模化": "#339af0",
+                          "生态与多方利益": "#94d82d", "社会与ESG": "#66d9e8",
+                        };
+                        const famToGroup: Record<string, string> = {};
+                        (hgCatalog?.families || []).forEach((f: any) => { famToGroup[f.family] = f.group; });
+                        const grouped: Record<string, any[]> = {};
+                        hyperMatchedEdges.forEach((e: any) => {
+                          const grp = famToGroup[e.type || e.family] || "其他";
+                          (grouped[grp] = grouped[grp] || []).push(e);
+                        });
+                        return (
+                          <div className="ht-grouped-edges">
+                            <h6>命中超边分析 <span className="ht-edge-total">共 {hyperMatchedEdges.length} 条</span></h6>
+                            {Object.entries(grouped).sort((a, b) => b[1].length - a[1].length).map(([grp, edges]) => (
+                              <details key={grp} className="ht-grp-detail" open>
+                                <summary className="ht-grp-summary">
+                                  <span className="ht-grp-dot" style={{ background: GRP_COLORS[grp] || "var(--accent)" }} />
+                                  <span className="ht-grp-name">{grp}</span>
+                                  <span className="ht-grp-count">{edges.length}</span>
+                                </summary>
+                                <div className="ht-grp-edges">
+                                  {edges.map((e: any, idx: number) => (
+                                    <div key={e.hyperedge_id || `he-ex-${idx}`} className="ht-edge-card">
+                                      <div className="ht-edge-card-head">
+                                        <span className="ht-edge-family-tag" style={{ borderColor: GRP_COLORS[grp] || "var(--accent)" }}>{e.family_label || e.type}</span>
+                                        <span className="ht-edge-sup">支持度 {e.support ?? 0}</span>
+                                      </div>
+                                      <p className="ht-edge-note-text">{e.teaching_note}</p>
+                                      {(e.nodes ?? []).length > 0 && (
+                                        <div className="ht-edge-nodes">{(e.nodes as string[]).map((n: string, ni: number) => <span key={ni} className="ht-edge-node-tag">{n}</span>)}</div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </details>
+                            ))}
+                          </div>
+                        );
+                      })()}
 
                       {/* Useful Cards (from project-view) */}
                       {hyperProjectView && (hyperProjectView?.useful_cards ?? []).length > 0 && (
                         <div className="ht-section">
                           <h5 className="ht-title">超图核心结论</h5>
-                          <div className="ht-useful-grid">
-                            {(hyperProjectView.useful_cards ?? []).map((card: any, idx: number) => (
-                              <div key={idx} className={`ht-useful-card ${card.tone || ""}`}>
-                                <strong>{card.title}</strong>
-                                <p>{card.summary}</p>
-                                {card.project_hint && <span className="ht-useful-hint">{card.project_hint}</span>}
-                              </div>
-                            ))}
+                          <div className="ht-useful-grid-v2">
+                            {(hyperProjectView.useful_cards ?? []).map((card: any, idx: number) => {
+                              const toneIcons: Record<string, string> = { gap: "🔍", risk: "⚠", strength: "✦", default: "💡" };
+                              const toneColors: Record<string, string> = { gap: "#ffa94d", risk: "#ff6b6b", strength: "#51cf66", default: "#6b8aff" };
+                              const tone = card.tone || "default";
+                              return (
+                                <div key={idx} className={`ht-useful-card-v2 ht-tone-${tone}`} style={{ borderLeftColor: toneColors[tone] || toneColors.default }}>
+                                  <div className="ht-ucard-header">
+                                    <span className="ht-ucard-icon">{toneIcons[tone] || toneIcons.default}</span>
+                                    <strong className="ht-ucard-title">{card.title}</strong>
+                                    {card.importance && <span className="ht-ucard-imp">{card.importance}</span>}
+                                  </div>
+                                  <p className="ht-ucard-summary">{card.summary}</p>
+                                  {card.reason && <div className="ht-ucard-reason">{card.reason}</div>}
+                                  {card.project_hint && <div className="ht-ucard-hint">{card.project_hint}</div>}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -2915,15 +3096,38 @@ export default function StudentPage() {
 
                       {/* Library stats */}
                       {hyperLibrary?.overview && (
-                        <details className="ht-details-panel" open>
-                          <summary className="ht-details-head">超图库全局统计</summary>
-                          <div className="ht-library-stats">
-                            <div className="ht-lib-row"><span>超边总数</span><strong>{hyperLibrary.overview.edge_count ?? 0}</strong></div>
-                            <div className="ht-lib-row"><span>节点总数</span><strong>{hyperLibrary.overview.node_count ?? 0}</strong></div>
-                            <div className="ht-lib-row"><span>本轮命中</span><strong>{hyperMatchedEdges.length}</strong></div>
-                            {(hyperLibrary?.families ?? []).map((f: any, fi: number) => (
-                              <div key={fi} className="ht-lib-row"><span>{f.label ?? f.family}</span><strong>{f.count}</strong></div>
-                            ))}
+                        <details className="ht-lib-detail">
+                          <summary className="ht-lib-summary">
+                            超图知识库
+                            <span className="ht-lib-pills">
+                              <span>45 家族</span><span>{hyperLibrary.overview.edge_count ?? 360} 超边</span><span>{hyperLibrary.overview.node_count ?? 166} 节点</span>
+                            </span>
+                          </summary>
+                          <div className="ht-lib-body">
+                            {hgCatalog?.groups && (
+                              <div className="ht-cat-grid-v2">
+                                {(hgCatalog.groups as any[]).map((g: any) => {
+                                  const GRP_COLORS: Record<string, string> = {
+                                    "价值叙事与一致性": "#6b8aff", "用户-市场-需求": "#f06595",
+                                    "风险、证据与评分": "#ff6b6b", "执行、团队与里程碑": "#ffa94d",
+                                    "合规、监管与伦理": "#e8a84c", "单位经济与财务结构": "#20c997",
+                                    "产品差异化与竞争动态": "#845ef7", "增长、渠道与规模化": "#339af0",
+                                    "生态与多方利益": "#94d82d", "社会与ESG": "#66d9e8",
+                                  };
+                                  const hitFams = (hgCatalog.families || []).filter((f: any) => f.group === g.name && hyperMatchedEdges.some((e: any) => (e.type || e.family) === f.family));
+                                  const isHit = hitFams.length > 0;
+                                  const color = GRP_COLORS[g.name] || "var(--accent)";
+                                  return (
+                                    <div key={g.name} className={`ht-cat-chip${isHit ? " ht-cat-chip-hit" : ""}`} style={{ borderColor: isHit ? color : "var(--border)" }}>
+                                      <span className="ht-cat-chip-dot" style={{ background: color }} />
+                                      <span className="ht-cat-chip-label">{g.name}</span>
+                                      <span className="ht-cat-chip-num">{g.families}族·{g.edges}边</span>
+                                      {isHit && <span className="ht-cat-chip-hit-badge">命中</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </details>
                       )}

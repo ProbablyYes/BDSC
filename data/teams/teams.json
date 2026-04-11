@@ -110,6 +110,15 @@
     "created_at": "2026-03-30T14:00:25.234171+08:00"
   },
   {
+    "team_id": "6c6678c1-3bf0-4292-b9b6-269ccf0f334c",
+    "team_name": "test2",
+    "invite_code": "XHGG66",
+    "teacher_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "teacher_name": "贪吃蛇",
+    "members": [],
+    "created_at": "2026-04-10T13:28:19.506038+08:00"
+  },
+  {
     "team_id": "986d4071-fd37-4cb0-b09c-1a7bdd928ae0",
     "team_name": "erst",
     "invite_code": "ERST123",

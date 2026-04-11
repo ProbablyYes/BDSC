@@ -1,0 +1,872 @@
+{
+  "plan_id": "6378cb0e",
+  "user_id": "12345678",
+  "name": "互联网+省赛参赛预算",
+  "purpose": "competition",
+  "visible_tabs": [
+    "cost",
+    "comp",
+    "fund"
+  ],
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-11T11:38:15.167920+08:00",
+  "updated_at": "2026-04-11T11:56:54.125871+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "云服务器（比赛演示）",
+            "unit_price": 200,
+            "quantity": 3,
+            "total": 600.0,
+            "note": "高配3个月",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "域名+CDN",
+            "unit_price": 100,
+            "quantity": 1,
+            "total": 100.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "API额度",
+            "unit_price": 300,
+            "quantity": 2,
+            "total": 600.0,
+            "note": "比赛期间用量增大",
+            "cost_type": "monthly"
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "用户测试招募",
+            "unit_price": 50,
+            "quantity": 20,
+            "total": 1000.0,
+            "note": "20名测试用户×50元",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": [
+          {
+            "name": "知识产权申请",
+            "unit_price": 600,
+            "quantity": 1,
+            "total": 600.0,
+            "note": "软著代理",
+            "cost_type": "once"
+          }
+        ]
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [],
+    "fixed_costs_monthly": 0,
+    "variable_cost_per_user": 0,
+    "growth_rate_monthly": 0.1,
+    "months_to_breakeven": 2,
+    "cash_flow_projection": [
+      {
+        "month": 1,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 2,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 3,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 4,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 5,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 6,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 7,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 8,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 9,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 10,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 11,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 12,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      }
+    ],
+    "scenario_models": {
+      "conservative": {
+        "label": "悲观",
+        "revenue_multiplier": 0.75,
+        "conversion_multiplier": 0.85,
+        "growth_rate_monthly": 0.05,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "更保守地估计增长与转化，适合答辩时说明风险边界。"
+      },
+      "baseline": {
+        "label": "基准",
+        "revenue_multiplier": 1.0,
+        "conversion_multiplier": 1.0,
+        "growth_rate_monthly": 0.1,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "当前最可信的执行版本，用于常规预算讨论。"
+      },
+      "optimistic": {
+        "label": "乐观",
+        "revenue_multiplier": 1.25,
+        "conversion_multiplier": 1.15,
+        "growth_rate_monthly": 0.18,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "假设推广与口碑扩散顺利，用于展示潜在上限。"
+      }
+    },
+    "scenario_results": {
+      "conservative": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      },
+      "baseline": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      },
+      "optimistic": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      }
+    }
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "参赛报名费",
+        "amount": 0.0,
+        "note": "学校统一缴纳"
+      },
+      {
+        "name": "省赛差旅(高铁)",
+        "amount": 1200.0,
+        "note": "5人×往返240"
+      },
+      {
+        "name": "住宿(2晚)",
+        "amount": 1400.0,
+        "note": "5人×2晚×140/晚"
+      },
+      {
+        "name": "餐饮补贴",
+        "amount": 600.0,
+        "note": "5人×3天×40/天"
+      },
+      {
+        "name": "展板+海报打印",
+        "amount": 350.0,
+        "note": "KT板+A0海报"
+      },
+      {
+        "name": "原型设备租赁",
+        "amount": 800.0,
+        "note": "平板+投影适配器"
+      },
+      {
+        "name": "团队文化衫",
+        "amount": 300.0,
+        "note": "5件定制"
+      },
+      {
+        "name": "答辩PPT设计",
+        "amount": 500.0,
+        "note": "外包美化"
+      },
+      {
+        "name": "视频制作",
+        "amount": 1000.0,
+        "note": "3分钟路演视频"
+      },
+      {
+        "name": "样品/Demo制作",
+        "amount": 500.0,
+        "note": "实体展示材料"
+      }
+    ],
+    "stages": [
+      {
+        "name": "筹备期",
+        "items": []
+      },
+      {
+        "name": "校赛",
+        "items": []
+      },
+      {
+        "name": "省赛",
+        "items": []
+      }
+    ],
+    "funding_sources": [
+      {
+        "name": "自筹(团队AA)",
+        "amount": 3000,
+        "note": "5人×600"
+      },
+      {
+        "name": "学院创新基金",
+        "amount": 2000,
+        "note": "已申请通过"
+      },
+      {
+        "name": "指导老师课题经费",
+        "amount": 1500,
+        "note": ""
+      },
+      {
+        "name": "学校双创中心补助",
+        "amount": 1500,
+        "note": "凭参赛通知报销"
+      }
+    ]
+  },
+  "funding_plan": {
+    "startup_capital_needed": 8950,
+    "sources": [],
+    "monthly_gap": [],
+    "fundraising_notes": "主要资金来源为学院创新基金和团队自筹。如进入国赛，将额外申请学校双创专项资金（上限2万元）。差旅费可凭比赛通知和发票向学院报销80%。"
+  },
+  "ai_suggestions": [
+    {
+      "timestamp": "2026-04-11T11:45:09.520113+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "营销推广",
+            "人力资源",
+            "技术支持"
+          ],
+          "unreasonable_flags": [
+            "基准月收入为0",
+            "基准盈亏平衡月为2"
+          ],
+          "risk_warnings": [
+            "缺乏明确的收入来源",
+            "资金缺口较大",
+            "成本结构不合理",
+            "未考虑长期运营成本"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": "¥1000",
+              "category": "市场"
+            },
+            {
+              "name": "营销推广",
+              "estimated": "¥2000",
+              "category": "市场"
+            },
+            {
+              "name": "人力资源",
+              "estimated": "¥3000",
+              "category": "运营"
+            },
+            {
+              "name": "技术支持",
+              "estimated": "¥1500",
+              "category": "技术"
+            }
+          ],
+          "revenue_model": "通过提供增值服务和广告合作获得收入",
+          "scenario_advice": "建议设置乐观、中性、悲观三种情景参数，分别考虑不同市场接受度和竞争环境下的收入和成本"
+        },
+        "pitch_summary": "本项目预算主要用于比赛期间的服务器、域名、API额度、用户测试和知识产权申请等成本。这些成本是确保项目顺利参赛的基础。同时，我们计划通过市场调研和营销推广来提高项目的知名度和影响力，从而吸引更多的用户和合作伙伴。虽然短期内可能无法实现盈利，但通过增值服务和广告合作，我们预计在项目成熟后能够获得稳定的收入来源。",
+        "faq": [
+          {
+            "question": "为什么基准月收入为0？",
+            "suggested_answer": "在比赛期间，我们主要关注项目的展示和推广，因此短期内不会有实际收入。我们预计在项目成熟后，通过增值服务和广告合作等方式实现盈利。"
+          },
+          {
+            "question": "如何应对资金缺口？",
+            "suggested_answer": "我们正在积极寻求外部投资和合作伙伴的支持，同时也会通过优化成本结构和提高运营效率来减少资金缺口。"
+          },
+          {
+            "question": "项目长期运营的成本结构是怎样的？",
+            "suggested_answer": "项目长期运营的成本主要包括市场推广、技术支持、人力资源和服务器维护等。我们计划通过合理的成本控制和收入增长来实现盈亏平衡。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:50:15.090821+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "营销推广",
+            "团队工资",
+            "办公场地租赁",
+            "客户服务"
+          ],
+          "unreasonable_flags": [
+            "基准月收入为0",
+            "基准盈亏平衡月为2"
+          ],
+          "risk_warnings": [
+            "项目成本和比赛预算合计与总投入不匹配",
+            "没有明确的收入来源",
+            "健康度评分过低",
+            "资金缺口过大"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": 5000,
+              "category": "市场"
+            },
+            {
+              "name": "营销推广",
+              "estimated": 3000,
+              "category": "市场"
+            },
+            {
+              "name": "团队工资",
+              "estimated": 10000,
+              "category": "人力"
+            },
+            {
+              "name": "办公场地租赁",
+              "estimated": 2000,
+              "category": "运营"
+            },
+            {
+              "name": "客户服务",
+              "estimated": 1000,
+              "category": "运营"
+            }
+          ],
+          "revenue_model": "通过提供增值服务和订阅模式获取收入",
+          "scenario_advice": "建议设定乐观、中性、悲观三种情景参数，分别对应不同市场接受度和用户增长速度"
+        },
+        "pitch_summary": "本项目预算主要集中在云服务器、域名、API额度、用户测试招募和知识产权申请上，这些是项目启动和比赛展示的基础。然而，为了确保项目的长期成功，我们还需要投入资金进行市场调研、营销推广、团队工资、办公场地租赁和客户服务。这些额外的成本将帮助我们更好地理解市场需求，提高品牌知名度，吸引和保留用户，从而实现预期的收入增长。",
+        "faq": [
+          {
+            "question": "为什么基准月收入为0？",
+            "suggested_answer": "目前项目还处于起步阶段，尚未正式推出产品或服务，因此没有实际收入。我们预计在接下来的几个月内通过增值服务和订阅模式开始获得收入。"
+          },
+          {
+            "question": "基准盈亏平衡月设定为2个月是否合理？",
+            "suggested_answer": "考虑到项目初期的市场推广和用户获取成本，2个月的盈亏平衡时间可能过于乐观。我们建议重新评估并调整这一时间点，以更好地反映实际情况。"
+          },
+          {
+            "question": "项目的资金缺口如何解决？",
+            "suggested_answer": "我们计划通过寻求外部投资、合作伙伴关系以及优化成本结构来填补资金缺口。同时，我们也会努力提高收入，以更快地实现盈利。"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-04-11T11:56:44.007392+08:00",
+      "suggestions": {
+        "diagnosis": {
+          "missing_items": [
+            "市场调研",
+            "营销推广",
+            "团队工资",
+            "办公场地租赁",
+            "法律咨询"
+          ],
+          "unreasonable_flags": [
+            "基准月收入为0",
+            "基准盈亏平衡月为2"
+          ],
+          "risk_warnings": [
+            "缺乏明确的收入来源",
+            "预算中未考虑长期运营成本",
+            "团队成员可能缺乏相关经验",
+            "市场风险和竞争压力"
+          ]
+        },
+        "template": {
+          "suggested_costs": [
+            {
+              "name": "市场调研",
+              "estimated": 5000,
+              "category": "市场"
+            },
+            {
+              "name": "营销推广",
+              "estimated": 10000,
+              "category": "市场"
+            },
+            {
+              "name": "团队工资",
+              "estimated": 20000,
+              "category": "人力资源"
+            },
+            {
+              "name": "办公场地租赁",
+              "estimated": 5000,
+              "category": "运营"
+            },
+            {
+              "name": "法律咨询",
+              "estimated": 2000,
+              "category": "法律"
+            }
+          ],
+          "revenue_model": "基于订阅模式的收入模型，结合广告收入和增值服务收费。",
+          "scenario_advice": "建议准备三档情景参数：乐观情景下，月收入达到10000元；中性情景下，月收入达到5000元；悲观情景下，月收入达到2000元。"
+        },
+        "pitch_summary": "本项目预算主要用于互联网+省赛参赛准备，包括云服务器、域名+CDN、API额度、用户测试招募和知识产权申请等。这些成本是确保项目顺利进行的基础。此外，我们还计划投入市场调研和营销推广，以确保项目能够吸引目标用户群体。团队工资和办公场地租赁是维持团队运营的必要支出，而法律咨询则有助于规避潜在的法律风险。尽管当前预算中没有收入来源，我们预计通过订阅模式、广告收入和增值服务收费等方式实现盈利，预期回报可观。",
+        "faq": [
+          {
+            "question": "为什么基准月收入为0？",
+            "suggested_answer": "当前预算主要集中在项目启动阶段，尚未考虑收入来源。我们计划通过订阅模式、广告收入和增值服务收费等方式实现盈利。"
+          },
+          {
+            "question": "基准盈亏平衡月为2是否合理？",
+            "suggested_answer": "考虑到项目初期的投入和市场推广成本，2个月的盈亏平衡时间可能过于乐观。我们建议在预算中增加市场调研和营销推广的预算，以确保更准确的盈亏平衡预测。"
+          },
+          {
+            "question": "项目的主要风险有哪些？",
+            "suggested_answer": "主要风险包括市场竞争激烈、用户需求变化和技术更新迅速。我们正在积极制定应对策略，包括加强市场调研、优化产品功能和提高用户体验。"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "project_cost_total": 2900.0,
+    "competition_cost_total": 6650.0,
+    "total_investment": 9550.0,
+    "baseline_monthly_revenue": 0.0,
+    "baseline_annual_net": 0.0,
+    "funding_gap": 9550.0,
+    "health_score": 42,
+    "breakeven_fastest": 2,
+    "breakeven_baseline": 2,
+    "breakeven_slowest": 2
+  },
+  "ai_result": {
+    "diagnosis": {
+      "missing_items": [
+        "市场调研",
+        "营销推广",
+        "团队工资",
+        "办公场地租赁",
+        "法律咨询"
+      ],
+      "unreasonable_flags": [
+        "基准月收入为0",
+        "基准盈亏平衡月为2"
+      ],
+      "risk_warnings": [
+        "缺乏明确的收入来源",
+        "预算中未考虑长期运营成本",
+        "团队成员可能缺乏相关经验",
+        "市场风险和竞争压力"
+      ]
+    },
+    "template": {
+      "suggested_costs": [
+        {
+          "name": "市场调研",
+          "estimated": 5000,
+          "category": "市场"
+        },
+        {
+          "name": "营销推广",
+          "estimated": 10000,
+          "category": "市场"
+        },
+        {
+          "name": "团队工资",
+          "estimated": 20000,
+          "category": "人力资源"
+        },
+        {
+          "name": "办公场地租赁",
+          "estimated": 5000,
+          "category": "运营"
+        },
+        {
+          "name": "法律咨询",
+          "estimated": 2000,
+          "category": "法律"
+        }
+      ],
+      "revenue_model": "基于订阅模式的收入模型，结合广告收入和增值服务收费。",
+      "scenario_advice": "建议准备三档情景参数：乐观情景下，月收入达到10000元；中性情景下，月收入达到5000元；悲观情景下，月收入达到2000元。"
+    },
+    "pitch_summary": "本项目预算主要用于互联网+省赛参赛准备，包括云服务器、域名+CDN、API额度、用户测试招募和知识产权申请等。这些成本是确保项目顺利进行的基础。此外，我们还计划投入市场调研和营销推广，以确保项目能够吸引目标用户群体。团队工资和办公场地租赁是维持团队运营的必要支出，而法律咨询则有助于规避潜在的法律风险。尽管当前预算中没有收入来源，我们预计通过订阅模式、广告收入和增值服务收费等方式实现盈利，预期回报可观。",
+    "faq": [
+      {
+        "question": "为什么基准月收入为0？",
+        "suggested_answer": "当前预算主要集中在项目启动阶段，尚未考虑收入来源。我们计划通过订阅模式、广告收入和增值服务收费等方式实现盈利。"
+      },
+      {
+        "question": "基准盈亏平衡月为2是否合理？",
+        "suggested_answer": "考虑到项目初期的投入和市场推广成本，2个月的盈亏平衡时间可能过于乐观。我们建议在预算中增加市场调研和营销推广的预算，以确保更准确的盈亏平衡预测。"
+      },
+      {
+        "question": "项目的主要风险有哪些？",
+        "suggested_answer": "主要风险包括市场竞争激烈、用户需求变化和技术更新迅速。我们正在积极制定应对策略，包括加强市场调研、优化产品功能和提高用户体验。"
+      }
+    ]
+  },
+  "ai_chat_history": [
+    {
+      "q": "省赛的预算安排有没有遗漏？评委会关注哪些财务问题？",
+      "a": "### 省赛预算检查与评委会关注点\n\n#### 1. 预算检查\n- **总投入**：¥9550.0\n- **基准月收入**：¥0.0\n- **盈亏平衡点**：2个月\n- **健康度**：42/100\n\n**建议检查以下项目是否已包含：**\n- **差旅费用**：交通、住宿、餐饮\n- **设备租赁或购买费用**：如电脑、投影仪等\n- **注册费用**：省赛报名费\n- **宣传费用**：海报、传单等\n- **应急费用**：预留一些不可预见的支出\n\n#### 2. 评委会关注的财务问题\n- **预算合理性**：确保所有支出都是必要的，没有冗余。\n- **盈亏平衡点**：2个月的盈亏平衡点是否可行？是否有足够的收入来源？\n- **收入预测**：是否有详细的收入预测和实现计划？\n- **资金来源**：资金来源是否稳定？是否有备用资金计划？\n- **健康度**：42/100的健康度偏低，需要具体分析原因并提出改进措施。\n\n希望这些建议能帮助你完善预算并顺利通过评审。"
+    },
+    {
+      "q": "如果进入国赛，预算大概还需要追加多少？",
+      "a": "根据当前的预算概况，总投入为¥9550.0，基准月收入为¥0.0，盈亏平衡需要2个月，健康度为42/100。进入国赛后，预算通常会增加，因为需要考虑更多的参赛费用，如交通费、住宿费、材料费等。\n\n建议追加预算的数额需要根据国赛的具体要求和参赛规模来确定。一般情况下，国赛的参赛成本可能会比省赛高出30%到50%。因此，建议追加的预算范围在¥2865到¥4775之间，即总预算在¥12415到¥14325之间。\n\n具体追加预算请根据实际情况进行调整。"
+    },
+    {
+      "q": "差旅报销需要注意什么？学校一般怎么审批？",
+      "a": "差旅报销需要注意以下几点：\n\n1. **保留所有票据**：确保保留所有与差旅相关的票据，如交通票、住宿发票、餐饮发票等。\n2. **票据清晰完整**：票据上的信息必须清晰、完整，包括日期、金额、项目等。\n3. **申请单填写详细**：填写差旅报销单时，应详细说明出差的目的、时间、地点、费用明细等。\n4. **遵守学校规定**：了解并遵守学校或单位的差旅报销规定，如餐饮费用的标准、住宿费用的上限等。\n\n学校一般审批流程如下：\n\n1. **提交报销单**：将填写好的差旅报销单连同相关票据提交给财务部门或指定的审批人员。\n2. **审核票据**：财务部门或审批人员会审核票据的完整性和合规性。\n3. **审批流程**：根据学校的规定，报销单可能需要经过多个层级的审批，如部门领导、财务主管等。\n4. **报销款项**：审批通过后，财务部门会进行报销款项的发放。\n\n建议详细了解并遵循学校的具体报销流程和规定。"
+    }
+  ]
+}

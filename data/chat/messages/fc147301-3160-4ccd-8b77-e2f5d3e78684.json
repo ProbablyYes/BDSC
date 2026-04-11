@@ -1,0 +1,207 @@
+[
+  {
+    "msg_id": "e9459d6b-4635-42a6-809f-015e46440ffb",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "sender_name": "仙人掌",
+    "type": "text",
+    "content": "@小文 你好",
+    "mentions": [
+      "ai_xiaowen"
+    ],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:39:27.044776+08:00"
+  },
+  {
+    "msg_id": "773d18d9-d85e-4796-a073-e84ed7b0ad25",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "system",
+    "content": "小文正在思考...",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:39:27.051151+08:00"
+  },
+  {
+    "msg_id": "52172285-7551-4ac8-83f0-3169da4520dd",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "ai_reply",
+    "content": "我暂时没有更多建议，你可以再详细描述一下。",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:39:29.587309+08:00"
+  },
+  {
+    "msg_id": "d87ca5c4-1716-4905-8fd4-26a078862b1f",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "sender_name": "测试",
+    "type": "text",
+    "content": "你好小文，帮我写个自我介绍",
+    "mentions": [
+      "ai_xiaowen"
+    ],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:48:06.876895+08:00"
+  },
+  {
+    "msg_id": "f9ea815c-77be-43b6-9f4f-f75fcc407a36",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "system",
+    "content": "小文正在思考...",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:48:06.880578+08:00"
+  },
+  {
+    "msg_id": "64d21f47-044b-44ec-b1c3-a6528f5e89f8",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "ai_reply",
+    "content": "当然可以，测试同学，请提供一些信息给我，比如你的名字、专业、兴趣爱好、特长以及你希望在自我介绍中强调的内容。这样我可以更好地帮助你。",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:48:08.567927+08:00"
+  },
+  {
+    "msg_id": "477073c1-3a7e-4fe4-a075-e4623610258c",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "sender_name": "测试",
+    "type": "text",
+    "content": "你好，帮我写个简单的自我介绍",
+    "mentions": [
+      "ai_xiaowen"
+    ],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:52:00.747176+08:00"
+  },
+  {
+    "msg_id": "174bf15e-0fef-408c-acf0-a61205b141ca",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "system",
+    "content": "小文正在思考...",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:52:00.758931+08:00"
+  },
+  {
+    "msg_id": "d315f11a-b74a-4977-966c-92de24260356",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "ai_reply",
+    "content": "当然可以，测试同学，这里有一个简单的自我介绍模板供你参考：\n\n大家好，我叫[你的名字]，是[你的专业]专业的学生。我对[你感兴趣的领域]有着浓厚的兴趣，并且在[相关经历或项目]中积累了一定的经验。我擅长[你的特长]，并且喜欢[你的兴趣爱好]。希望未来能够与大家一起学习和成长。\n\n请根据实际情况填写相应的内容。如果你有特定的信息想要强调，也可以告诉我。",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:52:03.140506+08:00"
+  },
+  {
+    "msg_id": "5ffc369f-07cf-4bc6-9cc3-096da9359987",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "sender_name": "仙人掌",
+    "type": "text",
+    "content": "你好",
+    "mentions": [
+      "ai_xiaowen"
+    ],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T10:10:22.920844+08:00"
+  },
+  {
+    "msg_id": "7a290c50-0eb8-4c5e-8477-de8f5bb4ce3d",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "system",
+    "content": "小文正在思考...",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T10:10:22.931767+08:00"
+  },
+  {
+    "msg_id": "b7c147cf-6d41-4c49-af4d-7e7973d6f473",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "ai_reply",
+    "content": "你好，仙人掌。有什么我可以帮忙的吗？如果有问题或者需要帮助的地方，请随时告诉我。",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T10:10:24.102300+08:00"
+  },
+  {
+    "msg_id": "175b2089-f55b-4d9c-9b8d-da167c94f8f2",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "sender_name": "仙人掌",
+    "type": "text",
+    "content": "hello",
+    "mentions": [
+      "ai_xiaowen"
+    ],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T10:10:35.983260+08:00"
+  },
+  {
+    "msg_id": "03db5d20-22cd-4e65-9d0a-5682cb47d496",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "system",
+    "content": "小文正在思考...",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T10:10:35.998292+08:00"
+  },
+  {
+    "msg_id": "5cf28736-7e47-4303-b010-0fc2492d90c6",
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "ai_reply",
+    "content": "你好，仙人掌。有什么可以帮助你的吗？如果有任何问题或需要协助的地方，请告诉我。",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T10:10:37.138655+08:00"
+  }
+]

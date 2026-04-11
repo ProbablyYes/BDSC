@@ -1,0 +1,217 @@
+[
+  {
+    "room_id": "705ea070-cca9-42c2-980d-9dc1181295bd",
+    "type": "direct",
+    "name": "贪吃蛇",
+    "avatar": null,
+    "members": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "7c221e48-9dee-42bd-8e53-fbf921759a38"
+    ],
+    "admin_ids": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T14:17:38.923160+08:00",
+    "last_message_preview": "",
+    "last_message_at": "",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "da6a8276-b2a6-4e83-8f96-663edf4494fc",
+    "type": "direct",
+    "name": "路人乙",
+    "avatar": null,
+    "members": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "341946ea-3be9-432f-b559-efb1a6a729cd"
+    ],
+    "admin_ids": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T14:17:46.867494+08:00",
+    "last_message_preview": "小文: [ai_reply]",
+    "last_message_at": "2026-04-10T09:28:45.448796+08:00",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "b75a2ee1-2a7a-435b-a115-47755d5f67a0",
+    "type": "direct",
+    "name": "路人丙",
+    "avatar": null,
+    "members": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "8fc576ee-0ba5-4915-b51b-21e19ec540da"
+    ],
+    "admin_ids": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T14:17:49.276209+08:00",
+    "last_message_preview": "",
+    "last_message_at": "",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "f7383136-a959-4856-b51f-69948b6a7627",
+    "type": "direct",
+    "name": "路人丁",
+    "avatar": null,
+    "members": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "36dbb73e-c0eb-497d-82a0-537596f6b007"
+    ],
+    "admin_ids": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T14:17:51.366641+08:00",
+    "last_message_preview": "小文: [ai_reply]",
+    "last_message_at": "2026-04-09T14:21:06.514751+08:00",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "fc147301-3160-4ccd-8b77-e2f5d3e78684",
+    "type": "direct",
+    "name": "小文 AI",
+    "avatar": null,
+    "members": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "ai_xiaowen"
+    ],
+    "admin_ids": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T14:21:07.293929+08:00",
+    "last_message_preview": "小文: [ai_reply]",
+    "last_message_at": "2026-04-10T10:10:37.138655+08:00",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "db9c6e7d-1d7f-46ab-b996-a78684ce9f10",
+    "type": "group",
+    "name": "群聊(3人)",
+    "avatar": null,
+    "members": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "7c221e48-9dee-42bd-8e53-fbf921759a38",
+      "36dbb73e-c0eb-497d-82a0-537596f6b007"
+    ],
+    "admin_ids": [
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T14:22:25.817148+08:00",
+    "last_message_preview": "小文: [ai_reply]",
+    "last_message_at": "2026-04-10T10:30:05.312953+08:00",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "84311bcb-97e7-46b1-9d74-db16088fba83",
+    "type": "team",
+    "name": "贪吃蛇大王",
+    "avatar": null,
+    "members": [
+      "341946ea-3be9-432f-b559-efb1a6a729cd",
+      "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+      "8fc576ee-0ba5-4915-b51b-21e19ec540da",
+      "36dbb73e-c0eb-497d-82a0-537596f6b007",
+      "7c221e48-9dee-42bd-8e53-fbf921759a38"
+    ],
+    "admin_ids": [
+      "341946ea-3be9-432f-b559-efb1a6a729cd"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-09T15:25:18.965240+08:00",
+    "last_message_preview": "",
+    "last_message_at": "",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "4fb13780-ce6d-41d3-a76c-4b943eea721d",
+    "type": "team",
+    "name": "TEST",
+    "avatar": null,
+    "members": [
+      "f2d66084-5486-4395-8abf-81034512ddf4",
+      "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+      "7c221e48-9dee-42bd-8e53-fbf921759a38"
+    ],
+    "admin_ids": [
+      "f2d66084-5486-4395-8abf-81034512ddf4"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-10T10:57:24.759546+08:00",
+    "last_message_preview": "",
+    "last_message_at": "",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "d668c085-ad0c-4685-a0c7-ea898dc4cd8f",
+    "type": "direct",
+    "name": "贪吃蛇",
+    "avatar": null,
+    "members": [
+      "f2d66084-5486-4395-8abf-81034512ddf4",
+      "7c221e48-9dee-42bd-8e53-fbf921759a38"
+    ],
+    "admin_ids": [
+      "f2d66084-5486-4395-8abf-81034512ddf4"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-10T10:57:28.297346+08:00",
+    "last_message_preview": "狒狒: yhhh",
+    "last_message_at": "2026-04-10T10:57:34.416537+08:00",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "4b09104f-6d98-435f-bad8-9d9bf56dcc42",
+    "type": "group",
+    "name": "起名字好难",
+    "avatar": null,
+    "members": [
+      "f2d66084-5486-4395-8abf-81034512ddf4",
+      "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+      "7c221e48-9dee-42bd-8e53-fbf921759a38"
+    ],
+    "admin_ids": [
+      "f2d66084-5486-4395-8abf-81034512ddf4"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-10T10:58:19.786151+08:00",
+    "last_message_preview": "小文: [ai_reply]",
+    "last_message_at": "2026-04-10T11:13:25.937511+08:00",
+    "unread_counts": {}
+  },
+  {
+    "room_id": "39bd8354-ff67-4635-9a3c-8dd1f0dba047",
+    "type": "direct",
+    "name": "小文 AI",
+    "avatar": null,
+    "members": [
+      "f2d66084-5486-4395-8abf-81034512ddf4",
+      "ai_xiaowen"
+    ],
+    "admin_ids": [
+      "f2d66084-5486-4395-8abf-81034512ddf4"
+    ],
+    "team_id": null,
+    "project_id": null,
+    "created_at": "2026-04-11T12:20:47.697222+08:00",
+    "last_message_preview": "",
+    "last_message_at": "",
+    "unread_counts": {}
+  }
+]

@@ -884,7 +884,7 @@ _DIM_RELEVANCE_MAP: dict[str, dict[str, float]] = {
     "core_bottleneck":     {"project_diagnosis": 0.95, "evidence_check": 0.8, "business_model": 0.8, "pressure_test": 0.7, "competition_prep": 0.6, "idea_brainstorm": 0.3, "learning_concept": 0.1, "market_competitor": 0.2, "general_chat": 0.0},
     "structural_cause":    {"project_diagnosis": 0.8,  "evidence_check": 0.6, "business_model": 0.6, "pressure_test": 0.7, "competition_prep": 0.5, "idea_brainstorm": 0.1, "learning_concept": 0.05, "market_competitor": 0.1, "general_chat": 0.0},
     "counter_intuitive":   {"project_diagnosis": 0.5,  "pressure_test": 0.9, "business_model": 0.5, "evidence_check": 0.4, "competition_prep": 0.3, "idea_brainstorm": 0.3, "learning_concept": 0.1, "market_competitor": 0.2, "general_chat": 0.0},
-    "method_bridge":       {"learning_concept": 0.95, "project_diagnosis": 0.15, "business_model": 0.4, "evidence_check": 0.3, "idea_brainstorm": 0.2, "competition_prep": 0.1, "pressure_test": 0.1, "market_competitor": 0.1, "general_chat": 0.0},
+    "method_bridge":       {"learning_concept": 0.95, "project_diagnosis": 0.55, "business_model": 0.6, "evidence_check": 0.5, "idea_brainstorm": 0.55, "competition_prep": 0.4, "pressure_test": 0.3, "market_competitor": 0.4, "general_chat": 0.0},
     "teacher_criteria":    {"competition_prep": 0.95, "project_diagnosis": 0.7, "evidence_check": 0.6, "business_model": 0.5, "pressure_test": 0.5, "idea_brainstorm": 0.3, "learning_concept": 0.1, "market_competitor": 0.3, "general_chat": 0.0},
     "external_reference":  {"market_competitor": 0.95, "competition_prep": 0.6, "project_diagnosis": 0.4, "business_model": 0.5, "idea_brainstorm": 0.5, "evidence_check": 0.3, "pressure_test": 0.3, "learning_concept": 0.2, "general_chat": 0.0},
     "strategy_directions": {"project_diagnosis": 0.7,  "business_model": 0.7, "idea_brainstorm": 0.6, "evidence_check": 0.5, "competition_prep": 0.5, "pressure_test": 0.4, "learning_concept": 0.1, "market_competitor": 0.2, "general_chat": 0.0},
@@ -921,7 +921,7 @@ def _dim_uncertainty(dim: str, message: str) -> float:
     if dim == "structural_cause":
         return 0.6
     if dim == "method_bridge":
-        return 0.7 if any(w in text for w in ("什么是", "怎么做", "教我", "不懂", "不理解")) else 0.3
+        return 0.8 if any(w in text for w in ("什么是", "怎么做", "教我", "不懂", "不理解")) else 0.55
     if dim == "external_reference":
         return 0.7 if any(w in text for w in ("竞品", "类似", "对标", "市面上", "别人")) else 0.4
     return 0.5
@@ -939,7 +939,7 @@ def _dim_impact(dim: str, intent: str, mode: str, complexity: int) -> float:
     if dim == "strategy_directions":
         return 0.7
     if dim == "method_bridge":
-        return 0.85 if intent == "learning_concept" else 0.3
+        return 0.85 if intent == "learning_concept" else 0.55
     if dim == "counter_intuitive":
         return 0.65
     if dim == "external_reference":
@@ -4579,7 +4579,8 @@ def _coach_analyze(state: dict) -> dict:
         )
         source_note = str(coach_json.get("source_note") or "").strip()
         if source_note:
-            analysis += f"\n\n{'这次我主要参考了：' if _is_exploring else '## 这次主要依据\n'}{source_note}"
+            _src_header = "这次我主要参考了：" if _is_exploring else "## 这次主要依据\n"
+            analysis += f"\n\n{_src_header}{source_note}"
     else:
         _comp_ontology_ctx = _get_competition_ontology_context(state.get("competition_type", "")) if mode == "competition" else ""
         _comp_coach_extra = (
@@ -5413,7 +5414,7 @@ def run_role_agents_node(state: WorkflowState) -> dict:
     )
 
     # ── Decide Path A vs Path B based on dims + message complexity ──
-    _GUIDE_DIMS = ["status_judgment", "probing_questions", "strategy_directions", "action_plan"]
+    _GUIDE_DIMS = ["status_judgment", "probing_questions", "strategy_directions", "action_plan", "method_bridge"]
     is_file = "[上传文件:" in state.get("message", "")
     _msg_for_complexity = state.get("message", "")
     _conv_for_complexity = state.get("conversation_messages", [])

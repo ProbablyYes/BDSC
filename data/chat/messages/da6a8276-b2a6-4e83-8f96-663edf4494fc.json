@@ -1,0 +1,56 @@
+[
+  {
+    "msg_id": "11e3e80c-9cc9-43ca-ba11-1e43b2454330",
+    "room_id": "da6a8276-b2a6-4e83-8f96-663edf4494fc",
+    "sender_id": "341946ea-3be9-432f-b559-efb1a6a729cd",
+    "sender_name": "路人乙",
+    "type": "text",
+    "content": "hi",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-09T15:25:29.619585+08:00"
+  },
+  {
+    "msg_id": "f77993df-4459-4eca-84d5-5f0f856027b6",
+    "room_id": "da6a8276-b2a6-4e83-8f96-663edf4494fc",
+    "sender_id": "c7bbfa77-26c5-4d69-a8fe-79d879f25e88",
+    "sender_name": "测试用户",
+    "type": "text",
+    "content": "@小文 你好，帮我总结一下",
+    "mentions": [
+      "ai_xiaowen"
+    ],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:28:41.839592+08:00"
+  },
+  {
+    "msg_id": "5b391613-ed48-4459-b147-921ad06a8d6a",
+    "room_id": "da6a8276-b2a6-4e83-8f96-663edf4494fc",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "system",
+    "content": "小文正在思考...",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:28:41.845333+08:00"
+  },
+  {
+    "msg_id": "1af1d683-d178-485b-93f3-3ca62332e48d",
+    "room_id": "da6a8276-b2a6-4e83-8f96-663edf4494fc",
+    "sender_id": "ai_xiaowen",
+    "sender_name": "小文",
+    "type": "ai_reply",
+    "content": "我暂时没有更多建议，你可以再详细描述一下。",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-10T09:28:45.446796+08:00"
+  }
+]

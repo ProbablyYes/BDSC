@@ -359,3 +359,59 @@ class TeamUpdatePayload(BaseModel):
 class TeamResponse(BaseModel):
     status: str = "ok"
     team: dict = Field(default_factory=dict)
+
+
+# ── Chat ──────────────────────────────────────────────────────────────
+
+class ChatRoomCreatePayload(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    room_type: str = "group"
+    members: list[str] = Field(default_factory=list)
+    admin_ids: list[str] = Field(default_factory=list)
+    team_id: Optional[str] = None
+    project_id: Optional[str] = None
+
+
+class ChatRoomAddMemberPayload(BaseModel):
+    user_id: str
+
+
+class ChatMessageSendPayload(BaseModel):
+    sender_id: str
+    sender_name: str = ""
+    msg_type: str = "text"
+    content: str = ""
+    mentions: list[str] = Field(default_factory=list)
+    reply_to: Optional[str] = None
+
+
+class ChatReactionPayload(BaseModel):
+    user_id: str
+    emoji: str
+
+
+# ── Budget ────────────────────────────────────────────────────────────
+
+class BudgetCreatePayload(BaseModel):
+    name: str = "未命名方案"
+    purpose: str = "business"
+
+
+class BudgetSavePayload(BaseModel):
+    project_costs: Optional[dict] = None
+    business_finance: Optional[dict] = None
+    competition_budget: Optional[dict] = None
+    funding_plan: Optional[dict] = None
+    name: Optional[str] = None
+    visible_tabs: Optional[list[str]] = None
+    ai_result: Optional[dict] = None
+    ai_chat_history: Optional[list[dict]] = None
+
+
+class BudgetAISuggestPayload(BaseModel):
+    project_description: str = ""
+    project_type: str = ""
+
+
+class BudgetAIChatPayload(BaseModel):
+    question: str = ""

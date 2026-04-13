@@ -181,5 +181,18 @@
     "file_meta": null,
     "reactions": {},
     "created_at": "2026-04-10T11:13:25.933326+08:00"
+  },
+  {
+    "msg_id": "3ba1523e-37e3-405d-acdf-f77a52ee4ac0",
+    "room_id": "4b09104f-6d98-435f-bad8-9d9bf56dcc42",
+    "sender_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "sender_name": "贪吃蛇",
+    "type": "text",
+    "content": "好的，就是这样",
+    "mentions": [],
+    "reply_to": null,
+    "file_meta": null,
+    "reactions": {},
+    "created_at": "2026-04-11T17:12:08.287529+08:00"
   }
 ]

@@ -960,114 +960,123 @@ class GraphService:
             return {"ok": True, "saved": 0, "members": 0, "projects": 0}
         try:
             def _write(session):
-                session.run(
-                    """
-                    MATCH (h:Hyperedge)
-                    DETACH DELETE h
-                    """
-                )
-                session.run(
-                    """
-                    MATCH (n:HyperNode)
-                    DETACH DELETE n
-                    """
-                )
-                saved = 0
-                members = 0
-                project_links = 0
-                for rec in records:
-                    session.run(
-                        """
-                        MERGE (h:Hyperedge {id: $id})
-                        SET h.family = $family,
-                            h.label = $label,
-                            h.category = $category,
-                            h.support = $support,
-                            h.confidence = $confidence,
-                            h.severity = $severity,
-                            h.score_impact = $score_impact,
-                            h.stage_scope = $stage_scope,
-                            h.teaching_note = $teaching_note,
-                            h.retrieval_reason = $retrieval_reason,
-                            h.rule_count = $rule_count,
-                            h.rubric_count = $rubric_count,
-                            h.version = $version
-                        """,
-                        id=rec.get("hyperedge_id", ""),
-                        family=rec.get("type", ""),
-                        label=rec.get("family_label", ""),
-                        category=rec.get("category"),
-                        support=int(rec.get("support", 0) or 0),
-                        confidence=float(rec.get("confidence", 0) or 0),
-                        severity=str(rec.get("severity", "") or ""),
-                        score_impact=float(rec.get("score_impact", 0) or 0),
-                        stage_scope=str(rec.get("stage_scope", "") or ""),
-                        teaching_note=str(rec.get("teaching_note", "") or ""),
-                        retrieval_reason=str(rec.get("retrieval_reason", "") or ""),
-                        rule_count=len(rec.get("rules") or []),
-                        rubric_count=len(rec.get("rubrics") or []),
-                        version=version,
-                    )
-                    saved += 1
+                session.run("MATCH (h:Hyperedge) DETACH DELETE h")
+                session.run("MATCH (n:HyperNode) WHERE NOT (n)--() OR ALL(r IN [(n)-[rel]-() | type(rel)] WHERE r = 'HAS_MEMBER') DETACH DELETE n")
 
+                edge_params = []
+                for rec in records:
+                    edge_params.append({
+                        "id": rec.get("hyperedge_id", ""),
+                        "family": rec.get("type", ""),
+                        "label": rec.get("family_label", ""),
+                        "category": rec.get("category") or "",
+                        "support": int(rec.get("support", 0) or 0),
+                        "confidence": float(rec.get("confidence", 0) or 0),
+                        "severity": str(rec.get("severity", "") or ""),
+                        "score_impact": float(rec.get("score_impact", 0) or 0),
+                        "stage_scope": str(rec.get("stage_scope", "") or ""),
+                        "teaching_note": str(rec.get("teaching_note", "") or ""),
+                        "retrieval_reason": str(rec.get("retrieval_reason", "") or ""),
+                        "rule_count": len(rec.get("rules") or []),
+                        "rubric_count": len(rec.get("rubrics") or []),
+                        "version": version,
+                    })
+                session.run(
+                    """
+                    UNWIND $edges AS e
+                    MERGE (h:Hyperedge {id: e.id})
+                    SET h.family = e.family, h.label = e.label, h.category = e.category,
+                        h.support = e.support, h.confidence = e.confidence,
+                        h.severity = e.severity, h.score_impact = e.score_impact,
+                        h.stage_scope = e.stage_scope, h.teaching_note = e.teaching_note,
+                        h.retrieval_reason = e.retrieval_reason,
+                        h.rule_count = e.rule_count, h.rubric_count = e.rubric_count,
+                        h.version = e.version
+                    """,
+                    edges=edge_params,
+                )
+                saved = len(edge_params)
+
+                member_params = []
+                for rec in records:
+                    eid = rec.get("hyperedge_id", "")
                     for member in rec.get("member_nodes") or []:
                         key = str(member.get("key", "")).strip()
                         if not key:
                             continue
-                        session.run(
-                            """
-                            MERGE (n:HyperNode {key: $key})
-                            SET n.type = $type,
-                                n.name = $name,
-                                n.display = $display
-                            WITH n
-                            MATCH (h:Hyperedge {id: $edge_id})
-                            MERGE (h)-[:HAS_MEMBER {role: $role}]->(n)
-                            """,
-                            key=key,
-                            type=str(member.get("type", "") or ""),
-                            name=str(member.get("name", "") or ""),
-                            display=str(member.get("display", "") or ""),
-                            role=str(member.get("type", "") or ""),
-                            edge_id=rec.get("hyperedge_id", ""),
-                        )
-                        members += 1
+                        member_params.append({
+                            "key": key,
+                            "type": str(member.get("type", "") or ""),
+                            "name": str(member.get("name", "") or ""),
+                            "display": str(member.get("display", "") or ""),
+                            "edge_id": eid,
+                        })
+                BATCH = 500
+                members = 0
+                for i in range(0, len(member_params), BATCH):
+                    batch = member_params[i:i + BATCH]
+                    session.run(
+                        """
+                        UNWIND $items AS m
+                        MERGE (n:HyperNode {key: m.key})
+                        SET n.type = m.type, n.name = m.name, n.display = m.display, n.label = m.display
+                        WITH n, m
+                        MATCH (h:Hyperedge {id: m.edge_id})
+                        MERGE (h)-[:HAS_MEMBER {role: m.type}]->(n)
+                        """,
+                        items=batch,
+                    )
+                    members += len(batch)
 
+                rule_params = []
+                for rec in records:
+                    eid = rec.get("hyperedge_id", "")
                     for rule_id in rec.get("rules") or []:
-                        session.run(
-                            """
-                            MATCH (h:Hyperedge {id: $edge_id})
-                            MATCH (r:RiskRule {id: $rule_id})
-                            MERGE (h)-[:TRIGGERS_RULE]->(r)
-                            """,
-                            edge_id=rec.get("hyperedge_id", ""),
-                            rule_id=str(rule_id),
-                        )
+                        rule_params.append({"edge_id": eid, "rule_id": str(rule_id)})
+                if rule_params:
+                    session.run(
+                        """
+                        UNWIND $items AS r
+                        MATCH (h:Hyperedge {id: r.edge_id})
+                        MATCH (rr:RiskRule {id: r.rule_id})
+                        MERGE (h)-[:TRIGGERS_RULE]->(rr)
+                        """,
+                        items=rule_params,
+                    )
 
+                rubric_params = []
+                for rec in records:
+                    eid = rec.get("hyperedge_id", "")
                     for rubric in rec.get("rubrics") or []:
-                        session.run(
-                            """
-                            MATCH (h:Hyperedge {id: $edge_id})
-                            MATCH (ri:RubricItem {name: $rubric})
-                            MERGE (h)-[:ALIGNS_WITH]->(ri)
-                            """,
-                            edge_id=rec.get("hyperedge_id", ""),
-                            rubric=str(rubric),
-                        )
+                        rubric_params.append({"edge_id": eid, "rubric": str(rubric)})
+                if rubric_params:
+                    session.run(
+                        """
+                        UNWIND $items AS r
+                        MATCH (h:Hyperedge {id: r.edge_id})
+                        MATCH (ri:RubricItem {name: r.rubric})
+                        MERGE (h)-[:ALIGNS_WITH]->(ri)
+                        """,
+                        items=rubric_params,
+                    )
 
-                    for project_id in rec.get("source_project_ids") or []:
-                        session.run(
-                            """
-                            MATCH (h:Hyperedge {id: $edge_id})
-                            MATCH (p:Project {id: $project_id})
-                            MERGE (h)-[:SUPPORTED_BY]->(p)
-                            """,
-                            edge_id=rec.get("hyperedge_id", ""),
-                            project_id=str(project_id),
-                        )
-                        project_links += 1
+                project_params = []
+                for rec in records:
+                    eid = rec.get("hyperedge_id", "")
+                    for pid in rec.get("source_project_ids") or []:
+                        project_params.append({"edge_id": eid, "project_id": str(pid)})
+                if project_params:
+                    session.run(
+                        """
+                        UNWIND $items AS p
+                        MATCH (h:Hyperedge {id: p.edge_id})
+                        MATCH (pr:Project {id: p.project_id})
+                        MERGE (h)-[:SUPPORTED_BY]->(pr)
+                        """,
+                        items=project_params,
+                    )
 
-                return {"saved": saved, "members": members, "projects": project_links}
+                return {"saved": saved, "members": members, "projects": len(project_params)}
 
             out = self._query_with_fallback(_write)
             return {"ok": True, **out}
@@ -1302,3 +1311,487 @@ class GraphService:
             return self._query_with_fallback(_query)
         except Exception as exc:  # noqa: BLE001
             return {"error": f"rule coverage query failed: {exc}"}
+
+    # ── KG Explorer panel APIs ──────────────────────────────────
+
+    DIMENSION_SUBGRAPHS: list[tuple[str, str, str, str]] = [
+        ("pain", "PainPoint", "HAS_PAIN", "#f87171"),
+        ("solution", "Solution", "HAS_SOLUTION", "#60a5fa"),
+        ("innovation", "InnovationPoint", "HAS_INNOVATION", "#a78bfa"),
+        ("business_model", "BusinessModelAspect", "HAS_BUSINESS_MODEL", "#34d399"),
+        ("market", "Market", "HAS_MARKET_ANALYSIS", "#fbbf24"),
+        ("execution", "ExecutionStep", "HAS_EXECUTION_STEP", "#38bdf8"),
+        ("risk_control", "RiskControlPoint", "HAS_RISK_CONTROL", "#fb923c"),
+        ("evidence", "Evidence", "HAS_EVIDENCE", "#94a3b8"),
+        ("stakeholder", "Stakeholder", "HAS_TARGET_USER", "#f0abfc"),
+    ]
+
+    EXTRA_SUBGRAPHS: list[tuple[str, str, str, str]] = [
+        ("category", "Category", "BELONGS_TO", "#c4b5fd"),
+        ("risk_rule", "RiskRule", "HITS_RULE", "#fca5a5"),
+        ("rubric", "RubricItem", "EVALUATED_BY", "#6ee7b7"),
+    ]
+
+    SG_LABELS: dict[str, str] = {
+        "pain": "痛点", "solution": "方案", "innovation": "创新点",
+        "business_model": "商业模式", "market": "市场分析", "execution": "执行计划",
+        "risk_control": "风控", "evidence": "证据", "stakeholder": "利益方",
+        "category": "类别", "risk_rule": "风险规则", "rubric": "评审标准",
+        "project": "项目",
+    }
+
+    def get_subgraph_overview(self) -> dict[str, Any]:
+        """Return meta-level overview: one node per subgraph + cross-subgraph links."""
+        try:
+            def _query(session):
+                all_sgs = self.DIMENSION_SUBGRAPHS + self.EXTRA_SUBGRAPHS
+                sg_meta: list[dict] = []
+                sg_node_counts: dict[str, int] = {}
+
+                project_rows = list(session.run(
+                    "MATCH (p:Project) RETURN count(p) AS cnt"
+                ))
+                project_count = project_rows[0]["cnt"] if project_rows else 0
+                sg_node_counts["project"] = project_count
+
+                for sg_id, node_label, rel_type, color in all_sgs:
+                    count_rows = list(session.run(
+                        f"MATCH (n:{node_label}) RETURN count(n) AS cnt"
+                    ))
+                    node_count = count_rows[0]["cnt"] if count_rows else 0
+                    sg_node_counts[sg_id] = node_count
+
+                    project_link_rows = list(session.run(
+                        f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}) "
+                        f"RETURN count(DISTINCT p) AS projects"
+                    ))
+                    linked_projects = project_link_rows[0]["projects"] if project_link_rows else 0
+
+                    edge_rows = list(session.run(
+                        f"MATCH (p:Project)-[r:{rel_type}]->(n:{node_label}) RETURN count(r) AS cnt"
+                    ))
+                    edge_count = edge_rows[0]["cnt"] if edge_rows else 0
+
+                    top_rows = list(session.run(
+                        f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}) "
+                        f"WITH n.name AS name, count(DISTINCT p) AS freq "
+                        f"ORDER BY freq DESC LIMIT 5 "
+                        f"RETURN name, freq"
+                    ))
+
+                    cat_rows = list(session.run(
+                        f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}), "
+                        f"      (p)-[:BELONGS_TO]->(c:Category) "
+                        f"RETURN c.name AS cat, count(DISTINCT n) AS cnt "
+                        f"ORDER BY cnt DESC LIMIT 10"
+                    ))
+
+                    sg_meta.append({
+                        "id": sg_id,
+                        "label": self.SG_LABELS.get(sg_id, node_label),
+                        "node_label": node_label,
+                        "color": color,
+                        "node_count": node_count,
+                        "edge_count": edge_count,
+                        "linked_projects": linked_projects,
+                        "top_nodes": [{"name": r["name"], "freq": r["freq"]} for r in top_rows],
+                        "category_dist": [{"cat": r["cat"], "count": r["cnt"]} for r in cat_rows],
+                    })
+
+                cross_links: list[dict] = []
+                for i, (sg_a, _, rel_a, _) in enumerate(all_sgs):
+                    for j, (sg_b, _, rel_b, _) in enumerate(all_sgs):
+                        if j <= i:
+                            continue
+                        nl_a = all_sgs[i][1]
+                        nl_b = all_sgs[j][1]
+                        shared_rows = list(session.run(
+                            f"MATCH (p:Project)-[:{rel_a}]->(a:{nl_a}), "
+                            f"      (p)-[:{rel_b}]->(b:{nl_b}) "
+                            f"RETURN count(DISTINCT p) AS shared"
+                        ))
+                        shared = shared_rows[0]["shared"] if shared_rows else 0
+                        if shared > 0:
+                            cross_links.append({
+                                "source": sg_a, "target": sg_b,
+                                "shared_projects": shared,
+                            })
+
+                overview_nodes = [
+                    {"id": "project", "label": "项目", "color": "#ffffff",
+                     "node_count": project_count, "node_label": "Project"},
+                ]
+                for m in sg_meta:
+                    overview_nodes.append({
+                        "id": m["id"], "label": m["label"], "color": m["color"],
+                        "node_count": m["node_count"], "node_label": m["node_label"],
+                    })
+                overview_links = []
+                for m in sg_meta:
+                    if m["linked_projects"] > 0:
+                        overview_links.append({
+                            "source": "project", "target": m["id"],
+                            "weight": m["edge_count"],
+                        })
+                for cl in cross_links:
+                    overview_links.append({
+                        "source": cl["source"], "target": cl["target"],
+                        "weight": cl["shared_projects"],
+                    })
+
+                return {
+                    "subgraphs": sg_meta,
+                    "overview_graph": {"nodes": overview_nodes, "links": overview_links},
+                    "cross_links": cross_links,
+                    "total_kg_nodes": sum(sg_node_counts.values()),
+                    "total_projects": project_count,
+                }
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"subgraph overview failed: {exc}"}
+
+    def get_single_subgraph(self, sg_id: str) -> dict[str, Any]:
+        """Return all nodes + project connections for a single subgraph dimension."""
+        try:
+            all_sgs = {s[0]: s for s in self.DIMENSION_SUBGRAPHS + self.EXTRA_SUBGRAPHS}
+            if sg_id not in all_sgs:
+                return {"error": f"Unknown subgraph: {sg_id}"}
+
+            _, node_label, rel_type, color = all_sgs[sg_id]
+
+            def _query(session):
+                nodes: list[dict] = []
+                links: list[dict] = []
+                node_set: set[str] = set()
+
+                rows = list(session.run(
+                    f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}) "
+                    f"OPTIONAL MATCH (p)-[:BELONGS_TO]->(c:Category) "
+                    f"RETURN p.id AS pid, p.name AS pname, c.name AS cat, "
+                    f"       n.name AS nname, elementId(n) AS nid"
+                ))
+                for r in rows:
+                    pid = r["pid"]
+                    if pid not in node_set:
+                        node_set.add(pid)
+                        nodes.append({
+                            "id": pid, "name": r["pname"] or pid,
+                            "type": "Project", "category": r["cat"] or "",
+                            "color": "#ffffff", "size": 6,
+                        })
+                    nid = f"{sg_id}_{r['nid']}"
+                    if nid not in node_set:
+                        node_set.add(nid)
+                        nodes.append({
+                            "id": nid, "name": r["nname"] or "",
+                            "type": node_label, "color": color, "size": 4,
+                        })
+                    links.append({"source": pid, "target": nid, "type": rel_type})
+
+                node_freq: dict[str, int] = {}
+                cat_dist: dict[str, int] = {}
+                for r in rows:
+                    nname = r["nname"] or ""
+                    node_freq[nname] = node_freq.get(nname, 0) + 1
+                    cat = r["cat"] or "未分类"
+                    cat_dist[cat] = cat_dist.get(cat, 0) + 1
+
+                top_nodes = sorted(node_freq.items(), key=lambda x: -x[1])[:15]
+                cat_stats = sorted(cat_dist.items(), key=lambda x: -x[1])
+
+                return {
+                    "sg_id": sg_id,
+                    "sg_label": self.SG_LABELS.get(sg_id, node_label),
+                    "node_label": node_label,
+                    "color": color,
+                    "graph": {"nodes": nodes, "links": links},
+                    "stats": {
+                        "entity_count": len([n for n in nodes if n["type"] != "Project"]),
+                        "project_count": len([n for n in nodes if n["type"] == "Project"]),
+                        "edge_count": len(links),
+                    },
+                    "top_nodes": [{"name": n, "freq": f} for n, f in top_nodes],
+                    "category_dist": [{"cat": c, "count": n} for c, n in cat_stats],
+                }
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"single subgraph query failed: {exc}"}
+
+    def get_subgraph_data(self) -> dict[str, Any]:
+        """Return the full KG organized into dimension-based logical subgraphs."""
+        try:
+            def _query(session):
+                subgraphs: list[dict] = []
+                all_nodes: list[dict] = []
+                all_links: list[dict] = []
+                node_id_set: set[str] = set()
+
+                project_rows = list(session.run(
+                    "MATCH (p:Project)-[:BELONGS_TO]->(c:Category) "
+                    "RETURN p.id AS id, p.name AS name, c.name AS category, p.confidence AS confidence"
+                ))
+                for r in project_rows:
+                    pid = r["id"]
+                    if pid not in node_id_set:
+                        node_id_set.add(pid)
+                        all_nodes.append({
+                            "id": pid, "name": r["name"] or pid,
+                            "type": "Project", "subgraph": "project",
+                            "category": r["category"] or "", "confidence": r["confidence"],
+                            "color": "#ffffff", "size": 6,
+                        })
+
+                for sg_id, node_label, rel_type, color in self.DIMENSION_SUBGRAPHS:
+                    rows = list(session.run(
+                        f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}) "
+                        f"RETURN p.id AS pid, n.name AS name, elementId(n) AS nid",
+                    ))
+                    sg_nodes: list[dict] = []
+                    sg_links: list[dict] = []
+                    for r in rows:
+                        nid = f"{sg_id}_{r['nid']}"
+                        if nid not in node_id_set:
+                            node_id_set.add(nid)
+                            node = {
+                                "id": nid, "name": r["name"] or "",
+                                "type": node_label, "subgraph": sg_id,
+                                "color": color, "size": 4,
+                            }
+                            all_nodes.append(node)
+                            sg_nodes.append(node)
+                        link = {"source": r["pid"], "target": nid, "type": rel_type}
+                        all_links.append(link)
+                        sg_links.append(link)
+
+                    subgraphs.append({
+                        "id": sg_id,
+                        "label": node_label,
+                        "rel_type": rel_type,
+                        "color": color,
+                        "node_count": len(sg_nodes),
+                        "edge_count": len(sg_links),
+                    })
+
+                cat_rows = list(session.run(
+                    "MATCH (c:Category) RETURN c.name AS name, elementId(c) AS cid"
+                ))
+                cat_sg_nodes = []
+                for r in cat_rows:
+                    cid = f"cat_{r['cid']}"
+                    if cid not in node_id_set:
+                        node_id_set.add(cid)
+                        node = {"id": cid, "name": r["name"] or "", "type": "Category", "subgraph": "category", "color": "#a78bfa", "size": 5}
+                        all_nodes.append(node)
+                        cat_sg_nodes.append(node)
+                cat_link_rows = list(session.run(
+                    "MATCH (p:Project)-[:BELONGS_TO]->(c:Category) RETURN p.id AS pid, elementId(c) AS cid"
+                ))
+                cat_sg_links = []
+                for r in cat_link_rows:
+                    link = {"source": r["pid"], "target": f"cat_{r['cid']}", "type": "BELONGS_TO"}
+                    all_links.append(link)
+                    cat_sg_links.append(link)
+                subgraphs.append({"id": "category", "label": "Category", "rel_type": "BELONGS_TO", "color": "#a78bfa", "node_count": len(cat_sg_nodes), "edge_count": len(cat_sg_links)})
+
+                rr_rows = list(session.run(
+                    "MATCH (r:RiskRule) RETURN r.id AS rid, r.name AS name, elementId(r) AS nid"
+                ))
+                rr_sg_nodes = []
+                for r in rr_rows:
+                    nid = f"rule_{r['nid']}"
+                    if nid not in node_id_set:
+                        node_id_set.add(nid)
+                        node = {"id": nid, "name": r["name"] or r["rid"], "type": "RiskRule", "subgraph": "risk_rule", "color": "#f87171", "size": 5}
+                        all_nodes.append(node)
+                        rr_sg_nodes.append(node)
+                hr_rows = list(session.run(
+                    "MATCH (p:Project)-[:HITS_RULE]->(r:RiskRule) RETURN p.id AS pid, elementId(r) AS rid"
+                ))
+                rr_sg_links = []
+                for r in hr_rows:
+                    link = {"source": r["pid"], "target": f"rule_{r['rid']}", "type": "HITS_RULE"}
+                    all_links.append(link)
+                    rr_sg_links.append(link)
+                subgraphs.append({"id": "risk_rule", "label": "RiskRule", "rel_type": "HITS_RULE", "color": "#f87171", "node_count": len(rr_sg_nodes), "edge_count": len(rr_sg_links)})
+
+                ri_rows = list(session.run(
+                    "MATCH (ri:RubricItem) RETURN ri.id AS riid, ri.name AS name, elementId(ri) AS nid"
+                ))
+                ri_sg_nodes = []
+                for r in ri_rows:
+                    nid = f"rubric_{r['nid']}"
+                    if nid not in node_id_set:
+                        node_id_set.add(nid)
+                        node = {"id": nid, "name": r["name"] or r["riid"], "type": "RubricItem", "subgraph": "rubric", "color": "#4ade80", "size": 5}
+                        all_nodes.append(node)
+                        ri_sg_nodes.append(node)
+                ev_rows = list(session.run(
+                    "MATCH (p:Project)-[:EVALUATED_BY]->(ri:RubricItem) RETURN p.id AS pid, elementId(ri) AS riid"
+                ))
+                ri_sg_links = []
+                for r in ev_rows:
+                    link = {"source": r["pid"], "target": f"rubric_{r['riid']}", "type": "EVALUATED_BY"}
+                    all_links.append(link)
+                    ri_sg_links.append(link)
+                subgraphs.append({"id": "rubric", "label": "RubricItem", "rel_type": "EVALUATED_BY", "color": "#4ade80", "node_count": len(ri_sg_nodes), "edge_count": len(ri_sg_links)})
+
+                return {
+                    "subgraphs": subgraphs,
+                    "graph": {"nodes": all_nodes, "links": all_links},
+                    "stats": {
+                        "total_nodes": len(all_nodes),
+                        "total_links": len(all_links),
+                        "total_projects": len(project_rows),
+                        "subgraph_count": len(subgraphs),
+                    },
+                }
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"subgraph query failed: {exc}"}
+
+    def get_hypergraph_viz(self) -> dict[str, Any]:
+        """Return Hyperedge / HyperNode data formatted for force-graph rendering."""
+        try:
+            def _query(session):
+                nodes: list[dict] = []
+                links: list[dict] = []
+                node_set: set[str] = set()
+
+                he_rows = list(session.run(
+                    "MATCH (h:Hyperedge) "
+                    "RETURN elementId(h) AS eid, h.label AS label, h.type AS htype, "
+                    "       h.project_id AS pid, h.weight AS weight LIMIT 5000"
+                ))
+                for r in he_rows:
+                    nid = f"he_{r['eid']}"
+                    node_set.add(nid)
+                    nodes.append({
+                        "id": nid, "name": r["label"] or "hyperedge",
+                        "type": "Hyperedge", "htype": r["htype"] or "",
+                        "project_id": r["pid"] or "",
+                        "weight": float(r["weight"] or 1),
+                        "color": "#f59e0b", "size": 8, "shape": "rect",
+                    })
+
+                hn_rows = list(session.run(
+                    "MATCH (n:HyperNode) "
+                    "RETURN elementId(n) AS nid, n.label AS label, n.type AS ntype, "
+                    "       n.segment_index AS seg LIMIT 10000"
+                ))
+                for r in hn_rows:
+                    nid = f"hn_{r['nid']}"
+                    node_set.add(nid)
+                    nodes.append({
+                        "id": nid, "name": r["label"] or "node",
+                        "type": "HyperNode", "ntype": r["ntype"] or "",
+                        "color": "#38bdf8", "size": 3,
+                    })
+
+                member_rows = list(session.run(
+                    "MATCH (h:Hyperedge)-[:HAS_MEMBER]->(n:HyperNode) "
+                    "RETURN elementId(h) AS hid, elementId(n) AS nid LIMIT 20000"
+                ))
+                for r in member_rows:
+                    links.append({
+                        "source": f"he_{r['hid']}", "target": f"hn_{r['nid']}",
+                        "type": "HAS_MEMBER",
+                    })
+
+                rule_rows = list(session.run(
+                    "MATCH (h:Hyperedge)-[:TRIGGERS_RULE]->(rr:RiskRule) "
+                    "RETURN elementId(h) AS hid, rr.id AS rid, rr.name AS rname LIMIT 5000"
+                ))
+                for r in rule_rows:
+                    rid = f"rule_{r['rid']}"
+                    if rid not in node_set:
+                        node_set.add(rid)
+                        nodes.append({
+                            "id": rid, "name": r["rname"] or r["rid"],
+                            "type": "RiskRule", "color": "#ef4444", "size": 5,
+                        })
+                    links.append({"source": f"he_{r['hid']}", "target": rid, "type": "TRIGGERS_RULE"})
+
+                align_rows = list(session.run(
+                    "MATCH (h:Hyperedge)-[:ALIGNS_WITH]->(ri:RubricItem) "
+                    "RETURN elementId(h) AS hid, ri.id AS riid, ri.name AS riname LIMIT 5000"
+                ))
+                for r in align_rows:
+                    riid = f"rubric_{r['riid']}"
+                    if riid not in node_set:
+                        node_set.add(riid)
+                        nodes.append({
+                            "id": riid, "name": r["riname"] or r["riid"],
+                            "type": "RubricItem", "color": "#22c55e", "size": 5,
+                        })
+                    links.append({"source": f"he_{r['hid']}", "target": riid, "type": "ALIGNS_WITH"})
+
+                return {
+                    "graph": {"nodes": nodes, "links": links},
+                    "stats": {
+                        "total_hyperedges": len(he_rows),
+                        "total_hypernodes": len(hn_rows),
+                        "total_links": len(links),
+                    },
+                }
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"error": f"hypergraph viz query failed: {exc}"}
+
+    def search_kg(self, query: str, subgraph_filter: str = "", category_filter: str = "", limit: int = 30) -> dict[str, Any]:
+        """Full-text search across all dimension nodes, returning matched nodes + their project context."""
+        if not query or len(query.strip()) < 1:
+            return {"results": [], "count": 0}
+        try:
+            def _query(session):
+                results: list[dict] = []
+                seen: set[str] = set()
+                q = query.strip()
+
+                search_targets = self.DIMENSION_SUBGRAPHS
+                if subgraph_filter:
+                    search_targets = [t for t in search_targets if t[0] == subgraph_filter]
+
+                for sg_id, node_label, rel_type, color in search_targets:
+                    cat_clause = ""
+                    params: dict[str, Any] = {"q": q, "lim": limit}
+                    if category_filter:
+                        cat_clause = "AND cat.name = $cat"
+                        params["cat"] = category_filter
+
+                    rows = list(session.run(
+                        f"MATCH (p:Project)-[:{rel_type}]->(n:{node_label}) "
+                        f"OPTIONAL MATCH (p)-[:BELONGS_TO]->(cat:Category) "
+                        f"WHERE toLower(n.name) CONTAINS toLower($q) {cat_clause} "
+                        f"RETURN n.name AS name, elementId(n) AS nid, "
+                        f"       p.id AS project_id, p.name AS project_name, "
+                        f"       cat.name AS category "
+                        f"LIMIT $lim",
+                        **params,
+                    ))
+                    for r in rows:
+                        key = f"{sg_id}_{r['nid']}"
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        results.append({
+                            "node_id": key,
+                            "name": r["name"],
+                            "subgraph": sg_id,
+                            "subgraph_label": node_label,
+                            "color": color,
+                            "project_id": r["project_id"],
+                            "project_name": r["project_name"],
+                            "category": r["category"] or "",
+                        })
+                    if len(results) >= limit:
+                        break
+
+                return {"results": results[:limit], "count": len(results)}
+
+            return self._query_with_fallback(_query)
+        except Exception as exc:  # noqa: BLE001
+            return {"results": [], "count": 0, "error": str(exc)}

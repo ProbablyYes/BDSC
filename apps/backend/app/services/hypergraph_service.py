@@ -2211,7 +2211,7 @@ class HypergraphService:
         limit: int = 10,
     ) -> dict[str, Any]:
         if not self._records:
-            rebuilt = self.rebuild(min_pattern_support=1, max_edges=80)
+            rebuilt = self.rebuild(min_pattern_support=1, max_edges=400)
             if not rebuilt.get("ok"):
                 return {"ok": False, "edges": [], "error": rebuilt.get("error", "rebuild failed")}
 
@@ -2293,6 +2293,183 @@ class HypergraphService:
             "rebuilt": len(self._records) > 0,
         }
 
+    # ── In-memory hypergraph → force-graph viz data ───────────
+    _FAMILY_COLORS: dict[str, str] = {
+        "Risk_Pattern_Edge": "#ef4444",
+        "Value_Loop_Edge": "#f59e0b",
+        "User_Pain_Fit_Edge": "#fb923c",
+        "Evidence_Grounding_Edge": "#22d3ee",
+        "Execution_Gap_Edge": "#a78bfa",
+        "Market_Competition_Edge": "#60a5fa",
+        "Compliance_Safety_Edge": "#f472b6",
+        "Innovation_Validation_Edge": "#34d399",
+        "Pricing_Unit_Economics_Edge": "#fbbf24",
+        "Substitute_Migration_Edge": "#94a3b8",
+        "Trust_Adoption_Edge": "#38bdf8",
+        "Retention_Workflow_Embed_Edge": "#c084fc",
+        "Stage_Goal_Fit_Edge": "#4ade80",
+        "Rule_Rubric_Tension_Edge": "#fb7185",
+        "Ontology_Grounded_Edge": "#2dd4bf",
+        "Team_Capability_Gap_Edge": "#e879f9",
+        "User_Journey_Edge": "#fca5a5",
+        "Social_Impact_Edge": "#86efac",
+        "Data_Flywheel_Edge": "#7dd3fc",
+        "Scalability_Bottleneck_Edge": "#fdba74",
+        "IP_Moat_Edge": "#d8b4fe",
+        "Pivot_Signal_Edge": "#fde68a",
+        "Cost_Structure_Edge": "#bef264",
+        "Ecosystem_Dependency_Edge": "#67e8f9",
+        "MVP_Scope_Edge": "#fda4af",
+        "Stakeholder_Conflict_Edge": "#a5b4fc",
+        "Channel_Conversion_Edge": "#99f6e4",
+        "Regulatory_Landscape_Edge": "#fed7aa",
+        "Presentation_Narrative_Edge": "#c4b5fd",
+        "Resource_Leverage_Edge": "#bbf7d0",
+        "Timing_Window_Edge": "#fef08a",
+        "Revenue_Sustainability_Edge": "#bae6fd",
+        "Demand_Supply_Match_Edge": "#e9d5ff",
+        "Founder_Risk_Edge": "#fecaca",
+        "Ethical_Bias_Edge": "#d9f99d",
+        "Assumption_Stack_Edge": "#a5f3fc",
+        "Metric_Definition_Edge": "#ddd6fe",
+        "Market_Segmentation_Edge": "#fbcfe8",
+        "Competitive_Response_Edge": "#ccfbf1",
+        "Milestone_Dependency_Edge": "#fef9c3",
+        "Funding_Stage_Fit_Edge": "#e0e7ff",
+        "Switching_Cost_Edge": "#cffafe",
+        "Network_Effect_Edge": "#ede9fe",
+        "Cross_Dimension_Coherence_Edge": "#fce7f3",
+        "ESG_Measurability_Edge": "#ecfccb",
+    }
+
+    def get_viz_data(self) -> dict[str, Any]:
+        """Build force-graph data directly from in-memory _records (no Neo4j).
+
+        All RiskRules (H1-H27) and RubricItems (9 dimensions) are sourced from
+        the local diagnosis_engine definitions, not Neo4j.
+        """
+        if not self._records:
+            rebuilt = self.rebuild(min_pattern_support=1, max_edges=400)
+            if not rebuilt.get("ok"):
+                return {"graph": {"nodes": [], "links": []}, "stats": {}, "error": "rebuild failed"}
+
+        from app.services.diagnosis_engine import RULE_FALLACY_MAP, RUBRICS
+        from collections import Counter
+
+        nodes: list[dict] = []
+        links: list[dict] = []
+        node_set: set[str] = set()
+        seen_links: set[tuple[str, str, str]] = set()
+
+        all_rule_names: dict[str, str] = dict(RULE_FALLACY_MAP)
+        all_rubric_names: dict[str, str] = {r["item"]: r["item"] for r in RUBRICS}
+
+        for rid, rname in all_rule_names.items():
+            r_id = f"rule_{rid}"
+            node_set.add(r_id)
+            nodes.append({
+                "id": r_id, "name": f"{rid} {rname}",
+                "type": "RiskRule", "color": "#ef4444", "size": 5,
+            })
+
+        for rub_name in all_rubric_names:
+            rb_id = f"rubric_{rub_name}"
+            node_set.add(rb_id)
+            nodes.append({
+                "id": rb_id, "name": rub_name,
+                "type": "RubricItem", "color": "#22c55e", "size": 5,
+            })
+
+        for rec in self._records:
+            he_id = rec.hyperedge_id
+            family_color = self._FAMILY_COLORS.get(rec.type, "#f59e0b")
+            nodes.append({
+                "id": he_id,
+                "name": rec.teaching_note or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                "type": "Hyperedge",
+                "family": rec.type,
+                "family_label": EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                "color": family_color,
+                "size": 6,
+                "shape": "rect",
+                "support": rec.support,
+                "severity": rec.severity,
+                "category": rec.category or "",
+            })
+            node_set.add(he_id)
+
+            for member in rec.member_nodes:
+                m_id = member["key"]
+                if m_id not in node_set:
+                    node_set.add(m_id)
+                    nodes.append({
+                        "id": m_id,
+                        "name": member["display"],
+                        "type": "HyperNode",
+                        "ntype": member["type"],
+                        "color": "#38bdf8",
+                        "size": 3,
+                    })
+                lk = (he_id, m_id, "HAS_MEMBER")
+                if lk not in seen_links:
+                    seen_links.add(lk)
+                    links.append({"source": he_id, "target": m_id, "type": "HAS_MEMBER"})
+
+            all_rules_for_edge: set[str] = set()
+            for rid in rec.rules:
+                raw = str(rid).strip()
+                if raw.startswith("H") and raw[1:].isdigit():
+                    all_rules_for_edge.add(raw)
+                else:
+                    canonical = self._canonical_rule_id(raw)
+                    if canonical.startswith("H"):
+                        all_rules_for_edge.add(canonical)
+            family_meta = self._FAMILY_META.get(rec.type)
+            if family_meta:
+                all_rules_for_edge.update(family_meta.get("rules", []))
+            for rule_id in all_rules_for_edge:
+                r_id = f"rule_{rule_id}"
+                if r_id not in node_set:
+                    continue
+                lk = (he_id, r_id, "TRIGGERS_RULE")
+                if lk not in seen_links:
+                    seen_links.add(lk)
+                    links.append({"source": he_id, "target": r_id, "type": "TRIGGERS_RULE"})
+
+            for rubric_id in rec.rubrics:
+                rb_id = f"rubric_{rubric_id}"
+                if rb_id not in node_set:
+                    continue
+                lk = (he_id, rb_id, "ALIGNS_WITH")
+                if lk not in seen_links:
+                    seen_links.add(lk)
+                    links.append({"source": he_id, "target": rb_id, "type": "ALIGNS_WITH"})
+
+        rubric_rules_map = {r["item"]: r.get("rules", []) for r in RUBRICS}
+        for rub_name, linked_rules in rubric_rules_map.items():
+            rb_id = f"rubric_{rub_name}"
+            for rid in linked_rules:
+                r_id = f"rule_{rid}"
+                if r_id in node_set and rb_id in node_set:
+                    lk = (r_id, rb_id, "EVALUATED_BY")
+                    if lk not in seen_links:
+                        seen_links.add(lk)
+                        links.append({"source": r_id, "target": rb_id, "type": "EVALUATED_BY"})
+
+        family_counts = Counter(rec.type for rec in self._records)
+        return {
+            "graph": {"nodes": nodes, "links": links},
+            "stats": {
+                "total_hyperedges": len(self._records),
+                "total_hypernodes": sum(1 for n in nodes if n["type"] == "HyperNode"),
+                "total_risk_rules": sum(1 for n in nodes if n["type"] == "RiskRule"),
+                "total_rubric_items": sum(1 for n in nodes if n["type"] == "RubricItem"),
+                "total_links": len(links),
+                "total_families": len(family_counts),
+                "family_counts": dict(family_counts),
+            },
+        }
+
     def library_snapshot(self, limit: int = 24) -> dict[str, Any]:
         db_snapshot = self.graph_service.hypergraph_library_snapshot(limit=limit)
         if db_snapshot and "error" not in db_snapshot:
@@ -2303,7 +2480,7 @@ class HypergraphService:
             if db_edge_count >= local_edge_count or local_edge_count == 0:
                 return db_snapshot
         if not self._records:
-            rebuilt = self.rebuild(min_pattern_support=1, max_edges=80)
+            rebuilt = self.rebuild(min_pattern_support=1, max_edges=400)
             if not rebuilt.get("ok"):
                 return {"error": rebuilt.get("error", "rebuild failed")}
         families = Counter(rec.type for rec in self._records)

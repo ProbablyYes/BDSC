@@ -2250,6 +2250,64 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
         result["teacher_intervention"] = _teacher_intervention_hint(student_intent_mix, result["latest_phase"], [])
         result["project_snapshots"] = project_snapshot_cards
 
+        # ── Student portrait enrichment (read from raw subs to avoid _safe_diagnosis stripping rubric) ──
+        rubric_scores_all: dict[str, list[float]] = {}
+        growth_points: list[dict] = []
+        submission_dates: list[str] = []
+        for _pid, raw_psubs in projects_map.items():
+            for sub in raw_psubs:
+                diag = sub.get("diagnosis", {})
+                if isinstance(diag, dict):
+                    for r_item in (diag.get("rubric_scores") or diag.get("rubric") or []):
+                        if isinstance(r_item, dict) and r_item.get("item"):
+                            rubric_scores_all.setdefault(r_item["item"], []).append(float(r_item.get("score", 0) or 0))
+                created = sub.get("created_at", "")
+                sc = float(sub.get("_score", 0) or sub.get("overall_score", 0) or 0)
+                if created:
+                    submission_dates.append(created)
+                if sc > 0 and created:
+                    growth_points.append({"date": created, "score": sc})
+
+        rubric_heatmap = []
+        strength_dims: list[str] = []
+        weakness_dims: list[str] = []
+        for rname, rscores in rubric_scores_all.items():
+            avg_rs = round(sum(rscores) / len(rscores), 1) if rscores else 0
+            rubric_heatmap.append({"item": rname, "avg_score": avg_rs, "count": len(rscores)})
+            if avg_rs >= 7:
+                strength_dims.append(rname)
+            elif avg_rs < 5:
+                weakness_dims.append(rname)
+
+        submission_dates.sort()
+        submit_interval_days = 0.0
+        if len(submission_dates) >= 2:
+            try:
+                from datetime import datetime as _dt
+                first_d = _dt.fromisoformat(submission_dates[0].replace("Z", "+00:00"))
+                last_d = _dt.fromisoformat(submission_dates[-1].replace("Z", "+00:00"))
+                span = (last_d - first_d).total_seconds() / 86400
+                submit_interval_days = round(span / max(len(submission_dates) - 1, 1), 1)
+            except Exception:
+                pass
+
+        improvement_rate = 0.0
+        if growth_points and len(growth_points) >= 2:
+            improvement_rate = round(growth_points[-1]["score"] - growth_points[0]["score"], 1)
+
+        result["portrait"] = {
+            "strength_dimensions": strength_dims,
+            "weakness_dimensions": weakness_dims,
+            "growth_trajectory": growth_points[-20:],
+            "rubric_heatmap": rubric_heatmap,
+            "behavioral_pattern": {
+                "total_submissions": len(subs),
+                "avg_submit_interval_days": submit_interval_days,
+                "improvement_rate": improvement_rate,
+                "active_days_span": submit_interval_days * max(len(submission_dates) - 1, 1),
+            },
+        }
+
     return result
 
 
@@ -7684,3 +7742,701 @@ def _now_iso() -> str:
 
 
 from uuid import uuid4
+
+
+# ── KG Explorer panel endpoints ─────────────────────────────
+
+@app.get("/api/kg/subgraphs")
+def kg_subgraphs() -> dict:
+    """Return entire KG organized into dimension-based logical subgraphs for force-graph rendering."""
+    return graph_service.get_subgraph_data()
+
+
+@app.get("/api/kg/subgraph-overview")
+def kg_subgraph_overview() -> dict:
+    """Return meta-level overview: one node per subgraph + cross-subgraph links."""
+    return graph_service.get_subgraph_overview()
+
+
+@app.get("/api/kg/subgraph-detail/{sg_id}")
+def kg_subgraph_detail(sg_id: str) -> dict:
+    """Return all nodes and project connections for a single subgraph dimension."""
+    return graph_service.get_single_subgraph(sg_id)
+
+
+@app.get("/api/kg/hypergraph-viz")
+def kg_hypergraph_viz() -> dict:
+    """Return Hyperedge/HyperNode graph data from in-memory hypergraph (no Neo4j dependency)."""
+    return hypergraph_service.get_viz_data()
+
+
+@app.get("/api/kg/search")
+def kg_search(q: str = "", subgraph: str = "", category: str = "", limit: int = 30) -> dict:
+    """Search KG nodes by keyword with optional subgraph/category filters."""
+    return graph_service.search_kg(q, subgraph_filter=subgraph, category_filter=category, limit=limit)
+
+
+@app.get("/api/kg/quality")
+def kg_quality() -> dict:
+    """Return pre-computed KG quality evaluation report."""
+    import json as _json
+    quality_path = settings.data_root / "kg_quality" / "quality_report.json"
+    if not quality_path.exists():
+        return {"error": "quality report not generated yet", "dimensions": []}
+    try:
+        return _json.loads(quality_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {"error": f"failed to read quality report: {exc}"}
+
+
+# ── Dimension Chinese Names ─────────────────────────────────
+
+DIM_CN: dict[str, str] = {
+    "Problem Definition": "问题定义",
+    "User Evidence Strength": "用户证据",
+    "Solution Feasibility": "方案可行性",
+    "Business Model Consistency": "商业模式一致性",
+    "Market & Competition": "市场与竞争",
+    "Financial Logic": "财务逻辑",
+    "Innovation & Differentiation": "创新差异化",
+    "Team & Execution": "团队执行力",
+    "Presentation Quality": "表达质量",
+}
+
+def _dim_cn(dim: str) -> str:
+    return DIM_CN.get(dim, dim)
+
+
+# ── Syndrome Templates ──────────────────────────────────────
+
+SYNDROME_TEMPLATES: list[dict] = [
+    {
+        "id": "market_validation_gap",
+        "label": "市场验证缺失",
+        "stage_focus": "early",
+        "rule_set": {"H1", "H4", "H5", "H6"},
+        "weakness_dims": {"Problem Definition", "Market & Competition", "User Evidence Strength"},
+        "severity_thresholds": {"warning_ratio": 0.3, "critical_ratio": 0.5, "min_students": 1},
+        "teacher_signal": "学生能讲想法，但无法证明「谁会买、为什么买、市场有多大」",
+        "description_tpl": "{ratio}% 的项目在目标用户识别、市场竞争格局或需求验证上存在明显缺口",
+        "intervention_steps": [
+            {"step": 1, "title": "市场验证工作坊", "action": "讲解用户画像-痛点-市场规模的三角验证方法，用正反案例对照", "expected_output": "每组提交修订版用户画像 + 市场规模测算"},
+            {"step": 2, "title": "竞品分析补交", "action": "要求每组补充至少 3 个竞品的对照表（价格、替代门槛、差异化点）", "expected_output": "竞品对照表（含数据来源标注）"},
+            {"step": 3, "title": "用户证据任务", "action": "每组至少完成 3 份用户访谈或问卷，提取原话作为痛点证据", "expected_output": "用户访谈记录 + 痛点证据摘要"},
+        ],
+    },
+    {
+        "id": "business_model_broken",
+        "label": "商业模型断裂",
+        "stage_focus": "middle",
+        "rule_set": {"H2", "H3", "H8", "H9"},
+        "weakness_dims": {"Business Model Consistency", "Financial Logic"},
+        "teacher_signal": "能讲产品功能，但讲不清「怎么赚钱、成本多少、多久回本」",
+        "description_tpl": "{ratio}% 的项目在价值主张与盈利路径之间的逻辑链不完整",
+        "intervention_steps": [
+            {"step": 1, "title": "商业模式复盘课", "action": "用商业模式画布逐块对照，重点检查价值主张→渠道→收入→成本的闭环", "expected_output": "修订版商业模式画布"},
+            {"step": 2, "title": "单位经济补课", "action": "讲解 CAC/LTV/毛利率等核心指标，要求每组用实际数据或合理假设计算", "expected_output": "单位经济模型表（含假设说明）"},
+            {"step": 3, "title": "定价策略验证", "action": "要求每组对比竞品定价，论证自身定价的合理性和用户付费意愿依据", "expected_output": "定价策略说明 + 竞品价格对照"},
+        ],
+    },
+    {
+        "id": "execution_hollow",
+        "label": "执行落地空心化",
+        "stage_focus": "middle",
+        "rule_set": {"H10", "H12", "H13"},
+        "weakness_dims": {"Team & Execution", "Solution Feasibility"},
+        "teacher_signal": "PPT 很完整，但里程碑、资源分工、MVP 路线说不清楚",
+        "description_tpl": "{ratio}% 的项目在执行计划、团队分工或 MVP 范围上缺乏具体可落地的路径",
+        "intervention_steps": [
+            {"step": 1, "title": "里程碑拆解会", "action": "每组当场把接下来 8 周拆成 4 个里程碑，明确每个里程碑的交付物和负责人", "expected_output": "里程碑甘特图 + 分工表"},
+            {"step": 2, "title": "MVP 范围校正", "action": "引导学生区分核心功能与非核心功能，砍掉不必要的范围膨胀", "expected_output": "MVP 功能清单（标注优先级 P0/P1/P2）"},
+            {"step": 3, "title": "资源匹配审查", "action": "检查团队人力、技术栈、外部资源是否能支撑当前计划", "expected_output": "资源缺口清单 + 补救方案"},
+        ],
+    },
+    {
+        "id": "evidence_weak",
+        "label": "证据支撑薄弱",
+        "stage_focus": "cross_stage",
+        "rule_set": {"H5", "H14", "H15"},
+        "weakness_dims": {"User Evidence Strength", "Presentation Quality"},
+        "teacher_signal": "论断很多，证据很少；说服性不足，缺少数据、原话或案例支撑",
+        "description_tpl": "{ratio}% 的项目核心主张缺少充分的数据佐证或用户验证证据",
+        "intervention_steps": [
+            {"step": 1, "title": "证据审计课", "action": "逐页审查每组 PPT，标注「无证据支撑」的论断，讲解证据分级标准", "expected_output": "证据审计清单（每个论断标注证据等级）"},
+            {"step": 2, "title": "用户验证冲刺", "action": "每组在一周内完成至少 5 条一手证据（访谈、问卷、数据分析、专家评审）", "expected_output": "证据清单 + 原始数据/原话"},
+            {"step": 3, "title": "路演表达改进", "action": "要求每个关键论断后必须跟一条证据，练习「论断→证据→推论」表达结构", "expected_output": "修订版路演脚本"},
+        ],
+    },
+    {
+        "id": "innovation_inflated",
+        "label": "创新差异化虚高",
+        "stage_focus": "early",
+        "rule_set": {"H6", "H7"},
+        "weakness_dims": {"Innovation & Differentiation", "Market & Competition"},
+        "teacher_signal": "过度强调「创新」，但缺乏对替代方案和竞品路径的证明",
+        "description_tpl": "{ratio}% 的项目声称的创新点缺少竞品对照和落地门槛验证",
+        "intervention_steps": [
+            {"step": 1, "title": "竞品深度对照", "action": "每组选 2-3 个最接近的竞品，从功能、价格、用户群、技术路线四维度逐项对比", "expected_output": "竞品深度对比矩阵"},
+            {"step": 2, "title": "差异化重写", "action": "基于对比结果，重新定义差异化：不是「我有什么」，而是「用户为什么不用竞品而用我」", "expected_output": "修订版差异化声明（含用户视角论证）"},
+            {"step": 3, "title": "技术门槛验证", "action": "如果声称技术创新，需提供原型/Demo 或技术可行性分析", "expected_output": "技术可行性说明或原型截图"},
+        ],
+    },
+    {
+        "id": "risk_blind_spot",
+        "label": "风险识别盲区",
+        "stage_focus": "late",
+        "rule_set": {"H11", "H22"},
+        "weakness_dims": set(),
+        "teacher_signal": "学生只讲机会，不讲边界条件、法规限制或伦理风险",
+        "description_tpl": "{ratio}% 的项目未识别或未讨论合规、伦理或法规层面的潜在风险",
+        "intervention_steps": [
+            {"step": 1, "title": "风险复盘课", "action": "讲解创业项目常见的法律、合规、伦理风险类型，用真实案例说明忽视风险的后果", "expected_output": "风险自查清单（每组填写）"},
+            {"step": 2, "title": "合规补充清单", "action": "每组列出项目涉及的数据隐私、行业法规、资质许可等合规要求", "expected_output": "合规要求清单 + 应对策略"},
+            {"step": 3, "title": "伦理审查讨论", "action": "如项目涉及 AI/算法/用户数据，组织一次伦理审查讨论，识别潜在偏见和公平性问题", "expected_output": "伦理审查简报"},
+        ],
+    },
+]
+
+
+# ── Team Diagnosis endpoint ─────────────────────────────────
+
+def _get_project_triggered_rules(proj: dict) -> set[str]:
+    """Extract triggered rule IDs from a project."""
+    diag = proj.get("latest_diagnosis") or {}
+    raw = diag.get("triggered_rules", []) or proj.get("top_risks", [])
+    rules: set[str] = set()
+    for item in (raw or []):
+        rid = item if isinstance(item, str) else (item.get("rule_id") or item.get("id") or "")
+        if rid:
+            rules.add(rid.strip().upper())
+    return rules
+
+
+def _compute_syndromes(student_project_map: list[dict], total_projects: int) -> list[dict]:
+    """Compute which syndromes are triggered for a team."""
+    syndromes_out: list[dict] = []
+    for tpl in SYNDROME_TEMPLATES:
+        rule_set = tpl["rule_set"]
+        affected: list[dict] = []
+        for sp in student_project_map:
+            overlap = sp["rules"] & rule_set
+            if len(overlap) >= max(1, len(rule_set) // 2):
+                affected.append({
+                    "student_id": sp["student_id"],
+                    "display_name": sp["display_name"],
+                    "project_id": sp.get("project_id", ""),
+                    "project_name": sp.get("project_name", ""),
+                    "avg_score": sp.get("avg_score", 0),
+                    "risk_count": sp.get("risk_count", 0),
+                    "trigger_rules": sorted(overlap),
+                })
+        if not affected:
+            continue
+        unique_students = {a["student_id"] for a in affected}
+        ratio = round(len(affected) / max(total_projects, 1) * 100)
+        thresholds = tpl.get("severity_thresholds", {})
+        warn_r = thresholds.get("warning_ratio", 0.3)
+        crit_r = thresholds.get("critical_ratio", 0.5)
+        min_stu = thresholds.get("min_students", 1)
+        frac = len(affected) / max(total_projects, 1)
+        if frac >= crit_r and len(unique_students) >= min_stu:
+            severity = "critical"
+        elif frac >= warn_r and len(unique_students) >= min_stu:
+            severity = "warning"
+        elif len(unique_students) >= 1:
+            severity = "potential"
+        else:
+            continue
+        syndromes_out.append({
+            "id": tpl["id"],
+            "label": tpl["label"],
+            "severity": severity,
+            "affected_project_count": len(affected),
+            "affected_student_count": len(unique_students),
+            "affected_ratio": ratio,
+            "stage_focus": tpl.get("stage_focus", "cross_stage"),
+            "related_rules": sorted(rule_set),
+            "related_dimensions": sorted(tpl.get("weakness_dims", set())),
+            "description": tpl["description_tpl"].format(ratio=ratio),
+            "teacher_signal": tpl["teacher_signal"],
+            "affected_students": affected[:8],
+            "intervention_steps": tpl["intervention_steps"],
+        })
+    syndromes_out.sort(key=lambda s: (0 if s["severity"] == "critical" else 1 if s["severity"] == "warning" else 2, -s["affected_ratio"]))
+    return syndromes_out
+
+
+def _build_priority_intervention(syndromes: list[dict], team_avg: float, top_strengths: list) -> str:
+    """Build a specific, actionable priority_intervention sentence."""
+    critical = [s for s in syndromes if s["severity"] == "critical"]
+    warning = [s for s in syndromes if s["severity"] == "warning"]
+    if critical:
+        s = critical[0]
+        return (
+            f"本周优先处理「{s['label']}」：已有 {s['affected_student_count']} 名学生的 "
+            f"{s['affected_project_count']} 个项目同时出现此问题（{s['affected_ratio']}%），"
+            f"建议立即开展一次「{s['intervention_steps'][0]['title']}」。"
+        )
+    if warning:
+        s = warning[0]
+        return (
+            f"当前最值得关注的是「{s['label']}」：{s['affected_student_count']} 名学生的项目"
+            f"在此方面存在共性缺口，建议安排「{s['intervention_steps'][0]['title']}」。"
+        )
+    strength_text = "、".join(s[0] for s in top_strengths[:2]) if top_strengths else "多个维度"
+    return f"团队整体状态稳定，在{strength_text}上表现较好。可引导学生在已有基础上深化细节。"
+
+
+def _build_student_project_issues(projects: list[dict], syndromes: list[dict]) -> list[dict]:
+    """Build project-level issues for a single student."""
+    issues: list[dict] = []
+    syndrome_map = {s["id"]: s for s in syndromes}
+    for proj in projects:
+        proj_rules = _get_project_triggered_rules(proj)
+        if not proj_rules:
+            continue
+        matched_syndromes: list[str] = []
+        for tpl in SYNDROME_TEMPLATES:
+            overlap = proj_rules & tpl["rule_set"]
+            if len(overlap) >= max(1, len(tpl["rule_set"]) // 2):
+                matched_syndromes.append(tpl["id"])
+        if not matched_syndromes:
+            rule_names = [get_rule_name(r) for r in sorted(proj_rules)[:3]]
+            issue_title = "存在风险规则触发"
+            issue_summary = f"项目触发了 {', '.join(rule_names)} 等风险，需要逐项排查修正。"
+        else:
+            primary = syndrome_map.get(matched_syndromes[0]) or {}
+            issue_title = primary.get("label", "存在问题")
+            issue_summary = primary.get("teacher_signal", "") or primary.get("description", "")
+        diag = proj.get("latest_diagnosis") or {}
+        bottleneck = diag.get("bottleneck") or proj.get("current_summary") or ""
+        if bottleneck and len(issue_summary) < 80:
+            issue_summary = f"{issue_summary}。具体表现：{bottleneck[:80]}"
+        issues.append({
+            "project_id": proj.get("project_id", ""),
+            "project_name": proj.get("project_name", ""),
+            "syndrome_ids": matched_syndromes,
+            "issue_title": issue_title,
+            "issue_summary": issue_summary.strip().rstrip("。") + "。",
+            "trigger_rules": sorted(proj_rules),
+            "weak_dimensions": sorted(set(
+                dim for sid in matched_syndromes
+                for dim in (syndrome_map.get(sid, {}).get("related_dimensions", []))
+            )),
+        })
+    return issues
+
+
+def _build_student_advice(portrait: dict, project_issues: list[dict]) -> list[dict]:
+    """Generate actionable advice for a student based on their weaknesses and project issues."""
+    advice: list[dict] = []
+    weakness_dims = set(portrait.get("weakness_dimensions") or [])
+    all_syndromes: set[str] = set()
+    for pi in project_issues:
+        all_syndromes.update(pi.get("syndrome_ids", []))
+
+    advice_map = {
+        "market_validation_gap": {
+            "title": "补充用户验证证据",
+            "advice": "1) 本周完成至少 3 份目标用户访谈，要求提取用户原话作为痛点证据；2) 补交竞品对照表（至少 3 个竞品，含价格、替代门槛、用户群差异）；3) 基于访谈结果重新评估市场规模假设，标注数据来源",
+            "expected_output": "用户访谈记录（含原话摘录）+ 竞品对照表 + 修订版市场规模测算",
+            "teacher_talk_point": "和学生讨论：你的目标用户到底是谁？他们现在用什么替代方案？你怎么确定他们愿意换用你的方案？",
+        },
+        "business_model_broken": {
+            "title": "重写商业模式逻辑链",
+            "advice": "1) 重新填写商业模式画布的收入和成本板块，确保价值主张→渠道→收入→成本形成闭环；2) 用 CAC/LTV 公式验证定价合理性；3) 补充用户付费意愿证据（如问卷/访谈中的价格敏感度数据）",
+            "expected_output": "修订版商业模式画布 + 单位经济模型表（含假设说明）",
+            "teacher_talk_point": "和学生讨论：你每获取一个用户要花多少钱？用户的生命周期价值是多少？你的毛利率能撑住多久？",
+        },
+        "execution_hollow": {
+            "title": "细化执行路线图",
+            "advice": "1) 把接下来 8 周拆成 4 个里程碑，每个里程碑写清交付物和负责人；2) 重新定义 MVP 范围，区分 P0（必做）/P1（应做）/P2（可不做），砍掉 P2；3) 检查团队人力和技术栈是否能支撑当前计划",
+            "expected_output": "里程碑甘特图（含分工）+ MVP 功能优先级表 + 资源缺口清单",
+            "teacher_talk_point": "和学生讨论：如果只能做一件事来验证你的核心假设，那是什么？你现在的计划里有多少是不验证核心假设的？",
+        },
+        "evidence_weak": {
+            "title": "证据补强",
+            "advice": "1) 逐页检查 PPT/BP，给每个核心论断标注证据来源和等级（一手数据 > 二手数据 > 类比推测）；2) 补充至少 5 条一手证据（用户访谈原话、问卷数据、产品测试结果、专家评审意见）；3) 练习「论断→证据→推论」的表达结构",
+            "expected_output": "证据审计清单（每个论断标注证据等级）+ 一手证据文档",
+            "teacher_talk_point": "和学生讨论：你这个结论的依据是什么？是你自己觉得还是有人告诉你的？能不能给我看原始数据？",
+        },
+        "innovation_inflated": {
+            "title": "差异化重新论证",
+            "advice": "1) 选 2-3 个最接近的竞品做深度对比（功能、价格、用户群、技术路线四个维度）；2) 基于对比结果重写差异化声明——不是「我有什么」，而是「用户为什么不用竞品而用我」；3) 如声称技术创新，提供原型/Demo 或可行性分析",
+            "expected_output": "竞品深度对比矩阵 + 修订版差异化声明（含用户视角论证）",
+            "teacher_talk_point": "和学生讨论：如果用户已经在用某个竞品，你凭什么让他换到你这里来？换的成本是什么？",
+        },
+        "risk_blind_spot": {
+            "title": "补充风险分析",
+            "advice": "1) 列出项目涉及的数据隐私、行业法规、资质许可等合规要求；2) 如涉及 AI/算法，讨论潜在偏见和公平性问题；3) 制定至少 2 个风险应对预案（如果某关键假设不成立怎么办）",
+            "expected_output": "风险自查清单 + 合规要求清单 + 风险应对预案",
+            "teacher_talk_point": "和学生讨论：你的项目最大的风险是什么？如果政策/法规不允许你这么做怎么办？",
+        },
+    }
+    for sid in all_syndromes:
+        if sid in advice_map:
+            a = dict(advice_map[sid])
+            related_projects = [pi["project_name"] for pi in project_issues if sid in pi.get("syndrome_ids", []) and pi.get("project_name")]
+            if related_projects:
+                a["related_projects"] = related_projects[:3]
+            advice.append(a)
+    if not advice and weakness_dims:
+        cn_dims = [_dim_cn(d) for d in sorted(weakness_dims)[:3]]
+        dim_str = "、".join(cn_dims)
+        advice.append({
+            "title": f"改善薄弱维度：{dim_str}",
+            "advice": f"在{dim_str}方面加强论述深度，补充数据或案例支撑，确保每个论断都有对应证据",
+            "expected_output": "修订版对应章节",
+            "teacher_talk_point": f"和学生讨论{cn_dims[0]}方面的具体不足之处",
+        })
+    return advice[:4]
+
+
+def _build_student_mini_summary(sp: dict, project_issues: list[dict], advice: list[dict], priority: str) -> dict:
+    """Build a rich mini portrait for a student, visible in team-detail view."""
+    portrait = sp.get("portrait", {})
+    strengths = [_dim_cn(d) for d in (portrait.get("strength_dimensions") or [])[:3]]
+    weaknesses = [_dim_cn(d) for d in (portrait.get("weakness_dimensions") or [])[:3]]
+    behavior = portrait.get("behavioral_pattern", {})
+    rubric = portrait.get("rubric_heatmap", [])
+    best_rubric = max(rubric, key=lambda r: r.get("avg_score", 0), default=None) if rubric else None
+    worst_rubric = min(rubric, key=lambda r: r.get("avg_score", 0), default=None) if rubric else None
+
+    situation_bullets: list[str] = []
+    for pi in project_issues[:3]:
+        pname = pi.get("project_name") or "项目"
+        title = pi.get("issue_title", "")
+        summary = pi.get("issue_summary", "")
+        if summary and len(summary) > 60:
+            summary = summary[:58] + "..."
+        situation_bullets.append(f"「{pname}」{title}：{summary}" if title else f"「{pname}」{summary}")
+
+    if not situation_bullets:
+        if sp.get("avg_score", 0) >= 7 and strengths:
+            situation_bullets.append(f"整体表现良好，在{strengths[0]}方面尤为突出")
+        elif sp.get("total_submissions", 0) == 0:
+            situation_bullets.append("暂无提交记录，无法生成项目诊断")
+        else:
+            situation_bullets.append("暂未检测到明显系统性问题")
+
+    advice_bullets: list[str] = []
+    for a in advice[:3]:
+        related = a.get("related_projects", [])
+        prefix = f"（涉及{'、'.join(related[:2])}）" if related else ""
+        advice_bullets.append(f"{a['title']}{prefix}：{a['advice'][:80]}...")
+        if a.get("teacher_talk_point"):
+            advice_bullets.append(f"  谈话要点 → {a['teacher_talk_point']}")
+
+    overall = ""
+    if priority == "high":
+        main_issue = project_issues[0]["issue_title"] if project_issues else "多个维度薄弱"
+        overall = f"该学生当前最大的问题是{main_issue}，建议教师本周优先与其面谈，围绕{advice[0]['title'] if advice else '薄弱环节'}展开辅导。"
+    elif priority == "medium":
+        overall = f"该学生存在一定共性问题，{'、'.join(weaknesses[:2]) if weaknesses else '部分维度'}需要关注，建议安排一次针对性讨论。"
+    else:
+        if strengths:
+            overall = f"该学生整体状态稳定，{strengths[0]}表现突出。可引导其在已有基础上深化细节。"
+        else:
+            overall = "该学生整体状态平稳，暂无紧急干预需求。"
+
+    return {
+        "overall": overall,
+        "situation_bullets": situation_bullets,
+        "advice_bullets": advice_bullets,
+        "strengths_cn": strengths,
+        "weaknesses_cn": weaknesses,
+        "best_dimension": _dim_cn(best_rubric["item"]) if best_rubric else None,
+        "best_score": round(best_rubric["avg_score"], 1) if best_rubric else None,
+        "worst_dimension": _dim_cn(worst_rubric["item"]) if worst_rubric else None,
+        "worst_score": round(worst_rubric["avg_score"], 1) if worst_rubric else None,
+        "submit_count": behavior.get("total_submissions", sp.get("total_submissions", 0)),
+        "improvement_rate": behavior.get("improvement_rate", 0),
+        "teacher_talk_points": [a.get("teacher_talk_point", "") for a in advice[:2] if a.get("teacher_talk_point")],
+    }
+
+
+@app.get("/api/teacher/team-diagnosis")
+def teacher_team_diagnosis(teacher_id: str = "") -> dict:
+    """Generate intervention-priority diagnosis cards for each team."""
+    if not teacher_id:
+        return {"teams": []}
+
+    teams_raw = team_store.list_by_teacher(teacher_id)
+    diagnosis_cards: list[dict] = []
+
+    for team in teams_raw:
+        tid = _safe_str(team.get("team_id", ""))
+        tname = _safe_str(team.get("team_name", ""))
+        members = list(team.get("members", []) or [])
+        if not members:
+            continue
+
+        team_scores: list[float] = []
+        team_risks = 0
+        active_count = 0
+        at_risk_students: list[dict] = []
+        strength_pool: dict[str, int] = {}
+        weakness_pool: dict[str, int] = {}
+        student_project_map: list[dict] = []
+        student_portraits: list[dict] = []
+        student_projects_cache: dict[str, list] = {}
+
+        for member in members:
+            uid = _safe_str(member.get("user_id", ""))
+            if not uid:
+                continue
+            info = user_store.get_by_id(uid)
+            display_name = _safe_str((info or {}).get("display_name", uid[:8]))
+
+            stats = _aggregate_student_data(uid, include_detail=True)
+            avg_sc = float(stats.get("avg_score", 0) or 0)
+            risk_c = int(stats.get("risk_count", 0) or 0)
+            total_sub = int(stats.get("total_submissions", 0) or 0)
+
+            if avg_sc > 0:
+                team_scores.append(avg_sc)
+            if total_sub > 0:
+                active_count += 1
+            team_risks += risk_c
+
+            portrait = stats.get("portrait", {})
+            for s in (portrait.get("strength_dimensions") or []):
+                strength_pool[s] = strength_pool.get(s, 0) + 1
+            for w in (portrait.get("weakness_dimensions") or []):
+                weakness_pool[w] = weakness_pool.get(w, 0) + 1
+
+            stu_projects = stats.get("projects") or []
+            student_projects_cache[uid] = stu_projects
+            for proj in stu_projects:
+                proj_rules = _get_project_triggered_rules(proj)
+                student_project_map.append({
+                    "student_id": uid,
+                    "display_name": display_name,
+                    "project_id": proj.get("project_id", ""),
+                    "project_name": proj.get("project_name", ""),
+                    "avg_score": avg_sc,
+                    "risk_count": risk_c,
+                    "rules": proj_rules,
+                })
+
+            stu_card = {
+                "student_id": uid,
+                "display_name": display_name,
+                "avg_score": avg_sc,
+                "risk_count": risk_c,
+                "total_submissions": total_sub,
+                "latest_phase": stats.get("latest_phase", ""),
+                "trend": stats.get("trend", 0),
+                "portrait": portrait,
+                "project_snapshots": stats.get("project_snapshots", [])[:3],
+            }
+            student_portraits.append(stu_card)
+
+            if avg_sc > 0 and (avg_sc < 5.5 or risk_c >= 2):
+                weak = portrait.get("weakness_dimensions", [])
+                reason_parts = []
+                if avg_sc < 5.5:
+                    reason_parts.append(f"均分仅 {avg_sc}")
+                if risk_c >= 2:
+                    reason_parts.append(f"触发 {risk_c} 次风险")
+                if weak:
+                    reason_parts.append(f"薄弱: {', '.join(weak[:3])}")
+                at_risk_students.append({
+                    "student_id": uid,
+                    "display_name": display_name,
+                    "avg_score": avg_sc,
+                    "risk_count": risk_c,
+                    "reason": "；".join(reason_parts),
+                    "weakness_dimensions": weak[:3],
+                })
+
+        team_avg = round(sum(team_scores) / len(team_scores), 1) if team_scores else 0
+        health = _compute_team_health(team_avg, team_risks, active_count, len(members))
+
+        top_weaknesses = sorted(weakness_pool.items(), key=lambda kv: kv[1], reverse=True)[:3]
+        top_strengths = sorted(strength_pool.items(), key=lambda kv: kv[1], reverse=True)[:3]
+
+        syndromes = _compute_syndromes(student_project_map, len(student_project_map))
+        priority_intervention = _build_priority_intervention(syndromes, team_avg, top_strengths)
+
+        crit_syndrome_ids = {s["id"] for s in syndromes if s["severity"] == "critical"}
+        warn_syndrome_ids = {s["id"] for s in syndromes if s["severity"] == "warning"}
+        for sp in student_portraits:
+            uid = sp["student_id"]
+            stu_projects = student_projects_cache.get(uid, [])
+            sp["project_issues"] = _build_student_project_issues(stu_projects, syndromes)
+            sp["actionable_advice"] = _build_student_advice(sp.get("portrait", {}), sp["project_issues"])
+            has_critical = any(si in crit_syndrome_ids for pi in sp["project_issues"] for si in pi.get("syndrome_ids", []))
+            has_warning = any(si in warn_syndrome_ids for pi in sp["project_issues"] for si in pi.get("syndrome_ids", []))
+            sp["teacher_intervention_priority"] = "high" if has_critical else "medium" if has_warning else "low"
+            sp["mini_summary"] = _build_student_mini_summary(sp, sp["project_issues"], sp["actionable_advice"], sp["teacher_intervention_priority"])
+
+        active_ratio = round(active_count / max(len(members), 1) * 100)
+        str_cn = [_dim_cn(s[0]) for s in top_strengths[:2]]
+        weak_cn = [_dim_cn(w[0]) for w in top_weaknesses[:2]]
+        high_pri = [sp for sp in student_portraits if sp["teacher_intervention_priority"] == "high"]
+        med_pri = [sp for sp in student_portraits if sp["teacher_intervention_priority"] == "medium"]
+
+        detail_bullets: list[str] = []
+        if team_avg > 0:
+            if team_avg >= 7:
+                detail_bullets.append(f"团队均分 {team_avg}，整体表现良好。{len(members)} 名成员中 {active_count} 人活跃（{active_ratio}%）")
+            elif team_avg >= 5:
+                detail_bullets.append(f"团队均分 {team_avg}，处于中等水平。{len(members)} 名成员中 {active_count} 人活跃（{active_ratio}%）")
+            else:
+                detail_bullets.append(f"团队均分仅 {team_avg}，整体水平偏低，需要重点关注。活跃率 {active_ratio}%")
+        for syn in syndromes:
+            if syn["severity"] in ("critical", "warning"):
+                names = "、".join(a["display_name"] for a in syn.get("affected_students", [])[:3])
+                detail_bullets.append(
+                    f"{'紧急' if syn['severity'] == 'critical' else '关注'}：{syn['label']} — "
+                    f"{syn['description']}（涉及 {names}）"
+                )
+        if weak_cn:
+            weak_ratio = max((w[1] for w in top_weaknesses[:1]), default=0)
+            detail_bullets.append(f"最突出的共性短板是「{weak_cn[0]}」，{weak_ratio}/{len(members)} 名学生在此维度得分偏低")
+        if str_cn:
+            str_ratio = max((s[1] for s in top_strengths[:1]), default=0)
+            detail_bullets.append(f"团队优势集中在「{str_cn[0]}」，{str_ratio}/{len(members)} 名学生在此维度表现突出")
+        if high_pri:
+            names = "、".join(sp["display_name"] for sp in high_pri[:3])
+            detail_bullets.append(f"需优先干预的学生：{names}（共 {len(high_pri)} 人）")
+        elif med_pri:
+            names = "、".join(sp["display_name"] for sp in med_pri[:3])
+            detail_bullets.append(f"需关注的学生：{names}（共 {len(med_pri)} 人）")
+        if not detail_bullets:
+            detail_bullets.append("数据不足，暂无法生成团队画像")
+
+        overall_parts: list[str] = []
+        if syndromes and syndromes[0]["severity"] in ("critical", "warning"):
+            s0 = syndromes[0]
+            overall_parts.append(f"当前最需关注的问题是「{s0['label']}」")
+            if s0.get("intervention_steps"):
+                overall_parts.append(f"建议本周优先开展「{s0['intervention_steps'][0]['title']}」")
+        elif high_pri:
+            overall_parts.append(f"建议优先与 {high_pri[0]['display_name']} 面谈")
+        if weak_cn:
+            overall_parts.append(f"教学重点放在「{weak_cn[0]}」方面的补强")
+        overall_assessment = "；".join(overall_parts) + "。" if overall_parts else "团队整体状态稳定，可引导学生在已有基础上深化细节。"
+
+        # ── Aggregate rubric heatmap across team ──
+        rubric_agg: dict[str, list[float]] = {}
+        all_submissions_counts: list[int] = []
+        all_trends: list[float] = []
+        rule_counter: dict[str, int] = {}
+        for sp in student_portraits:
+            port = sp.get("portrait", {})
+            for rh in (port.get("rubric_heatmap") or []):
+                if isinstance(rh, dict) and rh.get("item"):
+                    rubric_agg.setdefault(rh["item"], []).append(float(rh.get("avg_score", 0) or 0))
+            all_submissions_counts.append(int(sp.get("total_submissions", 0) or 0))
+            t = float(sp.get("trend", 0) or 0)
+            if sp.get("total_submissions", 0) > 0:
+                all_trends.append(t)
+            for proj in student_projects_cache.get(sp["student_id"], []):
+                for rid in _get_project_triggered_rules(proj):
+                    rule_counter[rid] = rule_counter.get(rid, 0) + 1
+
+        rubric_heatmap_team = []
+        for rname, scores in sorted(rubric_agg.items(), key=lambda kv: sum(kv[1]) / len(kv[1]) if kv[1] else 0):
+            avg_v = round(sum(scores) / len(scores), 1) if scores else 0
+            rubric_heatmap_team.append({"item": rname, "item_cn": _dim_cn(rname), "avg_score": avg_v, "sample_count": len(scores)})
+
+        score_distribution = {
+            "good": sum(1 for sp in student_portraits if sp.get("avg_score", 0) >= 7),
+            "average": sum(1 for sp in student_portraits if 5 <= sp.get("avg_score", 0) < 7),
+            "weak": sum(1 for sp in student_portraits if 0 < sp.get("avg_score", 0) < 5),
+            "no_data": sum(1 for sp in student_portraits if sp.get("avg_score", 0) <= 0),
+        }
+
+        non_zero_subs = [c for c in all_submissions_counts if c > 0]
+        max_sub_sp = max(student_portraits, key=lambda sp: sp.get("total_submissions", 0), default=None) if student_portraits else None
+        min_sub_sp = min((sp for sp in student_portraits if sp.get("total_submissions", 0) > 0), key=lambda sp: sp["total_submissions"], default=None)
+        engagement_stats = {
+            "avg_submissions": round(sum(non_zero_subs) / len(non_zero_subs), 1) if non_zero_subs else 0,
+            "max_submissions": max(all_submissions_counts) if all_submissions_counts else 0,
+            "min_submissions": min(non_zero_subs) if non_zero_subs else 0,
+            "max_name": max_sub_sp["display_name"] if max_sub_sp else "",
+            "min_name": min_sub_sp["display_name"] if min_sub_sp else "",
+            "total_submissions": sum(all_submissions_counts),
+        }
+
+        improving = sum(1 for t in all_trends if t > 0)
+        declining = sum(1 for t in all_trends if t < 0)
+        active_with_data = len(all_trends)
+        if active_with_data > 0:
+            if improving > declining:
+                trend_summary = f"近期 {improving}/{active_with_data} 名活跃学生呈进步趋势"
+            elif declining > improving:
+                trend_summary = f"近期 {declining}/{active_with_data} 名活跃学生成绩下滑，需关注"
+            else:
+                trend_summary = f"{active_with_data} 名活跃学生成绩波动不大，整体稳定"
+        else:
+            trend_summary = "数据不足，暂无法判断趋势"
+
+        risk_rule_top3 = sorted(rule_counter.items(), key=lambda kv: kv[1], reverse=True)[:3]
+        risk_rule_top3_list = [{"rule_id": rid, "count": cnt, "label": _dim_cn(rid) if rid in DIM_CN else rid} for rid, cnt in risk_rule_top3]
+
+        team_portrait = {
+            "summary": detail_bullets[0] if detail_bullets else "",
+            "health_label": "良好" if health["level"] == "healthy" else "一般" if health["level"] == "warning" else "需关注",
+            "active_ratio": active_ratio,
+            "top_strengths": str_cn,
+            "top_weaknesses": weak_cn,
+            "detail_bullets": detail_bullets,
+            "overall_assessment": overall_assessment,
+            "syndrome_count": len(syndromes),
+            "critical_count": sum(1 for s in syndromes if s["severity"] == "critical"),
+            "warning_count": sum(1 for s in syndromes if s["severity"] == "warning"),
+            "high_priority_count": len(high_pri),
+            "medium_priority_count": len(med_pri),
+            "rubric_heatmap_team": rubric_heatmap_team,
+            "score_distribution": score_distribution,
+            "engagement_stats": engagement_stats,
+            "trend_summary": trend_summary,
+            "risk_rule_top3": risk_rule_top3_list,
+        }
+
+        diagnosis_cards.append({
+            "team_id": tid,
+            "team_name": tname,
+            "member_count": len(members),
+            "active_count": active_count,
+            "team_avg_score": team_avg,
+            "team_risk_count": team_risks,
+            "health_score": health["score"],
+            "health_level": health["level"],
+            "health_summary": health["summary"],
+            "priority_intervention": priority_intervention,
+            "team_portrait": team_portrait,
+            "syndromes": syndromes,
+            "at_risk_students": at_risk_students,
+            "top_weaknesses": [{"dim": w[0], "count": w[1]} for w in top_weaknesses],
+            "top_strengths": [{"dim": s[0], "count": s[1]} for s in top_strengths],
+            "student_portraits": student_portraits,
+        })
+
+    diagnosis_cards.sort(key=lambda c: c["health_score"])
+    return {"teams": diagnosis_cards}
+
+
+def _compute_team_health(avg_score: float, risk_count: int, active: int, total: int) -> dict:
+    """Compute a 0-100 health score for a team."""
+    score = 50.0
+    if avg_score > 0:
+        score = min(40, avg_score * 5)
+    active_ratio = (active / max(total, 1))
+    score += active_ratio * 30
+    risk_penalty = min(30, risk_count * 3)
+    score = max(0, min(100, score - risk_penalty + 20))
+    score = round(score, 1)
+    if score >= 75:
+        level = "healthy"
+        summary = "团队整体状态良好，继续保持。"
+    elif score >= 50:
+        level = "warning"
+        summary = "部分学生需要关注，建议针对性辅导。"
+    else:
+        level = "critical"
+        summary = "团队需要紧急干预，多名学生存在风险。"
+    return {"score": score, "level": level, "summary": summary}

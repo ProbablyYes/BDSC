@@ -248,7 +248,6 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
 
   const handlePrintPoster = () => {
     if (typeof window === "undefined") return;
-
     const posterEl = posterRef.current as HTMLElement | null;
     if (!posterEl) {
       // 兜底：拿不到海报节点时退回整页打印
@@ -256,62 +255,120 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
       return;
     }
 
-    const printWindow = window.open("", "_blank", "width=1200,height=800");
-    if (!printWindow) return;
+    const doc = window.document;
+    const body = doc.body;
+    const portalId = "bdsc-poster-print-root";
 
-    const doc = printWindow.document;
+    // 清理旧的打印容器（如果存在）
+    const existingPortal = doc.getElementById(portalId);
+    if (existingPortal && existingPortal.parentNode) {
+      existingPortal.parentNode.removeChild(existingPortal);
+    }
 
-    // 克隆一份海报节点，仅去掉阴影/圆角，保持原有文字与图片比例
+    // 克隆当前海报节点，作为打印专用节点挂在 body 下，避免影响原界面布局
+    const portal = doc.createElement("div");
+    portal.id = portalId;
+    portal.style.position = "fixed";
+    portal.style.inset = "0";
+    portal.style.display = "flex";
+    portal.style.alignItems = "center";
+    portal.style.justifyContent = "center";
+    portal.style.zIndex = "9999";
+    portal.style.height = "100vh";
+    portal.style.overflow = "hidden";
+
+    const frame = doc.createElement("div");
+    frame.style.width = "100%";
+    frame.style.height = "100vh";
+    frame.style.overflow = "hidden";
+    frame.style.display = "flex";
+    frame.style.alignItems = "center";
+    frame.style.justifyContent = "center";
+
     const clone = posterEl.cloneNode(true) as HTMLElement;
     clone.style.margin = "0 auto";
+    clone.style.maxWidth = "100%";
+    clone.style.width = "100%";
     clone.style.boxShadow = "none";
     clone.style.borderRadius = "0";
+    clone.style.overflow = "visible";
+    clone.style.transformOrigin = "top left";
+    clone.style.transform = "none";
 
-    const posterHTML = clone.outerHTML;
-    doc.open();
-    doc.write(`<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>${(design.title || "项目海报").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</title>
-    <style>
-      @page {
-        size: A3 portrait;
-        margin: 10mm;
-      }
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        background: #020617;
-      }
-      body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .poster-wrapper {
-        max-width: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="poster-wrapper">${posterHTML}</div>
-  </body>
-</html>`);
-    doc.close();
+    frame.appendChild(clone);
+    portal.appendChild(frame);
+    body.appendChild(portal);
 
-    // 等待新窗口完成渲染后再触发打印，保证整张海报被送入打印
-    printWindow.focus();
-    printWindow.onload = () => {
-      try {
-        printWindow.focus();
-        printWindow.print();
-      } finally {
-        printWindow.close();
+    // 打印模式标记：配合 globals.css 中的 @media print 选择性只打印海报
+    body.setAttribute("data-print-mode", "poster");
+    body.setAttribute("data-poster-orientation", orientation);
+
+    const handleAfterPrint = () => {
+      // 清理克隆节点与标记，恢复正常页面
+      const p = doc.getElementById(portalId);
+      if (p && p.parentNode) {
+        p.parentNode.removeChild(p);
+      }
+      body.removeAttribute("data-print-mode");
+      body.removeAttribute("data-poster-orientation");
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+
+    window.addEventListener("afterprint", handleAfterPrint);
+
+    // 等待浏览器完成一次布局后，根据“虚拟纸张区域”动态缩放海报，确保完整落在单页内
+    const applyScale = () => {
+      const rect = clone.getBoundingClientRect();
+      const viewportW = window.innerWidth || rect.width || 1;
+      const viewportH = window.innerHeight || rect.height || 1;
+
+      // 以 A 系列纸张比例 (sqrt(2)) 为目标，构造一个与 A3 接近的虚拟纸张区域
+      const A_RATIO = Math.SQRT2; // 约等于 1.414
+      let paperW = viewportW;
+      let paperH = viewportH;
+
+      if (orientation === "portrait") {
+        const currentRatio = viewportH / viewportW;
+        if (currentRatio > A_RATIO) {
+          // 视口偏“瘦高”，裁剪高度以接近 A3 竖版比例
+          paperH = viewportW * A_RATIO;
+        } else {
+          // 视口偏“矮胖”，裁剪宽度以接近 A3 竖版比例
+          paperW = viewportH / A_RATIO;
+        }
+      } else {
+        // 横版时以宽高比为 sqrt(2) 的纸张为目标
+        const LANDSCAPE_RATIO = A_RATIO; // width / height
+        const currentRatio = viewportW / viewportH;
+        if (currentRatio > LANDSCAPE_RATIO) {
+          // 视口偏“超宽”，裁剪宽度
+          paperW = viewportH * LANDSCAPE_RATIO;
+        } else {
+          // 视口偏“超高”，裁剪高度
+          paperH = viewportW / LANDSCAPE_RATIO;
+        }
+      }
+
+      // 预留一点安全边距，避免因为页边距与渲染差异导致溢出到第二页
+      const safeW = paperW * 0.94;
+      const safeH = paperH * 0.94;
+
+      const scale = Math.min(safeW / rect.width, safeH / rect.height, 1);
+      if (Number.isFinite(scale) && scale > 0) {
+        clone.style.transform = `scale(${scale})`;
       }
     };
+
+    window.requestAnimationFrame(() => {
+      // 第一次缩放：基于初始布局
+      applyScale();
+
+      // 再等一帧，处理字体、图片加载后的细微布局变化，重新计算缩放并调起打印
+      window.requestAnimationFrame(() => {
+        applyScale();
+        window.print();
+      });
+    });
   };
 
   const hint = design.export_hint || (orientation === "portrait" ? "建议：A3 竖版 / 1080x1920 竖屏" : "建议：A3 横版 / 1920x1080 大屏");
@@ -362,6 +419,7 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
     return (
       <div
         key={sec.id || idx}
+        className="poster-section-card"
         style={{
           background: isHero
             ? "radial-gradient(circle at 0% 0%, rgba(56,189,248,0.45), rgba(15,23,42,0.95))"
@@ -511,7 +569,7 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
       </div>
 
       <div
-        className={`poster-canvas ${orientation}`}
+        className={`poster-canvas poster-print-root ${orientation}`}
         style={{
           background: theme.bg,
           color: theme.text,
@@ -533,6 +591,7 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
         ref={posterRef}
       >
         <div
+          className="poster-bg-layer"
           style={{
             position: "absolute",
             inset: 0,

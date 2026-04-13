@@ -7,6 +7,7 @@ const roleForTone: Record<string, UserRole> = { student: "student", teacher: "te
 
 export default function HomePage() {
   const [loggedRole, setLoggedRole] = useState<UserRole>(null);
+  const [loadingWorkspace, setLoadingWorkspace] = useState(false);
 
   useEffect(() => {
     try {
@@ -49,6 +50,10 @@ export default function HomePage() {
     },
   ];
 
+  const handleEnterWorkspace = () => {
+    setLoadingWorkspace(true);
+  };
+
   return (
     <main className="home-page">
       {/* ── Background ── */}
@@ -85,6 +90,7 @@ export default function HomePage() {
               <Link
                 href={loggedRole === "teacher" ? "/teacher" : loggedRole === "admin" ? "/admin" : "/student"}
                 className="home-nav-btn home-nav-btn-primary"
+                onClick={handleEnterWorkspace}
               >
                 进入工作台
               </Link>
@@ -246,6 +252,7 @@ export default function HomePage() {
           const directHref = loggedRole === thisRole
             ? (thisRole === "teacher" ? "/teacher" : thisRole === "admin" ? "/admin" : "/student")
             : "/auth/login";
+          const isDirectWorkspace = directHref !== "/auth/login";
 
           return (
             <article
@@ -285,7 +292,11 @@ export default function HomePage() {
                 <span className="home-role-preview-line rl-a" /><span className="home-role-preview-line rl-b" /><span className="home-role-preview-line rl-c" />
               </div>
 
-              <Link href={directHref} className="home-role-link">
+              <Link
+                href={directHref}
+                className="home-role-link"
+                onClick={isDirectWorkspace ? handleEnterWorkspace : undefined}
+              >
                 <span>{loggedRole === thisRole ? "进入工作台" : role.cta}</span>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{marginLeft:6}}><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </Link>
@@ -320,6 +331,31 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {loadingWorkspace && (
+        <div
+          className="home-loading-overlay"
+          role="alertdialog"
+          aria-modal="true"
+          aria-label="正在加载工作台"
+        >
+          <div className="home-loading-dialog">
+            <div className="home-loading-row">
+              <span className="home-loading-spinner" aria-hidden="true" />
+              <div>
+                <div className="home-loading-title">正在打开工作台...</div>
+                <div className="home-loading-subtext">
+                  为你加载项目、团队与最近一次学习状态，请稍候。
+                </div>
+              </div>
+            </div>
+            <div className="home-loading-hint-row" aria-hidden="true">
+              <span className="home-loading-hint-chip">同步项目进度</span>
+              <span className="home-loading-hint-chip">刷新角色权限</span>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

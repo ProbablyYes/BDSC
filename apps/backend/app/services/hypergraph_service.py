@@ -2884,6 +2884,7 @@ class HypergraphService:
         covered_dims = set(dim_entities.keys()) & set(DIMENSIONS.keys())
         all_dims = set(DIMENSIONS.keys())
         missing_dims = all_dims - covered_dims
+        missing_dims_list = list(missing_dims)
         coverage_score = round(len(covered_dims) / max(1, len(all_dims)) * 10, 1)
 
         dimensions_detail = {}
@@ -2977,7 +2978,7 @@ class HypergraphService:
                 for k, v in dim_entities.items() if v
             )
             _missing_dims_text = "、".join(
-                _dim_label_map.get(d, d) for d in missing_dims[:4]
+                _dim_label_map.get(d, d) for d in missing_dims_list[:4]
             )
 
             for rec in self._records:
@@ -3057,7 +3058,7 @@ class HypergraphService:
             "team": ("低", "团队信息缺失，但非必须一开始就有",
                      "团队成员有谁？各自负责什么？有没有互补的能力？"),
         }
-        for dim in missing_dims:
+        for dim in missing_dims_list:
             if dim in gap_importance:
                 importance, reason, hint = gap_importance[dim]
                 rec_text = reason

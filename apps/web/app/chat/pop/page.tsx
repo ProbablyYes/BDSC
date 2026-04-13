@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Suspense, useEffect, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
@@ -22,7 +22,7 @@ function avatarColor(id: string) {
   return colors[Math.abs(h) % colors.length];
 }
 
-export default function PopChatPage() {
+function PopChatContent() {
   const params = useSearchParams();
   const roomId = params.get("room") || "";
   const userId = params.get("user_id") || "";
@@ -115,5 +115,13 @@ export default function PopChatPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function PopChatPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 24, color: "#888" }}>正在加载聊天窗口...</div>}>
+      <PopChatContent />
+    </Suspense>
   );
 }

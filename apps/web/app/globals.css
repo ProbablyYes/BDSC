@@ -148,21 +148,23 @@ body {
 
 .poster-main-grid.poster-portrait {
   grid-template-columns: minmax(0, 1.65fr) minmax(0, 1.1fr);
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto auto auto auto;
   grid-template-areas:
     "title   media"
     "hero    media"
     "story   media"
+    "proof   media"
     "cta     media";
 }
 
 .poster-main-grid.poster-landscape {
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto auto auto auto;
   grid-template-areas:
     "title   media"
     "hero    media"
     "story   media"
+    "proof   media"
     "cta     media";
 }
 
@@ -196,7 +198,7 @@ body {
 }
 
 .poster-proof-block {
-  grid-area: story;
+  grid-area: proof;
   margin-top: 4px;
 }
 
@@ -287,11 +289,12 @@ body {
   .poster-main-grid.poster-portrait,
   .poster-main-grid.poster-landscape {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto auto;
+    grid-template-rows: auto auto auto auto auto auto;
     grid-template-areas:
       "title"
       "hero"
       "story"
+      "proof"
       "media"
       "cta";
   }
@@ -1101,6 +1104,124 @@ button {
   border: 1px solid rgba(255,255,255,0.06);
   color: var(--text-primary);
   line-height: 1.7;
+}
+
+@page {
+  /* 默认 A3 竖版，供一般打印使用 */
+  size: A3 portrait;
+  margin: 10mm;
+}
+
+/* 学生海报：为不同朝向准备命名页面，配合 page 属性使用 */
+@page poster-portrait {
+  size: A3 portrait;
+  margin: 8mm;
+}
+
+@page poster-landscape {
+  size: A3 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  /* 学生海报打印模式：只保留克隆出来的海报节点 */
+  body[data-print-mode="poster"] {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* 根据朝向选择对应的 A3 页面定义，尽量匹配物理纸张方向 */
+  body[data-print-mode="poster"][data-poster-orientation="portrait"] {
+    page: poster-portrait;
+  }
+
+  body[data-print-mode="poster"][data-poster-orientation="landscape"] {
+    page: poster-landscape;
+  }
+
+  body[data-print-mode="poster"] #__next {
+    display: none !important;
+  }
+
+  body[data-print-mode="poster"] #bdsc-poster-print-root {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  body[data-print-mode="poster"] #bdsc-poster-print-root .poster-print-root {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    /* 略微压缩整张海报的内边距与整体间距，提升单页容纳能力 */
+    padding: 16px 18px !important;
+    gap: 12px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+  }
+
+  /* 打印时强制保持左侧文字、右侧图片的双栏网格布局 */
+  body[data-print-mode="poster"] .poster-main-grid.poster-portrait,
+  body[data-print-mode="poster"] .poster-main-grid.poster-landscape {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+    grid-template-rows: auto auto auto auto auto;
+    grid-template-areas:
+      "title   media"
+      "hero    media"
+      "story   media"
+      "proof   media"
+      "cta     media";
+  }
+
+  body[data-print-mode="poster"] .poster-media-rail {
+    grid-area: media;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  /* 打印模式下，弱化或移除装饰性背景与过深色彩 */
+  body[data-print-mode="poster"] .poster-print-root .poster-body,
+  body[data-print-mode="poster"] .poster-print-root .poster-title,
+  body[data-print-mode="poster"] .poster-print-root .poster-subtitle,
+  body[data-print-mode="poster"] .poster-print-root .poster-section-title,
+  body[data-print-mode="poster"] .poster-print-root .poster-cta-text,
+  body[data-print-mode="poster"] .poster-print-root .poster-footer-hint,
+  body[data-print-mode="poster"] .poster-print-root .poster-footer-layout {
+    color: #111827 !important;
+  }
+
+  body[data-print-mode="poster"] .poster-print-root .poster-metric,
+  body[data-print-mode="poster"] .poster-print-root .poster-metric-hero {
+    color: #2563eb !important;
+  }
+
+  body[data-print-mode="poster"] .poster-print-root .poster-bg-layer {
+    display: none !important;
+  }
+
+  body[data-print-mode="poster"] .poster-print-root .poster-section-card {
+    box-shadow: none !important;
+    background: #f9fafb !important;
+    border-color: #e5e7eb !important;
+  }
 }
 
 @keyframes projectReportFloat {
@@ -8983,6 +9104,79 @@ pre {
   color: var(--text-secondary);
   line-height: 1.9;
   font-size: 14px;
+}
+
+/* Home workspace loading overlay */
+.home-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 8, 16, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.home-loading-dialog {
+  min-width: 260px;
+  max-width: 360px;
+  padding: 18px 20px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border-strong);
+  background:
+    radial-gradient(circle at top left, rgba(107,138,255,0.24), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(115,204,255,0.18), transparent 60%),
+    rgba(12,14,26,0.96);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.6);
+}
+
+.home-loading-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-loading-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.12);
+  border-top-color: var(--accent2);
+  animation: homeLoadingSpin 0.7s linear infinite;
+}
+
+.home-loading-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--heading-color);
+}
+
+.home-loading-subtext {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.home-loading-hint-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.home-loading-hint-chip {
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px dashed var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.02);
+}
+
+@keyframes homeLoadingSpin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes homeFloatA {

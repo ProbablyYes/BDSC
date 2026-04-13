@@ -2026,16 +2026,40 @@ def _safe_evidence_quotes(quotes: Any) -> list[dict]:
 
 def _project_label(pid: str, psubs: list[dict]) -> str:
     latest = psubs[-1] if psubs else {}
+    # Priority 1: AI-generated conversation title
+    conv_id = ""
+    for sub in reversed(psubs):
+        conv_id = _safe_str(sub.get("conversation_id", ""))
+        if conv_id:
+            break
+    if conv_id:
+        try:
+            proj_id = _safe_str(latest.get("project_id", "")) or pid
+            conv = conv_store.get(proj_id, conv_id)
+            title = _safe_str(conv.get("title", "")) if conv else ""
+            if title and title != "新对话" and len(title) >= 2:
+                return title[:24]
+        except Exception:
+            pass
+    # Priority 2: AI summary or bottleneck from diagnosis
+    for sub in reversed(psubs):
+        diag = sub.get("diagnosis") or sub.get("latest_diagnosis") or {}
+        if isinstance(diag, dict):
+            summary = _safe_str(diag.get("bottleneck", "")) or _safe_str(diag.get("ai_summary", ""))
+            if summary and len(summary) >= 4:
+                return summary[:24]
+    # Priority 3: filename
     filename = _safe_str(latest.get("filename", ""))
     if filename:
         stem = Path(filename).stem.strip()
         if stem:
             return stem[:24]
+    # Priority 4: raw_text keywords
     raw = _safe_str(latest.get("raw_text", "")).replace("\n", " ").strip()
     if raw:
         words = re.findall(r"[\u4e00-\u9fff]{2,}|[A-Za-z]{4,}", raw)
         if words:
-            return "".join(words[:2])[:24]
+            return "".join(words[:3])[:24]
     return f"项目 {pid[-4:]}" if len(pid) >= 4 else "项目病例"
 
 

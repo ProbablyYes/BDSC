@@ -558,6 +558,35 @@ class UserStorage:
         self._save(users)
         return self._public_user(user)
 
+    def get_or_create_by_email(self, email: str) -> dict:
+        """Find user by email or auto-create a student account."""
+        email = email.strip().lower()
+        users = self._load()
+        for user in users:
+            if str(user.get("email", "")).strip().lower() == email:
+                return self._public_user(user)
+        now = _now_iso()
+        salt, pw_hash = self._hash_password(secrets.token_hex(8))
+        local_part = email.split("@")[0] if "@" in email else email
+        user = {
+            "user_id": str(uuid4()),
+            "role": "student",
+            "display_name": local_part[:16],
+            "email": email,
+            "phone": "",
+            "student_id": None,
+            "class_id": None,
+            "cohort_id": None,
+            "bio": "",
+            "password_salt": salt,
+            "password_hash": pw_hash,
+            "created_at": now,
+            "updated_at": now,
+        }
+        users.append(user)
+        self._save(users)
+        return self._public_user(user)
+
 
 class TeamStorage:
     """Manages teams with JSON file persistence at data/teams/teams.json."""

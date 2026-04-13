@@ -312,7 +312,7 @@ export default function StudentPage() {
   const [loading, setLoading] = useState(false);
   const [rightTab, setRightTab] = useState<RightTab>("task");
   const [rightOpen, setRightOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [topbarMoreOpen, setTopbarMoreOpen] = useState(false);
   const [budgetPanelOpen, setBudgetPanelOpen] = useState(false);
   const [kbPanelOpen, setKbPanelOpen] = useState(false);
@@ -1472,12 +1472,6 @@ export default function StudentPage() {
 
             <div className="dock-sep" />
 
-            {/* Settings */}
-            <button type="button" className="dock-item" onClick={() => setSettingsOpen((v) => !v)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-              <span className="dock-tooltip">设置</span>
-            </button>
-
             {/* Theme toggle */}
             <button type="button" className="dock-item" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")}>
               {theme === "dark" ? (
@@ -1489,7 +1483,7 @@ export default function StudentPage() {
             </button>
 
             {/* Logout */}
-            <button type="button" className="dock-item dock-item-danger" onClick={logout}>
+            <button type="button" className="dock-item dock-item-danger" onClick={() => setShowLogoutConfirm(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               <span className="dock-tooltip">退出登录</span>
             </button>
@@ -1536,21 +1530,19 @@ export default function StudentPage() {
       )}
 
       {/* ── Settings Drawer ── */}
-      {settingsOpen && (
-        <div className="settings-drawer">
-          <div className="settings-grid">
-            <label>当前账号
-              <input value={currentUser?.display_name || studentId} readOnly />
-            </label>
-            <label>学号
-              <input value={studentNumber} onChange={(e) => setStudentNumber(e.target.value)} placeholder="请输入你的学号" maxLength={20} />
-            </label>
-            <label>团队状态
-              <input value={myTeams.length > 0 ? `已加入 ${myTeams.length} 个团队` : "未加入团队"} readOnly />
-            </label>
-            <label>当前项目
-              <input value={projectId} readOnly />
-            </label>
+      {/* ── Logout Confirm Modal ── */}
+      {showLogoutConfirm && (
+        <div className="logout-confirm-overlay" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="logout-confirm-box" onClick={(e) => e.stopPropagation()}>
+            <div className="logout-confirm-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <h4 style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text-primary)" }}>确认退出登录？</h4>
+            <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-muted)" }}>退出后需要重新输入账号密码登录</p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button type="button" className="logout-confirm-cancel" onClick={() => setShowLogoutConfirm(false)}>取消</button>
+              <button type="button" className="logout-confirm-ok" onClick={() => { setShowLogoutConfirm(false); logout(); }}>确认退出</button>
+            </div>
           </div>
         </div>
       )}

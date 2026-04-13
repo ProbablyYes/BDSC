@@ -46,6 +46,7 @@ export default function KBGraphPanel({ onClose }: Props) {
   const [hyperFamilyFilter, setHyperFamilyFilter] = useState<string | null>(null);
   const [hyperShowGroups, setHyperShowGroups] = useState(false);
   const [hyperSelectedFamilies, setHyperSelectedFamilies] = useState<Set<string>>(new Set());
+  const [clickedHE, setClickedHE] = useState<string | null>(null);
 
   /* ── Quality state ── */
   const [qualityData, setQualityData] = useState<any>(null);
@@ -243,42 +244,44 @@ export default function KBGraphPanel({ onClose }: Props) {
     setHyperSelectedFamilies(new Set());
   }, []);
 
+  const _activeHE = hoveredHE || clickedHE;
+
   const hoveredHEMembers = useMemo(() => {
-    if (!hoveredHE || !filteredHyperGraph?.links) return new Set<string>();
+    if (!_activeHE || !filteredHyperGraph?.links) return new Set<string>();
     const links: any[] = filteredHyperGraph.links;
     const ids = new Set<string>();
     for (const l of links) {
       const s = typeof l.source === "string" ? l.source : l.source?.id;
       const t = typeof l.target === "string" ? l.target : l.target?.id;
-      if (s === hoveredHE) ids.add(t);
-      if (t === hoveredHE) ids.add(s);
+      if (s === _activeHE) ids.add(t);
+      if (t === _activeHE) ids.add(s);
     }
     return ids;
-  }, [hoveredHE, filteredHyperGraph]);
+  }, [_activeHE, filteredHyperGraph]);
 
   const hoveredHEInfo = useMemo(() => {
-    if (!hoveredHE || !filteredHyperGraph?.nodes) return null;
-    const heNode = filteredHyperGraph.nodes.find((n: any) => n.id === hoveredHE);
+    if (!_activeHE || !filteredHyperGraph?.nodes) return null;
+    const heNode = filteredHyperGraph.nodes.find((n: any) => n.id === _activeHE);
     if (!heNode) return null;
     const members = filteredHyperGraph.nodes.filter((n: any) => hoveredHEMembers.has(n.id));
     const riskRules = members.filter((m: any) => m.type === "RiskRule");
     const rubricItems = members.filter((m: any) => m.type === "RubricItem");
     const hyperNodes = members.filter((m: any) => m.type === "HyperNode");
     return { ...heNode, riskRules, rubricItems, hyperNodes, totalMembers: members.length };
-  }, [hoveredHE, filteredHyperGraph, hoveredHEMembers]);
+  }, [_activeHE, filteredHyperGraph, hoveredHEMembers]);
 
   const hyperNodeColor = useCallback((node: any) => {
-    if (!hoveredHE) return node.color || "#38bdf8";
-    if (node.id === hoveredHE) return "#fbbf24";
+    if (!_activeHE) return node.color || "#38bdf8";
+    if (node.id === _activeHE) return "#fbbf24";
     return hoveredHEMembers.has(node.id) ? "#fbbf24" : "rgba(148,163,184,0.15)";
-  }, [hoveredHE, hoveredHEMembers]);
+  }, [_activeHE, hoveredHEMembers]);
 
   const hyperLinkColor = useCallback((link: any) => {
-    if (!hoveredHE) return "rgba(148,163,184,0.15)";
+    if (!_activeHE) return "rgba(148,163,184,0.15)";
     const s = typeof link.source === "string" ? link.source : link.source?.id;
     const t = typeof link.target === "string" ? link.target : link.target?.id;
-    return (s === hoveredHE || t === hoveredHE) ? "rgba(251,191,36,0.5)" : "rgba(148,163,184,0.05)";
-  }, [hoveredHE]);
+    return (s === _activeHE || t === _activeHE) ? "rgba(251,191,36,0.5)" : "rgba(148,163,184,0.05)";
+  }, [_activeHE]);
 
   const ErrorBox = ({ msg, onRetry }: { msg: string; onRetry: () => void }) => (
     <div className="kb-loading">
@@ -702,6 +705,7 @@ export default function KBGraphPanel({ onClose }: Props) {
                         return (
                           <div
                             key={family}
+                            id={`hyper-family-${family}`}
                             className={`hg-family-row ${isActive ? "hg-family-active" : ""} ${isDimmed ? "hg-family-dimmed" : ""}`}
                             onClick={() => toggleHyperFamily(family)}
                           >
@@ -761,9 +765,11 @@ export default function KBGraphPanel({ onClose }: Props) {
             <div className="kb-graph-area">
               {!hyperLoading && !hyperError && (hyperData?.graph?.nodes?.length || 0) > 0 && (
                 <div className="kb-graph-hint">
-                  {hyperSelectedFamilies.size > 0
-                    ? `筛选中：${hyperSelectedFamilies.size} 个家族 · ${hyperFilteredStats?.edges ?? 0} 超边 · ${hyperFilteredStats?.hnodes ?? 0} 节点`
-                    : "悬停方块查看超边详情 — 点击左侧家族可筛选"}
+                  {clickedHE
+                    ? `已锁定超边 — 左侧已定位到对应家族卡片，点击空白处取消`
+                    : hyperSelectedFamilies.size > 0
+                      ? `筛选中：${hyperSelectedFamilies.size} 个家族 · ${hyperFilteredStats?.edges ?? 0} 超边 · ${hyperFilteredStats?.hnodes ?? 0} 节点`
+                      : "点击方块锁定超边并定位左侧卡片 — 悬停查看详情 — 左侧家族可筛选"}
                 </div>
               )}
               {hyperLoading ? <div className="kb-loading">加载超图中...</div>
@@ -776,10 +782,11 @@ export default function KBGraphPanel({ onClose }: Props) {
                   nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
                     const size = (node.size || 3) / globalScale * 4;
                     const color = hyperNodeColor(node);
+                    const isActive = node.id === _activeHE;
                     if (node.type === "Hyperedge") {
                       ctx.fillStyle = color; ctx.fillRect(node.x - size, node.y - size, size * 2, size * 2);
-                      ctx.strokeStyle = hoveredHE === node.id ? "rgba(251,191,36,0.8)" : "rgba(255,255,255,0.3)";
-                      ctx.lineWidth = hoveredHE === node.id ? 2 : 0.5;
+                      ctx.strokeStyle = isActive ? "rgba(251,191,36,0.8)" : "rgba(255,255,255,0.3)";
+                      ctx.lineWidth = isActive ? 2 : 0.5;
                       ctx.strokeRect(node.x - size, node.y - size, size * 2, size * 2);
                     } else {
                       ctx.beginPath(); ctx.arc(node.x, node.y, size * 0.7, 0, 2 * Math.PI); ctx.fillStyle = color; ctx.fill();
@@ -789,11 +796,25 @@ export default function KBGraphPanel({ onClose }: Props) {
                     }
                   }}
                   onNodeHover={(n: any) => setHoveredHE(n?.type === "Hyperedge" ? n.id : null)}
+                  onNodeClick={(n: any) => {
+                    if (n?.type === "Hyperedge") {
+                      setClickedHE(n.id);
+                      if (n.family) {
+                        const el = document.getElementById(`hyper-family-${n.family}`);
+                        if (el) {
+                          el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          el.classList.add("hg-family-flash");
+                          setTimeout(() => el.classList.remove("hg-family-flash"), 1500);
+                        }
+                      }
+                    }
+                  }}
+                  onBackgroundClick={() => { setClickedHE(null); }}
                   linkColor={hyperLinkColor} linkWidth={(l: any) => {
-                    if (!hoveredHE) return 0.3;
+                    if (!_activeHE) return 0.3;
                     const s = typeof l.source === "string" ? l.source : l.source?.id;
                     const t = typeof l.target === "string" ? l.target : l.target?.id;
-                    return (s === hoveredHE || t === hoveredHE) ? 1.5 : 0.1;
+                    return (s === _activeHE || t === _activeHE) ? 1.5 : 0.1;
                   }}
                   backgroundColor="transparent"
                   width={typeof window !== "undefined" ? Math.max(400, window.innerWidth - 320) : 800}

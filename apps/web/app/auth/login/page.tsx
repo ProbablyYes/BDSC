@@ -1,19 +1,14 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
-type Mode = "email" | "phone";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [smsCode, setSmsCode] = useState("");
-  const [smsCooldown, setSmsCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPwd, setShowPwd] = useState(false);
@@ -29,37 +24,6 @@ export default function LoginPage() {
       }
     } catch { /* ignore */ }
   }, [router]);
-
-  useEffect(() => {
-    if (smsCooldown <= 0) return;
-    const t = setTimeout(() => setSmsCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [smsCooldown]);
-
-  useEffect(() => {
-    if (!smsToast) return;
-    const t = setTimeout(() => setSmsToast(""), 12000);
-    return () => clearTimeout(t);
-  }, [smsToast]);
-
-  const sendSms = useCallback(async () => {
-    if (!phone.trim() || smsCooldown > 0) return;
-    try {
-      const res = await fetch(`${API}/api/auth/sms/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.detail ?? "发送失败");
-      setSmsCooldown(60);
-      if (data.code_hint) {
-        setSmsToast(`开发模式验证码: ${data.code_hint}`);
-      }
-    } catch (err: any) {
-      setError(err?.message ?? "发送验证码失败");
-    }
-  }, [phone, smsCooldown]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -100,7 +64,6 @@ export default function LoginPage() {
 
   return (
     <main className="auth-split-page">
-      {/* ── Left: brand visual ── */}
       <aside className="auth-visual">
         <div className="auth-visual-bg" aria-hidden="true">
           <span className="auth-visual-orb auth-visual-orb-a" />
@@ -131,7 +94,6 @@ export default function LoginPage() {
         </div>
       </aside>
 
-      {/* ── Right: login form ── */}
       <section className="auth-form-side">
         {smsToast && (
           <div style={{
@@ -196,63 +158,28 @@ export default function LoginPage() {
             <p>登录后将根据角色自动进入对应工作台</p>
           </div>
 
-          {/* mode tabs */}
-          <div className="auth-mode-tabs">
-            <button type="button" className={`auth-mode-tab ${mode === "email" ? "active" : ""}`} onClick={() => setMode("email")}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
-              账号登录
-            </button>
-            <button type="button" className={`auth-mode-tab ${mode === "phone" ? "active" : ""}`} onClick={() => setMode("phone")}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="18" r="1"/></svg>
-              手机验证码
-            </button>
-          </div>
-
           <form className="auth-form" onSubmit={handleSubmit}>
-            {mode === "email" ? (
-              <>
-                <label className="auth-label">
-                  <span>账号 / 手机号</span>
-                  <div className="auth-input-wrap">
-                    <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
-                    <input type="text" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="输入邮箱、手机号或测试账号" className="auth-input auth-input-icon-pad" autoComplete="username" />
-                  </div>
-                </label>
-                <label className="auth-label">
-                  <span>密码</span>
-                  <div className="auth-input-wrap">
-                    <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="3"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    <input type={showPwd ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少 6 位" className="auth-input auth-input-icon-pad" autoComplete="current-password" />
-                    <button type="button" className="auth-pwd-toggle" onClick={() => setShowPwd((v) => !v)} tabIndex={-1}>
-                      {showPwd ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      )}
-                    </button>
-                  </div>
-                </label>
-              </>
-            ) : (
-              <>
-                <label className="auth-label">
-                  <span>手机号 / 任意测试串</span>
-                  <div className="auth-input-wrap">
-                    <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="18" r="1"/></svg>
-                    <input type="text" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="可输入任意内容用于测试" className="auth-input auth-input-icon-pad" />
-                  </div>
-                </label>
-                <label className="auth-label">
-                  <span>验证码</span>
-                  <div className="auth-sms-row">
-                    <input required value={smsCode} onChange={(e) => setSmsCode(e.target.value)} placeholder="6 位验证码" className="auth-input" maxLength={6} />
-                    <button type="button" className="auth-sms-btn" onClick={sendSms} disabled={smsCooldown > 0 || !phone.trim()}>
-                      {smsCooldown > 0 ? `${smsCooldown}s` : "获取验证码"}
-                    </button>
-                  </div>
-                </label>
-              </>
-            )}
+            <label className="auth-label">
+              <span>账号 / 邮箱</span>
+              <div className="auth-input-wrap">
+                <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="输入邮箱或测试账号" className="auth-input auth-input-icon-pad" autoComplete="username" />
+              </div>
+            </label>
+            <label className="auth-label">
+              <span>密码</span>
+              <div className="auth-input-wrap">
+                <svg className="auth-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="3"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                <input type={showPwd ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少 6 位" className="auth-input auth-input-icon-pad" autoComplete="current-password" />
+                <button type="button" className="auth-pwd-toggle" onClick={() => setShowPwd((v) => !v)} tabIndex={-1}>
+                  {showPwd ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  )}
+                </button>
+              </div>
+            </label>
 
             {error && <div className="auth-error">{error}</div>}
 

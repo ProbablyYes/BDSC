@@ -572,6 +572,7 @@ export default function TeacherPage() {
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [createdInviteCode, setCreatedInviteCode] = useState("");
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // 项目页面状态
   const [projectTabInput, setProjectTabInput] = useState("");
@@ -3086,13 +3087,30 @@ export default function TeacherPage() {
             </button>
 
             {/* Logout */}
-            <button type="button" className="dock-item dock-item-danger" onClick={logout}>
+            <button type="button" className="dock-item dock-item-danger" onClick={() => setShowLogoutConfirm(true)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               <span className="dock-tooltip">退出登录</span>
             </button>
           </div>
         </div>
       </header>
+
+      {/* ── Logout Confirm Modal ── */}
+      {showLogoutConfirm && (
+        <div className="logout-confirm-overlay" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="logout-confirm-box" onClick={(e) => e.stopPropagation()}>
+            <div className="logout-confirm-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <h4 style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text-primary)" }}>确认退出登录？</h4>
+            <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-muted)" }}>退出后需要重新输入账号密码登录</p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button type="button" className="logout-confirm-cancel" onClick={() => setShowLogoutConfirm(false)}>取消</button>
+              <button type="button" className="logout-confirm-ok" onClick={() => { setShowLogoutConfirm(false); logout(); }}>确认退出</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="tch-body">
         <nav className="tch-sidebar">

@@ -12,8 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPwd, setShowPwd] = useState(false);
-  const [smsToast, setSmsToast] = useState("");
-  const [showLoginOverlay, setShowLoginOverlay] = useState(false);
 
   useEffect(() => {
     try {
@@ -30,21 +28,6 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      if (mode === "phone") {
-        if (!smsCode.trim()) throw new Error("请输入验证码");
-        const res = await fetch(`${API}/api/auth/sms/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: phone.trim(), code: smsCode.trim() }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.detail ?? "登录失败");
-        localStorage.setItem("va_user", JSON.stringify(data.user));
-        const role = data.user?.role ?? "student";
-        setShowLoginOverlay(true);
-        router.push(role === "teacher" ? "/teacher" : role === "admin" ? "/admin" : "/student");
-        return;
-      }
       const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -54,7 +37,6 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data?.detail ?? "登录失败");
       localStorage.setItem("va_user", JSON.stringify(data.user));
       const role = data.user?.role ?? "student";
-      setShowLoginOverlay(true);
       router.push(role === "teacher" ? "/teacher" : role === "admin" ? "/admin" : "/student");
     } catch (err: any) {
       setError(err?.message ?? "登录失败");
@@ -95,58 +77,6 @@ export default function LoginPage() {
       </aside>
 
       <section className="auth-form-side">
-        {smsToast && (
-          <div style={{
-            position: "fixed", top: 24, right: 24, zIndex: 9999,
-            background: "linear-gradient(135deg, #6b8aff 0%, #8b5cf6 100%)",
-            color: "#fff", padding: "12px 20px", borderRadius: 12,
-            fontSize: 14, fontWeight: 600, boxShadow: "0 4px 24px rgba(107,138,255,.4)",
-            display: "flex", alignItems: "center", gap: 8,
-            animation: "fadeIn .3s ease",
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            {smsToast}
-            <button type="button" onClick={() => setSmsToast("")} style={{
-              background: "rgba(255,255,255,.2)", border: "none", color: "#fff",
-              borderRadius: 6, width: 22, height: 22, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, marginLeft: 4,
-            }}>✕</button>
-          </div>
-        )}
-        {showLoginOverlay && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(15,23,42,0.35)",
-              backdropFilter: "blur(4px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 9998,
-            }}
-          >
-            <div
-              style={{
-                background: "#020617",
-                borderRadius: 16,
-                padding: "20px 24px",
-                boxShadow: "0 18px 45px rgba(15,23,42,0.5)",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                color: "#e5e7eb",
-                minWidth: 260,
-              }}
-            >
-              <span className="auth-spinner" />
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 15, fontWeight: 600 }}>正在登陆，请稍后</span>
-                <span style={{ fontSize: 12, opacity: 0.8 }}>系统正在为你加载工作台...</span>
-              </div>
-            </div>
-          </div>
-        )}
         <div className="auth-form-container fade-up">
           <Link href="/" className="auth-back-link">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 2L4 8l6 6" /></svg>

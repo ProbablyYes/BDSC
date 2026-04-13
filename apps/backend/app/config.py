@@ -29,14 +29,6 @@ class Settings(BaseSettings):
 
     max_parse_file_mb: float = 30.0  # modify default file size limit in MB
 
-    # SMTP settings for email verification
-    smtp_host: str = ""
-    smtp_port: int = 465
-    smtp_user: str = ""
-    smtp_password: str = ""
-    smtp_from: str = ""
-    smtp_use_ssl: bool = True
-
     # 视频路演分析相关配置
     video_max_mb: float = 1024.0  # 单个视频最大体积（MB）
     video_max_duration_sec: int = 180  # 建议路演时长上限（秒），用于前端提示

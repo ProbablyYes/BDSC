@@ -367,19 +367,6 @@ class SmsLoginPayload(BaseModel):
     code: str = Field(min_length=4, max_length=8)
 
 
-class EmailCodeSendPayload(BaseModel):
-    email: str = Field(min_length=3, max_length=200)
-
-
-class EmailCodeSendResponse(BaseModel):
-    status: str = "ok"
-    expires_in: int = 300
-    code_hint: str = ""
-
-
-class EmailCodeLoginPayload(BaseModel):
-    email: str = Field(min_length=3, max_length=200)
-    code: str = Field(min_length=4, max_length=8)
 
 
 class TeamCreatePayload(BaseModel):

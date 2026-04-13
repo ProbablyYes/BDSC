@@ -3,10 +3,8 @@ import logging
 import math
 import random
 import re
-import smtplib
 import time
 from datetime import datetime
-from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Any
 
@@ -45,9 +43,6 @@ from app.schemas import (
     SmsLoginPayload,
     SmsSendPayload,
     SmsSendResponse,
-    EmailCodeSendPayload,
-    EmailCodeSendResponse,
-    EmailCodeLoginPayload,
     StudentInterventionViewPayload,
     TeamCreatePayload,
     TeamJoinPayload,
@@ -1520,85 +1515,6 @@ def sms_login(payload: SmsLoginPayload) -> AuthUserResponse:
             "duration_ms": 0,
         }
     )
-    return AuthUserResponse(status="ok", user=user)
-
-
-# ── Email verification code ──
-
-_email_codes: dict[str, tuple[str, float]] = {}
-EMAIL_CODE_TTL = 300  # 5 min
-
-
-def _send_email_code(to_email: str, code: str) -> bool:
-    """Send verification code via SMTP. Returns True if sent, False if SMTP not configured (dev fallback)."""
-    if not settings.smtp_host or not settings.smtp_user:
-        return False
-    msg = MIMEText(
-        f"您的验证码是：{code}\n\n有效期 5 分钟，请勿泄露给他人。\n\n—— VentureCheck 创新创业智能体平台",
-        "plain", "utf-8",
-    )
-    msg["Subject"] = f"VentureCheck 登录验证码: {code}"
-    msg["From"] = settings.smtp_from or settings.smtp_user
-    msg["To"] = to_email
-    try:
-        if settings.smtp_use_ssl:
-            server = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port, timeout=10)
-        else:
-            server = smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=10)
-            server.starttls()
-        server.login(settings.smtp_user, settings.smtp_password)
-        server.sendmail(msg["From"], [to_email], msg.as_string())
-        server.quit()
-        return True
-    except Exception as e:
-        logger.warning("SMTP send failed for %s: %s", to_email, e)
-        return False
-
-
-@app.post("/api/auth/email-code/send", response_model=EmailCodeSendResponse)
-def email_code_send(payload: EmailCodeSendPayload) -> EmailCodeSendResponse:
-    email_addr = payload.email.strip().lower()
-    code = f"{random.randint(0, 999999):06d}"
-    _email_codes[email_addr] = (code, time.time())
-    sent = _send_email_code(email_addr, code)
-    return EmailCodeSendResponse(
-        status="ok",
-        expires_in=EMAIL_CODE_TTL,
-        code_hint=code if not sent else "",
-    )
-
-
-@app.post("/api/auth/email-code/login", response_model=AuthUserResponse)
-def email_code_login(payload: EmailCodeLoginPayload) -> AuthUserResponse:
-    email_addr = payload.email.strip().lower()
-    record = _email_codes.get(email_addr)
-    if not record:
-        raise HTTPException(status_code=400, detail="请先获取验证码")
-    stored_code, ts = record
-    if time.time() - ts > EMAIL_CODE_TTL:
-        _email_codes.pop(email_addr, None)
-        raise HTTPException(status_code=400, detail="验证码已过期，请重新获取")
-    if payload.code.strip() != stored_code:
-        raise HTTPException(status_code=400, detail="验证码不正确")
-    _email_codes.pop(email_addr, None)
-    user = user_store.get_or_create_by_email(email_addr)
-    role = str(user.get("role", ""))
-    role_label = {"student": "学生", "teacher": "教师", "admin": "管理员"}.get(role, "用户")
-    display_name = str(user.get("display_name") or user.get("email") or user.get("user_id") or "")
-    user_label = f"{role_label}:{display_name}" if display_name else role_label
-    _append_access_log({
-        "time": datetime.utcnow().isoformat() + "Z",
-        "user": user_label,
-        "user_id": user.get("user_id"),
-        "role": role,
-        "action": "LOGIN_EMAIL_CODE",
-        "detail": "用户邮箱验证码登录成功",
-        "status": "OK",
-        "method": "POST",
-        "path": "/api/auth/email-code/login",
-        "status_code": 200,
-        "duration_ms": 0,
-    })
     return AuthUserResponse(status="ok", user=user)
 
 

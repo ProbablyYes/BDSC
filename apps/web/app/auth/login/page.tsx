@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [showLoginOverlay, setShowLoginOverlay] = useState(false);
 
   useEffect(() => {
     try {
@@ -37,6 +38,7 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(data?.detail ?? "登录失败");
       localStorage.setItem("va_user", JSON.stringify(data.user));
       const role = data.user?.role ?? "student";
+      setShowLoginOverlay(true);
       router.push(role === "teacher" ? "/teacher" : role === "admin" ? "/admin" : "/student");
     } catch (err: any) {
       setError(err?.message ?? "登录失败");
@@ -77,6 +79,40 @@ export default function LoginPage() {
       </aside>
 
       <section className="auth-form-side">
+        {showLoginOverlay && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15,23,42,0.35)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9998,
+            }}
+          >
+            <div
+              style={{
+                background: "#020617",
+                borderRadius: 16,
+                padding: "20px 24px",
+                boxShadow: "0 18px 45px rgba(15,23,42,0.5)",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                color: "#e5e7eb",
+                minWidth: 260,
+              }}
+            >
+              <span className="auth-spinner" />
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{ fontSize: 15, fontWeight: 600 }}>正在登陆，请稍后</span>
+                <span style={{ fontSize: 12, opacity: 0.8 }}>系统正在为你加载工作台...</span>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="auth-form-container fade-up">
           <Link href="/" className="auth-back-link">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 2L4 8l6 6" /></svg>

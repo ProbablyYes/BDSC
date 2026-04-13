@@ -345,13 +345,9 @@ export default function HomePage() {
               <div>
                 <div className="home-loading-title">正在打开工作台...</div>
                 <div className="home-loading-subtext">
-                  为你加载项目、团队与最近一次学习状态，请稍候。
+                  正在为你实时加载工作台状态，请稍候。
                 </div>
               </div>
-            </div>
-            <div className="home-loading-hint-row" aria-hidden="true">
-              <span className="home-loading-hint-chip">同步项目进度</span>
-              <span className="home-loading-hint-chip">刷新角色权限</span>
             </div>
           </div>
         </div>

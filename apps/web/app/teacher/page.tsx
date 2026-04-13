@@ -16,8 +16,20 @@ const RISK_RULE_NAMES: Record<string, string> = {
   "no_competitor_claim": "缺少竞争对手声明",
 };
 
-function getRuleDisplayName(ruleName: string): string {
-  return RISK_RULE_NAMES[ruleName] || ruleName;
+function normalizeRuleId(r: any): string {
+  if (typeof r === "string") return r;
+  if (r && typeof r === "object") return r.rule_id || r.id || r.pattern_id || r.warning || JSON.stringify(r);
+  return String(r ?? "");
+}
+
+function normalizeRuleList(rules: any): string[] {
+  if (!Array.isArray(rules)) return [];
+  return rules.map(normalizeRuleId).filter(Boolean);
+}
+
+function getRuleDisplayName(ruleName: any): string {
+  const id = normalizeRuleId(ruleName);
+  return RISK_RULE_NAMES[id] || id;
 }
 
 function parseServerTime(value?: string) {
@@ -352,6 +364,7 @@ export default function TeacherPage() {
   const [selectedTeamStudentId, setSelectedTeamStudentId] = useState("");
   const [diagnosisCards, setDiagnosisCards] = useState<any[]>([]);
   const [selectedTeamProjectId, setSelectedTeamProjectId] = useState("");
+  const [detailTab, setDetailTab] = useState<"overview" | "intervention" | "students">("overview");
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [createdInviteCode, setCreatedInviteCode] = useState("");
@@ -1624,7 +1637,7 @@ export default function TeacherPage() {
           project_phase: item.project_phase || "",
           student_name: item.student_name || item.student_id || "",
           team_name: item.team_name || "",
-          top_risks: item.top_risks || [],
+          top_risks: normalizeRuleList(item.top_risks),
           summary: item.summary || "",
           dominant_intent: item.dominant_intent || "综合咨询",
         })),
@@ -2434,7 +2447,7 @@ export default function TeacherPage() {
 
     // 规则雷达数据
     const ruleFreq: Record<string, number> = {};
-    subs.forEach((s: any) => { (s.triggered_rules || []).forEach((r: string) => { ruleFreq[r] = (ruleFreq[r] || 0) + 1; }); });
+    subs.forEach((s: any) => { normalizeRuleList(s.triggered_rules).forEach((r: string) => { ruleFreq[r] = (ruleFreq[r] || 0) + 1; }); });
     const ruleRadar = Object.entries(ruleFreq).sort(([,a],[,b]) => (b as number) - (a as number)).slice(0, 6).map(([rule, count]) => ({ label: getRuleDisplayName(rule), value: count as number, max: Math.max(1, ...Object.values(ruleFreq) as number[]) }));
 
     // 分位数（箱型图）
@@ -2484,7 +2497,7 @@ export default function TeacherPage() {
     const scorePercentiles = { min: sorted[0] || 0, q1: pctFn(sorted, 25), median: pctFn(sorted, 50), q3: pctFn(sorted, 75), max: sorted[sorted.length - 1] || 0, avg: avgScore };
 
     const ruleFreq: Record<string, number> = {};
-    subs.forEach((s: any) => { (s.triggered_rules || []).forEach((r: string) => { ruleFreq[r] = (ruleFreq[r] || 0) + 1; }); });
+    subs.forEach((s: any) => { normalizeRuleList(s.triggered_rules).forEach((r: string) => { ruleFreq[r] = (ruleFreq[r] || 0) + 1; }); });
     const ruleRadar = Object.entries(ruleFreq).sort(([, a], [, b]) => (b as number) - (a as number)).slice(0, 6).map(([rule, count]) => ({ label: getRuleDisplayName(rule), value: count as number, max: Math.max(1, ...Object.values(ruleFreq) as number[]) }));
 
     return { totalSubmissions: subs.length, studentCount: uniqueStudents.length, projectCount: uniqueProjects.length, avgScore, riskRate, withRules, students, activityByDate, scoreBuckets, scorePercentiles, ruleRadar, studentScatter: students.map(s => ({ id: s.id, x: s.count, y: s.avgScore })) };
@@ -2551,7 +2564,7 @@ export default function TeacherPage() {
             improvement: Number(proj.improvement || 0),
             submission_count: Number(proj.submission_count || 0),
             project_phase: proj.project_phase || "持续迭代",
-            top_risks: proj.top_risks || [],
+            top_risks: normalizeRuleList(proj.top_risks),
             summary: proj.current_summary || "暂无项目摘要",
             dominant_intent: dominantIntent(proj.intent_distribution),
           });
@@ -2573,8 +2586,7 @@ export default function TeacherPage() {
       const scores = projSubs.map((s: any) => Number(s.overall_score || 0)).filter((v: number) => v > 0);
       const latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
       const avgScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
-      // 使用规则ID字符串而不是对象，避免在渲染时传入 { id: ... } 导致 React 报错
-      const risks = projSubs.flatMap((s: any) => (s.triggered_rules || []));
+      const risks = projSubs.flatMap((s: any) => normalizeRuleList(s.triggered_rules));
       const latestSub = projSubs[projSubs.length - 1] || {};
       rows.push({
         root_project_id: pid,
@@ -2685,7 +2697,7 @@ export default function TeacherPage() {
     const riskFreq: Record<string, number> = {};
     const intentFreq: Record<string, number> = {};
     scope.forEach((item: any) => {
-      (item.top_risks || []).forEach((risk: string) => { riskFreq[risk] = (riskFreq[risk] || 0) + 1; });
+      normalizeRuleList(item.top_risks).forEach((risk: string) => { riskFreq[risk] = (riskFreq[risk] || 0) + 1; });
       const intent = item.dominant_intent || "综合咨询";
       intentFreq[intent] = (intentFreq[intent] || 0) + 1;
     });
@@ -2731,8 +2743,8 @@ export default function TeacherPage() {
     const stronger = scoreGap >= 0 ? left : right;
     const weaker = scoreGap >= 0 ? right : left;
     const progressLeader = Number(left.improvement || 0) >= Number(right.improvement || 0) ? left : right;
-    const riskUnion = Array.from(new Set([...(left.top_risks || []), ...(right.top_risks || [])]));
-    const sharedRisks = (left.top_risks || []).filter((risk: string) => (right.top_risks || []).includes(risk));
+    const riskUnion = Array.from(new Set([...normalizeRuleList(left.top_risks), ...normalizeRuleList(right.top_risks)]));
+    const sharedRisks = normalizeRuleList(left.top_risks).filter((risk: string) => normalizeRuleList(right.top_risks).includes(risk));
     return {
       stronger,
       weaker,
@@ -3268,8 +3280,8 @@ export default function TeacherPage() {
                   {(() => {
                     const KB_STRIP = [
                       { v: 96, l: "标准案例" }, { v: 13, l: "领域类别" },
-                      { v: 9, l: "评分维度" }, { v: 15, l: "风险规则" },
-                      { v: 96, l: "RAG 语料" }, { v: 7403, l: "知识关系" },
+                      { v: 9, l: "评分维度" }, { v: 27, l: "风险规则" },
+                      { v: 96, l: "RAG 语料" }, { v: 7144, l: "知识关系" },
                       { v: 45, l: "超边家族" }, { v: 166, l: "超图节点" }, { v: 360, l: "超图超边" },
                     ];
                     const dimItems = [
@@ -3334,7 +3346,7 @@ export default function TeacherPage() {
                     <div className="ov-section kb-pano">
                       <div className="kb-pano-header">
                         <h3>知识库全景</h3>
-                        <span className="kb-pano-sub">AI 助手以 96 个标准案例、7403 条知识关系、45 个超边家族、360 条超图超边、34 条一致性规则为底座，为学生提供精准引导</span>
+                        <span className="kb-pano-sub">AI 助手以 96 个标准案例、7,144 条知识关系、45 个超边家族、360 条超图超边、27 条风险规则 + 34 条一致性规则为底座，为学生提供精准引导</span>
                       </div>
 
                       {/* ── 1. 指标条 ── */}
@@ -3850,7 +3862,7 @@ export default function TeacherPage() {
                                   </div>
                                   <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>{s.bottleneck || s.text_preview || "暂无摘要"}</div>
                                   <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
-                                    {(s.triggered_rules || []).slice(0, 3).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                    {normalizeRuleList(s.triggered_rules).slice(0, 3).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                                     {(s.agent_trace_meta?.agents_called || []).slice(0, 2).map((agent: string) => <span key={agent} className="tm-smart-chip">{agent}</span>)}
                                   </div>
                                 </button>
@@ -4070,11 +4082,15 @@ export default function TeacherPage() {
                                   )}
                                   {s.diagnosis.triggered_rules && s.diagnosis.triggered_rules.length > 0 ? (
                                     <p>
-                                      <strong>触发规则:</strong> {s.diagnosis.triggered_rules.map((r: any) => (
-                                        <span key={r.id} style={{ display: "inline-block", marginRight: 8, padding: "2px 6px", background: "var(--tch-danger-soft)", borderRadius: 3, fontSize: 11 }}>
-                                          {r.id}: {r.name}
-                                        </span>
-                                      ))}
+                                      <strong>触发规则:</strong> {s.diagnosis.triggered_rules.map((r: any, ri: number) => {
+                                        const rId = typeof r === "string" ? r : (r.rule_id || r.id || r.pattern_id || "");
+                                        const rName = typeof r === "string" ? getRuleDisplayName(r) : (r.name || r.warning || rId);
+                                        return (
+                                          <span key={rId || ri} style={{ display: "inline-block", marginRight: 8, padding: "2px 6px", background: "var(--tch-danger-soft)", borderRadius: 3, fontSize: 11 }}>
+                                            {rId}{rName && rName !== rId ? `: ${rName}` : ""}
+                                          </span>
+                                        );
+                                      })}
                                     </p>
                                   ) : null}
                                 </div>
@@ -4156,7 +4172,7 @@ export default function TeacherPage() {
                         latest_score: Number(item.overall_score || 0),
                         submission_count: (projectSubmissionHistory || []).filter((row: any) => row.logical_project_id === item.logical_project_id).length,
                         project_phase: item.project_phase || "持续迭代",
-                        top_risks: (item.triggered_rules || []).slice(0, 3),
+                        top_risks: normalizeRuleList(item.triggered_rules).slice(0, 3),
                         summary: item.ai_summary || item.bottleneck || "暂无摘要",
                         feedback_order: item.project_order || 1,
                       },
@@ -4343,7 +4359,7 @@ export default function TeacherPage() {
                                     <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>{group.summary || "暂无摘要"}</div>
                                     <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
                                       <span className="tm-smart-chip">{category}</span>
-                                      {(group.top_risks || []).slice(0, 3).map((risk: string) => (
+                                      {normalizeRuleList(group.top_risks).slice(0, 3).map((risk: string) => (
                                         <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>
                                       ))}
                                     </div>
@@ -4393,7 +4409,7 @@ export default function TeacherPage() {
                                           {submission.ai_summary || submission.bottleneck || submission.text_preview || "查看本次提交的摘要和证据。"}
                                         </div>
                                         <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
-                                          {(submission.triggered_rules || []).slice(0, 3).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                          {normalizeRuleList(submission.triggered_rules).slice(0, 3).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                                         </div>
                                       </button>
                                     );
@@ -4432,7 +4448,7 @@ export default function TeacherPage() {
                                       <div className="feedback-history-focus-card">
                                         <div className="assistant-section-title">风险与 Agent</div>
                                         <div className="tm-corridor-tags" style={{ marginTop: 8 }}>
-                                          {(activeHistorySubmission.triggered_rules || []).slice(0, 3).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                          {normalizeRuleList(activeHistorySubmission.triggered_rules).slice(0, 3).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                                           {(activeHistorySubmission.agent_trace_meta?.agents_called || []).slice(0, 2).map((agent: string) => <span key={agent} className="tm-smart-chip">{agent}</span>)}
                                         </div>
                                       </div>
@@ -5564,7 +5580,7 @@ export default function TeacherPage() {
                                     </div>
                                     <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
                                       <span className="tm-smart-chip">{item.dominant_intent || "综合咨询"}</span>
-                                      {(item.top_risks || []).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                      {normalizeRuleList(item.top_risks).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                                     </div>
                                     <div className="project-board-actions">
                                       <button className={`tch-sm-btn ${selectedForCompare ? "active" : ""}`} onClick={() => toggleProjectCompareSelection(item.project_key)}>
@@ -6153,7 +6169,7 @@ export default function TeacherPage() {
                                 <button key={`${item.project_id}-${item.logical_project_id}`} className="assistant-signal-item" onClick={() => loadAssistantAssessment(item.project_id, item.logical_project_id || "")}>
                                   <strong>{item.project_name || "未命名项目"}</strong>
                                   <span>{item.student_name} · {item.project_phase || "持续迭代"}</span>
-                                  <em>{(item.top_risks || []).slice(0, 2).map((risk: string) => getRuleDisplayName(risk)).join(" / ") || "待看证据"}</em>
+                                  <em>{normalizeRuleList(item.top_risks).slice(0, 2).map((risk: string) => getRuleDisplayName(risk)).join(" / ") || "待看证据"}</em>
                                 </button>
                               ))}
                               {(assistantDashboard?.pending_assessments || []).length === 0 && <p className="right-hint">当前没有需要先判断的项目。</p>}
@@ -6725,7 +6741,7 @@ export default function TeacherPage() {
                               project_phase: item.project_phase,
                               latest_score: item.latest_score,
                               submission_count: item.submission_count,
-                              top_risks: item.top_risks || [],
+                              top_risks: normalizeRuleList(item.top_risks),
                               dominant_intent: item.dominant_intent || "综合咨询",
                               summary: item.summary,
                               project_order: item.project_order,
@@ -6737,7 +6753,7 @@ export default function TeacherPage() {
                               project_phase: item.project_phase,
                               latest_score: item.latest_score,
                               submission_count: item.submission_count,
-                              top_risks: item.top_risks || [],
+                              top_risks: normalizeRuleList(item.top_risks),
                               dominant_intent: item.dominant_intent || "综合咨询",
                               summary: item.current_summary || "暂无摘要",
                               project_order: idx + 1,
@@ -6774,7 +6790,7 @@ export default function TeacherPage() {
                                     <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>{item.summary}</div>
                                     <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
                                       <span className="tm-smart-chip">{item.dominant_intent || "综合咨询"}</span>
-                                      {(item.top_risks || []).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                      {normalizeRuleList(item.top_risks).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                                     </div>
                                   </button>
                                 ))}
@@ -7009,7 +7025,7 @@ export default function TeacherPage() {
                               <div className="tm-corridor-tags">
                                 <span className="tm-smart-chip" style={{ background: "rgba(224,112,112,0.12)", color: "var(--tch-danger)" }}>风险率 {Number(t.risk_rate || 0).toFixed(0)}%</span>
                                 <span className="tm-smart-chip">{dominant}</span>
-                                {(t.top_risks || []).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                {normalizeRuleList(t.top_risks).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                               </div>
                               <div className="tm-corridor-tooltip">
                                 <strong>团队摘要</strong>
@@ -7062,7 +7078,7 @@ export default function TeacherPage() {
                               </div>
                               <div className="tm-pulse-foot">
                                 <span>{dominantIntent(t.intent_distribution)}</span>
-                                <span>{(t.top_risks || []).slice(0, 1).map((r: string) => getRuleDisplayName(r)).join(" / ") || "暂无高频风险"}</span>
+                                <span>{normalizeRuleList(t.top_risks).slice(0, 1).map((r: string) => getRuleDisplayName(r)).join(" / ") || "暂无高频风险"}</span>
                               </div>
                             </button>
                           );
@@ -7073,10 +7089,13 @@ export default function TeacherPage() {
                     {/* ── Intervention Priority Diagnosis Cards ── */}
                     {diagnosisCards.length > 0 && (
                       <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                        <h3>干预优先级诊断</h3>
-                        <p className="tch-desc">按紧急程度排序，红色需要立即干预，黄色需要关注，绿色状态良好。</p>
+                        <h3>教学干预驾驶舱</h3>
+                        <p className="tch-desc">按系统性问题严重程度排序。每张卡片展示团队最需优先处理的共性问题、受影响学生和具体干预方案。</p>
                         <div className="tm-diag-grid">
-                          {diagnosisCards.map((card: any) => (
+                          {diagnosisCards.map((card: any) => {
+                            const syndromes: any[] = card.syndromes || [];
+                            const tp = card.team_portrait || {};
+                            return (
                             <div
                               key={card.team_id}
                               className={`tm-diag-card tm-diag-${card.health_level}`}
@@ -7085,39 +7104,71 @@ export default function TeacherPage() {
                               <div className="tm-diag-header">
                                 <div className="tm-diag-indicator" />
                                 <div className="tm-diag-title">{card.team_name}</div>
+                                <span className={`tm-portrait-health-badge tm-health-${card.health_level}`}>
+                                  {tp.health_label || (card.health_level === "healthy" ? "良好" : card.health_level === "warning" ? "一般" : "需关注")}
+                                </span>
                                 <div className="tm-diag-score">{card.health_score}</div>
                               </div>
                               <div className="tm-diag-bar-track">
                                 <div className="tm-diag-bar-fill" style={{ width: `${card.health_score}%` }} />
                               </div>
+
+                              {/* Team portrait summary */}
+                              <div className="tm-portrait-summary">
+                                {tp.summary || card.health_summary}
+                              </div>
+                              <div className="tm-portrait-dims">
+                                {(tp.top_strengths || []).slice(0, 2).map((s: string) => (
+                                  <span key={s} className="tm-portrait-dim-tag strength">{s}</span>
+                                ))}
+                                {(tp.top_weaknesses || []).slice(0, 2).map((w: string) => (
+                                  <span key={w} className="tm-portrait-dim-tag weakness">{w}</span>
+                                ))}
+                              </div>
+
                               <div className="tm-diag-meta">
                                 <span>{card.member_count} 人</span>
                                 <span>{card.active_count} 活跃</span>
                                 <span>均分 {card.team_avg_score}</span>
                                 <span>风险 {card.team_risk_count} 次</span>
                               </div>
-                              <p className="tm-diag-summary">{card.health_summary}</p>
-                              {card.at_risk_students.length > 0 && (
-                                <div className="tm-diag-risk-list">
-                                  <div className="tm-diag-risk-title">需关注学生 ({card.at_risk_students.length})</div>
-                                  {card.at_risk_students.slice(0, 3).map((s: any) => (
-                                    <div key={s.student_id} className="tm-diag-risk-item">
-                                      <span className="tm-diag-risk-name">{s.display_name}</span>
-                                      <span className="tm-diag-risk-reason">{s.reason}</span>
+
+                              {/* Priority intervention */}
+                              {(card.priority_intervention && card.priority_intervention !== card.health_summary) && (
+                                <p className="tm-diag-priority">{card.priority_intervention}</p>
+                              )}
+
+                              {/* Syndrome cards */}
+                              {syndromes.length > 0 && (
+                                <div className="tm-syndrome-list">
+                                  {syndromes.slice(0, 2).map((syn: any) => (
+                                    <div key={syn.id} className={`tm-syndrome-card tm-syndrome-${syn.severity}`}>
+                                      <div className="tm-syndrome-head">
+                                        <span className="tm-syndrome-label">{syn.label}</span>
+                                        <span className={`tm-syndrome-badge tm-badge-${syn.severity}`}>
+                                          {syn.severity === "critical" ? "紧急" : syn.severity === "warning" ? "关注" : "潜在"}
+                                        </span>
+                                      </div>
+                                      <div className="tm-syndrome-desc">{syn.description}</div>
+                                      <div className="tm-syndrome-stats">
+                                        <span>{syn.affected_ratio}% 项目</span>
+                                        <span>{syn.affected_student_count} 名学生</span>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
                               )}
-                              {card.top_weaknesses.length > 0 && (
-                                <div className="tm-diag-tags">
-                                  {card.top_weaknesses.map((w: any) => (
-                                    <span key={w.dim} className="tm-diag-weak-tag">{w.dim} ({w.count})</span>
-                                  ))}
+
+                              {syndromes.length > 0 && syndromes[0].intervention_steps?.[0] && (
+                                <div className="tm-diag-action">
+                                  建议本周：{syndromes[0].intervention_steps[0].title}
                                 </div>
                               )}
+
                               <div className="tm-diag-foot">查看详情 →</div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -7162,6 +7213,7 @@ export default function TeacherPage() {
                       </div>
                     )}
 
+                    {/* ── KPI Row ── */}
                     <div className="ov-kpi-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
                       {[
                         { icon: "👥", bg: "rgba(115,204,255,0.15)", c: "#73ccff", v: team.student_count, l: "学生", d: 0 },
@@ -7178,137 +7230,414 @@ export default function TeacherPage() {
                       ))}
                     </div>
 
-                    {team.team_insight && !team.team_insight.error && (
-                      <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                        <h3>班级洞察</h3>
-                        <p className="tch-desc">在保留当前团队页主体的前提下，把 A6-2 的洞察信息收进团队详情，不单独做成另一套大页面。</p>
-                        <div className="assistant-insight-grid">
-                          {(team.team_insight.coverage_summary || []).map((item: any) => (
-                            <div key={item.topic} className="assistant-summary-card">
-                              <span>{item.topic}</span>
-                              <strong>{item.ratio}%</strong>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="ov-chart-grid" style={{ marginTop: 14 }}>
-                          <div className="ov-chart-card" style={{ margin: 0 }}>
-                            <h3 style={{ marginTop: 0 }}>Top 5 Common Mistakes</h3>
-                            <div className="assistant-note-list">
-                              {(team.team_insight.top_mistakes || []).slice(0, 5).map((item: any) => (
-                                <div key={item.rule_id} className="tm-note-row warn">{item.summary}</div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="ov-chart-card" style={{ margin: 0 }}>
-                            <h3 style={{ marginTop: 0 }}>Suggested Teaching Interventions</h3>
-                            <div className="assistant-note-list">
-                              {(team.team_insight.suggested_teaching_interventions || []).slice(0, 3).map((item: any, idx: number) => (
-                                <div key={idx} className="tm-note-row good">{item.plan}</div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <details className="debug-json" style={{ marginTop: 14 }}>
-                          <summary style={{ cursor: "pointer", color: "var(--accent-text)", fontWeight: 600 }}>统计 JSON</summary>
-                          <pre style={{ marginTop: 12, padding: 12, background: "var(--bg-card)", borderRadius: 10, overflow: "auto", maxHeight: 220 }}>
-                            {JSON.stringify(team.team_insight.statistics_json || {}, null, 2)}
-                          </pre>
-                        </details>
-                      </div>
-                    )}
-
-                    <div className="ov-chart-grid">
-                      {/* ─ Lollipop: student ranking ─ */}
-                      <div className="ov-chart-card">
-                        <h3>学生均分排名</h3>
-                        <p className="tch-desc">棒棒糖图：圆点 = 均分，线长 = 与零轴距离</p>
-                        <svg viewBox={`0 0 440 ${sortedStu.length * 30 + 10}`} style={{ width: "100%", overflow: "visible" }}>
-                          {sortedStu.map((s: any, i) => {
-                            const x = (s.avg_score / 10) * 300 + 130;
-                            const y = i * 30 + 14;
-                            const col = s.avg_score >= 7 ? "#5cbd8a" : s.avg_score >= 5 ? "#e0a84c" : "#e07070";
-                            return (
-                              <g key={s.student_id} style={{ cursor: isMine ? "pointer" : "default" }} onClick={() => { if (isMine) { setSelectedTeamStudentId(s.student_id); setTeamView("student-detail"); } }}>
-                                <line x1="130" y1={y} x2={x} y2={y} stroke={col} strokeWidth="2" opacity="0.7" strokeLinecap="round" />
-                                <circle cx={x} cy={y} r="5" fill={col} />
-                                <text x={x + 10} y={y + 4} fill="var(--text-secondary)" fontSize="10" fontWeight="600">{s.avg_score.toFixed(1)}</text>
-                                <text x="125" y={y + 4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{(s.display_name || s.student_id).slice(0, 6)}</text>
-                              </g>
-                            );
-                          })}
-                        </svg>
-                      </div>
-
-                      {/* ─ Tier donut ─ */}
-                      <div className="ov-chart-card">
-                        <h3>成绩分层</h3>
-                        <p className="tch-desc">绿 = 良好(≥7)，黄 = 一般(5-7)，红 = 需关注(&lt;5)</p>
-                        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0" }}>
-                          <svg width="160" height="160" viewBox="0 0 160 160">
-                            {(() => {
-                              const R = 65; const C = 2 * Math.PI * R; const cx = 80; const cy = 80;
-                              const slices = [{ v: tiers[0], c: "#5cbd8a" }, { v: tiers[1], c: "#e0a84c" }, { v: tiers[2], c: "#e07070" }];
-                              let offset = 0;
-                              return slices.map((sl, si) => {
-                                const len = (sl.v / tierTotal) * C;
-                                const el = <circle key={si} cx={cx} cy={cy} r={R} fill="none" stroke={sl.c} strokeWidth="18" strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offset} transform={`rotate(-90 ${cx} ${cy})`} style={{ transition: "stroke-dasharray 0.8s, stroke-dashoffset 0.8s" }} />;
-                                offset += len;
-                                return el;
-                              });
-                            })()}
-                            <text x="80" y="76" textAnchor="middle" fill="var(--text-primary)" fontSize="22" fontWeight="700">{stuList.length}</text>
-                            <text x="80" y="92" textAnchor="middle" fill="var(--text-muted)" fontSize="10">学生</text>
-                          </svg>
-                        </div>
-                        <div style={{ display: "flex", justifyContent: "center", gap: 16, fontSize: 12 }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: "#5cbd8a", display: "inline-block" }} />良好 {tiers[0]}</span>
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: "#e0a84c", display: "inline-block" }} />一般 {tiers[1]}</span>
-                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: "#e07070", display: "inline-block" }} />需关注 {tiers[2]}</span>
-                        </div>
-                      </div>
+                    {/* ── Three-tab Switcher ── */}
+                    <div className="tm-detail-tabs">
+                      {([
+                        { id: "overview" as const, label: "团队全景", sub: "画像 · 维度 · 图表" },
+                        { id: "intervention" as const, label: "教学干预", sub: "问题 · 方案 · 名单" },
+                        { id: "students" as const, label: "学生个体", sub: "画像 · 明细" },
+                      ]).map((tab) => (
+                        <button key={tab.id} className={`tm-detail-tab ${detailTab === tab.id ? "active" : ""}`} onClick={() => setDetailTab(tab.id)}>
+                          <span className="tm-detail-tab-label">{tab.label}</span>
+                          <span className="tm-detail-tab-sub">{tab.sub}</span>
+                        </button>
+                      ))}
                     </div>
 
-                    {/* ─ Student activity bars ─ */}
-                    <div className="ov-chart-card" style={{ marginBottom: 20 }}>
-                      <h3>学生活跃度</h3>
-                      <p className="tch-desc">横条长度 = 提交次数，颜色反映成绩状态</p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
-                        {sortedStu.map((s: any) => {
-                          const col = s.avg_score >= 7 ? "#5cbd8a" : s.avg_score >= 5 ? "#e0a84c" : "#e07070";
-                          return (
-                            <div key={s.student_id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: isMine ? "pointer" : "default" }} onClick={() => { if (isMine) { setSelectedTeamStudentId(s.student_id); setTeamView("student-detail"); } }}>
-                              <span style={{ minWidth: 60, fontSize: 11, color: "var(--text-muted)", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(s.display_name || "").slice(0, 4)}</span>
-                              <div style={{ flex: 1, height: 14, background: "var(--bg-card-hover)", borderRadius: 7, overflow: "hidden" }}>
-                                <div style={{ width: `${(s.total_submissions / maxStuSubs) * 100}%`, height: "100%", background: col, borderRadius: 7, transition: "width 0.8s ease" }} />
+                    {/* ══════ TAB: 团队全景 ══════ */}
+                    {detailTab === "overview" && (() => {
+                      const diagCard = diagnosisCards.find((c: any) => c.team_id === selectedTeamId);
+                      const tp = diagCard?.team_portrait || {};
+                      const bullets: string[] = tp.detail_bullets || [];
+                      const heatmap: any[] = tp.rubric_heatmap_team || [];
+                      const maxHeatScore = Math.max(10, ...heatmap.map((h: any) => h.avg_score || 0));
+                      const engage = tp.engagement_stats || {};
+                      const riskTop3: any[] = tp.risk_rule_top3 || [];
+                      return (
+                        <>
+                          {/* ── Enhanced Team Portrait ── */}
+                          <div className="ov-chart-card tm-team-panorama">
+                            <div className="tm-panorama-header">
+                              <h3>团队画像</h3>
+                              <span className={`tm-portrait-health-badge tm-health-${diagCard?.health_level || "warning"}`}>
+                                {tp.health_label || "—"}
+                              </span>
+                              {tp.high_priority_count > 0 && <span className="tm-portrait-health-badge tm-health-critical">{tp.high_priority_count} 人需优先干预</span>}
+                              {tp.medium_priority_count > 0 && <span className="tm-portrait-health-badge tm-health-warning">{tp.medium_priority_count} 人需关注</span>}
+                            </div>
+
+                            {/* Row 1: Health Ring + 9-Dimension Bar Chart */}
+                            <div className="tm-portrait-top-row">
+                              <div className="tm-portrait-ring-box">
+                                <svg viewBox="0 0 120 120" className="tm-portrait-ring-svg">
+                                  <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="10" />
+                                  <circle cx="60" cy="60" r="48" fill="none"
+                                    stroke={diagCard?.health_level === "healthy" ? "#5cbd8a" : diagCard?.health_level === "critical" ? "#ef4444" : "#eab308"}
+                                    strokeWidth="10" strokeLinecap="round"
+                                    strokeDasharray={`${(diagCard?.health_score || 0) / 100 * 2 * Math.PI * 48} ${2 * Math.PI * 48}`}
+                                    transform="rotate(-90 60 60)" style={{ transition: "stroke-dasharray .8s ease" }} />
+                                  <text x="60" y="55" textAnchor="middle" fill="var(--text-primary)" fontSize="22" fontWeight="700">{diagCard?.health_score || 0}</text>
+                                  <text x="60" y="72" textAnchor="middle" fill="var(--text-muted)" fontSize="10">健康指数</text>
+                                </svg>
+                                <div className="tm-portrait-ring-meta">
+                                  <div className="tm-ring-stat"><span className="tm-ring-stat-v" style={{ color: "#5cbd8a" }}>{tp.score_distribution?.good || 0}</span><span className="tm-ring-stat-l">良好</span></div>
+                                  <div className="tm-ring-stat"><span className="tm-ring-stat-v" style={{ color: "#eab308" }}>{tp.score_distribution?.average || 0}</span><span className="tm-ring-stat-l">一般</span></div>
+                                  <div className="tm-ring-stat"><span className="tm-ring-stat-v" style={{ color: "#ef4444" }}>{tp.score_distribution?.weak || 0}</span><span className="tm-ring-stat-l">薄弱</span></div>
+                                </div>
                               </div>
-                              <span style={{ minWidth: 24, fontSize: 11, fontWeight: 600, color: col }}>{s.total_submissions}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
 
-                    {/* Student table */}
-                    <div className="ov-section">
-                      <h3>学生明细 ({stuList.length})</h3>
-                      <div className="cls-stu-table">
-                        <div className="cls-stu-hdr"><span>#</span><span>学生</span><span>提交</span><span>均分</span><span>趋势</span><span>状态</span></div>
-                        {sortedStu.map((stu: any, idx: number) => {
-                          const st = stu.avg_score >= 7 ? { l: "良好", c: "var(--tch-success)", bg: "var(--tch-success-soft)" } : stu.avg_score >= 5 ? { l: "一般", c: "var(--tch-warning)", bg: "var(--tch-warning-soft)" } : { l: "需关注", c: "var(--tch-danger)", bg: "var(--tch-danger-soft)" };
-                          return (
-                            <div key={stu.student_id} className="cls-stu-row" style={{ animationDelay: `${idx * 0.03}s`, cursor: isMine ? "pointer" : "default", opacity: isMine ? 1 : 0.75 }}
-                              onClick={() => { if (isMine) { setSelectedTeamStudentId(stu.student_id); setTeamView("student-detail"); } }}>
-                              <span style={{ fontWeight: 700, color: idx < 3 ? "var(--accent)" : "var(--text-muted)" }}>{idx + 1}</span>
-                              <span className="ov-stu-name"><span className="ov-stu-av">{(stu.display_name || "?")[0]}</span>{stu.display_name || stu.student_id}</span>
-                              <span><strong>{stu.total_submissions}</strong></span>
-                              <span style={{ fontWeight: 600, color: st.c }}>{stu.avg_score.toFixed(1)}</span>
-                              <span style={{ color: stu.trend > 0 ? "var(--tch-success)" : stu.trend < 0 ? "var(--tch-danger)" : "var(--text-muted)", fontWeight: 600 }}>{stu.trend > 0 ? `↑${stu.trend.toFixed(1)}` : stu.trend < 0 ? `↓${Math.abs(stu.trend).toFixed(1)}` : "—"}</span>
-                              <span><span className="ov-status-badge" style={{ color: st.c, background: st.bg }}>{st.l}</span></span>
+                              {heatmap.length > 0 && (
+                                <div className="tm-portrait-bars-box">
+                                  <div className="tm-portrait-bars-title">九维评审均分</div>
+                                  {heatmap.map((h: any) => {
+                                    const pct = Math.min(100, (h.avg_score / maxHeatScore) * 100);
+                                    const col = h.avg_score >= 7 ? "#5cbd8a" : h.avg_score >= 5 ? "#eab308" : "#ef4444";
+                                    return (
+                                      <div key={h.item} className="tm-bar-row">
+                                        <span className="tm-bar-label">{h.item_cn}</span>
+                                        <div className="tm-bar-track">
+                                          <div className="tm-bar-fill" style={{ width: `${pct}%`, background: col }} />
+                                        </div>
+                                        <span className="tm-bar-value" style={{ color: col }}>{h.avg_score}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+
+                            {/* Row 2: 核心发现 */}
+                            <div className="tm-portrait-section">
+                              <div className="tm-portrait-section-title">核心发现</div>
+                              {bullets.length > 0 ? (
+                                <ul className="tm-panorama-bullets">
+                                  {bullets.map((b: string, i: number) => <li key={i}>{b}</li>)}
+                                </ul>
+                              ) : (
+                                <div className="tm-panorama-summary">暂无足够数据生成团队画像。</div>
+                              )}
+                            </div>
+
+                            {/* Row 3: Dimensions + Risk Rules */}
+                            <div className="tm-portrait-tags-row">
+                              <div className="tm-portrait-tags-col">
+                                {(tp.top_strengths || []).length > 0 && (
+                                  <div className="tm-panorama-dim-group"><span className="tm-panorama-dim-label">优势</span>{tp.top_strengths.slice(0, 3).map((s: string) => <span key={s} className="tm-portrait-dim-tag strength">{s}</span>)}</div>
+                                )}
+                                {(tp.top_weaknesses || []).length > 0 && (
+                                  <div className="tm-panorama-dim-group"><span className="tm-panorama-dim-label">短板</span>{tp.top_weaknesses.slice(0, 3).map((w: string) => <span key={w} className="tm-portrait-dim-tag weakness">{w}</span>)}</div>
+                                )}
+                              </div>
+                              {riskTop3.length > 0 && (
+                                <div className="tm-portrait-tags-col">
+                                  <div className="tm-panorama-dim-group">
+                                    <span className="tm-panorama-dim-label">高频风险</span>
+                                    {riskTop3.map((r: any) => <span key={r.rule_id} className="tm-portrait-dim-tag risk">{r.rule_id} <small>({r.count})</small></span>)}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Row 4: Engagement + Trend */}
+                            <div className="tm-portrait-engage-row">
+                              <div className="tm-engage-item"><span className="tm-engage-v">{engage.avg_submissions || 0}</span><span className="tm-engage-l">人均提交</span></div>
+                              <div className="tm-engage-item"><span className="tm-engage-v">{engage.total_submissions || 0}</span><span className="tm-engage-l">总提交</span></div>
+                              {engage.max_name && <div className="tm-engage-item"><span className="tm-engage-v">{engage.max_name}</span><span className="tm-engage-l">最活跃 ({engage.max_submissions})</span></div>}
+                              {engage.min_name && <div className="tm-engage-item"><span className="tm-engage-v">{engage.min_name}</span><span className="tm-engage-l">最少 ({engage.min_submissions})</span></div>}
+                            </div>
+                            {tp.trend_summary && (
+                              <div className="tm-portrait-trend">{tp.trend_summary}</div>
+                            )}
+
+                            {/* Row 5: Overall Assessment */}
+                            {tp.overall_assessment && (
+                              <div className="tm-panorama-overall">{tp.overall_assessment}</div>
+                            )}
+                          </div>
+
+                          {/* ── Charts Row ── */}
+                          <div className="ov-chart-grid">
+                            <div className="ov-chart-card">
+                              <h3>学生均分排名</h3>
+                              <svg viewBox={`0 0 440 ${sortedStu.length * 30 + 10}`} style={{ width: "100%", overflow: "visible" }}>
+                                {sortedStu.map((s: any, i) => {
+                                  const x = (s.avg_score / 10) * 300 + 130; const y = i * 30 + 14;
+                                  const col = s.avg_score >= 7 ? "#5cbd8a" : s.avg_score >= 5 ? "#e0a84c" : "#e07070";
+                                  return (
+                                    <g key={s.student_id} style={{ cursor: isMine ? "pointer" : "default" }} onClick={() => { if (isMine) { setSelectedTeamStudentId(s.student_id); setTeamView("student-detail"); } }}>
+                                      <line x1="130" y1={y} x2={x} y2={y} stroke={col} strokeWidth="2" opacity="0.7" strokeLinecap="round" />
+                                      <circle cx={x} cy={y} r="5" fill={col} />
+                                      <text x={x + 10} y={y + 4} fill="var(--text-secondary)" fontSize="10" fontWeight="600">{s.avg_score.toFixed(1)}</text>
+                                      <text x="125" y={y + 4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{(s.display_name || s.student_id).slice(0, 6)}</text>
+                                    </g>
+                                  );
+                                })}
+                              </svg>
+                            </div>
+                            <div className="ov-chart-card">
+                              <h3>成绩分层</h3>
+                              <div style={{ display: "flex", justifyContent: "center", padding: "12px 0" }}>
+                                <svg width="160" height="160" viewBox="0 0 160 160">
+                                  {(() => {
+                                    const R = 65; const C = 2 * Math.PI * R; const cx = 80; const cy = 80;
+                                    const slices = [{ v: tiers[0], c: "#5cbd8a" }, { v: tiers[1], c: "#e0a84c" }, { v: tiers[2], c: "#e07070" }];
+                                    let offset = 0;
+                                    return slices.map((sl, si) => { const len = (sl.v / tierTotal) * C; const el = <circle key={si} cx={cx} cy={cy} r={R} fill="none" stroke={sl.c} strokeWidth="18" strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offset} transform={`rotate(-90 ${cx} ${cy})`} style={{ transition: "stroke-dasharray 0.8s" }} />; offset += len; return el; });
+                                  })()}
+                                  <text x="80" y="76" textAnchor="middle" fill="var(--text-primary)" fontSize="22" fontWeight="700">{stuList.length}</text>
+                                  <text x="80" y="92" textAnchor="middle" fill="var(--text-muted)" fontSize="10">学生</text>
+                                </svg>
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "center", gap: 16, fontSize: 12 }}>
+                                {[{ c: "#5cbd8a", l: "良好", v: tiers[0] }, { c: "#e0a84c", l: "一般", v: tiers[1] }, { c: "#e07070", l: "需关注", v: tiers[2] }].map((t) => (
+                                  <span key={t.l} style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: t.c, display: "inline-block" }} />{t.l} {t.v}</span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Activity Bars */}
+                          <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                            <h3>学生活跃度</h3>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+                              {sortedStu.map((s: any) => {
+                                const col = s.avg_score >= 7 ? "#5cbd8a" : s.avg_score >= 5 ? "#e0a84c" : "#e07070";
+                                return (
+                                  <div key={s.student_id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: isMine ? "pointer" : "default" }} onClick={() => { if (isMine) { setSelectedTeamStudentId(s.student_id); setTeamView("student-detail"); } }}>
+                                    <span style={{ minWidth: 60, fontSize: 11, color: "var(--text-muted)", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{(s.display_name || "").slice(0, 4)}</span>
+                                    <div style={{ flex: 1, height: 14, background: "var(--bg-card-hover)", borderRadius: 7, overflow: "hidden" }}>
+                                      <div style={{ width: `${(s.total_submissions / maxStuSubs) * 100}%`, height: "100%", background: col, borderRadius: 7, transition: "width 0.8s ease" }} />
+                                    </div>
+                                    <span style={{ minWidth: 24, fontSize: 11, fontWeight: 600, color: col }}>{s.total_submissions}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* ══════ TAB: 教学干预 ══════ */}
+                    {detailTab === "intervention" && (() => {
+                      const diagCard = diagnosisCards.find((c: any) => c.team_id === selectedTeamId);
+                      const syndromes: any[] = diagCard?.syndromes || [];
+                      const allPortraits: any[] = diagCard?.student_portraits || [];
+                      const focusStudents = allPortraits
+                        .filter((s: any) => s.teacher_intervention_priority === "high" || s.teacher_intervention_priority === "medium")
+                        .sort((a: any, b: any) => (a.teacher_intervention_priority === "high" ? 0 : 1) - (b.teacher_intervention_priority === "high" ? 0 : 1));
+                      return (
+                        <>
+                          {syndromes.length > 0 ? (
+                            <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                              <h3>班级共性问题地图</h3>
+                              <p className="tch-desc">{diagCard?.priority_intervention || "以下是本团队按严重程度排列的系统性共性问题。"}</p>
+                              <div className="tm-syndrome-detail-grid">
+                                {syndromes.map((syn: any) => (
+                                  <div key={syn.id} className={`tm-syndrome-detail-card tm-syndrome-${syn.severity}`}>
+                                    <div className="tm-syndrome-head">
+                                      <span className="tm-syndrome-label">{syn.label}</span>
+                                      <span className={`tm-syndrome-badge tm-badge-${syn.severity}`}>{syn.severity === "critical" ? "紧急" : syn.severity === "warning" ? "关注" : "潜在"}</span>
+                                    </div>
+                                    <div className="tm-syndrome-desc">{syn.description}</div>
+                                    <div className="tm-syndrome-signal">{syn.teacher_signal}</div>
+                                    <div className="tm-syndrome-stats">
+                                      <span>{syn.affected_ratio}% 项目受影响</span>
+                                      <span>{syn.affected_student_count} 名学生</span>
+                                      <span>阶段: {syn.stage_focus === "early" ? "立项期" : syn.stage_focus === "middle" ? "验证期" : syn.stage_focus === "late" ? "路演期" : "贯穿"}</span>
+                                    </div>
+                                    {syn.related_dimensions?.length > 0 && (
+                                      <div className="tm-syndrome-dims">{syn.related_dimensions.map((d: string) => <span key={d} className="tm-syndrome-dim-tag">{d}</span>)}</div>
+                                    )}
+                                    {syn.affected_students?.length > 0 && (
+                                      <div className="tm-affected-detail">
+                                        <div className="tm-affected-title">受影响学生</div>
+                                        {syn.affected_students.slice(0, 6).map((stu: any) => (
+                                          <div key={stu.student_id + stu.project_id} className="tm-affected-item"
+                                            onClick={(e) => { e.stopPropagation(); if (isMine) { setSelectedTeamStudentId(stu.student_id); setTeamView("student-detail"); } }}>
+                                            <span className="tm-affected-name">{stu.display_name}</span>
+                                            <span className="tm-affected-proj">{stu.project_name || "—"}</span>
+                                            <span className="tm-affected-rules">{normalizeRuleList(stu.trigger_rules).join(", ")}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="ov-chart-card" style={{ marginBottom: 20, textAlign: "center", padding: 40 }}>
+                              <p style={{ color: "var(--text-muted)", fontSize: 13 }}>暂未检测到系统性共性问题，团队整体表现稳定。</p>
+                            </div>
+                          )}
+
+                          {syndromes.filter((s: any) => s.severity !== "potential").length > 0 && (
+                            <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                              <h3>干预方案工作台</h3>
+                              <p className="tch-desc">基于共性问题自动生成的教学干预建议。</p>
+                              <div className="tm-intervention-grid">
+                                {syndromes.filter((s: any) => s.severity !== "potential").slice(0, 3).map((syn: any) => (
+                                  <div key={syn.id} className="tm-intervention-card">
+                                    <div className="tm-intervention-header">
+                                      <span className={`tm-syndrome-badge tm-badge-${syn.severity}`}>{syn.severity === "critical" ? "紧急" : "关注"}</span>
+                                      <span className="tm-intervention-title">{syn.label}</span>
+                                    </div>
+                                    <div className="tm-intervention-why">影响 {syn.affected_ratio}% 项目 · {syn.affected_student_count} 名学生</div>
+                                    <div className="tm-intervention-steps">
+                                      {(syn.intervention_steps || []).map((step: any) => (
+                                        <div key={step.step} className="tm-intervention-step">
+                                          <div className="tm-step-num">{step.step}</div>
+                                          <div className="tm-step-body">
+                                            <div className="tm-step-title">{step.title}</div>
+                                            <div className="tm-step-action">{step.action}</div>
+                                            <div className="tm-step-output">预期产出: {step.expected_output}</div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {focusStudents.length > 0 && (
+                            <div className="ov-chart-card" style={{ marginBottom: 20 }}>
+                              <h3>重点辅导名单</h3>
+                              <p className="tch-desc">按干预优先级排序，点击可查看详细画像。</p>
+                              <div className="tm-focus-list">
+                                {focusStudents.slice(0, 8).map((sp: any) => {
+                                  const issues = sp.project_issues || [];
+                                  const synIds = new Set(issues.flatMap((i: any) => i.syndrome_ids || []));
+                                  const matchedSynLabels = syndromes.filter((s: any) => synIds.has(s.id)).map((s: any) => s.label);
+                                  return (
+                                    <div key={sp.student_id} className={`tm-focus-card tm-focus-${sp.teacher_intervention_priority}`}
+                                      onClick={() => { if (isMine) { setSelectedTeamStudentId(sp.student_id); setTeamView("student-detail"); } }}>
+                                      <div className="tm-focus-head">
+                                        <span className="tm-focus-name">{sp.display_name}</span>
+                                        <span className={`tm-focus-priority tm-pri-${sp.teacher_intervention_priority}`}>{sp.teacher_intervention_priority === "high" ? "优先" : "关注"}</span>
+                                        <span className="tm-focus-score">均分 {sp.avg_score}</span>
+                                      </div>
+                                      {matchedSynLabels.length > 0 && (
+                                        <div className="tm-focus-syndromes">{matchedSynLabels.map((l: string) => <span key={l} className="tm-focus-syn-tag">{l}</span>)}</div>
+                                      )}
+                                      {(sp.actionable_advice || []).length > 0 && (
+                                        <div className="tm-focus-advice">建议先聊: {sp.actionable_advice[0].title}</div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+
+                    {/* ══════ TAB: 学生个体 ══════ */}
+                    {detailTab === "students" && (() => {
+                      const diagCard = diagnosisCards.find((c: any) => c.team_id === selectedTeamId);
+                      const portraits: any[] = diagCard?.student_portraits || [];
+                      const sortedPortraits = [...portraits].sort((a: any, b: any) => {
+                        const priOrder: any = { high: 0, medium: 1, low: 2 };
+                        return (priOrder[a.teacher_intervention_priority] ?? 2) - (priOrder[b.teacher_intervention_priority] ?? 2);
+                      });
+                      const portraitMap = new Map<string, any>();
+                      for (const sp of portraits) portraitMap.set(sp.student_id, sp);
+                      return (
+                        <>
+                          {sortedPortraits.length > 0 && (
+                            <div className="ov-chart-card" style={{ marginBottom: 16 }}>
+                              <h3>学生画像快览</h3>
+                              <p className="tch-desc">按干预优先级排序，点击可查看完整详情。</p>
+                              <div className="tm-mini-grid">
+                                {sortedPortraits.map((sp: any) => {
+                                  const ms = sp.mini_summary || {};
+                                  const priority = sp.teacher_intervention_priority || "low";
+                                  return (
+                                    <div key={sp.student_id} className={`tm-mini-card tm-mini-${priority}`}
+                                      onClick={() => { if (isMine) { setSelectedTeamStudentId(sp.student_id); setTeamView("student-detail"); } }}
+                                      style={{ cursor: isMine ? "pointer" : "default" }}>
+                                      <div className="tm-mini-head">
+                                        <span className="tm-mini-avatar">{(sp.display_name || "?")[0]}</span>
+                                        <div className="tm-mini-name-row">
+                                          <span className="tm-mini-name">{sp.display_name}</span>
+                                          <span className={`tm-focus-priority tm-pri-${priority}`}>{priority === "high" ? "优先干预" : priority === "medium" ? "需关注" : "状态良好"}</span>
+                                        </div>
+                                        <div className="tm-mini-stats">
+                                          <span>均分 {sp.avg_score}</span>
+                                          <span>{sp.total_submissions} 次提交</span>
+                                          {sp.trend > 0 && <span style={{ color: "var(--tch-success)" }}>↑{sp.trend.toFixed(1)}</span>}
+                                          {sp.trend < 0 && <span style={{ color: "var(--tch-danger)" }}>↓{Math.abs(sp.trend).toFixed(1)}</span>}
+                                        </div>
+                                      </div>
+                                      <div className="tm-mini-overall">{ms.overall || "暂无画像数据"}</div>
+                                      {(ms.situation_bullets || []).length > 0 && (
+                                        <div className="tm-mini-section">
+                                          <div className="tm-mini-section-label">当前情况</div>
+                                          <ul className="tm-mini-bullets">{ms.situation_bullets.map((b: string, i: number) => <li key={i}>{b}</li>)}</ul>
+                                        </div>
+                                      )}
+                                      <div className="tm-mini-dims">
+                                        {ms.best_dimension && <span className="tm-portrait-dim-tag strength">{ms.best_dimension} {ms.best_score}</span>}
+                                        {ms.worst_dimension && <span className="tm-portrait-dim-tag weakness">{ms.worst_dimension} {ms.worst_score}</span>}
+                                        {(ms.weaknesses_cn || []).filter((w: string) => w !== ms.worst_dimension).slice(0, 1).map((w: string) => <span key={w} className="tm-portrait-dim-tag weakness">{w}</span>)}
+                                      </div>
+                                      {(ms.advice_bullets || []).length > 0 && (
+                                        <div className="tm-mini-section">
+                                          <div className="tm-mini-section-label">建议措施</div>
+                                          <ul className="tm-mini-bullets advice">{ms.advice_bullets.slice(0, 3).map((b: string, i: number) => <li key={i}>{b}</li>)}</ul>
+                                        </div>
+                                      )}
+                                      {(ms.teacher_talk_points || []).length > 0 && (
+                                        <div className="tm-mini-talk">
+                                          <span className="tm-mini-talk-label">谈话要点</span>
+                                          {ms.teacher_talk_points.slice(0, 1).map((t: string, i: number) => <span key={i} className="tm-mini-talk-text">{t}</span>)}
+                                        </div>
+                                      )}
+                                      <div className="tm-mini-foot">查看完整画像 →</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="ov-section">
+                            <h3>学生明细 ({stuList.length})</h3>
+                            <div className="cls-stu-table">
+                              <div className="cls-stu-hdr"><span>#</span><span>学生</span><span>提交</span><span>均分</span><span>趋势</span><span>状态</span><span>画像标签</span></div>
+                              {sortedStu.map((stu: any, idx: number) => {
+                                const st = stu.avg_score >= 7 ? { l: "良好", c: "var(--tch-success)", bg: "var(--tch-success-soft)" } : stu.avg_score >= 5 ? { l: "一般", c: "var(--tch-warning)", bg: "var(--tch-warning-soft)" } : { l: "需关注", c: "var(--tch-danger)", bg: "var(--tch-danger-soft)" };
+                                const sp = portraitMap.get(stu.student_id);
+                                const portrait = sp?.portrait || {};
+                                const strengths: string[] = (portrait.strength_dimensions || []).slice(0, 2);
+                                const weaknesses: string[] = (portrait.weakness_dimensions || []).slice(0, 2);
+                                const priority = sp?.teacher_intervention_priority || "low";
+                                return (
+                                  <div key={stu.student_id} className="cls-stu-row" style={{ animationDelay: `${idx * 0.03}s`, cursor: isMine ? "pointer" : "default", opacity: isMine ? 1 : 0.75 }}
+                                    onClick={() => { if (isMine) { setSelectedTeamStudentId(stu.student_id); setTeamView("student-detail"); } }}>
+                                    <span style={{ fontWeight: 700, color: idx < 3 ? "var(--accent)" : "var(--text-muted)" }}>{idx + 1}</span>
+                                    <span className="ov-stu-name"><span className="ov-stu-av">{(stu.display_name || "?")[0]}</span>{stu.display_name || stu.student_id}</span>
+                                    <span><strong>{stu.total_submissions}</strong></span>
+                                    <span style={{ fontWeight: 600, color: st.c }}>{stu.avg_score.toFixed(1)}</span>
+                                    <span style={{ color: stu.trend > 0 ? "var(--tch-success)" : stu.trend < 0 ? "var(--tch-danger)" : "var(--text-muted)", fontWeight: 600 }}>{stu.trend > 0 ? `↑${stu.trend.toFixed(1)}` : stu.trend < 0 ? `↓${Math.abs(stu.trend).toFixed(1)}` : "—"}</span>
+                                    <span><span className="ov-status-badge" style={{ color: st.c, background: st.bg }}>{st.l}</span></span>
+                                    <span className="tm-stu-portrait-tags">
+                                      {priority !== "low" && <span className={`tm-focus-priority tm-pri-${priority}`}>{priority === "high" ? "优先" : "关注"}</span>}
+                                      {strengths.map((s: string) => <span key={s} className="tm-portrait-dim-tag strength">{s}</span>)}
+                                      {weaknesses.map((w: string) => <span key={w} className="tm-portrait-dim-tag weakness">{w}</span>)}
+                                      {!strengths.length && !weaknesses.length && priority === "low" && <span style={{ color: "var(--text-muted)", fontSize: 10 }}>数据不足</span>}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </>
                 );
               })()}
@@ -7335,12 +7664,12 @@ export default function TeacherPage() {
                 const latestKgStrengths: string[] = latestKg.content_strengths || [];
                 const latestHubs: any[] = latestHyperStudent.hub_entities || [];
                 const latestCrossLinks: any[] = latestHyperStudent.cross_links || [];
-                const latestWarnings: string[] = latestHyperStudent.pattern_warnings || [];
+                const latestWarnings: any[] = latestHyperStudent.pattern_warnings || [];
                 const localDate = (v: string) => formatBJTime(v) || "—";
                 const studentNarrative = stu.student_case_summary || activeProject?.current_summary || "暂无可用的项目理解摘要";
                 const statusColor = stu.avg_score >= 7 ? "var(--tch-success)" : stu.avg_score >= 5 ? "var(--tch-warning)" : "var(--tch-danger)";
                 const statusLabel = stu.avg_score >= 7 ? "良好" : stu.avg_score >= 5 ? "一般" : "需关注";
-                const riskScore = allSubs.length > 0 ? Math.round(allSubs.filter((s: any) => (s.triggered_rules || []).length > 0).length / allSubs.length * 100) : 0;
+                const riskScore = allSubs.length > 0 ? Math.round(allSubs.filter((s: any) => normalizeRuleList(s.triggered_rules).length > 0).length / allSubs.length * 100) : 0;
 
                 return (
                   <>
@@ -7478,6 +7807,71 @@ export default function TeacherPage() {
                       );
                     })()}
 
+                    {/* ── Project Issues & Actionable Advice ── */}
+                    {(() => {
+                      const diagCard = diagnosisCards.find((c: any) => c.team_id === selectedTeamId);
+                      const teamSyndromes: any[] = diagCard?.syndromes || [];
+                      const stuPortrait = diagCard?.student_portraits?.find((s: any) => s.student_id === selectedTeamStudentId);
+                      const projectIssues: any[] = stuPortrait?.project_issues || [];
+                      const advice: any[] = stuPortrait?.actionable_advice || [];
+                      const priority = stuPortrait?.teacher_intervention_priority || "low";
+                      if (!projectIssues.length && !advice.length) return null;
+                      return (
+                        <div className="ov-chart-card tm-portrait-section">
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                            <h3 style={{ margin: 0 }}>项目具体问题 & 行动建议</h3>
+                            <span className={`tm-focus-priority tm-pri-${priority}`}>
+                              {priority === "high" ? "优先干预" : priority === "medium" ? "需关注" : "暂无紧急"}
+                            </span>
+                          </div>
+                          <p className="tch-desc">基于综合症分析的项目级诊断和可执行行动建议。</p>
+                          {projectIssues.length > 0 && (
+                            <div className="tm-project-issues">
+                              {projectIssues.map((pi: any, idx: number) => {
+                                const matchedSyns = teamSyndromes.filter((s: any) => (pi.syndrome_ids || []).includes(s.id));
+                                return (
+                                  <div key={idx} className="tm-project-issue-card">
+                                    <div className="tm-issue-head">
+                                      <span className="tm-issue-proj-name">{pi.project_name || "未命名项目"}</span>
+                                      <span className="tm-issue-title-badge">{pi.issue_title}</span>
+                                    </div>
+                                    <div className="tm-issue-summary">{pi.issue_summary}</div>
+                                    {normalizeRuleList(pi.trigger_rules).length > 0 && (
+                                      <div className="tm-issue-rules">
+                                        {normalizeRuleList(pi.trigger_rules).map((r: string) => <span key={r} className="tm-issue-rule-chip">{getRuleDisplayName(r)}</span>)}
+                                      </div>
+                                    )}
+                                    {(pi.weak_dimensions || []).length > 0 && (
+                                      <div className="tm-issue-dims">
+                                        {pi.weak_dimensions.map((d: string) => <span key={d} className="tm-syndrome-dim-tag">{d}</span>)}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                          {advice.length > 0 && (
+                            <div className="tm-advice-section">
+                              <div className="tm-portrait-label" style={{ marginTop: 16, marginBottom: 8 }}>本周行动建议</div>
+                              <div className="tm-advice-list">
+                                {advice.map((a: any, idx: number) => (
+                                  <div key={idx} className="tm-advice-card">
+                                    <div className="tm-advice-num">{idx + 1}</div>
+                                    <div className="tm-advice-body">
+                                      <div className="tm-advice-title">{a.title}</div>
+                                      <div className="tm-advice-text">{a.advice}</div>
+                                      <div className="tm-advice-output">预期产出: {a.expected_output}</div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     <div className="ov-chart-grid">
                       <div className="ov-chart-card">
                         <h3>项目病例切换</h3>
@@ -7503,7 +7897,7 @@ export default function TeacherPage() {
                                 </div>
                                 <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>{p.current_summary || "暂无项目摘要"}</div>
                                 <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
-                                  {(p.top_risks || []).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
+                                  {normalizeRuleList(p.top_risks).slice(0, 2).map((risk: string) => <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)}</span>)}
                                   <span className="tm-smart-chip">{dominantIntent(p.intent_distribution)}</span>
                                 </div>
                                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
@@ -7644,7 +8038,7 @@ export default function TeacherPage() {
                         )}
                         {latestWarnings.length > 0 && (
                           <div style={{ marginTop: 10 }}>
-                            {latestWarnings.slice(0, 3).map((w: string, i: number) => <div key={i} className="tm-note-row warn">{w}</div>)}
+                            {latestWarnings.slice(0, 3).map((w: any, i: number) => <div key={i} className="tm-note-row warn">{typeof w === "string" ? w : (w.warning || w.pattern_id || JSON.stringify(w))}</div>)}
                           </div>
                         )}
                       </div>

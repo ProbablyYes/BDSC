@@ -2343,16 +2343,42 @@ class HypergraphService:
     }
 
     def get_viz_data(self) -> dict[str, Any]:
-        """Build force-graph data directly from in-memory _records (no Neo4j)."""
+        """Build force-graph data directly from in-memory _records (no Neo4j).
+
+        All RiskRules (H1-H27) and RubricItems (9 dimensions) are sourced from
+        the local diagnosis_engine definitions, not Neo4j.
+        """
         if not self._records:
             rebuilt = self.rebuild(min_pattern_support=1, max_edges=400)
             if not rebuilt.get("ok"):
                 return {"graph": {"nodes": [], "links": []}, "stats": {}, "error": "rebuild failed"}
 
+        from app.services.diagnosis_engine import RULE_FALLACY_MAP, RUBRICS
+        from collections import Counter
+
         nodes: list[dict] = []
         links: list[dict] = []
         node_set: set[str] = set()
-        seen_rule_links: set[tuple[str, str]] = set()
+        seen_links: set[tuple[str, str, str]] = set()
+
+        all_rule_names: dict[str, str] = dict(RULE_FALLACY_MAP)
+        all_rubric_names: dict[str, str] = {r["item"]: r["item"] for r in RUBRICS}
+
+        for rid, rname in all_rule_names.items():
+            r_id = f"rule_{rid}"
+            node_set.add(r_id)
+            nodes.append({
+                "id": r_id, "name": f"{rid} {rname}",
+                "type": "RiskRule", "color": "#ef4444", "size": 5,
+            })
+
+        for rub_name in all_rubric_names:
+            rb_id = f"rubric_{rub_name}"
+            node_set.add(rb_id)
+            nodes.append({
+                "id": rb_id, "name": rub_name,
+                "type": "RubricItem", "color": "#22c55e", "size": 5,
+            })
 
         for rec in self._records:
             he_id = rec.hyperedge_id
@@ -2384,47 +2410,52 @@ class HypergraphService:
                         "color": "#38bdf8",
                         "size": 3,
                     })
-                links.append({"source": he_id, "target": m_id, "type": "HAS_MEMBER"})
+                lk = (he_id, m_id, "HAS_MEMBER")
+                if lk not in seen_links:
+                    seen_links.add(lk)
+                    links.append({"source": he_id, "target": m_id, "type": "HAS_MEMBER"})
 
-            for rule_id in rec.rules:
+            all_rules_for_edge: set[str] = set()
+            for rid in rec.rules:
+                raw = str(rid).strip()
+                if raw.startswith("H") and raw[1:].isdigit():
+                    all_rules_for_edge.add(raw)
+                else:
+                    canonical = self._canonical_rule_id(raw)
+                    if canonical.startswith("H"):
+                        all_rules_for_edge.add(canonical)
+            family_meta = self._FAMILY_META.get(rec.type)
+            if family_meta:
+                all_rules_for_edge.update(family_meta.get("rules", []))
+            for rule_id in all_rules_for_edge:
                 r_id = f"rule_{rule_id}"
                 if r_id not in node_set:
-                    node_set.add(r_id)
-                    nodes.append({
-                        "id": r_id, "name": rule_id,
-                        "type": "RiskRule", "color": "#ef4444", "size": 5,
-                    })
-                link_key = (he_id, r_id)
-                if link_key not in seen_rule_links:
-                    seen_rule_links.add(link_key)
+                    continue
+                lk = (he_id, r_id, "TRIGGERS_RULE")
+                if lk not in seen_links:
+                    seen_links.add(lk)
                     links.append({"source": he_id, "target": r_id, "type": "TRIGGERS_RULE"})
 
             for rubric_id in rec.rubrics:
                 rb_id = f"rubric_{rubric_id}"
                 if rb_id not in node_set:
-                    node_set.add(rb_id)
-                    nodes.append({
-                        "id": rb_id, "name": rubric_id,
-                        "type": "RubricItem", "color": "#22c55e", "size": 5,
-                    })
-                links.append({"source": he_id, "target": rb_id, "type": "ALIGNS_WITH"})
+                    continue
+                lk = (he_id, rb_id, "ALIGNS_WITH")
+                if lk not in seen_links:
+                    seen_links.add(lk)
+                    links.append({"source": he_id, "target": rb_id, "type": "ALIGNS_WITH"})
 
-            family_meta = self._FAMILY_META.get(rec.type)
-            if family_meta:
-                for declared_rule in family_meta.get("rules", []):
-                    r_id = f"rule_{declared_rule}"
-                    if r_id not in node_set:
-                        node_set.add(r_id)
-                        nodes.append({
-                            "id": r_id, "name": declared_rule,
-                            "type": "RiskRule", "color": "#ef4444", "size": 5,
-                        })
-                    link_key = (he_id, r_id)
-                    if link_key not in seen_rule_links:
-                        seen_rule_links.add(link_key)
-                        links.append({"source": he_id, "target": r_id, "type": "TRIGGERS_RULE"})
+        rubric_rules_map = {r["item"]: r.get("rules", []) for r in RUBRICS}
+        for rub_name, linked_rules in rubric_rules_map.items():
+            rb_id = f"rubric_{rub_name}"
+            for rid in linked_rules:
+                r_id = f"rule_{rid}"
+                if r_id in node_set and rb_id in node_set:
+                    lk = (r_id, rb_id, "EVALUATED_BY")
+                    if lk not in seen_links:
+                        seen_links.add(lk)
+                        links.append({"source": r_id, "target": rb_id, "type": "EVALUATED_BY"})
 
-        from collections import Counter
         family_counts = Counter(rec.type for rec in self._records)
         return {
             "graph": {"nodes": nodes, "links": links},

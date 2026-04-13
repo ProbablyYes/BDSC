@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-11T20:25:02.575095",
+  "generated_at": "2026-04-11T22:52:53.139623",
   "total_cases": 96,
   "neo4j_stats": {
     "total_nodes": 3018,
@@ -109,7 +109,7 @@
       "HAS_COMPETITION": 3
     }
   },
-  "overall_score": 95.4,
+  "overall_score": 95.2,
   "overall_grade": "A+",
   "dimensions": [
     {
@@ -1155,20 +1155,32 @@
       "label": "风险规则命中分布",
       "label_en": "Risk Rule Distribution",
       "description": "分析15条风险规则（H1-H15）在案例库中的触发频率和分布均匀性。理想状态下每条规则都应该有适当的触发率（既不是万能规则也不是沉默规则），这说明风险检测体系设计合理、无冗余。",
-      "score": 94.8,
+      "score": 93.6,
       "grade": "A+",
-      "summary": "15 条规则，96/96 个案例触发了风险。万能规则: H3, H5, H15。沉默规则: H1。",
+      "summary": "27 条规则，96/96 个案例触发了风险。万能规则: H3, H5, H15。沉默规则: H1, H16, H17, H18, H19, H20, H21, H22, H23, H24, H25, H26, H27。",
       "detail": {
-        "total_rules": 15,
+        "total_rules": 27,
         "cases_with_rules": 96,
-        "coefficient_of_variation": 1.102,
+        "coefficient_of_variation": 1.717,
         "universal_rules": [
           "H3",
           "H5",
           "H15"
         ],
         "silent_rules": [
-          "H1"
+          "H1",
+          "H16",
+          "H17",
+          "H18",
+          "H19",
+          "H20",
+          "H21",
+          "H22",
+          "H23",
+          "H24",
+          "H25",
+          "H26",
+          "H27"
         ],
         "distribution": [
           {
@@ -1245,6 +1257,66 @@
             "rule_id": "H15",
             "hit_count": 84,
             "hit_rate": 87.5
+          },
+          {
+            "rule_id": "H16",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H17",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H18",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H19",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H20",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H21",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H22",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H23",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H24",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H25",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H26",
+            "hit_count": 0,
+            "hit_rate": 0.0
+          },
+          {
+            "rule_id": "H27",
+            "hit_count": 0,
+            "hit_rate": 0.0
           }
         ]
       }
@@ -1300,27 +1372,46 @@
               {
                 "id": "Value_Loop_Edge",
                 "label": "价值闭环超边",
-                "target": 16
+                "target": 16,
+                "rules": [
+                  "H1",
+                  "H2",
+                  "H3"
+                ]
               },
               {
                 "id": "User_Journey_Edge",
                 "label": "用户旅程闭环超边",
-                "target": 10
+                "target": 10,
+                "rules": [
+                  "H1",
+                  "H16"
+                ]
               },
               {
                 "id": "Presentation_Narrative_Edge",
                 "label": "路演叙事线超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H14"
+                ]
               },
               {
                 "id": "Cross_Dimension_Coherence_Edge",
                 "label": "跨维度一致性超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H14"
+                ]
               },
               {
                 "id": "Stage_Goal_Fit_Edge",
                 "label": "阶段目标匹配超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H10",
+                  "H13"
+                ]
               }
             ]
           },
@@ -1334,22 +1425,39 @@
               {
                 "id": "User_Pain_Fit_Edge",
                 "label": "用户痛点匹配超边",
-                "target": 12
+                "target": 12,
+                "rules": [
+                  "H1",
+                  "H5"
+                ]
               },
               {
                 "id": "Market_Segmentation_Edge",
                 "label": "市场细分超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H1",
+                  "H4",
+                  "H19"
+                ]
               },
               {
                 "id": "Demand_Supply_Match_Edge",
                 "label": "供需匹配超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H1",
+                  "H5"
+                ]
               },
               {
                 "id": "Market_Competition_Edge",
                 "label": "市场竞争超边",
-                "target": 10
+                "target": 10,
+                "rules": [
+                  "H4",
+                  "H6"
+                ]
               }
             ]
           },
@@ -1363,27 +1471,47 @@
               {
                 "id": "Risk_Pattern_Edge",
                 "label": "风险模式超边",
-                "target": 18
+                "target": 18,
+                "rules": [
+                  "H2",
+                  "H3",
+                  "H11"
+                ]
               },
               {
                 "id": "Evidence_Grounding_Edge",
                 "label": "证据锚定超边",
-                "target": 12
+                "target": 12,
+                "rules": [
+                  "H5"
+                ]
               },
               {
                 "id": "Rule_Rubric_Tension_Edge",
                 "label": "规则评分张力超边",
-                "target": 10
+                "target": 10,
+                "rules": [
+                  "H14"
+                ]
               },
               {
                 "id": "Assumption_Stack_Edge",
                 "label": "假设堆叠超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H5",
+                  "H7",
+                  "H20"
+                ]
               },
               {
                 "id": "Metric_Definition_Edge",
                 "label": "指标定义超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H13",
+                  "H20"
+                ]
               }
             ]
           },
@@ -1397,27 +1525,47 @@
               {
                 "id": "Execution_Gap_Edge",
                 "label": "执行断裂超边",
-                "target": 10
+                "target": 10,
+                "rules": [
+                  "H10"
+                ]
               },
               {
                 "id": "Team_Capability_Gap_Edge",
                 "label": "团队能力缺口超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H9",
+                  "H10"
+                ]
               },
               {
                 "id": "Milestone_Dependency_Edge",
                 "label": "里程碑依赖超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H10",
+                  "H21"
+                ]
               },
               {
                 "id": "MVP_Scope_Edge",
                 "label": "MVP边界超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H10",
+                  "H13"
+                ]
               },
               {
                 "id": "Founder_Risk_Edge",
                 "label": "创始人风险超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H10",
+                  "H21",
+                  "H25"
+                ]
               }
             ]
           },
@@ -1431,17 +1579,27 @@
               {
                 "id": "Compliance_Safety_Edge",
                 "label": "合规安全超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H11"
+                ]
               },
               {
                 "id": "Regulatory_Landscape_Edge",
                 "label": "政策法规环境超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H11"
+                ]
               },
               {
                 "id": "Ethical_Bias_Edge",
                 "label": "伦理偏见超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H11",
+                  "H22"
+                ]
               }
             ]
           },
@@ -1455,27 +1613,47 @@
               {
                 "id": "Pricing_Unit_Economics_Edge",
                 "label": "定价单元经济超边",
-                "target": 10
+                "target": 10,
+                "rules": [
+                  "H8",
+                  "H9"
+                ]
               },
               {
                 "id": "Cost_Structure_Edge",
                 "label": "成本结构超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H8",
+                  "H9"
+                ]
               },
               {
                 "id": "Revenue_Sustainability_Edge",
                 "label": "收入可持续性超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H8",
+                  "H26"
+                ]
               },
               {
                 "id": "Resource_Leverage_Edge",
                 "label": "资源杠杆超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H9",
+                  "H10"
+                ]
               },
               {
                 "id": "Funding_Stage_Fit_Edge",
                 "label": "融资阶段匹配超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H9",
+                  "H24"
+                ]
               }
             ]
           },
@@ -1489,37 +1667,64 @@
               {
                 "id": "Innovation_Validation_Edge",
                 "label": "创新验证超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H7"
+                ]
               },
               {
                 "id": "Substitute_Migration_Edge",
                 "label": "替代迁移超边",
-                "target": 10
+                "target": 10,
+                "rules": [
+                  "H4",
+                  "H17"
+                ]
               },
               {
                 "id": "Competitive_Response_Edge",
                 "label": "竞品反应超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H6",
+                  "H7",
+                  "H16"
+                ]
               },
               {
                 "id": "IP_Moat_Edge",
                 "label": "知识产权护城河超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H7"
+                ]
               },
               {
                 "id": "Switching_Cost_Edge",
                 "label": "用户切换成本超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H16",
+                  "H17"
+                ]
               },
               {
                 "id": "Network_Effect_Edge",
                 "label": "网络效应超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H7",
+                  "H9"
+                ]
               },
               {
                 "id": "Pivot_Signal_Edge",
                 "label": "转型信号超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H5",
+                  "H6"
+                ]
               }
             ]
           },
@@ -1533,32 +1738,55 @@
               {
                 "id": "Trust_Adoption_Edge",
                 "label": "信任采纳超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H16",
+                  "H17"
+                ]
               },
               {
                 "id": "Retention_Workflow_Embed_Edge",
                 "label": "工作流嵌入超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H16"
+                ]
               },
               {
                 "id": "Channel_Conversion_Edge",
                 "label": "渠道转化漏斗超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H8",
+                  "H16"
+                ]
               },
               {
                 "id": "Scalability_Bottleneck_Edge",
                 "label": "规模化瓶颈超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H9",
+                  "H10"
+                ]
               },
               {
                 "id": "Data_Flywheel_Edge",
                 "label": "数据飞轮超边",
-                "target": 8
+                "target": 8,
+                "rules": [
+                  "H7",
+                  "H9"
+                ]
               },
               {
                 "id": "Timing_Window_Edge",
                 "label": "时机窗口超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H4",
+                  "H6"
+                ]
               }
             ]
           },
@@ -1572,17 +1800,28 @@
               {
                 "id": "Ecosystem_Dependency_Edge",
                 "label": "生态依赖超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H11",
+                  "H6"
+                ]
               },
               {
                 "id": "Stakeholder_Conflict_Edge",
                 "label": "利益方冲突超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H3",
+                  "H11"
+                ]
               },
               {
                 "id": "Ontology_Grounded_Edge",
                 "label": "本体落地超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H14"
+                ]
               }
             ]
           },
@@ -1596,12 +1835,20 @@
               {
                 "id": "Social_Impact_Edge",
                 "label": "社会价值链超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H5",
+                  "H13"
+                ]
               },
               {
                 "id": "ESG_Measurability_Edge",
                 "label": "ESG可量化超边",
-                "target": 6
+                "target": 6,
+                "rules": [
+                  "H5",
+                  "H13"
+                ]
               }
             ]
           }
@@ -1609,6 +1856,2914 @@
         "rule_coverage_pct": 100,
         "rubric_coverage_pct": 100
       }
+    }
+  ],
+  "coverage_matrix": {
+    "rules": [
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "H7",
+      "H8",
+      "H9",
+      "H10",
+      "H11",
+      "H12",
+      "H13",
+      "H14",
+      "H15",
+      "H16",
+      "H17",
+      "H18",
+      "H19",
+      "H20",
+      "H21",
+      "H22",
+      "H23",
+      "H24",
+      "H25",
+      "H26",
+      "H27"
+    ],
+    "families": [
+      {
+        "id": "Value_Loop_Edge",
+        "label": "价值闭环超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性"
+      },
+      {
+        "id": "User_Journey_Edge",
+        "label": "用户旅程闭环超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性"
+      },
+      {
+        "id": "Presentation_Narrative_Edge",
+        "label": "路演叙事线超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性"
+      },
+      {
+        "id": "Cross_Dimension_Coherence_Edge",
+        "label": "跨维度一致性超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性"
+      },
+      {
+        "id": "Stage_Goal_Fit_Edge",
+        "label": "阶段目标匹配超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性"
+      },
+      {
+        "id": "User_Pain_Fit_Edge",
+        "label": "用户痛点匹配超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求"
+      },
+      {
+        "id": "Market_Segmentation_Edge",
+        "label": "市场细分超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求"
+      },
+      {
+        "id": "Demand_Supply_Match_Edge",
+        "label": "供需匹配超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求"
+      },
+      {
+        "id": "Market_Competition_Edge",
+        "label": "市场竞争超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求"
+      },
+      {
+        "id": "Risk_Pattern_Edge",
+        "label": "风险模式超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分"
+      },
+      {
+        "id": "Evidence_Grounding_Edge",
+        "label": "证据锚定超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分"
+      },
+      {
+        "id": "Rule_Rubric_Tension_Edge",
+        "label": "规则评分张力超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分"
+      },
+      {
+        "id": "Assumption_Stack_Edge",
+        "label": "假设堆叠超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分"
+      },
+      {
+        "id": "Metric_Definition_Edge",
+        "label": "指标定义超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分"
+      },
+      {
+        "id": "Execution_Gap_Edge",
+        "label": "执行断裂超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑"
+      },
+      {
+        "id": "Team_Capability_Gap_Edge",
+        "label": "团队能力缺口超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑"
+      },
+      {
+        "id": "Milestone_Dependency_Edge",
+        "label": "里程碑依赖超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑"
+      },
+      {
+        "id": "MVP_Scope_Edge",
+        "label": "MVP边界超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑"
+      },
+      {
+        "id": "Founder_Risk_Edge",
+        "label": "创始人风险超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑"
+      },
+      {
+        "id": "Compliance_Safety_Edge",
+        "label": "合规安全超边",
+        "group_id": "compliance_ethics",
+        "group_name": "合规、监管与伦理"
+      },
+      {
+        "id": "Regulatory_Landscape_Edge",
+        "label": "政策法规环境超边",
+        "group_id": "compliance_ethics",
+        "group_name": "合规、监管与伦理"
+      },
+      {
+        "id": "Ethical_Bias_Edge",
+        "label": "伦理偏见超边",
+        "group_id": "compliance_ethics",
+        "group_name": "合规、监管与伦理"
+      },
+      {
+        "id": "Pricing_Unit_Economics_Edge",
+        "label": "定价单元经济超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构"
+      },
+      {
+        "id": "Cost_Structure_Edge",
+        "label": "成本结构超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构"
+      },
+      {
+        "id": "Revenue_Sustainability_Edge",
+        "label": "收入可持续性超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构"
+      },
+      {
+        "id": "Resource_Leverage_Edge",
+        "label": "资源杠杆超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构"
+      },
+      {
+        "id": "Funding_Stage_Fit_Edge",
+        "label": "融资阶段匹配超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构"
+      },
+      {
+        "id": "Innovation_Validation_Edge",
+        "label": "创新验证超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "Substitute_Migration_Edge",
+        "label": "替代迁移超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "Competitive_Response_Edge",
+        "label": "竞品反应超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "IP_Moat_Edge",
+        "label": "知识产权护城河超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "Switching_Cost_Edge",
+        "label": "用户切换成本超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "Network_Effect_Edge",
+        "label": "网络效应超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "Pivot_Signal_Edge",
+        "label": "转型信号超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态"
+      },
+      {
+        "id": "Trust_Adoption_Edge",
+        "label": "信任采纳超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化"
+      },
+      {
+        "id": "Retention_Workflow_Embed_Edge",
+        "label": "工作流嵌入超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化"
+      },
+      {
+        "id": "Channel_Conversion_Edge",
+        "label": "渠道转化漏斗超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化"
+      },
+      {
+        "id": "Scalability_Bottleneck_Edge",
+        "label": "规模化瓶颈超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化"
+      },
+      {
+        "id": "Data_Flywheel_Edge",
+        "label": "数据飞轮超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化"
+      },
+      {
+        "id": "Timing_Window_Edge",
+        "label": "时机窗口超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化"
+      },
+      {
+        "id": "Ecosystem_Dependency_Edge",
+        "label": "生态依赖超边",
+        "group_id": "ecosystem",
+        "group_name": "生态与多方利益"
+      },
+      {
+        "id": "Stakeholder_Conflict_Edge",
+        "label": "利益方冲突超边",
+        "group_id": "ecosystem",
+        "group_name": "生态与多方利益"
+      },
+      {
+        "id": "Ontology_Grounded_Edge",
+        "label": "本体落地超边",
+        "group_id": "ecosystem",
+        "group_name": "生态与多方利益"
+      },
+      {
+        "id": "Social_Impact_Edge",
+        "label": "社会价值链超边",
+        "group_id": "social_esg",
+        "group_name": "社会与ESG"
+      },
+      {
+        "id": "ESG_Measurability_Edge",
+        "label": "ESG可量化超边",
+        "group_id": "social_esg",
+        "group_name": "社会与ESG"
+      }
+    ],
+    "matrix": [
+      {
+        "family_id": "Value_Loop_Edge",
+        "family_label": "价值闭环超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性",
+        "rules": {
+          "H1": 1,
+          "H2": 1,
+          "H3": 1,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 3
+      },
+      {
+        "family_id": "User_Journey_Edge",
+        "family_label": "用户旅程闭环超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性",
+        "rules": {
+          "H1": 1,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 1,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Presentation_Narrative_Edge",
+        "family_label": "路演叙事线超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 1,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Cross_Dimension_Coherence_Edge",
+        "family_label": "跨维度一致性超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 1,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Stage_Goal_Fit_Edge",
+        "family_label": "阶段目标匹配超边",
+        "group_id": "value_narrative",
+        "group_name": "价值叙事与一致性",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 1,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "User_Pain_Fit_Edge",
+        "family_label": "用户痛点匹配超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求",
+        "rules": {
+          "H1": 1,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Market_Segmentation_Edge",
+        "family_label": "市场细分超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求",
+        "rules": {
+          "H1": 1,
+          "H2": 0,
+          "H3": 0,
+          "H4": 1,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 1,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 3
+      },
+      {
+        "family_id": "Demand_Supply_Match_Edge",
+        "family_label": "供需匹配超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求",
+        "rules": {
+          "H1": 1,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Market_Competition_Edge",
+        "family_label": "市场竞争超边",
+        "group_id": "user_market",
+        "group_name": "用户-市场-需求",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 1,
+          "H5": 0,
+          "H6": 1,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Risk_Pattern_Edge",
+        "family_label": "风险模式超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分",
+        "rules": {
+          "H1": 0,
+          "H2": 1,
+          "H3": 1,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 1,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 3
+      },
+      {
+        "family_id": "Evidence_Grounding_Edge",
+        "family_label": "证据锚定超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Rule_Rubric_Tension_Edge",
+        "family_label": "规则评分张力超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 1,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Assumption_Stack_Edge",
+        "family_label": "假设堆叠超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 0,
+          "H7": 1,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 1,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 3
+      },
+      {
+        "family_id": "Metric_Definition_Edge",
+        "family_label": "指标定义超边",
+        "group_id": "risk_evidence",
+        "group_name": "风险、证据与评分",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 1,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 1,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Execution_Gap_Edge",
+        "family_label": "执行断裂超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Team_Capability_Gap_Edge",
+        "family_label": "团队能力缺口超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 1,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Milestone_Dependency_Edge",
+        "family_label": "里程碑依赖超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 1,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "MVP_Scope_Edge",
+        "family_label": "MVP边界超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 1,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Founder_Risk_Edge",
+        "family_label": "创始人风险超边",
+        "group_id": "execution_team",
+        "group_name": "执行、团队与里程碑",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 1,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 1,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 3
+      },
+      {
+        "family_id": "Compliance_Safety_Edge",
+        "family_label": "合规安全超边",
+        "group_id": "compliance_ethics",
+        "group_name": "合规、监管与伦理",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 1,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Regulatory_Landscape_Edge",
+        "family_label": "政策法规环境超边",
+        "group_id": "compliance_ethics",
+        "group_name": "合规、监管与伦理",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 1,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Ethical_Bias_Edge",
+        "family_label": "伦理偏见超边",
+        "group_id": "compliance_ethics",
+        "group_name": "合规、监管与伦理",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 1,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 1,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Pricing_Unit_Economics_Edge",
+        "family_label": "定价单元经济超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 1,
+          "H9": 1,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Cost_Structure_Edge",
+        "family_label": "成本结构超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 1,
+          "H9": 1,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Revenue_Sustainability_Edge",
+        "family_label": "收入可持续性超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 1,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 1,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Resource_Leverage_Edge",
+        "family_label": "资源杠杆超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 1,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Funding_Stage_Fit_Edge",
+        "family_label": "融资阶段匹配超边",
+        "group_id": "financial_structure",
+        "group_name": "单位经济与财务结构",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 1,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 1,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Innovation_Validation_Edge",
+        "family_label": "创新验证超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 1,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Substitute_Migration_Edge",
+        "family_label": "替代迁移超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 1,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 1,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Competitive_Response_Edge",
+        "family_label": "竞品反应超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 1,
+          "H7": 1,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 1,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 3
+      },
+      {
+        "family_id": "IP_Moat_Edge",
+        "family_label": "知识产权护城河超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 1,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Switching_Cost_Edge",
+        "family_label": "用户切换成本超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 1,
+          "H17": 1,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Network_Effect_Edge",
+        "family_label": "网络效应超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 1,
+          "H8": 0,
+          "H9": 1,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Pivot_Signal_Edge",
+        "family_label": "转型信号超边",
+        "group_id": "product_competition",
+        "group_name": "产品差异化与竞争动态",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 1,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Trust_Adoption_Edge",
+        "family_label": "信任采纳超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 1,
+          "H17": 1,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Retention_Workflow_Embed_Edge",
+        "family_label": "工作流嵌入超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 1,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Channel_Conversion_Edge",
+        "family_label": "渠道转化漏斗超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 1,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 1,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Scalability_Bottleneck_Edge",
+        "family_label": "规模化瓶颈超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 1,
+          "H10": 1,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Data_Flywheel_Edge",
+        "family_label": "数据飞轮超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 1,
+          "H8": 0,
+          "H9": 1,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Timing_Window_Edge",
+        "family_label": "时机窗口超边",
+        "group_id": "growth_scale",
+        "group_name": "增长、渠道与规模化",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 1,
+          "H5": 0,
+          "H6": 1,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Ecosystem_Dependency_Edge",
+        "family_label": "生态依赖超边",
+        "group_id": "ecosystem",
+        "group_name": "生态与多方利益",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 1,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 1,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Stakeholder_Conflict_Edge",
+        "family_label": "利益方冲突超边",
+        "group_id": "ecosystem",
+        "group_name": "生态与多方利益",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 1,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 1,
+          "H12": 0,
+          "H13": 0,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "Ontology_Grounded_Edge",
+        "family_label": "本体落地超边",
+        "group_id": "ecosystem",
+        "group_name": "生态与多方利益",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 0,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 0,
+          "H14": 1,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 1
+      },
+      {
+        "family_id": "Social_Impact_Edge",
+        "family_label": "社会价值链超边",
+        "group_id": "social_esg",
+        "group_name": "社会与ESG",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 1,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      },
+      {
+        "family_id": "ESG_Measurability_Edge",
+        "family_label": "ESG可量化超边",
+        "group_id": "social_esg",
+        "group_name": "社会与ESG",
+        "rules": {
+          "H1": 0,
+          "H2": 0,
+          "H3": 0,
+          "H4": 0,
+          "H5": 1,
+          "H6": 0,
+          "H7": 0,
+          "H8": 0,
+          "H9": 0,
+          "H10": 0,
+          "H11": 0,
+          "H12": 0,
+          "H13": 1,
+          "H14": 0,
+          "H15": 0,
+          "H16": 0,
+          "H17": 0,
+          "H18": 0,
+          "H19": 0,
+          "H20": 0,
+          "H21": 0,
+          "H22": 0,
+          "H23": 0,
+          "H24": 0,
+          "H25": 0,
+          "H26": 0,
+          "H27": 0
+        },
+        "rule_count": 2
+      }
+    ],
+    "rubric_coverage": [
+      {
+        "rubric": "Problem Definition",
+        "rules": [
+          "H1",
+          "H5"
+        ],
+        "families_count": 10,
+        "families": [
+          "Value_Loop_Edge",
+          "User_Journey_Edge",
+          "User_Pain_Fit_Edge",
+          "Market_Segmentation_Edge",
+          "Demand_Supply_Match_Edge",
+          "Evidence_Grounding_Edge",
+          "Assumption_Stack_Edge",
+          "Pivot_Signal_Edge",
+          "Social_Impact_Edge",
+          "ESG_Measurability_Edge"
+        ]
+      },
+      {
+        "rubric": "User Evidence Strength",
+        "rules": [
+          "H13",
+          "H5"
+        ],
+        "families_count": 10,
+        "families": [
+          "Stage_Goal_Fit_Edge",
+          "User_Pain_Fit_Edge",
+          "Demand_Supply_Match_Edge",
+          "Evidence_Grounding_Edge",
+          "Assumption_Stack_Edge",
+          "Metric_Definition_Edge",
+          "MVP_Scope_Edge",
+          "Pivot_Signal_Edge",
+          "Social_Impact_Edge",
+          "ESG_Measurability_Edge"
+        ]
+      },
+      {
+        "rubric": "Solution Feasibility",
+        "rules": [
+          "H12",
+          "H7"
+        ],
+        "families_count": 6,
+        "families": [
+          "Assumption_Stack_Edge",
+          "Innovation_Validation_Edge",
+          "Competitive_Response_Edge",
+          "IP_Moat_Edge",
+          "Network_Effect_Edge",
+          "Data_Flywheel_Edge"
+        ]
+      },
+      {
+        "rubric": "Business Model Consistency",
+        "rules": [
+          "H1",
+          "H2",
+          "H3"
+        ],
+        "families_count": 7,
+        "families": [
+          "Value_Loop_Edge",
+          "User_Journey_Edge",
+          "User_Pain_Fit_Edge",
+          "Market_Segmentation_Edge",
+          "Demand_Supply_Match_Edge",
+          "Risk_Pattern_Edge",
+          "Stakeholder_Conflict_Edge"
+        ]
+      },
+      {
+        "rubric": "Market & Competition",
+        "rules": [
+          "H4",
+          "H6"
+        ],
+        "families_count": 7,
+        "families": [
+          "Market_Segmentation_Edge",
+          "Market_Competition_Edge",
+          "Substitute_Migration_Edge",
+          "Competitive_Response_Edge",
+          "Pivot_Signal_Edge",
+          "Timing_Window_Edge",
+          "Ecosystem_Dependency_Edge"
+        ]
+      },
+      {
+        "rubric": "Financial Logic",
+        "rules": [
+          "H8",
+          "H9"
+        ],
+        "families_count": 10,
+        "families": [
+          "Team_Capability_Gap_Edge",
+          "Pricing_Unit_Economics_Edge",
+          "Cost_Structure_Edge",
+          "Revenue_Sustainability_Edge",
+          "Resource_Leverage_Edge",
+          "Funding_Stage_Fit_Edge",
+          "Network_Effect_Edge",
+          "Channel_Conversion_Edge",
+          "Scalability_Bottleneck_Edge",
+          "Data_Flywheel_Edge"
+        ]
+      },
+      {
+        "rubric": "Innovation & Differentiation",
+        "rules": [
+          "H6",
+          "H7"
+        ],
+        "families_count": 10,
+        "families": [
+          "Market_Competition_Edge",
+          "Assumption_Stack_Edge",
+          "Innovation_Validation_Edge",
+          "Competitive_Response_Edge",
+          "IP_Moat_Edge",
+          "Network_Effect_Edge",
+          "Pivot_Signal_Edge",
+          "Data_Flywheel_Edge",
+          "Timing_Window_Edge",
+          "Ecosystem_Dependency_Edge"
+        ]
+      },
+      {
+        "rubric": "Team & Execution",
+        "rules": [
+          "H10",
+          "H12"
+        ],
+        "families_count": 8,
+        "families": [
+          "Stage_Goal_Fit_Edge",
+          "Execution_Gap_Edge",
+          "Team_Capability_Gap_Edge",
+          "Milestone_Dependency_Edge",
+          "MVP_Scope_Edge",
+          "Founder_Risk_Edge",
+          "Resource_Leverage_Edge",
+          "Scalability_Bottleneck_Edge"
+        ]
+      },
+      {
+        "rubric": "Presentation Quality",
+        "rules": [
+          "H14",
+          "H15"
+        ],
+        "families_count": 4,
+        "families": [
+          "Presentation_Narrative_Edge",
+          "Cross_Dimension_Coherence_Edge",
+          "Rule_Rubric_Tension_Edge",
+          "Ontology_Grounded_Edge"
+        ]
+      }
+    ],
+    "rule_stats": [
+      {
+        "rule": "H1",
+        "family_count": 5,
+        "rubric_count": 2
+      },
+      {
+        "rule": "H2",
+        "family_count": 2,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H3",
+        "family_count": 3,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H4",
+        "family_count": 4,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H5",
+        "family_count": 7,
+        "rubric_count": 2
+      },
+      {
+        "rule": "H6",
+        "family_count": 5,
+        "rubric_count": 2
+      },
+      {
+        "rule": "H7",
+        "family_count": 6,
+        "rubric_count": 2
+      },
+      {
+        "rule": "H8",
+        "family_count": 4,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H9",
+        "family_count": 8,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H10",
+        "family_count": 8,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H11",
+        "family_count": 6,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H12",
+        "family_count": 0,
+        "rubric_count": 2
+      },
+      {
+        "rule": "H13",
+        "family_count": 5,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H14",
+        "family_count": 4,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H15",
+        "family_count": 0,
+        "rubric_count": 1
+      },
+      {
+        "rule": "H16",
+        "family_count": 6,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H17",
+        "family_count": 3,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H18",
+        "family_count": 0,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H19",
+        "family_count": 1,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H20",
+        "family_count": 2,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H21",
+        "family_count": 2,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H22",
+        "family_count": 1,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H23",
+        "family_count": 0,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H24",
+        "family_count": 1,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H25",
+        "family_count": 1,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H26",
+        "family_count": 1,
+        "rubric_count": 0
+      },
+      {
+        "rule": "H27",
+        "family_count": 0,
+        "rubric_count": 0
+      }
+    ],
+    "summary": {
+      "total_families": 45,
+      "total_rules": 27,
+      "total_rubrics": 9,
+      "matrix_density": 7.0,
+      "rules_covered": 22,
+      "rule_coverage_pct": 81.5,
+      "rubrics_well_covered": 9
+    }
+  },
+  "family_evidence": [
+    {
+      "family_id": "Value_Loop_Edge",
+      "family_label": "价值闭环超边",
+      "target": 16,
+      "actual": 17,
+      "trigger_rate": 17.7,
+      "realization_pct": 100.0,
+      "avg_support": 1.8,
+      "rules": [
+        "H1",
+        "H2",
+        "H3"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Risk_Pattern_Edge",
+      "family_label": "风险模式超边",
+      "target": 18,
+      "actual": 17,
+      "trigger_rate": 17.7,
+      "realization_pct": 94.4,
+      "avg_support": 1.9,
+      "rules": [
+        "H2",
+        "H3",
+        "H11"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Evidence_Grounding_Edge",
+      "family_label": "证据锚定超边",
+      "target": 12,
+      "actual": 11,
+      "trigger_rate": 11.5,
+      "realization_pct": 91.7,
+      "avg_support": 2.5,
+      "rules": [
+        "H5"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Market_Competition_Edge",
+      "family_label": "市场竞争超边",
+      "target": 10,
+      "actual": 11,
+      "trigger_rate": 11.5,
+      "realization_pct": 100.0,
+      "avg_support": 3.7,
+      "rules": [
+        "H4",
+        "H6"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Execution_Gap_Edge",
+      "family_label": "执行断裂超边",
+      "target": 10,
+      "actual": 11,
+      "trigger_rate": 11.5,
+      "realization_pct": 100.0,
+      "avg_support": 2.8,
+      "rules": [
+        "H10"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "User_Pain_Fit_Edge",
+      "family_label": "用户痛点匹配超边",
+      "target": 12,
+      "actual": 10,
+      "trigger_rate": 10.4,
+      "realization_pct": 83.3,
+      "avg_support": 2.3,
+      "rules": [
+        "H1",
+        "H5"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Rule_Rubric_Tension_Edge",
+      "family_label": "规则评分张力超边",
+      "target": 10,
+      "actual": 10,
+      "trigger_rate": 10.4,
+      "realization_pct": 100.0,
+      "avg_support": 2.1,
+      "rules": [
+        "H14"
+      ],
+      "is_high_value": true,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Compliance_Safety_Edge",
+      "family_label": "合规安全超边",
+      "target": 8,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 100.0,
+      "avg_support": 2.8,
+      "rules": [
+        "H11"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Pricing_Unit_Economics_Edge",
+      "family_label": "定价单元经济超边",
+      "target": 10,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 90.0,
+      "avg_support": 4.8,
+      "rules": [
+        "H8",
+        "H9"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Substitute_Migration_Edge",
+      "family_label": "替代迁移超边",
+      "target": 10,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 90.0,
+      "avg_support": 3.8,
+      "rules": [
+        "H4",
+        "H17"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "User_Journey_Edge",
+      "family_label": "用户旅程闭环超边",
+      "target": 10,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 90.0,
+      "avg_support": 5.0,
+      "rules": [
+        "H1",
+        "H16"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Data_Flywheel_Edge",
+      "family_label": "数据飞轮超边",
+      "target": 8,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 100.0,
+      "avg_support": 3.4,
+      "rules": [
+        "H7",
+        "H9"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "MVP_Scope_Edge",
+      "family_label": "MVP边界超边",
+      "target": 8,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 100.0,
+      "avg_support": 2.6,
+      "rules": [
+        "H10",
+        "H13"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Presentation_Narrative_Edge",
+      "family_label": "路演叙事线超边",
+      "target": 8,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 100.0,
+      "avg_support": 4.6,
+      "rules": [
+        "H14"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Revenue_Sustainability_Edge",
+      "family_label": "收入可持续性超边",
+      "target": 8,
+      "actual": 9,
+      "trigger_rate": 9.4,
+      "realization_pct": 100.0,
+      "avg_support": 2.9,
+      "rules": [
+        "H8",
+        "H26"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Innovation_Validation_Edge",
+      "family_label": "创新验证超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 2.4,
+      "rules": [
+        "H7"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Trust_Adoption_Edge",
+      "family_label": "信任采纳超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 3.6,
+      "rules": [
+        "H16",
+        "H17"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Team_Capability_Gap_Edge",
+      "family_label": "团队能力缺口超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 2.8,
+      "rules": [
+        "H9",
+        "H10"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Cost_Structure_Edge",
+      "family_label": "成本结构超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 2.3,
+      "rules": [
+        "H8",
+        "H9"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Demand_Supply_Match_Edge",
+      "family_label": "供需匹配超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 4.7,
+      "rules": [
+        "H1",
+        "H5"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Assumption_Stack_Edge",
+      "family_label": "假设堆叠超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 2.4,
+      "rules": [
+        "H5",
+        "H7",
+        "H20"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Market_Segmentation_Edge",
+      "family_label": "市场细分超边",
+      "target": 8,
+      "actual": 8,
+      "trigger_rate": 8.3,
+      "realization_pct": 100.0,
+      "avg_support": 2.4,
+      "rules": [
+        "H1",
+        "H4",
+        "H19"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Retention_Workflow_Embed_Edge",
+      "family_label": "工作流嵌入超边",
+      "target": 8,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 87.5,
+      "avg_support": 2.1,
+      "rules": [
+        "H16"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Stage_Goal_Fit_Edge",
+      "family_label": "阶段目标匹配超边",
+      "target": 8,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 87.5,
+      "avg_support": 4.1,
+      "rules": [
+        "H10",
+        "H13"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Scalability_Bottleneck_Edge",
+      "family_label": "规模化瓶颈超边",
+      "target": 8,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 87.5,
+      "avg_support": 3.9,
+      "rules": [
+        "H9",
+        "H10"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "IP_Moat_Edge",
+      "family_label": "知识产权护城河超边",
+      "target": 6,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 100.0,
+      "avg_support": 4.4,
+      "rules": [
+        "H7"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Channel_Conversion_Edge",
+      "family_label": "渠道转化漏斗超边",
+      "target": 8,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 87.5,
+      "avg_support": 2.2,
+      "rules": [
+        "H8",
+        "H16"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Timing_Window_Edge",
+      "family_label": "时机窗口超边",
+      "target": 6,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 100.0,
+      "avg_support": 3.8,
+      "rules": [
+        "H4",
+        "H6"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Founder_Risk_Edge",
+      "family_label": "创始人风险超边",
+      "target": 6,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 100.0,
+      "avg_support": 3.1,
+      "rules": [
+        "H10",
+        "H21",
+        "H25"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Metric_Definition_Edge",
+      "family_label": "指标定义超边",
+      "target": 6,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 100.0,
+      "avg_support": 3.5,
+      "rules": [
+        "H13",
+        "H20"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Competitive_Response_Edge",
+      "family_label": "竞品反应超边",
+      "target": 6,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 100.0,
+      "avg_support": 3.5,
+      "rules": [
+        "H6",
+        "H7",
+        "H16"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Network_Effect_Edge",
+      "family_label": "网络效应超边",
+      "target": 8,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 87.5,
+      "avg_support": 5.0,
+      "rules": [
+        "H7",
+        "H9"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "ESG_Measurability_Edge",
+      "family_label": "ESG可量化超边",
+      "target": 6,
+      "actual": 7,
+      "trigger_rate": 7.3,
+      "realization_pct": 100.0,
+      "avg_support": 1.8,
+      "rules": [
+        "H5",
+        "H13"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Social_Impact_Edge",
+      "family_label": "社会价值链超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 3.7,
+      "rules": [
+        "H5",
+        "H13"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Pivot_Signal_Edge",
+      "family_label": "转型信号超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 4.2,
+      "rules": [
+        "H5",
+        "H6"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Stakeholder_Conflict_Edge",
+      "family_label": "利益方冲突超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 2.4,
+      "rules": [
+        "H3",
+        "H11"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Resource_Leverage_Edge",
+      "family_label": "资源杠杆超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 2.6,
+      "rules": [
+        "H9",
+        "H10"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Ethical_Bias_Edge",
+      "family_label": "伦理偏见超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 2.4,
+      "rules": [
+        "H11",
+        "H22"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Milestone_Dependency_Edge",
+      "family_label": "里程碑依赖超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 4.6,
+      "rules": [
+        "H10",
+        "H21"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Funding_Stage_Fit_Edge",
+      "family_label": "融资阶段匹配超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 2.9,
+      "rules": [
+        "H9",
+        "H24"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Cross_Dimension_Coherence_Edge",
+      "family_label": "跨维度一致性超边",
+      "target": 6,
+      "actual": 6,
+      "trigger_rate": 6.2,
+      "realization_pct": 100.0,
+      "avg_support": 3.3,
+      "rules": [
+        "H14"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Ontology_Grounded_Edge",
+      "family_label": "本体落地超边",
+      "target": 6,
+      "actual": 5,
+      "trigger_rate": 5.2,
+      "realization_pct": 83.3,
+      "avg_support": 2.2,
+      "rules": [
+        "H14"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Ecosystem_Dependency_Edge",
+      "family_label": "生态依赖超边",
+      "target": 6,
+      "actual": 5,
+      "trigger_rate": 5.2,
+      "realization_pct": 83.3,
+      "avg_support": 1.6,
+      "rules": [
+        "H11",
+        "H6"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Regulatory_Landscape_Edge",
+      "family_label": "政策法规环境超边",
+      "target": 6,
+      "actual": 5,
+      "trigger_rate": 5.2,
+      "realization_pct": 83.3,
+      "avg_support": 4.8,
+      "rules": [
+        "H11"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
+    },
+    {
+      "family_id": "Switching_Cost_Edge",
+      "family_label": "用户切换成本超边",
+      "target": 6,
+      "actual": 5,
+      "trigger_rate": 5.2,
+      "realization_pct": 83.3,
+      "avg_support": 2.3,
+      "rules": [
+        "H16",
+        "H17"
+      ],
+      "is_high_value": false,
+      "is_low_trigger": false
     }
   ]
 }

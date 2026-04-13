@@ -2330,10 +2330,10 @@ export default function StudentPage() {
                     ];
                     const maxDim = Math.max(...dimEntries.map(d => d[1]), 1);
                     const KB_STATIC = {
-                      projects: 96, nodes: 2840, relationships: 7403,
+                      projects: 96, nodes: 2492, relationships: 7144,
                       categories: 13, rag: 96, edgeFamilies: 45,
                       hyperNodes: 166, hyperEdges: 360,
-                      riskRules: 15, rubricItems: 9,
+                      riskRules: 27, rubricItems: 9,
                     };
                     return (
                       <div className="kb-global-stats">

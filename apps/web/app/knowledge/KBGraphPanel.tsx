@@ -393,7 +393,7 @@ export default function KBGraphPanel({ onClose }: Props) {
                   <h2 className="kb-section-title">KG 质量维度详情</h2>
                   <div className="kb-quality-dims">
                     {(qualityData.dimensions || []).map((dim: any) => (
-                      <DimensionCard key={dim.id} dim={dim} expanded={expandedDim === dim.id} onToggle={() => setExpandedDim(expandedDim === dim.id ? null : dim.id)} />
+                      <DimensionCard key={dim.id} dim={dim} expanded={expandedDim === dim.id} onToggle={() => setExpandedDim(expandedDim === dim.id ? null : dim.id)} qualityData={qualityData} />
                     ))}
                   </div>
                 </section>
@@ -405,9 +405,18 @@ export default function KBGraphPanel({ onClose }: Props) {
                     <p className="kb-section-desc">超图（Hypergraph）是在传统知识图谱之上构建的高阶结构，用于捕获多元素之间的N元关系和跨段落语义模式。</p>
                     <div className="kb-quality-dims">
                       {hyperQualityDims.map((dim: any) => (
-                        <DimensionCard key={dim.id} dim={dim} expanded={expandedDim === dim.id} onToggle={() => setExpandedDim(expandedDim === dim.id ? null : dim.id)} />
+                        <DimensionCard key={dim.id} dim={dim} expanded={expandedDim === dim.id} onToggle={() => setExpandedDim(expandedDim === dim.id ? null : dim.id)} qualityData={qualityData} />
                       ))}
                     </div>
+                  </section>
+                )}
+
+                {/* ── Coverage Matrix ── */}
+                {qualityData?.coverage_matrix && (
+                  <section className="kb-section">
+                    <h2 className="kb-section-title">覆盖矩阵：45 家族 &times; 27 风险规则</h2>
+                    <p className="kb-section-desc">展示每个超边家族与风险规则 (H1-H27) 的设计关联。矩阵越密说明家族体系对风险规则的覆盖越全面。</p>
+                    <CoverageMatrix data={qualityData.coverage_matrix} />
                   </section>
                 )}
               </div>
@@ -659,8 +668,8 @@ export default function KBGraphPanel({ onClose }: Props) {
                 <div className="hg-legend-grid">
                   <div className="hg-legend-item"><span className="hg-legend-shape hg-shape-rect" style={{ background: "#f59e0b" }} /><span>超边（方块）</span></div>
                   <div className="hg-legend-item"><span className="hg-legend-shape hg-shape-circle" style={{ background: "#38bdf8" }} /><span>超节点（语义片段）</span></div>
-                  <div className="hg-legend-item"><span className="hg-legend-shape hg-shape-circle" style={{ background: "#ef4444" }} /><span>风险规则 (H1-H15)</span></div>
-                  <div className="hg-legend-item"><span className="hg-legend-shape hg-shape-circle" style={{ background: "#22c55e" }} /><span>评审量表项</span></div>
+                  <div className="hg-legend-item"><span className="hg-legend-shape hg-shape-circle" style={{ background: "#ef4444" }} /><span>风险规则 (H1-H27)</span></div>
+                  <div className="hg-legend-item"><span className="hg-legend-shape hg-shape-circle" style={{ background: "#22c55e" }} /><span>评审量表项 (9维)</span></div>
                 </div>
                 <div className="hg-legend-tip">悬停方块超边 → 高亮所有连接节点并在下方查看详情</div>
               </div>
@@ -804,7 +813,7 @@ export default function KBGraphPanel({ onClose }: Props) {
    Sub-components
    ════════════════════════════════════════════════════════════ */
 
-function DimensionCard({ dim, expanded, onToggle }: { dim: any; expanded: boolean; onToggle: () => void }) {
+function DimensionCard({ dim, expanded, onToggle, qualityData }: { dim: any; expanded: boolean; onToggle: () => void; qualityData?: any }) {
   return (
     <div className={`kb-dim-card${expanded ? " expanded" : ""}`}>
       <button className="kb-dim-card-header" onClick={onToggle}>
@@ -821,7 +830,7 @@ function DimensionCard({ dim, expanded, onToggle }: { dim: any; expanded: boolea
         <div className="kb-dim-detail">
           {dim.description && <p className="kb-dim-description">{dim.description}</p>}
           <p className="kb-dim-summary">{dim.summary || ""}</p>
-          <DimensionDetailChart dim={dim} />
+          <DimensionDetailChart dim={dim} qualityData={qualityData} />
         </div>
       )}
     </div>
@@ -861,7 +870,7 @@ function QualityRadar({ dimensions }: { dimensions: any[] }) {
   return <canvas ref={canvasRef} className="kb-radar-canvas" style={{ width: 340, height: 340 }} />;
 }
 
-function DimensionDetailChart({ dim }: { dim: any }) {
+function DimensionDetailChart({ dim, qualityData }: { dim: any; qualityData?: any }) {
   const detail: any = dim?.detail || {};
 
   if (dim.id === "extraction_accuracy") {
@@ -992,6 +1001,9 @@ function DimensionDetailChart({ dim }: { dim: any }) {
     );
   }
   if (dim.id === "hypergraph_completeness") {
+    const familyEvidence: any[] = qualityData?.family_evidence || [];
+    const highValue = familyEvidence.filter((f: any) => f.is_high_value);
+    const lowTrigger = familyEvidence.filter((f: any) => f.is_low_trigger);
     return (
       <div className="kb-dim-chart">
         <div className="kb-dim-stat-row">
@@ -1003,8 +1015,49 @@ function DimensionDetailChart({ dim }: { dim: any }) {
         <div className="kb-dim-stat-row">
           <span>规则触发</span><strong>{detail.triggers_rule_links ?? 0}</strong>
           <span>评审对齐</span><strong>{detail.aligns_with_links ?? 0}</strong>
-          <span>覆盖率</span><strong>{detail.coverage_rate ?? 0}%</strong>
+          <span>实现率</span><strong>{detail.realization_rate ?? 0}%</strong>
         </div>
+
+        {familyEvidence.length > 0 && (
+          <>
+            <div className="fe-section-title">家族级实例化统计 <span className="fe-section-sub">按触发率排序</span></div>
+            <div className="fe-legend-row">
+              <span className="fe-legend-item fe-high">高价值家族 ({highValue.length})</span>
+              <span className="fe-legend-item fe-low">低触发家族 ({lowTrigger.length})</span>
+            </div>
+            <div className="fe-table-wrap">
+              <table className="fe-table">
+                <thead>
+                  <tr>
+                    <th>家族</th>
+                    <th>实际/目标</th>
+                    <th>实现率</th>
+                    <th>触发率</th>
+                    <th>支撑度</th>
+                    <th>关联规则</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {familyEvidence.map((f: any) => (
+                    <tr key={f.family_id} className={f.is_high_value ? "fe-row-high" : f.is_low_trigger ? "fe-row-low" : ""}>
+                      <td className="fe-fam-name">{f.family_label}</td>
+                      <td><strong>{f.actual}</strong> / {f.target}</td>
+                      <td>
+                        <div className="fe-bar-wrap">
+                          <div className="fe-bar-fill" style={{ width: `${Math.min(f.realization_pct, 100)}%`, background: f.realization_pct >= 90 ? "#22c55e" : f.realization_pct >= 60 ? "#eab308" : "#ef4444" }} />
+                        </div>
+                        <span className="fe-bar-label">{f.realization_pct}%</span>
+                      </td>
+                      <td className={f.is_high_value ? "fe-val-high" : f.is_low_trigger ? "fe-val-low" : ""}>{f.trigger_rate}%</td>
+                      <td>{f.avg_support}</td>
+                      <td className="fe-rules">{(f.rules || []).map((r: string) => <span key={r} className="fe-rule-tag">{r}</span>)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -1018,25 +1071,155 @@ function DimensionDetailChart({ dim }: { dim: any }) {
           <span>风险对齐 {detail.rule_coverage_pct ?? 0}%</span>
           <span>评审对齐 {detail.rubric_coverage_pct ?? 0}%</span>
         </div>
-        <div className="kb-tmpl-rationale">{(detail.rationale || "").split("\n").filter((l: string) => l.trim()).map((line: string, i: number) => <p key={i}>{line.replace(/\*\*/g, "")}</p>)}</div>
-        <div className="kb-tmpl-groups">
-          {groups.map((g: any) => (
-            <div key={g.group_id} className="kb-tmpl-group">
-              <div className="kb-tmpl-group-header">
-                <span className="kb-tmpl-group-name">{g.group_name}</span>
-                <span className="kb-tmpl-group-meta">{g.family_count} 个家族 / 目标 {g.target_edges} 条超边</span>
-              </div>
-              <div className="kb-tmpl-group-purpose">{g.purpose}</div>
-              <div className="kb-tmpl-family-tags">
-                {(g.families || []).map((f: any) => (
-                  <span key={f.id} className="kb-tmpl-family-tag" title={f.id}>{f.label} ({f.target})</span>
-                ))}
-              </div>
+
+        {/* ── Design Derivation Tree ── */}
+        <div className="tmpl-tree">
+          <div className="tmpl-tree-root">
+            <div className="tmpl-tree-root-icon">&#9670;</div>
+            <div className="tmpl-tree-root-text">
+              <strong>创业项目评估体系</strong>
+              <span>{detail.total_groups ?? 10} 功能组 &rarr; {detail.total_families ?? 45} 超边家族</span>
             </div>
-          ))}
+          </div>
+          <div className="tmpl-tree-connector" />
+          <div className="tmpl-tree-groups">
+            {groups.map((g: any, gi: number) => (
+              <div key={g.group_id} className="tmpl-tree-group">
+                <div className="tmpl-tree-group-head">
+                  <span className="tmpl-tree-group-idx">{String(gi + 1).padStart(2, "0")}</span>
+                  <span className="tmpl-tree-group-name">{g.group_name}</span>
+                  <span className="tmpl-tree-group-badge">{g.family_count} 族 · {g.target_edges} 边</span>
+                </div>
+                <div className="tmpl-tree-group-purpose">{g.purpose}</div>
+                <div className="tmpl-tree-families">
+                  {(g.families || []).map((f: any) => (
+                    <div key={f.id} className="tmpl-tree-family-card">
+                      <div className="tmpl-tree-family-name">{f.label}</div>
+                      <div className="tmpl-tree-family-meta">
+                        <span className="tmpl-tree-family-target">目标 {f.target}</span>
+                        {(f.rules || []).length > 0 && (
+                          <div className="tmpl-tree-family-rules">
+                            {(f.rules || []).map((r: string) => (
+                              <span key={r} className="tmpl-tree-rule-tag">{r}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
   return <pre className="kb-dim-json">{JSON.stringify(detail, null, 2)}</pre>;
+}
+
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║  CoverageMatrix – 45 families × 27 rules heatmap            ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+const GROUP_COLORS: Record<string, string> = {
+  value_narrative: "#3b82f6",
+  user_market: "#22c55e",
+  risk_evidence: "#ef4444",
+  execution_team: "#f59e0b",
+  compliance_ethics: "#a855f7",
+  financial_structure: "#06b6d4",
+  product_competition: "#ec4899",
+  growth_scale: "#84cc16",
+  ecosystem: "#f97316",
+  social_esg: "#14b8a6",
+};
+
+function CoverageMatrix({ data }: { data: any }) {
+  const rules: string[] = data?.rules || [];
+  const matrixRows: any[] = data?.matrix || [];
+  const rubricCov: any[] = data?.rubric_coverage || [];
+  const ruleStats: any[] = data?.rule_stats || [];
+  const summary = data?.summary || {};
+
+  let currentGroup = "";
+  return (
+    <div className="cm-wrap">
+      {/* Summary stats */}
+      <div className="cm-summary">
+        <div className="cm-stat"><div className="cm-stat-val">{summary.total_families}</div><div className="cm-stat-label">超边家族</div></div>
+        <div className="cm-stat"><div className="cm-stat-val">{summary.total_rules}</div><div className="cm-stat-label">风险规则</div></div>
+        <div className="cm-stat"><div className="cm-stat-val">{summary.rules_covered}/{summary.total_rules}</div><div className="cm-stat-label">规则已覆盖</div></div>
+        <div className="cm-stat"><div className="cm-stat-val">{summary.matrix_density}%</div><div className="cm-stat-label">矩阵密度</div></div>
+        <div className="cm-stat"><div className="cm-stat-val">{summary.rubrics_well_covered}/{summary.total_rubrics}</div><div className="cm-stat-label">评审全覆盖</div></div>
+      </div>
+
+      {/* Matrix */}
+      <div className="cm-table-scroll">
+        <table className="cm-table">
+          <thead>
+            <tr>
+              <th className="cm-th-family">家族</th>
+              {rules.map(r => <th key={r} className="cm-th-rule">{r}</th>)}
+              <th className="cm-th-count">#</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matrixRows.map((row: any) => {
+              const showGroupHeader = row.group_id !== currentGroup;
+              currentGroup = row.group_id;
+              return (
+                <React.Fragment key={row.family_id}>
+                  {showGroupHeader && (
+                    <tr className="cm-group-row">
+                      <td colSpan={rules.length + 2} style={{ borderLeft: `3px solid ${GROUP_COLORS[row.group_id] || "#64748b"}` }}>
+                        {row.group_name}
+                      </td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td className="cm-td-family" title={row.family_id}>{row.family_label}</td>
+                    {rules.map(r => (
+                      <td key={r} className={`cm-cell${row.rules?.[r] ? " cm-filled" : ""}`} style={row.rules?.[r] ? { background: GROUP_COLORS[row.group_id] || "#3b82f6" } : undefined} />
+                    ))}
+                    <td className="cm-td-count">{row.rule_count}</td>
+                  </tr>
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td className="cm-td-family">规则覆盖家族数</td>
+              {rules.map(r => {
+                const st = ruleStats.find((s: any) => s.rule === r);
+                return <td key={r} className="cm-td-foot">{st?.family_count ?? 0}</td>;
+              })}
+              <td />
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* Rubric coverage */}
+      <div className="cm-rubric-section">
+        <h3 className="cm-rubric-title">9 评审维度 &times; 家族覆盖</h3>
+        <div className="cm-rubric-grid">
+          {rubricCov.map((rc: any) => (
+            <div key={rc.rubric} className="cm-rubric-card">
+              <div className="cm-rubric-name">{rc.rubric}</div>
+              <div className="cm-rubric-detail">
+                <span className="cm-rubric-rules">{(rc.rules || []).join(", ")}</span>
+                <span className="cm-rubric-fam-count">{rc.families_count} 个家族覆盖</span>
+              </div>
+              <div className="cm-rubric-bar-track">
+                <div className="cm-rubric-bar-fill" style={{ width: `${Math.min(rc.families_count * 4, 100)}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

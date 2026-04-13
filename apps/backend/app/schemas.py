@@ -171,6 +171,33 @@ class DialogueTurnResponse(BaseModel):
     insight_sources: dict = Field(default_factory=dict)
 
 
+class VideoRubricItem(BaseModel):
+    item: str
+    score: float
+    weight: float
+    status: Literal["ok", "risk"] = "ok"
+    reason: str = ""
+
+
+class VideoAnalysisResult(BaseModel):
+    overall_score: float | None = None
+    score_band: str = ""
+    rubric: list[VideoRubricItem] = Field(default_factory=list)
+    transcript: str = ""
+    summary: str = ""
+    presentation_feedback: str = ""
+    mode: Literal["coursework", "competition", "learning"] = "competition"
+    competition_type: Literal["", "internet_plus", "challenge_cup", "dachuang"] = ""
+
+
+class VideoAnalysisResponse(BaseModel):
+    project_id: str
+    student_id: str
+    filename: str
+    created_at: datetime
+    analysis: VideoAnalysisResult
+
+
 class PosterSection(BaseModel):
     id: str
     title: str
@@ -240,6 +267,8 @@ class PosterGeneratePayload(BaseModel):
 
         project_id: str
         student_id: str
+        # 当前对话 ID，用于严格限定海报生成只基于这一条对话记录
+        conversation_id: str = ""
         mode: Literal["coursework", "competition", "learning"] = "coursework"
         competition_type: Literal["", "internet_plus", "challenge_cup", "dachuang"] = ""
         source_text: str | None = None

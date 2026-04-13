@@ -29,10 +29,20 @@ class Settings(BaseSettings):
 
     max_parse_file_mb: float = 30.0  # modify default file size limit in MB
 
+    # 视频路演分析相关配置
+    video_max_mb: float = 1024.0  # 单个视频最大体积（MB）
+    video_max_duration_sec: int = 180  # 建议路演时长上限（秒），用于前端提示
+    video_allowed_ext: list[str] = [".mp4", ".mov", ".m4v", ".webm"]
+
+    # 语音转写（STT）模型配置：用于将路演视频音轨转为文本
+    stt_provider: str = "openai"  # 目前仅用于区分日志，可与 llm_provider 共用网关
+    stt_model: str = ""  # 需在实际部署时按网关支持情况调整
+
     # config.py -> app -> backend -> apps -> BDSC (workspace root)
     workspace_root: Path = Path(__file__).resolve().parents[3]
     data_root: Path = workspace_root / "data"
     upload_root: Path = data_root / "uploads" / "student_submissions"
+    video_upload_root: Path = data_root / "uploads" / "video_pitches"
     teacher_examples_root: Path = data_root / "corpus" / "teacher_examples"
 
     model_config = SettingsConfigDict(

@@ -34,6 +34,7 @@ class JsonStorage:
                 "teacher_annotations": [],
                 "teacher_feedback_files": [],
                 "teacher_document_edits": [],
+                "video_analyses": [],
             }
         data = json.loads(target.read_text(encoding="utf-8"))
         # new确保新增字段存在
@@ -47,6 +48,8 @@ class JsonStorage:
             data["teacher_feedback_files"] = []
         if "teacher_document_edits" not in data:
             data["teacher_document_edits"] = []
+        if "video_analyses" not in data:
+            data["video_analyses"] = []
         return data
 
     def save_project(self, project_id: str, payload: dict) -> None:

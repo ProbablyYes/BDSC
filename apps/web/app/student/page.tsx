@@ -14,8 +14,35 @@ import BudgetPanel from "../budget/BudgetPanel";
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
 type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
-type RightTab = "agents" | "task" | "risk" | "score" | "kg" | "hyper" | "cases" | "feedback" | "interventions" | "poster" | "debug";
+type RightTab =
+  | "agents"
+  | "task"
+  | "risk"
+  | "score"
+  | "kg"
+  | "hyper"
+  | "cases"
+  | "feedback"
+  | "interventions"
+  | "debug";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
+
+type VideoRubricItem = { item: string; score: number; weight: number; status: "ok" | "risk"; reason?: string };
+type VideoAnalysisResult = {
+  overall_score: number | null;
+  score_band: string;
+  rubric: VideoRubricItem[];
+  transcript: string;
+  summary: string;
+  presentation_feedback?: string;
+};
+type VideoAnalysisResponse = {
+  project_id: string;
+  student_id: string;
+  filename: string;
+  created_at: string;
+  analysis: VideoAnalysisResult;
+};
 
 let _msgId = 0;
 
@@ -314,6 +341,12 @@ export default function StudentPage() {
   const [pitchDuration, setPitchDuration] = useState(300);
   const pitchIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // video pitch analysis
+  const [videoAnalysis, setVideoAnalysis] = useState<VideoAnalysisResult | null>(null);
+  const [videoLoading, setVideoLoading] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+
   // new features
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [searchQuery, setSearchQuery] = useState("");
@@ -334,8 +367,8 @@ export default function StudentPage() {
   const [posterDesign, setPosterDesign] = useState<PosterDesign | null>(null);
   const [posterLoading, setPosterLoading] = useState(false);
   const [posterError, setPosterError] = useState("");
-  const [posterImageLoading, setPosterImageLoading] = useState(false);
-  const [posterImageError, setPosterImageError] = useState("");
+  const [posterPanelOpen, setPosterPanelOpen] = useState(false);
+  const [videoPanelOpen, setVideoPanelOpen] = useState(false);
   const modeWelcome = MODE_WELCOME[mode] ?? MODE_WELCOME.coursework;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -439,6 +472,55 @@ export default function StudentPage() {
       setJoinCode("");
       loadMyTeams();
     } catch { setTeamMsg("网络错误"); }
+  }
+
+  async function handleVideoAnalyze() {
+    if (!videoFile) {
+      setVideoError("请先选择要分析的路演视频文件。");
+      return;
+    }
+    const maxMb = 1024;
+    const sizeMb = videoFile.size / (1024 * 1024);
+    if (sizeMb > maxMb + 0.1) {
+      setVideoError(`视频文件过大（约 ${sizeMb.toFixed(1)}MB），请控制在 ${maxMb}MB 以内。`);
+      return;
+    }
+    if (!projectId || !studentId) {
+      setVideoError("项目信息缺失，请刷新页面后重试。");
+      return;
+    }
+
+    setVideoLoading(true);
+    setVideoError(null);
+    try {
+      const fd = new FormData();
+      fd.append("project_id", projectId);
+      fd.append("student_id", studentId || currentUser?.user_id || "");
+      fd.append("class_id", classId);
+      fd.append("cohort_id", cohortId);
+      fd.append("mode", mode);
+      fd.append("competition_type", competitionType);
+      fd.append("conversation_id", conversationId || "");
+      fd.append("file", videoFile);
+
+      const resp = await fetch(`${API_BASE}/api/student/video-analysis`, { method: "POST", body: fd });
+      const data: VideoAnalysisResponse | { detail?: any } = await resp.json().catch(() => ({} as any));
+      if (!resp.ok) {
+        const detail = (data as any)?.detail;
+        setVideoError(typeof detail === "string" ? detail : "视频分析失败，请稍后重试。");
+        return;
+      }
+      const analysis = (data as VideoAnalysisResponse).analysis;
+      if (analysis) {
+        setVideoAnalysis(analysis);
+      } else {
+        setVideoError("后端返回结果格式不完整，稍后再试。");
+      }
+    } catch {
+      setVideoError("网络错误，视频分析请求未完成。");
+    } finally {
+      setVideoLoading(false);
+    }
   }
 
   function handleKgWheel(e: any) {
@@ -824,6 +906,7 @@ export default function StudentPage() {
         body: JSON.stringify({
           project_id: projectId,
           student_id: studentId,
+          conversation_id: conversationId || "",
           mode,
           competition_type: competitionType || "",
           use_latest_context: true,
@@ -836,73 +919,82 @@ export default function StudentPage() {
       if (!data?.poster) {
         throw new Error("后端未返回有效的 PosterDesign 结构");
       }
-      setPosterDesign(data.poster as PosterDesign);
-      setRightTab("poster");
+      let poster = data.poster as PosterDesign;
+
+      // 一键生成图文海报：在成功拿到文案后，立刻串行调用插图接口
+      try {
+        const prompts = poster.image_prompts || [];
+        const promptList: string[] = [];
+        if (prompts[0]) promptList.push(prompts[0]);
+        if (prompts[1]) promptList.push(prompts[1]);
+        if (prompts[2]) promptList.push(prompts[2]);
+
+        if (promptList.length === 0) {
+          const title = (poster.title || "").slice(0, 40);
+          const subtitle = (poster.subtitle || "").slice(0, 60);
+          promptList.push(`${title} | ${subtitle || "中文学生创新项目大赛展演海报插图"}`);
+        }
+
+        // 确保有 3 个 prompt，用于生成上中下三张不同插图
+        const basePrompt = promptList[0];
+        const suffixes = [" — 主视觉插图", " — 使用场景插图", " — 数据与成果插图"];
+        while (promptList.length < 3 && basePrompt) {
+          const idx = promptList.length;
+          promptList.push(`${basePrompt}${suffixes[idx] || " — 补充插图"}`);
+        }
+
+        const orientation = poster.layout?.orientation === "landscape" ? "landscape" : "portrait";
+        const size = orientation === "landscape" ? "1280x720" : "1024x576";
+
+        const urls: string[] = [];
+        for (let i = 0; i < Math.min(promptList.length, 3); i += 1) {
+          const prompt = promptList[i];
+          const imgResp = await fetch(`${API_BASE}/api/poster/generate-image`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              project_id: projectId,
+              student_id: studentId,
+              prompt,
+              orientation,
+              size,
+            }),
+          });
+
+          if (!imgResp.ok) {
+            let msg = "生成插图失败";
+            try {
+              const errJson = await imgResp.json();
+              msg = errJson?.detail || msg;
+            } catch { /* ignore */ }
+            throw new Error(msg);
+          }
+
+          const imgData = await imgResp.json();
+          if (!imgData?.image_url) {
+            throw new Error("后端未返回 image_url");
+          }
+          const url: string = imgData.image_url.startsWith("http") ? imgData.image_url : `${API_BASE}${imgData.image_url}`;
+          urls.push(url);
+        }
+
+        if (urls.length > 0) {
+          const next: any = { ...poster };
+          next.hero_image_url = urls[0];
+          if (urls.length > 1) next.gallery_image_urls = urls.slice(1);
+          poster = next as PosterDesign;
+        }
+      } catch (imgErr: any) {
+        // 插图生成失败不阻塞文案海报，只在错误区提示
+        setPosterError((prev) => prev || imgErr?.message || "生成插图失败");
+      }
+
+      setPosterDesign(poster);
+      setPosterPanelOpen(true);
     } catch (err: any) {
       setPosterError(err?.message || "生成海报失败");
     } finally {
       setPosterLoading(false);
-    }
-  }
-
-  async function generatePosterIllustration() {
-    if (!projectId || !studentId) {
-      alert("请先在顶部选择项目与学生身份");
-      return;
-    }
-    if (!posterDesign) {
-      alert("请先生成海报文案，然后再生成插图");
-      return;
-    }
-    if (posterImageLoading) return;
-
-    setPosterImageLoading(true);
-    setPosterImageError("");
-
-    try {
-      const basePrompt = (() => {
-        const prompts = posterDesign.image_prompts || [];
-        if (prompts.length > 0 && prompts[0]) return prompts[0];
-        const title = (posterDesign.title || "").slice(0, 40);
-        const subtitle = (posterDesign.subtitle || "").slice(0, 60);
-        return `${title} | ${subtitle || "中文学生创新项目路演海报插图"}`;
-      })();
-
-      const orientation = posterDesign.layout?.orientation === "landscape" ? "landscape" : "portrait";
-      const size = orientation === "landscape" ? "1280x720" : "1024x576";
-
-      const resp = await fetch(`${API_BASE}/api/poster/generate-image`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          project_id: projectId,
-          student_id: studentId,
-          prompt: basePrompt,
-          orientation,
-          size,
-        }),
-      });
-
-      if (!resp.ok) {
-        let msg = "生成插图失败";
-        try {
-          const errJson = await resp.json();
-          msg = errJson?.detail || msg;
-        } catch {/* ignore */}
-        throw new Error(msg);
-      }
-
-      const data = await resp.json();
-      if (!data?.image_url) {
-        throw new Error("后端未返回 image_url");
-      }
-      const url: string = data.image_url.startsWith("http") ? data.image_url : `${API_BASE}${data.image_url}`;
-
-      setPosterDesign((prev) => (prev ? { ...prev, hero_image_url: url } : prev));
-    } catch (err: any) {
-      setPosterImageError(err?.message || "生成插图失败");
-    } finally {
-      setPosterImageLoading(false);
     }
   }
 
@@ -1265,6 +1357,48 @@ export default function StudentPage() {
             {rightOpen ? "收起" : "分析面板"}
           </button>
 
+          {/* 视频路演分析入口：打开独立视频分析面板 */}
+          <button
+            type="button"
+            className="topbar-icon-btn"
+            onClick={() => setVideoPanelOpen(true)}
+            title="路演视频分析（上传小视频获取 Rubric 评分）"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="13" height="14" rx="2" />
+              <polygon points="17 8 21 6 21 18 17 16 17 8" />
+            </svg>
+          </button>
+
+          {/* 项目海报：改为仅图标按钮 */}
+          <button
+            type="button"
+            className="topbar-icon-btn"
+            onClick={() => setPosterPanelOpen(true)}
+            disabled={posterLoading}
+            title={posterLoading ? "生成海报中…" : "项目海报"}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {/* 画布框 */}
+              <rect x="4" y="3" width="16" height="14" rx="2" />
+              {/* 标题线 */}
+              <path d="M8 8h8" />
+              {/* 内容线 */}
+              <path d="M8 12h5" />
+              {/* 支架 */}
+              <path d="M10 21l2-4 2 4" />
+            </svg>
+          </button>
+
           <div className="topbar-dock">
             {/* Chat */}
             <Link href="/chat" className="dock-item">
@@ -1418,6 +1552,311 @@ export default function StudentPage() {
         <div className="budget-panel-overlay">
           <div className="budget-panel-container">
             <BudgetPanel userId={currentUser.user_id} onClose={() => setBudgetPanelOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* ── Video Analysis Panel (triggered from TopBar) ── */}
+      {videoPanelOpen && (
+        <div
+          className="poster-panel-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget) setVideoPanelOpen(false); }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 60,
+            background: "radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(2,6,23,0.98))",
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <div
+            className="poster-panel-container"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(960px, 100%)",
+              maxHeight: "min(92vh, 900px)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
+              padding: 24,
+              borderRadius: 24,
+              background: "rgba(15,23,42,0.96)",
+              boxShadow: "0 30px 80px rgba(0,0,0,0.85)",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              className="poster-panel-header"
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                marginBottom: 6,
+                position: "relative",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 17, letterSpacing: 1 }}>路演视频分析（Beta）</h3>
+              <button
+                type="button"
+                className="topbar-icon-btn"
+                onClick={() => setVideoPanelOpen(false)}
+                style={{ fontSize: 18, position: "absolute", right: 0, top: 0 }}
+              >
+                ✕
+              </button>
+            </div>
+            <p
+              className="panel-desc"
+              style={{ textAlign: "center", maxWidth: 640, margin: "4px auto 12px", fontSize: 13 }}
+            >
+              上传一段不超过约 3 分钟的小视频（建议 mp4 / mov / webm），系统会先转写语音，再按 Rubric 帮你看整体表现，并结合当前对话上下文给出点评。
+            </p>
+
+            <div className="right-section sc-panel" style={{ marginTop: 8 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/x-msvideo"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] ?? null;
+                    setVideoFile(f);
+                    setVideoError(null);
+                    if (f) setVideoAnalysis(null);
+                  }}
+                />
+                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                  建议：控制在 1GB 以内，环境安静、口齿清晰，可以先用右上角“路演计时”功能练习一遍再录制。
+                </div>
+                <button
+                  type="button"
+                  className="tch-sm-btn"
+                  onClick={handleVideoAnalyze}
+                  disabled={videoLoading || !videoFile}
+                  style={{ alignSelf: "flex-start" }}
+                >
+                  {videoLoading ? "正在分析视频…" : "开始分析路演视频"}
+                </button>
+                {videoError && <div style={{ color: "#e07070", fontSize: 12 }}>{videoError}</div>}
+              </div>
+
+              {videoAnalysis ? (() => {
+                const total = videoAnalysis.overall_score ?? 0;
+                const totalColor = total >= 7 ? "var(--accent-green,#22c55e)" : total >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
+                const circumf = 2 * Math.PI * 42;
+                const offset = circumf * (1 - total / 10);
+                const rubric = videoAnalysis.rubric ?? [];
+                return (
+                  <>
+                    <div className="sc-hero">
+                      <div className="sc-hero-ring-wrap">
+                        <svg width="104" height="104" viewBox="0 0 104 104">
+                          <circle cx="52" cy="52" r="42" fill="none" stroke="var(--border)" strokeWidth="8" />
+                          <circle cx="52" cy="52" r="42" fill="none" stroke={totalColor} strokeWidth="8"
+                            strokeDasharray={circumf} strokeDashoffset={offset}
+                            strokeLinecap="round" transform="rotate(-90 52 52)" style={{ transition: "stroke-dashoffset .5s ease" }} />
+                          <text x="52" y="48" textAnchor="middle" fontSize="24" fontWeight="800" fill={totalColor}>{total.toFixed(1)}</text>
+                          <text x="52" y="64" textAnchor="middle" fontSize="10" fill="var(--text-muted)">/10</text>
+                        </svg>
+                      </div>
+                      <div className="sc-hero-meta">
+                        {videoAnalysis.score_band && <span className="sc-meta-chip">{videoAnalysis.score_band}</span>}
+                        <span className="sc-meta-chip">语音转写 + Rubric 评分</span>
+                      </div>
+                    </div>
+
+                    <div className="sc-dim-list">
+                      {rubric.map((r) => {
+                        const pct = Math.min(100, (r.score / 10) * 100);
+                        const clr = pct >= 70 ? "var(--accent-green,#22c55e)" : pct >= 40 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
+                        const levelLabel = pct >= 70 ? "达标" : pct >= 40 ? "一般" : "薄弱";
+                        return (
+                          <details key={r.item} className="sc-dim-card">
+                            <summary className="sc-dim-head">
+                              <div className="sc-dim-info">
+                                <span className="sc-dim-name">{r.item}</span>
+                                <span className="sc-dim-level" style={{ color: clr }}>{levelLabel}</span>
+                              </div>
+                              <div className="sc-dim-bar-wrap">
+                                <div className="sc-dim-bar-track"><div className="sc-dim-bar-fill" style={{ width: `${pct}%`, background: clr }} /></div>
+                                <span className="sc-dim-score" style={{ color: clr }}>{r.score.toFixed(1)}</span>
+                              </div>
+                            </summary>
+                            {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
+                          </details>
+                        );
+                      })}
+                    </div>
+
+                    {videoAnalysis.presentation_feedback && (() => {
+                      const raw = videoAnalysis.presentation_feedback || "";
+                      // 去掉可能残留的 Markdown 加粗符号等
+                      const cleaned = raw.replace(/\*\*/g, "").trim();
+                      const blocks = cleaned.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+                      return (
+                        <details className="sc-principles" open>
+                          <summary>路演表现点评</summary>
+                          <div className="sc-principles-list">
+                            {blocks.length > 0 ? (
+                              blocks.map((p, idx) => (
+                                <div key={idx} className="sc-principle-item" style={{ whiteSpace: "pre-wrap", marginBottom: idx === blocks.length - 1 ? 0 : 8 }}>
+                                  {p}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="sc-principle-item" style={{ whiteSpace: "pre-wrap" }}>{cleaned}</div>
+                            )}
+                          </div>
+                        </details>
+                      );
+                    })()}
+
+                    {videoAnalysis.transcript && (
+                      <details className="sc-principles">
+                        <summary>语音转写逐字稿（前 2000 字）</summary>
+                        <div className="sc-principles-list">
+                          <div className="sc-principle-item" style={{ whiteSpace: "pre-wrap" }}>
+                            {videoAnalysis.transcript.slice(0, 2000)}
+                            {videoAnalysis.transcript.length > 2000 ? " …" : ""}
+                          </div>
+                        </div>
+                      </details>
+                    )}
+                  </>
+                );
+              })() : !videoLoading && (
+                <p className="right-hint">选择并上传路演视频后，这里会显示评分与点评。</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Poster Panel (triggered from TopBar) ── */}
+      {posterPanelOpen && (
+        <div
+          className="poster-panel-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget) setPosterPanelOpen(false); }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 60,
+            background: "radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(2,6,23,0.98))",
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <div
+            className="poster-panel-container"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(1040px, 100%)",
+              maxHeight: "min(92vh, 980px)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: 24,
+              borderRadius: 24,
+              background: "rgba(15,23,42,0.96)",
+              boxShadow: "0 30px 80px rgba(0,0,0,0.85)",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              className="poster-panel-header"
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                marginBottom: 6,
+                position: "relative",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 17, letterSpacing: 1 }}>项目路演海报</h3>
+              <button
+                type="button"
+                className="topbar-icon-btn"
+                onClick={() => setPosterPanelOpen(false)}
+                style={{ fontSize: 18, position: "absolute", right: 0, top: 0 }}
+              >
+                ✕
+              </button>
+            </div>
+            <p
+              className="panel-desc"
+              style={{ textAlign: "center", maxWidth: 640, margin: "4px auto 12px", fontSize: 13 }}
+            >
+              基于当前项目诊断和知识图谱，一键生成图文并茂的路演海报：上方按钮会自动生成海报文案并调用视觉模型生成插图。
+            </p>
+            <div
+              style={{
+                margin: "4px 0 16px",
+                display: "flex",
+                gap: 12,
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <button
+                type="button"
+                className="tch-sm-btn"
+                onClick={generatePosterFromCurrentProject}
+                disabled={posterLoading}
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+              >
+                {posterLoading ? (
+                  "正在生成图文海报…"
+                ) : (
+                  <>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="4" y="3" width="16" height="14" rx="2" />
+                      <path d="M8 8h8" />
+                      <path d="M8 12h5" />
+                    </svg>
+                    <span>一键生成图文路演海报</span>
+                  </>
+                )}
+              </button>
+            </div>
+            {latestResult && !posterDesign && !posterLoading && (
+              <p className="right-hint" style={{ textAlign: "center", marginTop: 0 }}>
+                已检测到诊断结果，可先一键生成海报文案，然后再生成插图。
+              </p>
+            )}
+            {posterError && (
+              <p className="right-hint" style={{ color: "#e07070", textAlign: "center", marginTop: 4 }}>
+                {posterError}
+              </p>
+            )}
+            {posterDesign ? (
+              <PosterPreview design={posterDesign} onChange={setPosterDesign} mode="view" />
+            ) : !posterLoading ? (
+              <p className="right-hint" style={{ textAlign: "center", marginTop: 8 }}>
+                先在左侧描述你的项目或上传计划书，然后点击上方按钮生成第一版路演海报。
+              </p>
+            ) : null}
           </div>
         </div>
       )}
@@ -1666,7 +2105,6 @@ export default function StudentPage() {
                 { id: "cases",  label: "案例" },
                 { id: "feedback", label: "批注" },
                 { id: "interventions", label: "教师任务" },
-                { id: "poster", label: "海报" },
                 { id: "debug",  label: "调试" },
               ] as { id: RightTab; label: string }[]).map((t) => (
                 <button key={t.id} className={`rtab-pill ${rightTab === t.id ? "active" : ""}`} onClick={() => { setRightTab(t.id); if (t.id === "feedback") loadFeedback(); if (t.id === "interventions") loadInterventions(); }}>
@@ -3444,41 +3882,6 @@ export default function StudentPage() {
                       )}
                     </div>
                   )) : <p className="right-hint">暂无教师下发任务。老师审核并发送后会显示在这里。</p>}
-                </div>
-              )}
-
-              {rightTab === "poster" && (
-                <div className="right-section">
-                  <h4>项目路演海报</h4>
-                  <div className="panel-desc">基于当前项目诊断和知识图谱自动生成的一页式海报草稿，你可以在这里微调标题和要点文案，然后复制或打印导出。</div>
-                  <div style={{ margin: "8px 0 10px", display: "flex", justifyContent: "space-between", gap: 8 }}>
-                    <button
-                      type="button"
-                      className="tch-sm-btn"
-                      onClick={generatePosterFromCurrentProject}
-                      disabled={posterLoading}
-                    >
-                      {posterLoading ? "正在生成海报…" : "根据当前项目生成路演海报"}
-                    </button>
-                    <button
-                      type="button"
-                      className="tch-sm-btn secondary"
-                      onClick={generatePosterIllustration}
-                      disabled={posterImageLoading || !posterDesign}
-                    >
-                      {posterImageLoading ? "正在生成插图…" : "为海报生成插图"}
-                    </button>
-                  </div>
-                  {latestResult && !posterDesign && !posterLoading && (
-                    <p className="right-hint">已检测到诊断结果，可先一键生成海报文案，然后再生成插图。</p>
-                  )}
-                  {posterError && <p className="right-hint" style={{ color: "#e07070" }}>{posterError}</p>}
-                  {posterImageError && <p className="right-hint" style={{ color: "#e07070" }}>{posterImageError}</p>}
-                  {posterDesign ? (
-                    <PosterPreview design={posterDesign} onChange={setPosterDesign} />
-                  ) : !posterLoading ? (
-                    <p className="right-hint">先在左侧描述你的项目或上传计划书，然后点击上方按钮生成第一版路演海报。</p>
-                  ) : null}
                 </div>
               )}
 

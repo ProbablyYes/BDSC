@@ -55,6 +55,7 @@ from app.schemas import (
     TeacherFeedbackResponse,
     TeamUpdatePayload,
     UploadAnalysisResponse,
+    VideoAnalysisResponse,
     PosterImageGeneratePayload,
     PosterImageGenerateResponse,
 )
@@ -67,6 +68,7 @@ from app.services.graph_workflow import init_workflow_services
 from app.services.hypergraph_service import HypergraphService
 from app.services.llm_client import LlmClient
 from app.services.image_client import ImageClient
+from app.services.video_pitch_analyzer import VideoPitchAnalyzer
 from app.services.rag_engine import RagEngine
 from app.services.budget_storage import BudgetStorage
 from app.services.chat_storage import ChatStorage
@@ -85,9 +87,14 @@ app.add_middleware(
 )
 
 settings.upload_root.mkdir(parents=True, exist_ok=True)
+settings.video_upload_root.mkdir(parents=True, exist_ok=True)
 settings.teacher_examples_root.mkdir(parents=True, exist_ok=True)
 
+# 学生文档上传（计划书等）
 app.mount("/uploads", StaticFiles(directory=str(settings.upload_root)), name="uploads")
+
+# 路演视频上传，可按需用于日后预览
+app.mount("/video_uploads", StaticFiles(directory=str(settings.video_upload_root)), name="video_uploads")
 
 json_store = JsonStorage(settings.data_root / "project_state")
 conv_store = ConversationStorage(settings.data_root / "conversations")
@@ -1120,10 +1127,248 @@ def teacher_intervention_impact(teacher_id: str) -> dict[str, Any]:
     return _build_teacher_intervention_impact(teacher_id)
 
 
+def _compute_system_health() -> dict[str, Any]:
+    """Compute multi-dimensional system health scores for admin dashboard.
+
+    This aggregates project quality, risk control, system stability and
+    teaching engagement into a single health score in [0, 100]. The
+    formulas are aligned with apps/web/app/admin/health.md.
+    """
+
+    # ── 1) Project quality Q (based on /api/admin/projects) ──
+    projects_data = admin_projects_overview(limit=0)
+    projects = list((projects_data or {}).get("projects", []) or [])
+    project_count = len(projects)
+
+    scores: list[float] = []
+    low_count = 0
+    for proj in projects:
+        sc = _safe_float(proj.get("overall_score", 0))
+        scores.append(sc)
+        if sc < 6.0:
+            low_count += 1
+
+    avg_score = sum(scores) / project_count if project_count else 0.0
+    low_ratio = (low_count / project_count) if project_count else 0.0
+
+    Q_neutral = 60.0
+
+    def _quality_base(mean_score: float) -> float:
+        if mean_score <= 0:
+            return 40.0
+        if mean_score <= 6.0:
+            return 40.0 + 20.0 * (mean_score / 6.0)
+        if mean_score <= 8.5:
+            return 60.0 + 25.0 * ((mean_score - 6.0) / 2.5)
+        top = min(mean_score, 10.0)
+        return 85.0 + 10.0 * ((top - 8.5) / 1.5)
+
+    if project_count:
+        q_base = _quality_base(avg_score)
+        q_penalty = min(20.0, 40.0 * low_ratio)
+        q_raw = q_base - q_penalty
+        k_q = min(1.0, project_count / 50.0)
+        q_score = (1.0 - k_q) * Q_neutral + k_q * q_raw
+    else:
+        q_base = Q_neutral
+        q_penalty = 0.0
+        q_raw = Q_neutral
+        q_score = Q_neutral
+
+    # ── 2) Risk control R (high-risk project ratio + weighted rules) ──
+    R_neutral = 60.0
+    high_risk_count = 0
+    weighted_rule_hits = 0.0
+
+    if project_count:
+        for proj in projects:
+            pid = _safe_str(proj.get("project_id", ""))
+            if not pid:
+                continue
+            project_state = json_store.load_project(pid)
+            submissions = list(project_state.get("submissions", []) or [])
+            latest_sub: dict[str, Any] | None = submissions[-1] if submissions else None
+            diag = (
+                latest_sub.get("diagnosis", {})
+                if isinstance(latest_sub, dict) and isinstance(latest_sub.get("diagnosis"), dict)
+                else {}
+            )
+            overall_score = _safe_float(diag.get("overall_score", proj.get("overall_score", 0)))
+            triggered_rules = diag.get("triggered_rules", []) or []
+
+            level = _risk_level(overall_score, triggered_rules)
+            if level == "高":
+                high_risk_count += 1
+
+            for rule in triggered_rules:
+                if isinstance(rule, dict):
+                    sev = str(rule.get("severity") or "").lower()
+                    if sev == "high":
+                        weight = 3.0
+                    elif sev == "medium":
+                        weight = 2.0
+                    else:
+                        weight = 1.0
+                else:
+                    weight = 1.0
+                weighted_rule_hits += weight
+
+        p_hr = high_risk_count / max(project_count, 1)
+        r_avg = weighted_rule_hits / max(project_count, 1)
+
+        if p_hr <= 0.3:
+            r_hr = 100.0 - 60.0 * (p_hr / 0.3 if p_hr > 0 else 0.0)
+        else:
+            r_hr = 40.0 - 20.0 * ((p_hr - 0.3) / 0.7)
+
+        r_penalty_avg = min(25.0, max(0.0, r_avg - 1.0) * 5.0)
+        r_raw = r_hr - r_penalty_avg
+        k_r = min(1.0, project_count / 50.0)
+        r_score = (1.0 - k_r) * R_neutral + k_r * r_raw
+    else:
+        p_hr = 0.0
+        r_avg = 0.0
+        r_hr = 100.0
+        r_penalty_avg = 0.0
+        r_raw = R_neutral
+        r_score = R_neutral
+
+    # ── 3) System stability S (from access logs) ──
+    logs_data = _load_access_logs()
+    stats = (logs_data or {}).get("stats", {}) or {}
+    total_requests = int(stats.get("total_requests", 0) or 0)
+    success_count = int(stats.get("success_count", 0) or 0)
+    error_count = int(stats.get("error_count", 0) or 0)
+    blocked_count = int(stats.get("blocked_count", 0) or 0)
+    avg_duration_ms = float(stats.get("avg_duration_ms", 0.0) or 0.0)
+    p95_duration_ms = float(stats.get("p95_duration_ms", 0.0) or 0.0)
+
+    denom = max(total_requests, 1)
+    p_succ = success_count / denom
+    p_err = error_count / denom
+    p_blk = blocked_count / denom
+
+    # Stability dimension: score equals success rate plus blocked rate (converted to percentage)
+    s_raw = (p_succ + p_blk) * 100.0
+    s_score = s_raw
+
+    # ── 4) Teaching engagement E (from interventions + users) ──
+    interventions_data = admin_interventions()
+    summary = (interventions_data or {}).get("summary", {}) or {}
+    total_interventions = int(summary.get("total_interventions", 0) or 0)
+    teachers_with_interventions = int(summary.get("teacher_count", 0) or 0)
+    students_with_interventions = int(summary.get("student_count", 0) or 0)
+
+    all_teachers = user_store.list_users(role="teacher")
+    all_students = user_store.list_users(role="student")
+    total_teachers = len(all_teachers)
+    total_students = len(all_students)
+
+    c_teacher = teachers_with_interventions / max(total_teachers, 1) if total_teachers else 0.0
+    c_student = students_with_interventions / max(total_students, 1) if total_students else 0.0
+
+    status_counts = summary.get("status_counts", {}) or {}
+    completed_count = int(status_counts.get("completed", 0) or 0) if isinstance(status_counts, dict) else 0
+    c_done = completed_count / max(total_interventions, 1) if total_interventions else 0.0
+
+    def _engagement_subscore(c: float) -> float:
+        c = max(0.0, min(1.0, c))
+        if c <= 0.8:
+            return 40.0 + 55.0 * (c / 0.8 if c > 0 else 0.0)
+        return 95.0 + 5.0 * ((c - 0.8) / 0.2)
+
+    if total_interventions:
+        e_teacher = _engagement_subscore(c_teacher)
+        e_student = _engagement_subscore(c_student)
+        e_done = _engagement_subscore(c_done)
+        e_raw = 0.3 * e_teacher + 0.4 * e_student + 0.3 * e_done
+        k_e = min(1.0, total_interventions / 50.0)
+        e_score = (1.0 - k_e) * 60.0 + k_e * e_raw
+    else:
+        e_teacher = _engagement_subscore(0.0)
+        e_student = _engagement_subscore(0.0)
+        e_done = _engagement_subscore(0.0)
+        e_raw = 60.0
+        e_score = 60.0
+
+    # ── 5) Final health score H ──
+    # Weights: quality (Q), risk (R), stability (S), engagement (E)
+    # Sum to 1.0: 0.20 + 0.15 + 0.55 + 0.10 = 1.0
+    w_q = 0.20
+    w_r = 0.15
+    w_s = 0.55
+    w_e = 0.10
+
+    def _clamp_score(v: float) -> float:
+        return max(0.0, min(100.0, v))
+
+    q_score = _clamp_score(q_score)
+    r_score = _clamp_score(r_score)
+    s_score = _clamp_score(s_score)
+    e_score = _clamp_score(e_score)
+
+    h_score = w_q * q_score + w_r * r_score + w_s * s_score + w_e * e_score
+    h_score = _clamp_score(h_score)
+
+    def _round1(v: float) -> float:
+        return round(v * 10.0) / 10.0
+
+    return {
+        "health_score": _round1(h_score),
+        "quality_score": _round1(q_score),
+        "risk_score": _round1(r_score),
+        "stability_score": _round1(s_score),
+        "engagement_score": _round1(e_score),
+        "weights": {
+            "quality": w_q,
+            "risk": w_r,
+            "stability": w_s,
+            "engagement": w_e,
+        },
+        "quality_detail": {
+            "project_count": project_count,
+            "avg_score": round(avg_score, 2) if project_count else 0.0,
+            "low_score_ratio": round(low_ratio, 3) if project_count else 0.0,
+            "base_score": round(q_base, 2),
+            "penalty_low_ratio": round(q_penalty, 2),
+        },
+        "risk_detail": {
+            "project_count": project_count,
+            "high_risk_project_ratio": round(p_hr, 3) if project_count else 0.0,
+            "high_risk_project_count": high_risk_count,
+            "avg_weighted_rule_hits": round(r_avg, 3) if project_count else 0.0,
+        },
+        "stability_detail": {
+            "total_requests": total_requests,
+            "success_rate": round(p_succ, 3) if total_requests else 0.0,
+            "error_rate": round(p_err, 3) if total_requests else 0.0,
+            "blocked_rate": round(p_blk, 3) if total_requests else 0.0,
+            "avg_duration_ms": avg_duration_ms,
+            "p95_duration_ms": p95_duration_ms,
+        },
+        "engagement_detail": {
+            "total_interventions": total_interventions,
+            "teacher_coverage": round(c_teacher, 3) if total_teachers else 0.0,
+            "student_coverage": round(c_student, 3) if total_students else 0.0,
+            "done_ratio": round(c_done, 3) if total_interventions else 0.0,
+            "teacher_with_interventions": teachers_with_interventions,
+            "student_with_interventions": students_with_interventions,
+            "total_teachers": total_teachers,
+            "total_students": total_students,
+        },
+    }
+
+
 @app.get("/api/admin/logs")
 def admin_logs() -> dict:
     """Admin view of access logs + aggregate statistics."""
     return _load_access_logs()
+
+
+@app.get("/api/admin/health")
+def admin_health() -> dict[str, Any]:
+    """Return overall system health scores for admin dashboard."""
+    return _compute_system_health()
 
 
 @app.post("/api/admin/logs/unauthorized")
@@ -2313,6 +2558,122 @@ async def upload_and_analyze(
     )
 
 
+@app.post("/api/student/video-analysis", response_model=VideoAnalysisResponse)
+async def student_video_analysis(
+    project_id: str = Form(...),
+    student_id: str = Form(...),
+    class_id: str = Form(""),
+    cohort_id: str = Form(""),
+    mode: str = Form("competition"),
+    competition_type: str = Form(""),
+    conversation_id: str = Form(""),
+    file: UploadFile = File(...),
+) -> VideoAnalysisResponse:
+    """学生端路演视频同步分析接口。
+
+    特点：
+    - 与多智能体对话工作流解耦，不写入 agent_trace；
+    - 使用语音转写 + 诊断引擎 Rubric 打分；
+    - 结果持久化到 project_state.video_analyses，便于教师和学生事后回看。
+    """
+
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="请上传有效的视频文件。")
+
+    analyzer = VideoPitchAnalyzer()
+    safe_mode = (mode or "competition").strip() or "competition"
+    safe_comp = (competition_type or "").strip()
+
+    # 构造与当前对话相关的精简上下文，帮助模型理解项目背景
+    project_state = json_store.load_project(project_id)
+    ctx_summary = ""
+    latest_user_msg = ""
+    conv_id_val = (conversation_id or "").strip() or None
+    try:
+        ctx_summary, _latest_sub = _summarize_latest_diagnosis_for_poster(
+            project_state,
+            student_id=student_id or None,
+            conversation_id=conv_id_val,
+        )
+    except Exception:  # noqa: BLE001
+        ctx_summary = ""
+    try:
+        latest_user_msg = _get_latest_user_message(
+            project_id,
+            conversation_id=conv_id_val,
+            student_id=student_id or None,
+        )
+    except Exception:  # noqa: BLE001
+        latest_user_msg = ""
+
+    ctx_parts: list[str] = []
+    if ctx_summary:
+        ctx_parts.append("【诊断概要】" + str(ctx_summary)[:800])
+    if latest_user_msg:
+        ctx_parts.append("【最近学生说明】" + str(latest_user_msg)[:800])
+    context_text = "\n\n".join(ctx_parts)
+
+    upload_target = settings.video_upload_root / project_id
+    upload_target.mkdir(parents=True, exist_ok=True)
+    target_path = upload_target / file.filename
+
+    content = await file.read()
+    try:
+        target_path.write_bytes(content)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed to save uploaded video for %s: %s", project_id, exc)
+        raise HTTPException(status_code=500, detail="保存视频文件失败，请稍后重试。") from exc
+
+    try:
+        analysis = analyzer.analyze(
+            video_path=target_path,
+            mode=safe_mode,
+            competition_type=safe_comp,
+            filename=file.filename,
+            context_text=context_text,
+        )
+    except ValueError as exc:
+        # 用户输入问题（文件过大/格式不支持/内容过短等）
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        # 环境或模型未配置好
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Video analysis failed for %s: %s", project_id, exc)
+        raise HTTPException(status_code=500, detail="视频分析失败，请稍后重试。") from exc
+
+    created_at = datetime.utcnow()
+
+    # 持久化到 project_state.video_analyses（不影响 submissions/agent_trace）
+    records = project_state.get("video_analyses") or []
+    if not isinstance(records, list):
+        records = []
+    record = {
+        "project_id": project_id,
+        "student_id": student_id,
+        "class_id": class_id or None,
+        "cohort_id": cohort_id or None,
+        "mode": safe_mode,
+        "competition_type": safe_comp,
+        "filename": file.filename,
+        "created_at": created_at.isoformat() + "Z",
+        "analysis": analysis,
+    }
+    records.append(record)
+    project_state["video_analyses"] = records
+    json_store.save_project(project_id, project_state)
+
+    return VideoAnalysisResponse(
+        project_id=project_id,
+        student_id=student_id,
+        filename=file.filename,
+        created_at=created_at,
+        analysis=analysis,
+    )
+
+
 def _compose_assistant_message(
     user_message: str,
     coach: dict,
@@ -2917,14 +3278,30 @@ def document_review(payload: dict):
     return {"annotations": annotations}
 
 
-def _summarize_latest_diagnosis_for_poster(project_state: dict) -> tuple[str, dict]:
+def _summarize_latest_diagnosis_for_poster(
+    project_state: dict,
+    student_id: str | None = None,
+    conversation_id: str | None = None,
+) -> tuple[str, dict]:
     """Build a compact text summary of the latest diagnosis context for poster generation.
 
     Returns (summary_text, latest_submission_dict).
+
+    If conversation_id is provided, only submissions from that conversation
+    are considered. Otherwise, if student_id is provided, submissions are
+    limited to that student.
     """
 
     submissions = list(project_state.get("submissions", []) or [])
-    latest: dict[str, Any] | None = submissions[-1] if submissions else None
+
+    scoped: list[dict] = submissions
+    if conversation_id:
+        scoped = [s for s in submissions if str(s.get("conversation_id") or "") == conversation_id]
+    elif student_id:
+        sid_norm = student_id.strip()
+        scoped = [s for s in submissions if str(s.get("student_id") or "").strip() == sid_norm]
+
+    latest: dict[str, Any] | None = scoped[-1] if scoped else None
     if not latest:
         return "", {}
 
@@ -2988,13 +3365,44 @@ def _summarize_latest_diagnosis_for_poster(project_state: dict) -> tuple[str, di
     return "\n".join(lines), latest
 
 
-def _get_latest_user_message(project_id: str) -> str:
-    """Fetch the latest user message content from ConversationStorage (best-effort)."""
+def _get_latest_user_message(
+    project_id: str,
+    conversation_id: str | None = None,
+    student_id: str | None = None,
+) -> str:
+    """Fetch the latest user message content from ConversationStorage.
+
+    If conversation_id is provided, messages are taken strictly from that
+    conversation so that poster generation only反映当前这一条对话记录。
+    """
 
     try:
+        # If we know the exact conversation, only use its messages.
+        if conversation_id:
+            conv = conv_store.get(project_id, conversation_id)
+            if not conv:
+                return ""
+            msgs = conv.get("messages") or []
+            for m in reversed(msgs):
+                if isinstance(m, dict) and m.get("role") == "user":
+                    text = str(m.get("content") or "").strip()
+                    if text:
+                        return text
+            return ""
+
+        # Fallback to previous behaviour (best-effort) when no conversation
+        # is provided — primarily for legacy callers.
         convs = conv_store.list_conversations(project_id)
         if not convs:
             return ""
+
+        # Optionally narrow to the same student if that metadata is present.
+        if student_id:
+            sid_norm = student_id.strip()
+            scoped_convs = [c for c in convs if str(c.get("student_id") or "").strip() == sid_norm]
+            if scoped_convs:
+                convs = scoped_convs
+
         latest_conv_id = str(convs[0].get("conversation_id"))
         conv = conv_store.get(project_id, latest_conv_id)
         if not conv:
@@ -3028,17 +3436,37 @@ def generate_poster(payload: PosterGeneratePayload) -> PosterGenerateResponse:
     if not project_id or not student_id:
         raise HTTPException(status_code=400, detail="project_id 和 student_id 不能为空")
 
+    conv_id = (getattr(payload, "conversation_id", "") or "").strip() or None
+
+    # Try to read the current conversation's title / summary so that the
+    # poster generation can stay strictly aligned with "this" dialogue,
+    # instead of hallucinating一个完全不同的项目名称。
+    conv_title = ""
+    conv_summary = ""
+    if conv_id:
+        try:
+            conv_meta = conv_store.get(project_id, conv_id) or {}
+            conv_title = str(conv_meta.get("title") or "").strip()
+            conv_summary = str(conv_meta.get("summary") or "").strip()
+        except Exception:
+            conv_title = ""
+            conv_summary = ""
+
     project_state = json_store.load_project(project_id)
 
     # ── collect text sources ──
     base_text = (payload.source_text or "").strip()
-    diag_summary, latest_sub = _summarize_latest_diagnosis_for_poster(project_state)
+    diag_summary, latest_sub = _summarize_latest_diagnosis_for_poster(
+        project_state,
+        student_id=student_id,
+        conversation_id=conv_id,
+    )
     latest_raw = str(latest_sub.get("raw_text") or "").strip() if latest_sub else ""
 
     if payload.use_latest_context and not base_text and latest_raw:
         base_text = latest_raw
 
-    latest_user_msg = _get_latest_user_message(project_id)
+    latest_user_msg = _get_latest_user_message(project_id, conversation_id=conv_id, student_id=student_id)
 
     if not base_text and not diag_summary and not latest_user_msg:
         raise HTTPException(status_code=400, detail="暂无可用项目上下文，请先在对话中描述一下你的项目或完成一次诊断")
@@ -3054,33 +3482,72 @@ def generate_poster(payload: PosterGeneratePayload) -> PosterGenerateResponse:
 
     system_prompt = (
         "你是一名资深的创业路演海报设计师，擅长为学生项目做一页式中文项目海报设计。\n"
-        "现在需要你根据项目文本和最近一次诊断结果，给出一份 *结构化* 的海报设计方案 PosterDesign。\n\n"
+        "你的目标：让路人或评委在【3 秒内】看懂这个项目——第一眼被画面和痛点吸引，第二眼知道你做什么，第三眼看到关键数据和护城河。\n\n"
+        "现在需要你根据项目文本和最近一次诊断结果，给出一份 *结构化* 的海报设计方案 PosterDesign，用于线下/线上路演宣传海报。\n\n"
         "必须严格输出一个 JSON 对象，字段如下（不要额外增加顶层字段）：\n"
         "{\n"
-        '  "title": 项目海报主标题（不超过 18 字，适合路演现场海报顶部）,\n'
-        '  "subtitle": 副标题 / 一句话电梯陈述（不超过 40 字）,\n'
+        '  "title": 项目名称或品牌名（不超过 16 字，用于海报顶部或左上角，品牌辨识度要强）,\n'
+        '  "subtitle": Slogan / 一句话定位（不超过 40 字，用“为谁 + 做什么 + 带来什么价值”讲清楚）,\n'
         '  "sections": [\n'
-        '    { "id": "hero" | 自定义ID, "title": 分区标题, "bullets": [精炼要点...], "highlight": true/false },\n'
+        '    { "id": "hero" | "problem" | "solution" | "advantages" | "data" | "cta" | "team" | 自定义ID, "title": 分区标题, "bullets": [精炼要点...], "highlight": true/false },\n'
         '    ...\n'
         '  ],\n'
         '  "layout": {\n'
         '    "orientation": "portrait" | "landscape",  // 竖版或横版\n'
-        '    "grid": 如 "3x3"、"2x4"，表示大致分区网格结构,\n'
+        '    "grid": 如 "3x4"、"2x4"，表示大致分区网格结构,\n'
         '    "accent_area": 建议突出区域，例如 "top_left"、"center"、"right_column" 等\n'
         '  },\n'
-        '  "theme": 配色/风格标签，如 "tech_blue"、"youthful_gradient"、"minimal_black",\n'
-        '  "image_prompts": [若干用于背景图/插画的英文或中文 prompt],\n'
+        '  "theme": 配色/风格标签，如 "tech_blue"、"youthful_gradient"、"minimal_black"、"warm_orange"、"deep_navy"、"green_growth",\n'
+        '  "image_prompts": [\n'
+        '    // 至少 3 条，用于一次性生成多张插图：\n'
+        '    // image_prompts[0]: 第一眼抓人眼球的主视觉（项目场景或核心痛点/成果），\n'
+        '    // image_prompts[1]: 使用场景或“传统方案 vs 我们方案”的对比画面，\n'
+        '    // image_prompts[2]: 数据/奖项/里程碑相关的可视化画面。\n'
+        '    // 每条需描述画面主体、场景、风格和光影，例如\n'
+        '    // "futuristic isometric illustration of campus startup pitch, neon blue, high contrast"\n'
+        '  ],\n'
         '  "export_hint": 推荐纸张/分辨率，例如 "A3 纵向，适合现场展板" 或 "1080x1920 竖屏海报"\n'
         "}\n\n"
-        "要求：\n"
-        "1. 文案要简短有力，适合印在 A3 一页纸海报上，优先使用 3-6 字的小标题 + 10-18 字要点。\n"
-        "2. 至少包含这些分区：项目概览/亮点、目标用户与痛点、解决方案与关键功能、商业或成果亮点（视模式而定）、比赛/路演加分点。\n"
-        "3. 如果诊断里有评分/风险/知识图谱/超图洞察，请把【优势】转成亮点分区，把【风险和缺口】转成提醒或 TODO 分区，但文案保持积极建设性。\n"
-        "4. theme 字段尽量从语义上贴合项目气质，例如校园公益可以用 \"warm_orange\"，前沿技术可以用 \"tech_blue\" 或 \"deep_navy\"。\n"
-        "5. 禁止在 JSON 外输出任何说明文字、注释或 markdown，只能返回上述结构的 JSON。\n"
+        "要求（严格遵守）：\n"
+        "1. 遵循“三秒原则”：\n"
+        "   - 第 1 秒（第一眼）：hero 分区 + 主视觉插图，要用一句话或 1-2 个亮点钩住读者，文案可以偏情绪/冲击。\n"
+        "   - 第 2 秒（第二眼）：title + subtitle 让人一眼知道你是“为谁解决什么问题”。\n"
+        "   - 第 3 秒（第三眼）：通过 data / advantages 分区里的数字和优势，让人觉得项目靠谱、有护城河。\n"
+        "2. 分区设计建议：\n"
+        "   - hero：放在视觉最显眼区域，包含一句 Slogan 或亮点摘要（可与 subtitle 呼应），highlight=true。\n"
+        "   - problem：目标用户 + 当前痛点/市场现状，2-3 条要点。\n"
+        "   - solution：产品形态 / 核心功能 / 商业模式，用 2-4 条 bullet 讲清。\n"
+        "   - advantages：用数据化语言描述核心优势和护城河（如 成本降低 40%、准确率提升 30%、专利/算法壁垒 等）。\n"
+        "   - data：关键 KPI、里程碑或比赛获奖信息，建议每条中都出现醒目的数字（百分比、倍数、数量）。\n"
+        "   - cta：路演/展位信息，如时间、地点、展位号、报名或联系方式。\n"
+        "   - team：团队/导师亮点（可选），只保留最打动人的 2-3 点。\n"
+        "   分区总数建议控制在 4-7 个，每个分区 bullets 不超过 4 条。\n"
+        "3. 文案长度与可读性（避免“说明书式”堆字）：\n"
+        "   - 整张海报的中文总字数控制在约 200 字以内，不写大段长段落。\n"
+        "   - 小标题 3-6 字，bullet 每条不超过 30 字，尽量一句话说清。\n"
+        "   - 多用动词+结果，少用抽象名词堆砌（如“显著提升用户体验”要具体成“决策时间缩短 50%+”）。\n"
+        "4. 审美与风格：\n"
+        "   - 科技/AI 类：推荐 theme=\"tech_blue\" 或 \"deep_navy\"，image_prompts 中多用深蓝、紫色、线性光效、科技感 UI 元素。\n"
+        "   - 社会创新/文创类：推荐 theme=\"warm_orange\" 或 \"youthful_gradient\"，采用暖色调、插画或手绘风格。\n"
+        "   - B 端/工业类：推荐 theme=\"minimal_black\" 或偏工程蓝的搭配，布局更克制、逻辑感强。\n"
+        "   - 无法判断类型时，默认使用 \"tech_blue\"。\n"
+        "5. 视觉避雷（需在文案结构上规避）：\n"
+        "   - 不要引导生成超长段落：每个 bullet 不超过 1-2 行。\n"
+        "   - 不要在 sections 里塞太多概念性词语，而是尽量加入可见的数字、场景和对比。\n"
+        "   - 保留足够“留白”空间：可以通过减少 bullet 数量来实现，而不是塞满所有空间。\n"
+        "6. image_prompts：\n"
+        "   - 至少给出 3 条，用于一次性生成多张插图，分别服务于“第一眼主视觉”、“使用场景/对比”、“数据或奖项可视化”。\n"
+        "   - 每条需要说明主体（谁/什么）、场景（在哪里）、风格（插画/写实/3D/等距）、色彩氛围（冷暖、明暗对比）。\n"
+        "7. 如果诊断里有评分/风险/知识图谱/超图洞察，请把【优势】转成 hero/advantages/data 等分区的亮点，把【风险和缺口】转成温和的 TODO/改进建议（可放在单独分区），语气保持积极建设性。\n"
+        "8. 标题命名规则：如果上下文中已经给出了清晰的项目名称或对话标题（例如“非遗木雕盲盒海外营销策略探讨”），请在 title 中优先沿用或轻度优化该名称，禁止凭空创造与上下文无关的新项目标题。\n"
+        "9. 输出要求：禁止在 JSON 外输出任何说明文字、注释或 markdown，只能返回上述结构的 JSON。\n"
     )
 
     parts: list[str] = []
+    if conv_title:
+        parts.append("【当前对话的项目标题】\n" + conv_title[:120])
+    if conv_summary:
+        parts.append("【本对话的项目小结】\n" + conv_summary[:800])
     if base_text:
         parts.append("【项目原始描述或材料节选】\n" + base_text[:1500])
     if diag_summary:
@@ -3123,8 +3590,8 @@ def generate_poster(payload: PosterGeneratePayload) -> PosterGenerateResponse:
     except Exception:
         # Fallback: build a minimal PosterDesign from available text so the
         # frontend always has something usable.
-        fallback_title = "项目海报草稿"
-        if base_text:
+        fallback_title = conv_title or "项目海报草稿"
+        if not fallback_title and base_text:
             first_line = base_text.strip().splitlines()[0][:30]
             if first_line:
                 fallback_title = first_line
@@ -3133,14 +3600,33 @@ def generate_poster(payload: PosterGeneratePayload) -> PosterGenerateResponse:
             subtitle=f"模式：{mode_label}；类型：{comp_label or '普通项目'}",
             sections=[
                 {
-                    "id": "overview",
-                    "title": "项目概览",
+                    "id": "hero",
+                    "title": "项目亮点",
                     "bullets": [
-                        "请在这里补充一句话项目介绍",
-                        "添加 2-3 个最想让评委记住的亮点",
+                        "请在这里补充一句话项目 Slogan",
+                        "写出 1-2 个最打动评委的亮点",
                     ],
                     "highlight": True,
-                }
+                },
+                {
+                    "id": "problem",
+                    "title": "痛点与机会",
+                    "bullets": [
+                        "用一两句话说明目标用户是谁、遇到什么问题",
+                        "可以补充一条最关键的机会点或市场空白",
+                    ],
+                    "highlight": False,
+                },
+                {
+                    "id": "cta",
+                    "title": "路演信息",
+                    "bullets": [
+                        "时间：请写明路演或展示时间",
+                        "地点：填写教室/会场/展位号等信息",
+                        "欢迎评委和同学现场交流，可备注二维码/联系方式说明",
+                    ],
+                    "highlight": False,
+                },
             ],
             layout={"orientation": "portrait", "grid": "3x4", "accent_area": "top_left"},
             theme="tech_blue",
@@ -4451,7 +4937,8 @@ def _build_conversation_analytics(class_id: str | None = None, cohort_id: str | 
             intent_counts: dict[str, int] = student["intent_counts"]
             intent_counts[intent] = intent_counts.get(intent, 0) + 1
             student["intent_turns"] += 1
-            if intent in {"学习理解", "商业诊断", "方案设计", "路演表达"}:
+            is_high_intent = intent in {"学习理解", "商业诊断", "方案设计", "路演表达"}
+            if is_high_intent:
                 student["high_intent_turns"] += 1
 
             created_at = _safe_str(sub.get("created_at", ""))
@@ -4459,6 +4946,7 @@ def _build_conversation_analytics(class_id: str | None = None, cohort_id: str | 
                 {
                     "created_at": created_at,
                     "missing_evidence": me_count,
+                    "is_high_intent": is_high_intent,
                 }
             )
 
@@ -4524,32 +5012,61 @@ def _build_conversation_analytics(class_id: str | None = None, cohort_id: str | 
         }
 
     scatter_rows: list[dict[str, Any]] = []
-    hor_values: list[float] = []
+    hor_values: list[float] = []  # 班级箱线图与均值仅统计样本充足的学生
     students_out: list[dict[str, Any]] = []
     total_turns = 0
+
+    # 高阶对话占比计算参数：
+    # - 时间加权仍按整段对话前后两半划分
+    # - 为保证班级分布稳定，仅纳入轮数较充足的学生（例如 8 轮及以上）
+    T_MIN_HIGH_ORDER_TURNS = 8
+    W1, W2 = 1.0, 1.5  # 前半段/后半段权重
 
     for sid, sdata in students.items():
         turns = sorted(sdata["turns"], key=lambda r: r.get("created_at", ""))
         missing_counts = [int(t.get("missing_evidence", 0) or 0) for t in turns]
+        high_flags = [bool(t.get("is_high_intent", False)) for t in turns]
+
+        # 证据意识趋势（保持原有定义）
         evidence_trend = 0.0
         if len(missing_counts) >= 2:
             evidence_trend = (missing_counts[0] - missing_counts[-1]) / max(len(missing_counts) - 1, 1)
 
+        # 提问密度（保持原有定义）
         question_density = (
             float(sdata["challenge_questions_total"]) / max(int(sdata["effective_turn_count"] or 0), 1)
         )
-        high_order_ratio = (
-            float(sdata["high_intent_turns"]) / max(int(sdata["intent_turns"] or 0), 1)
-            if sdata["intent_turns"]
-            else 0.0
-        )
+
+        # 高阶对话占比：基础占比 + 时间加权占比
+        T = len(turns)
+        T_high = int(sdata.get("high_intent_turns", 0) or 0)
+        R_base = float(T_high) / max(T, 1)
+
+        if T >= 2:
+            mid = T // 2
+            h1 = high_flags[:mid]
+            h2 = high_flags[mid:]
+            T1, T2 = len(h1), len(h2)
+            Th1 = sum(1 for f in h1 if f)
+            Th2 = sum(1 for f in h2 if f)
+            denom = W1 * T1 + W2 * T2
+            R_time = (W1 * Th1 + W2 * Th2) / denom if denom > 0 else R_base
+        else:
+            R_time = R_base
+
+        # 最终指标：样本不足用 R_base，仅用于个人视图；样本充足用时间加权，并进入班级统计
+        sample_sufficient = T >= T_MIN_HIGH_ORDER_TURNS
+        high_order_ratio = R_time if sample_sufficient else R_base
+
+        if sample_sufficient:
+            hor_values.append(high_order_ratio)
+
+        # 评分均值（保持原有定义）
         avg_score = (
             float(sdata["score_sum"]) / max(int(sdata["score_count"] or 0), 1)
             if sdata["score_count"]
             else 0.0
         )
-
-        hor_values.append(high_order_ratio * 10.0)
         intent_counts = sdata["intent_counts"]
         dominant_intent = (
             max(intent_counts.items(), key=lambda kv: kv[1])[0] if intent_counts else "综合咨询"
@@ -4578,6 +5095,7 @@ def _build_conversation_analytics(class_id: str | None = None, cohort_id: str | 
                 "total_missing_evidence": int(sdata["missing_evidence_total"] or 0),
                 "latest_risk_summary": sdata["latest_bottleneck"],
                 "persona": persona,
+                "high_order_sample_sufficient": sample_sufficient,
             }
         )
 
@@ -4626,8 +5144,10 @@ def _build_conversation_analytics(class_id: str | None = None, cohort_id: str | 
         "avg_evidence_awareness_trend": round(
             sum(row["evidence_awareness_trend"] for row in students_out) / max(len(students_out), 1), 3
         ),
+        # 仅统计样本充足的学生（T >= T_MIN_HIGH_ORDER_TURNS）
         "avg_high_order_ratio": round(
-            sum(row["high_order_ratio"] for row in students_out) / max(len(students_out), 1), 3
+            (sum(hor_values) / max(len(hor_values), 1)) if hor_values else 0.0,
+            3,
         ),
     }
 

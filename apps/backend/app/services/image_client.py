@@ -61,7 +61,18 @@ class ImageClient:
                 n=1,
                 response_format="b64_json",
             )
-        except Exception as exc:  # pragma: no cover - network errors are logged and surfaced as HTTP 503
+        except Exception as exc:  # pragma: no cover - network / policy errors are logged and surfaced
+            # 部分模型（如图像模型）在命中内容安全策略时会返回 451 / code=20021 等错误；
+            # 这里统一转换为 RuntimeError，供上层 API 以友好文案返回给前端。
+            msg = str(exc)
+            if "20021" in msg or "prohibited or sensitive content" in msg or "status code: 451" in msg:
+                logger.warning(
+                    "Image generation content-moderation blocked (model=%s): %s",
+                    settings.llm_image_model,
+                    exc,
+                )
+                raise RuntimeError("图像生成被模型的内容安全策略拦截，请稍微调整提示词后重试。")
+
             logger.warning("Image generation failed (model=%s): %s", settings.llm_image_model, exc)
             raise
 

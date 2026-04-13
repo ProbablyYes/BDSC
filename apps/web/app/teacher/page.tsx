@@ -249,27 +249,174 @@ function AreaChart({ data, width = 340, height = 110, color = "var(--accent)" }:
 }
 
 // ── 散点图组件 ──
-function ScatterPlot({ data, width = 300, height = 200, xLabel = "提交次数", yLabel = "均分" }: { data: Array<{ id: string; x: number; y: number }>; width?: number; height?: number; xLabel?: string; yLabel?: string }) {
+type ScatterDatum = {
+  id: string;
+  x: number;
+  y: number;
+  questionPer10?: number;
+  evidenceTrend?: number;
+  turnCount?: number;
+  persona?: string;
+  avgScore?: number;
+  needsIntervention?: boolean;
+  isFastImprover?: boolean;
+};
+
+function ScatterPlot({
+  data,
+  width = 300,
+  height = 200,
+  xLabel = "提交次数",
+  yLabel = "均分",
+  xThreshold,
+  yThreshold,
+  quadrantLabels,
+  colorScale,
+  getTooltip,
+  onPointClick,
+  yZeroLine = false,
+  positiveBg,
+  negativeBg,
+}: {
+  data: ScatterDatum[];
+  width?: number;
+  height?: number;
+  xLabel?: string;
+  yLabel?: string;
+  xThreshold?: number;
+  yThreshold?: number;
+  quadrantLabels?: { topRight: string; topLeft: string; bottomRight: string; bottomLeft: string };
+  colorScale?: (point: ScatterDatum) => string;
+  getTooltip?: (point: ScatterDatum) => string;
+  onPointClick?: (id: string) => void;
+  yZeroLine?: boolean;
+  positiveBg?: string;
+  negativeBg?: string;
+}) {
   const [hover, setHover] = useState<string | null>(null);
   if (data.length === 0) return null;
   const pad = { t: 14, b: 30, l: 38, r: 14 };
   const cW = width - pad.l - pad.r, cH = height - pad.t - pad.b;
-  const maxX = Math.max(1, ...data.map(d => d.x)), maxY = Math.max(1, ...data.map(d => d.y));
+  const xs = data.map(d => d.x);
+  const ys = data.map(d => d.y);
+  const maxX = Math.max(1, ...xs);
+  const minX = 0;
+  const maxY = Math.max(0, ...ys);
+  const minY = Math.min(0, ...ys);
+  const xRange = maxX - minX || 1;
+  const yRange = maxY - minY || 1;
+  const xToPix = (val: number) => pad.l + ((val - minX) / xRange) * cW;
+  const yToPix = (val: number) => pad.t + (1 - (val - minY) / yRange) * cH;
   return (
     <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
-      {[0, 0.5, 1].map(r => <line key={r} x1={pad.l} y1={pad.t + cH * (1 - r)} x2={pad.l + cW} y2={pad.t + cH * (1 - r)} stroke="var(--border)" strokeWidth="1" opacity="0.35" />)}
-      {[0, 0.5, 1].map(r => <text key={`y${r}`} x={pad.l - 6} y={pad.t + cH * (1 - r) + 3} textAnchor="end" fill="var(--text-muted)" fontSize="9">{(maxY * r).toFixed(1)}</text>)}
-      {[0, 0.5, 1].map(r => <text key={`x${r}`} x={pad.l + cW * r} y={height - 8} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{Math.round(maxX * r)}</text>)}
+      {/* 背景高亮区域（仅在需要时启用） */}
+      {yZeroLine && minY < 0 && maxY > 0 && (
+        (() => {
+          const zeroY = yToPix(0);
+          return (
+            <>
+              {positiveBg && (
+                <rect
+                  x={pad.l}
+                  y={0}
+                  width={cW}
+                  height={Math.max(0, zeroY - pad.t)}
+                  fill={positiveBg}
+                />
+              )}
+              {negativeBg && (
+                <rect
+                  x={pad.l}
+                  y={zeroY}
+                  width={cW}
+                  height={Math.max(0, pad.t + cH - zeroY)}
+                  fill={negativeBg}
+                />
+              )}
+            </>
+          );
+        })()
+      )}
+
+      {/* 网格与刻度 */}
+      {[0, 0.5, 1].map(r => {
+        const yVal = minY + r * yRange;
+        const yPix = yToPix(yVal);
+        return (
+          <g key={r}>
+            <line x1={pad.l} y1={yPix} x2={pad.l + cW} y2={yPix} stroke="var(--border)" strokeWidth="1" opacity="0.35" />
+            <text x={pad.l - 6} y={yPix + 3} textAnchor="end" fill="var(--text-muted)" fontSize="9">{yVal.toFixed(1)}</text>
+          </g>
+        );
+      })}
+      {[0, 0.5, 1].map(r => {
+        const xVal = minX + r * xRange;
+        return (
+          <text key={`x${r}`} x={xToPix(xVal)} y={height - 8} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{Math.round(xVal)}</text>
+        );
+      })}
       <text x={pad.l + cW / 2} y={height} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{xLabel}</text>
       <text x={8} y={pad.t + cH / 2} textAnchor="middle" fill="var(--text-muted)" fontSize="9" transform={`rotate(-90,8,${pad.t + cH / 2})`}>{yLabel}</text>
+      {/* 阈值线与象限标签 */}
+      {typeof xThreshold === "number" && xRange > 0 && (
+        (() => {
+          const clamped = Math.min(maxX, Math.max(minX, xThreshold));
+          const px = xToPix(clamped);
+          return <line x1={px} y1={pad.t} x2={px} y2={pad.t + cH} stroke="var(--border-strong, var(--border))" strokeDasharray="4 3" strokeWidth={1} opacity={0.8} />;
+        })()
+      )}
+      {typeof yThreshold === "number" && yRange > 0 && (
+        (() => {
+          const clamped = Math.min(maxY, Math.max(minY, yThreshold));
+          const py = yToPix(clamped);
+          return <line x1={pad.l} y1={py} x2={pad.l + cW} y2={py} stroke="var(--border-strong, var(--border))" strokeDasharray="4 3" strokeWidth={1} opacity={0.8} />;
+        })()
+      )}
+      {quadrantLabels && typeof xThreshold === "number" && typeof yThreshold === "number" && (
+        (() => {
+          const xMidLeft = xToPix((minX + Math.min(maxX, Math.max(minX, xThreshold))) / 2);
+          const xMidRight = xToPix((Math.min(maxX, Math.max(minX, xThreshold)) + maxX) / 2);
+          const yMidTop = yToPix((Math.min(maxY, Math.max(minY, yThreshold)) + maxY) / 2);
+          const yMidBottom = yToPix((minY + Math.min(maxY, Math.max(minY, yThreshold))) / 2);
+          return (
+            <>
+              <text x={xMidRight} y={yMidTop} textAnchor="middle" fill="var(--text-muted)" fontSize="9" opacity={0.85}>{quadrantLabels.topRight}</text>
+              <text x={xMidLeft} y={yMidTop} textAnchor="middle" fill="var(--text-muted)" fontSize="9" opacity={0.85}>{quadrantLabels.topLeft}</text>
+              <text x={xMidRight} y={yMidBottom} textAnchor="middle" fill="var(--text-muted)" fontSize="9" opacity={0.85}>{quadrantLabels.bottomRight}</text>
+              <text x={xMidLeft} y={yMidBottom} textAnchor="middle" fill="var(--text-muted)" fontSize="9" opacity={0.85}>{quadrantLabels.bottomLeft}</text>
+            </>
+          );
+        })()
+      )}
+
       {data.map(d => {
-        const px = pad.l + (d.x / maxX) * cW, py = pad.t + cH - (d.y / maxY) * cH;
-        const c = d.y >= 7 ? "rgba(92,189,138,0.85)" : d.y >= 5 ? "rgba(232,168,76,0.85)" : "rgba(224,112,112,0.85)";
+        const px = xToPix(d.x);
+        const py = yToPix(d.y);
+        const c = colorScale
+          ? colorScale(d)
+          : d.y >= 7
+            ? "rgba(92,189,138,0.85)"
+            : d.y >= 5
+              ? "rgba(232,168,76,0.85)"
+              : "rgba(224,112,112,0.85)";
         const isH = hover === d.id;
+        const tooltip = getTooltip ? getTooltip(d) : `${d.id.slice(0, 12)} (${d.y.toFixed(1)})`;
+        const isNearTop = py < pad.t + 20;
+        const tooltipY = isNearTop ? py + 14 : py - 12;
         return (
-          <g key={d.id} onMouseEnter={() => setHover(d.id)} onMouseLeave={() => setHover(null)} style={{ cursor: "pointer" }}>
+          <g
+            key={d.id}
+            onMouseEnter={() => setHover(d.id)}
+            onMouseLeave={() => setHover(null)}
+            onClick={() => onPointClick?.(d.id)}
+            style={{ cursor: onPointClick ? "pointer" : "default" }}
+          >
             <circle cx={px} cy={py} r={isH ? 8 : 5.5} fill={c} stroke="var(--bg-primary)" strokeWidth="2" style={{ transition: "r 0.2s" }} />
-            {isH && <text x={px} y={py - 12} textAnchor="middle" fill="var(--text-primary)" fontSize="10" fontWeight="600">{d.id.slice(0, 12)} ({d.y.toFixed(1)})</text>}
+            {isH && (
+              <text x={px} y={tooltipY} textAnchor="middle" fill="var(--text-primary)" fontSize="10" fontWeight="600">
+                {tooltip}
+              </text>
+            )}
           </g>
         );
       })}
@@ -277,25 +424,82 @@ function ScatterPlot({ data, width = 300, height = 200, xLabel = "提交次数",
   );
 }
 
-// ── 箱型图组件 ──
-function BoxPlotChart({ data, width = 300, height = 70 }: { data: { min: number; q1: number; median: number; q3: number; max: number; avg: number }; width?: number; height?: number }) {
-  const maxV = 10;
-  const pad = { l: 30, r: 16, t: 14, b: 20 };
-  const cW = width - pad.l - pad.r, midY = pad.t + (height - pad.t - pad.b) / 2;
-  const sc = (v: number) => pad.l + (v / maxV) * cW;
+// ── 箱型图组件（高阶对话占比，0-100%） ──
+function BoxPlotChart({
+  data,
+  width = 360,
+  height = 120,
+  highlightMin = 40,
+  highlightMax = 70,
+}: {
+  data: { min: number; q1: number; median: number; q3: number; max: number; avg: number };
+  width?: number;
+  height?: number;
+  highlightMin?: number;
+  highlightMax?: number;
+}) {
+  const maxV = 100;
+  const pad = { l: 34, r: 20, t: 18, b: 34 };
+  const cW = width - pad.l - pad.r;
+  const innerH = height - pad.t - pad.b;
+  const midY = pad.t + innerH / 2;
+  const sc = (v: number) => pad.l + (Math.min(Math.max(v, 0), maxV) / maxV) * cW;
+
+  const hStart = Math.min(highlightMin, highlightMax);
+  const hEnd = Math.max(highlightMin, highlightMax);
+  const hasHighlight = hEnd > hStart;
+
   return (
     <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
+      {/* 目标合理区间背景带 */}
+      {hasHighlight && (
+        <rect
+          x={sc(hStart)}
+          y={midY - 20}
+          width={Math.max(sc(hEnd) - sc(hStart), 0)}
+          height={40}
+          fill="rgba(92,189,138,0.06)"
+        />
+      )}
+
+      {/* 轴线与刻度（0-100%） */}
       <line x1={pad.l} y1={height - pad.b} x2={pad.l + cW} y2={height - pad.b} stroke="var(--border)" strokeWidth="1" />
-      {[0, 2, 4, 6, 8, 10].map(v => (
-        <g key={v}><line x1={sc(v)} y1={height - pad.b} x2={sc(v)} y2={height - pad.b + 4} stroke="var(--border)" strokeWidth="1" /><text x={sc(v)} y={height - 3} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{v}</text></g>
+      {[0, 25, 50, 75, 100].map(v => (
+        <g key={v}>
+          <line x1={sc(v)} y1={height - pad.b} x2={sc(v)} y2={height - pad.b + 4} stroke="var(--border)" strokeWidth="1" />
+          <text x={sc(v)} y={height - pad.b + 15} textAnchor="middle" fill="var(--text-muted)" fontSize="9">{v}%</text>
+        </g>
       ))}
+
+      <text
+        x={pad.l + cW / 2}
+        y={height - 8}
+        textAnchor="middle"
+        fill="var(--text-muted)"
+        fontSize="9"
+      >
+        小贴士：横轴为高阶对话占全部对话的百分比（0%-100%）
+      </text>
+
+      {/* 箱型图主体 */}
       <line x1={sc(data.min)} y1={midY} x2={sc(data.max)} y2={midY} stroke="var(--text-muted)" strokeWidth="1.5" strokeDasharray="3 2" />
       <line x1={sc(data.min)} y1={midY - 10} x2={sc(data.min)} y2={midY + 10} stroke="var(--text-muted)" strokeWidth="1.5" />
       <line x1={sc(data.max)} y1={midY - 10} x2={sc(data.max)} y2={midY + 10} stroke="var(--text-muted)" strokeWidth="1.5" />
-      <rect x={sc(data.q1)} y={midY - 16} width={Math.max(sc(data.q3) - sc(data.q1), 2)} height={32} rx="4" fill="rgba(107,138,255,0.18)" stroke="var(--accent)" strokeWidth="1.5" />
-      <line x1={sc(data.median)} y1={midY - 16} x2={sc(data.median)} y2={midY + 16} stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx={sc(data.avg)} cy={midY} r="4.5" fill="var(--tch-warning)" stroke="var(--bg-primary)" strokeWidth="2" />
-      <text x={sc(data.avg)} y={midY - 22} textAnchor="middle" fill="var(--tch-warning)" fontSize="9" fontWeight="600">均值 {data.avg.toFixed(1)}</text>
+      <rect
+        x={sc(data.q1)}
+        y={midY - 16}
+        width={Math.max(sc(data.q3) - sc(data.q1), 2)}
+        height={32}
+        rx={4}
+        fill="rgba(107,138,255,0.18)"
+        stroke="var(--accent)"
+        strokeWidth={1.5}
+      />
+      <line x1={sc(data.median)} y1={midY - 16} x2={sc(data.median)} y2={midY + 16} stroke="var(--accent)" strokeWidth={2.5} strokeLinecap="round" />
+      <circle cx={sc(data.avg)} cy={midY} r={4.5} fill="var(--tch-warning)" stroke="var(--bg-primary)" strokeWidth={2} />
+      <text x={sc(data.avg)} y={midY - 22} textAnchor="middle" fill="var(--tch-warning)" fontSize="9" fontWeight={600}>
+        均值 {data.avg.toFixed(1)}%
+      </text>
     </svg>
   );
 }
@@ -382,6 +586,11 @@ export default function TeacherPage() {
   const [projectStructuredReport, setProjectStructuredReport] = useState<any>(null);
   const [hyperLibrary, setHyperLibrary] = useState<any>(null);
   const [conversationAnalytics, setConversationAnalytics] = useState<any>(null);
+  const [conversationPersonaFilter, setConversationPersonaFilter] = useState<"all" | "evidence" | "passive" | "intuitive">("all");
+  const [conversationFocusFilter, setConversationFocusFilter] = useState<"all" | "needs-support" | "fast-improver">("all");
+  const [conversationHighOrderFilter, setConversationHighOrderFilter] = useState<
+    "all" | "low" | "high" | "band-0-25" | "band-25-50" | "band-50-75" | "band-75-100"
+  >("band-0-25");
   const [projectStructuredReportLoading, setProjectStructuredReportLoading] = useState(false);
   const [teachingInterventions, setTeachingInterventions] = useState<any>(null);
   const [assistantDashboard, setAssistantDashboard] = useState<any>(null);
@@ -3571,34 +3780,184 @@ export default function TeacherPage() {
           {/* ── 对话质量 ── */}
           {tab === "conversation-analytics" && !loading && (
             <div className="tch-panel fade-up">
-              <h2>🧠 对话质量分析</h2>
-              <p className="tch-desc">基于多轮对话的提问密度、高阶对话占比、证据意识趋势，以及班级共性谬误与提问热点。</p>
+              <h2>🧠 对话质量与证据意识</h2>
+              <p className="tch-desc">这部分告诉你：班级在“追问”和“用证据说话”两个维度上的整体情况。</p>
+              <p className="tch-desc">图上每个点代表一名学生，点的位置和颜色帮助你区分“表现稳定”与“需要关注”。</p>
+              <p className="tch-desc">根据这些信息，你可以判断是组织一次全班活动，还是挑出少数学生做个别辅导。</p>
               {!conversationAnalytics ? (
                 <SkeletonLoader rows={3} type="card" />
               ) : (() => {
                 const ca = conversationAnalytics as any;
                 const summary = ca.summary || {};
-                const scatter = (ca.scatter || []) as any[];
+                const students = (ca.students || []) as any[];
                 const box = ca.high_order_ratio_box || { min: 0, q1: 0, median: 0, q3: 0, max: 0, avg: 0 };
                 const topics = (ca.topics || []) as any[];
-                const fallacies = (ca.fallacies || []) as any[];
-                const scatterQuestion = scatter.map((row: any) => ({
-                  id: row.student_id || "?",
-                  x: Number(row.turn_count || 0),
-                  y: Math.max(0, Math.min(10, Number(row.question_density || 0) * 10)),
-                }));
-                const scatterEvidence = scatter.map((row: any) => {
-                  const raw = Number(row.evidence_awareness_trend || 0);
-                  const score = Math.max(0, Math.min(10, 5 + raw));
+                const fallacies = ((ca.fallacies || []) as any[]).slice(0, 5);
+
+                const QUESTION_TARGET_PER_10 = 4;
+                const EVIDENCE_IMPROVEMENT_SLOPE_THRESHOLD = 0.2;
+
+                const enhancedStudents = students.map((stu: any) => {
+                  const turnCount = Number(stu.turn_count || 0);
+                  const questionDensity = Number(stu.question_density || 0);
+                  const questionPer10 = questionDensity * 10;
+                  const evidenceTrend = Number(stu.evidence_awareness_trend || 0);
+                  const evidenceTrendClamped = Math.max(-5, Math.min(5, evidenceTrend));
+                  const highOrderPct = Math.round(Number(stu.high_order_ratio || 0) * 100);
+                  const persona = String(stu.persona || "直觉表达型");
+                  const highOrderSampleOk = Boolean(stu.high_order_sample_sufficient);
+                  const highOrderLevel = highOrderPct < 40 ? "偏低" : (highOrderPct <= 70 ? "适中" : "偏高");
+                  const highOrderBand4 =
+                    highOrderPct < 25 ? "0-25" : highOrderPct < 50 ? "25-50" : highOrderPct < 75 ? "50-75" : "75-100";
+                  const meetsQuestionTarget = questionPer10 >= QUESTION_TARGET_PER_10;
+                  const hasEvidenceImprovement = evidenceTrend >= EVIDENCE_IMPROVEMENT_SLOPE_THRESHOLD;
+                  const needsIntervention = !meetsQuestionTarget && evidenceTrend <= 0 && turnCount >= 6;
+                  const isFastImprover = hasEvidenceImprovement && meetsQuestionTarget && highOrderPct >= 50;
                   return {
-                    id: row.student_id || "?",
-                    x: Number(row.turn_count || 0),
-                    y: score,
+                    ...stu,
+                    turnCount,
+                    questionPer10,
+                    evidenceTrend,
+                    evidenceTrendClamped,
+                    highOrderPct,
+                    persona,
+                    highOrderSampleOk,
+                    highOrderLevel,
+                    highOrderBand4,
+                    meetsQuestionTarget,
+                    hasEvidenceImprovement,
+                    needsIntervention,
+                    isFastImprover,
                   };
                 });
-                const students = (ca.students || []) as any[];
+
+                const totalStudents = enhancedStudents.length || 1;
+                const questionTargetCount = enhancedStudents.filter((s: any) => s.meetsQuestionTarget).length;
+                const evidenceImprovedCount = enhancedStudents.filter((s: any) => s.hasEvidenceImprovement).length;
+                const needsInterventionCount = enhancedStudents.filter((s: any) => s.needsIntervention).length;
+
+                const turnThreshold = Math.max(12, Number(summary.avg_turn_count || 0) || 0);
+
+                const filteredStudents = enhancedStudents.filter((stu: any) => {
+                  const personaMatch =
+                    conversationPersonaFilter === "all"
+                    || (conversationPersonaFilter === "evidence" && stu.persona === "证据敏感型")
+                    || (conversationPersonaFilter === "passive" && stu.persona === "被动应答型")
+                    || (conversationPersonaFilter === "intuitive" && stu.persona === "直觉表达型");
+                  const focusMatch =
+                    conversationFocusFilter === "all"
+                    || (conversationFocusFilter === "needs-support" && stu.needsIntervention)
+                    || (conversationFocusFilter === "fast-improver" && stu.isFastImprover);
+                  const pct = stu.highOrderPct || 0;
+                  const highOrderMatch =
+                    conversationHighOrderFilter === "all"
+                    || (conversationHighOrderFilter === "low" && pct < 25)
+                    || (conversationHighOrderFilter === "high" && pct >= 60)
+                    || (conversationHighOrderFilter === "band-0-25" && pct >= 0 && pct < 25)
+                    || (conversationHighOrderFilter === "band-25-50" && pct >= 25 && pct < 50)
+                    || (conversationHighOrderFilter === "band-50-75" && pct >= 50 && pct < 75)
+                    || (conversationHighOrderFilter === "band-75-100" && pct >= 75 && pct <= 100.01);
+                  return personaMatch && focusMatch && highOrderMatch;
+                });
+
+                const scatterQuestion: ScatterDatum[] = filteredStudents.map((stu: any) => ({
+                  id: stu.student_id || "?",
+                  x: stu.turnCount,
+                  y: stu.questionPer10,
+                  questionPer10: stu.questionPer10,
+                  evidenceTrend: stu.evidenceTrend,
+                  turnCount: stu.turnCount,
+                  persona: stu.persona,
+                  avgScore: stu.avg_score,
+                  needsIntervention: stu.needsIntervention,
+                  isFastImprover: stu.isFastImprover,
+                }));
+
+                const scatterEvidence: ScatterDatum[] = filteredStudents.map((stu: any) => ({
+                  id: stu.student_id || "?",
+                  x: stu.turnCount,
+                  y: stu.evidenceTrendClamped,
+                  questionPer10: stu.questionPer10,
+                  evidenceTrend: stu.evidenceTrend,
+                  turnCount: stu.turnCount,
+                  persona: stu.persona,
+                  avgScore: stu.avg_score,
+                  needsIntervention: stu.needsIntervention,
+                  isFastImprover: stu.isFastImprover,
+                }));
+
+                const emptyHint = "当前班级尚未产生与 AI 的多轮对话，请先布置一次诊断对话任务（建议每位学生至少完成 15 轮），系统才会生成本页分析。";
+
+                const questionColorScale = (p: ScatterDatum) => {
+                  const val = p.questionPer10 ?? p.y;
+                  if (val >= QUESTION_TARGET_PER_10 + 2) return "rgba(92,189,138,0.85)";
+                  if (val >= QUESTION_TARGET_PER_10) return "rgba(232,168,76,0.85)";
+                  return "rgba(224,112,112,0.85)";
+                };
+
+                const evidenceColorScale = (p: ScatterDatum) => {
+                  const slope = p.evidenceTrend ?? p.y;
+                  if (slope >= EVIDENCE_IMPROVEMENT_SLOPE_THRESHOLD * 2) return "rgba(92,189,138,0.85)";
+                  if (slope >= 0) return "rgba(232,168,76,0.85)";
+                  return "rgba(224,112,112,0.85)";
+                };
+
+                const highOrderBoxPct = {
+                  min: Math.round((box.min || 0) * 100),
+                  q1: Math.round((box.q1 || 0) * 100),
+                  median: Math.round((box.median || 0) * 100),
+                  q3: Math.round((box.q3 || 0) * 100),
+                  max: Math.round((box.max || 0) * 100),
+                  avg: (box.avg || 0) * 100,
+                };
+
+                const classAvgHighOrderPct = highOrderBoxPct.avg || 0;
+
+                const highOrderBands = [
+                  { id: "0-25", label: "0%-25%", min: 0, max: 25 },
+                  { id: "25-50", label: "25%-50%", min: 25, max: 50 },
+                  { id: "50-75", label: "50%-75%", min: 50, max: 75 },
+                  { id: "75-100", label: "75%-100%", min: 75, max: 100.01 },
+                ];
+
+                const sampleStudents = enhancedStudents.filter((s: any) => s.highOrderSampleOk);
+                const sampleTotal = sampleStudents.length || 1;
+
+                const highOrderDistribution = highOrderBands.map(b => {
+                  const count = sampleStudents.filter((s: any) => {
+                    const pct = s.highOrderPct || 0;
+                    return pct >= b.min && pct < b.max;
+                  }).length;
+                  return {
+                    ...b,
+                    count,
+                    ratio: sampleTotal ? count / sampleTotal : 0,
+                  };
+                });
+
+                const lowBandStudents = sampleStudents.filter((s: any) => (s.highOrderPct || 0) < 25);
+                const highBandStudents = sampleStudents.filter((s: any) => (s.highOrderPct || 0) >= 60);
+
                 return (
                   <>
+                    <div className="kpi-grid" style={{ marginBottom: 12 }}>
+                      <div className="kpi">
+                        <span>追问活跃度达标学生占比</span>
+                        <strong><AnimatedNumber value={(questionTargetCount / totalStudents) * 100} decimals={0} />%</strong>
+                        <em className="kpi-hint">每10轮平均追问 ≥4 次的学生比例</em>
+                      </div>
+                      <div className="kpi">
+                        <span>证据意识明显提升占比</span>
+                        <strong><AnimatedNumber value={(evidenceImprovedCount / totalStudents) * 100} decimals={0} />%</strong>
+                        <em className="kpi-hint">证据缺口随轮数稳定减少的学生比例</em>
+                      </div>
+                      <div className="kpi">
+                        <span>当前需重点干预学生数</span>
+                        <strong><AnimatedNumber value={needsInterventionCount} decimals={0} /></strong>
+                        <em className="kpi-hint">对话轮数较多但追问不足、证据未改善的学生</em>
+                      </div>
+                    </div>
+
                     <div className="kpi-grid" style={{ marginBottom: 16 }}>
                       <div className="kpi">
                         <span>活跃学生</span>
@@ -3606,9 +3965,9 @@ export default function TeacherPage() {
                         <em className="kpi-hint">有对话记录的学生人数</em>
                       </div>
                       <div className="kpi">
-                        <span>总对话轮数</span>
+                        <span>总对话数</span>
                         <strong>{summary.conversation_count ?? 0}</strong>
-                        <em className="kpi-hint">按 conversation_id 聚合的轮数总和</em>
+                        <em className="kpi-hint">按 conversation_id 聚合的多轮对话条数</em>
                       </div>
                       <div className="kpi">
                         <span>人均轮数</span>
@@ -3616,29 +3975,199 @@ export default function TeacherPage() {
                         <em className="kpi-hint">平均每名学生的对话轮数</em>
                       </div>
                       <div className="kpi">
-                        <span>平均提问密度</span>
-                        <strong>{Number(summary.avg_question_density || 0).toFixed(2)}</strong>
-                        <em className="kpi-hint">每轮对话中 AI 关键追问条数</em>
+                        <span>平均追问活跃度</span>
+                        <strong>{(Number(summary.avg_question_density || 0) * 10).toFixed(1)}</strong>
+                        <em className="kpi-hint">平均每10轮对话中 AI 关键追问条数</em>
                       </div>
                     </div>
 
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: 8,
+                        marginBottom: 8,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>按学生画像筛选：</span>
+                        {[{
+                          id: "all", label: "全部"
+                        }, {
+                          id: "evidence", label: "证据敏感型"
+                        }, {
+                          id: "passive", label: "被动应答型"
+                        }, {
+                          id: "intuitive", label: "直觉表达型"
+                        }].map(opt => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className="tch-sm-btn"
+                            style={{
+                              padding: "4px 10px",
+                              fontSize: 12,
+                              borderRadius: 999,
+                              background: conversationPersonaFilter === opt.id ? "var(--accent)" : "var(--bg-secondary)",
+                              color: conversationPersonaFilter === opt.id ? "var(--bg-primary)" : "var(--text-secondary)",
+                            }}
+                            onClick={() => setConversationPersonaFilter(opt.id as any)}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>按教学动作筛选：</span>
+                        {[{
+                          id: "all", label: "全部学生"
+                        }, {
+                          id: "needs-support", label: "只看需要干预的学生"
+                        }, {
+                          id: "fast-improver", label: "只看进步最快的学生"
+                        }].map(opt => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className="tch-sm-btn"
+                            style={{
+                              padding: "4px 10px",
+                              fontSize: 12,
+                              borderRadius: 999,
+                              background: conversationFocusFilter === opt.id ? "var(--accent)" : "var(--bg-secondary)",
+                              color: conversationFocusFilter === opt.id ? "var(--bg-primary)" : "var(--text-secondary)",
+                            }}
+                            onClick={() => setConversationFocusFilter(opt.id as any)}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>按高阶对话占比筛选：</span>
+                        {[{
+                          id: "all", label: "全部学生"
+                        }, {
+                          id: "low", label: "只看偏低（<25%）"
+                        }, {
+                          id: "high", label: "只看偏高（≥60%）"
+                        }].map(opt => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className="tch-sm-btn"
+                            style={{
+                              padding: "4px 10px",
+                              fontSize: 12,
+                              borderRadius: 999,
+                              background:
+                                (opt.id === "all" && conversationHighOrderFilter === "all")
+                                  || (opt.id === "low" && (conversationHighOrderFilter === "low" || conversationHighOrderFilter === "band-0-25"))
+                                  || (opt.id === "high" && conversationHighOrderFilter === "high")
+                                  ? "var(--accent)"
+                                  : "var(--bg-secondary)",
+                              color:
+                                (opt.id === "all" && conversationHighOrderFilter === "all")
+                                  || (opt.id === "low" && (conversationHighOrderFilter === "low" || conversationHighOrderFilter === "band-0-25"))
+                                  || (opt.id === "high" && conversationHighOrderFilter === "high")
+                                  ? "var(--bg-primary)"
+                                  : "var(--text-secondary)",
+                            }}
+                            onClick={() => setConversationHighOrderFilter(opt.id as any)}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {enhancedStudents.length === 0 && (
+                      <div className="ov-chart-card" style={{ marginTop: 8 }}>
+                        <p style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.6 }}>{emptyHint}</p>
+                      </div>
+                    )}
+
                     <div className="ov-chart-grid">
                       <div className="ov-chart-card">
-                        <h3>提问密度 vs 对话轮数</h3>
-                        <p className="tch-desc">横轴=对话轮数 纵轴=提问密度(0-10)，颜色代表得分高低。</p>
+                        <h3>追问活跃度 vs 对话轮数</h3>
+                        <p className="tch-desc">横轴是对话轮数，纵轴是每10轮平均追问数，每个点代表一位学生。</p>
+                        <p className="tch-desc">右上象限表示对话多且追问充分，是理想状态；左下象限接近“一问一答”，互动不足需要关注。</p>
+                        <p className="tch-desc" style={{ marginBottom: 10 }}>建议优先点开左下和右下象限的红色点，查看对话示例，在课堂上示范如何“多问一句为什么”。</p>
                         {scatterQuestion.length > 0 ? (
-                          <ScatterPlot data={scatterQuestion} xLabel="对话轮数" yLabel="提问密度(0-10)" />
+                          <ScatterPlot
+                            data={scatterQuestion}
+                            xLabel="对话轮数（轮）"
+                            yLabel="每10轮平均追问数（次）"
+                            xThreshold={turnThreshold}
+                            yThreshold={QUESTION_TARGET_PER_10}
+                            quadrantLabels={{
+                              topRight: "高频深度追问",
+                              topLeft: "短而高效的追问",
+                              bottomRight: "轮数多但追问少（易跑题）",
+                              bottomLeft: "一问一答（互动不足）",
+                            }}
+                            colorScale={questionColorScale}
+                            getTooltip={(p) => {
+                              const turns = p.turnCount ?? p.x;
+                              const q = p.questionPer10 ?? p.y;
+                              const hint = q >= QUESTION_TARGET_PER_10
+                                ? "已达到班级追问目标"
+                                : `略低于班级目标（${QUESTION_TARGET_PER_10.toFixed(1)} 次/10轮）`;
+                              return `该生共 ${turns} 轮，每10轮平均 ${q.toFixed(1)} 次追问，${hint}`;
+                            }}
+                            onPointClick={(id) => loadAssistantConversationEval(`project-${id}`)}
+                          />
                         ) : (
-                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无对话记录</p>
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>{emptyHint}</p>
                         )}
+                        <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+                          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>提示：每10轮 ≥4 次追问视为追问较充足。</span>
+                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>颜色含义：</span>
+                            <span className="tm-smart-chip" style={{ background: "rgba(92,189,138,0.12)", color: "var(--tch-success)" }}>绿色：追问充分</span>
+                            <span className="tm-smart-chip" style={{ background: "rgba(232,168,76,0.12)", color: "var(--tch-warning)" }}>黄色：接近目标</span>
+                            <span className="tm-smart-chip" style={{ background: "rgba(224,112,112,0.12)", color: "var(--tch-danger)" }}>红色：需要关注</span>
+                          </div>
+                        </div>
                       </div>
                       <div className="ov-chart-card">
                         <h3>证据意识进步度</h3>
-                        <p className="tch-desc">横轴=对话轮数 纵轴=证据意识分数(0-10)，高于5表示缺失证据在减少。</p>
+                        <p className="tch-desc">横轴是对话轮数，纵轴是每轮平均减少的缺失证据条数（条/轮）。</p>
+                        <p className="tch-desc">0 为分界线，上方淡绿色区域表示证据缺口在收敛，下方淡红色区域表示证据意识可能在下降或停滞。</p>
+                        <p className="tch-desc" style={{ marginBottom: 30 }}>建议优先点开位于下方红色区域的学生，查看他们在哪些轮次一再忽略证据补充。</p>
                         {scatterEvidence.length > 0 ? (
-                          <ScatterPlot data={scatterEvidence} xLabel="对话轮数" yLabel="证据意识(0-10)" />
+                          <ScatterPlot
+                            data={scatterEvidence}
+                            xLabel="对话轮数（轮）"
+                            yLabel="证据缺口收敛速度（条/轮）"
+                            xThreshold={turnThreshold}
+                            yThreshold={0}
+                            quadrantLabels={{
+                              topRight: "长对话且证据持续收敛",
+                              topLeft: "对话较少但证据抓得稳",
+                              bottomRight: "对话多但证据未跟上",
+                              bottomLeft: "短而散的对话",
+                            }}
+                            colorScale={evidenceColorScale}
+                            getTooltip={(p) => {
+                              const turns = p.turnCount ?? p.x;
+                              const slope = p.evidenceTrend ?? p.y;
+                              const trendLabel = slope > 0
+                                ? "每轮都在补齐证据"
+                                : slope < 0
+                                  ? "证据缺口反而在放大"
+                                  : "证据缺口几乎没有变化";
+                              return `该生共 ${turns} 轮，对话中证据缺口平均每轮变化 ${slope.toFixed(2)} 条，${trendLabel}`;
+                            }}
+                            onPointClick={(id) => loadAssistantConversationEval(`project-${id}`)}
+                            yZeroLine
+                            positiveBg="rgba(92,189,138,0.06)"
+                            negativeBg="rgba(224,112,112,0.06)"
+                          />
                         ) : (
-                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无对话记录</p>
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>{emptyHint}</p>
                         )}
                       </div>
                     </div>
@@ -3646,14 +4175,99 @@ export default function TeacherPage() {
                     <div className="ov-chart-grid">
                       <div className="ov-chart-card">
                         <h3>高阶对话占比（班级分布）</h3>
-                        <p className="tch-desc">统计每名学生高阶意图对话（学习/诊断/方案/路演）的占比，0-10 代表 0%-100%。</p>
-                        <BoxPlotChart data={box} />
+                        <p className="tch-desc">高阶对话占比 = 高阶意图轮次 ÷ 全部对话轮次，单位为 %。</p>
+                        <p className="tch-desc">中间 50% 学生集中在 {highOrderBoxPct.q1}%–{highOrderBoxPct.q3}%，代表大部分学生的高阶对话水平。</p>
+                        <p className="tch-desc">目标是让大多数学生分布在 40%–70% 的合理区间内：过低说明多停留在“聊天/答题”，过高可能缺少基础梳理与练习。</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4, marginBottom: 2 }}>
+                          <div style={{ flex: "0 0 260px", minWidth: 240 }}>
+                            <BoxPlotChart data={highOrderBoxPct} highlightMin={40} highlightMax={70} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 180, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                            <div style={{ marginBottom: 4 }}>
+                              <span style={{ display: "inline-block", width: 10, height: 4, borderRadius: 4, background: "rgba(92,189,138,0.16)", marginRight: 4 }} />
+                              推荐区间 40%–70%：高阶对话与基础梳理较为平衡。
+                            </div>
+                            <div style={{ marginBottom: 4 }}>
+                              <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: "var(--tch-warning)", marginRight: 4 }} />
+                              橙色圆点表示班级平均高阶对话占比。
+                            </div>
+                            <div>
+                              箱体（Q1–Q3）表示中间 50% 学生的区间，中线为中位数，方便你一眼判断整体是否偏低或偏高。
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ marginTop: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
+                            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>人数结构（按高阶对话占比区间）</span>
+                            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                              班级均值约 {classAvgHighOrderPct.toFixed(0)}%，建议重点关注 0%-25% 区间的学生。
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
+                            <div style={{ flex: "1 1 260px", minWidth: 240 }}>
+                              <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+                                {highOrderDistribution.map((b: any, idx: number) => {
+                                  const maxCount = Math.max(1, ...highOrderDistribution.map((x: any) => x.count || 0));
+                                  const h = maxCount ? ((b.count || 0) / maxCount) * 60 : 10;
+                                  const colors = [
+                                    "rgba(224,112,112,0.85)",
+                                    "rgba(232,168,76,0.9)",
+                                    "rgba(190,200,90,0.9)",
+                                    "rgba(92,189,138,0.9)",
+                                  ];
+                                  const barColor = colors[idx] || colors[colors.length - 1];
+                                  return (
+                                    <div
+                                      key={b.id}
+                                      style={{ flex: 1, minWidth: 40, textAlign: "center", cursor: "pointer" }}
+                                      onClick={() => {
+                                        const bandId =
+                                          b.id === "0-25" ? "band-0-25"
+                                          : b.id === "25-50" ? "band-25-50"
+                                          : b.id === "50-75" ? "band-50-75"
+                                          : "band-75-100";
+                                        setConversationHighOrderFilter(bandId as any);
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          margin: "0 auto 4px",
+                                          width: 26,
+                                          height: Math.max(8, h),
+                                          borderRadius: 6,
+                                          background: barColor,
+                                          boxShadow: conversationHighOrderFilter.includes(b.id)
+                                            ? "0 0 0 2px var(--bg-primary)"
+                                            : "none",
+                                          opacity: (b.count || 0) === 0 ? 0.35 : 1,
+                                          transition: "all 0.2s",
+                                        }}
+                                      />
+                                      <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 2 }}>{b.label}</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                                        {b.count} 人（{(b.ratio * 100).toFixed(0)}%）
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <div style={{ flex: "0 0 220px", minWidth: 200, fontSize: 11, color: "var(--text-muted)" }}>
+                              <div style={{ marginBottom: 4 }}>
+                                当前约有 {lowBandStudents.length} 名学生高阶对话占比低于 25%，建议作为重点引导对象；
+                              </div>
+                              <div>
+                                另有 {highBandStudents.length} 名学生高于 60%，适合作为分享案例或同伴示范。
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <div className="ov-chart-card">
                         <h3>学生对话画像</h3>
                         <p className="tch-desc">快速识别“话很多但进步小”的学生，点击可跳转到对话复盘。</p>
-                        {students.length === 0 ? (
-                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>暂无对话记录</p>
+                        {filteredStudents.length === 0 ? (
+                          <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", padding: 20 }}>{emptyHint}</p>
                         ) : (
                           <div className="ov-stu-table">
                             <div className="ov-stu-header">
@@ -3664,8 +4278,8 @@ export default function TeacherPage() {
                               <span>画像</span>
                               <span>操作</span>
                             </div>
-                            {students.map((stu: any, idx: number) => {
-                              const highOrderPct = Math.round(Number(stu.high_order_ratio || 0) * 100);
+                            {filteredStudents.map((stu: any, idx: number) => {
+                              const highOrderPct = stu.highOrderPct ?? Math.round(Number(stu.high_order_ratio || 0) * 100);
                               const qd = Number(stu.question_density || 0);
                               const persona = String(stu.persona || "直觉表达型");
                               const personaStyle = persona === "证据敏感型"
@@ -3681,7 +4295,14 @@ export default function TeacherPage() {
                                   </span>
                                   <span>{stu.turn_count}</span>
                                   <span>{qd.toFixed(2)}</span>
-                                  <span>{highOrderPct}%</span>
+                                  <span>
+                                    <span style={{ opacity: stu.highOrderSampleOk === false ? 0.6 : 1 }}>
+                                      {highOrderPct}%{stu.highOrderLevel ? `（${stu.highOrderLevel}）` : ""}
+                                    </span>
+                                    {stu.highOrderSampleOk === false && (
+                                      <span style={{ marginLeft: 4, fontSize: 10, color: "var(--text-muted)" }}>样本不足</span>
+                                    )}
+                                  </span>
                                   <span>
                                     <span className="ov-status-badge" style={personaStyle}>{persona}</span>
                                   </span>

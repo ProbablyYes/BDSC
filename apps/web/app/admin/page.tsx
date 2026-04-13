@@ -120,6 +120,61 @@ type AdminLogStats = {
   top_paths: AdminLogPathStat[];
 };
 
+type HealthWeights = {
+  quality: number;
+  risk: number;
+  stability: number;
+  engagement: number;
+};
+
+type HealthQualityDetail = {
+  project_count: number;
+  avg_score: number;
+  low_score_ratio: number;
+  base_score: number;
+  penalty_low_ratio: number;
+};
+
+type HealthRiskDetail = {
+  project_count: number;
+  high_risk_project_ratio: number;
+  high_risk_project_count: number;
+  avg_weighted_rule_hits: number;
+};
+
+type HealthStabilityDetail = {
+  total_requests: number;
+  success_rate: number;
+  error_rate: number;
+  blocked_rate: number;
+  avg_duration_ms: number;
+  p95_duration_ms: number;
+};
+
+type HealthEngagementDetail = {
+  total_interventions: number;
+  teacher_coverage: number;
+  student_coverage: number;
+  done_ratio: number;
+  teacher_with_interventions: number;
+  student_with_interventions: number;
+  total_teachers: number;
+  total_students: number;
+};
+
+type SystemHealth = {
+  health_score: number;
+  quality_score: number;
+  risk_score: number;
+  stability_score: number;
+  engagement_score: number;
+  weights?: HealthWeights;
+  quality_detail?: HealthQualityDetail;
+  risk_detail?: HealthRiskDetail;
+  stability_detail?: HealthStabilityDetail;
+  engagement_detail?: HealthEngagementDetail;
+};
+
 const INTERVENTION_STATUS_LABEL: Record<InterventionStatus, string> = {
   draft: "草稿",
   approved: "已审批",
@@ -147,6 +202,7 @@ export default function AdminPage() {
   // Dashboard data
   const [dashboard, setDashboard] = useState<any>(null);
   const [allProjects, setAllProjects] = useState<any[]>([]);
+  const [health, setHealth] = useState<SystemHealth | null>(null);
 
   // User management
   const [users, setUsers] = useState<UserRecord[]>([]);
@@ -184,6 +240,7 @@ export default function AdminPage() {
   // Logs
   const [accessLogs, setAccessLogs] = useState<AdminLogEntry[]>([]);
   const [logStats, setLogStats] = useState<AdminLogStats | null>(null);
+  const [showHealthDetail, setShowHealthDetail] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -232,6 +289,17 @@ export default function AdminPage() {
       setAllProjects(list);
     } catch {
       setAllProjects([]);
+    }
+    try {
+      const r3 = await fetch(`${API}/api/admin/health`);
+      if (r3.ok) {
+        const d3 = await r3.json();
+        setHealth(d3 as SystemHealth);
+      } else {
+        setHealth(null);
+      }
+    } catch {
+      setHealth(null);
     }
     setLoading(false);
   }
@@ -526,11 +594,15 @@ export default function AdminPage() {
   }, [allProjects]);
 
   const healthScore = useMemo(() => {
+    const backendScore = health?.health_score;
+    if (typeof backendScore === "number" && !Number.isNaN(backendScore)) {
+      return Math.round(backendScore * 10) / 10;
+    }
     if (stats.total === 0) return 0;
     const avgNorm = Math.min(stats.avgScore / 10, 1);
     const riskPenalty = stats.topRules.reduce((s, [, c]) => s + c, 0) / Math.max(stats.total, 1);
     return Math.max(0, Math.round((avgNorm * 80 - riskPenalty * 5 + 20) * 10) / 10);
-  }, [stats]);
+  }, [health, stats]);
 
   const sortedTeachers = useMemo(() => {
     const list = [...teachers];
@@ -567,6 +639,14 @@ export default function AdminPage() {
   function closeTeamMemberManager() {
     setEditTeamId(null);
     setNewMemberUserId("");
+  }
+
+  function openHealthDetail() {
+    setShowHealthDetail(true);
+  }
+
+  function closeHealthDetail() {
+    setShowHealthDetail(false);
   }
 
   async function createTeacherTeam() {
@@ -1027,7 +1107,11 @@ export default function AdminPage() {
           <span className="admin-role-badge">Admin</span>
         </div>
         <div className="topbar-center">
-          <span className="admin-health-badge">
+          <span
+            className="admin-health-badge"
+            onClick={openHealthDetail}
+            style={{ cursor: "pointer" }}
+          >
             系统健康度 <strong>{healthScore}</strong>/100
           </span>
         </div>
@@ -1055,7 +1139,7 @@ export default function AdminPage() {
               className={`admin-nav-btn ${tab === t.id ? "active" : ""}`}
               onClick={() => setTab(t.id)}
             >
-              {t.label}
+              <span className="admin-nav-label">{t.label}</span>
             </button>
           ))}
         </nav>
@@ -1100,10 +1184,20 @@ export default function AdminPage() {
                 </div>
                 <div className="admin-kpi">
                   <div className="admin-kpi-icon">💚</div>
-                  <div className="admin-kpi-content">
+                  <button
+                    type="button"
+                    className="admin-kpi-content admin-kpi-button"
+                    onClick={openHealthDetail}
+                    style={{ textAlign: "left" }}
+                  >
                     <span className="admin-kpi-label">系统健康度</span>
-                    <strong className="admin-kpi-value" style={{ color: healthScore >= 70 ? "#5cbd8a" : healthScore >= 40 ? "#e0a84c" : "#e07070" }}>{healthScore}/100</strong>
-                  </div>
+                    <strong
+                      className="admin-kpi-value"
+                      style={{ color: healthScore >= 70 ? "#5cbd8a" : healthScore >= 40 ? "#e0a84c" : "#e07070" }}
+                    >
+                      {healthScore}/100
+                    </strong>
+                  </button>
                 </div>
                 <div className="admin-kpi">
                   <div className="admin-kpi-icon">📄</div>
@@ -1113,30 +1207,6 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Class breakdown */}
-              {Object.keys(stats.classStats).length > 0 && (
-                <div className="admin-section">
-                  <h3>各班级概况</h3>
-                  <div className="admin-table">
-                    <div className="admin-table-header">
-                      <span>班级</span><span>项目数</span><span>平均分</span><span>风险触发</span><span>状态</span>
-                    </div>
-                    {Object.entries(stats.classStats).map(([cls, data]) => (
-                      <div key={cls} className="admin-table-row">
-                        <span className="admin-cell-primary">{cls}</span>
-                        <span>{data.count}</span>
-                        <span>{data.avgScore}</span>
-                        <span>{data.riskCount}</span>
-                        <span>
-                          <span className={`admin-status-dot ${data.avgScore >= 5 ? "good" : data.avgScore >= 3 ? "warn" : "danger"}`} />
-                          {data.avgScore >= 5 ? "良好" : data.avgScore >= 3 ? "需关注" : "高风险"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Team quick navigation */}
               {teams.length > 0 && (
@@ -1193,42 +1263,48 @@ export default function AdminPage() {
               </div>
 
               <div className="admin-user-toolbar">
-                <div className="admin-search-box">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                  <input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="搜索用户名、ID或邮箱…" />
+                <div className="admin-user-toolbar-row">
+                  <div className="admin-search-box">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="搜索用户名、ID或邮箱…" />
+                  </div>
+                  <div className="admin-filter-group">
+                    <button className={`admin-filter-btn ${userRoleFilter === "" ? "active" : ""}`} onClick={() => setUserRoleFilter("")}>全部</button>
+                    <button className={`admin-filter-btn ${userRoleFilter === "student" ? "active" : ""}`} onClick={() => setUserRoleFilter("student")}>学生</button>
+                    <button className={`admin-filter-btn ${userRoleFilter === "teacher" ? "active" : ""}`} onClick={() => setUserRoleFilter("teacher")}>教师</button>
+                    <button className={`admin-filter-btn ${userRoleFilter === "admin" ? "active" : ""}`} onClick={() => setUserRoleFilter("admin")}>管理员</button>
+                  </div>
                 </div>
-                <div className="admin-filter-group">
-                  <button className={`admin-filter-btn ${userRoleFilter === "" ? "active" : ""}`} onClick={() => setUserRoleFilter("")}>全部</button>
-                  <button className={`admin-filter-btn ${userRoleFilter === "student" ? "active" : ""}`} onClick={() => setUserRoleFilter("student")}>学生</button>
-                  <button className={`admin-filter-btn ${userRoleFilter === "teacher" ? "active" : ""}`} onClick={() => setUserRoleFilter("teacher")}>教师</button>
-                  <button className={`admin-filter-btn ${userRoleFilter === "admin" ? "active" : ""}`} onClick={() => setUserRoleFilter("admin")}>管理员</button>
+                <div className="admin-user-toolbar-row">
+                  <div className="admin-filter-group">
+                    <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
+                      <option value="">全部团队</option>
+                      <option value="__no_team__">未加入团队</option>
+                      {teams.map((t) => (
+                        <option key={t.team_id} value={t.team_id}>{t.team_name}</option>
+                      ))}
+                    </select>
+                    <label style={{ marginLeft: 8, fontSize: 12 }}>
+                      <input
+                        type="checkbox"
+                        checked={groupByTeam}
+                        onChange={(e) => setGroupByTeam(e.target.checked)}
+                        style={{ marginRight: 4 }}
+                      />
+                      按团队分组
+                    </label>
+                  </div>
+                  <div className="admin-user-toolbar-actions">
+                    <button className="admin-add-btn" onClick={() => setShowAddUser(true)}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+                      添加用户
+                    </button>
+                    <button className="admin-add-btn" onClick={() => setShowBatchCreate(true)}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+                      批量创建
+                    </button>
+                  </div>
                 </div>
-                <div className="admin-filter-group">
-                  <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
-                    <option value="">全部团队</option>
-                    <option value="__no_team__">未加入团队</option>
-                    {teams.map((t) => (
-                      <option key={t.team_id} value={t.team_id}>{t.team_name}</option>
-                    ))}
-                  </select>
-                  <label style={{ marginLeft: 8, fontSize: 12 }}>
-                    <input
-                      type="checkbox"
-                      checked={groupByTeam}
-                      onChange={(e) => setGroupByTeam(e.target.checked)}
-                      style={{ marginRight: 4 }}
-                    />
-                    按团队分组
-                  </label>
-                </div>
-                <button className="admin-add-btn" onClick={() => setShowAddUser(true)}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-                  添加用户
-                </button>
-                <button className="admin-add-btn" onClick={() => setShowBatchCreate(true)}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-                  批量创建
-                </button>
               </div>
 
               {/* Add user form */}
@@ -1964,7 +2040,7 @@ export default function AdminPage() {
                         </span>
                       </span>
                       <span>{log.path || "-"}</span>
-                      <span>{log.detail}</span>
+                      <span className="admin-log-detail" title={log.detail}>{log.detail}</span>
                       <span>
                         {isBlocked ? (
                           <span className="admin-log-blocked">🚫 已拦截{statusCode ? ` (${statusCode})` : ""}</span>
@@ -2015,6 +2091,304 @@ export default function AdminPage() {
             </div>
           )}
         </main>
+
+            {showHealthDetail && (
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  backgroundColor: "rgba(0,0,0,0.45)",
+                  zIndex: 55,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  className="admin-panel fade-up"
+                  style={{
+                    maxWidth: 860,
+                    width: "92%",
+                    maxHeight: "82vh",
+                    overflow: "auto",
+                    background: "var(--bg, #111)",
+                    borderRadius: 10,
+                    boxShadow: "0 14px 36px rgba(0,0,0,0.45)",
+                    padding: 20,
+                  }}
+                >
+                  <div className="admin-panel-header" style={{ marginBottom: 8 }}>
+                    <h2>系统健康度详情</h2>
+                    <span className="admin-panel-desc">基于项目质量、风险控制、系统稳定性与教学干预的综合评分</span>
+                  </div>
+
+                  <div className="admin-kpi-grid" style={{ marginBottom: 12 }}>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">💚</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">总健康度 H</span>
+                        <strong
+                          className="admin-kpi-value"
+                          style={{ color: healthScore >= 70 ? "#5cbd8a" : healthScore >= 40 ? "#e0a84c" : "#e07070" }}
+                        >
+                          {healthScore}/100
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">📁</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">项目质量 Q</span>
+                        <strong className="admin-kpi-value">{health?.quality_score ?? "—"}/100</strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">🛡️</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">风险控制 R</span>
+                        <strong className="admin-kpi-value">{health?.risk_score ?? "—"}/100</strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">🧱</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">系统稳定 S</span>
+                        <strong className="admin-kpi-value">{health?.stability_score ?? "—"}/100</strong>
+                      </div>
+                    </div>
+                    <div className="admin-kpi">
+                      <div className="admin-kpi-icon">👩‍🏫</div>
+                      <div className="admin-kpi-content">
+                        <span className="admin-kpi-label">教学干预 E</span>
+                        <strong className="admin-kpi-value">{health?.engagement_score ?? "—"}/100</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {health ? (
+                    <>
+                      {health.weights && (
+                        <div className="admin-section" style={{ marginTop: 8 }}>
+                          <h3>权重 Weights</h3>
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                              gap: 8,
+                              fontSize: 12,
+                            }}
+                          >
+                            <div>
+                              <div style={{ opacity: 0.7 }}>项目质量 Q</div>
+                              <div>{Math.round(health.weights.quality * 1000) / 1000}</div>
+                            </div>
+                            <div>
+                              <div style={{ opacity: 0.7 }}>风险控制 R</div>
+                              <div>{Math.round(health.weights.risk * 1000) / 1000}</div>
+                            </div>
+                            <div>
+                              <div style={{ opacity: 0.7 }}>系统稳定 S</div>
+                              <div>{Math.round(health.weights.stability * 1000) / 1000}</div>
+                            </div>
+                            <div>
+                              <div style={{ opacity: 0.7 }}>教学干预 E</div>
+                              <div>{Math.round(health.weights.engagement * 1000) / 1000}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="admin-section" style={{ marginTop: 12 }}>
+                        <h3>项目质量 Q 详情</h3>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                            gap: 8,
+                            fontSize: 12,
+                          }}
+                        >
+                          <div>
+                            <div style={{ opacity: 0.7 }}>项目数</div>
+                            <div>{health.quality_detail?.project_count ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>平均分</div>
+                            <div>{health.quality_detail?.avg_score ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>低分项目占比 (&lt;6 分)</div>
+                            <div>
+                              {typeof health.quality_detail?.low_score_ratio === "number"
+                                ? `${Math.round(health.quality_detail.low_score_ratio * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>基础质量分 Q_base</div>
+                            <div>{health.quality_detail?.base_score ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>低分惩罚 Q_penalty</div>
+                            <div>{health.quality_detail?.penalty_low_ratio ?? "—"}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="admin-section" style={{ marginTop: 12 }}>
+                        <h3>风险控制 R 详情</h3>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                            gap: 8,
+                            fontSize: 12,
+                          }}
+                        >
+                          <div>
+                            <div style={{ opacity: 0.7 }}>项目数</div>
+                            <div>{health.risk_detail?.project_count ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>高风险项目占比</div>
+                            <div>
+                              {typeof health.risk_detail?.high_risk_project_ratio === "number"
+                                ? `${Math.round(health.risk_detail.high_risk_project_ratio * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>高风险项目数</div>
+                            <div>{health.risk_detail?.high_risk_project_count ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>平均加权规则触发数</div>
+                            <div>{health.risk_detail?.avg_weighted_rule_hits ?? "—"}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="admin-section" style={{ marginTop: 12 }}>
+                        <h3>系统稳定 S 详情</h3>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                            gap: 8,
+                            fontSize: 12,
+                          }}
+                        >
+                          <div>
+                            <div style={{ opacity: 0.7 }}>请求总数</div>
+                            <div>{health.stability_detail?.total_requests ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>成功率</div>
+                            <div>
+                              {typeof health.stability_detail?.success_rate === "number"
+                                ? `${Math.round(health.stability_detail.success_rate * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>错误率</div>
+                            <div>
+                              {typeof health.stability_detail?.error_rate === "number"
+                                ? `${Math.round(health.stability_detail.error_rate * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>越权拦截率</div>
+                            <div>
+                              {typeof health.stability_detail?.blocked_rate === "number"
+                                ? `${Math.round(health.stability_detail.blocked_rate * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>平均时延 (ms)</div>
+                            <div>{health.stability_detail?.avg_duration_ms ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>95 分位时延 (ms)</div>
+                            <div>{health.stability_detail?.p95_duration_ms ?? "—"}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="admin-section" style={{ marginTop: 12 }}>
+                        <h3>教学干预 E 详情</h3>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                            gap: 8,
+                            fontSize: 12,
+                          }}
+                        >
+                          <div>
+                            <div style={{ opacity: 0.7 }}>干预总数</div>
+                            <div>{health.engagement_detail?.total_interventions ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>教师覆盖率</div>
+                            <div>
+                              {typeof health.engagement_detail?.teacher_coverage === "number"
+                                ? `${Math.round(health.engagement_detail.teacher_coverage * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>学生覆盖率</div>
+                            <div>
+                              {typeof health.engagement_detail?.student_coverage === "number"
+                                ? `${Math.round(health.engagement_detail.student_coverage * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>干预完成率</div>
+                            <div>
+                              {typeof health.engagement_detail?.done_ratio === "number"
+                                ? `${Math.round(health.engagement_detail.done_ratio * 1000) / 10}%`
+                                : "—"}
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>有干预记录的教师数</div>
+                            <div>{health.engagement_detail?.teacher_with_interventions ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>有干预记录的学生数</div>
+                            <div>{health.engagement_detail?.student_with_interventions ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>教师总数</div>
+                            <div>{health.engagement_detail?.total_teachers ?? "—"}</div>
+                          </div>
+                          <div>
+                            <div style={{ opacity: 0.7 }}>学生总数</div>
+                            <div>{health.engagement_detail?.total_students ?? "—"}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="admin-empty" style={{ marginTop: 12 }}>
+                      <div className="admin-empty-icon">💡</div>
+                      <p>当前健康度明细暂不可用，已回退为前端根据项目分数与规则触发次数估算的健康分。</p>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 16, textAlign: "right" }}>
+                    <button type="button" className="admin-btn-secondary" onClick={closeHealthDetail}>
+                      关闭
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
         {showTeamManager && manageTeacherId && (() => {
           const teacherTeams = teams.filter((t) => t.teacher_id === manageTeacherId);

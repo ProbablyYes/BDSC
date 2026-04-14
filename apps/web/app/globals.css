@@ -706,6 +706,55 @@ button {
   animation: projectReportFloat 9s ease-in-out infinite;
 }
 
+.project-report-flow {
+  display: grid;
+  gap: 18px;
+}
+
+.project-report-stage {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+}
+
+.project-report-stage-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.project-report-stage-index {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #d9e5ff;
+  background: linear-gradient(135deg, rgba(107,138,255,0.9), rgba(115,204,255,0.78));
+  box-shadow: 0 10px 24px rgba(107,138,255,0.22);
+}
+
+.project-report-stage-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.project-report-stage-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
 .project-report-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
@@ -798,6 +847,52 @@ button {
   line-height: 1.7;
 }
 
+.project-report-metric-ribbon {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-report-metric-card {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.028);
+}
+
+.project-report-metric-card span,
+.project-report-sample-card span,
+.project-compare-summary-side span,
+.project-compare-dimension-card span,
+.project-compare-evidence-card span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.project-report-metric-card strong,
+.project-report-sample-card strong,
+.project-compare-summary-side strong,
+.project-compare-dimension-card strong,
+.project-compare-evidence-card strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.project-report-metric-card p,
+.project-report-watch-item p,
+.project-report-sample-card p,
+.project-report-sequence-item p,
+.project-compare-summary-card p,
+.project-compare-dimension-card p,
+.project-compare-risk-card p,
+.project-compare-evidence-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
 .project-report-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
@@ -815,6 +910,93 @@ button {
   background:
     radial-gradient(circle at top right, rgba(107,138,255,0.14), transparent 30%),
     rgba(255,255,255,0.025);
+}
+
+.project-report-watchlist {
+  display: grid;
+  gap: 12px;
+}
+
+.project-report-watch-item {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.project-report-watch-top,
+.project-compare-risk-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.project-report-watch-top span,
+.project-compare-risk-top span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.project-report-quadrant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-report-quadrant-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.project-report-quadrant-card.good {
+  background: rgba(92,189,138,0.08);
+  border-color: rgba(92,189,138,0.18);
+}
+
+.project-report-quadrant-card.warn {
+  background: rgba(224,168,76,0.08);
+  border-color: rgba(224,168,76,0.18);
+}
+
+.project-report-quadrant-card.neutral {
+  background: rgba(115,204,255,0.08);
+  border-color: rgba(115,204,255,0.18);
+}
+
+.project-report-quadrant-card.danger {
+  background: rgba(224,112,112,0.08);
+  border-color: rgba(224,112,112,0.18);
+}
+
+.project-report-quadrant-card span,
+.project-compare-axis-side span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.project-report-quadrant-card strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.project-report-quadrant-card p,
+.project-report-quadrant-note,
+.project-compare-axis-side em {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-style: normal;
+}
+
+.project-report-quadrant-note {
+  margin-top: 12px;
+  font-size: 12px;
 }
 
 .project-report-chart-head {
@@ -1040,6 +1222,30 @@ button {
   color: var(--text-secondary);
 }
 
+.project-report-sample-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.project-report-sample-card {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02)),
+    rgba(255,255,255,0.02);
+}
+
+.project-report-sample-card em,
+.project-compare-dimension-card em {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-style: normal;
+  color: #bfd1ff;
+  font-size: 12px;
+}
+
 .project-report-evidence-list {
   display: grid;
   gap: 12px;
@@ -1104,6 +1310,34 @@ button {
   border: 1px solid rgba(255,255,255,0.06);
   color: var(--text-primary);
   line-height: 1.7;
+}
+
+.project-report-sequence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-report-sequence-item {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.028);
+}
+
+.project-report-sequence-item span {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(107,138,255,0.14);
+  color: #bfd1ff;
+  font-size: 12px;
+}
+
+.project-report-sequence-item strong {
+  display: block;
+  margin-bottom: 8px;
 }
 
 @page {
@@ -1357,6 +1591,218 @@ button {
   gap: 14px;
 }
 
+.project-compare-flow {
+  display: grid;
+  gap: 18px;
+}
+
+.project-compare-stage {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+}
+
+.project-compare-stage-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.project-compare-stage-index {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #d9e5ff;
+  background: linear-gradient(135deg, rgba(107,138,255,0.9), rgba(115,204,255,0.78));
+  box-shadow: 0 10px 24px rgba(107,138,255,0.22);
+}
+
+.project-compare-stage-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.project-compare-stage-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.project-compare-summary-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(107,138,255,0.16);
+  background:
+    radial-gradient(circle at top right, rgba(107,138,255,0.14), transparent 28%),
+    rgba(255,255,255,0.025);
+}
+
+.project-compare-summary-card h3 {
+  margin: 0 0 10px;
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.project-compare-summary-side {
+  display: grid;
+  gap: 12px;
+}
+
+.project-compare-summary-side > div {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.project-compare-dimension-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-compare-dimension-card {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.028);
+}
+
+.project-compare-visual-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 14px;
+}
+
+.project-compare-visual-card {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.025);
+}
+
+.project-compare-radar-shell {
+  position: relative;
+  height: 280px;
+}
+
+.project-compare-radar-chart {
+  position: absolute;
+  inset: 0;
+}
+
+.project-compare-radar-chart svg polygon:nth-of-type(5),
+.project-compare-radar-chart svg circle {
+  filter: drop-shadow(0 4px 12px rgba(107,138,255,0.18));
+}
+
+.project-compare-radar-chart.ghost {
+  opacity: 0.72;
+  mix-blend-mode: screen;
+}
+
+.project-compare-radar-chart.ghost svg polygon:nth-of-type(5) {
+  fill: rgba(115,204,255,0.16);
+  stroke: #73ccff;
+}
+
+.project-compare-radar-chart.ghost svg circle {
+  fill: #73ccff;
+}
+
+.project-compare-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.project-compare-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.project-compare-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.project-compare-axis-board {
+  display: grid;
+  gap: 14px;
+}
+
+.project-compare-axis-row {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.project-compare-axis-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.project-compare-axis-top span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.project-compare-axis-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.project-compare-axis-side {
+  display: grid;
+  grid-template-columns: minmax(88px, 120px) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.project-compare-axis-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.project-compare-axis-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.project-compare-axis-fill.left {
+  background: linear-gradient(90deg, rgba(107,138,255,0.72), rgba(107,138,255,0.95));
+}
+
+.project-compare-axis-fill.right {
+  background: linear-gradient(90deg, rgba(115,204,255,0.72), rgba(115,204,255,0.95));
+}
+
 .project-compare-duo {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1394,6 +1840,22 @@ button {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.project-compare-risk-grid,
+.project-compare-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-compare-risk-card,
+.project-compare-evidence-card,
+.project-compare-question-board {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.028);
 }
 
 .project-category-stack {
@@ -1485,21 +1947,39 @@ button {
 
   .project-board-grid,
   .project-insight-grid,
+  .project-report-metric-ribbon,
   .project-report-dashboard,
   .project-report-columns,
   .project-report-hero,
   .project-intel-summary-band,
+  .project-report-quadrant-grid,
+  .project-report-sample-grid,
+  .project-report-sequence,
+  .project-compare-summary-card,
+  .project-compare-dimension-grid,
+  .project-compare-visual-grid,
+  .project-compare-risk-grid,
+  .project-compare-evidence-grid,
   .project-report-sample-board,
   .project-report-dual-list,
   .project-report-signal-strip,
   .project-report-footer {
     grid-template-columns: 1fr;
   }
+
+  .project-report-stage-head {
+    grid-template-columns: 1fr;
+  }
+
+  .project-compare-stage-head {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
   .project-board-stats,
-  .project-compare-duo {
+  .project-compare-duo,
+  .project-compare-axis-side {
     grid-template-columns: 1fr;
   }
 

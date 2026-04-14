@@ -4333,6 +4333,11 @@ def teacher_project_insight_report(payload: dict) -> dict:
             "priority_projects": [],
             "comparison_axes": [],
             "sample_comparison": [],
+            "sample_cards": [],
+            "risk_watchlist": [],
+            "intent_profile": [],
+            "cohort_snapshot": {},
+            "teaching_sequence": [],
             "teaching_modules": [],
             "evidence_citations": [],
             "teaching_focus": "",
@@ -4341,6 +4346,7 @@ def teacher_project_insight_report(payload: dict) -> dict:
 
     sorted_by_score = sorted(rows, key=lambda item: float(item.get("latest_score", 0) or 0), reverse=True)
     sorted_by_risk = sorted(rows, key=lambda item: len(item.get("top_risks") or []), reverse=True)
+    sorted_by_improvement = sorted(rows, key=lambda item: float(item.get("improvement", 0) or 0), reverse=True)
     risk_counter: dict[str, int] = {}
     intent_counter: dict[str, int] = {}
     for row in rows:
@@ -4352,14 +4358,99 @@ def teacher_project_insight_report(payload: dict) -> dict:
         intent_counter[intent] = intent_counter.get(intent, 0) + 1
 
     avg_score = round(sum(float(row.get("latest_score", 0) or 0) for row in rows) / max(1, len(rows)), 1)
+    avg_improvement = round(sum(float(row.get("improvement", 0) or 0) for row in rows) / max(1, len(rows)), 1)
+    avg_risk_count = round(sum(len(row.get("top_risks") or []) for row in rows) / max(1, len(rows)), 1)
+    avg_submission_count = round(sum(float(row.get("submission_count", 0) or 0) for row in rows) / max(1, len(rows)), 1)
+    high_score_count = sum(1 for row in rows if float(row.get("latest_score", 0) or 0) >= 8)
+    low_score_count = sum(1 for row in rows if float(row.get("latest_score", 0) or 0) < 6)
     top_risks = sorted(risk_counter.items(), key=lambda item: item[1], reverse=True)[:3]
+    intent_profile = [
+        {"intent": intent, "count": count}
+        for intent, count in sorted(intent_counter.items(), key=lambda item: item[1], reverse=True)[:4]
+    ]
     dominant_intent = sorted(intent_counter.items(), key=lambda item: item[1], reverse=True)[0][0] if intent_counter else "综合咨询"
+    sample_cards: list[dict[str, Any]] = []
+
+    def _append_sample_card(label: str, row: dict[str, Any] | None, metric: str, takeaway: str) -> None:
+        if not row:
+            return
+        project_name = _safe_str(row.get("project_name", "未命名项目"))
+        if any(card.get("project_name") == project_name and card.get("label") == label for card in sample_cards):
+            return
+        sample_cards.append({
+            "label": label,
+            "project_name": project_name,
+            "metric": metric,
+            "takeaway": takeaway,
+        })
+
+    _append_sample_card(
+        "高分样本",
+        sorted_by_score[0] if sorted_by_score else None,
+        f"{float(sorted_by_score[0].get('latest_score', 0) or 0):.1f} 分" if sorted_by_score else "",
+        "适合作为正向样本，优先拆解其结构完整度与表达方式。",
+    )
+    _append_sample_card(
+        "进步最快",
+        sorted_by_improvement[0] if sorted_by_improvement else None,
+        f"{float(sorted_by_improvement[0].get('improvement', 0) or 0):+.1f} 分" if sorted_by_improvement else "",
+        "适合拿来复盘其迭代路径，提炼成可迁移的方法。",
+    )
+    _append_sample_card(
+        "高风险样本",
+        sorted_by_risk[0] if sorted_by_risk else None,
+        f"{len((sorted_by_risk[0].get('top_risks') or []))} 个风险" if sorted_by_risk else "",
+        "建议优先精读，确认是结构性短板还是单次提交失误。",
+    )
+    cohort_snapshot = {
+        "avg_score": avg_score,
+        "avg_improvement": avg_improvement,
+        "avg_risk_count": avg_risk_count,
+        "avg_submission_count": avg_submission_count,
+        "high_score_share": round(high_score_count / max(1, len(rows)) * 100),
+        "low_score_share": round(low_score_count / max(1, len(rows)) * 100),
+        "dominant_intent": dominant_intent,
+    }
+    risk_watchlist = [
+        {
+            "risk": risk,
+            "count": count,
+            "advice": f"当前分类中出现 {count} 次，建议把它放进下一次统一讲评的固定检查项。",
+        }
+        for risk, count in top_risks
+    ]
+    teaching_sequence = [
+        {
+            "step": "先定标",
+            "action": f"先展示 {sample_cards[0]['project_name']} 的可取结构或表达亮点。" if sample_cards else "先展示一个高分样本。",
+            "goal": "让学生先看到这类项目的完成标准。",
+        },
+        {
+            "step": "再对照",
+            "action": (
+                f"对照说明 {top_risks[0][0]} 等高频问题如何拖低项目质量。"
+                if top_risks else
+                "对照一个高风险样本，说明为什么会失分。"
+            ),
+            "goal": "把共性问题讲透，而不是逐个零散点评。",
+        },
+        {
+            "step": "后布置",
+            "action": "统一布置下一轮修改要求，并明确必须补充的证据或结构。",
+            "goal": "让同类项目在下一轮提交中出现可观察的整体改善。",
+        },
+    ]
     snapshot = {
         "category": category,
         "project_count": len(rows),
         "avg_score": avg_score,
+        "avg_improvement": avg_improvement,
+        "avg_risk_count": avg_risk_count,
+        "avg_submission_count": avg_submission_count,
         "dominant_intent": dominant_intent,
+        "intent_profile": intent_profile,
         "top_sample": sorted_by_score[:5],
+        "improving_sample": sorted_by_improvement[:5],
         "priority_sample": sorted_by_risk[:5],
         "top_risks": [{"risk": risk, "count": count} for risk, count in top_risks],
         "rows": rows[:24],
@@ -4415,6 +4506,11 @@ def teacher_project_insight_report(payload: dict) -> dict:
                 "takeaway": "适合作为反例样本，帮助老师判断共性问题到底出在哪里。"
             },
         ],
+        "sample_cards": sample_cards,
+        "risk_watchlist": risk_watchlist,
+        "intent_profile": intent_profile,
+        "cohort_snapshot": cohort_snapshot,
+        "teaching_sequence": teaching_sequence,
         "teaching_modules": [
             "先展示一个高分样本的结构优势。",
             "再对照一个高风险样本，指出最关键的断点。",
@@ -4451,6 +4547,11 @@ def teacher_project_insight_report(payload: dict) -> dict:
             'priority_projects: [{"project_name": string, "reason": string}],\n'
             'comparison_axes: [{"dimension": string, "insight": string}],\n'
             'sample_comparison: [{"role": string, "project_name": string, "takeaway": string}],\n'
+            'sample_cards: [{"label": string, "project_name": string, "metric": string, "takeaway": string}],\n'
+            'risk_watchlist: [{"risk": string, "count": number, "advice": string}],\n'
+            'intent_profile: [{"intent": string, "count": number}],\n'
+            'cohort_snapshot: {"avg_score": number, "avg_improvement": number, "avg_risk_count": number, "avg_submission_count": number, "high_score_share": number, "low_score_share": number, "dominant_intent": string},\n'
+            'teaching_sequence: [{"step": string, "action": string, "goal": string}],\n'
             'teaching_modules: string[],\n'
             'evidence_citations: [{"claim": string, "project_name": string, "evidence": string}],\n'
             'teaching_focus: string, teaching_action: string。\n'
@@ -4459,7 +4560,8 @@ def teacher_project_insight_report(payload: dict) -> dict:
             "2. 不要泛泛而谈，尽量结合风险、分数、迭代、项目名称给出判断。\n"
             "3. 必须体现至少一个高分样本和一个高风险样本之间的对照分析。\n"
             "4. 每个数组控制在 2-4 条。\n"
-            "5. 中文输出，简洁但信息密度高，像老师真正会看的教学分析报告。"
+            "5. 结论要适合前端做卡片和图表展示，不要只写成长段文字。\n"
+            "6. 中文输出，简洁但信息密度高，像老师真正会看的教学分析报告。"
         ),
         user_prompt=f"当前分类项目数据：\n{json.dumps(snapshot, ensure_ascii=False)}",
         temperature=0.25,
@@ -4477,10 +4579,193 @@ def teacher_project_insight_report(payload: dict) -> dict:
         "priority_projects": result.get("priority_projects") or fallback["priority_projects"],
         "comparison_axes": result.get("comparison_axes") or fallback["comparison_axes"],
         "sample_comparison": result.get("sample_comparison") or fallback["sample_comparison"],
+        "sample_cards": result.get("sample_cards") or fallback["sample_cards"],
+        "risk_watchlist": result.get("risk_watchlist") or fallback["risk_watchlist"],
+        "intent_profile": result.get("intent_profile") or fallback["intent_profile"],
+        "cohort_snapshot": result.get("cohort_snapshot") or fallback["cohort_snapshot"],
+        "teaching_sequence": result.get("teaching_sequence") or fallback["teaching_sequence"],
         "teaching_modules": result.get("teaching_modules") or fallback["teaching_modules"],
         "evidence_citations": result.get("evidence_citations") or fallback["evidence_citations"],
         "teaching_focus": _safe_str(result.get("teaching_focus", fallback["teaching_focus"])),
         "teaching_action": _safe_str(result.get("teaching_action", fallback["teaching_action"])),
+        "snapshot": snapshot,
+    }
+
+
+@app.post("/api/teacher/project-compare-report")
+def teacher_project_compare_report(payload: dict) -> dict:
+    left = dict(payload.get("left") or {})
+    right = dict(payload.get("right") or {})
+    if not left or not right:
+        return {
+            "headline": "请选择两个项目进行对比",
+            "overall_judgement": "",
+            "winning_project": "",
+            "winning_reason": "",
+            "dimension_cards": [],
+            "risk_overlap": [],
+            "teaching_actions": [],
+            "focus_questions": [],
+            "evidence_citations": [],
+            "snapshot": {},
+        }
+
+    def _metric(item: dict[str, Any], key: str) -> float:
+        return float(item.get(key, 0) or 0)
+
+    def _risk_list(item: dict[str, Any]) -> list[str]:
+        return [_safe_str(risk) for risk in list(item.get("top_risks") or []) if _safe_str(risk)]
+
+    left_name = _safe_str(left.get("project_name", "项目A")) or "项目A"
+    right_name = _safe_str(right.get("project_name", "项目B")) or "项目B"
+    left_score = _metric(left, "latest_score")
+    right_score = _metric(right, "latest_score")
+    left_improvement = _metric(left, "improvement")
+    right_improvement = _metric(right, "improvement")
+    left_iterations = _metric(left, "submission_count")
+    right_iterations = _metric(right, "submission_count")
+    left_risks = _risk_list(left)
+    right_risks = _risk_list(right)
+    shared_risks = sorted(set(left_risks) & set(right_risks))
+    left_only_risks = [risk for risk in left_risks if risk not in shared_risks]
+    right_only_risks = [risk for risk in right_risks if risk not in shared_risks]
+
+    left_strength_score = left_score * 0.55 + left_improvement * 0.2 + left_iterations * 0.05 - len(left_risks) * 0.7
+    right_strength_score = right_score * 0.55 + right_improvement * 0.2 + right_iterations * 0.05 - len(right_risks) * 0.7
+    stronger = left if left_strength_score >= right_strength_score else right
+    weaker = right if stronger is left else left
+    stronger_name = _safe_str(stronger.get("project_name", "更优项目")) or "更优项目"
+    weaker_name = _safe_str(weaker.get("project_name", "另一项目")) or "另一项目"
+
+    dimension_cards = [
+        {
+            "dimension": "当前分",
+            "winner": left_name if left_score >= right_score else right_name,
+            "delta": f"{abs(left_score - right_score):.1f} 分",
+            "insight": f"{left_name} {left_score:.1f} 分，{right_name} {right_score:.1f} 分，当前完成度差异已经比较明显。",
+        },
+        {
+            "dimension": "迭代成效",
+            "winner": left_name if left_improvement >= right_improvement else right_name,
+            "delta": f"{abs(left_improvement - right_improvement):.1f} 分",
+            "insight": f"最近提分更明显的一项更值得复盘其修改路径，看是否能迁移到另一项。",
+        },
+        {
+            "dimension": "迭代投入",
+            "winner": left_name if left_iterations >= right_iterations else right_name,
+            "delta": f"{abs(left_iterations - right_iterations):.0f} 次",
+            "insight": "提交次数能帮助判断项目是稳步迭代，还是投入不足导致诊断停滞。",
+        },
+        {
+            "dimension": "风险暴露",
+            "winner": left_name if len(left_risks) <= len(right_risks) else right_name,
+            "delta": f"{abs(len(left_risks) - len(right_risks))} 个风险",
+            "insight": "风险更少的一方通常结构更稳，风险更多的一方更需要老师介入拆解。",
+        },
+    ]
+    risk_overlap = [
+        {
+            "risk": risk,
+            "status": "shared",
+            "detail": "这是两项项目共同卡住的风险，适合做一次共性讲评。",
+        }
+        for risk in shared_risks[:3]
+    ] + [
+        {
+            "risk": risk,
+            "status": left_name,
+            "detail": f"{left_name} 独有风险，说明它的短板更偏向个体性问题。",
+        }
+        for risk in left_only_risks[:2]
+    ] + [
+        {
+            "risk": risk,
+            "status": right_name,
+            "detail": f"{right_name} 独有风险，建议单独追踪其修正质量。",
+        }
+        for risk in right_only_risks[:2]
+    ]
+    snapshot = {
+        "left": left,
+        "right": right,
+        "shared_risks": shared_risks,
+        "left_only_risks": left_only_risks,
+        "right_only_risks": right_only_risks,
+        "dimension_cards": dimension_cards,
+    }
+    fallback = {
+        "headline": f"{stronger_name} 当前整体更稳，{weaker_name} 更需要教师介入。",
+        "overall_judgement": (
+            f"{stronger_name} 在当前分、风险控制或近期迭代上占优，更适合作为本轮示范样本；"
+            f"{weaker_name} 则更适合作为反例，帮助老师快速定位这一类项目最容易断掉的环节。"
+        ),
+        "winning_project": stronger_name,
+        "winning_reason": (
+            f"{stronger_name} 的综合表现更好：当前分更高或风险更少，同时具备更清晰的可迁移经验。"
+        ),
+        "dimension_cards": dimension_cards,
+        "risk_overlap": risk_overlap,
+        "teaching_actions": [
+            f"先讲 {stronger_name} 的亮点结构，再对照 {weaker_name} 的断点做一次示范讲评。",
+            f"围绕 {(_safe_str(shared_risks[0]) if shared_risks else '核心风险')} 设计统一修改要求，减少共性返工。",
+            f"优先复查 {weaker_name} 的下一轮提交，确认问题是否真正被修正。",
+        ],
+        "focus_questions": [
+            f"{weaker_name} 的问题主要出在论证闭环、证据支撑，还是表达组织？",
+            f"{stronger_name} 的成功经验里，哪些步骤可以要求另一项直接照做？",
+            "两项项目的共同风险，是否已经到了需要全班统一讲评的程度？",
+        ],
+        "evidence_citations": [
+            {
+                "project_name": left_name,
+                "claim": f"{left_name} 当前状态摘要",
+                "evidence": _safe_str(left.get("summary", "")),
+            },
+            {
+                "project_name": right_name,
+                "claim": f"{right_name} 当前状态摘要",
+                "evidence": _safe_str(right.get("summary", "")),
+            },
+        ],
+    }
+    if not composer_llm.enabled:
+        return {**fallback, "snapshot": snapshot}
+
+    result = composer_llm.chat_json(
+        system_prompt=(
+            "你是教师端的项目对比智能体，需要比较两个学生项目，并输出老师可直接拿来决策的结构化 JSON。\n"
+            "请只输出 JSON，字段必须包含：\n"
+            'headline: string,\n'
+            'overall_judgement: string,\n'
+            'winning_project: string,\n'
+            'winning_reason: string,\n'
+            'dimension_cards: [{"dimension": string, "winner": string, "delta": string, "insight": string}],\n'
+            'risk_overlap: [{"risk": string, "status": string, "detail": string}],\n'
+            'teaching_actions: string[],\n'
+            'focus_questions: string[],\n'
+            'evidence_citations: [{"project_name": string, "claim": string, "evidence": string}]。\n'
+            "要求：\n"
+            "1. 不要空泛夸奖，必须指出两项项目到底差在哪里。\n"
+            "2. 既要比较当前结果，也要比较迭代势头与风险分布。\n"
+            "3. 至少给出 3 个可以指导老师下一步动作的结论。\n"
+            "4. 语言简洁、信息密度高，适合前端卡片展示。"
+        ),
+        user_prompt=f"两个项目的对比数据：\n{json.dumps(snapshot, ensure_ascii=False)}",
+        temperature=0.2,
+        model=settings.llm_structured_model,
+    ) or {}
+    if not isinstance(result, dict):
+        return {**fallback, "snapshot": snapshot}
+    return {
+        "headline": _safe_str(result.get("headline", fallback["headline"])),
+        "overall_judgement": _safe_str(result.get("overall_judgement", fallback["overall_judgement"])),
+        "winning_project": _safe_str(result.get("winning_project", fallback["winning_project"])),
+        "winning_reason": _safe_str(result.get("winning_reason", fallback["winning_reason"])),
+        "dimension_cards": result.get("dimension_cards") or fallback["dimension_cards"],
+        "risk_overlap": result.get("risk_overlap") or fallback["risk_overlap"],
+        "teaching_actions": result.get("teaching_actions") or fallback["teaching_actions"],
+        "focus_questions": result.get("focus_questions") or fallback["focus_questions"],
+        "evidence_citations": result.get("evidence_citations") or fallback["evidence_citations"],
         "snapshot": snapshot,
     }
 

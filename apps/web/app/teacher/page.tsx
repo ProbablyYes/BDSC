@@ -599,6 +599,7 @@ export default function TeacherPage() {
   const [projectWorkbenchSummary, setProjectWorkbenchSummary] = useState<any>(null);
   const [projectCaseBenchmark, setProjectCaseBenchmark] = useState<any>(null);
   const [projectStructuredReport, setProjectStructuredReport] = useState<any>(null);
+  const [projectCompareReport, setProjectCompareReport] = useState<any>(null);
   const [hyperLibrary, setHyperLibrary] = useState<any>(null);
   const [conversationAnalytics, setConversationAnalytics] = useState<any>(null);
   const [conversationPersonaFilter, setConversationPersonaFilter] = useState<"all" | "evidence" | "passive" | "intuitive">("all");
@@ -607,6 +608,7 @@ export default function TeacherPage() {
     "all" | "low" | "high" | "band-0-25" | "band-25-50" | "band-50-75" | "band-75-100"
   >("band-0-25");
   const [projectStructuredReportLoading, setProjectStructuredReportLoading] = useState(false);
+  const [projectCompareLoading, setProjectCompareLoading] = useState(false);
   const [teachingInterventions, setTeachingInterventions] = useState<any>(null);
   const [assistantDashboard, setAssistantDashboard] = useState<any>(null);
   const [assistantAssessment, setAssistantAssessment] = useState<any>(null);
@@ -1866,6 +1868,55 @@ export default function TeacherPage() {
     }
   }
 
+  async function generateProjectCompareReport(left: any, right: any) {
+    if (!left || !right) {
+      setProjectCompareReport(null);
+      return;
+    }
+    try {
+      setProjectCompareLoading(true);
+      const payload = {
+        left: {
+          project_name: left.project_name || left.logical_project_id || "项目A",
+          category: left.category || inferProjectCategory(left),
+          latest_score: Number(left.latest_score || 0),
+          improvement: Number(left.improvement || 0),
+          submission_count: Number(left.submission_count || 0),
+          project_phase: left.project_phase || "",
+          student_name: left.student_name || left.student_id || "",
+          team_name: left.team_name || "",
+          top_risks: normalizeRuleList(left.top_risks),
+          summary: left.summary || "",
+          dominant_intent: left.dominant_intent || "综合咨询",
+        },
+        right: {
+          project_name: right.project_name || right.logical_project_id || "项目B",
+          category: right.category || inferProjectCategory(right),
+          latest_score: Number(right.latest_score || 0),
+          improvement: Number(right.improvement || 0),
+          submission_count: Number(right.submission_count || 0),
+          project_phase: right.project_phase || "",
+          student_name: right.student_name || right.student_id || "",
+          team_name: right.team_name || "",
+          top_risks: normalizeRuleList(right.top_risks),
+          summary: right.summary || "",
+          dominant_intent: right.dominant_intent || "综合咨询",
+        },
+      };
+      const data = await api("/api/teacher/project-compare-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      setProjectCompareReport(data);
+    } catch (error) {
+      setErrorMessage(`${error instanceof Error ? error.message : "生成项目对比报告失败"}`);
+      setProjectCompareReport(null);
+    } finally {
+      setProjectCompareLoading(false);
+    }
+  }
+
   async function loadTeachingInterventions() {
     setLoadingMessage("正在分析教学干预方案");
     setLoading(true);
@@ -2929,6 +2980,54 @@ export default function TeacherPage() {
     };
   }, [filteredProjectCatalog, projectBoardCategory]);
 
+  const projectMatrixData = useMemo(() => {
+    if (!filteredProjectCatalog.length) return { points: [], quadrants: [], xThreshold: 1, yThreshold: 0 };
+    const avgRisk = filteredProjectCatalog.reduce((sum: number, item: any) => sum + normalizeRuleList(item.top_risks).length, 0) / filteredProjectCatalog.length;
+    const avgScore = filteredProjectCatalog.reduce((sum: number, item: any) => sum + Number(item.latest_score || 0), 0) / filteredProjectCatalog.length;
+    const points = filteredProjectCatalog.map((item: any) => ({
+      id: item.project_key,
+      x: normalizeRuleList(item.top_risks).length,
+      y: Number(item.latest_score || 0),
+      avgScore: Number(item.latest_score || 0),
+      project_name: item.project_name,
+      student_name: item.student_name,
+      team_name: item.team_name,
+      riskCount: normalizeRuleList(item.top_risks).length,
+      improvement: Number(item.improvement || 0),
+    }));
+    const quadrants = [
+      {
+        key: "high-score-low-risk",
+        label: "高分低风险",
+        tone: "good",
+        count: points.filter((item: any) => item.y >= avgScore && item.x <= avgRisk).length,
+        hint: "可作为示范样本",
+      },
+      {
+        key: "high-score-high-risk",
+        label: "高分高风险",
+        tone: "warn",
+        count: points.filter((item: any) => item.y >= avgScore && item.x > avgRisk).length,
+        hint: "成绩尚可，但结构不稳",
+      },
+      {
+        key: "low-score-low-risk",
+        label: "低分低风险",
+        tone: "neutral",
+        count: points.filter((item: any) => item.y < avgScore && item.x <= avgRisk).length,
+        hint: "可能是完成度不足",
+      },
+      {
+        key: "low-score-high-risk",
+        label: "低分高风险",
+        tone: "danger",
+        count: points.filter((item: any) => item.y < avgScore && item.x > avgRisk).length,
+        hint: "优先介入区",
+      },
+    ];
+    return { points, quadrants, xThreshold: avgRisk, yThreshold: avgScore };
+  }, [filteredProjectCatalog]);
+
   useEffect(() => {
     if (projectWorkspaceView !== "insight") return;
     if (!filteredProjectCatalog.length) {
@@ -2972,6 +3071,78 @@ export default function TeacherPage() {
       ],
     };
   }, [comparedProjectCards]);
+
+  const projectCompareVisuals = useMemo(() => {
+    if (comparedProjectCards.length < 2) return null;
+    const [left, right] = comparedProjectCards as any[];
+    const leftRisk = normalizeRuleList(left.top_risks).length;
+    const rightRisk = normalizeRuleList(right.top_risks).length;
+    const maxIteration = Math.max(1, Number(left.submission_count || 0), Number(right.submission_count || 0));
+    const maxRisk = Math.max(1, leftRisk, rightRisk);
+    const radar = [
+      {
+        label: "当前分",
+        leftValue: Number(left.latest_score || 0),
+        rightValue: Number(right.latest_score || 0),
+        max: Math.max(10, Number(left.latest_score || 0), Number(right.latest_score || 0)),
+      },
+      {
+        label: "提分幅度",
+        leftValue: Math.max(0, Number(left.improvement || 0)),
+        rightValue: Math.max(0, Number(right.improvement || 0)),
+        max: Math.max(1, Number(left.improvement || 0), Number(right.improvement || 0), 3),
+      },
+      {
+        label: "迭代投入",
+        leftValue: Number(left.submission_count || 0),
+        rightValue: Number(right.submission_count || 0),
+        max: maxIteration,
+      },
+      {
+        label: "风险控制",
+        leftValue: Math.max(0, maxRisk - leftRisk + 1),
+        rightValue: Math.max(0, maxRisk - rightRisk + 1),
+        max: Math.max(2, maxRisk + 1),
+      },
+    ];
+    const scoreAxes = [
+      {
+        label: "当前分",
+        leftValue: Number(left.latest_score || 0),
+        rightValue: Number(right.latest_score || 0),
+        max: Math.max(10, Number(left.latest_score || 0), Number(right.latest_score || 0)),
+      },
+      {
+        label: "提分幅度",
+        leftValue: Math.max(0, Number(left.improvement || 0)),
+        rightValue: Math.max(0, Number(right.improvement || 0)),
+        max: Math.max(1, Number(left.improvement || 0), Number(right.improvement || 0), 3),
+      },
+      {
+        label: "提交次数",
+        leftValue: Number(left.submission_count || 0),
+        rightValue: Number(right.submission_count || 0),
+        max: maxIteration,
+      },
+      {
+        label: "风险数",
+        leftValue: leftRisk,
+        rightValue: rightRisk,
+        max: maxRisk,
+        invert: true,
+      },
+    ];
+    return { left, right, radar, scoreAxes };
+  }, [comparedProjectCards]);
+
+  useEffect(() => {
+    if (projectWorkspaceView !== "compare") return;
+    if (comparedProjectCards.length < 2) {
+      setProjectCompareReport(null);
+      return;
+    }
+    void generateProjectCompareReport(comparedProjectCards[0], comparedProjectCards[1]);
+  }, [projectWorkspaceView, comparedProjectCards]);
 
   useEffect(() => {
     const availableKeys = filteredProjectCatalog.map((item: any) => item.project_key);
@@ -5872,6 +6043,98 @@ export default function TeacherPage() {
                           evidence: item.summary || "暂无材料摘要。",
                         }))
                   ).filter(Boolean);
+                  const reportDiagnosisItems = (
+                    projectStructuredReport?.category_diagnosis?.length
+                      ? projectStructuredReport.category_diagnosis
+                      : [
+                        { theme: "整体完成度", detail: projectBoardInsight?.summaryLines?.[0] || "暂无整体判断。" },
+                        { theme: "主要风险", detail: projectBoardInsight?.summaryLines?.[1] || "暂无集中风险。" },
+                      ]
+                  );
+                  const reportSampleComparison = (
+                    projectStructuredReport?.sample_comparison?.length
+                      ? projectStructuredReport.sample_comparison
+                      : [
+                        {
+                          role: "高分样本",
+                          project_name: projectBoardInsight?.highest?.project_name || "暂无",
+                          takeaway: "适合作为这一类项目的正样本。",
+                        },
+                        {
+                          role: "高风险样本",
+                          project_name: projectBoardInsight?.lowest?.project_name || "暂无",
+                          takeaway: "适合作为需要老师优先介入的反例样本。",
+                        },
+                      ]
+                  );
+                  const reportStrengths = (
+                    projectStructuredReport?.strengths?.length ? projectStructuredReport.strengths : [
+                      projectBoardInsight?.highest ? `${projectBoardInsight.highest.project_name} 当前分 ${Number(projectBoardInsight.highest.latest_score || 0).toFixed(1)}，适合作为这一类项目的正样本。` : "",
+                      projectBoardInsight?.fastest ? `${projectBoardInsight.fastest.project_name} 最近提升 ${Number(projectBoardInsight.fastest.improvement || 0).toFixed(1)} 分，说明这一类项目存在可复制的迭代路径。` : "",
+                    ].filter(Boolean)
+                  );
+                  const reportIssues = (
+                    projectStructuredReport?.issues?.length
+                      ? projectStructuredReport.issues.map((item: any) => `${item.title}：${item.detail}`)
+                      : (projectBoardInsight?.topRisks || []).map(([risk, count]: any) => `${getRuleDisplayName(risk)}：当前分类中出现 ${count} 次，建议集中讲评。`)
+                  );
+                  const reportPriorityProjects = (
+                    projectStructuredReport?.priority_projects?.length ? projectStructuredReport.priority_projects : [
+                      {
+                        project_name: projectBoardInsight?.lowest?.project_name || "暂无",
+                        reason: projectBoardInsight?.lowest ? `当前分 ${Number(projectBoardInsight.lowest.latest_score || 0).toFixed(1)}，建议优先检查证据链和材料结构。` : "当前没有明显的优先项目。",
+                      },
+                    ]
+                  );
+                  const reportTeachingSequence = (
+                    projectStructuredReport?.teaching_sequence?.length
+                      ? projectStructuredReport.teaching_sequence
+                      : [
+                        { step: "先定标", action: "先展示一个高分样本。", goal: "让学生先理解完成标准。" },
+                        { step: "再对照", action: "再对照一个高风险样本。", goal: "把高频问题讲透。" },
+                        { step: "后布置", action: "最后统一布置修改要求。", goal: "形成下一轮共同提升。" },
+                      ]
+                  );
+                  const reportComparisonAxes = (
+                    projectStructuredReport?.comparison_axes?.length
+                      ? projectStructuredReport.comparison_axes.map((item: any) => `${item.dimension}：${item.insight}`)
+                      : [`主导意图 ${projectBoardInsight?.topIntent || "综合咨询"}，横向比较时可重点看论证闭环和迭代质量。`]
+                  );
+                  const reportTeachingModules = projectStructuredReport?.teaching_modules || [];
+                  const reportIntentProfile = (
+                    projectStructuredReport?.intent_profile?.length
+                      ? projectStructuredReport.intent_profile
+                      : [{ intent: projectBoardInsight?.topIntent || "综合咨询", count: filteredProjectCatalog.length }]
+                  );
+                  const maxIntentCount = Math.max(1, ...(reportIntentProfile.map((row: any) => Number(row.count || 0)) || [filteredProjectCatalog.length || 1]));
+                  const reportWatchlist = (
+                    projectStructuredReport?.risk_watchlist?.length
+                      ? projectStructuredReport.risk_watchlist
+                      : (projectBoardInsight?.topRisks || []).map(([risk, count]: any) => ({
+                        risk,
+                        count,
+                        advice: `当前分类中出现 ${count} 次，建议固定加入讲评检查项。`,
+                      }))
+                  );
+                  const reportSampleCards = (
+                    projectStructuredReport?.sample_cards?.length
+                      ? projectStructuredReport.sample_cards
+                      : [
+                        {
+                          label: "高分样本",
+                          project_name: projectBoardInsight?.highest?.project_name || "暂无",
+                          metric: projectBoardInsight?.highest ? `${Number(projectBoardInsight.highest.latest_score || 0).toFixed(1)} 分` : "",
+                          takeaway: "适合作为同类项目的示范样本。",
+                        },
+                        {
+                          label: "高风险样本",
+                          project_name: projectBoardInsight?.lowest?.project_name || "暂无",
+                          metric: projectBoardInsight?.lowest ? `${normalizeRuleList(projectBoardInsight.lowest.top_risks).length} 个风险` : "",
+                          takeaway: "建议作为反例样本优先讲评。",
+                        },
+                      ]
+                  );
+                  const reportSignalLines = reportDiagnosisItems.map((item: any) => `${item.theme}：${item.detail}`).slice(0, 3);
                   return (
                     <>
                       <div className="project-intel-hero">
@@ -5967,208 +6230,339 @@ export default function TeacherPage() {
                                 </button>
                               </div>
                               <div className="project-report-board">
-                                <div className="project-report-hero">
-                                  <div>
-                                    <span className="project-report-label">AI 分类报告</span>
-                                    <h3>{projectStructuredReport?.headline || `${activeBoardCategory?.category || "全部项目"} 的总体判断`}</h3>
-                                    <div className="project-report-tag-row">
-                                      <span>{activeBoardCategory?.category || "全部项目"}</span>
-                                      <span>{activeBoardCategory?.count || filteredProjectCatalog.length || 0} 个项目</span>
-                                      <span>主导意图 {projectBoardInsight?.topIntent || "综合咨询"}</span>
-                                    </div>
-                                  </div>
-                                  <div className="project-report-kpis">
-                                    <div><span>代表性优势</span><strong>{projectBoardInsight?.highest?.project_name || "暂无"}</strong></div>
-                                    <div><span>最需介入</span><strong>{projectBoardInsight?.lowest?.project_name || "暂无"}</strong></div>
-                                    <div><span>高频问题</span><strong>{projectBoardInsight?.topRisks?.length ? getRuleDisplayName(projectBoardInsight.topRisks[0][0]) : "暂无"}</strong></div>
-                                  </div>
-                                </div>
-                                <div className="project-report-overview">
-                                  <p>{projectStructuredReport?.overview || projectBoardInsight?.summaryLines?.join(" ") || "系统正在汇总这一类项目的主要洞察。"}</p>
-                                </div>
-                                <div className="project-report-dashboard">
-                                  <div className="project-report-chart-card">
-                                    <div className="project-report-chart-head">
-                                      <strong>分数分布</strong>
-                                      <span>看这一类项目当前的成熟度分层</span>
-                                    </div>
-                                    <div className="table-like">
-                                      {scoreBands.map((band) => (
-                                        <div key={band.label} className="bar-row">
-                                          <span>{band.label}</span>
-                                          <div className={`bar-track ${band.label === "0-5.9" ? "danger" : ""}`}>
-                                            <div
-                                              className={`bar-fill ${band.label === "0-5.9" ? "danger" : ""}`}
-                                              style={{ width: `${(band.count / maxBandCount) * 100}%` }}
-                                            />
-                                          </div>
-                                          <strong>{band.count}</strong>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                  <div className="project-report-chart-card accent">
-                                    <div className="project-report-chart-head">
-                                      <strong>分类走势</strong>
-                                      <span>抽样看当前分类前几项项目分数起伏</span>
-                                    </div>
-                                    <div className="project-report-spark-shell">
-                                      <svg width="100%" height="86" viewBox="0 0 220 86" preserveAspectRatio="none">
-                                        <polyline
-                                          points={sparklinePoints(reportSparkData, 220, 86)}
-                                          fill="none"
-                                          stroke="url(#projectReportSpark)"
-                                          strokeWidth="3"
-                                          strokeLinejoin="round"
-                                          strokeLinecap="round"
-                                        />
-                                        <defs>
-                                          <linearGradient id="projectReportSpark" x1="0" y1="0" x2="1" y2="0">
-                                            <stop offset="0%" stopColor="#73ccff" />
-                                            <stop offset="100%" stopColor="#8f7bff" />
-                                          </linearGradient>
-                                        </defs>
-                                      </svg>
-                                    </div>
-                                    <div className="tm-corridor-tags" style={{ marginTop: 8 }}>
-                                      {(projectBoardInsight?.topRisks || []).slice(0, 3).map(([risk, count]: any) => (
-                                        <span key={risk} className="tm-smart-chip">{getRuleDisplayName(risk)} {count}</span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="project-report-signal-strip">
-                                  {(projectStructuredReport?.category_diagnosis?.length
-                                    ? projectStructuredReport.category_diagnosis.map((item: any) => `${item.theme}：${item.detail}`)
-                                    : (projectBoardInsight?.summaryLines || [])
-                                  ).slice(0, 3).map((line: string) => (
-                                    <div key={line} className="project-report-signal-item">{line}</div>
-                                  ))}
-                                </div>
-                                <div className="project-report-article">
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">Agent 总判断</div>
-                                    <p>{projectStructuredReport?.executive_brief || "先看这一类项目是否已经出现可被统一讲评的共性问题，再决定是批量干预还是逐个精读。"}</p>
-                                  </section>
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">分类诊断</div>
-                                    <div className="project-report-stack">
-                                      {(projectStructuredReport?.category_diagnosis?.length
-                                        ? projectStructuredReport.category_diagnosis
-                                        : [
-                                          { theme: "整体完成度", detail: projectBoardInsight?.summaryLines?.[0] || "暂无整体判断。" },
-                                          { theme: "主要风险", detail: projectBoardInsight?.summaryLines?.[1] || "暂无集中风险。" },
-                                        ]).map((item: any) => (
-                                          <div key={`${item.theme}-${item.detail}`} className="project-report-stack-item">
-                                            <strong>{item.theme}</strong>
-                                            <p>{item.detail}</p>
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </section>
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">样本对照</div>
-                                    <div className="project-report-sample-board">
-                                      {(projectStructuredReport?.sample_comparison?.length
-                                        ? projectStructuredReport.sample_comparison
-                                        : [
-                                          {
-                                            role: "高分样本",
-                                            project_name: projectBoardInsight?.highest?.project_name || "暂无",
-                                            takeaway: "适合作为这一类项目的正样本。",
-                                          },
-                                          {
-                                            role: "高风险样本",
-                                            project_name: projectBoardInsight?.lowest?.project_name || "暂无",
-                                            takeaway: "适合作为需要老师优先介入的反例样本。",
-                                          },
-                                        ]).map((item: any) => (
-                                          <div key={`${item.role}-${item.project_name}`} className="project-report-sample-item">
-                                            <span>{item.role}</span>
-                                            <strong>{item.project_name}</strong>
-                                            <p>{item.takeaway}</p>
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </section>
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">结论依据</div>
-                                    <div className="project-report-evidence-list">
-                                      {reportEvidenceCitations.map((item: any) => (
-                                        <div key={`${item.claim}-${item.project_name}`} className="project-report-evidence-item">
-                                          <div className="project-report-evidence-top">
-                                            <span>引用项目</span>
-                                            <strong>{item.project_name || "未命名项目"}</strong>
-                                          </div>
-                                          <div className="project-report-evidence-claim">{item.claim}</div>
-                                          <p>{item.evidence || "暂无可展示论据。"}</p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </section>
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">共性优势与问题</div>
-                                    <div className="project-report-dual-list">
+                                <div className="project-report-flow">
+                                  <section className="project-report-stage">
+                                    <div className="project-report-stage-head">
+                                      <div className="project-report-stage-index">01</div>
                                       <div>
-                                        <h4>共性优势</h4>
-                                        <ul className="project-report-list">
-                                          {(projectStructuredReport?.strengths?.length ? projectStructuredReport.strengths : [
-                                            projectBoardInsight?.highest ? `${projectBoardInsight.highest.project_name} 当前分 ${Number(projectBoardInsight.highest.latest_score || 0).toFixed(1)}，适合作为这一类项目的正样本。` : "",
-                                            projectBoardInsight?.fastest ? `${projectBoardInsight.fastest.project_name} 最近提升 ${Number(projectBoardInsight.fastest.improvement || 0).toFixed(1)} 分，说明这一类项目存在可复制的迭代路径。` : "",
-                                          ].filter(Boolean)).map((item: string) => (
-                                            <li key={item}>{item}</li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                      <div>
-                                        <h4>共性问题</h4>
-                                        <ul className="project-report-list">
-                                          {(projectStructuredReport?.issues?.length
-                                            ? projectStructuredReport.issues.map((item: any) => `${item.title}：${item.detail}`)
-                                            : (projectBoardInsight?.topRisks || []).map(([risk, count]: any) => `${getRuleDisplayName(risk)}：当前分类中出现 ${count} 次，建议集中讲评。`)
-                                          ).map((item: string) => (
-                                            <li key={item}>{item}</li>
-                                          ))}
-                                        </ul>
+                                        <div className="project-report-stage-title">总体结论</div>
+                                        <div className="project-report-stage-desc">先快速判断这类项目整体处在什么状态，以及老师此刻最需要关注哪一类信号。</div>
                                       </div>
                                     </div>
-                                  </section>
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">建议老师先做什么</div>
-                                    <div className="project-report-priority-list">
-                                      {(projectStructuredReport?.priority_projects?.length ? projectStructuredReport.priority_projects : [
+                                    <div className="project-report-hero">
+                                      <div>
+                                        <span className="project-report-label">AI 分类报告</span>
+                                        <h3>{projectStructuredReport?.headline || `${activeBoardCategory?.category || "全部项目"} 的总体判断`}</h3>
+                                        <div className="project-report-tag-row">
+                                          <span>{activeBoardCategory?.category || "全部项目"}</span>
+                                          <span>{activeBoardCategory?.count || filteredProjectCatalog.length || 0} 个项目</span>
+                                          <span>主导意图 {projectBoardInsight?.topIntent || "综合咨询"}</span>
+                                        </div>
+                                      </div>
+                                      <div className="project-report-kpis">
+                                        <div><span>代表性优势</span><strong>{projectBoardInsight?.highest?.project_name || "暂无"}</strong></div>
+                                        <div><span>最需介入</span><strong>{projectBoardInsight?.lowest?.project_name || "暂无"}</strong></div>
+                                        <div><span>高频问题</span><strong>{projectBoardInsight?.topRisks?.length ? getRuleDisplayName(projectBoardInsight.topRisks[0][0]) : "暂无"}</strong></div>
+                                      </div>
+                                    </div>
+                                    <div className="project-report-overview">
+                                      <p>{projectStructuredReport?.overview || projectBoardInsight?.summaryLines?.join(" ") || "系统正在汇总这一类项目的主要洞察。"}</p>
+                                    </div>
+                                    <div className="project-report-metric-ribbon">
+                                      {[
                                         {
-                                          project_name: projectBoardInsight?.lowest?.project_name || "暂无",
-                                          reason: projectBoardInsight?.lowest ? `当前分 ${Number(projectBoardInsight.lowest.latest_score || 0).toFixed(1)}，建议优先检查证据链和材料结构。` : "当前没有明显的优先项目。",
+                                          label: "平均提分",
+                                          value: `${Number(projectStructuredReport?.cohort_snapshot?.avg_improvement ?? 0).toFixed(1)} 分`,
+                                          note: "看这类项目是否在持续变好",
                                         },
-                                      ]).map((item: any) => (
-                                        <div key={`${item.project_name}-${item.reason}`} className="project-report-priority-item">
-                                          <strong>{item.project_name}</strong>
-                                          <p>{item.reason}</p>
+                                        {
+                                          label: "平均风险数",
+                                          value: `${Number(projectStructuredReport?.cohort_snapshot?.avg_risk_count ?? 0).toFixed(1)} 个`,
+                                          note: "判断问题是集中还是分散",
+                                        },
+                                        {
+                                          label: "平均迭代数",
+                                          value: `${Number(projectStructuredReport?.cohort_snapshot?.avg_submission_count ?? 0).toFixed(1)} 次`,
+                                          note: "衡量这一类项目的投入密度",
+                                        },
+                                        {
+                                          label: "高分占比",
+                                          value: `${Number(projectStructuredReport?.cohort_snapshot?.high_score_share ?? 0)}%`,
+                                          note: "看这一类项目是否已形成成熟样本",
+                                        },
+                                      ].map((item) => (
+                                        <div key={item.label} className="project-report-metric-card">
+                                          <span>{item.label}</span>
+                                          <strong>{item.value}</strong>
+                                          <p>{item.note}</p>
                                         </div>
                                       ))}
                                     </div>
+                                    <div className="project-report-signal-strip">
+                                      {reportSignalLines.map((line: string) => (
+                                        <div key={line} className="project-report-signal-item">{line}</div>
+                                      ))}
+                                    </div>
                                   </section>
-                                  <section className="project-report-block">
-                                    <div className="project-report-block-title">教学动作与比较维度</div>
-                                    <ul className="project-report-list">
-                                      {(projectStructuredReport?.comparison_axes?.length
-                                        ? projectStructuredReport.comparison_axes.map((item: any) => `${item.dimension}：${item.insight}`)
-                                        : [`主导意图 ${projectBoardInsight?.topIntent || "综合咨询"}，横向比较时可重点看论证闭环和迭代质量。`]
-                                      ).map((item: string) => (
-                                        <li key={item}>{item}</li>
-                                      ))}
-                                    </ul>
-                                    <div className="project-report-action">
-                                      <span>建议教学动作</span>
-                                      <strong>{projectStructuredReport?.teaching_focus || "统一提醒高频问题"}</strong>
-                                      <p>{projectStructuredReport?.teaching_action || "先抽一份高分样本和一份高风险样本做对照讲评，再布置下一轮修改要求。"}</p>
+
+                                  <section className="project-report-stage">
+                                    <div className="project-report-stage-head">
+                                      <div className="project-report-stage-index">02</div>
+                                      <div>
+                                        <div className="project-report-stage-title">分层诊断</div>
+                                        <div className="project-report-stage-desc">再看项目群体是如何分层的，哪些风险是全班共性问题，哪些项目已经进入优先介入区。</div>
+                                      </div>
                                     </div>
-                                    <div className="project-report-teaching-list">
-                                      {(projectStructuredReport?.teaching_modules || []).map((item: string) => (
-                                        <div key={item} className="project-report-teaching-item">{item}</div>
+                                    <div className="project-report-dashboard">
+                                      <div className="project-report-chart-card">
+                                        <div className="project-report-chart-head">
+                                          <strong>项目分层矩阵</strong>
+                                          <span>按分数高低与风险多寡做四象限判断</span>
+                                        </div>
+                                        <ScatterPlot
+                                          data={projectMatrixData.points.map((item: any) => ({
+                                            id: item.id,
+                                            x: item.x,
+                                            y: item.y,
+                                          }))}
+                                          width={360}
+                                          height={250}
+                                          xLabel="风险数量"
+                                          yLabel="当前分"
+                                          xThreshold={projectMatrixData.xThreshold}
+                                          yThreshold={projectMatrixData.yThreshold}
+                                          quadrantLabels={{
+                                            topRight: "高分高风险",
+                                            topLeft: "高分低风险",
+                                            bottomRight: "低分高风险",
+                                            bottomLeft: "低分低风险",
+                                          }}
+                                          colorScale={(point) => {
+                                            const raw = projectMatrixData.points.find((item: any) => item.id === point.id);
+                                            if (!raw) return "rgba(154,164,191,0.85)";
+                                            if (raw.y >= projectMatrixData.yThreshold && raw.x <= projectMatrixData.xThreshold) return "rgba(92,189,138,0.9)";
+                                            if (raw.y >= projectMatrixData.yThreshold && raw.x > projectMatrixData.xThreshold) return "rgba(224,168,76,0.9)";
+                                            if (raw.y < projectMatrixData.yThreshold && raw.x <= projectMatrixData.xThreshold) return "rgba(115,204,255,0.9)";
+                                            return "rgba(224,112,112,0.9)";
+                                          }}
+                                          getTooltip={(point) => {
+                                            const raw = projectMatrixData.points.find((item: any) => item.id === point.id);
+                                            return raw ? `${raw.project_name} · ${raw.avgScore.toFixed(1)}分 · ${raw.riskCount}风险` : point.id;
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="project-report-chart-card accent">
+                                        <div className="project-report-chart-head">
+                                          <strong>象限分层摘要</strong>
+                                          <span>直接看哪些项目处在示范区或优先介入区</span>
+                                        </div>
+                                        <div className="project-report-quadrant-grid">
+                                          {projectMatrixData.quadrants.map((item: any) => (
+                                            <div key={item.key} className={`project-report-quadrant-card ${item.tone}`}>
+                                              <span>{item.label}</span>
+                                              <strong>{item.count} 项</strong>
+                                              <p>{item.hint}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div className="project-report-quadrant-note">
+                                          当前以平均分 {projectMatrixData.yThreshold.toFixed(1)} 和平均风险数 {projectMatrixData.xThreshold.toFixed(1)} 作为分层阈值。
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="project-report-dashboard">
+                                      <div className="project-report-chart-card">
+                                        <div className="project-report-chart-head">
+                                          <strong>分数分布与走势</strong>
+                                          <span>判断这类项目当前成熟度是否稳定</span>
+                                        </div>
+                                        <div className="table-like">
+                                          {scoreBands.map((band) => (
+                                            <div key={band.label} className="bar-row">
+                                              <span>{band.label}</span>
+                                              <div className={`bar-track ${band.label === "0-5.9" ? "danger" : ""}`}>
+                                                <div
+                                                  className={`bar-fill ${band.label === "0-5.9" ? "danger" : ""}`}
+                                                  style={{ width: `${(band.count / maxBandCount) * 100}%` }}
+                                                />
+                                              </div>
+                                              <strong>{band.count}</strong>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div className="project-report-spark-shell" style={{ marginTop: 14 }}>
+                                          <svg width="100%" height="86" viewBox="0 0 220 86" preserveAspectRatio="none">
+                                            <polyline
+                                              points={sparklinePoints(reportSparkData, 220, 86)}
+                                              fill="none"
+                                              stroke="url(#projectReportSpark)"
+                                              strokeWidth="3"
+                                              strokeLinejoin="round"
+                                              strokeLinecap="round"
+                                            />
+                                            <defs>
+                                              <linearGradient id="projectReportSpark" x1="0" y1="0" x2="1" y2="0">
+                                                <stop offset="0%" stopColor="#73ccff" />
+                                                <stop offset="100%" stopColor="#8f7bff" />
+                                              </linearGradient>
+                                            </defs>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <div className="project-report-chart-card accent">
+                                        <div className="project-report-chart-head">
+                                          <strong>意图与风险重点</strong>
+                                          <span>帮助老师决定讲评时先讲什么</span>
+                                        </div>
+                                        <div className="table-like">
+                                          {reportIntentProfile.map((item: any) => (
+                                            <div key={item.intent} className="bar-row">
+                                              <span>{item.intent}</span>
+                                              <div className="bar-track">
+                                                <div className="bar-fill" style={{ width: `${(Number(item.count || 0) / maxIntentCount) * 100}%` }} />
+                                              </div>
+                                              <strong>{item.count}</strong>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div className="project-report-watchlist" style={{ marginTop: 14 }}>
+                                          {reportWatchlist.map((item: any) => (
+                                            <div key={`${item.risk}-${item.count}`} className="project-report-watch-item">
+                                              <div className="project-report-watch-top">
+                                                <strong>{getRuleDisplayName(item.risk)}</strong>
+                                                <span>{item.count} 次</span>
+                                              </div>
+                                              <p>{item.advice}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </section>
+
+                                  <section className="project-report-stage">
+                                    <div className="project-report-stage-head">
+                                      <div className="project-report-stage-index">03</div>
+                                      <div>
+                                        <div className="project-report-stage-title">样本与证据</div>
+                                        <div className="project-report-stage-desc">接着看哪些项目可以当示范、哪些可以当反例，以及这些结论是基于哪些项目材料得出的。</div>
+                                      </div>
+                                    </div>
+                                    <div className="project-report-sample-grid">
+                                      {reportSampleCards.map((item: any) => (
+                                        <div key={`${item.label}-${item.project_name}`} className="project-report-sample-card">
+                                          <span>{item.label}</span>
+                                          <strong>{item.project_name}</strong>
+                                          <em>{item.metric}</em>
+                                          <p>{item.takeaway}</p>
+                                        </div>
                                       ))}
                                     </div>
+                                    <div className="project-report-columns">
+                                      <section className="project-report-block">
+                                        <div className="project-report-block-title">样本对照</div>
+                                        <div className="project-report-sample-board">
+                                          {reportSampleComparison.map((item: any) => (
+                                            <div key={`${item.role}-${item.project_name}`} className="project-report-sample-item">
+                                              <span>{item.role}</span>
+                                              <strong>{item.project_name}</strong>
+                                              <p>{item.takeaway}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </section>
+                                      <section className="project-report-block">
+                                        <div className="project-report-block-title">结论依据</div>
+                                        <div className="project-report-evidence-list">
+                                          {reportEvidenceCitations.map((item: any) => (
+                                            <div key={`${item.claim}-${item.project_name}`} className="project-report-evidence-item">
+                                              <div className="project-report-evidence-top">
+                                                <span>引用项目</span>
+                                                <strong>{item.project_name || "未命名项目"}</strong>
+                                              </div>
+                                              <div className="project-report-evidence-claim">{item.claim}</div>
+                                              <p>{item.evidence || "暂无可展示论据。"}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </section>
+                                    </div>
+                                    <section className="project-report-block">
+                                      <div className="project-report-block-title">共性优势与问题</div>
+                                      <div className="project-report-dual-list">
+                                        <div>
+                                          <h4>共性优势</h4>
+                                          <ul className="project-report-list">
+                                            {reportStrengths.map((item: string) => (
+                                              <li key={item}>{item}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                        <div>
+                                          <h4>共性问题</h4>
+                                          <ul className="project-report-list">
+                                            {reportIssues.map((item: string) => (
+                                              <li key={item}>{item}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </section>
+                                  </section>
+
+                                  <section className="project-report-stage">
+                                    <div className="project-report-stage-head">
+                                      <div className="project-report-stage-index">04</div>
+                                      <div>
+                                        <div className="project-report-stage-title">教学动作</div>
+                                        <div className="project-report-stage-desc">最后把分析落到课堂动作上，明确先介入谁、怎么讲、按什么路径推进。</div>
+                                      </div>
+                                    </div>
+                                    <div className="project-report-columns">
+                                      <section className="project-report-block">
+                                        <div className="project-report-block-title">Agent 总判断</div>
+                                        <p>{projectStructuredReport?.executive_brief || "先看这一类项目是否已经出现可被统一讲评的共性问题，再决定是批量干预还是逐个精读。"}</p>
+                                        <div className="project-report-stack" style={{ marginTop: 14 }}>
+                                          {reportDiagnosisItems.map((item: any) => (
+                                            <div key={`${item.theme}-${item.detail}`} className="project-report-stack-item">
+                                              <strong>{item.theme}</strong>
+                                              <p>{item.detail}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </section>
+                                      <section className="project-report-block">
+                                        <div className="project-report-block-title">建议老师先做什么</div>
+                                        <div className="project-report-priority-list">
+                                          {reportPriorityProjects.map((item: any) => (
+                                            <div key={`${item.project_name}-${item.reason}`} className="project-report-priority-item">
+                                              <strong>{item.project_name}</strong>
+                                              <p>{item.reason}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </section>
+                                    </div>
+                                    <section className="project-report-block">
+                                      <div className="project-report-block-title">教学推进路径</div>
+                                      <div className="project-report-sequence">
+                                        {reportTeachingSequence.map((item: any) => (
+                                          <div key={`${item.step}-${item.action}`} className="project-report-sequence-item">
+                                            <span>{item.step}</span>
+                                            <strong>{item.action}</strong>
+                                            <p>{item.goal}</p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </section>
+                                    <section className="project-report-block">
+                                      <div className="project-report-block-title">教学动作与比较维度</div>
+                                      <ul className="project-report-list">
+                                        {reportComparisonAxes.map((item: string) => (
+                                          <li key={item}>{item}</li>
+                                        ))}
+                                      </ul>
+                                      <div className="project-report-action">
+                                        <span>建议教学动作</span>
+                                        <strong>{projectStructuredReport?.teaching_focus || "统一提醒高频问题"}</strong>
+                                        <p>{projectStructuredReport?.teaching_action || "先抽一份高分样本和一份高风险样本做对照讲评，再布置下一轮修改要求。"}</p>
+                                      </div>
+                                      <div className="project-report-teaching-list">
+                                        {reportTeachingModules.map((item: string) => (
+                                          <div key={item} className="project-report-teaching-item">{item}</div>
+                                        ))}
+                                      </div>
+                                    </section>
                                   </section>
                                 </div>
                               </div>
@@ -6249,18 +6643,207 @@ export default function TeacherPage() {
                                         </button>
                                       ))}
                                     </div>
-                                    <div className="project-compare-opinion">
-                                      {(projectCompareInsight?.lines || []).map((line: string) => (
-                                        <div key={line} className="project-insight-line">{line}</div>
-                                      ))}
-                                    </div>
-                                    <div className="project-compare-signals">
-                                      <span>分差 {projectCompareInsight?.scoreGap?.toFixed(1) || "0.0"}</span>
-                                      <span>迭代差 {projectCompareInsight?.iterationGap || 0}</span>
-                                      <span>共同问题 {(projectCompareInsight?.sharedRisks || []).length}</span>
+                                    <div className="project-compare-flow">
+                                      <section className="project-compare-stage">
+                                        <div className="project-compare-stage-head">
+                                          <div className="project-compare-stage-index">01</div>
+                                          <div>
+                                            <div className="project-compare-stage-title">先看总体结论</div>
+                                            <div className="project-compare-stage-desc">先明确哪一个项目当前更优，以及系统为什么这样判断。</div>
+                                          </div>
+                                        </div>
+                                        <div className="project-compare-summary-card">
+                                          <div>
+                                            <span className="project-report-label">AI 对比判断</span>
+                                            <h3>{projectCompareReport?.headline || "系统正在生成两项目差异结论"}</h3>
+                                            <p>{projectCompareReport?.overall_judgement || projectCompareInsight?.lines?.join(" ") || "请稍候，系统正在整理两项目之间最关键的差异。"}</p>
+                                          </div>
+                                          <div className="project-compare-summary-side">
+                                            <div>
+                                              <span>当前更优样本</span>
+                                              <strong>{projectCompareReport?.winning_project || projectCompareInsight?.stronger?.project_name || "待生成"}</strong>
+                                            </div>
+                                            <div>
+                                              <span>判断依据</span>
+                                              <p>{projectCompareReport?.winning_reason || `${projectCompareInsight?.stronger?.project_name || "当前更优项目"} 在当前分和稳定性上更占优。`}</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="project-compare-signals">
+                                          <span>分差 {projectCompareInsight?.scoreGap?.toFixed(1) || "0.0"}</span>
+                                          <span>迭代差 {projectCompareInsight?.iterationGap || 0}</span>
+                                          <span>共同问题 {(projectCompareInsight?.sharedRisks || []).length}</span>
+                                        </div>
+                                      </section>
+
+                                      <section className="project-compare-stage">
+                                        <div className="project-compare-stage-head">
+                                          <div className="project-compare-stage-index">02</div>
+                                          <div>
+                                            <div className="project-compare-stage-title">再看维度差异</div>
+                                            <div className="project-compare-stage-desc">把差异拆成维度卡和可视化，快速判断两者到底差在哪些轴上。</div>
+                                          </div>
+                                        </div>
+                                        <div className="project-compare-dimension-grid">
+                                          {(projectCompareReport?.dimension_cards?.length
+                                            ? projectCompareReport.dimension_cards
+                                            : [
+                                              {
+                                                dimension: "当前分",
+                                                winner: projectCompareInsight?.stronger?.project_name || "待分析",
+                                                delta: `${projectCompareInsight?.scoreGap?.toFixed(1) || "0.0"} 分`,
+                                                insight: projectCompareInsight?.lines?.[0] || "系统正在对齐当前分差异。",
+                                              },
+                                              {
+                                                dimension: "迭代成效",
+                                                winner: projectCompareInsight?.progressLeader?.project_name || "待分析",
+                                                delta: `${projectCompareInsight?.iterationGap || 0} 次`,
+                                                insight: projectCompareInsight?.lines?.[1] || "系统正在判断谁的迭代路径更有效。",
+                                              },
+                                            ]).map((item: any) => (
+                                              <div key={`${item.dimension}-${item.winner}`} className="project-compare-dimension-card">
+                                                <span>{item.dimension}</span>
+                                                <strong>{item.winner}</strong>
+                                                <em>{item.delta}</em>
+                                                <p>{item.insight}</p>
+                                              </div>
+                                            ))}
+                                        </div>
+                                        {projectCompareVisuals && (
+                                          <div className="project-compare-visual-grid">
+                                            <div className="project-compare-visual-card">
+                                              <div className="project-report-block-title">对比雷达</div>
+                                              <div className="project-compare-radar-shell">
+                                                <div className="project-compare-radar-chart">
+                                                  <RadarChart
+                                                    size={260}
+                                                    data={projectCompareVisuals.radar.map((item) => ({
+                                                      label: item.label,
+                                                      value: item.leftValue,
+                                                      max: item.max,
+                                                    }))}
+                                                  />
+                                                </div>
+                                                <div className="project-compare-radar-chart ghost">
+                                                  <RadarChart
+                                                    size={260}
+                                                    data={projectCompareVisuals.radar.map((item) => ({
+                                                      label: item.label,
+                                                      value: item.rightValue,
+                                                      max: item.max,
+                                                    }))}
+                                                  />
+                                                </div>
+                                              </div>
+                                              <div className="project-compare-legend">
+                                                <span><i style={{ background: "rgba(107,138,255,0.9)" }} />{projectCompareVisuals.left.project_name}</span>
+                                                <span><i style={{ background: "rgba(115,204,255,0.9)" }} />{projectCompareVisuals.right.project_name}</span>
+                                              </div>
+                                            </div>
+                                            <div className="project-compare-visual-card">
+                                              <div className="project-report-block-title">双列评分轴</div>
+                                              <div className="project-compare-axis-board">
+                                                {projectCompareVisuals.scoreAxes.map((axis) => {
+                                                  const leftRatio = axis.max > 0 ? Math.min(axis.leftValue / axis.max, 1) : 0;
+                                                  const rightRatio = axis.max > 0 ? Math.min(axis.rightValue / axis.max, 1) : 0;
+                                                  return (
+                                                    <div key={axis.label} className="project-compare-axis-row">
+                                                      <div className="project-compare-axis-top">
+                                                        <strong>{axis.label}</strong>
+                                                        <span>{axis.invert ? "越低越好" : "越高越好"}</span>
+                                                      </div>
+                                                      <div className="project-compare-axis-bars">
+                                                        <div className="project-compare-axis-side">
+                                                          <span>{projectCompareVisuals.left.project_name}</span>
+                                                          <div className="project-compare-axis-track">
+                                                            <div className="project-compare-axis-fill left" style={{ width: `${leftRatio * 100}%` }} />
+                                                          </div>
+                                                          <em>{axis.leftValue.toFixed(axis.label === "提交次数" || axis.label === "风险数" ? 0 : 1)}</em>
+                                                        </div>
+                                                        <div className="project-compare-axis-side">
+                                                          <span>{projectCompareVisuals.right.project_name}</span>
+                                                          <div className="project-compare-axis-track">
+                                                            <div className="project-compare-axis-fill right" style={{ width: `${rightRatio * 100}%` }} />
+                                                          </div>
+                                                          <em>{axis.rightValue.toFixed(axis.label === "提交次数" || axis.label === "风险数" ? 0 : 1)}</em>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                })}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </section>
+
+                                      <section className="project-compare-stage">
+                                        <div className="project-compare-stage-head">
+                                          <div className="project-compare-stage-index">03</div>
+                                          <div>
+                                            <div className="project-compare-stage-title">再看证据与风险</div>
+                                            <div className="project-compare-stage-desc">把共同问题、独有问题和摘要证据放在一起，方便老师确认系统结论是否站得住。</div>
+                                          </div>
+                                        </div>
+                                        <div className="project-compare-risk-grid">
+                                          {(projectCompareReport?.risk_overlap?.length
+                                            ? projectCompareReport.risk_overlap
+                                            : [
+                                              ...(projectCompareInsight?.sharedRisks || []).map((risk: string) => ({
+                                                risk,
+                                                status: "共同问题",
+                                                detail: "适合直接提炼成一次共性教学。",
+                                              })),
+                                            ]).map((item: any) => (
+                                              <div key={`${item.risk}-${item.status}`} className="project-compare-risk-card">
+                                                <div className="project-compare-risk-top">
+                                                  <strong>{getRuleDisplayName(item.risk)}</strong>
+                                                  <span>{item.status}</span>
+                                                </div>
+                                                <p>{item.detail}</p>
+                                              </div>
+                                            ))}
+                                        </div>
+                                        <div className="project-compare-evidence-grid">
+                                          {(projectCompareReport?.evidence_citations || []).map((item: any) => (
+                                            <div key={`${item.project_name}-${item.claim}`} className="project-compare-evidence-card">
+                                              <span>{item.project_name}</span>
+                                              <strong>{item.claim}</strong>
+                                              <p>{item.evidence || "暂无摘要证据。"}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </section>
+
+                                      <section className="project-compare-stage">
+                                        <div className="project-compare-stage-head">
+                                          <div className="project-compare-stage-index">04</div>
+                                          <div>
+                                            <div className="project-compare-stage-title">最后看教学动作</div>
+                                            <div className="project-compare-stage-desc">最后再把对比结论转成老师可执行的动作和追问问题。</div>
+                                          </div>
+                                        </div>
+                                        <div className="project-compare-opinion">
+                                          {(projectCompareReport?.teaching_actions?.length
+                                            ? projectCompareReport.teaching_actions
+                                            : (projectCompareInsight?.lines || [])
+                                          ).map((line: string) => (
+                                            <div key={line} className="project-insight-line">{line}</div>
+                                          ))}
+                                        </div>
+                                        <div className="project-compare-question-board">
+                                          <div className="project-report-block-title">老师接下来重点追问</div>
+                                          <div className="project-report-teaching-list">
+                                            {(projectCompareReport?.focus_questions || []).map((item: string) => (
+                                              <div key={item} className="project-report-teaching-item">{item}</div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </section>
                                     </div>
                                   </div>
                                 ) : <p className="right-hint">先在下方候选区选中两项项目，再看系统给出的横向差异判断。</p>}
+                                {projectCompareLoading && <p className="right-hint" style={{ marginTop: 12 }}>AI 正在综合分数、迭代和风险信息生成对比报告...</p>}
                               </div>
                               <div className="assistant-section">
                                 <div className="assistant-section-title">对比候选项目</div>

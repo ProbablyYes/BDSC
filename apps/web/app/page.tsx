@@ -112,7 +112,7 @@ export default function HomePage() {
           <div className="home-kicker">VentureCheck Platform</div>
           <h1>创检官VentureCheck</h1>
           <p className="home-hero-text">
-            面向学生、教师与管理员的三端协同空间。它不是单纯把功能入口摆在一起，而是把项目成长、教学判断与平台治理放进同一套连续的界面语言里。
+            面向学生、教师与管理员的三端协同空间。助力在每一个萌芽的创新创业想法，让创新更快、更稳、更优
           </p>
           <p className="home-hero-subtext">
             学生看到的是作品如何一步步变好，教师看到的是问题如何被定位与解释，管理员看到的是整个平台如何稳定运行。

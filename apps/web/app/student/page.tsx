@@ -18,6 +18,7 @@ type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: 
 type RightTab =
   | "agents"
   | "task"
+  | "bp"
   | "risk"
   | "score"
   | "kg"
@@ -27,6 +28,109 @@ type RightTab =
   | "interventions"
   | "debug";
 type ConvMeta = { conversation_id: string; title: string; created_at: string; message_count: number; last_message: string };
+
+type BpRevisionChange = { kind: "add" | "remove" | "context"; text: string };
+type BpRevision = {
+  revision_id: string;
+  section_id: string;
+  section_title: string;
+  summary: string;
+  reason: string;
+  source_hint?: string;
+  old_content: string;
+  new_content: string;
+  changes?: BpRevisionChange[];
+};
+type BpSection = {
+  section_id: string;
+  title: string;
+  display_title?: string;
+  content: string;
+  ai_draft?: string;
+  user_edit?: string;
+  field_map?: Record<string, any>;
+  missing_points?: string[];
+  confidence?: number;
+  evidence_sources?: string[];
+  revision_status?: string;
+  missing_level?: "complete" | "mostly_complete" | "partial" | "critical";
+  status?: string;
+  is_custom?: boolean;
+  narrative_opening?: string;
+  has_material?: boolean;
+  is_ai_stub?: boolean;
+  bullets?: string[];
+};
+type BpMaturity = {
+  score?: number;
+  tier?: "not_ready" | "basic_ready" | "full_ready";
+  breakdown?: {
+    skeleton?: number;
+    agent_density?: number;
+    coherence?: number;
+    skeleton_max?: number;
+    agent_density_max?: number;
+    coherence_max?: number;
+  };
+  next_gap?: Array<{
+    dimension?: string;
+    field?: string;
+    field_label?: string;
+    current_level?: string;
+    current_level_label?: string;
+    reason?: string;
+    suggestion?: string;
+  }>;
+  field_levels?: Record<string, string>;
+};
+type BpUpgradeReport = {
+  mode?: "basic" | "full";
+  requested?: string[];
+  success_ids?: string[];
+  failed_ids?: string[];
+  timestamp?: string;
+};
+type BusinessPlan = {
+  plan_id: string;
+  project_id: string;
+  conversation_id: string;
+  title: string;
+  status: string;
+  version_tier?: "draft" | "basic" | "full";
+  sections: BpSection[];
+  pending_revisions?: BpRevision[];
+  revision_badge_count?: number;
+  cover_info?: Record<string, any>;
+  knowledge_base?: Record<string, any>;
+  maturity?: BpMaturity;
+  upgrade_report?: BpUpgradeReport;
+  updated_at?: string;
+  created_at?: string;
+};
+type BusinessPlanResponse = {
+  status: string;
+  plan: BusinessPlan | null;
+  readiness?: {
+    ready?: boolean;
+    filled_core_count?: number;
+    missing_core_slots?: string[];
+    suggested_questions?: string[];
+    maturity_score?: number;
+    maturity_tier?: "not_ready" | "basic_ready" | "full_ready";
+    maturity_tier_label?: string;
+    maturity_breakdown?: BpMaturity["breakdown"];
+    maturity_next_gap?: BpMaturity["next_gap"];
+    maturity_field_levels?: Record<string, string>;
+  };
+};
+type BpDeepenQuestion = { id: string; text: string; focus_point?: string };
+type BpDeepenSuggestion = {
+  section_id: string;
+  section_title?: string;
+  priority?: number;
+  question?: string;
+  why?: string;
+};
 
 type VideoRubricItem = { item: string; score: number; weight: number; status: "ok" | "risk"; reason?: string };
 type VideoAnalysisResult = {
@@ -40,6 +144,17 @@ type VideoAnalysisResult = {
 type VideoAnalysisResponse = {
   project_id: string;
   student_id: string;
+  filename: string;
+  created_at: string;
+  analysis: VideoAnalysisResult;
+};
+type VideoAnalysisRecord = {
+  project_id: string;
+  student_id: string;
+  class_id?: string | null;
+  cohort_id?: string | null;
+  mode?: string;
+  competition_type?: string;
   filename: string;
   created_at: string;
   analysis: VideoAnalysisResult;
@@ -348,6 +463,8 @@ export default function StudentPage() {
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState<string | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoHistory, setVideoHistory] = useState<VideoAnalysisRecord[]>([]);
+  const [selectedVideoHistoryIdx, setSelectedVideoHistoryIdx] = useState<number>(-1);
 
   // new features
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -370,7 +487,36 @@ export default function StudentPage() {
   const [posterLoading, setPosterLoading] = useState(false);
   const [posterError, setPosterError] = useState("");
   const [posterPanelOpen, setPosterPanelOpen] = useState(false);
+  const [posterEditMode, setPosterEditMode] = useState(false);
   const [videoPanelOpen, setVideoPanelOpen] = useState(false);
+  const [businessPlan, setBusinessPlan] = useState<BusinessPlan | null>(null);
+  const [bpReadiness, setBpReadiness] = useState<any>(null);
+  const [bpLoading, setBpLoading] = useState(false);
+  const [bpSaving, setBpSaving] = useState(false);
+  const [bpError, setBpError] = useState("");
+  const [bpSelectedSectionId, setBpSelectedSectionId] = useState("");
+  const [bpEditorContent, setBpEditorContent] = useState("");
+  const [bpViewMode, setBpViewMode] = useState<"read" | "edit">("read");
+  const [bpDrawerOpen, setBpDrawerOpen] = useState(false);
+  const [bpScrollProgress, setBpScrollProgress] = useState(0);
+  const [activeBpSectionId, setActiveBpSectionId] = useState("");
+  const [bpMaturityOpen, setBpMaturityOpen] = useState(false);
+  const [bpSuggestDrawerOpen, setBpSuggestDrawerOpen] = useState(false);
+  const [bpSuggestions, setBpSuggestions] = useState<BpDeepenSuggestion[]>([]);
+  const [bpSuggestLoading, setBpSuggestLoading] = useState(false);
+  const [bpDeepenSectionId, setBpDeepenSectionId] = useState("");
+  const [bpDeepenQuestions, setBpDeepenQuestions] = useState<BpDeepenQuestion[]>([]);
+  const [bpDeepenAnswers, setBpDeepenAnswers] = useState<Record<string, string>>({});
+  const [bpDeepenLoading, setBpDeepenLoading] = useState(false);
+  const [bpDeepenSubmitting, setBpDeepenSubmitting] = useState(false);
+  const [bpUpgradeBusy, setBpUpgradeBusy] = useState(false);
+  const [bpExportBusy, setBpExportBusy] = useState(false);
+  const [bpMoreOpen, setBpMoreOpen] = useState(false);
+  const [bpAcceptAllBusy, setBpAcceptAllBusy] = useState(false);
+  const [bpUpgradeToast, setBpUpgradeToast] = useState("");
+  const bpMoreRef = useRef<HTMLDivElement>(null);
+  const bpReadRootRef = useRef<HTMLDivElement>(null);
+  const bpSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const modeWelcome = MODE_WELCOME[mode] ?? MODE_WELCOME.coursework;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -447,6 +593,461 @@ export default function StudentPage() {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
+  const selectedBpSection = useMemo(
+    () => (businessPlan?.sections ?? []).find((item) => item.section_id === bpSelectedSectionId) ?? (businessPlan?.sections ?? [])[0] ?? null,
+    [businessPlan, bpSelectedSectionId],
+  );
+
+  useEffect(() => {
+    if (!selectedBpSection) return;
+    setBpSelectedSectionId(selectedBpSection.section_id);
+    setBpEditorContent(selectedBpSection.user_edit || selectedBpSection.content || "");
+  }, [selectedBpSection?.section_id, selectedBpSection?.content, selectedBpSection?.user_edit]);
+
+  useEffect(() => {
+    if (bpViewMode !== "read") return;
+    const root = bpReadRootRef.current;
+    if (!root) return;
+    const handle = () => {
+      const max = root.scrollHeight - root.clientHeight;
+      setBpScrollProgress(max > 0 ? Math.min(1, Math.max(0, root.scrollTop / max)) : 0);
+    };
+    handle();
+    root.addEventListener("scroll", handle, { passive: true });
+    return () => root.removeEventListener("scroll", handle);
+  }, [bpViewMode, businessPlan?.plan_id, businessPlan?.sections?.length]);
+
+  useEffect(() => {
+    if (bpViewMode !== "read") return;
+    const root = bpReadRootRef.current;
+    const sections = businessPlan?.sections ?? [];
+    if (!root || sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => (a.boundingClientRect.top || 0) - (b.boundingClientRect.top || 0))[0];
+        if (visible) {
+          const id = (visible.target as HTMLElement).dataset.sectionId || "";
+          if (id) setActiveBpSectionId(id);
+        }
+      },
+      { root, rootMargin: "-40% 0px -55% 0px", threshold: 0 },
+    );
+    sections.forEach((section) => {
+      const el = bpSectionRefs.current[section.section_id];
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [bpViewMode, businessPlan?.plan_id, businessPlan?.sections?.length]);
+
+  useEffect(() => {
+    if (!activeBpSectionId) return;
+    const outline = typeof document !== "undefined" ? document.querySelector<HTMLElement>(".bp-right-outline .bp-ro-list") : null;
+    if (!outline) return;
+    const items = outline.querySelectorAll<HTMLElement>(".bp-ro-item");
+    const activeBtn = Array.from(items).find((btn) => btn.classList.contains("is-active"));
+    if (!activeBtn) return;
+    const listRect = outline.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    if (btnRect.top < listRect.top || btnRect.bottom > listRect.bottom) {
+      activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [activeBpSectionId]);
+
+  const loadProjectSnapshot = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const resp = await fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}`);
+      const data = await resp.json();
+      const records = Array.isArray(data?.video_analyses) ? data.video_analyses : [];
+      setVideoHistory(records);
+      if (records.length > 0) {
+        setSelectedVideoHistoryIdx(records.length - 1);
+      } else {
+        setSelectedVideoHistoryIdx(-1);
+      }
+    } catch {
+      setVideoHistory([]);
+      setSelectedVideoHistoryIdx(-1);
+    }
+  }, [projectId]);
+
+  const loadBusinessPlan = useCallback(async () => {
+    if (!projectId || !conversationId) return;
+    setBpLoading(true);
+    setBpError("");
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/latest?project_id=${encodeURIComponent(projectId)}&conversation_id=${encodeURIComponent(conversationId)}`,
+      );
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+      const firstSection = (data.plan?.sections ?? [])[0];
+      if (firstSection) {
+        setBpSelectedSectionId((prev) => prev || firstSection.section_id);
+        setBpEditorContent(firstSection.user_edit || firstSection.content || "");
+      } else {
+        setBpSelectedSectionId("");
+        setBpEditorContent("");
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "加载商业计划书失败");
+    } finally {
+      setBpLoading(false);
+    }
+  }, [projectId, conversationId]);
+
+  useEffect(() => {
+    if (projectId && conversationId) loadBusinessPlan();
+  }, [projectId, conversationId, loadBusinessPlan]);
+
+  async function generateBusinessPlan(allowLowConfidence = false) {
+    if (!projectId || !conversationId) return;
+    setBpLoading(true);
+    setBpError("");
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_id: projectId,
+          student_id: studentId,
+          conversation_id: conversationId,
+          allow_low_confidence: allowLowConfidence,
+        }),
+      });
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+      if (data.status === "needs_more_info" && !data.plan) {
+        setBpError("当前信息还不够完整，建议先补充更多项目核心信息。");
+      }
+      const firstSection = (data.plan?.sections ?? [])[0];
+      if (firstSection) {
+        setBpSelectedSectionId(firstSection.section_id);
+        setBpEditorContent(firstSection.user_edit || firstSection.content || "");
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "生成商业计划书失败");
+    } finally {
+      setBpLoading(false);
+    }
+  }
+
+  async function refreshBusinessPlan() {
+    if (!businessPlan?.plan_id) return;
+    setBpLoading(true);
+    setBpError("");
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/refresh`, {
+        method: "POST",
+      });
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+    } catch (err: any) {
+      setBpError(err?.message || "刷新计划书失败");
+    } finally {
+      setBpLoading(false);
+    }
+  }
+
+  async function saveBusinessPlanSection() {
+    if (!businessPlan?.plan_id || !bpSelectedSectionId) return;
+    setBpSaving(true);
+    setBpError("");
+    try {
+      const section = (businessPlan.sections ?? []).find((item) => item.section_id === bpSelectedSectionId);
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/sections/${encodeURIComponent(bpSelectedSectionId)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: bpEditorContent,
+          field_map: section?.field_map ?? {},
+          display_title: section?.display_title ?? section?.title ?? "",
+        }),
+      });
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+    } catch (err: any) {
+      setBpError(err?.message || "保存章节失败");
+    } finally {
+      setBpSaving(false);
+    }
+  }
+
+  async function handleBpRevision(planId: string, revisionId: string, action: "accept" | "reject") {
+    setBpSaving(true);
+    setBpError("");
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/revisions/${encodeURIComponent(revisionId)}/${action}`, {
+        method: "POST",
+      });
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+    } catch (err: any) {
+      setBpError(err?.message || "处理修订失败");
+    } finally {
+      setBpSaving(false);
+    }
+  }
+
+  async function upgradeBusinessPlan(mode: "basic" | "full") {
+    if (!businessPlan?.plan_id) return;
+    setBpUpgradeBusy(true);
+    setBpError("");
+    setBpUpgradeToast("");
+    setBpMoreOpen(false);
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/upgrade`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode }),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        setBpError(`升级失败（HTTP ${resp.status}）：${txt.slice(0, 200) || "请检查后端日志"}`);
+        return;
+      }
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+      const rep = data.plan?.upgrade_report;
+      if (rep) {
+        const succ = rep.success_ids?.length ?? 0;
+        const fail = rep.failed_ids?.length ?? 0;
+        const total = rep.requested?.length ?? 0;
+        setBpUpgradeToast(
+          fail > 0
+            ? `升级完成：成功 ${succ}/${total} 章，${fail} 章未写完，可在「更多」里重试`
+            : `升级完成：全部 ${succ}/${total} 章已生成修订，请审阅`
+        );
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "升级失败");
+    } finally {
+      setBpUpgradeBusy(false);
+    }
+  }
+
+  async function acceptAllRevisions() {
+    if (!businessPlan?.plan_id) return;
+    setBpAcceptAllBusy(true);
+    setBpError("");
+    setBpMoreOpen(false);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/revisions/accept-all`,
+        { method: "POST" }
+      );
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        setBpError(`接受修订失败（HTTP ${resp.status}）：${txt.slice(0, 200)}`);
+        return;
+      }
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+    } catch (err: any) {
+      setBpError(err?.message || "接受修订失败");
+    } finally {
+      setBpAcceptAllBusy(false);
+    }
+  }
+
+  async function rejectAllRevisions() {
+    if (!businessPlan?.plan_id) return;
+    setBpAcceptAllBusy(true);
+    setBpError("");
+    setBpMoreOpen(false);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/revisions/reject-all`,
+        { method: "POST" }
+      );
+      if (!resp.ok) return;
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+    } catch (err: any) {
+      setBpError(err?.message || "忽略修订失败");
+    } finally {
+      setBpAcceptAllBusy(false);
+    }
+  }
+
+  async function loadDeepenSuggestions() {
+    if (!businessPlan?.plan_id) return;
+    setBpSuggestLoading(true);
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/deepen-suggestions`);
+      const data = await resp.json();
+      setBpSuggestions(data?.suggestions ?? []);
+    } catch {
+      setBpSuggestions([]);
+    } finally {
+      setBpSuggestLoading(false);
+    }
+  }
+
+  async function openDeepenDialog(sectionId: string) {
+    if (!businessPlan?.plan_id || !sectionId) return;
+    setBpDeepenSectionId(sectionId);
+    setBpDeepenQuestions([]);
+    setBpDeepenAnswers({});
+    setBpDeepenLoading(true);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/chapter/${encodeURIComponent(sectionId)}/deepen-questions`,
+        { method: "GET" },
+      );
+      const data = await resp.json();
+      const raw = Array.isArray(data?.questions) ? data.questions : [];
+      const normalized: BpDeepenQuestion[] = raw.map((q: any, i: number) => ({
+        id: String(q?.id || `q${i + 1}`),
+        text: String(q?.question || q?.text || ""),
+        focus_point: String(q?.why || q?.focus_point || q?.hint || ""),
+      })).filter((q: BpDeepenQuestion) => q.text);
+      setBpDeepenQuestions(normalized);
+    } catch {
+      setBpDeepenQuestions([]);
+    } finally {
+      setBpDeepenLoading(false);
+    }
+  }
+
+  function closeDeepenDialog() {
+    setBpDeepenSectionId("");
+    setBpDeepenQuestions([]);
+    setBpDeepenAnswers({});
+  }
+
+  useEffect(() => {
+    if (!bpMoreOpen) return;
+    const onDown = (e: MouseEvent) => {
+      const root = bpMoreRef.current;
+      if (root && !root.contains(e.target as Node)) setBpMoreOpen(false);
+    };
+    window.addEventListener("mousedown", onDown);
+    return () => window.removeEventListener("mousedown", onDown);
+  }, [bpMoreOpen]);
+
+  useEffect(() => {
+    if (rightTab !== "bp") return;
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const tag = (e.target as HTMLElement | null)?.tagName || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement | null)?.isContentEditable) {
+        return;
+      }
+      if (e.key.toLowerCase() === "e" && !e.shiftKey) {
+        e.preventDefault();
+        setBpViewMode((m) => (m === "read" ? "edit" : "read"));
+      } else if (e.key.toLowerCase() === "u" && !e.shiftKey && businessPlan?.plan_id) {
+        e.preventDefault();
+        upgradeBusinessPlan((businessPlan.version_tier === "draft" ? "basic" : "full"));
+      } else if (e.key.toLowerCase() === "a" && e.shiftKey && businessPlan?.plan_id) {
+        e.preventDefault();
+        if ((businessPlan.pending_revisions ?? []).length > 0) acceptAllRevisions();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [rightTab, businessPlan?.plan_id, businessPlan?.version_tier, businessPlan?.pending_revisions]);
+
+  async function submitDeepenAnswers() {
+    if (!businessPlan?.plan_id || !bpDeepenSectionId) return;
+    const answers = bpDeepenQuestions.map((q) => ({
+      question_id: q.id,
+      question: q.text,
+      answer: (bpDeepenAnswers[q.id] || "").trim(),
+    })).filter((a) => a.answer);
+    if (!answers.length) return;
+    setBpDeepenSubmitting(true);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/chapter/${encodeURIComponent(bpDeepenSectionId)}/deepen`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers }),
+        },
+      );
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+      const sid = bpDeepenSectionId;
+      closeDeepenDialog();
+      setTimeout(() => {
+        const target = bpSectionRefs.current[sid];
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 60);
+    } catch (err: any) {
+      setBpError(err?.message || "深化失败");
+    } finally {
+      setBpDeepenSubmitting(false);
+    }
+  }
+
+  async function exportBusinessPlan(format: "docx" | "pdf") {
+    if (!businessPlan?.plan_id) return;
+    setBpMoreOpen(false);
+    // pdf 走「浏览器打印」路线：打开打印预览页 + 自动触发打印，用户选择「另存为 PDF」
+    if (format === "pdf") {
+      const url = `/business-plan/${encodeURIComponent(businessPlan.plan_id)}/print?autoprint=1`;
+      try {
+        window.open(url, "_blank");
+      } catch (err: any) {
+        setBpError(err?.message || "打开打印预览失败");
+      }
+      return;
+    }
+    setBpExportBusy(true);
+    setBpError("");
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/export`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          export_mode: "clean_final",
+          export_format: format,
+          cover_info: businessPlan.cover_info || {},
+        }),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        setBpError(`导出失败（HTTP ${resp.status}）：${txt.slice(0, 240) || "请检查后端日志"}`);
+        return;
+      }
+      const data = await resp.json();
+      if (data?.status === "error") {
+        setBpError(data.message || "导出失败");
+        return;
+      }
+      if (data?.status === "pdf_unavailable") {
+        setBpError(data.message || "pdf 不可用，已回退为 docx");
+      }
+      if (data?.file_url) {
+        window.open(`${API_BASE}${data.file_url}`, "_blank");
+      } else if (data?.message) {
+        setBpError(data.message);
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "导出失败");
+    } finally {
+      setBpExportBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    loadProjectSnapshot();
+  }, [loadProjectSnapshot]);
+
   const loadMyTeams = useCallback(async () => {
     if (!currentUser?.user_id) return;
     try {
@@ -515,6 +1116,22 @@ export default function StudentPage() {
       const analysis = (data as VideoAnalysisResponse).analysis;
       if (analysis) {
         setVideoAnalysis(analysis);
+        const record: VideoAnalysisRecord = {
+          project_id: (data as VideoAnalysisResponse).project_id,
+          student_id: (data as VideoAnalysisResponse).student_id,
+          class_id: classId || null,
+          cohort_id: cohortId || null,
+          mode,
+          competition_type: competitionType,
+          filename: (data as VideoAnalysisResponse).filename,
+          created_at: (data as VideoAnalysisResponse).created_at,
+          analysis,
+        };
+        setVideoHistory((prev) => {
+          const next = [...prev, record];
+          setSelectedVideoHistoryIdx(next.length - 1);
+          return next;
+        });
       } else {
         setVideoError("后端返回结果格式不完整，稍后再试。");
       }
@@ -522,6 +1139,58 @@ export default function StudentPage() {
       setVideoError("网络错误，视频分析请求未完成。");
     } finally {
       setVideoLoading(false);
+    }
+  }
+
+  async function regeneratePosterImages() {
+    if (!posterDesign || !projectId || !studentId) return;
+    setPosterLoading(true);
+    setPosterError("");
+    try {
+      const prompts = (posterDesign.image_prompts || []).filter(Boolean);
+      const promptList = prompts.length > 0
+        ? prompts.slice(0, 3)
+        : [`${posterDesign.title || "项目海报"} | ${posterDesign.subtitle || "中文学生创新项目大赛展演海报插图"}`];
+      const basePrompt = promptList[0];
+      const suffixes = [" — 主视觉插图", " — 使用场景插图", " — 数据与成果插图"];
+      while (promptList.length < 3 && basePrompt) {
+        const idx = promptList.length;
+        promptList.push(`${basePrompt}${suffixes[idx] || " — 补充插图"}`);
+      }
+      const orientation = posterDesign.layout?.orientation === "landscape" ? "landscape" : "portrait";
+      const size = orientation === "landscape" ? "1280x720" : "1024x576";
+      const urls: string[] = [];
+      for (let i = 0; i < Math.min(promptList.length, 3); i += 1) {
+        const imgResp = await fetch(`${API_BASE}/api/poster/generate-image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            project_id: projectId,
+            student_id: studentId,
+            prompt: promptList[i],
+            orientation,
+            size,
+          }),
+        });
+        if (!imgResp.ok) {
+          const errJson = await imgResp.json().catch(() => ({}));
+          throw new Error(errJson?.detail || "生成插图失败");
+        }
+        const imgData = await imgResp.json();
+        const url: string = imgData.image_url.startsWith("http") ? imgData.image_url : `${API_BASE}${imgData.image_url}`;
+        urls.push(url);
+      }
+      setPosterDesign((prev) => {
+        if (!prev) return prev;
+        const next: PosterDesign = { ...prev };
+        if (urls.length > 0) next.hero_image_url = urls[0];
+        next.gallery_image_urls = urls.slice(1);
+        return next;
+      });
+    } catch (err: any) {
+      setPosterError(err?.message || "重新生成插图失败");
+    } finally {
+      setPosterLoading(false);
     }
   }
 
@@ -1019,6 +1688,68 @@ export default function StudentPage() {
     }));
   }, [resultHistory, latestResult]);
 
+  const currentVideoRecord = useMemo(
+    () => (selectedVideoHistoryIdx >= 0 ? videoHistory[selectedVideoHistoryIdx] ?? null : null),
+    [selectedVideoHistoryIdx, videoHistory],
+  );
+
+  const currentVideoAnalysis = useMemo(
+    () => currentVideoRecord?.analysis ?? videoAnalysis ?? null,
+    [currentVideoRecord, videoAnalysis],
+  );
+
+  const videoRiskItems = useMemo(
+    () => (currentVideoAnalysis?.rubric ?? []).filter((item) => item.status === "risk"),
+    [currentVideoAnalysis],
+  );
+
+  const videoSummaryCards = useMemo(() => {
+    const analysis = currentVideoAnalysis;
+    if (!analysis) return [];
+    const lastRecord = currentVideoRecord;
+    const transcriptLength = analysis.transcript ? analysis.transcript.length : 0;
+    return [
+      { label: "总分", value: analysis.overall_score != null ? `${analysis.overall_score.toFixed(1)}/10` : "--", hint: analysis.score_band || "本次评分" },
+      { label: "风险项", value: `${videoRiskItems.length}`, hint: videoRiskItems.length > 0 ? "优先修正的表达问题" : "当前未识别明显风险" },
+      { label: "逐字稿", value: transcriptLength > 0 ? `${Math.min(analysis.transcript.length, 2000)}字+` : "--", hint: "可用于复盘表达逻辑" },
+      { label: "分析时间", value: lastRecord?.created_at ? formatBjTime(lastRecord.created_at, true) : "--", hint: lastRecord?.filename || "本次上传文件" },
+    ];
+  }, [currentVideoAnalysis, currentVideoRecord, videoRiskItems.length]);
+
+  const videoHistoryTrend = useMemo(() => {
+    if (videoHistory.length < 2) return null;
+    const scores = videoHistory.map((item) => item.analysis?.overall_score).filter((s): s is number => typeof s === "number");
+    if (scores.length < 2) return null;
+    const prev = scores[scores.length - 2];
+    const current = scores[scores.length - 1];
+    return {
+      prev,
+      current,
+      delta: Number((current - prev).toFixed(2)),
+      improved: current > prev,
+    };
+  }, [videoHistory]);
+
+  const videoVsTextInsight = useMemo(() => {
+    const textScore = latestResult?.diagnosis?.overall_score;
+    const videoScore = currentVideoAnalysis?.overall_score;
+    const textRules = latestResult?.diagnosis?.triggered_rules ?? [];
+    if (videoScore == null && textScore == null) return null;
+    const riskHeavy = videoRiskItems.length >= 2;
+    if (typeof textScore === "number" && typeof videoScore === "number") {
+      if (textScore >= 7 && videoScore < 6) {
+        return "项目内容成熟度高，但视频表达与路演呈现偏弱，建议优先训练讲述结构和重点突出。";
+      }
+      if (textScore < 6 && videoScore >= 7) {
+        return "表达状态优于项目文本本身，说明你有讲述优势，但项目证据与逻辑仍需补强。";
+      }
+      if (riskHeavy && textRules.length > 0) {
+        return "文本诊断与视频分析都提示存在薄弱项，建议把书面材料整改和路演表达训练同步推进。";
+      }
+    }
+    return "建议把本次视频表现和当前文本诊断一起看，确认问题是出在内容、证据，还是表达方式。";
+  }, [currentVideoAnalysis, latestResult, videoRiskItems.length]);
+
   const triggeredRules = useMemo(() => {
     const allSeen: Record<string, { rule: any; firstTurn: number; lastTurn: number; turnCount: number }> = {};
     resultHistory.forEach((r, idx) => {
@@ -1128,7 +1859,9 @@ export default function StudentPage() {
         if (!relSet.has(k)) { relSet.add(k); rels.push({ ...r, source: src, target: tgt }); }
       }
     }
-    return { entities, relationships: rels, structural_gaps: Array.from(gapSet), content_strengths: Array.from(strengthSet), insight, section_scores: scores, completeness_score: completeness };
+    const lastKg = all[all.length - 1];
+    const kgQuality = lastKg?.kg_quality ?? null;
+    return { entities, relationships: rels, structural_gaps: Array.from(gapSet), content_strengths: Array.from(strengthSet), insight, section_scores: scores, completeness_score: completeness, kg_quality: kgQuality as any };
   }, [resultHistory, latestResult]);
 
   const hyperStudent = useMemo(() => {
@@ -1359,49 +2092,28 @@ export default function StudentPage() {
             {rightOpen ? "收起" : "分析面板"}
           </button>
 
-          {/* 视频路演分析入口：打开独立视频分析面板 */}
-          <button
-            type="button"
-            className="topbar-icon-btn"
-            onClick={() => setVideoPanelOpen(true)}
-            title="路演视频分析（上传小视频获取 Rubric 评分）"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="13" height="14" rx="2" />
-              <polygon points="17 8 21 6 21 18 17 16 17 8" />
-            </svg>
-          </button>
-
-          {/* 项目海报：改为仅图标按钮 */}
-          <button
-            type="button"
-            className="topbar-icon-btn"
-            onClick={() => setPosterPanelOpen(true)}
-            disabled={posterLoading}
-            title={posterLoading ? "生成海报中…" : "项目海报"}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {/* 画布框 */}
-              <rect x="4" y="3" width="16" height="14" rx="2" />
-              {/* 标题线 */}
-              <path d="M8 8h8" />
-              {/* 内容线 */}
-              <path d="M8 12h5" />
-              {/* 支架 */}
-              <path d="M10 21l2-4 2 4" />
-            </svg>
-          </button>
-
           <div className="topbar-dock">
+            {/* 视频路演分析 */}
+            <button type="button" className={`dock-item${videoPanelOpen ? " active" : ""}`} onClick={() => { setVideoPanelOpen(v => !v); setPosterPanelOpen(false); }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="13" height="14" rx="2" />
+                <polygon points="17 8 21 6 21 18 17 16 17 8" />
+              </svg>
+              <span className="dock-tooltip">路演视频分析</span>
+            </button>
+
+            {/* 项目海报 */}
+            <button type="button" className={`dock-item${posterPanelOpen ? " active" : ""}`} onClick={() => { setPosterPanelOpen(v => !v); setVideoPanelOpen(false); }} disabled={posterLoading}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="3" width="16" height="14" rx="2" />
+                <path d="M8 8h8" />
+                <path d="M8 12h5" />
+                <path d="M10 21l2-4 2 4" />
+              </svg>
+              <span className="dock-tooltip">{posterLoading ? "生成海报中…" : "项目海报"}</span>
+            </button>
+
+            <div className="dock-sep" />
             {/* Chat */}
             <Link href="/chat" className="dock-item">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -1556,307 +2268,305 @@ export default function StudentPage() {
         </div>
       )}
 
-      {/* ── Video Analysis Panel (triggered from TopBar) ── */}
+      {/* ── Video Analysis Panel (slides in below TopBar) ── */}
       {videoPanelOpen && (
-        <div
-          className="poster-panel-overlay"
-          onClick={(e) => { if (e.target === e.currentTarget) setVideoPanelOpen(false); }}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 60,
-            background: "radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(2,6,23,0.98))",
-            backdropFilter: "blur(18px)",
-            WebkitBackdropFilter: "blur(18px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-        >
-          <div
-            className="poster-panel-container"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "min(960px, 100%)",
-              maxHeight: "min(92vh, 900px)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "stretch",
-              padding: 24,
-              borderRadius: 24,
-              background: "rgba(15,23,42,0.96)",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.85)",
-              overflowY: "auto",
-            }}
-          >
-            <div
-              className="poster-panel-header"
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                marginBottom: 6,
-                position: "relative",
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: 17, letterSpacing: 1 }}>路演视频分析（Beta）</h3>
-              <button
-                type="button"
-                className="topbar-icon-btn"
-                onClick={() => setVideoPanelOpen(false)}
-                style={{ fontSize: 18, position: "absolute", right: 0, top: 0 }}
-              >
-                ✕
+        <div className="studio-panel-overlay">
+          <div className="studio-panel-shell">
+            <div className="studio-panel-header">
+              <div className="studio-panel-title-row">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2"><rect x="3" y="4" width="13" height="14" rx="2" /><polygon points="17 8 21 6 21 18 17 16 17 8" /></svg>
+                <h3 className="studio-panel-title">路演视频分析</h3>
+                <span className="studio-panel-badge">Beta</span>
+              </div>
+              <p className="studio-panel-desc">上传路演视频（mp4/mov/webm, ≤3min），系统将转写语音并按 Rubric 评分。</p>
+              <button type="button" className="studio-panel-close" onClick={() => setVideoPanelOpen(false)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
-            <p
-              className="panel-desc"
-              style={{ textAlign: "center", maxWidth: 640, margin: "4px auto 12px", fontSize: 13 }}
-            >
-              上传一段不超过约 3 分钟的小视频（建议 mp4 / mov / webm），系统会先转写语音，再按 Rubric 帮你看整体表现，并结合当前对话上下文给出点评。
-            </p>
-
-            <div className="right-section sc-panel" style={{ marginTop: 8 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
-                <input
-                  type="file"
-                  accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/x-msvideo"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0] ?? null;
-                    setVideoFile(f);
-                    setVideoError(null);
-                    if (f) setVideoAnalysis(null);
-                  }}
-                />
-                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                  建议：控制在 1GB 以内，环境安静、口齿清晰，可以先用右上角“路演计时”功能练习一遍再录制。
+            <div className="studio-panel-body">
+              <div className="studio-upload-zone">
+                <div className="studio-upload-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" /></svg>
                 </div>
-                <button
-                  type="button"
-                  className="tch-sm-btn"
-                  onClick={handleVideoAnalyze}
-                  disabled={videoLoading || !videoFile}
-                  style={{ alignSelf: "flex-start" }}
-                >
-                  {videoLoading ? "正在分析视频…" : "开始分析路演视频"}
-                </button>
-                {videoError && <div style={{ color: "#e07070", fontSize: 12 }}>{videoError}</div>}
+                <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/x-msvideo" className="studio-file-input"
+                  onChange={(e) => { const f = e.target.files?.[0] ?? null; setVideoFile(f); setVideoError(null); if (f) setVideoAnalysis(null); }}
+                />
+                {videoFile ? <span className="studio-upload-name">{videoFile.name}</span> : <span className="studio-upload-hint">点击或拖拽上传视频文件</span>}
+                <span className="studio-upload-sub">建议：环境安静、口齿清晰，先用路演计时练习</span>
               </div>
+              <button type="button" className="studio-action-btn" onClick={handleVideoAnalyze} disabled={videoLoading || !videoFile}>
+                {videoLoading ? <><span className="studio-spinner" /> 正在分析视频…</> : <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg> 开始分析</>}
+              </button>
+              {videoError && <div className="studio-error">{videoError}</div>}
 
-              {videoAnalysis ? (() => {
-                const total = videoAnalysis.overall_score ?? 0;
+              {currentVideoAnalysis ? (() => {
+                const total = currentVideoAnalysis.overall_score ?? 0;
                 const totalColor = total >= 7 ? "var(--accent-green,#22c55e)" : total >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
                 const circumf = 2 * Math.PI * 42;
                 const offset = circumf * (1 - total / 10);
-                const rubric = videoAnalysis.rubric ?? [];
+                const rubric = currentVideoAnalysis.rubric ?? [];
                 return (
-                  <>
-                    <div className="sc-hero">
-                      <div className="sc-hero-ring-wrap">
-                        <svg width="104" height="104" viewBox="0 0 104 104">
-                          <circle cx="52" cy="52" r="42" fill="none" stroke="var(--border)" strokeWidth="8" />
-                          <circle cx="52" cy="52" r="42" fill="none" stroke={totalColor} strokeWidth="8"
-                            strokeDasharray={circumf} strokeDashoffset={offset}
-                            strokeLinecap="round" transform="rotate(-90 52 52)" style={{ transition: "stroke-dashoffset .5s ease" }} />
-                          <text x="52" y="48" textAnchor="middle" fontSize="24" fontWeight="800" fill={totalColor}>{total.toFixed(1)}</text>
-                          <text x="52" y="64" textAnchor="middle" fontSize="10" fill="var(--text-muted)">/10</text>
-                        </svg>
-                      </div>
-                      <div className="sc-hero-meta">
-                        {videoAnalysis.score_band && <span className="sc-meta-chip">{videoAnalysis.score_band}</span>}
-                        <span className="sc-meta-chip">语音转写 + Rubric 评分</span>
+                  <div className="studio-result">
+                    <div className="studio-score-hero">
+                      <svg width="96" height="96" viewBox="0 0 104 104">
+                        <circle cx="52" cy="52" r="42" fill="none" stroke="var(--border)" strokeWidth="6" />
+                        <circle cx="52" cy="52" r="42" fill="none" stroke={totalColor} strokeWidth="6"
+                          strokeDasharray={circumf} strokeDashoffset={offset}
+                          strokeLinecap="round" transform="rotate(-90 52 52)" style={{ transition: "stroke-dashoffset .6s ease" }} />
+                        <text x="52" y="48" textAnchor="middle" fontSize="22" fontWeight="800" fill={totalColor}>{total.toFixed(1)}</text>
+                        <text x="52" y="64" textAnchor="middle" fontSize="10" fill="var(--text-muted)">/10</text>
+                      </svg>
+                      <div className="studio-score-meta">
+                        {currentVideoAnalysis.score_band && <span className="studio-chip">{currentVideoAnalysis.score_band}</span>}
+                        <span className="studio-chip muted">Rubric 评分</span>
+                        {videoHistoryTrend && (
+                          <span className={`studio-chip ${videoHistoryTrend.improved ? "good" : "warn"}`}>
+                            {videoHistoryTrend.improved ? "较上次提升" : "较上次回落"} {Math.abs(videoHistoryTrend.delta).toFixed(1)}
+                          </span>
+                        )}
                       </div>
                     </div>
-
-                    <div className="sc-dim-list">
-                      {rubric.map((r) => {
+                    <div className="studio-summary-grid">
+                      {videoSummaryCards.map((card) => (
+                        <div key={card.label} className="studio-summary-card">
+                          <span>{card.label}</span>
+                          <strong>{card.value}</strong>
+                          <p>{card.hint}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {videoHistory.length > 0 && (
+                      <div className="studio-history-strip">
+                        <div className="studio-section-caption">历史记录</div>
+                        <div className="studio-history-list">
+                          {videoHistory.map((record, idx) => (
+                            <button
+                              key={`${record.created_at}-${idx}`}
+                              type="button"
+                              className={`studio-history-item${idx === selectedVideoHistoryIdx ? " active" : ""}`}
+                              onClick={() => {
+                                setSelectedVideoHistoryIdx(idx);
+                                setVideoAnalysis(record.analysis);
+                              }}
+                            >
+                              <strong>{record.analysis?.overall_score != null ? record.analysis.overall_score.toFixed(1) : "--"}</strong>
+                              <span>{formatBjTime(record.created_at, true)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {videoRiskItems.length > 0 && (
+                      <div className="studio-risk-board">
+                        <div className="studio-section-caption">优先风险项</div>
+                        <div className="studio-risk-list">
+                          {videoRiskItems.map((item) => (
+                            <div key={item.item} className="studio-risk-item">
+                              <div className="studio-risk-top">
+                                <strong>{item.item}</strong>
+                                <span>{item.score.toFixed(1)}</span>
+                              </div>
+                              <p>{item.reason || "建议优先复盘这一项的路演表达。"}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {videoVsTextInsight && (
+                      <div className="studio-link-card">
+                        <div className="studio-section-caption">与文本诊断联动</div>
+                        <p>{videoVsTextInsight}</p>
+                      </div>
+                    )}
+                    {currentVideoAnalysis.summary && (
+                      <div className="studio-link-card">
+                        <div className="studio-section-caption">分析摘要</div>
+                        <p>{currentVideoAnalysis.summary}</p>
+                      </div>
+                    )}
+                    <div className="studio-dim-grid">
+                      {rubric.map((r: any) => {
                         const pct = Math.min(100, (r.score / 10) * 100);
                         const clr = pct >= 70 ? "var(--accent-green,#22c55e)" : pct >= 40 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
-                        const levelLabel = pct >= 70 ? "达标" : pct >= 40 ? "一般" : "薄弱";
                         return (
-                          <details key={r.item} className="sc-dim-card">
-                            <summary className="sc-dim-head">
-                              <div className="sc-dim-info">
-                                <span className="sc-dim-name">{r.item}</span>
-                                <span className="sc-dim-level" style={{ color: clr }}>{levelLabel}</span>
-                              </div>
-                              <div className="sc-dim-bar-wrap">
-                                <div className="sc-dim-bar-track"><div className="sc-dim-bar-fill" style={{ width: `${pct}%`, background: clr }} /></div>
-                                <span className="sc-dim-score" style={{ color: clr }}>{r.score.toFixed(1)}</span>
+                          <details key={r.item} className="studio-dim-card">
+                            <summary className="studio-dim-head">
+                              <span className="studio-dim-name">{r.item}</span>
+                              <div className="studio-dim-bar-wrap">
+                                <div className="studio-dim-bar"><div className="studio-dim-fill" style={{ width: `${pct}%`, background: clr }} /></div>
+                                <span className="studio-dim-score" style={{ color: clr }}>{r.score.toFixed(1)}</span>
                               </div>
                             </summary>
-                            {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
+                            {r.reason && <div className="studio-dim-reason">{r.reason}</div>}
                           </details>
                         );
                       })}
                     </div>
-
-                    {videoAnalysis.presentation_feedback && (() => {
-                      const raw = videoAnalysis.presentation_feedback || "";
-                      // 去掉可能残留的 Markdown 加粗符号等
+                    {currentVideoAnalysis.presentation_feedback && (() => {
+                      const raw = currentVideoAnalysis.presentation_feedback || "";
                       const cleaned = raw.replace(/\*\*/g, "").trim();
-                      const blocks = cleaned.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+                      const blocks = cleaned.split(/\n{2,}/).map((b: string) => b.trim()).filter(Boolean);
                       return (
-                        <details className="sc-principles" open>
-                          <summary>路演表现点评</summary>
-                          <div className="sc-principles-list">
-                            {blocks.length > 0 ? (
-                              blocks.map((p, idx) => (
-                                <div key={idx} className="sc-principle-item" style={{ whiteSpace: "pre-wrap", marginBottom: idx === blocks.length - 1 ? 0 : 8 }}>
-                                  {p}
-                                </div>
-                              ))
-                            ) : (
-                              <div className="sc-principle-item" style={{ whiteSpace: "pre-wrap" }}>{cleaned}</div>
-                            )}
+                        <details className="studio-section" open>
+                          <summary className="studio-section-title">路演表现点评</summary>
+                          <div className="studio-section-body">
+                            {blocks.map((p: string, idx: number) => (
+                              <p key={idx} className="studio-feedback-block">{p}</p>
+                            ))}
                           </div>
                         </details>
                       );
                     })()}
-
-                    {videoAnalysis.transcript && (
-                      <details className="sc-principles">
-                        <summary>语音转写逐字稿（前 2000 字）</summary>
-                        <div className="sc-principles-list">
-                          <div className="sc-principle-item" style={{ whiteSpace: "pre-wrap" }}>
-                            {videoAnalysis.transcript.slice(0, 2000)}
-                            {videoAnalysis.transcript.length > 2000 ? " …" : ""}
-                          </div>
+                    {currentVideoAnalysis.transcript && (
+                      <details className="studio-section">
+                        <summary className="studio-section-title">语音转写逐字稿</summary>
+                        <div className="studio-section-body">
+                          <p className="studio-transcript">{currentVideoAnalysis.transcript.slice(0, 2000)}{currentVideoAnalysis.transcript.length > 2000 ? " …" : ""}</p>
                         </div>
                       </details>
                     )}
-                  </>
+                  </div>
                 );
               })() : !videoLoading && (
-                <p className="right-hint">选择并上传路演视频后，这里会显示评分与点评。</p>
+                <div className="studio-empty">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.2"><rect x="3" y="4" width="13" height="14" rx="2" /><polygon points="17 8 21 6 21 18 17 16 17 8" /></svg>
+                  <span>上传路演视频后，这里会显示分析结果</span>
+                </div>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Poster Panel (triggered from TopBar) ── */}
+      {/* ── Poster Panel (slides in below TopBar) ── */}
       {posterPanelOpen && (
-        <div
-          className="poster-panel-overlay"
-          onClick={(e) => { if (e.target === e.currentTarget) setPosterPanelOpen(false); }}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 60,
-            background: "radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(2,6,23,0.98))",
-            backdropFilter: "blur(18px)",
-            WebkitBackdropFilter: "blur(18px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-        >
-          <div
-            className="poster-panel-container"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "min(1040px, 100%)",
-              maxHeight: "min(92vh, 980px)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: 24,
-              borderRadius: 24,
-              background: "rgba(15,23,42,0.96)",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.85)",
-              overflowY: "auto",
-            }}
-          >
-            <div
-              className="poster-panel-header"
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                marginBottom: 6,
-                position: "relative",
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: 17, letterSpacing: 1 }}>项目路演海报</h3>
-              <button
-                type="button"
-                className="topbar-icon-btn"
-                onClick={() => setPosterPanelOpen(false)}
-                style={{ fontSize: 18, position: "absolute", right: 0, top: 0 }}
-              >
-                ✕
+        <div className="studio-panel-overlay">
+          <div className="studio-panel-shell">
+            <div className="studio-panel-header">
+              <div className="studio-panel-title-row">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="14" rx="2" /><path d="M8 8h8" /><path d="M8 12h5" /><path d="M10 21l2-4 2 4" /></svg>
+                <h3 className="studio-panel-title">项目海报工作台</h3>
+              </div>
+              <p className="studio-panel-desc">先生成一版海报草稿，再挑选风格、调整版式和润色文案，让最终展示更像一张真正能用的作品。</p>
+              <button type="button" className="studio-panel-close" onClick={() => setPosterPanelOpen(false)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
-            <p
-              className="panel-desc"
-              style={{ textAlign: "center", maxWidth: 640, margin: "4px auto 12px", fontSize: 13 }}
-            >
-              基于当前项目诊断和知识图谱，一键生成图文并茂的路演海报：上方按钮会自动生成海报文案并调用视觉模型生成插图。
-            </p>
-            <div
-              style={{
-                margin: "4px 0 16px",
-                display: "flex",
-                gap: 12,
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <button
-                type="button"
-                className="tch-sm-btn"
-                onClick={generatePosterFromCurrentProject}
-                disabled={posterLoading}
-                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-              >
-                {posterLoading ? (
-                  "正在生成图文海报…"
-                ) : (
-                  <>
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="4" y="3" width="16" height="14" rx="2" />
-                      <path d="M8 8h8" />
-                      <path d="M8 12h5" />
-                    </svg>
-                    <span>一键生成图文路演海报</span>
-                  </>
-                )}
-              </button>
+            <div className="studio-panel-body">
+              <div className="studio-poster-hero">
+                <div>
+                  <div className="studio-section-caption">推荐流程</div>
+                  <p className="studio-poster-hero-text">先生成海报草稿，再选择你想要的风格和版式，最后用编辑模式把标题、卖点和行动信息调顺。</p>
+                </div>
+                <span className="studio-chip muted">单页海报 · 可持续微调</span>
+              </div>
+
+              <div className="studio-poster-controls-card">
+                <div className="studio-poster-controls-head">
+                  <div>
+                    <strong>先生成内容草稿</strong>
+                    <p>系统会基于当前项目内容整理出一版适合展示的标题、结构和插图建议。</p>
+                  </div>
+                </div>
+                <div className="studio-inline-actions">
+                  <button type="button" className="studio-action-btn" onClick={generatePosterFromCurrentProject} disabled={posterLoading}>
+                    {posterLoading ? <><span className="studio-spinner" /> 正在整理海报草稿…</> : <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="14" rx="2" /><path d="M8 8h8" /><path d="M8 12h5" /></svg> 生成一版海报草稿</>}
+                  </button>
+                  {posterDesign && (
+                    <>
+                      <button type="button" className="studio-sub-btn" onClick={() => setPosterEditMode((v) => !v)}>
+                        {posterEditMode ? "返回预览" : "进入编辑模式"}
+                      </button>
+                      <button type="button" className="studio-sub-btn" onClick={regeneratePosterImages} disabled={posterLoading}>
+                        换一组插图
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+              {latestResult && !posterDesign && !posterLoading && (
+                <div className="studio-hint-box">已检测到当前项目的诊断内容，直接生成即可；如果后面觉得气质不对，还可以继续改风格和文案。</div>
+              )}
+              {posterError && <div className="studio-error">{posterError}</div>}
+              {posterDesign ? (
+                <div className="studio-poster-preview-wrap">
+                  <div className="studio-poster-controls-grid">
+                    <div className="studio-poster-controls-card">
+                      <div className="studio-poster-controls-head">
+                        <div>
+                          <strong>配色风格</strong>
+                          <p>先决定海报的气质，预览会实时更新。</p>
+                        </div>
+                      </div>
+                      <div className="studio-theme-row">
+                        {[
+                          ["tech_blue", "科技蓝"],
+                          ["youthful_gradient", "青春渐变"],
+                          ["minimal_black", "极简黑"],
+                          ["warm_orange", "暖橙"],
+                          ["green_growth", "成长绿"],
+                        ].map(([value, label]) => (
+                          <button
+                            key={value}
+                            type="button"
+                            className={`studio-theme-chip${posterDesign.theme === value ? " active" : ""}`}
+                            onClick={() => setPosterDesign((prev) => (prev ? { ...prev, theme: value } : prev))}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="studio-poster-controls-card">
+                      <div className="studio-poster-controls-head">
+                        <div>
+                          <strong>版式偏好</strong>
+                          <p>可以选择更偏展示感，或更偏信息表达。</p>
+                        </div>
+                      </div>
+                      <div className="studio-theme-row">
+                        {[
+                          ["portrait", "竖版展示"],
+                          ["landscape", "横版展示"],
+                          ["story_focus", "故事表达"],
+                          ["data_focus", "数据表达"],
+                        ].map(([value, label]) => (
+                          <button
+                            key={value}
+                            type="button"
+                            className={`studio-theme-chip${(value === "portrait" || value === "landscape")
+                              ? posterDesign.layout?.orientation === value
+                              : posterDesign.layout?.grid === value ? " active" : ""}`}
+                            onClick={() => setPosterDesign((prev) => {
+                              if (!prev) return prev;
+                              if (value === "portrait" || value === "landscape") {
+                                return { ...prev, layout: { ...prev.layout, orientation: value as "portrait" | "landscape" } };
+                              }
+                              return { ...prev, layout: { ...prev.layout, grid: value, accent_area: value === "data_focus" ? "right_column" : "top_left" } };
+                            })}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="studio-poster-preview-head">
+                    <div>
+                      <div className="studio-section-caption">海报预览</div>
+                      <p>{posterEditMode ? "当前处于编辑模式，可以直接修改标题、小节和要点。" : "当前处于预览模式，适合整体看风格和版式效果。"}</p>
+                    </div>
+                  </div>
+                  <PosterPreview design={posterDesign} onChange={setPosterDesign} mode={posterEditMode ? "edit" : "view"} />
+                </div>
+              ) : !posterLoading ? (
+                <div className="studio-empty">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.2"><rect x="4" y="3" width="16" height="14" rx="2" /><path d="M8 8h8" /><path d="M8 12h5" /><path d="M10 21l2-4 2 4" /></svg>
+                  <span>先在左侧补充项目内容，再生成一版海报草稿，后面可以继续改风格和文案。</span>
+                </div>
+              ) : null}
             </div>
-            {latestResult && !posterDesign && !posterLoading && (
-              <p className="right-hint" style={{ textAlign: "center", marginTop: 0 }}>
-                已检测到诊断结果，可先一键生成海报文案，然后再生成插图。
-              </p>
-            )}
-            {posterError && (
-              <p className="right-hint" style={{ color: "#e07070", textAlign: "center", marginTop: 4 }}>
-                {posterError}
-              </p>
-            )}
-            {posterDesign ? (
-              <PosterPreview design={posterDesign} onChange={setPosterDesign} mode="view" />
-            ) : !posterLoading ? (
-              <p className="right-hint" style={{ textAlign: "center", marginTop: 8 }}>
-                先在左侧描述你的项目或上传计划书，然后点击上方按钮生成第一版路演海报。
-              </p>
-            ) : null}
           </div>
         </div>
       )}
@@ -2107,6 +2817,7 @@ export default function StudentPage() {
               {([
                 { id: "agents", label: "智能体" },
                 { id: "task",   label: "任务" },
+                { id: "bp",     label: "计划书" },
                 { id: "risk",   label: "风险" },
                 { id: "score",  label: "评分" },
                 { id: "kg",     label: "图谱" },
@@ -2182,6 +2893,43 @@ export default function StudentPage() {
                         if (!val || !val.analysis) return null;
                         const nameMap: Record<string, string> = { coach: "🎯 项目教练", analyst: "⚠️ 风险分析师", advisor: "🏆 竞赛顾问", tutor: "📚 课程导师", grader: "📊 评分官", planner: "📋 行动规划师" };
                         const toolMap: Record<string, string> = { diagnosis: "诊断引擎", rag: "案例知识库", kg_extract: "项目分析", web_search: "联网搜索", hypergraph: "多维分析", hypergraph_student: "维度覆盖", challenge_strategies: "追问策略库", critic_llm: "批判思维", competition_llm: "竞赛评审", learning_llm: "概念教学", kg_baseline: "本地KG检索", rag_reference: "案例引用", rubric_engine: "评分标准", kg_scores: "维度评分", next_task: "任务建议", critic: "批判分析" };
+
+                        const renderPlannerCard = (analysis: string) => {
+                          const titleMatch = analysis.match(/\*\*标题\*\*[：:]\s*(.+?)(?:\n|$)/);
+                          const whyMatch = analysis.match(/\*\*为什么现在做这个\*\*[：:]\s*(.+?)(?:\n\*\*|$)/s);
+                          const stepsMatch = analysis.match(/\*\*具体步骤\*\*[：:]\s*\n((?:\d+\..+\n?)+)/);
+                          const criteriaMatch = analysis.match(/\*\*验收标准\*\*[：:]\s*\n((?:[-•].+\n?)+)/);
+                          const deferredMatch = analysis.match(/##\s*暂不处理[^\n]*\n((?:[-•].+\n?)+)/);
+                          if (!titleMatch) return null;
+                          const steps = stepsMatch ? stepsMatch[1].split("\n").filter((l: string) => l.trim()).map((l: string) => l.replace(/^\d+\.\s*/, "").trim()) : [];
+                          const criteria = criteriaMatch ? criteriaMatch[1].split("\n").filter((l: string) => l.trim()).map((l: string) => l.replace(/^[-•]\s*/, "").trim()) : [];
+                          const deferred = deferredMatch ? deferredMatch[1].split("\n").filter((l: string) => l.trim()).map((l: string) => l.replace(/^[-•]\s*/, "").trim()) : [];
+                          return (
+                            <div className="planner-structured">
+                              <div style={{ fontWeight: 700, fontSize: "1.05em", marginBottom: 6 }}>{titleMatch[1].trim()}</div>
+                              {whyMatch && <div style={{ color: "var(--text-secondary)", fontSize: "0.92em", marginBottom: 8 }}>{whyMatch[1].trim()}</div>}
+                              {steps.length > 0 && (
+                                <div style={{ marginBottom: 8 }}>
+                                  <div style={{ fontWeight: 600, fontSize: "0.9em", marginBottom: 4 }}>具体步骤</div>
+                                  <ol style={{ margin: 0, paddingLeft: 20 }}>{steps.map((s: string, i: number) => <li key={i} style={{ marginBottom: 3, fontSize: "0.92em" }}>{s}</li>)}</ol>
+                                </div>
+                              )}
+                              {criteria.length > 0 && (
+                                <div style={{ marginBottom: 8 }}>
+                                  <div style={{ fontWeight: 600, fontSize: "0.9em", marginBottom: 4 }}>验收标准</div>
+                                  <ul style={{ margin: 0, paddingLeft: 20, listStyle: "none" }}>{criteria.map((c: string, i: number) => <li key={i} style={{ fontSize: "0.92em" }}>✓ {c}</li>)}</ul>
+                                </div>
+                              )}
+                              {deferred.length > 0 && (
+                                <details style={{ marginTop: 6 }}>
+                                  <summary style={{ fontSize: "0.88em", color: "var(--text-secondary)", cursor: "pointer" }}>暂不处理（{deferred.length}项）</summary>
+                                  <ul style={{ margin: "4px 0 0 0", paddingLeft: 20, fontSize: "0.88em" }}>{deferred.map((d: string, i: number) => <li key={i}>{d}</li>)}</ul>
+                                </details>
+                              )}
+                            </div>
+                          );
+                        };
+
                         return (
                           <details key={key} className="agent-card" open>
                             <summary className="agent-card-header">
@@ -2192,7 +2940,7 @@ export default function StudentPage() {
                               </span>
                             </summary>
                             <div className="agent-card-body">
-                              <MarkdownContent content={val.analysis} theme={theme} />
+                              {key === "planner" ? (renderPlannerCard(val.analysis) ?? <MarkdownContent content={val.analysis} theme={theme} />) : <MarkdownContent content={val.analysis} theme={theme} />}
                             </div>
                           </details>
                         );
@@ -2296,6 +3044,654 @@ export default function StudentPage() {
                       );
                     }
                     return <p className="right-hint">描述你的项目后，这里会生成针对性的行动建议</p>;
+                  })()}
+                </div>
+              )}
+
+              {rightTab === "bp" && (
+                <div className="right-section">
+                  <h4>商业计划书</h4>
+                  <div className="panel-desc">先快速生成一份草稿（1 次 KB 蒸馏 + 1 次短版写作），再按需升级为基础版或正式版；每章支持「继续深化」。</div>
+                  {(() => {
+                    const maturityScore = typeof bpReadiness?.maturity_score === "number" ? bpReadiness.maturity_score : (businessPlan?.maturity?.score ?? null);
+                    const maturityTier = (bpReadiness?.maturity_tier as string) || businessPlan?.maturity?.tier || "not_ready";
+                    const maturityTierLabel = (bpReadiness?.maturity_tier_label as string) || (maturityTier === "full_ready" ? "充分就绪" : maturityTier === "basic_ready" ? "基础就绪" : "未就绪");
+                    const maturityBreakdown = (bpReadiness?.maturity_breakdown as any) || businessPlan?.maturity?.breakdown || {};
+                    const maturityNextGap = (bpReadiness?.maturity_next_gap as any[]) || businessPlan?.maturity?.next_gap || [];
+                    const versionTier = (businessPlan?.version_tier as string) || "draft";
+                    const upgradeLabel = maturityTier === "full_ready" ? "升级为正式版" : maturityTier === "basic_ready" ? "升级为基础版" : "升级（未就绪）";
+                    const upgradeMode: "basic" | "full" = maturityTier === "full_ready" ? "full" : "basic";
+                    const chipClass = `bp-maturity-chip tier-${maturityTier}`;
+                    const pendingCount = (businessPlan?.pending_revisions ?? []).length;
+                    const suggestCount = bpSuggestions.length;
+                    const plan = businessPlan;
+                    const sectionsCount = plan?.sections?.length ?? 0;
+                    const wordCount = plan ? (plan.sections || []).reduce((sum, s) => sum + ((s.user_edit || s.content || "").length), 0) : 0;
+                    const titleText = plan?.title || (plan?.cover_info?.project_name as string) || "商业计划书";
+                    const oneLiner = (plan?.knowledge_base as any)?.one_liner || (plan?.cover_info?.one_liner as string) || "请在对话中描述你的项目定位，系统会根据此自动更新此处";
+                    const teamInfo = [(plan?.cover_info?.student_or_team as string), (plan?.cover_info?.course_or_class as string), (plan?.cover_info?.teacher_name as string)].filter(Boolean).join(" · ");
+                    const updatedAt = (plan?.updated_at as string) || (plan?.created_at as string) || "";
+                    const ring = (() => {
+                      const score = Number(maturityScore ?? 0);
+                      const pct = Math.max(0, Math.min(100, score));
+                      const radius = 28;
+                      const circ = 2 * Math.PI * radius;
+                      const dash = (pct / 100) * circ;
+                      return { pct, radius, circ, dash };
+                    })();
+                    const failedIds = plan?.upgrade_report?.failed_ids ?? [];
+                    return (
+                      <>
+                        {plan && (
+                          <div className="bp-cover-strip">
+                            <div className="bp-cs-title" title={titleText}>{titleText}</div>
+                            {oneLiner && <div className="bp-cs-oneliner" title={oneLiner}>{oneLiner}</div>}
+                            <span className={`bp-version-chip tier-${versionTier} bp-cs-chip`}>{versionTier === "full" ? "正式版" : versionTier === "basic" ? "基础版" : "草稿"}</span>
+                            {maturityScore != null && (
+                              <button
+                                type="button"
+                                className={`bp-cs-maturity tier-${maturityTier}`}
+                                onClick={() => setBpMaturityOpen((v) => !v)}
+                                title="点击查看成熟度详情"
+                              >
+                                <svg viewBox="0 0 32 32" width="26" height="26">
+                                  <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.14)" strokeWidth="3" fill="none" />
+                                  <circle
+                                    cx="16" cy="16" r="13"
+                                    stroke="currentColor" strokeWidth="3" fill="none"
+                                    strokeDasharray={`${(Math.max(0, Math.min(100, Number(maturityScore ?? 0))) / 100) * (2 * Math.PI * 13)} ${2 * Math.PI * 13}`}
+                                    strokeLinecap="round"
+                                    transform="rotate(-90 16 16)"
+                                  />
+                                </svg>
+                                <span className="bp-cs-m-val">{Number(maturityScore)}</span>
+                                <span className="bp-cs-m-lbl">{maturityTierLabel}</span>
+                              </button>
+                            )}
+                            <div className="bp-cs-stats" aria-hidden>
+                              <span><b>{sectionsCount}</b>章</span>
+                              <span className="bp-cs-sep">·</span>
+                              <span><b>{wordCount.toLocaleString()}</b>字</span>
+                              {pendingCount > 0 && <><span className="bp-cs-sep">·</span><span className="bp-cs-pending"><b>{pendingCount}</b>待审</span></>}
+                              {updatedAt && <><span className="bp-cs-sep">·</span><span className="bp-cs-date">{updatedAt.slice(5, 10)}</span></>}
+                            </div>
+                            {bpMaturityOpen && maturityScore != null && (
+                              <div className="bp-maturity-pop bp-maturity-pop-strip">
+                                <div className="bp-maturity-pop-row">
+                                  <span>项目骨架</span>
+                                  <div className="bp-maturity-bar"><div style={{ width: `${Math.round(((maturityBreakdown.skeleton ?? 0) / (maturityBreakdown.skeleton_max || 60)) * 100)}%` }} /></div>
+                                  <span>{maturityBreakdown.skeleton ?? 0}/{maturityBreakdown.skeleton_max ?? 60}</span>
+                                </div>
+                                <div className="bp-maturity-pop-row">
+                                  <span>智能体密度</span>
+                                  <div className="bp-maturity-bar"><div style={{ width: `${Math.round(((maturityBreakdown.agent_density ?? 0) / (maturityBreakdown.agent_density_max || 30)) * 100)}%` }} /></div>
+                                  <span>{maturityBreakdown.agent_density ?? 0}/{maturityBreakdown.agent_density_max ?? 30}</span>
+                                </div>
+                                <div className="bp-maturity-pop-row">
+                                  <span>逻辑自洽</span>
+                                  <div className="bp-maturity-bar"><div style={{ width: `${Math.round(((maturityBreakdown.coherence ?? 0) / (maturityBreakdown.coherence_max || 10)) * 100)}%` }} /></div>
+                                  <span>{maturityBreakdown.coherence ?? 0}/{maturityBreakdown.coherence_max ?? 10}</span>
+                                </div>
+                                {maturityNextGap.length > 0 && (
+                                  <div className="bp-maturity-gaps">
+                                    <div className="bp-maturity-gap-title">距离下一档还差：</div>
+                                    {maturityNextGap.slice(0, 3).map((g: any, idx: number) => (
+                                      <div key={idx} className="bp-maturity-gap">
+                                        <div className="bp-maturity-gap-reason">{g.field_label || g.field}</div>
+                                        <div className="bp-maturity-gap-sugg">{g.suggestion}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <button className="bp-maturity-close" onClick={() => setBpMaturityOpen(false)}>关闭</button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ═ FAB 悬浮工具栏（右下）═ */}
+                        <div className={`bp-fab-wrap ${bpMoreOpen ? "is-open" : ""}`} ref={bpMoreRef}>
+                          {bpMoreOpen && (
+                            <div className="bp-fab-menu" role="menu">
+                              <button
+                                className="bp-fab-item bp-fab-primary"
+                                onClick={() => { setBpMoreOpen(false); generateBusinessPlan(maturityTier === "not_ready"); }}
+                                disabled={bpLoading || !conversationId}
+                                title={plan ? "重新生成草稿（会替换全部章节内容）" : "生成一份快速草稿"}
+                              >
+                                <span className="bp-fab-ic">✦</span>
+                                <span className="bp-fab-lbl">{bpLoading ? "生成中…" : (plan ? "重新生成草稿" : maturityTier === "not_ready" ? "强制生成草稿" : "生成草稿")}</span>
+                              </button>
+                              {plan && versionTier === "draft" && maturityTier !== "not_ready" && (
+                                <button
+                                  className="bp-fab-item"
+                                  onClick={() => { setBpMoreOpen(false); upgradeBusinessPlan(upgradeMode); }}
+                                  disabled={bpUpgradeBusy}
+                                  title="基于草稿 + KB + 行业资料 + 同行业范本，并发扩写为正式长版（Ctrl+U）"
+                                >
+                                  <span className="bp-fab-ic">↑</span>
+                                  <span className="bp-fab-lbl">{bpUpgradeBusy ? "升级中…" : upgradeLabel}</span>
+                                  <kbd className="bp-fab-kbd">Ctrl+U</kbd>
+                                </button>
+                              )}
+                              {plan && versionTier !== "draft" && (
+                                <button
+                                  className="bp-fab-item"
+                                  onClick={() => { setBpMoreOpen(false); upgradeBusinessPlan("full"); }}
+                                  disabled={bpUpgradeBusy}
+                                  title="再次基于最新素材重写正式版（Ctrl+U）"
+                                >
+                                  <span className="bp-fab-ic">↻</span>
+                                  <span className="bp-fab-lbl">{bpUpgradeBusy ? "升级中…" : "重做正式版"}</span>
+                                  <kbd className="bp-fab-kbd">Ctrl+U</kbd>
+                                </button>
+                              )}
+                              {plan && pendingCount > 0 && (
+                                <button
+                                  className="bp-fab-item bp-fab-accent"
+                                  onClick={() => { setBpMoreOpen(false); acceptAllRevisions(); }}
+                                  disabled={bpAcceptAllBusy}
+                                  title="把所有 AI 修订一次性合并到正文（Ctrl+Shift+A）"
+                                >
+                                  <span className="bp-fab-ic">✓</span>
+                                  <span className="bp-fab-lbl">{bpAcceptAllBusy ? "合并中…" : "接受全部修订"}</span>
+                                  <span className="bp-fab-badge">{pendingCount}</span>
+                                </button>
+                              )}
+                              {plan && (
+                                <>
+                                  <div className="bp-fab-sep" />
+                                  <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); refreshBusinessPlan(); }} disabled={bpLoading || !plan?.plan_id}>
+                                    <span className="bp-fab-ic">⟳</span><span className="bp-fab-lbl">刷新修订建议</span>
+                                  </button>
+                                  {bpViewMode === "edit" && (
+                                    <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); saveBusinessPlanSection(); }} disabled={bpSaving || !selectedBpSection}>
+                                      <span className="bp-fab-ic">💾</span><span className="bp-fab-lbl">{bpSaving ? "保存中…" : "保存当前章节"}</span>
+                                    </button>
+                                  )}
+                                  <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); setBpSuggestDrawerOpen(true); if (bpSuggestions.length === 0) loadDeepenSuggestions(); }}>
+                                    <span className="bp-fab-ic">💡</span>
+                                    <span className="bp-fab-lbl">补充建议{suggestCount > 0 ? ` (${suggestCount})` : ""}</span>
+                                  </button>
+                                  {pendingCount > 0 && (
+                                    <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); rejectAllRevisions(); }} disabled={bpAcceptAllBusy}>
+                                      <span className="bp-fab-ic">✕</span>
+                                      <span className="bp-fab-lbl">忽略全部修订 ({pendingCount})</span>
+                                    </button>
+                                  )}
+                                  <div className="bp-fab-sep" />
+                                  <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); exportBusinessPlan("docx"); }} disabled={bpExportBusy}>
+                                    <span className="bp-fab-ic">↓</span><span className="bp-fab-lbl">{bpExportBusy ? "导出中…" : "导出 docx"}</span>
+                                  </button>
+                                  <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); exportBusinessPlan("pdf"); }}>
+                                    <span className="bp-fab-ic">🖨</span><span className="bp-fab-lbl">导出 PDF（浏览器打印）</span>
+                                  </button>
+                                  {failedIds.length > 0 && (
+                                    <button
+                                      className="bp-fab-item bp-fab-ghost"
+                                      onClick={() => { setBpMoreOpen(false); upgradeBusinessPlan((plan.upgrade_report?.mode as any) || "full"); }}
+                                      disabled={bpUpgradeBusy}
+                                    >
+                                      <span className="bp-fab-ic">!</span>
+                                      <span className="bp-fab-lbl">重试未完成的 {failedIds.length} 章</span>
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              <div className="bp-fab-sep" />
+                              <div className="bp-fab-mode">
+                                {(["read", "edit"] as const).map((m) => (
+                                  <button
+                                    key={m}
+                                    onClick={() => setBpViewMode(m)}
+                                    className={bpViewMode === m ? "is-active" : ""}
+                                    title={`切换${m === "read" ? "阅读" : "编辑"}（Ctrl+E）`}
+                                  >
+                                    {m === "read" ? "阅读" : "编辑"}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            className={`bp-fab ${pendingCount > 0 ? "has-pending" : ""}`}
+                            onClick={() => setBpMoreOpen((v) => !v)}
+                            title="计划书工具箱"
+                            aria-expanded={bpMoreOpen}
+                          >
+                            <span className="bp-fab-main-ic">{bpMoreOpen ? "×" : "✦"}</span>
+                            {pendingCount > 0 && !bpMoreOpen && <span className="bp-fab-pill">{pendingCount}</span>}
+                          </button>
+                        </div>
+                        {bpUpgradeToast && (
+                          <div className="bp-toast-info">{bpUpgradeToast}</div>
+                        )}
+                      </>
+                    );
+                  })()}
+                  {bpError && <div className="right-card" style={{ color: "#ff8787" }}>{bpError}</div>}
+                  {!businessPlan && bpReadiness && (
+                    <div className="right-card">
+                      <strong>首次生成门槛</strong>
+                      <p style={{ marginTop: 8 }}>当前已覆盖 {bpReadiness?.filled_core_count ?? 0} 个核心维度。</p>
+                      {(bpReadiness?.missing_core_slots ?? []).length > 0 && (
+                        <div className="tch-tag-row">
+                          {(bpReadiness.missing_core_slots ?? []).map((item: string) => (
+                            <span key={item} className="tch-tag">{item}</span>
+                          ))}
+                        </div>
+                      )}
+                      {(bpReadiness?.suggested_questions ?? []).length > 0 && (
+                        <ul style={{ marginTop: 10, paddingLeft: 18 }}>
+                          {(bpReadiness.suggested_questions ?? []).map((q: string, idx: number) => <li key={idx}>{q}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                  {businessPlan && (() => {
+                    const sections = businessPlan.sections ?? [];
+                    const pendingRevs = businessPlan.pending_revisions ?? [];
+                    const revisionIdSet = new Set(pendingRevs.map((r) => r.section_id));
+                    const levelColor = (lv?: string) =>
+                      lv === "complete" ? "#51cf66"
+                        : lv === "mostly_complete" ? "#74c0fc"
+                        : lv === "partial" ? "#ffa94d"
+                        : "#ff6b6b";
+                    const isPlaceholder = (section: BpSection) => {
+                      const text = (section.user_edit || section.content || "").trim();
+                      if (section.missing_level === "critical" && text.length < 120) return true;
+                      return false;
+                    };
+                    const isAiStub = (section: BpSection) => !!section.is_ai_stub && !isPlaceholder(section);
+                    const scrollToSection = (sid: string) => {
+                      setBpSelectedSectionId(sid);
+                      const section = sections.find((s) => s.section_id === sid);
+                      if (section) setBpEditorContent(section.user_edit || section.content || "");
+                      if (bpViewMode === "read") {
+                        const el = bpSectionRefs.current[sid];
+                        if (el) {
+                          el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                      }
+                    };
+                    const activeId = activeBpSectionId || selectedBpSection?.section_id;
+                    return (
+                      <>
+                        {/* ═ 右浮大纲（仅阅读模式） ═ */}
+                        {bpViewMode === "read" && (
+                          <aside className="bp-right-outline" aria-label="章节大纲">
+                            <div className="bp-ro-head">
+                              <span className="bp-ro-title">章节</span>
+                              <button className="bp-ro-expand" onClick={() => setBpDrawerOpen(true)} title="展开完整目录">⤢</button>
+                            </div>
+                            <div className="bp-ro-list">
+                              {sections.map((section, idx) => {
+                                const active = section.section_id === activeId;
+                                const hasRevision = revisionIdSet.has(section.section_id);
+                                return (
+                                  <button
+                                    key={section.section_id}
+                                    className={`bp-ro-item ${active ? "is-active" : ""} ${isPlaceholder(section) ? "is-placeholder" : ""} ${isAiStub(section) ? "is-aistub" : ""}`}
+                                    onClick={() => scrollToSection(section.section_id)}
+                                    title={section.display_title || section.title}
+                                  >
+                                    <span className="bp-ro-num">{String(idx + 1).padStart(2, "0")}</span>
+                                    <span className="bp-ro-text">{section.display_title || section.title}</span>
+                                    <span className="bp-ro-dot" style={{ background: levelColor(section.missing_level) }} />
+                                    {hasRevision && <span className="bp-ro-rev" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </aside>
+                        )}
+
+                        {bpViewMode === "read" && (
+                          <div className="bp-progress" aria-hidden>
+                            <div className="bp-progress-fill" style={{ width: `${Math.round(bpScrollProgress * 100)}%` }} />
+                          </div>
+                        )}
+
+                        <div className={`bp-mode-fade bp-mode-${bpViewMode}`} key={bpViewMode}>
+                          {bpViewMode === "read" ? (
+                            <div
+                              ref={bpReadRootRef}
+                              className="right-card bp-read-root"
+                              style={{
+                                padding: "32px 40px",
+                                maxHeight: "calc(100vh - 200px)",
+                                overflowY: "auto",
+                                lineHeight: 1.9,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  textAlign: "center",
+                                  padding: "28px 0 30px",
+                                  borderBottom: "1px dashed rgba(255,255,255,0.15)",
+                                  marginBottom: 28,
+                                }}
+                              >
+                                <div style={{ fontSize: 12, color: "var(--text-muted, #9aa3b2)", letterSpacing: 3, marginBottom: 10 }}>BUSINESS PLAN</div>
+                                <div className="bp-cover-title">
+                                  {businessPlan.cover_info?.project_name || businessPlan.title || "商业计划书"}
+                                </div>
+                                <div style={{ fontSize: 13, color: "var(--text-muted, #9aa3b2)", display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: 12 }}>
+                                  <span>负责人：{businessPlan.cover_info?.student_or_team || currentUser?.display_name || currentUser?.user_id || "—"}</span>
+                                  {classId && <span>班级：{classId}</span>}
+                                  <span>日期：{businessPlan.cover_info?.date || new Date().toISOString().slice(0, 10)}</span>
+                                </div>
+                              </div>
+
+                              <div style={{ marginBottom: 32 }}>
+                                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>目录</div>
+                                <ol style={{ paddingLeft: 22, margin: 0, display: "grid", gap: 6 }}>
+                                  {sections.map((section) => (
+                                    <li key={section.section_id}>
+                                      <a
+                                        href={`#bp-sec-${section.section_id}`}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          scrollToSection(section.section_id);
+                                        }}
+                                        style={{ color: "inherit", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
+                                      >
+                                        <span>{section.display_title || section.title}</span>
+                                        {section.missing_level && section.missing_level !== "complete" && section.missing_level !== "mostly_complete" && (
+                                          <span className="tch-tag" style={{ fontSize: 11 }}>{section.status || "待完善"}</span>
+                                        )}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ol>
+                              </div>
+
+                              {(sections[0]?.narrative_opening) && (
+                                <div style={{ padding: "16px 20px", borderLeft: "3px solid rgba(107,138,255,0.6)", background: "rgba(107,138,255,0.06)", borderRadius: 6, marginBottom: 30, color: "var(--text-muted, #9aa3b2)", fontSize: 14, lineHeight: 1.8 }}>
+                                  {sections[0].narrative_opening}
+                                </div>
+                              )}
+
+                              {sections.map((section, idx) => {
+                                const placeholder = isPlaceholder(section);
+                                const aiStub = isAiStub(section);
+                                return (
+                                  <section
+                                    key={section.section_id}
+                                    id={`bp-sec-${section.section_id}`}
+                                    ref={(el) => { bpSectionRefs.current[section.section_id] = el; }}
+                                    data-section-id={section.section_id}
+                                    className={`bp-section ${placeholder ? "bp-section-placeholder" : ""} ${aiStub ? "bp-section-aistub" : ""}`}
+                                    style={{ marginBottom: 36, scrollMarginTop: 16 }}
+                                  >
+                                    <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 12px", display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                                      <span className="bp-chap-num">{String(idx + 1).padStart(2, "0")}</span>
+                                      <span>{section.display_title || section.title}</span>
+                                      {placeholder && <span className="bp-badge-placeholder">待补充</span>}
+                                      {aiStub && <span className="bp-badge-aistub">AI 参考稿</span>}
+                                    </h2>
+                                    {aiStub && (
+                                      <div className="bp-aistub-hint">本章尚未收集到用户素材，以下为基于行业通用框架生成的参考稿，建议团队校准事实后再定稿。</div>
+                                    )}
+                                    <div style={{ fontSize: 14 }}>
+                                      <MarkdownContent content={section.user_edit || section.content || "_本章内容仍在补全中。_"} theme={theme} />
+                                    </div>
+                                    {!!section.missing_points?.length && (
+                                      <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,169,77,0.08)", borderRadius: 8, fontSize: 12.5, color: "#ffa94d" }}>
+                                        本章仍需补充：{section.missing_points.join("、")}
+                                      </div>
+                                    )}
+                                    <div className="bp-section-actions">
+                                      <button
+                                        className="bp-deepen-btn"
+                                        onClick={() => openDeepenDialog(section.section_id)}
+                                      >
+                                        继续深化本章
+                                      </button>
+                                    </div>
+                                  </section>
+                                );
+                              })}
+
+                              {pendingRevs.length > 0 && (
+                                <div style={{ marginTop: 16, padding: "10px 14px", background: "rgba(255,212,59,0.08)", borderRadius: 8, fontSize: 13, color: "#ffd43b" }}>
+                                  当前有 {pendingRevs.length} 条 AI 修订建议待处理，切换到编辑模式后在对应章节查看并确认。
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            selectedBpSection ? (
+                              <div className="bp-edit-root" key={selectedBpSection.section_id}>
+                                <div className="right-card">
+                                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginBottom: 8 }}>
+                                    <strong>{selectedBpSection.display_title || selectedBpSection.title}</strong>
+                                    <span className="msg-time">{selectedBpSection.status || "部分缺失"} · 置信度 {Math.round((selectedBpSection.confidence || 0) * 100)}%</span>
+                                  </div>
+                                  {!!selectedBpSection.missing_points?.length && (
+                                    <div className="tch-tag-row" style={{ marginBottom: 10 }}>
+                                      {selectedBpSection.missing_points.map((item) => <span key={item} className="tch-tag">{item}</span>)}
+                                    </div>
+                                  )}
+                                  <textarea
+                                    value={bpEditorContent}
+                                    onChange={(e) => setBpEditorContent(e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      minHeight: 360,
+                                      resize: "vertical",
+                                      borderRadius: 12,
+                                      border: "1px solid rgba(255,255,255,0.12)",
+                                      background: "rgba(255,255,255,0.04)",
+                                      color: "inherit",
+                                      padding: 14,
+                                      fontSize: 14,
+                                      lineHeight: 1.75,
+                                      fontFamily: "inherit",
+                                    }}
+                                  />
+                                  <div className="msg-time" style={{ marginTop: 8 }}>
+                                    {bpSaving ? "正在保存..." : "支持 Markdown 语法，保存后在阅读模式即可看到润色后的展示效果。"}
+                                  </div>
+                                </div>
+
+                                {!!selectedBpSection.field_map && Object.keys(selectedBpSection.field_map).length > 0 && (
+                                  <div className="right-card" style={{ marginTop: 12 }}>
+                                    <strong>字段线索</strong>
+                                    <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                                      {Object.entries(selectedBpSection.field_map).slice(0, 8).map(([key, value]) => (
+                                        <div key={key}>
+                                          <div className="msg-time">{key}</div>
+                                          <div style={{ marginTop: 2, whiteSpace: "pre-wrap" }}>{typeof value === "string" ? value : JSON.stringify(value)}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {(() => {
+                                  const revision = pendingRevs.find((item) => item.section_id === selectedBpSection.section_id);
+                                  if (!revision) return null;
+                                  const changes = revision.changes ?? [];
+                                  const shown = changes.slice(0, 80);
+                                  return (
+                                    <details className="bp-revision-card" style={{ marginTop: 12 }} open>
+                                      <summary className="bp-revision-head">
+                                        <span className="bp-revision-title">{revision.summary || "本章修订建议"}</span>
+                                        <span className="bp-revision-reason">{revision.reason}</span>
+                                        <span className="bp-revision-actions">
+                                          <button className="tch-sm-btn" onClick={() => handleBpRevision(businessPlan.plan_id, revision.revision_id, "accept")} disabled={bpSaving}>接受</button>
+                                          <button className="tch-sm-btn" onClick={() => handleBpRevision(businessPlan.plan_id, revision.revision_id, "reject")} disabled={bpSaving}>忽略</button>
+                                        </span>
+                                      </summary>
+                                      {revision.source_hint && <div className="msg-time" style={{ marginBottom: 8 }}>{revision.source_hint}</div>}
+                                      <div className="bp-diff-body">
+                                        {shown.map((item, idx) => (
+                                          <div
+                                            key={idx}
+                                            className={`bp-diff-line bp-diff-${item.kind === "add" ? "add" : item.kind === "remove" ? "remove" : "equal"}`}
+                                          >
+                                            <span className="bp-diff-sign">
+                                              {item.kind === "add" ? "+" : item.kind === "remove" ? "−" : " "}
+                                            </span>
+                                            <span className="bp-diff-text">{item.text || " "}</span>
+                                          </div>
+                                        ))}
+                                        {changes.length > shown.length && (
+                                          <div className="bp-diff-line bp-diff-equal bp-diff-more">
+                                            …还有 {changes.length - shown.length} 行差异未展示，接受后即可在正文看到完整内容
+                                          </div>
+                                        )}
+                                      </div>
+                                    </details>
+                                  );
+                                })()}
+                              </div>
+                            ) : (
+                              <p className="right-hint">先在顶部选择章节，或返回阅读模式浏览整篇计划书。</p>
+                            )
+                          )}
+                        </div>
+
+                        {bpSuggestDrawerOpen && (
+                          <>
+                            <div className="bp-drawer-mask" onClick={() => setBpSuggestDrawerOpen(false)} />
+                            <aside className="bp-drawer bp-drawer-suggest" role="dialog" aria-label="补充建议">
+                              <div className="bp-drawer-head">
+                                <strong>补充建议（按优先级）</strong>
+                                <button className="bp-drawer-close" onClick={() => setBpSuggestDrawerOpen(false)} aria-label="关闭">×</button>
+                              </div>
+                              <div className="bp-drawer-body">
+                                {bpSuggestLoading ? (
+                                  <div className="bp-drawer-empty">正在生成建议…</div>
+                                ) : bpSuggestions.length === 0 ? (
+                                  <div className="bp-drawer-empty">暂无优先级较高的补充建议，计划书已经比较完整。</div>
+                                ) : (
+                                  bpSuggestions.map((item) => (
+                                    <button
+                                      key={`${item.section_id}-${item.priority}`}
+                                      className="bp-suggest-item"
+                                      onClick={() => {
+                                        setBpSuggestDrawerOpen(false);
+                                        openDeepenDialog(item.section_id);
+                                      }}
+                                    >
+                                      <div className="bp-suggest-head">
+                                        <span className="bp-suggest-title">{item.section_title}</span>
+                                        <span className="bp-suggest-pri">优先级 {item.priority}</span>
+                                      </div>
+                                      <div className="bp-suggest-q">{item.question}</div>
+                                      {item.why && <div className="bp-suggest-why">{item.why}</div>}
+                                    </button>
+                                  ))
+                                )}
+                              </div>
+                            </aside>
+                          </>
+                        )}
+
+                        {bpDeepenSectionId && (
+                          <>
+                            <div className="bp-dialog-mask" onClick={() => (!bpDeepenSubmitting ? closeDeepenDialog() : null)} />
+                            <div className="bp-dialog" role="dialog" aria-label="继续深化本章">
+                              <div className="bp-dialog-head">
+                                <strong>继续深化本章</strong>
+                                <button className="bp-dialog-close" onClick={closeDeepenDialog} disabled={bpDeepenSubmitting} aria-label="关闭">×</button>
+                              </div>
+                              <div className="bp-dialog-body">
+                                <div className="bp-dialog-subtitle">
+                                  {sections.find((s) => s.section_id === bpDeepenSectionId)?.display_title || "本章"}
+                                </div>
+                                {bpDeepenLoading ? (
+                                  <div className="bp-dialog-hint">AI 正在基于项目知识库生成针对性问题…</div>
+                                ) : bpDeepenQuestions.length === 0 ? (
+                                  <div className="bp-dialog-hint">暂未生成深化问题，请稍后重试。</div>
+                                ) : (
+                                  <div className="bp-dialog-questions">
+                                    {bpDeepenQuestions.map((q, idx) => (
+                                      <div key={q.id} className="bp-dialog-qitem">
+                                        <div className="bp-dialog-qlabel">
+                                          <span className="bp-dialog-qnum">Q{idx + 1}</span>
+                                          <span>{q.text}</span>
+                                        </div>
+                                        {q.focus_point && <div className="bp-dialog-qfocus">关注点：{q.focus_point}</div>}
+                                        <textarea
+                                          value={bpDeepenAnswers[q.id] || ""}
+                                          onChange={(e) => setBpDeepenAnswers((m) => ({ ...m, [q.id]: e.target.value }))}
+                                          placeholder="在此输入你的补充…（可留空跳过）"
+                                          className="bp-dialog-qinput"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="bp-dialog-foot">
+                                <button className="tch-sm-btn" onClick={closeDeepenDialog} disabled={bpDeepenSubmitting}>取消</button>
+                                <button
+                                  className="tch-sm-btn bp-btn-primary"
+                                  onClick={submitDeepenAnswers}
+                                  disabled={bpDeepenSubmitting || bpDeepenQuestions.length === 0}
+                                >
+                                  {bpDeepenSubmitting ? "扩写中…" : "提交并扩写本章"}
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {bpDrawerOpen && (
+                          <>
+                            <div className="bp-drawer-mask" onClick={() => setBpDrawerOpen(false)} />
+                            <aside className="bp-drawer" role="dialog" aria-label="商业计划书目录">
+                              <div className="bp-drawer-head">
+                                <strong>完整目录</strong>
+                                <button className="bp-drawer-close" onClick={() => setBpDrawerOpen(false)} aria-label="关闭">×</button>
+                              </div>
+                              <div className="bp-drawer-body">
+                                {sections.map((section, idx) => {
+                                  const hasRevision = revisionIdSet.has(section.section_id);
+                                  const active = section.section_id === activeId;
+                                  return (
+                                    <button
+                                      key={section.section_id}
+                                      className={`bp-drawer-item ${active ? "is-active" : ""} ${isPlaceholder(section) ? "is-placeholder" : ""} ${isAiStub(section) ? "is-aistub" : ""}`}
+                                      onClick={() => {
+                                        scrollToSection(section.section_id);
+                                        setBpDrawerOpen(false);
+                                      }}
+                                    >
+                                      <div className="bp-drawer-row-top">
+                                        <span className="bp-drawer-num">{String(idx + 1).padStart(2, "0")}</span>
+                                        <span className="bp-drawer-title">{section.display_title || section.title}</span>
+                                        <span className="bp-pill-dot" style={{ background: levelColor(section.missing_level) }} />
+                                        {hasRevision && <span className="bp-pill-rev" style={{ marginLeft: 2 }} />}
+                                      </div>
+                                      <div className="bp-drawer-row-meta">
+                                        <span>{section.status || "部分缺失"}</span>
+                                        <span>· 置信度 {Math.round((section.confidence || 0) * 100)}%</span>
+                                      </div>
+                                      {!!section.missing_points?.length && (
+                                        <div className="bp-drawer-tags">
+                                          {section.missing_points.slice(0, 4).map((m) => (
+                                            <span key={m} className="bp-drawer-tag">{m}</span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                                {pendingRevs.length > 0 && (
+                                  <div className="bp-drawer-revnote">
+                                    共 {pendingRevs.length} 条待处理修订
+                                  </div>
+                                )}
+                              </div>
+                            </aside>
+                          </>
+                        )}
+                      </>
+                    );
                   })()}
                 </div>
               )}
@@ -2501,7 +3897,7 @@ export default function StudentPage() {
                                     <div className="sc-dim-bar-track"><div className="sc-dim-bar-fill" style={{width:`${pct}%`, background: clr}} /></div>
                                     <span className="sc-dim-score" style={{color: clr}}>{r.score}</span>
                                   </div>
-                                  {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}</span>}
+                                  {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}{r.prev_score != null ? ` (${r.prev_score}→${r.score})` : ""}</span>}
                             </summary>
                                 {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
                           </details>
@@ -2754,6 +4150,64 @@ export default function StudentPage() {
                             })}
                           </div>
                         )}
+
+                        {/* KG Quality Metrics Card */}
+                        {kgAnalysis?.kg_quality && (() => {
+                          const kq = kgAnalysis.kg_quality;
+                          const kqMetrics = [
+                            { key: "entity_specificity", label: "实体特异性", max: 10, desc: "实体命名和属性的具体程度" },
+                            { key: "relationship_density", label: "关系密度", max: 1, desc: "实体间关系的丰富程度" },
+                            { key: "dimension_balance", label: "维度均衡度", max: 1, desc: "不同类型实体的均衡分布" },
+                            { key: "cross_validation_index", label: "交叉验证", max: 1, desc: "KG与评分维度的相关性" },
+                            { key: "extraction_confidence", label: "抽取置信度", max: 10, desc: "综合抽取可信度" },
+                          ];
+                          const overallKq = Math.round(
+                            ((Number(kq.extraction_confidence ?? 0) / 10) * 40
+                            + Number(kq.dimension_balance ?? 0) * 25
+                            + (Number(kq.entity_specificity ?? 0) / 10) * 20
+                            + Math.max(0, Number(kq.cross_validation_index ?? 0)) * 15) * 10
+                          ) / 10;
+                          return (
+                            <div className="kg-quality-section">
+                              <h5>知识图谱质量评估 <span className="ht-title-sub">综合 {overallKq}/100</span></h5>
+                              <p className="ht-guide-sub">基于实体特异性、关系密度和信息熵的量化分析，评估知识图谱抽取质量。</p>
+                              <div className="kg-quality-cards">
+                                {kqMetrics.map(m => {
+                                  const v = Number(kq[m.key] ?? 0);
+                                  const pct = m.key === "cross_validation_index"
+                                    ? Math.max(0, Math.min(100, (v + 1) / 2 * 100))
+                                    : Math.min(100, (v / m.max) * 100);
+                                  const barColor = pct >= 70 ? "#22c55e" : pct >= 40 ? "#f59e0b" : "#ef4444";
+                                  return (
+                                    <div key={m.key} className="ht-metric-row" title={kq.formulas?.[m.key] ?? m.desc}>
+                                      <span className="ht-metric-label">{m.label}</span>
+                                      <div className="ht-metric-bar"><div className="ht-metric-fill" style={{ width: `${pct}%`, background: barColor }} /></div>
+                                      <span className="ht-metric-val">{m.max === 1 ? (v * 100).toFixed(1) + "%" : v.toFixed(1)}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {kq.type_distribution && Object.keys(kq.type_distribution).length > 0 && (
+                                <div className="kg-type-dist">
+                                  <h6 className="ht-sub-title">实体类型分布</h6>
+                                  <div className="kg-type-bars">
+                                    {Object.entries(kq.type_distribution as Record<string, number>).sort(([, a], [, b]) => (b as number) - (a as number)).map(([type, count]) => {
+                                      const maxCount = Math.max(...Object.values(kq.type_distribution as Record<string, number>));
+                                      const w = ((count as number) / maxCount) * 100;
+                                      return (
+                                        <div key={type} className="kg-dist-row">
+                                          <span className="kg-dist-label">{typeNames[type] ?? type}</span>
+                                          <div className="kg-dist-bar"><div className="kg-dist-fill" style={{ width: `${w}%`, background: typeColors[type] ?? "#6ba3d6" }} /></div>
+                                          <span className="kg-dist-count">{count as number}</span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {/* KB Search Story (Module 3c) */}
                         {(() => {
@@ -3243,6 +4697,117 @@ export default function StudentPage() {
                           </div>
                         </div>
                       )}
+
+                      {/* ── 7c. Quality Metrics Radar + Family Heatmap ── */}
+                      {(() => {
+                        const qm = hyperStudent?.quality_metrics;
+                        if (!qm) return null;
+                        const metrics = [
+                          { key: "depth_weighted_coverage", label: "深度覆盖", max: 10 },
+                          { key: "template_completion_score", label: "闭环完成", max: 10 },
+                          { key: "consistency_health_score", label: "一致性健康", max: 10 },
+                          { key: "information_entropy", label: "信息熵", max: 1 },
+                          { key: "cross_dimension_ratio", label: "跨维度比", max: 1 },
+                          { key: "family_group_balance", label: "族群均衡", max: 1 },
+                          { key: "hub_concentration", label: "Hub集中度", max: 1 },
+                          { key: "graph_density", label: "图密度", max: 1 },
+                        ];
+                        const cx = 120, cy = 120, R = 95, n = metrics.length;
+                        const angleStep = (2 * Math.PI) / n;
+                        const pts = metrics.map((m, i) => {
+                          const v = Number(qm[m.key] ?? 0);
+                          const ratio = Math.min(1, v / m.max);
+                          const angle = i * angleStep - Math.PI / 2;
+                          return { x: cx + R * ratio * Math.cos(angle), y: cy + R * ratio * Math.sin(angle), ratio, label: m.label, value: v, max: m.max };
+                        });
+                        const polygon = pts.map(p => `${p.x},${p.y}`).join(" ");
+
+                        const dimDepths = qm.dim_depths ?? {};
+                        const dimList = Object.entries(dimDepths) as [string, number][];
+                        const dimNames: Record<string, string> = {
+                          stakeholder: "目标用户", pain_point: "痛点", solution: "解决方案",
+                          innovation: "创新点", market: "市场", competitor: "竞争",
+                          business_model: "商业模式", execution_step: "执行", risk_control: "风控",
+                          technology: "技术", resource: "资源", team: "团队",
+                          evidence: "证据", risk: "风险", channel: "渠道",
+                        };
+                        const depthColor = (d: number) => d >= 2.5 ? "#22c55e" : d >= 1.5 ? "#f59e0b" : d >= 0.5 ? "#fb923c" : "#e5e7eb";
+
+                        const overallScore = Math.round(
+                          (Number(qm.depth_weighted_coverage ?? 0) / 10 * 25
+                          + Number(qm.template_completion_score ?? 0) / 10 * 20
+                          + Number(qm.consistency_health_score ?? 0) / 10 * 20
+                          + Number(qm.information_entropy ?? 0) * 15
+                          + Number(qm.family_group_balance ?? 0) * 10
+                          + Number(qm.cross_dimension_ratio ?? 0) * 10) * 10
+                        ) / 10;
+
+                        return (
+                          <div className="ht-section ht-quality-section">
+                            <h5 className="ht-title">超图质量评估 <span className="ht-title-sub">综合 {overallScore}/100</span></h5>
+                            <p className="ht-guide-sub">基于图论与信息论的量化指标体系，从结构完整性、逻辑一致性和信息丰富度多维度评估超图质量。雷达图面积越大，超图质量越高。</p>
+
+                            <div className="ht-quality-grid">
+                              <div className="ht-radar-wrap">
+                                <svg width="240" height="240" viewBox="0 0 240 240">
+                                  {[0.25, 0.5, 0.75, 1].map(r => (
+                                    <polygon key={r} points={metrics.map((_, i) => {
+                                      const a = i * angleStep - Math.PI / 2;
+                                      return `${cx + R * r * Math.cos(a)},${cy + R * r * Math.sin(a)}`;
+                                    }).join(" ")} fill="none" stroke="var(--border)" strokeWidth="0.5" opacity="0.5" />
+                                  ))}
+                                  {metrics.map((_, i) => {
+                                    const a = i * angleStep - Math.PI / 2;
+                                    return <line key={i} x1={cx} y1={cy} x2={cx + R * Math.cos(a)} y2={cy + R * Math.sin(a)} stroke="var(--border)" strokeWidth="0.5" opacity="0.3" />;
+                                  })}
+                                  <polygon points={polygon} fill="rgba(99,102,241,0.2)" stroke="#6366f1" strokeWidth="2" />
+                                  {pts.map((p, i) => (
+                                    <g key={i}>
+                                      <circle cx={p.x} cy={p.y} r="3" fill="#6366f1" />
+                                      <text x={cx + (R + 14) * Math.cos(i * angleStep - Math.PI / 2)} y={cy + (R + 14) * Math.sin(i * angleStep - Math.PI / 2)} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill="var(--text-muted)">{p.label}</text>
+                                    </g>
+                                  ))}
+                                </svg>
+                              </div>
+
+                              <div className="ht-metric-cards">
+                                {metrics.map(m => {
+                                  const v = Number(qm[m.key] ?? 0);
+                                  const pct = Math.min(100, (v / m.max) * 100);
+                                  const barColor = pct >= 70 ? "#22c55e" : pct >= 40 ? "#f59e0b" : "#ef4444";
+                                  return (
+                                    <div key={m.key} className="ht-metric-row" title={qm.formulas?.[m.key] ?? ""}>
+                                      <span className="ht-metric-label">{m.label}</span>
+                                      <div className="ht-metric-bar"><div className="ht-metric-fill" style={{ width: `${pct}%`, background: barColor }} /></div>
+                                      <span className="ht-metric-val">{m.max === 1 ? (v * 100).toFixed(1) + "%" : v.toFixed(1)}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {dimList.length > 0 && (
+                              <div className="ht-dim-depth-grid">
+                                <h6 className="ht-sub-title">维度深度热力图</h6>
+                                <div className="ht-depth-cells">
+                                  {dimList.map(([k, d]) => (
+                                    <div key={k} className="ht-depth-cell" style={{ background: depthColor(d) }} title={`${dimNames[k] ?? k}: depth=${d}`}>
+                                      <span className="ht-depth-name">{(dimNames[k] ?? k).slice(0, 3)}</span>
+                                      <span className="ht-depth-val">{typeof d === "number" ? d.toFixed(1) : d}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="ht-depth-legend">
+                                  <span><span className="ht-legend-sq" style={{ background: "#22c55e" }} />深度≥2.5</span>
+                                  <span><span className="ht-legend-sq" style={{ background: "#f59e0b" }} />≥1.5</span>
+                                  <span><span className="ht-legend-sq" style={{ background: "#fb923c" }} />≥0.5</span>
+                                  <span><span className="ht-legend-sq" style={{ background: "#e5e7eb" }} />未覆盖</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* ── 8. Collapsible Details ── */}
                       <details className="ht-details-panel">

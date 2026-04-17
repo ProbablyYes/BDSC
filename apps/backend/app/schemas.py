@@ -112,6 +112,7 @@ class ProjectSnapshotResponse(BaseModel):
     project_id: str
     latest_student_submission: dict | None = None
     teacher_feedback: list[dict] = Field(default_factory=list)
+    video_analyses: list[dict] = Field(default_factory=list)
     graph_signals: dict = Field(default_factory=dict)
 
 
@@ -446,3 +447,55 @@ class BudgetAISuggestPayload(BaseModel):
 
 class BudgetAIChatPayload(BaseModel):
     question: str = ""
+
+
+# ── Business Plan ─────────────────────────────────────────────────────
+
+class BusinessPlanGeneratePayload(BaseModel):
+    project_id: str
+    student_id: str = ""
+    conversation_id: str = ""
+    allow_low_confidence: bool = False
+
+
+class BusinessPlanSectionUpdatePayload(BaseModel):
+    content: str = ""
+    field_map: dict = Field(default_factory=dict)
+    display_title: str | None = None
+
+
+class BusinessPlanExportPayload(BaseModel):
+    export_mode: Literal["clean_final", "revision_marked"] = "clean_final"
+    export_format: Literal["docx", "pdf"] = "docx"
+    cover_info: dict = Field(default_factory=dict)
+
+
+class BusinessPlanUpgradePayload(BaseModel):
+    mode: Literal["basic", "full"] = "full"
+
+
+class BusinessPlanExpandAnswer(BaseModel):
+    question_id: str = ""
+    question_text: str = ""
+    text: str = ""
+
+
+class BusinessPlanExpandPayload(BaseModel):
+    answers: list[BusinessPlanExpandAnswer] = Field(default_factory=list)
+    merge_strategy: Literal["append", "rewrite"] = "append"
+
+
+class BusinessPlanResponse(BaseModel):
+    status: str = "ok"
+    plan: dict | None = None
+    readiness: dict = Field(default_factory=dict)
+
+
+class BusinessPlanQuestionsResponse(BaseModel):
+    status: str = "ok"
+    questions: list[dict] = Field(default_factory=list)
+
+
+class BusinessPlanSuggestionsResponse(BaseModel):
+    status: str = "ok"
+    suggestions: list[dict] = Field(default_factory=list)

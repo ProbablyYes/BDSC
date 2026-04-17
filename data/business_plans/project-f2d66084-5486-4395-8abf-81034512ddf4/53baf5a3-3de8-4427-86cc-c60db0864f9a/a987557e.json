@@ -1,0 +1,247 @@
+{
+  "plan_id": "a987557e",
+  "project_id": "project-f2d66084-5486-4395-8abf-81034512ddf4",
+  "conversation_id": "53baf5a3-3de8-4427-86cc-c60db0864f9a",
+  "student_id": "None",
+  "title": "大学生技能变现平台探索 · 商业计划书",
+  "status": "draft",
+  "created_at": "2026-04-17T14:40:15.761102+08:00",
+  "updated_at": "2026-04-17T14:40:15.761102+08:00",
+  "sections": [
+    {
+      "section_id": "overview",
+      "title": "项目概述",
+      "display_title": "项目概述",
+      "content": "CodeBuddy是一个旨在为编程初学者提供个性化学习路径的在线教育平台。通过AI技术，CodeBuddy能够根据用户的学习习惯和能力水平，定制个性化的学习计划，帮助用户高效地掌握编程技能。",
+      "ai_draft": "CodeBuddy是一个旨在为编程初学者提供个性化学习路径的在线教育平台。通过AI技术，CodeBuddy能够根据用户的学习习惯和能力水平，定制个性化的学习计划，帮助用户高效地掌握编程技能。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的用户调研数据和市场分析"
+      ],
+      "confidence": 0.7,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "users",
+      "title": "用户痛点与目标人群",
+      "display_title": "用户痛点与目标人群",
+      "content": "编程初学者在学习过程中常常遇到资源分散、学习路径不清晰等问题，导致学习效率低下。CodeBuddy的目标用户是所有希望系统学习编程的初学者，尤其是那些缺乏明确学习路径和个性化指导的学生。",
+      "ai_draft": "编程初学者在学习过程中常常遇到资源分散、学习路径不清晰等问题，导致学习效率低下。CodeBuddy的目标用户是所有希望系统学习编程的初学者，尤其是那些缺乏明确学习路径和个性化指导的学生。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的用户调研数据和市场分析"
+      ],
+      "confidence": 0.6,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "solution",
+      "title": "产品/服务方案",
+      "display_title": "产品/服务方案",
+      "content": "CodeBuddy通过AI算法分析用户的学习行为，提供个性化的学习路径和课程推荐。平台还设有互动社区，用户可以交流学习经验，解决编程难题。此外，CodeBuddy还提供一对一的在线辅导服务，帮助用户解决个性化问题。",
+      "ai_draft": "CodeBuddy通过AI算法分析用户的学习行为，提供个性化的学习路径和课程推荐。平台还设有互动社区，用户可以交流学习经验，解决编程难题。此外，CodeBuddy还提供一对一的在线辅导服务，帮助用户解决个性化问题。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的产品功能和技术实现细节"
+      ],
+      "confidence": 0.6,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "business_model",
+      "title": "商业模式与价值主张",
+      "display_title": "商业模式与价值主张",
+      "content": "CodeBuddy的商业模式主要基于订阅制，用户可以按月或按年订阅服务。此外，平台还提供付费的一对一辅导服务。CodeBuddy的价值主张在于通过AI技术提供个性化学习路径，帮助用户高效学习编程。",
+      "ai_draft": "CodeBuddy的商业模式主要基于订阅制，用户可以按月或按年订阅服务。此外，平台还提供付费的一对一辅导服务。CodeBuddy的价值主张在于通过AI技术提供个性化学习路径，帮助用户高效学习编程。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的收入来源和成本结构"
+      ],
+      "confidence": 0.5,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "market",
+      "title": "市场与竞品分析",
+      "display_title": "市场与竞品分析",
+      "content": "在线编程教育市场正在快速增长，但大多数平台缺乏个性化学习路径。CodeBuddy通过AI技术提供个性化学习方案，具有明显的竞争优势。然而，CodeBuddy需要进一步分析市场趋势和竞品特点，以制定有效的市场策略。",
+      "ai_draft": "在线编程教育市场正在快速增长，但大多数平台缺乏个性化学习路径。CodeBuddy通过AI技术提供个性化学习方案，具有明显的竞争优势。然而，CodeBuddy需要进一步分析市场趋势和竞品特点，以制定有效的市场策略。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的市场趋势分析和竞品特点"
+      ],
+      "confidence": 0.5,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "advantage",
+      "title": "核心优势与竞争壁垒",
+      "display_title": "核心优势与竞争壁垒",
+      "content": "CodeBuddy的核心优势在于其AI驱动的个性化学习路径，这使得用户能够获得更加高效的学习体验。此外，CodeBuddy还提供互动社区和一对一辅导服务，进一步增强了用户体验。",
+      "ai_draft": "CodeBuddy的核心优势在于其AI驱动的个性化学习路径，这使得用户能够获得更加高效的学习体验。此外，CodeBuddy还提供互动社区和一对一辅导服务，进一步增强了用户体验。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的技术壁垒和用户粘性分析"
+      ],
+      "confidence": 0.6,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "operations",
+      "title": "运营与推广策略",
+      "display_title": "运营与推广策略",
+      "content": "CodeBuddy将通过社交媒体、在线广告和合作伙伴关系进行推广。此外，平台还将举办线上编程挑战赛，吸引用户参与。CodeBuddy还计划与学校和教育机构合作，扩大用户基础。",
+      "ai_draft": "CodeBuddy将通过社交媒体、在线广告和合作伙伴关系进行推广。此外，平台还将举办线上编程挑战赛，吸引用户参与。CodeBuddy还计划与学校和教育机构合作，扩大用户基础。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的推广渠道和合作伙伴"
+      ],
+      "confidence": 0.5,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "finance",
+      "title": "财务与融资计划",
+      "display_title": "财务与融资计划",
+      "content": "CodeBuddy的财务计划包括初期的开发成本、市场推广费用和运营成本。预计初期投入约为100万元人民币，主要用于产品开发和市场推广。CodeBuddy计划通过天使轮和A轮融资获得资金支持，预计融资总额为500万元人民币。",
+      "ai_draft": "CodeBuddy的财务计划包括初期的开发成本、市场推广费用和运营成本。预计初期投入约为100万元人民币，主要用于产品开发和市场推广。CodeBuddy计划通过天使轮和A轮融资获得资金支持，预计融资总额为500万元人民币。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的财务预算和融资计划"
+      ],
+      "confidence": 0.4,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "risk",
+      "title": "当前风险与待验证假设",
+      "display_title": "当前风险与待验证假设",
+      "content": "CodeBuddy面临的主要风险包括市场竞争加剧和技术实现难度。此外，CodeBuddy还需要验证用户对个性化学习路径的需求和付费意愿。CodeBuddy将通过市场调研和用户反馈来验证这些假设。",
+      "ai_draft": "CodeBuddy面临的主要风险包括市场竞争加剧和技术实现难度。此外，CodeBuddy还需要验证用户对个性化学习路径的需求和付费意愿。CodeBuddy将通过市场调研和用户反馈来验证这些假设。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的市场调研计划和用户反馈机制"
+      ],
+      "confidence": 0.5,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    },
+    {
+      "section_id": "roadmap",
+      "title": "阶段目标与下一步行动",
+      "display_title": "阶段目标与下一步行动",
+      "content": "CodeBuddy的短期目标是完成产品开发并进行市场推广。长期目标是扩大用户基础并实现盈利。下一步，CodeBuddy将进行产品开发和市场调研，以验证商业模式的可行性。",
+      "ai_draft": "CodeBuddy的短期目标是完成产品开发并进行市场推广。长期目标是扩大用户基础并实现盈利。下一步，CodeBuddy将进行产品开发和市场调研，以验证商业模式的可行性。",
+      "user_edit": "",
+      "field_map": {},
+      "missing_points": [
+        "具体的产品开发计划和市场调研时间表"
+      ],
+      "confidence": 0.5,
+      "evidence_sources": [
+        "conversation",
+        "agent_trace"
+      ],
+      "revision_status": "clean",
+      "is_custom": false,
+      "updated_at": "2026-04-17T14:40:15.761102+08:00",
+      "missing_level": "mostly_complete",
+      "status": "基本完整"
+    }
+  ],
+  "pending_revisions": [],
+  "revision_badge_count": 0,
+  "cover_info": {
+    "project_name": "大学生技能变现平台探索",
+    "student_or_team": "",
+    "course_or_class": "",
+    "teacher_name": "",
+    "date": "2026-04-17"
+  },
+  "source_summary": {
+    "latest_user_message": "你能给我的想法打个分吗",
+    "message_count": 18
+  },
+  "version": 1,
+  "previous_version": null
+}

@@ -1,11 +1,14 @@
 import logging
+import time
 from dataclasses import dataclass
 from typing import Any
 
 from neo4j import GraphDatabase
-from neo4j.exceptions import Neo4jError
+from neo4j.exceptions import Neo4jError, ServiceUnavailable, SessionExpired
 
 logger = logging.getLogger(__name__)
+
+_TRANSIENT_ERRORS = (ServiceUnavailable, SessionExpired, ConnectionResetError, TimeoutError, OSError)
 
 
 @dataclass
@@ -20,6 +23,29 @@ class GraphService:
         self.username = username
         self.password = password
         self.database = database
+        self._shared_driver = None
+
+    def _driver(self):
+        if self._shared_driver is not None:
+            return self._shared_driver
+        self._shared_driver = GraphDatabase.driver(
+            self.uri,
+            auth=(self.username, self.password),
+            connection_timeout=15,
+            max_connection_lifetime=300,
+            max_connection_pool_size=10,
+            connection_acquisition_timeout=30,
+            max_transaction_retry_time=30,
+        )
+        return self._shared_driver
+
+    def close(self):
+        if self._shared_driver:
+            try:
+                self._shared_driver.close()
+            except Exception:  # noqa: BLE001
+                pass
+            self._shared_driver = None
 
     def health(self) -> GraphSignal:
         try:
@@ -37,28 +63,37 @@ class GraphService:
     def _session_kwargs(self) -> dict[str, Any]:
         return {"database": self.database} if self.database else {}
 
-    def _driver(self):
-        return GraphDatabase.driver(self.uri, auth=(self.username, self.password))
-
-    def _query_with_fallback(self, query_fn):
+    def _query_with_fallback(self, query_fn, *, max_retries: int = 2):
         """
         Try configured database first; fallback to default database when routing/db lookup is unstable.
+        Retries on transient network errors (timeout, connection reset, service unavailable).
         """
         db_candidates: list[str] = [self.database] if self.database else [""]
         if self.database:
             db_candidates.append("")
 
         last_exc: Exception | None = None
-        for db_name in db_candidates:
-            driver = self._driver()
-            try:
-                session_kwargs = {"database": db_name} if db_name else {}
-                with driver.session(**session_kwargs) as session:
-                    return query_fn(session)
-            except Exception as exc:  # noqa: BLE001
-                last_exc = exc
-            finally:
-                driver.close()
+        for attempt in range(max_retries + 1):
+            for db_name in db_candidates:
+                driver = self._driver()
+                try:
+                    session_kwargs = {"database": db_name} if db_name else {}
+                    with driver.session(**session_kwargs) as session:
+                        return query_fn(session)
+                except _TRANSIENT_ERRORS as exc:
+                    last_exc = exc
+                    logger.warning(
+                        "Neo4j transient error (attempt %d/%d, db=%r): %s",
+                        attempt + 1, max_retries + 1, db_name, exc,
+                    )
+                    self.close()
+                except Exception as exc:  # noqa: BLE001
+                    last_exc = exc
+            if attempt < max_retries:
+                wait = min(2 ** attempt, 4)
+                logger.info("Retrying Neo4j in %.1fs …", wait)
+                time.sleep(wait)
+
         if last_exc:
             raise last_exc
         raise RuntimeError("neo4j query failed without explicit exception")
@@ -181,29 +216,963 @@ class GraphService:
                 risk_rules = int(session.run("MATCH (r:RiskRule) RETURN count(r) AS c").single()["c"])
                 rubric_items = int(session.run("MATCH (r:RubricItem) RETURN count(r) AS c").single()["c"])
 
+                dims = {
+                    "pain_points": int(dim_data.get("total_pains", 0)),
+                    "solutions": int(dim_data.get("total_solutions", 0)),
+                    "business_models": int(dim_data.get("total_biz_models", 0)),
+                    "markets": int(dim_data.get("total_markets", 0)),
+                    "innovations": int(dim_data.get("total_innovations", 0)),
+                    "evidence": int(dim_data.get("total_evidence", 0)),
+                    "execution_steps": int(dim_data.get("total_exec_steps", 0)),
+                    "stakeholders": int(dim_data.get("total_stakeholders", 0)),
+                    "risk_controls": int(dim_data.get("total_risk_controls", 0)),
+                }
+                total_projects = node_labels.get("Project", 0)
+
+                # ── Rationality Metrics ──
+                import math as _math
+
+                # 1. Case Representativeness
+                cat_counts = [c["count"] for c in categories if c.get("count", 0) > 0]
+                n_cats = len(cat_counts)
+                cat_total = sum(cat_counts)
+                if cat_total > 0 and n_cats > 1:
+                    cat_props = [c / cat_total for c in cat_counts]
+                    cat_entropy = -sum(p * _math.log2(p) for p in cat_props)
+                    cat_balance = round(cat_entropy / _math.log2(n_cats), 4)
+                else:
+                    cat_balance = 0
+                category_coverage = n_cats
+
+                dim_specs = [
+                    ("pain_points", "痛点", "HAS_PAIN"),
+                    ("solutions", "方案", "HAS_SOLUTION"),
+                    ("business_models", "商业模式", "HAS_BUSINESS_MODEL"),
+                    ("markets", "市场", "HAS_MARKET_ANALYSIS"),
+                    ("innovations", "创新点", "HAS_INNOVATION"),
+                    ("evidence", "证据", "HAS_EVIDENCE"),
+                    ("execution_steps", "执行步骤", "HAS_EXECUTION_STEP"),
+                    ("stakeholders", "目标用户", "HAS_TARGET_USER"),
+                    ("risk_controls", "风控", "HAS_RISK_CONTROL"),
+                ]
+                low_frequency_dim_config = {
+                    "execution_steps": {
+                        "reason": "执行步骤通常只在方案已经较具体、里程碑较明确的案例中出现，不要求所有项目都高频覆盖。",
+                        "expected_presence_range": [0.55, 0.85],
+                        "missing_weight": 0.6,
+                    },
+                    "risk_controls": {
+                        "reason": "风控更多在高监管、高安全或实施复杂度较高的案例中集中出现，低于通用维度覆盖并不直接代表抽取失真。",
+                        "expected_presence_range": [0.5, 0.8],
+                        "missing_weight": 0.55,
+                    },
+                }
+
+                # 2. Content Richness
+                dim_values = [
+                    dims.get("pain_points", 0), dims.get("solutions", 0),
+                    dims.get("business_models", 0), dims.get("markets", 0),
+                    dims.get("innovations", 0), dims.get("evidence", 0),
+                    dims.get("execution_steps", 0), dims.get("stakeholders", 0),
+                    dims.get("risk_controls", 0),
+                ]
+                dim_names_list = ["痛点", "方案", "商业模式", "市场", "创新点", "证据", "执行步骤", "目标用户", "风控"]
+                n_dim_types = len(dim_values)
+                dim_total_ents = sum(dim_values)
+                dim_covered = sum(1 for v in dim_values if v > 0)
+                if dim_total_ents > 0 and dim_covered > 1:
+                    dim_props = [v / dim_total_ents for v in dim_values if v > 0]
+                    dim_entropy = -sum(p * _math.log2(p) for p in dim_props)
+                    dim_balance = round(dim_entropy / _math.log2(n_dim_types), 4)
+                else:
+                    dim_balance = 0
+                avg_entities_per_project = round(dim_total_ents / max(1, total_projects), 2)
+                evidence_density = round(dims.get("evidence", 0) / max(1, total_projects), 2)
+
+                # 3. Node Quality - entity sharing (requires additional query)
+                try:
+                    sharing_result = session.run(
+                        """
+                        MATCH (p:Project)-[]->(e)
+                        WHERE NOT e:Category AND NOT e:RiskRule AND NOT e:RubricItem
+                          AND NOT e:OntologyNode AND NOT e:Evidence
+                          AND NOT e:EducationLevel AND NOT e:AwardLevel
+                          AND NOT e:Competition AND NOT e:CompetitionDomain
+                          AND NOT e:Entrepreneurship AND NOT e:HyperNode AND NOT e:Hyperedge
+                        WITH e, count(DISTINCT p) AS proj_count
+                        RETURN count(e) AS total_entities,
+                               sum(CASE WHEN proj_count >= 2 THEN 1 ELSE 0 END) AS shared_entities,
+                               avg(proj_count) AS avg_projects_per_entity
+                        """
+                    ).single()
+                    total_dim_entities = int(sharing_result["total_entities"] or 0)
+                    shared_entities = int(sharing_result["shared_entities"] or 0)
+                    avg_proj_per_ent = round(float(sharing_result["avg_projects_per_entity"] or 0), 2)
+                    sharing_rate = round(shared_entities / max(1, total_dim_entities), 4)
+                except Exception:
+                    total_dim_entities = 0
+                    shared_entities = 0
+                    avg_proj_per_ent = 0
+                    sharing_rate = 0
+
+                # 4. Graph Structure
+                graph_density = round(2 * total_rels / max(1, total_nodes * (total_nodes - 1)), 6) if total_nodes > 1 else 0
+                avg_degree = round(2 * total_rels / max(1, total_nodes), 2)
+                max_possible_edges = int(total_nodes * (total_nodes - 1) / 2) if total_nodes > 1 else 0
+                try:
+                    degree_profile = session.run(
+                        """
+                        MATCH (n)
+                        OPTIONAL MATCH (n)-[r]-()
+                        WITH n, count(r) AS degree
+                        RETURN sum(CASE WHEN degree = 0 THEN 1 ELSE 0 END) AS isolated_nodes,
+                               sum(CASE WHEN degree = 1 THEN 1 ELSE 0 END) AS degree1_nodes,
+                               sum(CASE WHEN degree <= 2 THEN 1 ELSE 0 END) AS degree_le2_nodes
+                        """
+                    ).single()
+                    isolated_nodes = int((degree_profile or {}).get("isolated_nodes") or 0)
+                    degree1_nodes = int((degree_profile or {}).get("degree1_nodes") or 0)
+                    degree_le2_nodes = int((degree_profile or {}).get("degree_le2_nodes") or 0)
+                except Exception:
+                    isolated_nodes = 0
+                    degree1_nodes = 0
+                    degree_le2_nodes = 0
+                try:
+                    project_anchor_result = session.run(
+                        """
+                        MATCH (p:Project)-[r]-()
+                        RETURN count(r) AS project_anchor_relationships
+                        """
+                    ).single()
+                    project_anchor_relationships = int(
+                        (project_anchor_result or {}).get("project_anchor_relationships") or 0
+                    )
+                except Exception:
+                    project_anchor_relationships = 0
+                sparse_node_ratio = round(degree_le2_nodes / max(1, total_nodes), 4)
+                project_anchor_ratio = round(project_anchor_relationships / max(1, total_rels), 4)
+
+                # 4.5 Extraction Quality / Auditability
+                coverage_query = session.run(
+                    """
+                    MATCH (p:Project)
+                    OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+                    OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+                    OPTIONAL MATCH (p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect)
+                    OPTIONAL MATCH (p)-[:HAS_MARKET_ANALYSIS]->(mkt:Market)
+                    OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)
+                    OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(ev:Evidence)
+                    OPTIONAL MATCH (p)-[:HAS_EXECUTION_STEP]->(ex:ExecutionStep)
+                    OPTIONAL MATCH (p)-[:HAS_TARGET_USER]->(st:Stakeholder)
+                    OPTIONAL MATCH (p)-[:HAS_RISK_CONTROL]->(rc:RiskControlPoint)
+                    WITH p,
+                         CASE WHEN count(DISTINCT pain) > 0 THEN 1 ELSE 0 END AS has_pain,
+                         CASE WHEN count(DISTINCT sol) > 0 THEN 1 ELSE 0 END AS has_solution,
+                         CASE WHEN count(DISTINCT bm) > 0 THEN 1 ELSE 0 END AS has_bm,
+                         CASE WHEN count(DISTINCT mkt) > 0 THEN 1 ELSE 0 END AS has_market,
+                         CASE WHEN count(DISTINCT inn) > 0 THEN 1 ELSE 0 END AS has_innovation,
+                         CASE WHEN count(DISTINCT ev) > 0 THEN 1 ELSE 0 END AS has_evidence,
+                         CASE WHEN count(DISTINCT ex) > 0 THEN 1 ELSE 0 END AS has_exec,
+                         CASE WHEN count(DISTINCT st) > 0 THEN 1 ELSE 0 END AS has_stakeholder,
+                         CASE WHEN count(DISTINCT rc) > 0 THEN 1 ELSE 0 END AS has_risk,
+                         CASE
+                           WHEN count(
+                             DISTINCT CASE
+                               WHEN trim(coalesce(ev.quote, "")) <> "" OR trim(coalesce(ev.source_unit, "")) <> ""
+                               THEN ev
+                             END
+                           ) > 0
+                           THEN 1 ELSE 0
+                         END AS has_traceable_evidence
+                    RETURN count(p) AS total_projects,
+                           sum(has_pain) AS pain_projects,
+                           sum(has_solution) AS solution_projects,
+                           sum(has_bm) AS bm_projects,
+                           sum(has_market) AS market_projects,
+                           sum(has_innovation) AS innovation_projects,
+                           sum(has_evidence) AS evidence_projects,
+                           sum(has_exec) AS exec_projects,
+                           sum(has_stakeholder) AS stakeholder_projects,
+                           sum(has_risk) AS risk_projects,
+                           sum(has_traceable_evidence) AS projects_with_traceable_evidence,
+                           sum(CASE WHEN has_pain = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS pain_traceable_projects,
+                           sum(CASE WHEN has_solution = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS solution_traceable_projects,
+                           sum(CASE WHEN has_bm = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS bm_traceable_projects,
+                           sum(CASE WHEN has_market = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS market_traceable_projects,
+                           sum(CASE WHEN has_innovation = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS innovation_traceable_projects,
+                           sum(CASE WHEN has_evidence = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS evidence_traceable_projects,
+                           sum(CASE WHEN has_exec = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS exec_traceable_projects,
+                           sum(CASE WHEN has_stakeholder = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS stakeholder_traceable_projects,
+                           sum(CASE WHEN has_risk = 1 AND has_traceable_evidence = 1 THEN 1 ELSE 0 END) AS risk_traceable_projects
+                    """
+                ).single()
+
+                entity_traceability = session.run(
+                    """
+                    MATCH (p:Project)
+                    OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(ev:Evidence)
+                    WITH p,
+                         CASE
+                           WHEN count(
+                             DISTINCT CASE
+                               WHEN trim(coalesce(ev.quote, "")) <> "" OR trim(coalesce(ev.source_unit, "")) <> ""
+                               THEN ev
+                             END
+                           ) > 0
+                           THEN 1 ELSE 0
+                         END AS has_traceable_evidence
+                    OPTIONAL MATCH (p)-[:HAS_PAIN|HAS_SOLUTION|HAS_BUSINESS_MODEL|HAS_MARKET_ANALYSIS|HAS_INNOVATION|HAS_EVIDENCE|HAS_EXECUTION_STEP|HAS_TARGET_USER|HAS_RISK_CONTROL]->(dim)
+                    WITH has_traceable_evidence, count(DISTINCT dim) AS entity_count
+                    RETURN sum(entity_count) AS total_entities,
+                           sum(CASE WHEN has_traceable_evidence = 1 THEN entity_count ELSE 0 END) AS traceable_entities
+                    """
+                ).single()
+
+                total_traceable_entities = int((entity_traceability or {}).get("traceable_entities") or 0)
+                total_entities_for_trace = int((entity_traceability or {}).get("total_entities") or 0)
+                projects_with_evidence = int((coverage_query or {}).get("evidence_projects") or 0)
+                projects_with_traceable_evidence = int((coverage_query or {}).get("projects_with_traceable_evidence") or 0)
+                project_evidence_coverage = round(projects_with_evidence / max(1, total_projects), 4)
+                project_traceable_coverage = round(projects_with_traceable_evidence / max(1, total_projects), 4)
+                traceability_rate = round(total_traceable_entities / max(1, total_entities_for_trace), 4)
+
+                dimension_missing_rate = []
+                evidence_backed_dimensions = []
+                low_frequency_dimensions = []
+                weighted_missing_sum = 0.0
+                weighted_missing_denominator = 0.0
+                for dim_key, dim_name, _ in dim_specs:
+                    base_name = dim_key.replace("pain_points", "pain").replace("solutions", "solution").replace("business_models", "bm").replace("markets", "market").replace("innovations", "innovation").replace("execution_steps", "exec").replace("stakeholders", "stakeholder").replace("risk_controls", "risk")
+                    proj_count = int((coverage_query or {}).get(f"{base_name}_projects") or 0)
+                    trace_proj_count = int((coverage_query or {}).get(f"{base_name}_traceable_projects") or 0)
+                    missing_count = max(0, total_projects - proj_count)
+                    missing_rate = round(missing_count / max(1, total_projects), 4)
+                    evidence_backed_rate = round(trace_proj_count / max(1, proj_count), 4) if proj_count > 0 else 0
+                    dim_meta = low_frequency_dim_config.get(dim_key)
+                    missing_weight = float((dim_meta or {}).get("missing_weight") or 1.0)
+                    weighted_missing_sum += missing_rate * missing_weight
+                    weighted_missing_denominator += missing_weight
+                    dimension_missing_rate.append({
+                        "key": dim_key,
+                        "name": dim_name,
+                        "project_count": proj_count,
+                        "missing_count": missing_count,
+                        "missing_rate": missing_rate,
+                        "is_low_frequency_expected": bool(dim_meta),
+                        "missing_weight": missing_weight,
+                    })
+                    evidence_backed_dimensions.append({
+                        "key": dim_key,
+                        "name": dim_name,
+                        "project_count": proj_count,
+                        "traceable_project_count": trace_proj_count,
+                        "evidence_backed_rate": evidence_backed_rate,
+                        "is_low_frequency_expected": bool(dim_meta),
+                    })
+                    if dim_meta:
+                        observed_presence_rate = round(proj_count / max(1, total_projects), 4)
+                        expected_range = dim_meta.get("expected_presence_range") or [0.0, 1.0]
+                        low_frequency_dimensions.append({
+                            "key": dim_key,
+                            "name": dim_name,
+                            "observed_presence_rate": observed_presence_rate,
+                            "expected_min": expected_range[0],
+                            "expected_max": expected_range[1],
+                            "reason": dim_meta.get("reason") or "",
+                            "status": (
+                                "符合预期"
+                                if expected_range[0] <= observed_presence_rate <= expected_range[1]
+                                else ("低于预期" if observed_presence_rate < expected_range[0] else "高于预期")
+                            ),
+                        })
+
+                avg_dim_count = (dim_total_ents / max(1, n_dim_types)) if n_dim_types else 0
+                dimension_overrepresented = []
+                dimension_underrepresented = []
+                for idx, dim_name in enumerate(dim_names_list):
+                    dim_count = dim_values[idx]
+                    ratio = round(dim_count / max(1, avg_dim_count), 2)
+                    row = {"name": dim_name, "count": dim_count, "ratio_to_mean": ratio}
+                    if ratio >= 1.25:
+                        dimension_overrepresented.append(row)
+                    elif ratio <= 0.75:
+                        dimension_underrepresented.append(row)
+
+                audit_project_rows = list(session.run(
+                    """
+                    MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
+                    OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+                    OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+                    OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)
+                    OPTIONAL MATCH (p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect)
+                    OPTIONAL MATCH (p)-[:HAS_TARGET_USER]->(st:Stakeholder)
+                    OPTIONAL MATCH (p)-[:HAS_MARKET_ANALYSIS]->(mkt:Market)
+                    OPTIONAL MATCH (p)-[:HAS_EXECUTION_STEP]->(ex:ExecutionStep)
+                    OPTIONAL MATCH (p)-[:HAS_RISK_CONTROL]->(rc:RiskControlPoint)
+                    OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(ev:Evidence)
+                    WITH p, c,
+                         count(DISTINCT pain) AS pain_count,
+                         count(DISTINCT sol) AS solution_count,
+                         count(DISTINCT inn) AS innovation_count,
+                         count(DISTINCT bm) AS business_model_count,
+                         count(DISTINCT st) AS stakeholder_count,
+                         count(DISTINCT mkt) AS market_count,
+                         count(DISTINCT ex) AS execution_count,
+                         count(DISTINCT rc) AS risk_count,
+                         count(DISTINCT ev) AS evidence_count,
+                         count(DISTINCT CASE WHEN trim(coalesce(ev.quote, "")) <> "" THEN ev END) AS quote_evidence_count,
+                         count(DISTINCT CASE WHEN trim(coalesce(ev.source_unit, "")) <> "" THEN ev END) AS source_evidence_count
+                    RETURN p.id AS project_id,
+                           p.name AS project_name,
+                           c.name AS category,
+                           p.source_file AS source_file,
+                           pain_count, solution_count, innovation_count, business_model_count,
+                           stakeholder_count, market_count, execution_count, risk_count,
+                           evidence_count, quote_evidence_count, source_evidence_count
+                    """
+                ))
+                sample_rows = list(session.run(
+                    """
+                    MATCH (p:Project)-[:BELONGS_TO]->(c:Category)
+                    OPTIONAL MATCH (p)-[:HAS_PAIN]->(pain:PainPoint)
+                    OPTIONAL MATCH (p)-[:HAS_SOLUTION]->(sol:Solution)
+                    OPTIONAL MATCH (p)-[:HAS_INNOVATION]->(inn:InnovationPoint)
+                    OPTIONAL MATCH (p)-[:HAS_BUSINESS_MODEL]->(bm:BusinessModelAspect)
+                    OPTIONAL MATCH (p)-[:HAS_EVIDENCE]->(ev:Evidence)
+                    WITH p, c,
+                         collect(DISTINCT pain.name)[..2] AS pains,
+                         collect(DISTINCT sol.name)[..2] AS solutions,
+                         collect(DISTINCT inn.name)[..1] AS innovations,
+                         collect(DISTINCT bm.name)[..1] AS business_models,
+                         collect(
+                           DISTINCT CASE
+                             WHEN trim(coalesce(ev.quote, "")) <> "" OR trim(coalesce(ev.source_unit, "")) <> ""
+                             THEN {
+                               quote: coalesce(ev.quote, ""),
+                               source_unit: coalesce(ev.source_unit, ""),
+                               type: coalesce(ev.type, "")
+                             }
+                           END
+                         )[..3] AS evidence_samples,
+                         count(DISTINCT ev) AS evidence_count
+                    WHERE evidence_count > 0
+                    RETURN p.id AS project_id,
+                           p.name AS project_name,
+                           c.name AS category,
+                           p.source_file AS source_file,
+                           pains, solutions, innovations, business_models,
+                           evidence_count, evidence_samples
+                    ORDER BY evidence_count DESC, p.name ASC
+                    LIMIT 96
+                    """
+                ))
+                audit_candidates: list[dict[str, Any]] = []
+                audit_buckets: dict[str, list[dict[str, Any]]] = {}
+                for row in sample_rows:
+                    evidence_samples = [e for e in (row.get("evidence_samples") or []) if e]
+                    if not evidence_samples:
+                        continue
+                    category_name = str(row.get("category") or "")
+                    pains = [x for x in (row.get("pains") or []) if x][:2]
+                    solutions = [x for x in (row.get("solutions") or []) if x][:2]
+                    innovations = [x for x in (row.get("innovations") or []) if x][:1]
+                    business_models = [x for x in (row.get("business_models") or []) if x][:1]
+                    candidate = {
+                        "project_id": row.get("project_id"),
+                        "project_name": row.get("project_name"),
+                        "category": category_name,
+                        "source_file": row.get("source_file") or "",
+                        "pains": pains,
+                        "solutions": solutions,
+                        "innovations": innovations,
+                        "business_models": business_models,
+                        "evidence_count": int(row.get("evidence_count") or 0),
+                        "evidence_samples": evidence_samples[:3],
+                        "key_dimension_count": sum(
+                            1 for bucket in [pains, solutions, innovations, business_models] if bucket
+                        ),
+                    }
+                    audit_candidates.append(candidate)
+                    audit_buckets.setdefault(category_name or "未分类", []).append(candidate)
+
+                for items in audit_buckets.values():
+                    items.sort(
+                        key=lambda item: (
+                            -int(item.get("evidence_count") or 0),
+                            -int(item.get("key_dimension_count") or 0),
+                            str(item.get("project_name") or ""),
+                        )
+                    )
+
+                audit_target_size = 0
+                if projects_with_traceable_evidence > 0:
+                    audit_target_size = min(
+                        projects_with_traceable_evidence,
+                        18,
+                        max(12, int(round(projects_with_traceable_evidence * 0.16))),
+                    )
+                strata_categories = [cat for cat, items in audit_buckets.items() if items]
+                quota_map = {cat: 0 for cat in strata_categories}
+                if strata_categories and audit_target_size > 0:
+                    if audit_target_size >= len(strata_categories):
+                        for cat in strata_categories:
+                            quota_map[cat] = 1
+                        remaining_slots = audit_target_size - len(strata_categories)
+                    else:
+                        strata_sorted = sorted(
+                            strata_categories,
+                            key=lambda cat: len(audit_buckets[cat]),
+                            reverse=True,
+                        )
+                        for cat in strata_sorted[:audit_target_size]:
+                            quota_map[cat] = 1
+                        remaining_slots = 0
+
+                    while remaining_slots > 0:
+                        available_cats = [
+                            cat for cat in strata_categories
+                            if quota_map[cat] < len(audit_buckets[cat])
+                        ]
+                        if not available_cats:
+                            break
+                        target_cat = max(
+                            available_cats,
+                            key=lambda cat: len(audit_buckets[cat]) / max(1, quota_map[cat] + 1),
+                        )
+                        quota_map[target_cat] += 1
+                        remaining_slots -= 1
+
+                sampled_items: list[dict[str, Any]] = []
+                for cat in strata_categories:
+                    sampled_items.extend(audit_buckets[cat][:quota_map.get(cat, 0)])
+                sampled_items.sort(
+                    key=lambda item: (
+                        -int(item.get("evidence_count") or 0),
+                        -int(item.get("key_dimension_count") or 0),
+                        str(item.get("project_name") or ""),
+                    )
+                )
+
+                display_sample_limit = 6
+                sample_audit_pool = [
+                    {
+                        **item,
+                        "evidence_samples": (item.get("evidence_samples") or [])[:2],
+                    }
+                    for item in sampled_items[:display_sample_limit]
+                ]
+
+                audit_sample_size = len(sampled_items)
+                audit_sample_evidence = sum(int(item.get("evidence_count") or 0) for item in sampled_items)
+                audit_snippet_count = sum(len(item.get("evidence_samples") or []) for item in sampled_items)
+                audit_traceable_snippet_count = sum(
+                    1
+                    for item in sampled_items
+                    for ev in (item.get("evidence_samples") or [])
+                    if str(ev.get("quote", "")).strip() or str(ev.get("source_unit", "")).strip()
+                )
+                audit_quote_project_count = sum(
+                    1
+                    for item in sampled_items
+                    if any(str(ev.get("quote", "")).strip() for ev in (item.get("evidence_samples") or []))
+                )
+                audit_source_project_count = sum(
+                    1
+                    for item in sampled_items
+                    if any(str(ev.get("source_unit", "")).strip() for ev in (item.get("evidence_samples") or []))
+                )
+                audit_multi_evidence_count = sum(
+                    1 for item in sampled_items if int(item.get("evidence_count") or 0) >= 2
+                )
+                audit_key_dimension_count = sum(
+                    1 for item in sampled_items if int(item.get("key_dimension_count") or 0) >= 2
+                )
+                audit_category_coverage = round(
+                    len({item.get("category") for item in sampled_items if item.get("category")}) / max(1, n_cats),
+                    4,
+                )
+                audit_category_strata = [
+                    {
+                        "category": cat,
+                        "universe_count": len(audit_buckets[cat]),
+                        "sampled_count": quota_map.get(cat, 0),
+                        "sample_rate": round(quota_map.get(cat, 0) / max(1, len(audit_buckets[cat])), 4),
+                    }
+                    for cat in sorted(
+                        strata_categories,
+                        key=lambda key: len(audit_buckets[key]),
+                        reverse=True,
+                    )
+                ]
+                sample_audit_summary = {
+                    "sample_size": audit_sample_size,
+                    "display_size": len(sample_audit_pool),
+                    "sample_universe": projects_with_traceable_evidence,
+                    "sample_coverage": round(audit_sample_size / max(1, projects_with_traceable_evidence), 4),
+                    "avg_evidence_per_sample": round(audit_sample_evidence / max(1, audit_sample_size), 2),
+                    "avg_key_dimension_count": round(
+                        sum(int(item.get("key_dimension_count") or 0) for item in sampled_items) / max(1, audit_sample_size),
+                        2,
+                    ),
+                    "category_coverage": audit_category_coverage,
+                    "traceable_snippet_rate": round(audit_traceable_snippet_count / max(1, audit_snippet_count), 4),
+                    "quote_presence_rate": round(audit_quote_project_count / max(1, audit_sample_size), 4),
+                    "source_unit_presence_rate": round(audit_source_project_count / max(1, audit_sample_size), 4),
+                    "multi_evidence_support_rate": round(audit_multi_evidence_count / max(1, audit_sample_size), 4),
+                    "key_dimension_presence_rate": round(audit_key_dimension_count / max(1, audit_sample_size), 4),
+                    "category_strata": audit_category_strata,
+                    "sampling_method": "以含可追溯证据的项目为总体，按类别分层抽样；每类至少抽取1个样本，其余名额按类别项目占比分配，层内按证据条数与关键维度数排序抽取",
+                    "audit_focus": [
+                        "样本是否覆盖主要类别，而不是只展示个别好案例",
+                        "抽取字段是否能对应到原文quote/source_unit",
+                        "关键维度是否有证据支撑",
+                        "同一项目是否具备多条证据与多维度信息，避免单点支撑",
+                    ],
+                }
+
+                audit_universe_rows = [
+                    row for row in audit_project_rows
+                    if int(row.get("evidence_count") or 0) > 0
+                ]
+                audit_universe_size = len(audit_universe_rows)
+                audit_rule_specs = [
+                    {
+                        "key": "locatable_evidence",
+                        "name": "证据定位完备率",
+                        "formula": "同时含 quote 与 source_unit 的项目数 / 含证据项目数",
+                        "meaning": "回答证据是否不仅存在，而且能看到原文摘录并定位来源位置。",
+                        "pass_count": sum(
+                            1
+                            for row in audit_universe_rows
+                            if int(row.get("quote_evidence_count") or 0) > 0
+                            and int(row.get("source_evidence_count") or 0) > 0
+                        ),
+                    },
+                    {
+                        "key": "multi_evidence",
+                        "name": "多证据支撑率",
+                        "formula": "证据数 >= 2 的项目数 / 含证据项目数",
+                        "meaning": "回答结构判断是否只依赖单条证据，还是至少有双证据支撑。",
+                        "pass_count": sum(
+                            1 for row in audit_universe_rows if int(row.get("evidence_count") or 0) >= 2
+                        ),
+                    },
+                    {
+                        "key": "multi_dimension",
+                        "name": "多维标签联查率",
+                        "formula": "关键维度数 >= 2 的项目数 / 含证据项目数",
+                        "meaning": "回答一个项目是否同时呈现多个分析维度，避免只靠单点字段形成判断。",
+                        "pass_count": sum(
+                            1
+                            for row in audit_universe_rows
+                            if sum(
+                                1
+                                for field_name in [
+                                    "pain_count",
+                                    "solution_count",
+                                    "innovation_count",
+                                    "business_model_count",
+                                    "stakeholder_count",
+                                    "market_count",
+                                ]
+                                if int(row.get(field_name) or 0) > 0
+                            ) >= 2
+                        ),
+                    },
+                    {
+                        "key": "audit_closure",
+                        "name": "审计闭环率",
+                        "formula": "同时满足『可定位 + 多证据 + 多维标签』的项目数 / 含证据项目数",
+                        "meaning": "回答进入审计的项目里，有多少项目已经具备比较完整的复核条件。",
+                        "pass_count": sum(
+                            1
+                            for row in audit_universe_rows
+                            if int(row.get("quote_evidence_count") or 0) > 0
+                            and int(row.get("source_evidence_count") or 0) > 0
+                            and int(row.get("evidence_count") or 0) >= 2
+                            and sum(
+                                1
+                                for field_name in [
+                                    "pain_count",
+                                    "solution_count",
+                                    "innovation_count",
+                                    "business_model_count",
+                                    "stakeholder_count",
+                                    "market_count",
+                                ]
+                                if int(row.get(field_name) or 0) > 0
+                            ) >= 2
+                        ),
+                    },
+                ]
+                audit_rule_results = []
+                for spec in audit_rule_specs:
+                    pass_count = int(spec["pass_count"])
+                    fail_count = max(0, audit_universe_size - pass_count)
+                    audit_rule_results.append({
+                        "key": spec["key"],
+                        "name": spec["name"],
+                        "formula": spec["formula"],
+                        "meaning": spec["meaning"],
+                        "universe_size": audit_universe_size,
+                        "pass_count": pass_count,
+                        "fail_count": fail_count,
+                        "pass_rate": round(pass_count / max(1, audit_universe_size), 4),
+                    })
+                audit_failure_distribution = sorted(
+                    [
+                        {
+                            "name": item["name"],
+                            "fail_count": item["fail_count"],
+                            "fail_rate": round(item["fail_count"] / max(1, item["universe_size"]), 4),
+                        }
+                        for item in audit_rule_results
+                    ],
+                    key=lambda item: item["fail_count"],
+                    reverse=True,
+                )
+                audit_total_checks = sum(item["universe_size"] for item in audit_rule_results)
+                audit_total_passes = sum(item["pass_count"] for item in audit_rule_results)
+                audit_summary = {
+                    "rule_count": len(audit_rule_results),
+                    "audit_universe": audit_universe_size,
+                    "total_checks": audit_total_checks,
+                    "total_passes": audit_total_passes,
+                    "overall_pass_rate": round(audit_total_passes / max(1, audit_total_checks), 4),
+                    "methodology": "基于进入审计总体的规则核验，而不是仅展示个别样本。每条规则都统计样本空间、通过数、失败数与通过率。",
+                    "rule_results": audit_rule_results,
+                    "failure_distribution": audit_failure_distribution,
+                }
+
+                semantic_specs = [
+                    {
+                        "key": "pain_points",
+                        "name": "痛点",
+                        "label": "PainPoint",
+                        "theory_basis": "Lean Canvas 的 Problem + Design Thinking 的需求洞察",
+                        "positive_keywords": ["痛点", "问题", "难", "低", "高", "慢", "贵", "不足", "缺", "瓶颈", "障碍", "压力", "风险", "不便"],
+                        "counter_keywords": ["方案", "系统", "平台", "服务", "模型", "产品", "收费", "商业"],
+                        "closure_fields": ["solution_count", "stakeholder_count"],
+                        "dim_alias": "pain",
+                    },
+                    {
+                        "key": "solutions",
+                        "name": "方案",
+                        "label": "Solution",
+                        "theory_basis": "Lean Canvas 的 Solution + 产品机制描述",
+                        "positive_keywords": ["方案", "系统", "平台", "服务", "工具", "机制", "模型", "产品", "助手", "引擎", "装置"],
+                        "counter_keywords": ["痛点", "问题", "用户需求", "市场规模", "收费", "收入"],
+                        "closure_fields": ["pain_count", "business_model_count", "innovation_count"],
+                        "dim_alias": "solution",
+                    },
+                    {
+                        "key": "stakeholders",
+                        "name": "目标用户",
+                        "label": "Stakeholder",
+                        "theory_basis": "Lean Canvas / BMC 的 Customer Segments",
+                        "positive_keywords": ["用户", "学生", "教师", "家长", "老人", "企业", "医院", "学校", "商户", "农户", "客户", "机构", "人群"],
+                        "counter_keywords": ["市场", "渠道", "平台", "方案", "系统", "产品"],
+                        "closure_fields": ["pain_count", "market_count"],
+                        "dim_alias": "stakeholder",
+                    },
+                    {
+                        "key": "business_models",
+                        "name": "商业模式",
+                        "label": "BusinessModelAspect",
+                        "theory_basis": "BMC 的 Revenue Streams / Value Capture",
+                        "positive_keywords": ["收费", "收入", "订阅", "会员", "佣金", "服务费", "SaaS", "B2B", "B2C", "租赁", "销售", "分成", "变现", "商业模式"],
+                        "counter_keywords": ["痛点", "用户", "技术", "平台", "问题", "市场背景"],
+                        "closure_fields": ["solution_count", "market_count", "stakeholder_count"],
+                        "dim_alias": "bm",
+                    },
+                ]
+
+                def _contains_any(text: str, keywords: list[str]) -> bool:
+                    return any(keyword and keyword in text for keyword in keywords)
+
+                label_validity_details = []
+                confusion_pair_counter: dict[tuple[str, str], int] = {}
+                semantic_weighted_total = 0
+                semantic_score_accumulator = 0.0
+                semantic_score_formula = "0.35×边界命中率 + 0.20×(1-反例触发率) + 0.25×证据-标签一致率 + 0.20×结构闭环率"
+                for spec in semantic_specs:
+                    entity_rows = list(session.run(
+                        f"MATCH (n:{spec['label']}) RETURN coalesce(n.name, '') AS name"
+                    ))
+                    entity_names = [str(row.get("name") or "").strip() for row in entity_rows if str(row.get("name") or "").strip()]
+                    total_items = len(entity_names)
+                    boundary_hits = 0
+                    counter_hits = 0
+                    for name in entity_names:
+                        if _contains_any(name, spec["positive_keywords"]):
+                            boundary_hits += 1
+                        if _contains_any(name, spec["counter_keywords"]):
+                            counter_hits += 1
+                        for other_spec in semantic_specs:
+                            if other_spec["key"] == spec["key"]:
+                                continue
+                            if _contains_any(name, other_spec["positive_keywords"]):
+                                confusion_pair_counter[(spec["name"], other_spec["name"])] = confusion_pair_counter.get((spec["name"], other_spec["name"]), 0) + 1
+
+                    dim_proj_count = int((coverage_query or {}).get(f"{spec['dim_alias']}_projects") or 0)
+                    dim_trace_proj_count = int((coverage_query or {}).get(f"{spec['dim_alias']}_traceable_projects") or 0)
+                    evidence_alignment_rate = round(dim_trace_proj_count / max(1, dim_proj_count), 4) if dim_proj_count > 0 else 0
+                    closure_pass_count = sum(
+                        1
+                        for row in audit_project_rows
+                        if int(row.get(f"{spec['dim_alias']}_count") or 0) > 0
+                        and any(int(row.get(field_name) or 0) > 0 for field_name in spec["closure_fields"])
+                    )
+                    closure_rate = round(closure_pass_count / max(1, dim_proj_count), 4) if dim_proj_count > 0 else 0
+                    boundary_hit_rate = round(boundary_hits / max(1, total_items), 4) if total_items > 0 else 0
+                    counter_signal_rate = round(counter_hits / max(1, total_items), 4) if total_items > 0 else 0
+                    validity_score = round(
+                        boundary_hit_rate * 0.35
+                        + (1 - counter_signal_rate) * 0.20
+                        + evidence_alignment_rate * 0.25
+                        + closure_rate * 0.20,
+                        4,
+                    )
+                    semantic_weighted_total += total_items
+                    semantic_score_accumulator += validity_score * total_items
+                    label_validity_details.append({
+                        "key": spec["key"],
+                        "name": spec["name"],
+                        "theory_basis": spec["theory_basis"],
+                        "total_items": total_items,
+                        "boundary_hit_count": boundary_hits,
+                        "boundary_hit_rate": boundary_hit_rate,
+                        "counter_signal_count": counter_hits,
+                        "counter_signal_rate": counter_signal_rate,
+                        "evidence_alignment_count": dim_trace_proj_count,
+                        "evidence_alignment_rate": evidence_alignment_rate,
+                        "closure_pass_count": closure_pass_count,
+                        "closure_rate": closure_rate,
+                        "validity_score": validity_score,
+                        "positive_cues": spec["positive_keywords"][:6],
+                        "common_confusions": spec["counter_keywords"][:5],
+                        "closure_fields": spec["closure_fields"],
+                    })
+
+                confusion_pairs = sorted(
+                    [
+                        {
+                            "from_label": src,
+                            "to_label": dst,
+                            "suspected_count": cnt,
+                            "suspected_rate": round(
+                                cnt / max(
+                                    1,
+                                    next(
+                                        (item["total_items"] for item in label_validity_details if item["name"] == src),
+                                        1,
+                                    ),
+                                ),
+                                4,
+                            ),
+                        }
+                        for (src, dst), cnt in confusion_pair_counter.items()
+                    ],
+                    key=lambda item: item["suspected_count"],
+                    reverse=True,
+                )[:6]
+                semantic_validity = {
+                    "methodology": "采用基于理论边界的弱监督代理法，不直接宣称严格语义准确率。方法把标签判定拆成四个可量化代理维度：标签边界命中、反例触发、证据-标签一致、结构闭环。",
+                    "strategy": [
+                        "理论锚点：每个标签先绑定到 Lean Canvas / BMC / Design Thinking 等经典框架中的对应概念。",
+                        "边界规则：为每个标签定义正向语义线索与反向混淆线索，统计命中与误触发情况。",
+                        "证据一致：检查含该标签的项目里，有多少项目能回到带 quote/source_unit 的证据。",
+                        "结构闭环：检查标签是否与其应出现的上下游标签共同出现，例如痛点是否接到方案。",
+                    ],
+                    "score_formula": semantic_score_formula,
+                    "overall_validity_score": round(semantic_score_accumulator / max(1, semantic_weighted_total), 4),
+                    "labels": label_validity_details,
+                    "confusion_pairs": confusion_pairs,
+                }
+
+                # 5. Framework Alignment
+                KB_FRAMEWORK_MAP = {
+                    "Lean Canvas": {
+                        "mapped_dims": ["痛点", "方案", "目标用户", "商业模式", "市场"],
+                        "dims_keys": ["pain_points", "solutions", "stakeholders", "business_models", "markets"],
+                    },
+                    "Business Model Canvas": {
+                        "mapped_dims": ["目标用户", "方案", "商业模式", "市场", "执行步骤"],
+                        "dims_keys": ["stakeholders", "solutions", "business_models", "markets", "execution_steps"],
+                    },
+                    "Porter Value Chain": {
+                        "mapped_dims": ["方案", "创新点", "执行步骤", "风控"],
+                        "dims_keys": ["solutions", "innovations", "execution_steps", "risk_controls"],
+                    },
+                }
+                fw_alignment = []
+                for fw_name, fw_info in KB_FRAMEWORK_MAP.items():
+                    matched = sum(1 for dk in fw_info["dims_keys"] if dims.get(dk, 0) > 0)
+                    fw_alignment.append({
+                        "framework": fw_name,
+                        "matched_dims": fw_info["mapped_dims"],
+                        "coverage": round(matched / max(1, len(fw_info["dims_keys"])), 2),
+                    })
+
+                avg_missing_rate = round(
+                    sum(item["missing_rate"] for item in dimension_missing_rate) / max(1, len(dimension_missing_rate)),
+                    4,
+                )
+                missing_control = round(1 - avg_missing_rate, 4)
+                adjusted_missing_control = round(
+                    1 - (weighted_missing_sum / max(1e-9, weighted_missing_denominator)),
+                    4,
+                )
+
+                # 6. Composite
+                composite = round(
+                    cat_balance * 0.20
+                    + dim_balance * 0.20
+                    + (dim_covered / n_dim_types) * 0.20
+                    + traceability_rate * 0.15
+                    + project_traceable_coverage * 0.15
+                    + adjusted_missing_control * 0.10,
+                    4,
+                )
+                score_breakdown = [
+                    {
+                        "key": "category_balance",
+                        "label": "类别均衡度",
+                        "value": cat_balance,
+                        "weight": 0.20,
+                        "weighted_score": round(cat_balance * 20, 2),
+                        "formula": "Shannon 熵归一化: H/log2(N)",
+                    },
+                    {
+                        "key": "dimension_balance",
+                        "label": "维度均衡度",
+                        "value": dim_balance,
+                        "weight": 0.20,
+                        "weighted_score": round(dim_balance * 20, 2),
+                        "formula": "各维度实体数分布的 Shannon 熵归一化",
+                    },
+                    {
+                        "key": "dimension_coverage",
+                        "label": "维度覆盖率",
+                        "value": round(dim_covered / max(1, n_dim_types), 4),
+                        "weight": 0.20,
+                        "weighted_score": round((dim_covered / max(1, n_dim_types)) * 20, 2),
+                        "formula": "有实体维度数 / 总维度数",
+                    },
+                    {
+                        "key": "traceability_rate",
+                        "label": "实体可追溯率",
+                        "value": traceability_rate,
+                        "weight": 0.15,
+                        "weighted_score": round(traceability_rate * 15, 2),
+                        "formula": "有 quote/source_unit 的实体数 / 总实体数",
+                    },
+                    {
+                        "key": "project_traceable_coverage",
+                        "label": "项目可追溯覆盖",
+                        "value": project_traceable_coverage,
+                        "weight": 0.15,
+                        "weighted_score": round(project_traceable_coverage * 15, 2),
+                        "formula": "至少含 1 条可追溯证据的项目数 / 总项目数",
+                    },
+                    {
+                        "key": "adjusted_missing_control",
+                        "label": "缺失控制（频次修正）",
+                        "value": adjusted_missing_control,
+                        "weight": 0.10,
+                        "weighted_score": round(adjusted_missing_control * 10, 2),
+                        "formula": "1 - 加权平均维度缺失率；执行步骤/风控按低频维度降低缺失惩罚",
+                    },
+                ]
+
+                rationality = {
+                    "representativeness": {
+                        "category_count": n_cats,
+                        "category_balance": cat_balance,
+                        "total_projects": total_projects,
+                        "category_distribution": [{"name": c.get("name", ""), "count": c.get("count", 0)} for c in categories],
+                    },
+                    "content_richness": {
+                        "dimension_balance": dim_balance,
+                        "dimension_coverage": round(dim_covered / n_dim_types, 4),
+                        "dimensions_detail": [
+                            {"name": dim_names_list[i], "count": dim_values[i]}
+                            for i in range(n_dim_types)
+                        ],
+                        "avg_entities_per_project": avg_entities_per_project,
+                        "evidence_density": evidence_density,
+                        "total_entities": dim_total_ents,
+                    },
+                    "node_quality": {
+                        "total_dim_entities": total_dim_entities,
+                        "shared_entities": shared_entities,
+                        "sharing_rate": sharing_rate,
+                        "avg_projects_per_entity": avg_proj_per_ent,
+                    },
+                    "graph_structure": {
+                        "total_nodes": total_nodes,
+                        "total_relationships": total_rels,
+                        "graph_density": graph_density,
+                        "avg_degree": avg_degree,
+                        "max_possible_edges": max_possible_edges,
+                        "project_anchor_relationships": project_anchor_relationships,
+                        "project_anchor_ratio": project_anchor_ratio,
+                        "isolated_nodes": isolated_nodes,
+                        "degree1_nodes": degree1_nodes,
+                        "degree_le2_nodes": degree_le2_nodes,
+                        "sparse_node_ratio": sparse_node_ratio,
+                    },
+                    "extraction_quality": {
+                        "traceability_rate": traceability_rate,
+                        "traceable_entities": total_traceable_entities,
+                        "total_entities": total_entities_for_trace,
+                        "project_evidence_coverage": project_evidence_coverage,
+                        "project_traceable_coverage": project_traceable_coverage,
+                        "projects_with_evidence": projects_with_evidence,
+                        "projects_with_traceable_evidence": projects_with_traceable_evidence,
+                        "dimension_missing_rate": dimension_missing_rate,
+                        "dimension_overrepresented": sorted(
+                            dimension_overrepresented,
+                            key=lambda item: item["ratio_to_mean"],
+                            reverse=True,
+                        ),
+                        "dimension_underrepresented": sorted(
+                            dimension_underrepresented,
+                            key=lambda item: item["ratio_to_mean"],
+                        ),
+                        "evidence_backed_dimensions": sorted(
+                            evidence_backed_dimensions,
+                            key=lambda item: item["evidence_backed_rate"],
+                            reverse=True,
+                        ),
+                        "sample_audit_pool": sample_audit_pool,
+                        "sample_audit_summary": sample_audit_summary,
+                        "audit_summary": audit_summary,
+                        "semantic_validity": semantic_validity,
+                        "low_frequency_dimensions": low_frequency_dimensions,
+                        "missing_control": missing_control,
+                        "adjusted_missing_control": adjusted_missing_control,
+                    },
+                    "framework_alignment": fw_alignment,
+                    "composite_score": composite,
+                    "score_breakdown": score_breakdown,
+                    "score_formula": "0.20×cat_balance + 0.20×dim_balance + 0.20×dim_coverage + 0.15×traceability_rate + 0.15×project_traceable_coverage + 0.10×adjusted_missing_control",
+                }
+
                 return {
                     "total_nodes": total_nodes,
                     "total_relationships": total_rels,
-                    "total_projects": node_labels.get("Project", 0),
+                    "total_projects": total_projects,
                     "total_categories": node_labels.get("Category", 0),
                     "node_labels": node_labels,
                     "relationship_types": rel_types,
                     "categories": categories,
-                    "dimensions": {
-                        "pain_points": int(dim_data.get("total_pains", 0)),
-                        "solutions": int(dim_data.get("total_solutions", 0)),
-                        "business_models": int(dim_data.get("total_biz_models", 0)),
-                        "markets": int(dim_data.get("total_markets", 0)),
-                        "innovations": int(dim_data.get("total_innovations", 0)),
-                        "evidence": int(dim_data.get("total_evidence", 0)),
-                        "execution_steps": int(dim_data.get("total_exec_steps", 0)),
-                        "stakeholders": int(dim_data.get("total_stakeholders", 0)),
-                        "risk_controls": int(dim_data.get("total_risk_controls", 0)),
-                    },
+                    "dimensions": dims,
                     "hypergraph": {"nodes": hyper_nodes, "edges": hyper_edges},
                     "ontology_nodes": onto_nodes,
                     "risk_rules": risk_rules,
                     "rubric_items": rubric_items,
+                    "rationality": rationality,
                 }
             return self._query_with_fallback(_query)
         except Exception as exc:

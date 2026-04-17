@@ -739,7 +739,7 @@ def _impact_message(rule_id: str, rule_name: str) -> str:
 
 
 def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
-    """Use LLM to intelligently score each rubric dimension for uploaded files."""
+    """Use LLM to score each rubric dimension with per-item justification."""
     try:
         from app.services.llm_client import LlmClient
         llm = LlmClient()
@@ -747,19 +747,21 @@ def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
             return None
 
         rubric_desc = "\n".join(
-            f"- {r['item']} (weight {r['weight']}): evidence={r['evidence']}"
+            f"- {r['item']}（权重{r['weight']}）：需要的证据={r['evidence']}"
             for r in RUBRICS
         )
         result = llm.chat_json(
             system_prompt=(
-                "You are a startup project evaluator. Score each rubric dimension 0-10.\n"
-                "Be fair and nuanced: a complete business plan typically scores 5-8.\n"
-                "Only give <3 if the dimension is completely missing.\n"
-                "Only give >8 if there is exceptional evidence.\n\n"
-                f"Rubric dimensions:\n{rubric_desc}\n\n"
-                'Output JSON: {"scores": [{"item": "...", "score": 0-10, "reason": "one sentence"}]}'
+                "你是创业项目评审专家。请对以下每个评分维度打 0-10 分，并给出**中文**评分依据。\n"
+                "评分原则：\n"
+                "- 一份完整的商业计划书通常在 5-8 分\n"
+                "- 只有维度完全缺失时才打 <3 分\n"
+                "- 只有有特别充分的证据支撑时才打 >8 分\n"
+                "- reason 必须具体说明「学生提供了什么/缺少什么」，不要泛泛说「不够完善」\n\n"
+                f"评分维度：\n{rubric_desc}\n\n"
+                '输出 JSON：{"scores": [{"item": "...", "score": 0-10, "reason": "一句话中文依据，引用学生内容"}]}'
             ),
-            user_prompt=f"Evaluate this project content (mode={mode}):\n\n{text[:4000]}",
+            user_prompt=f"请评估以下项目内容（模式={mode}）：\n\n{text[:4000]}",
             temperature=0.2,
         )
         if result and "scores" in result:
@@ -862,9 +864,10 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
             "template_guideline": task.get("template_guideline", []),
         }
 
-    # ── LLM-based scoring for uploaded files ──
+    # ── LLM-based scoring: uploaded files OR substantial project text ──
     llm_scores = None
-    if is_file and text_len > 200:
+    _use_llm = (is_file and text_len > 200) or (text_len > 400 and project_stage not in ("idea",))
+    if _use_llm:
         llm_scores = _llm_rubric_score(input_text, mode)
 
     rubric: list[dict] = []
@@ -883,7 +886,6 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
                     "status": "risk" if dim_score < 5.0 else "ok",
                     "weight": row["weight"],
                     "reason": llm_s.get("reason", ""),
-                    # 结构化证据链 & 常见错误池，保证每个评分维度可追溯
                     "evidence_chain": get_rubric_evidence_chain(row["item"]),
                     "common_mistakes": get_rubric_error_pool(row["item"]),
                 })
@@ -898,17 +900,34 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
         length_bonus = min(1.0, text_len / 2200) if is_file else min(0.6, text_len / 700)
         for row in active_rubrics:
             ev_score = _evidence_score(normalized_text, row["evidence"], stage=project_stage, is_file=is_file)
+            matched_evidence = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
+            missing_evidence = [kw for kw in row["evidence"] if kw.lower() not in normalized_text]
+            dim_rules = [r for r in triggered_rules if r["id"] in row["rules"]]
             penalties = sum(
                 _rule_penalty(r["severity"], project_stage, is_file=is_file)
-                for r in triggered_rules if r["id"] in row["rules"]
+                for r in dim_rules
             )
             penalties = min(penalties, 1.15 if project_stage == "idea" else 1.45 if project_stage == "structured" else 1.8)
             dim_score = max(0.0, min(10.0, ev_score + length_bonus - penalties))
+
+            if dim_rules:
+                reason = "；".join(
+                    f"触发{r['name']}(-{round(_rule_penalty(r['severity'], project_stage, is_file=is_file), 1)})"
+                    for r in dim_rules[:2]
+                )
+            elif len(matched_evidence) >= len(row["evidence"]) * 0.6:
+                reason = f"证据较充分，覆盖了{', '.join(matched_evidence[:3])}"
+            elif missing_evidence:
+                reason = f"缺少{', '.join(missing_evidence[:3])}相关证据"
+            else:
+                reason = ""
+
             rubric.append({
                 "item": row["item"],
                 "score": round(dim_score, 2),
                 "status": "risk" if dim_score < 5.0 else "ok",
                 "weight": row["weight"],
+                "reason": reason,
                 "evidence_chain": get_rubric_evidence_chain(row["item"]),
                 "common_mistakes": get_rubric_error_pool(row["item"]),
             })

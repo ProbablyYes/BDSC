@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, FormEvent, useEffect, useMemo, useState, useRef } from "react";
+import { CSSProperties, FormEvent, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
 
@@ -552,6 +552,48 @@ export default function TeacherPage() {
   const [feedbackTags, setFeedbackTags] = useState("evidence,feasibility");
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedLogicalProjectId, setSelectedLogicalProjectId] = useState("");
+
+  const [studentPlansOpen, setStudentPlansOpen] = useState(false);
+  const [studentPlansInput, setStudentPlansInput] = useState("");
+  const [studentPlansLoading, setStudentPlansLoading] = useState(false);
+  const [studentPlansError, setStudentPlansError] = useState("");
+  const [studentPlansList, setStudentPlansList] = useState<any[]>([]);
+
+  const loadStudentPlansFor = useCallback(async (projectId: string) => {
+    const pid = projectId.trim();
+    if (!pid) {
+      setStudentPlansList([]);
+      setStudentPlansError("请先输入或选择一个项目 ID。");
+      return;
+    }
+    setStudentPlansLoading(true);
+    setStudentPlansError("");
+    try {
+      const data = await api(`/api/teacher/project/${encodeURIComponent(pid)}/business-plans`);
+      const rows = Array.isArray(data?.plans) ? data.plans : [];
+      setStudentPlansList(rows);
+      if (rows.length === 0) {
+        setStudentPlansError("该项目下暂无学生计划书。");
+      }
+    } catch (err: any) {
+      setStudentPlansError(err?.message || "获取学生计划书列表失败。");
+      setStudentPlansList([]);
+    } finally {
+      setStudentPlansLoading(false);
+    }
+  }, []);
+
+  const openStudentPlansPanel = useCallback(() => {
+    const pid = (selectedProject || "").trim();
+    setStudentPlansInput(pid);
+    setStudentPlansOpen(true);
+    if (pid) {
+      void loadStudentPlansFor(pid);
+    } else {
+      setStudentPlansList([]);
+      setStudentPlansError("");
+    }
+  }, [selectedProject, loadStudentPlansFor]);
   const [expandedSubmission, setExpandedSubmission] = useState<number | null>(null);
 
   // 班级页面状态
@@ -3247,6 +3289,14 @@ export default function TeacherPage() {
 
             <div className="dock-sep" />
 
+            {/* 学生计划书（只读） */}
+            <button type="button" className="dock-item" onClick={openStudentPlansPanel}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><line x1="8" y1="7" x2="16" y2="7" /><line x1="8" y1="11" x2="16" y2="11" /></svg>
+              <span className="dock-tooltip">查看学生计划书（只读）</span>
+            </button>
+
+            <div className="dock-sep" />
+
             {/* Theme toggle */}
             <button type="button" className="dock-item" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} suppressHydrationWarning>
               {theme === "dark" ? (
@@ -3265,6 +3315,111 @@ export default function TeacherPage() {
           </div>
         </div>
       </header>
+
+      {/* ── 学生计划书浏览器（只读入口） ── */}
+      {studentPlansOpen && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(3, 9, 25, 0.58)", backdropFilter: "blur(3px)",
+          }}
+          onClick={() => setStudentPlansOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(720px, 92vw)", maxHeight: "82vh", overflow: "hidden",
+              background: "var(--panel)", color: "var(--text)", borderRadius: 14,
+              border: "1px solid var(--border)", boxShadow: "0 18px 60px rgba(0,0,0,0.45)",
+              display: "flex", flexDirection: "column",
+            }}
+          >
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>学生计划书 · 只读预览</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>按项目 ID 查询；所有编辑操作在学生端完成。</div>
+              </div>
+              <button type="button" onClick={() => setStudentPlansOpen(false)} style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18 }}>×</button>
+            </div>
+            <div style={{ padding: "14px 20px", display: "flex", gap: 8, alignItems: "center", borderBottom: "1px solid var(--border)" }}>
+              <input
+                type="text"
+                placeholder="输入项目 ID（如 proj_xxx）"
+                value={studentPlansInput}
+                onChange={(e) => setStudentPlansInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") void loadStudentPlansFor(studentPlansInput); }}
+                style={{
+                  flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)",
+                  background: "var(--input-bg, rgba(255,255,255,0.03))", color: "var(--text)", fontSize: 13,
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => void loadStudentPlansFor(studentPlansInput)}
+                disabled={studentPlansLoading}
+                style={{
+                  padding: "8px 14px", borderRadius: 8, border: "1px solid var(--accent)",
+                  background: "var(--accent)", color: "#fff", fontSize: 13, cursor: "pointer",
+                  opacity: studentPlansLoading ? 0.6 : 1,
+                }}
+              >
+                {studentPlansLoading ? "查询中..." : "查询"}
+              </button>
+            </div>
+            <div style={{ padding: "12px 20px 20px", overflow: "auto" }}>
+              {studentPlansError && (
+                <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255, 99, 99, 0.08)", color: "#ff8a8a", fontSize: 12, marginBottom: 10 }}>
+                  {studentPlansError}
+                </div>
+              )}
+              {studentPlansList.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {studentPlansList.map((row) => (
+                    <div
+                      key={row.plan_id}
+                      style={{
+                        padding: 12, borderRadius: 10, border: "1px solid var(--border)",
+                        background: "var(--bg-subtle, rgba(255,255,255,0.02))", display: "flex",
+                        alignItems: "center", justifyContent: "space-between", gap: 12,
+                      }}
+                    >
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {row.project_name || "未命名项目"} <span style={{ color: "var(--text-muted)", fontWeight: 400, marginLeft: 6, fontSize: 11 }}>#{row.plan_id}</span>
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginBottom: 2 }}>
+                          版本：{row.version_tier || "-"} · 成熟度：{row.readiness_score ?? "-"}/100 {row.readiness_tier ? `(${row.readiness_tier})` : ""}
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                          对话 ID：{row.conversation_id || "-"} · 更新：{row.updated_at ? String(row.updated_at).slice(0, 19).replace("T", " ") : "-"}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                        <a
+                          href={`/business-plan/${encodeURIComponent(row.plan_id)}/print?viewOnly=1`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            padding: "7px 12px", borderRadius: 8, border: "1px solid var(--accent)",
+                            background: "transparent", color: "var(--accent)", fontSize: 12, textDecoration: "none",
+                          }}
+                        >
+                          只读预览
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!studentPlansLoading && !studentPlansError && studentPlansList.length === 0 && (
+                <div style={{ color: "var(--text-muted)", fontSize: 12, padding: "16px 4px" }}>
+                  输入项目 ID 后可查询该项目已生成的所有计划书，点击右侧「只读预览」即可查看。
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Logout Confirm Modal ── */}
       {showLogoutConfirm && (

@@ -35,6 +35,7 @@ class JsonStorage:
                 "teacher_feedback_files": [],
                 "teacher_document_edits": [],
                 "video_analyses": [],
+                "business_plans": [],
             }
         data = json.loads(target.read_text(encoding="utf-8"))
         # new确保新增字段存在
@@ -50,6 +51,8 @@ class JsonStorage:
             data["teacher_document_edits"] = []
         if "video_analyses" not in data:
             data["video_analyses"] = []
+        if "business_plans" not in data:
+            data["business_plans"] = []
         return data
 
     def save_project(self, project_id: str, payload: dict) -> None:
@@ -172,6 +175,35 @@ class JsonStorage:
             except Exception:  # noqa: BLE001
                 continue
         return projects
+
+    def upsert_business_plan_meta(self, project_id: str, plan_meta: dict) -> dict:
+        data = self.load_project(project_id)
+        items = data.setdefault("business_plans", [])
+        plan_id = str(plan_meta.get("plan_id") or uuid4())
+        target_idx = -1
+        for idx, item in enumerate(items):
+            if item.get("plan_id") == plan_id:
+                target_idx = idx
+                break
+        if target_idx >= 0:
+            existing = items[target_idx]
+            items[target_idx] = {
+                **existing,
+                **plan_meta,
+                "plan_id": plan_id,
+                "updated_at": _now_iso(),
+            }
+            saved = items[target_idx]
+        else:
+            saved = {
+                **plan_meta,
+                "plan_id": plan_id,
+                "created_at": _now_iso(),
+                "updated_at": _now_iso(),
+            }
+            items.append(saved)
+        self.save_project(project_id, data)
+        return saved
 
 
 class ConversationStorage:

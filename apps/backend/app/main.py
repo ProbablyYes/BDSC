@@ -26,6 +26,14 @@ from app.schemas import (
     AuthPasswordChangePayload,
     AuthRegisterPayload,
     AuthUserResponse,
+    BusinessPlanExpandPayload,
+    BusinessPlanExportPayload,
+    BusinessPlanGeneratePayload,
+    BusinessPlanQuestionsResponse,
+    BusinessPlanResponse,
+    BusinessPlanSectionUpdatePayload,
+    BusinessPlanSuggestionsResponse,
+    BusinessPlanUpgradePayload,
     BudgetAIChatPayload,
     BudgetAISuggestPayload,
     BudgetCreatePayload,
@@ -70,6 +78,7 @@ from app.services.llm_client import LlmClient
 from app.services.image_client import ImageClient
 from app.services.video_pitch_analyzer import VideoPitchAnalyzer
 from app.services.rag_engine import RagEngine
+from app.services.business_plan_service import BusinessPlanService, BusinessPlanStorage
 from app.services.budget_storage import BudgetStorage
 from app.services.chat_storage import ChatStorage
 from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
@@ -102,6 +111,9 @@ user_store = UserStorage(settings.data_root / "users")
 team_store = TeamStorage(settings.data_root / "teams")
 chat_store = ChatStorage(settings.data_root / "chat")
 budget_store = BudgetStorage(settings.data_root / "budgets")
+business_plan_store = BusinessPlanStorage(settings.data_root / "business_plans")
+business_plan_exports_root = settings.data_root / "exports"
+business_plan_exports_root.mkdir(parents=True, exist_ok=True)
 
 chat_files_root = settings.data_root / "chat_files"
 chat_files_root.mkdir(parents=True, exist_ok=True)
@@ -123,6 +135,12 @@ image_client = ImageClient()
 rag_engine = RagEngine()
 rag_engine.initialize()
 init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
+business_plan_service = BusinessPlanService(
+    storage=business_plan_store,
+    json_store=json_store,
+    conv_store=conv_store,
+    llm=composer_llm,
+)
 
 def _background_hyper_rebuild():
     """Run hypergraph rebuild in background so it doesn't block server startup."""
@@ -146,6 +164,11 @@ async def _capture_event_loop():
     import asyncio as _aio
     global _main_loop
     _main_loop = _aio.get_running_loop()
+
+
+@app.on_event("shutdown")
+async def _cleanup_neo4j():
+    graph_service.close()
 
 
 # Setup teacher file feedback routes
@@ -1648,6 +1671,7 @@ def _safe_kg_analysis(kg: Any) -> dict:
         "insight": _safe_str(kg.get("insight", "")),
         "completeness_score": float(kg.get("completeness_score", 0) or 0),
         "section_scores": kg.get("section_scores", {}) if isinstance(kg.get("section_scores"), dict) else {},
+        "kg_quality": kg.get("kg_quality", {}),
     }
 
 
@@ -1765,6 +1789,9 @@ def _safe_hypergraph_student(hs: Any) -> dict:
         "missing_dimensions": missing_dimensions,
         "projected_edge_types": [_safe_str(x) for x in (hs.get("projected_edge_types") or [])[:8]],
         "student_graph_stats": hs.get("student_graph_stats", {}) if isinstance(hs.get("student_graph_stats"), dict) else {},
+        "quality_metrics": hs.get("quality_metrics", {}),
+        "template_matches": hs.get("template_matches", []),
+        "consistency_issues": hs.get("consistency_issues", []),
     }
 
 
@@ -1827,7 +1854,9 @@ def _derive_logical_project_id(project_state: dict, conversation_id: str | None,
                 _safe_str((row.get("next_task") or {}).get("title", "")),
                 _safe_str((row.get("diagnosis") or {}).get("bottleneck", "")),
             ]))
-            if len(terms.intersection(row_terms)) >= 3 and row.get("logical_project_id"):
+            overlap = terms.intersection(row_terms)
+            overlap_ratio = len(overlap) / len(terms) if terms else 0
+            if len(overlap) >= 5 and overlap_ratio >= 0.4 and row.get("logical_project_id"):
                 return str(row.get("logical_project_id"))
     return conversation_id or project_id
 
@@ -2367,7 +2396,19 @@ def _build_scoped_project_state(project_state: dict, conversation_id: str, messa
             score += 1
         return score
 
-    relevant_other = [row for row in recent if row not in same_conv]
+    # Only pull from other conversations if they belong to the same logical_project_id
+    cur_logical_id = None
+    for sc in reversed(same_conv):
+        if sc.get("logical_project_id"):
+            cur_logical_id = sc["logical_project_id"]
+            break
+
+    relevant_other = []
+    for row in recent:
+        if row in same_conv:
+            continue
+        if cur_logical_id and row.get("logical_project_id") == cur_logical_id:
+            relevant_other.append(row)
     relevant_other.sort(key=_row_score, reverse=True)
 
     selected: list[dict] = []
@@ -2399,6 +2440,17 @@ def _build_scoped_project_state(project_state: dict, conversation_id: str, messa
             history_context += "\n"
 
     scoped = {**project_state, "submissions": normalized}
+
+    # For brand-new conversations (no same_conv history), only expose
+    # public profile fields to avoid cross-conversation memory bleed.
+    if not same_conv:
+        full_profile = scoped.get("student_profile")
+        if isinstance(full_profile, dict):
+            _public_keys = {"interest_domains", "name", "grade", "major", "school", "team_name"}
+            scoped["student_profile"] = {
+                k: v for k, v in full_profile.items() if k in _public_keys
+            }
+
     return scoped, history_context
 
 
@@ -2874,6 +2926,28 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     import logging as _log
     _log.getLogger("main").info("API response: hyper_student.ok=%s, kg_entities=%d", hyper_student.get("ok"), len(kg_analysis.get("entities", [])))
 
+    # Enrich rubric entries with trend (delta from previous turn)
+    _cur_rubric = diagnosis.get("rubric") if isinstance(diagnosis, dict) else []
+    if _cur_rubric and conv_messages:
+        _prev_rubric_map: dict[str, float] = {}
+        for _hm in reversed(conv_messages):
+            _hm_trace = _hm.get("agent_trace") if isinstance(_hm, dict) else None
+            if isinstance(_hm_trace, dict):
+                _hm_diag = _hm_trace.get("diagnosis") or {}
+                if isinstance(_hm_diag, dict) and _hm_diag.get("rubric"):
+                    for _pr in _hm_diag["rubric"]:
+                        if isinstance(_pr, dict) and _pr.get("item"):
+                            _prev_rubric_map[_pr["item"]] = float(_pr.get("score", 0))
+                    break
+        if _prev_rubric_map:
+            for _cr in _cur_rubric:
+                if isinstance(_cr, dict) and _cr.get("item"):
+                    _prev_s = _prev_rubric_map.get(_cr["item"])
+                    if _prev_s is not None:
+                        _diff = round(float(_cr.get("score", 0)) - _prev_s, 2)
+                        _cr["trend"] = "up" if _diff > 0.1 else "down" if _diff < -0.1 else "stable"
+                        _cr["prev_score"] = _prev_s
+
     agent_trace = _build_agent_trace(
         result,
         mode=payload.mode,
@@ -3024,6 +3098,30 @@ async def dialogue_turn_stream(request: Request):
             intent_confidence = float(pre.get("intent_confidence", 0) or 0)
             intent_shape = _safe_str(pre.get("intent_shape", "")) or "single"
             evidence_quotes = _extract_evidence_quotes(msg, pre.get("diagnosis", {}))
+
+            # Enrich rubric with trend
+            _s_diag = pre.get("diagnosis") if isinstance(pre.get("diagnosis"), dict) else {}
+            _s_rubric = _s_diag.get("rubric") if isinstance(_s_diag, dict) else []
+            if _s_rubric and conv_messages:
+                _s_prev_map: dict[str, float] = {}
+                for _shm in reversed(conv_messages):
+                    _shm_t = _shm.get("agent_trace") if isinstance(_shm, dict) else None
+                    if isinstance(_shm_t, dict):
+                        _shm_d = _shm_t.get("diagnosis") or {}
+                        if isinstance(_shm_d, dict) and _shm_d.get("rubric"):
+                            for _spr in _shm_d["rubric"]:
+                                if isinstance(_spr, dict) and _spr.get("item"):
+                                    _s_prev_map[_spr["item"]] = float(_spr.get("score", 0))
+                            break
+                if _s_prev_map:
+                    for _scr in _s_rubric:
+                        if isinstance(_scr, dict) and _scr.get("item"):
+                            _sp = _s_prev_map.get(_scr["item"])
+                            if _sp is not None:
+                                _sd = round(float(_scr.get("score", 0)) - _sp, 2)
+                                _scr["trend"] = "up" if _sd > 0.1 else "down" if _sd < -0.1 else "stable"
+                                _scr["prev_score"] = _sp
+
             agent_trace = _build_agent_trace(
                 pre,
                 mode=mode_val,
@@ -3285,6 +3383,7 @@ async def dialogue_turn_upload(
     conv_store.append_message(project_id, conv_id, {
         "role": "user", "content": f"[上传文件: {file.filename}] {message}",
     })
+    category = result.get("category", "")
     file_title = _generate_conversation_title(message, assistant_message, category)
     conv_store.append_message(project_id, conv_id, {
         "role": "assistant", "content": assistant_message,
@@ -3792,11 +3891,13 @@ def add_teacher_feedback(payload: TeacherFeedbackRequest) -> TeacherFeedbackResp
 def project_snapshot(project_id: str) -> ProjectSnapshotResponse:
     data = json_store.load_project(project_id)
     latest_submission = data["submissions"][-1] if data["submissions"] else None
+    video_analyses = list(data.get("video_analyses", []) or [])
     graph = graph_service.health()
     return ProjectSnapshotResponse(
         project_id=project_id,
         latest_student_submission=latest_submission,
         teacher_feedback=data["teacher_feedback"],
+        video_analyses=video_analyses,
         graph_signals={"connected": graph.connected, "detail": graph.detail},
     )
 
@@ -8043,6 +8144,250 @@ def budget_ai_chat(user_id: str, plan_id: str, payload: BudgetAIChatPayload) -> 
         logger.error(f"Budget AI chat failed: {e}")
         reply = "AI 服务暂时不可用，请稍后再试。"
     return {"status": "ok", "reply": reply}
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Business Plan Module — conversation-scoped draft + revisions
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.get("/api/business-plan/latest", response_model=BusinessPlanResponse)
+def business_plan_latest(project_id: str, conversation_id: str) -> BusinessPlanResponse:
+    readiness = business_plan_service.get_readiness(project_id, conversation_id)
+    plan = business_plan_service.get_latest(project_id, conversation_id)
+    return BusinessPlanResponse(status="ok", plan=plan, readiness=readiness)
+
+
+@app.get("/api/business-plan/{plan_id}", response_model=BusinessPlanResponse)
+def business_plan_detail(plan_id: str) -> BusinessPlanResponse:
+    plan = business_plan_service.get_plan(plan_id)
+    if not plan:
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status="ok", plan=plan, readiness=readiness)
+
+
+@app.post("/api/business-plan/generate", response_model=BusinessPlanResponse)
+def business_plan_generate(payload: BusinessPlanGeneratePayload) -> BusinessPlanResponse:
+    result = business_plan_service.generate_plan(
+        project_id=payload.project_id,
+        conversation_id=payload.conversation_id,
+        student_id=payload.student_id,
+        allow_low_confidence=payload.allow_low_confidence,
+    )
+    return BusinessPlanResponse(
+        status=str(result.get("status") or "ok"),
+        plan=result.get("plan"),
+        readiness=result.get("readiness") or {},
+    )
+
+
+@app.post("/api/business-plan/{plan_id}/refresh", response_model=BusinessPlanResponse)
+def business_plan_refresh(plan_id: str) -> BusinessPlanResponse:
+    result = business_plan_service.refresh_plan(plan_id)
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan")
+    readiness = result.get("readiness") or business_plan_service.get_readiness(
+        str((plan or {}).get("project_id") or ""),
+        str((plan or {}).get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status=str(result.get("status") or "ok"), plan=plan, readiness=readiness)
+
+
+@app.put("/api/business-plan/{plan_id}/sections/{section_id}", response_model=BusinessPlanResponse)
+def business_plan_update_section(
+    plan_id: str,
+    section_id: str,
+    payload: BusinessPlanSectionUpdatePayload,
+) -> BusinessPlanResponse:
+    plan = business_plan_service.update_section(
+        plan_id,
+        section_id,
+        content=payload.content,
+        field_map=payload.field_map,
+        display_title=payload.display_title,
+    )
+    if not plan:
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status="ok", plan=plan, readiness=readiness)
+
+
+@app.post("/api/business-plan/{plan_id}/revisions/{revision_id}/accept", response_model=BusinessPlanResponse)
+def business_plan_accept_revision(plan_id: str, revision_id: str) -> BusinessPlanResponse:
+    plan = business_plan_service.accept_revision(plan_id, revision_id)
+    if not plan:
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status="ok", plan=plan, readiness=readiness)
+
+
+@app.post("/api/business-plan/{plan_id}/revisions/{revision_id}/reject", response_model=BusinessPlanResponse)
+def business_plan_reject_revision(plan_id: str, revision_id: str) -> BusinessPlanResponse:
+    plan = business_plan_service.reject_revision(plan_id, revision_id)
+    if not plan:
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status="ok", plan=plan, readiness=readiness)
+
+
+@app.post("/api/business-plan/{plan_id}/revisions/accept-all", response_model=BusinessPlanResponse)
+def business_plan_accept_all(plan_id: str) -> BusinessPlanResponse:
+    result = business_plan_service.accept_all_revisions(plan_id)
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan") or {}
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status=str(result.get("status") or "ok"), plan=plan, readiness=readiness)
+
+
+@app.post("/api/business-plan/{plan_id}/revisions/reject-all", response_model=BusinessPlanResponse)
+def business_plan_reject_all(plan_id: str) -> BusinessPlanResponse:
+    result = business_plan_service.reject_all_revisions(plan_id)
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan") or {}
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status=str(result.get("status") or "ok"), plan=plan, readiness=readiness)
+
+
+# ── 教师端：按项目查看学生计划书列表（只读入口） ─────────────
+@app.get("/api/teacher/project/{project_id}/business-plans")
+def teacher_list_business_plans(project_id: str) -> dict:
+    rows = business_plan_store.list_by_project(project_id)
+    return {"status": "ok", "plans": rows}
+
+
+# ── 单章深化闭环 ────────────────────────────────────────────────
+@app.get("/api/business-plan/{plan_id}/chapter/{section_id}/deepen-questions")
+def business_plan_chapter_deepen_questions(plan_id: str, section_id: str) -> dict:
+    return business_plan_service.generate_chapter_deepen_questions(plan_id, section_id)
+
+
+@app.post("/api/business-plan/{plan_id}/chapter/{section_id}/deepen", response_model=BusinessPlanResponse)
+def business_plan_chapter_deepen_apply(
+    plan_id: str,
+    section_id: str,
+    payload: dict,
+) -> BusinessPlanResponse:
+    answers = payload.get("answers") if isinstance(payload, dict) else None
+    if not isinstance(answers, list):
+        answers = []
+    result = business_plan_service.apply_chapter_deepen(plan_id, section_id, answers)
+    status = str(result.get("status") or "ok")
+    plan = result.get("plan") or {}
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    ) if plan else {}
+    return BusinessPlanResponse(status=status, plan=plan if plan else None, readiness=readiness)
+
+
+@app.post("/api/business-plan/{plan_id}/upgrade", response_model=BusinessPlanResponse)
+def business_plan_upgrade(plan_id: str, payload: BusinessPlanUpgradePayload) -> BusinessPlanResponse:
+    result = business_plan_service.upgrade_plan(plan_id, mode=payload.mode)
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan")
+    readiness = business_plan_service.get_readiness(
+        str((plan or {}).get("project_id") or ""),
+        str((plan or {}).get("conversation_id") or ""),
+    )
+    return BusinessPlanResponse(status=str(result.get("status") or "ok"), plan=plan, readiness=readiness)
+
+
+@app.post(
+    "/api/business-plan/{plan_id}/sections/{section_id}/deepen-questions",
+    response_model=BusinessPlanQuestionsResponse,
+)
+def business_plan_deepen_questions(plan_id: str, section_id: str) -> BusinessPlanQuestionsResponse:
+    result = business_plan_service.generate_deepen_questions(plan_id, section_id)
+    return BusinessPlanQuestionsResponse(
+        status=str(result.get("status") or "ok"),
+        questions=result.get("questions") or [],
+    )
+
+
+@app.post(
+    "/api/business-plan/{plan_id}/sections/{section_id}/expand",
+    response_model=BusinessPlanResponse,
+)
+def business_plan_expand_section(
+    plan_id: str,
+    section_id: str,
+    payload: BusinessPlanExpandPayload,
+) -> BusinessPlanResponse:
+    answers = [a.dict() for a in payload.answers]
+    result = business_plan_service.expand_section(
+        plan_id,
+        section_id,
+        answers=answers,
+        merge_strategy=payload.merge_strategy,
+    )
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan")
+    readiness = business_plan_service.get_readiness(
+        str((plan or {}).get("project_id") or ""),
+        str((plan or {}).get("conversation_id") or ""),
+    ) if plan else {}
+    return BusinessPlanResponse(status=str(result.get("status") or "ok"), plan=plan, readiness=readiness)
+
+
+@app.get(
+    "/api/business-plan/{plan_id}/deepen-suggestions",
+    response_model=BusinessPlanSuggestionsResponse,
+)
+def business_plan_deepen_suggestions(plan_id: str) -> BusinessPlanSuggestionsResponse:
+    result = business_plan_service.generate_deepen_suggestions(plan_id)
+    return BusinessPlanSuggestionsResponse(
+        status=str(result.get("status") or "ok"),
+        suggestions=result.get("suggestions") or [],
+    )
+
+
+@app.post("/api/business-plan/{plan_id}/export")
+def business_plan_export(plan_id: str, payload: BusinessPlanExportPayload) -> dict:
+    return business_plan_service.export_plan(
+        plan_id=plan_id,
+        export_mode=payload.export_mode,
+        export_format=payload.export_format,
+        cover_info=payload.cover_info,
+    )
+
+
+@app.get("/api/business-plan/exports/{filename}")
+def business_plan_export_download(filename: str):
+    from fastapi.responses import FileResponse
+
+    safe = re.sub(r"[\\/]+", "", filename)
+    target = business_plan_exports_root / safe
+    if not target.exists() or not target.is_file():
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="export not found")
+    return FileResponse(
+        path=str(target),
+        filename=safe,
+        media_type="application/octet-stream",
+    )
 
 
 def _now_iso() -> str:

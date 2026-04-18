@@ -12,7 +12,7 @@ from typing import Any
 from uuid import uuid4
 
 from app.services.llm_client import LlmClient
-from app.services.storage import ConversationStorage, JsonStorage
+from app.services.storage import ConversationStorage, JsonStorage, _safe_read_json
 
 
 logger = logging.getLogger(__name__)
@@ -292,10 +292,8 @@ class BusinessPlanStorage:
             self.index_file.write_text("[]", encoding="utf-8")
 
     def _load_index(self) -> list[dict[str, Any]]:
-        try:
-            return json.loads(self.index_file.read_text(encoding="utf-8"))
-        except Exception:
-            return []
+        data = _safe_read_json(self.index_file, default=[], label="business_plans/index.json")
+        return list(data) if isinstance(data, list) else []
 
     def _save_index(self, rows: list[dict[str, Any]]) -> None:
         self.index_file.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -334,6 +332,198 @@ class BusinessPlanStorage:
             except Exception:
                 continue
         return None
+
+    # ── 快照：挂在 plan_dir/snapshots/ 下 ──────────────────────────
+    _SNAPSHOT_MAX = 50
+
+    def _snapshot_dir(self, project_id: str, conversation_id: str, plan_id: str) -> Path:
+        target = self._plan_dir(project_id, conversation_id) / "snapshots" / plan_id
+        target.mkdir(parents=True, exist_ok=True)
+        return target
+
+    def _snapshot_meta_of(self, plan: dict[str, Any], snap_id: str, label: str) -> dict[str, Any]:
+        sections = plan.get("sections") or []
+        word_count = 0
+        for s in sections:
+            try:
+                word_count += len(re.findall(r"[\u4e00-\u9fff]", str(s.get("content") or "")))
+            except Exception:
+                pass
+        return {
+            "snap_id": snap_id,
+            "label": str(label or "").strip() or "（无标注）",
+            "created_at": _now_iso(),
+            "word_count": word_count,
+            "section_count": len(sections),
+            "version_tier": str(plan.get("version_tier") or ""),
+        }
+
+    def save_snapshot(self, plan_id: str, label: str = "") -> dict[str, Any] | None:
+        plan = self.load(plan_id)
+        if not plan:
+            return None
+        project_id = str(plan.get("project_id") or "")
+        conversation_id = str(plan.get("conversation_id") or "")
+        if not project_id or not conversation_id:
+            return None
+        snap_dir = self._snapshot_dir(project_id, conversation_id, plan_id)
+        snap_id = f"snap_{int(datetime.now().timestamp()*1000)}"
+        meta = self._snapshot_meta_of(plan, snap_id, label)
+        payload = {"meta": meta, "plan": plan}
+        target = snap_dir / f"{snap_id}.json"
+        target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        # 硬上限 50，超出按时间删除最早的
+        files = sorted(snap_dir.glob("snap_*.json"), key=lambda p: p.stat().st_mtime)
+        if len(files) > self._SNAPSHOT_MAX:
+            for old in files[: len(files) - self._SNAPSHOT_MAX]:
+                try:
+                    old.unlink(missing_ok=True)
+                except Exception:
+                    pass
+        return meta
+
+    def list_snapshots(self, plan_id: str) -> list[dict[str, Any]]:
+        plan = self.load(plan_id)
+        if not plan:
+            return []
+        project_id = str(plan.get("project_id") or "")
+        conversation_id = str(plan.get("conversation_id") or "")
+        if not project_id or not conversation_id:
+            return []
+        snap_dir = self._snapshot_dir(project_id, conversation_id, plan_id)
+        rows: list[dict[str, Any]] = []
+        for file in sorted(snap_dir.glob("snap_*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+            try:
+                data = json.loads(file.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            meta = data.get("meta") or {}
+            if isinstance(meta, dict):
+                rows.append(meta)
+        return rows
+
+    def rollback_to(self, plan_id: str, snap_id: str) -> dict[str, Any] | None:
+        plan = self.load(plan_id)
+        if not plan:
+            return None
+        project_id = str(plan.get("project_id") or "")
+        conversation_id = str(plan.get("conversation_id") or "")
+        if not project_id or not conversation_id:
+            return None
+        snap_dir = self._snapshot_dir(project_id, conversation_id, plan_id)
+        target = snap_dir / f"{snap_id}.json"
+        if not target.exists():
+            return None
+        try:
+            data = json.loads(target.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        snap_plan = data.get("plan")
+        if not isinstance(snap_plan, dict):
+            return None
+        # 保留当前 plan_id / project_id / conversation_id，其余从快照还原
+        snap_plan["plan_id"] = plan_id
+        snap_plan["project_id"] = project_id
+        snap_plan["conversation_id"] = conversation_id
+        snap_plan["updated_at"] = _now_iso()
+        snap_plan["rolled_back_from"] = snap_id
+        return self.save(snap_plan)
+
+    # ── 教师批注：独立文件存储，不随快照/回滚改变 ──────────────
+    def _comments_file(self, project_id: str, conversation_id: str, plan_id: str) -> Path:
+        return self._plan_dir(project_id, conversation_id) / f"{plan_id}.comments.json"
+
+    def _resolve_comments_file(self, plan_id: str) -> Path | None:
+        plan = self.load(plan_id)
+        if not plan:
+            return None
+        project_id = str(plan.get("project_id") or "")
+        conversation_id = str(plan.get("conversation_id") or "")
+        if not project_id or not conversation_id:
+            return None
+        return self._comments_file(project_id, conversation_id, plan_id)
+
+    def list_comments(self, plan_id: str) -> list[dict[str, Any]]:
+        target = self._resolve_comments_file(plan_id)
+        if not target or not target.exists():
+            return []
+        try:
+            data = _safe_read_json(target, default=[], label=f"comments/{plan_id}")
+        except Exception:
+            return []
+        if isinstance(data, list):
+            return [c for c in data if isinstance(c, dict)]
+        return []
+
+    def _write_comments(self, plan_id: str, comments: list[dict[str, Any]]) -> bool:
+        target = self._resolve_comments_file(plan_id)
+        if not target:
+            return False
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(comments, ensure_ascii=False, indent=2), encoding="utf-8")
+        return True
+
+    def add_comment(self, plan_id: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+        if not isinstance(payload, dict):
+            return None
+        comments = self.list_comments(plan_id)
+        now_ts = int(datetime.now().timestamp() * 1000)
+        rand = uuid4().hex[:4]
+        comment = {
+            "comment_id": f"cmt_{now_ts}_{rand}",
+            "section_id": str(payload.get("section_id") or "").strip(),
+            "teacher_id": str(payload.get("teacher_id") or "").strip(),
+            "teacher_name": str(payload.get("teacher_name") or "").strip(),
+            "quote": str(payload.get("quote") or "").strip(),
+            "position": int(payload.get("position") or 0),
+            "length": int(payload.get("length") or len(str(payload.get("quote") or ""))),
+            "annotation_type": str(payload.get("annotation_type") or "suggestion").strip() or "suggestion",
+            "content": str(payload.get("content") or "").strip(),
+            "status": "open",
+            "created_at": _now_iso(),
+            "updated_at": _now_iso(),
+        }
+        if not comment["content"]:
+            return None
+        comments.append(comment)
+        if not self._write_comments(plan_id, comments):
+            return None
+        return comment
+
+    def update_comment(
+        self, plan_id: str, comment_id: str, patch: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        comments = self.list_comments(plan_id)
+        updated: dict[str, Any] | None = None
+        for c in comments:
+            if str(c.get("comment_id")) == str(comment_id):
+                if isinstance(patch, dict):
+                    if "content" in patch:
+                        c["content"] = str(patch.get("content") or "").strip()
+                    if "status" in patch:
+                        status = str(patch.get("status") or "").strip()
+                        if status in ("open", "resolved"):
+                            c["status"] = status
+                    if "annotation_type" in patch:
+                        at = str(patch.get("annotation_type") or "").strip()
+                        if at in ("suggestion", "issue", "praise"):
+                            c["annotation_type"] = at
+                c["updated_at"] = _now_iso()
+                updated = c
+                break
+        if not updated:
+            return None
+        self._write_comments(plan_id, comments)
+        return updated
+
+    def delete_comment(self, plan_id: str, comment_id: str) -> bool:
+        comments = self.list_comments(plan_id)
+        before = len(comments)
+        comments = [c for c in comments if str(c.get("comment_id")) != str(comment_id)]
+        if len(comments) == before:
+            return False
+        self._write_comments(plan_id, comments)
+        return True
 
     def list_by_project(self, project_id: str) -> list[dict[str, Any]]:
         project_id = str(project_id or "").strip()
@@ -1092,6 +1282,8 @@ class BusinessPlanService:
             "updated_at": plan.get("updated_at") or _now_iso(),
             "version": plan.get("version") or 1,
             "revision_badge_count": plan.get("revision_badge_count") or 0,
+            "student_id": plan.get("student_id") or "",
+            "version_tier": plan.get("version_tier") or "",
         }
         self.json_store.upsert_business_plan_meta(str(plan.get("project_id") or ""), meta)
 
@@ -2476,6 +2668,49 @@ class BusinessPlanService:
         return normalized
 
     # ══════════════════════════════════════════════════════════════
+    #  Teacher comments → prompt injection helper
+    # ══════════════════════════════════════════════════════════════
+
+    _ANNOT_TYPE_LABEL = {
+        "suggestion": "建议",
+        "issue": "问题",
+        "praise": "表扬",
+    }
+
+    def _collect_teacher_notes_by_section(self, plan_id: str) -> dict[str, str]:
+        """
+        把 plan 的 comments.json 里 status=open 的 suggestion/issue 按 section_id 聚合成一段
+        教师点评文本块，用于注入 LLM prompt。praise 类批注不回灌（表扬无需改写）。
+        返回 {section_id: "- [建议] 引用了「xxx」，教师说：yyy"} 的字典。
+        """
+        try:
+            comments = self.storage.list_comments(plan_id)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("load teacher comments failed for %s: %s", plan_id, exc)
+            return {}
+        grouped: dict[str, list[str]] = {}
+        for c in comments or []:
+            if not isinstance(c, dict):
+                continue
+            status = str(c.get("status") or "open")
+            atype = str(c.get("annotation_type") or "suggestion")
+            sid = str(c.get("section_id") or "").strip()
+            content = str(c.get("content") or "").strip()
+            if not sid or not content:
+                continue
+            if status != "open":
+                continue
+            if atype not in ("suggestion", "issue"):
+                continue
+            quote = str(c.get("quote") or "").strip()
+            label = self._ANNOT_TYPE_LABEL.get(atype, atype)
+            teacher = str(c.get("teacher_name") or "").strip() or "指导教师"
+            q_frag = f"引用「{quote[:60]}」" if quote else "针对本章"
+            line = f"- [{label}] {q_frag}，{teacher}指出：{content[:260]}"
+            grouped.setdefault(sid, []).append(line)
+        return {k: "\n".join(v[:6]) for k, v in grouped.items()}
+
+    # ══════════════════════════════════════════════════════════════
     #  Formal Upgrade (3-group concurrent, LLM)
     # ══════════════════════════════════════════════════════════════
 
@@ -2512,6 +2747,9 @@ class BusinessPlanService:
         web_ctx = self._collect_web_context(requested_ids, kb)
         case_header, case_per_section = self._retrieve_case_fewshots(kb)
 
+        # ── 预先按章节分组加载未解决的教师批注，作为额外的 prompt 注入项 ──
+        teacher_notes_by_sid = self._collect_teacher_notes_by_section(plan_id)
+
         upgraded_map: dict[str, dict[str, Any]] = {}
         outlines_map: dict[str, Any] = {}
         if self.llm and self.llm.enabled:
@@ -2534,6 +2772,7 @@ class BusinessPlanService:
                         web_ctx.get(sid, ""),
                         case_header,
                         case_per_section.get(sid, ""),
+                        teacher_notes_by_sid.get(sid, ""),
                     ): sid
                     for sid in requested_ids
                 }
@@ -2556,6 +2795,7 @@ class BusinessPlanService:
                         sid, _per_chapter_kb(sid), draft_map, mode,
                         web_ctx.get(sid, ""),
                         case_header, case_per_section.get(sid, ""),
+                        teacher_notes_by_sid.get(sid, ""),
                     )
                 except Exception as exc:
                     logger.warning("_upgrade_single fallback failed for %s: %s", sid, exc)
@@ -2904,6 +3144,7 @@ class BusinessPlanService:
         web_ctx_text: str = "",
         case_header: str = "",
         case_block_text: str = "",
+        teacher_notes: str = "",
     ) -> dict[str, Any] | None:
         """单章兜底：只针对一章的窄 prompt。"""
         if not self.llm or not self.llm.enabled:
@@ -2921,11 +3162,18 @@ class BusinessPlanService:
                 "\n\n" + case_header
                 + "\n注意：范本仅供写作风格/深度/结构参考，不得照搬事实。"
             )
+        if teacher_notes:
+            system_prompt += (
+                "\n\n【教师批注处理规则】本章学生获得了指导教师的批注，必须在改写时"
+                "逐条正面回应——对应段落要具体解决教师提出的 issue / suggestion，"
+                "不允许只加一句『已吸收老师意见』敷衍。"
+            )
         user_prompt = (
             "【本章规格】\n" + spec
             + "\n\n【项目知识库（KB）】\n" + kb_json
             + ("\n\n【行业参考资料】\n" + web_ctx_text if web_ctx_text else "")
             + ("\n\n【同行业范本片段】\n" + case_block_text if case_block_text else "")
+            + ("\n\n【指导教师对本章的批注】\n" + teacher_notes if teacher_notes else "")
             + "\n\n【现有草稿】\n" + draft_block
             + f"\n\n请严格产出 JSON：{{\"sections\": [{{ section_id, content, is_ai_stub, missing_points }}]}}，mode={mode}。"
         )
@@ -2961,6 +3209,7 @@ class BusinessPlanService:
         web_ctx_text: str = "",
         case_header: str = "",
         case_block_text: str = "",
+        teacher_notes: str = "",
     ) -> dict[str, Any] | None:
         """
         为一章生成小标题大纲 + 论点骨架。
@@ -3008,8 +3257,14 @@ class BusinessPlanService:
             f"【行业参考资料】\n{web_ctx_text or '（无）'}\n\n"
             f"{('【同行业范本片段（只看结构，不要照搬事实）】\n' + case_block_text) if case_block_text else ''}\n\n"
             f"【现有草稿】\n{draft_content or '（暂无）'}\n\n"
-            "请严格输出 JSON，仅包含 subheads 数组，共 2-3 项。"
+            + (f"【指导教师对本章的批注（必须逐条回应，反映在 thesis/evidence_points 中）】\n{teacher_notes}\n\n" if teacher_notes else "")
+            + "请严格输出 JSON，仅包含 subheads 数组，共 2-3 项。"
         )
+        if teacher_notes:
+            system_prompt += (
+                "\n\n【教师批注处理规则】若用户补充了教师批注，需把其中每条 issue / suggestion 都"
+                "对应到某个 thesis 或 evidence_points 中——或者专门拆出一个小标题回应，不得忽略。"
+            )
         try:
             raw = self.llm.chat_json(system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.3)
         except Exception as exc:
@@ -3056,6 +3311,7 @@ class BusinessPlanService:
         web_ctx_text: str = "",
         case_block_text: str = "",
         mode: str = "full",
+        teacher_notes: str = "",
     ) -> str:
         """
         扩写单个小标题为 600-900 字的正文（3-4 段，四要素推进），返回不含 `### 标题` 的正文。
@@ -3084,7 +3340,11 @@ class BusinessPlanService:
             f"4. 必须落实以下指标建议：{('、'.join(metrics_hint)) or '至少给出 2-3 个具体数字'}。\n"
             + ("5. 必须包含 1 个 Markdown 表格（3-5 行 × 2-4 列，表头用 | 分隔），表格承载主要对比或拆解。\n" if need_table else "")
             + "6. 第三人称书面语，严禁『学生 / 用户说 / 在对话中』等元叙述；禁止写 "
-            "『根据搜索结果』『以下是我的分析』等口水。\n\n"
+            "『根据搜索结果』『以下是我的分析』等口水。\n"
+            "7. 引用行业数据时，直接在句子里采用商业计划书习惯的『文中自然标注』格式，例如"
+            "『据艾瑞咨询《2024 中国 XX 行业报告》数据显示，……』、"
+            "『国家统计局 2023 年数据表明，……』。"
+            "严禁使用学术论文式的 [^1] / [1] 脚注或编号引用，也不要在段落末尾统一列来源。\n\n"
             "【返回】纯 Markdown 正文（不要包 ### 标题，不要 JSON，不要代码块包裹），可含段落、列表、表格。"
         )
         kb_json = json.dumps(kb, ensure_ascii=False)[:2600]
@@ -3097,8 +3357,15 @@ class BusinessPlanService:
             f"【项目 KB】\n{kb_json}\n\n"
             f"【行业参考资料】\n{web_ctx_text or '（无）'}\n\n"
             f"{('【同行业范本片段（只借鉴结构，不照抄事实）】\n' + case_block_text) if case_block_text else ''}\n\n"
-            "现在直接输出该小标题的正文 Markdown（不带 ### 标题行）。"
+            + (f"【指导教师对本章的批注（必须在本小标题内明确回应相关条目）】\n{teacher_notes}\n\n" if teacher_notes else "")
+            + "现在直接输出该小标题的正文 Markdown（不带 ### 标题行）。"
         )
+        if teacher_notes:
+            system_prompt += (
+                "\n8. 教师在本章提出的 issue / suggestion，必须在相应段落里以书面语正面回应；"
+                "比如教师质疑『客户画像不清』，就要在画像段补具体人群、规模和数据。"
+                "不允许简单加一句『已吸收老师意见』敷衍。"
+            )
         try:
             text = self.llm.chat_text(
                 system_prompt=system_prompt,
@@ -3154,6 +3421,7 @@ class BusinessPlanService:
         web_ctx_text: str = "",
         case_header: str = "",
         case_block_text: str = "",
+        teacher_notes: str = "",
     ) -> dict[str, Any] | None:
         """
         整章两步式：先拿 outline，再并发扩写每个小标题，最后拼装成 Markdown content。
@@ -3163,6 +3431,7 @@ class BusinessPlanService:
             web_ctx_text=web_ctx_text,
             case_header=case_header,
             case_block_text=case_block_text,
+            teacher_notes=teacher_notes,
         )
         if not outline or not outline.get("subheads"):
             return None
@@ -3177,7 +3446,7 @@ class BusinessPlanService:
                 pool.submit(
                     self._expand_subhead,
                     sid, chapter_title, sh,
-                    kb, web_ctx_text, case_block_text, mode,
+                    kb, web_ctx_text, case_block_text, mode, teacher_notes,
                 ): idx
                 for idx, sh in enumerate(subheads)
             }
@@ -3577,6 +3846,9 @@ class BusinessPlanService:
         if mode not in UPGRADE_LEN:
             mode = "full"
 
+        teacher_notes_by_sid = self._collect_teacher_notes_by_section(plan_id)
+        chapter_teacher_notes = teacher_notes_by_sid.get(section_id, "")
+
         result: dict[str, Any] | None = None
         try:
             result = self._upgrade_chapter_two_step(
@@ -3584,6 +3856,7 @@ class BusinessPlanService:
                 web_ctx.get(section_id, ""),
                 case_header,
                 case_per_section.get(section_id, ""),
+                chapter_teacher_notes,
             )
         except Exception as exc:
             logger.warning("apply_chapter_deepen two-step failed: %s", exc)
@@ -3595,6 +3868,7 @@ class BusinessPlanService:
                     section_id, kb, draft_map, mode,
                     web_ctx.get(section_id, ""),
                     case_header, case_per_section.get(section_id, ""),
+                    chapter_teacher_notes,
                 )
             except Exception as exc:
                 logger.warning("apply_chapter_deepen single fallback failed: %s", exc)
@@ -3651,7 +3925,375 @@ class BusinessPlanService:
         plan_copy["revision_badge_count"] = len(pending)
         plan_copy["updated_at"] = _now_iso()
         saved = self._save_plan(plan_copy, previous=previous)
+
+        # ── 把本轮深化问答沉淀为 silent assistant 消息，供后续对话 agent 读取 ──
+        # kind=deepen_addon + silent=True：前端聊天流过滤不渲染，后续 agent 构建
+        # context 时能读到学生已经针对该章补充过的事实，避免重复提问。
+        try:
+            self._sink_deepen_to_conv(
+                project_id=str(plan_copy.get("project_id") or ""),
+                conversation_id=str(plan_copy.get("conversation_id") or ""),
+                section_title=title,
+                answers=answers or [],
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("sink deepen to conv failed: %s", exc)
+
         return {"status": "ok", "plan": saved, "revision": revision}
+
+    def _sink_deepen_to_conv(
+        self,
+        *,
+        project_id: str,
+        conversation_id: str,
+        section_title: str,
+        answers: list[dict[str, Any]],
+    ) -> None:
+        """把深化问答作为 silent assistant 消息写入对话 JSON。"""
+        if not project_id or not conversation_id or not self.conv_store:
+            return
+        pairs: list[str] = []
+        for ans in answers or []:
+            if not isinstance(ans, dict):
+                continue
+            q = str(ans.get("question") or "").strip()
+            a = str(ans.get("answer") or "").strip()
+            if not a:
+                continue
+            if q:
+                pairs.append(f"· Q：{q}\n  A：{a}")
+            else:
+                pairs.append(f"· {a}")
+        if not pairs:
+            return
+        content = (
+            f"[计划书深化补充 · {section_title}]\n"
+            + "\n".join(pairs)
+            + "\n\n（以上为学生在计划书章节深化环节补充的事实，供后续对话参考，"
+            "无需在对话中重复追问已覆盖的信息点。）"
+        )
+        path = self.conv_store._conv_dir(project_id) / f"{conversation_id}.json"
+        if not path.exists():
+            return
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            return
+        msgs = list(data.get("messages") or [])
+        msgs.append({
+            "role": "assistant",
+            "kind": "deepen_addon",
+            "silent": True,
+            "section_title": section_title,
+            "content": content,
+            "timestamp": _now_iso(),
+        })
+        data["messages"] = msgs
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # ══════════════════════════════════════════════════════════════
+    #  Finalize pass：执行摘要 + 每章小结 + 统一入口
+    # ══════════════════════════════════════════════════════════════
+
+    EXEC_SUMMARY_SECTION_ID = "executive_summary"
+    _CH_SUMMARY_MARKER = "#### 本章小结"
+
+    def _build_executive_summary(
+        self, plan: dict[str, Any], kb: dict[str, Any]
+    ) -> str:
+        """把全文 + KB 蒸馏为一页 800 字左右的执行摘要，顶部含核心数字表。"""
+        cover = plan.get("cover_info") or {}
+        project_name = str(cover.get("project_name") or plan.get("project_name") or "本项目").strip()
+        sections = [s for s in (plan.get("sections") or []) if str(s.get("section_id")) != self.EXEC_SUMMARY_SECTION_ID]
+        # 每章取前 320 字，作为 context 摘要
+        digest_parts: list[str] = []
+        for s in sections:
+            title = s.get("display_title") or s.get("title") or s.get("section_id")
+            body = str(s.get("content") or "").strip()
+            if not body:
+                continue
+            digest_parts.append(f"【{title}】{body[:320]}")
+        digest = "\n\n".join(digest_parts)[:5400]
+
+        fallback = (
+            f"| 项目名称 | {project_name} |\n"
+            "| --- | --- |\n"
+            "| 一句话定位 | " + (str(plan.get("one_liner") or cover.get("one_liner") or "（待补充）")) + " |\n"
+            "| 目标市场 | （见第 5 章市场与竞品分析） |\n"
+            "| 核心优势 | （见第 6 章核心优势与竞争壁垒） |\n"
+            "| 融资需求 | （见第 8 章财务与融资计划） |\n"
+            "| 团队规模 | " + str((kb.get("team") or {}).get("size") or "（待补充）") + " |\n\n"
+            "本摘要由系统在临时不可用时按模板兜底生成，建议再次点击「润色为正式稿」刷新。"
+        )
+
+        if not self.llm or not self.llm.enabled:
+            return fallback
+
+        system_prompt = (
+            "你是商业计划书总编辑，现在为一份已完成的项目计划书撰写【执行摘要】，放在全书正文之前。\n\n"
+            "【格式硬性要求】\n"
+            "1. 最前面输出一张 Markdown 表格，标题行为「项目名称 | 详情」两列，表体 6-8 行，"
+            "覆盖：项目名称、一句话定位、赛道 / 行业、目标用户、主要收入模式、核心壁垒、"
+            "近期里程碑、融资需求（若未知写『（待定）』，不要编造）。\n"
+            "2. 表格之后，用 5-7 段叙事摘要，共 700-900 字，依次覆盖：\n"
+            "   - 市场机会（规模与切入点）\n"
+            "   - 项目做了什么 / 为谁解决什么问题\n"
+            "   - 差异化优势与护城河\n"
+            "   - 商业模式与关键数字\n"
+            "   - 团队与阶段\n"
+            "   - 近期计划与融资 / 资源诉求\n"
+            "3. 严格第三人称；严禁使用 [^n] / [1] 等脚注编号；引用数据时用文中自然标注"
+            "（如『据艾瑞咨询 2024 报告，……』）。\n"
+            "4. 禁止寒暄语、开场白、总结陈述口水。\n\n"
+            "【返回】纯 Markdown 正文，直接输出表格与段落，不要 ### 标题，不要代码块。"
+        )
+        user_prompt = (
+            f"【项目名称】{project_name}\n"
+            f"【一句话定位】{plan.get('one_liner') or cover.get('one_liner') or ''}\n\n"
+            f"【项目 KB（蒸馏后的结构化知识）】\n{json.dumps(kb, ensure_ascii=False)[:2600]}\n\n"
+            f"【全文各章正文摘录】\n{digest}\n\n"
+            "请按规则撰写执行摘要。"
+        )
+        try:
+            text = self.llm.chat_text(
+                system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.35,
+            )
+        except Exception as exc:
+            logger.warning("_build_executive_summary LLM failed: %s", exc)
+            return fallback
+        if not text:
+            return fallback
+        cleaned = str(text).strip()
+        if cleaned.startswith("```"):
+            parts = cleaned.split("```")
+            if len(parts) >= 2:
+                cleaned = parts[1]
+                if cleaned.lower().startswith("markdown"):
+                    cleaned = cleaned[len("markdown"):]
+                cleaned = cleaned.strip()
+        return cleaned or fallback
+
+    def _append_chapter_summary(
+        self, section: dict[str, Any], kb: dict[str, Any]
+    ) -> str:
+        """为单章生成 3 条本章小结 bullet，返回附加到章末的 Markdown 片段。"""
+        title = section.get("display_title") or section.get("title") or section.get("section_id")
+        body = str(section.get("content") or "").strip()
+        if not body:
+            return ""
+
+        def _fallback() -> str:
+            pts = [p.strip() for p in (section.get("missing_points") or []) if p and isinstance(p, str)]
+            if len(pts) < 3:
+                para_bodies = [p.strip() for p in body.split("\n\n") if len(p.strip()) > 40]
+                for p in para_bodies:
+                    line = p.replace("\n", "").strip()
+                    if line and line not in pts:
+                        pts.append(line[:58] + ("…" if len(line) > 58 else ""))
+                    if len(pts) >= 3:
+                        break
+            pts = pts[:3] or ["本章围绕核心问题展开", "已给出初步解决思路", "后续需要补充具体数据与案例"]
+            lines = [f"- {p}" for p in pts]
+            return self._CH_SUMMARY_MARKER + "\n\n" + "\n".join(lines)
+
+        if not self.llm or not self.llm.enabled:
+            return _fallback()
+
+        system_prompt = (
+            "你是商业计划书总编辑，现在要为指定章节末尾写【本章小结】，只写 3 条 bullet。\n\n"
+            "【硬性要求】\n"
+            "1. 每条 bullet 必须是一句完整陈述句，30-60 字，概括本章最关键的 3 个结论。\n"
+            "2. 结论须来自正文，不得新增正文未覆盖的事实或数字。\n"
+            "3. 第三人称书面语；禁止『本章论述了……』这种空洞自指。\n"
+            "4. 禁止使用 [^n]/[1] 脚注编号。\n\n"
+            "返回严格 JSON：{\"bullets\": [\"...\", \"...\", \"...\"]}，数组长度恰好 3。"
+        )
+        user_prompt = (
+            f"章节标题：{title}\n"
+            f"章节正文（截断）：\n{body[:3500]}\n\n"
+            "请输出 3 条本章小结。"
+        )
+        try:
+            raw = self.llm.chat_json(
+                system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.3,
+            )
+        except Exception as exc:
+            logger.warning("_append_chapter_summary LLM failed: %s", exc)
+            return _fallback()
+        if not isinstance(raw, dict):
+            return _fallback()
+        bullets = raw.get("bullets")
+        if not isinstance(bullets, list) or len(bullets) < 2:
+            return _fallback()
+        lines: list[str] = []
+        for b in bullets[:3]:
+            s = str(b or "").strip().lstrip("-•*·").strip()
+            if s:
+                lines.append(f"- {s}")
+        if len(lines) < 2:
+            return _fallback()
+        return self._CH_SUMMARY_MARKER + "\n\n" + "\n".join(lines)
+
+    def finalize_plan(self, plan_id: str) -> dict[str, Any]:
+        """
+        温和版骨架升级：
+        1. 生成 / 更新开篇「执行摘要」章（若已存在则覆盖其 content）；
+        2. 对每章末尾追加 / 更新「本章小结」。
+        返回 revision 化后的 plan。
+        """
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "plan": None}
+        if not (plan.get("sections") or []):
+            return {"status": "empty", "plan": plan}
+
+        previous = copy.deepcopy(plan)
+        kb = plan.get("knowledge_base") or {}
+
+        # 1. 执行摘要
+        exec_content = self._build_executive_summary(plan, kb)
+
+        # 2. 对每章并发生成小结
+        regular_sections = [
+            s for s in (plan.get("sections") or [])
+            if str(s.get("section_id")) != self.EXEC_SUMMARY_SECTION_ID
+        ]
+        summaries: dict[str, str] = {}
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            futures = {
+                pool.submit(self._append_chapter_summary, s, kb): str(s.get("section_id"))
+                for s in regular_sections
+            }
+            for fut, sid in futures.items():
+                try:
+                    summaries[sid] = fut.result(timeout=90) or ""
+                except Exception as exc:
+                    logger.warning("chapter summary failed: %s %s", sid, exc)
+                    summaries[sid] = ""
+
+        # 3. 组装回写
+        plan_copy = copy.deepcopy(plan)
+        sections = list(plan_copy.get("sections") or [])
+        has_exec = any(str(s.get("section_id")) == self.EXEC_SUMMARY_SECTION_ID for s in sections)
+        if has_exec:
+            for s in sections:
+                if str(s.get("section_id")) == self.EXEC_SUMMARY_SECTION_ID:
+                    s["content"] = exec_content
+                    s["user_edit"] = exec_content
+                    s["status"] = "完整"
+                    s["missing_level"] = "complete"
+                    s["is_ai_stub"] = False
+                    break
+        else:
+            sections.insert(0, {
+                "section_id": self.EXEC_SUMMARY_SECTION_ID,
+                "title": "执行摘要",
+                "display_title": "执行摘要",
+                "content": exec_content,
+                "user_edit": exec_content,
+                "status": "完整",
+                "missing_level": "complete",
+                "confidence": 0.95,
+                "missing_points": [],
+                "field_map": {},
+                "is_ai_stub": False,
+                "writing_points": [
+                    "一张 6-8 行核心数字表",
+                    "市场机会 / 产品 / 差异化 / 模式 / 团队 / 融资的总览叙事",
+                ],
+            })
+
+        # 附加本章小结：若已有 marker 则替换，否则 append
+        for s in sections:
+            sid = str(s.get("section_id") or "")
+            if sid == self.EXEC_SUMMARY_SECTION_ID:
+                continue
+            block = summaries.get(sid) or ""
+            if not block:
+                continue
+            original = str(s.get("content") or "")
+            marker = self._CH_SUMMARY_MARKER
+            if marker in original:
+                idx = original.rfind(marker)
+                new_content = original[:idx].rstrip() + "\n\n" + block
+            else:
+                new_content = original.rstrip() + "\n\n" + block
+            s["content"] = new_content
+            s["user_edit"] = new_content
+
+        plan_copy["sections"] = sections
+        plan_copy["updated_at"] = _now_iso()
+        plan_copy["finalized_at"] = _now_iso()
+        saved = self._save_plan(plan_copy, previous=previous)
+        return {"status": "ok", "plan": saved}
+
+    # ══════════════════════════════════════════════════════════════
+    #  Snapshot & Rollback
+    # ══════════════════════════════════════════════════════════════
+
+    def create_snapshot(self, plan_id: str, label: str = "") -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "snapshot": None}
+        meta = self.storage.save_snapshot(plan_id, label=label)
+        if not meta:
+            return {"status": "error", "snapshot": None}
+        return {"status": "ok", "snapshot": meta}
+
+    def list_snapshots(self, plan_id: str) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "snapshots": []}
+        rows = self.storage.list_snapshots(plan_id)
+        return {"status": "ok", "snapshots": rows}
+
+    def rollback_to_snapshot(self, plan_id: str, snap_id: str) -> dict[str, Any]:
+        current = self.storage.load(plan_id)
+        if not current:
+            return {"status": "not_found", "plan": None}
+        # 回滚前自动存一份兜底快照
+        self.storage.save_snapshot(plan_id, label="回滚前自动快照")
+        restored = self.storage.rollback_to(plan_id, snap_id)
+        if not restored:
+            return {"status": "snap_not_found", "plan": current}
+        return {"status": "ok", "plan": restored}
+
+    # ══════════════════════════════════════════════════════════════
+    #  教师批注 wrapper
+    # ══════════════════════════════════════════════════════════════
+
+    def list_plan_comments(self, plan_id: str) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "comments": []}
+        return {"status": "ok", "comments": self.storage.list_comments(plan_id)}
+
+    def add_plan_comment(self, plan_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "comment": None}
+        comment = self.storage.add_comment(plan_id, payload or {})
+        if not comment:
+            return {"status": "invalid", "comment": None}
+        return {"status": "ok", "comment": comment}
+
+    def update_plan_comment(
+        self, plan_id: str, comment_id: str, patch: dict[str, Any]
+    ) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "comment": None}
+        comment = self.storage.update_comment(plan_id, comment_id, patch or {})
+        if not comment:
+            return {"status": "cmt_not_found", "comment": None}
+        return {"status": "ok", "comment": comment}
+
+    def delete_plan_comment(self, plan_id: str, comment_id: str) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "deleted": False}
+        ok = self.storage.delete_comment(plan_id, comment_id)
+        return {"status": "ok" if ok else "cmt_not_found", "deleted": ok}
 
     def generate_deepen_suggestions(self, plan_id: str) -> dict[str, Any]:
         plan = self.storage.load(plan_id)

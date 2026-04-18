@@ -1,5 +1,7 @@
 import json
+import logging
 import secrets
+import shutil
 import string
 from hashlib import pbkdf2_hmac
 from datetime import datetime, timedelta, timezone
@@ -7,11 +9,49 @@ from pathlib import Path
 from uuid import uuid4
 
 
+logger = logging.getLogger(__name__)
+
+
 BJ_TZ = timezone(timedelta(hours=8))
 
 
 def _now_iso() -> str:
     return datetime.now(BJ_TZ).isoformat()
+
+
+def _safe_read_json(path: Path, *, default, label: str = ""):
+    """
+    安全读取 JSON。
+    - 文件不存在 → 返回 default
+    - 文件为空 → 返回 default
+    - 解析失败 → 备份坏文件到 <name>.broken-<ts>.json 并抛出 RuntimeError，
+      这样调用方（登录 / 列表接口）会返回 500 明确报错，而不是假装里面没数据
+      导致"账号都登不上却无任何提示"的隐匿故障。
+    """
+    try:
+        if not path.exists():
+            return default
+        raw = path.read_text(encoding="utf-8").strip()
+        if not raw:
+            return default
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        backup = path.with_name(f"{path.name}.broken-{int(datetime.now().timestamp())}.json")
+        try:
+            shutil.copy2(path, backup)
+        except Exception:  # noqa: BLE001
+            pass
+        logger.error(
+            "[storage] JSON 损坏: %s (label=%s) 已备份到 %s；错误：%s",
+            path, label or path.name, backup, exc,
+        )
+        raise RuntimeError(
+            f"持久化文件损坏：{path.name}（label={label or path.name}）。"
+            f"原文件已备份为 {backup.name}，请人工检查后再启动。"
+        ) from exc
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("[storage] 读 %s 出错: %s", path, exc)
+        raise
 
 
 class JsonStorage:
@@ -331,10 +371,8 @@ class UserStorage:
             self.target.write_text("[]", encoding="utf-8")
 
     def _load(self) -> list[dict]:
-        try:
-            return json.loads(self.target.read_text(encoding="utf-8"))
-        except Exception:  # noqa: BLE001
-            return []
+        data = _safe_read_json(self.target, default=[], label="users.json")
+        return list(data) if isinstance(data, list) else []
 
     def _save(self, users: list[dict]) -> None:
         self.target.write_text(json.dumps(users, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -631,10 +669,8 @@ class TeamStorage:
             self.target.write_text("[]", encoding="utf-8")
 
     def _load(self) -> list[dict]:
-        try:
-            return json.loads(self.target.read_text(encoding="utf-8"))
-        except Exception:
-            return []
+        data = _safe_read_json(self.target, default=[], label="teams.json")
+        return list(data) if isinstance(data, list) else []
 
     def _save(self, teams: list[dict]) -> None:
         self.target.write_text(json.dumps(teams, ensure_ascii=False, indent=2), encoding="utf-8")

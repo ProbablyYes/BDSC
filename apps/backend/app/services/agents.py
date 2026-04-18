@@ -136,6 +136,7 @@ def competition_advisor_agent(input_text: str, mode: str = "coursework") -> dict
         rubric_rows.append(
             {
                 "item": row["item"],
+                "estimated_score_0_10": round(score, 2),
                 "estimated_score_0_5": round(score / 2, 1),
                 "missing_evidence": "需要补充可验证证据链" if row["status"] == "risk" else "证据基础可继续增强",
                 "minimal_fix_24h": "补充至少2条数据证据并更新对照表",

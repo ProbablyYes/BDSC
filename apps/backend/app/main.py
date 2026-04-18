@@ -95,6 +95,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.exception_handler(RuntimeError)
+async def _runtime_error_handler(request: Request, exc: RuntimeError):
+    """
+    存储层 _safe_read_json 在 JSON 损坏时会抛 RuntimeError（带详细原因 + 备份文件名）。
+    这里统一转成 500，避免前端看到空响应或 "邮箱或密码错误" 这类迷惑性文案。
+    """
+    from fastapi.responses import JSONResponse
+    logger.error("RuntimeError on %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=500,
+        content={"status": "server_error", "detail": str(exc)},
+    )
+
 settings.upload_root.mkdir(parents=True, exist_ok=True)
 settings.video_upload_root.mkdir(parents=True, exist_ok=True)
 settings.teacher_examples_root.mkdir(parents=True, exist_ok=True)
@@ -8274,6 +8288,156 @@ def business_plan_reject_all(plan_id: str) -> BusinessPlanResponse:
 def teacher_list_business_plans(project_id: str) -> dict:
     rows = business_plan_store.list_by_project(project_id)
     return {"status": "ok", "plans": rows}
+
+
+# ── 教师端：按学生聚合计划书列表（学生计划书 Tab 的主数据源） ─
+@app.get("/api/teacher/student-plans")
+def teacher_student_plans(teacher_id: str = "", team_id: str = "") -> dict:
+    """按老师的团队遍历学生 → 每位学生的 project-{user_id} 取全部计划书。
+
+    返回结构：
+    {
+      "status": "ok",
+      "teams": [
+        {
+          "team_id": "...",
+          "team_name": "...",
+          "students": [
+            {
+              "student_id": "<user_id>",
+              "display_name": "...",
+              "student_id_code": "<学号字段>",
+              "class_id": "...",
+              "project_id": "project-<user_id>",
+              "plans": [ { plan_id, title, version_tier, updated_at, word_count, comment_count, unresolved_count }, ... ]
+            }
+          ]
+        }
+      ]
+    }
+    """
+    all_teams = team_store.list_all() or []
+    teams_out: list[dict[str, Any]] = []
+    for t in all_teams:
+        if teacher_id and t.get("teacher_id") != teacher_id:
+            continue
+        tid = str(t.get("team_id") or "")
+        if team_id and tid != team_id:
+            continue
+        students_out: list[dict[str, Any]] = []
+        for m in (t.get("members") or []):
+            uid = str(m.get("user_id") or "")
+            if not uid:
+                continue
+            user_info = user_store.get_by_id(uid) or {}
+            project_id = f"project-{uid}"
+            plans = business_plan_store.list_by_project(project_id)
+            enriched_plans: list[dict[str, Any]] = []
+            for p in plans:
+                plan_id = str(p.get("plan_id") or "")
+                word_count = 0
+                try:
+                    target = business_plan_store._plan_file(  # internal helper is fine here
+                        project_id, str(p.get("conversation_id") or ""), plan_id,
+                    )
+                    if target.exists():
+                        data = json.loads(target.read_text(encoding="utf-8"))
+                        for s in (data.get("sections") or []):
+                            word_count += len(re.findall(r"[\u4e00-\u9fff]", str(s.get("content") or "")))
+                except Exception:
+                    pass
+                comments = business_plan_store.list_comments(plan_id)
+                unresolved = sum(1 for c in comments if str(c.get("status") or "open") != "resolved")
+                enriched_plans.append({
+                    **p,
+                    "word_count": word_count,
+                    "comment_count": len(comments),
+                    "unresolved_count": unresolved,
+                })
+            if enriched_plans:
+                students_out.append({
+                    "student_id": uid,
+                    "display_name": user_info.get("display_name") or uid[:8],
+                    "student_id_code": user_info.get("student_id") or "",
+                    "class_id": user_info.get("class_id") or "",
+                    "project_id": project_id,
+                    "plans": enriched_plans,
+                })
+        if students_out:
+            teams_out.append({
+                "team_id": tid,
+                "team_name": str(t.get("team_name") or t.get("name") or "团队"),
+                "students": students_out,
+            })
+    return {"status": "ok", "teams": teams_out}
+
+
+# ── 教师批注 CRUD（按 plan_id，独立文件存储） ────────────────
+@app.get("/api/business-plan/{plan_id}/comments")
+def business_plan_comments_list(plan_id: str) -> dict:
+    return business_plan_service.list_plan_comments(plan_id)
+
+
+@app.post("/api/business-plan/{plan_id}/comments")
+def business_plan_comments_add(plan_id: str, payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        payload = {}
+    return business_plan_service.add_plan_comment(plan_id, payload)
+
+
+@app.patch("/api/business-plan/{plan_id}/comments/{comment_id}")
+def business_plan_comments_update(plan_id: str, comment_id: str, payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        payload = {}
+    return business_plan_service.update_plan_comment(plan_id, comment_id, payload)
+
+
+@app.delete("/api/business-plan/{plan_id}/comments/{comment_id}")
+def business_plan_comments_delete(plan_id: str, comment_id: str) -> dict:
+    return business_plan_service.delete_plan_comment(plan_id, comment_id)
+
+
+# ── 润色为正式稿：执行摘要 + 每章小结 ────────────────────────
+@app.post("/api/business-plan/{plan_id}/finalize", response_model=BusinessPlanResponse)
+def business_plan_finalize(plan_id: str) -> BusinessPlanResponse:
+    result = business_plan_service.finalize_plan(plan_id)
+    status = str(result.get("status") or "ok")
+    if status == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan") or {}
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    ) if plan else {}
+    return BusinessPlanResponse(status=status, plan=plan if plan else None, readiness=readiness)
+
+
+# ── 版本快照：手动保存 / 列表 / 回滚 ────────────────────────
+@app.post("/api/business-plan/{plan_id}/snapshots")
+def business_plan_snapshot_create(plan_id: str, payload: dict) -> dict:
+    label = ""
+    if isinstance(payload, dict):
+        label = str(payload.get("label") or "").strip()
+    return business_plan_service.create_snapshot(plan_id, label=label)
+
+
+@app.get("/api/business-plan/{plan_id}/snapshots")
+def business_plan_snapshot_list(plan_id: str) -> dict:
+    return business_plan_service.list_snapshots(plan_id)
+
+
+@app.post("/api/business-plan/{plan_id}/snapshots/{snap_id}/rollback", response_model=BusinessPlanResponse)
+def business_plan_snapshot_rollback(plan_id: str, snap_id: str) -> BusinessPlanResponse:
+    result = business_plan_service.rollback_to_snapshot(plan_id, snap_id)
+    status = str(result.get("status") or "ok")
+    if status == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan") or {}
+    readiness = business_plan_service.get_readiness(
+        str(plan.get("project_id") or ""),
+        str(plan.get("conversation_id") or ""),
+    ) if plan else {}
+    return BusinessPlanResponse(status=status, plan=plan if plan else None, readiness=readiness)
 
 
 # ── 单章深化闭环 ────────────────────────────────────────────────

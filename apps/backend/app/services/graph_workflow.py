@@ -4155,7 +4155,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         "competition": "你现在还需要帮学生理解这个概念在竞赛评审中的权重和评委判断标准。",
         "learning": "你现在还需要帮学生理解这个概念在项目实操中如何验证，做完后该看什么信号判断自己学会了。",
     }.get(mode, "")
-    tutor_comp_hint = _get_competition_hint(state.get("competition_type", ""), "tutor")
+    tutor_comp_hint = _get_competition_hint(state.get("competition_type", ""), "tutor", state.get("category", ""))
     if tutor_comp_hint:
         _tutor_mode_hint += f"\n{tutor_comp_hint}"
 
@@ -4433,12 +4433,38 @@ _COMPETITION_AGENT_HINTS: dict[str, dict[str, str]] = {
 }
 
 
-def _get_competition_hint(comp_type: str, agent_role: str) -> str:
-    """Get competition-type specific hint for a given agent role."""
+# 公益语境附加 hint：当 competition_type=internet_plus（创业型）且 category 被识别为
+# 「社会公益」时，在对应 agent 的主 hint 之后追加这段，提醒 agent 关注社会影响维度。
+_PUBLIC_GOOD_ADDITIONAL_HINT: dict[str, str] = {
+    "coach": "同时关注社会效益：受益人覆盖规模、项目可持续性、公益与商业的边界、社会使命是否清晰。",
+    "analyst": "除商业指标外，还要评估社会影响（SROI/受益人数/问题缓解度/长期效果追踪）。",
+    "advisor": "如涉及公益赛道红区，请重点考察「受益人证据」「可持续资金来源」「问题解决的可度量性」。",
+    "grader": "评分时对『社会影响』『受益人覆盖』『可持续性』给予 10-15% 的附加权重；避免把『商业闭环弱』简单等同于扣分。",
+    "planner": "备赛时准备公益案例证据、受益人访谈、社会价值量化数据（SROI / 改变前后对比 / 受益人原话）。",
+    "tutor": "讲解时结合 B-Corp、社会企业、SDG、影响力投资、SROI、理论变革（Theory of Change）等概念。",
+}
+
+
+def _get_competition_hint(comp_type: str, agent_role: str, category: str = "") -> str:
+    """Get competition-type specific hint for a given agent role.
+
+    若 comp_type=internet_plus 且 category 命中「社会公益」，在主 hint 后追加公益语境提示。
+    """
     if not comp_type:
         return ""
     hints = _COMPETITION_AGENT_HINTS.get(comp_type, {})
-    return hints.get(agent_role, "")
+    base_hint = hints.get(agent_role, "")
+    if (
+        comp_type == "internet_plus"
+        and category
+        and "公益" in category
+        and agent_role in _PUBLIC_GOOD_ADDITIONAL_HINT
+    ):
+        addendum = _PUBLIC_GOOD_ADDITIONAL_HINT[agent_role]
+        if base_hint:
+            return base_hint + "\n【公益语境补充】" + addendum
+        return "【公益语境】" + addendum
+    return base_hint
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -4664,7 +4690,7 @@ def _coach_analyze(state: dict) -> dict:
         "learning": "当前是项目教练模式，侧重识别当前阶段最关键的瓶颈，用启发式追问推动思考。",
     }.get(mode, "")
     comp_type = state.get("competition_type", "")
-    coach_comp_hint = _get_competition_hint(comp_type, "coach")
+    coach_comp_hint = _get_competition_hint(comp_type, "coach", state.get("category", ""))
     if coach_comp_hint:
         mode_hint += f"\n{coach_comp_hint}"
 
@@ -5041,7 +5067,7 @@ def _analyst_analyze(state: dict) -> dict:
         "coursework": "你同时兼顾教学视角：解释每个风险为什么算风险，帮学生建立风险判断的思维框架。",
         "learning": "你同时兼顾推进视角：按紧迫度排序风险，指出最小可行修复路径。",
     }.get(mode, "")
-    analyst_comp_hint = _get_competition_hint(state.get("competition_type", ""), "analyst")
+    analyst_comp_hint = _get_competition_hint(state.get("competition_type", ""), "analyst", state.get("category", ""))
     if analyst_comp_hint:
         _analyst_mode_hint += f"\n{analyst_comp_hint}"
 
@@ -5276,7 +5302,7 @@ def _grader_analyze(state: dict) -> dict:
     advisor_out = state.get("advisor_output", {})
     hs = state.get("hypergraph_student", {})
     hyper_grader_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "grader", incremental_stats=state.get("incremental_stats"))
-    grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader")
+    grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader", state.get("category", ""))
 
     # Fallback: if current turn has no rubric, pull from conversation history
     if (not rubric or overall is None):
@@ -5412,7 +5438,7 @@ def _planner_analyze(state: dict) -> dict:
 
     hyper_insight = state.get("hypergraph_insight", {})
     hs_missing_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "planner", incremental_stats=state.get("incremental_stats"))
-    planner_comp_hint = _get_competition_hint(state.get("competition_type", ""), "planner")
+    planner_comp_hint = _get_competition_hint(state.get("competition_type", ""), "planner", state.get("category", ""))
 
     neo4j_planner_ctx = ""
     if _graph_service and kg.get("entities"):

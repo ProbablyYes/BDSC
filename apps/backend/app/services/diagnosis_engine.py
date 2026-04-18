@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 import json
+import logging
 import re
 from pathlib import Path
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 from app.services.kg_ontology import (
     get_rule_ontology_nodes,
     get_rule_tasks,
@@ -449,30 +452,49 @@ def _rule_penalty(severity: str, stage: str, is_file: bool = False) -> float:
 
 
 def _infer_project_stage(text: str, is_file: bool = False) -> str:
-    evidence_hits = sum(1 for k in ["访谈", "问卷", "样本", "数据", "实验", "验证", "原型", "mvp"] if _fuzzy_match(k, text))
-    business_hits = sum(1 for k in ["市场规模", "tam", "sam", "som", "定价", "商业模式", "渠道", "收入", "成本"] if _fuzzy_match(k, text))
-    execution_hits = sum(1 for k in ["团队", "里程碑", "时间表", "技术路线", "落地", "执行"] if _fuzzy_match(k, text))
+    evidence_keys = [
+        "访谈", "问卷", "样本", "数据", "实验", "验证", "原型", "mvp",
+        "调研", "田野", "试点", "poc", "用户测试", "留存", "dau", "内测",
+    ]
+    business_keys = [
+        "市场规模", "tam", "sam", "som", "定价", "商业模式", "渠道",
+        "收入", "成本", "毛利", "财务", "客单价", "盈利模式", "变现",
+    ]
+    execution_keys = [
+        "团队", "里程碑", "时间表", "技术路线", "落地", "执行",
+        "分工", "负责人", "路线图", "计划表",
+    ]
+    evidence_hits = sum(1 for k in evidence_keys if _fuzzy_match(k, text))
+    business_hits = sum(1 for k in business_keys if _fuzzy_match(k, text))
+    execution_hits = sum(1 for k in execution_keys if _fuzzy_match(k, text))
     text_len = len(text)
+    number_hits = len(re.findall(r"\d+(?:\.\d+)?%?", text))
 
     if is_file and text_len >= 800:
         return "document"
     if evidence_hits >= 4 and business_hits >= 3:
         return "validated"
-    if business_hits >= 2 or execution_hits >= 2 or text_len >= 350:
+    # 辅助结构指标：文本含 ≥3 个数字 + ≥2 个业务术语 + ≥400 字 → 至少 structured
+    if (
+        business_hits >= 2
+        or execution_hits >= 2
+        or text_len >= 350
+        or (number_hits >= 3 and business_hits >= 2 and text_len >= 400)
+    ):
         return "structured"
     return "idea"
 
 
 def _stage_baseline(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 5.9, "validated": 5.6, "structured": 5.2, "idea": 4.7}.get(stage, 5.2)
-    return {"idea": 4.1, "structured": 5.0, "validated": 5.9, "document": 6.3}.get(stage, 4.8)
+        return {"document": 5.5, "validated": 5.0, "structured": 4.0, "idea": 2.5}.get(stage, 4.0)
+    return {"idea": 2.0, "structured": 3.8, "validated": 5.2, "document": 6.0}.get(stage, 3.5)
 
 
 def _stage_ceiling(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 9.3, "validated": 8.8, "structured": 8.2, "idea": 7.5}.get(stage, 8.2)
-    return {"idea": 6.9, "structured": 8.1, "validated": 8.9, "document": 9.1}.get(stage, 8.0)
+        return {"document": 9.8, "validated": 9.5, "structured": 8.8, "idea": 7.5}.get(stage, 8.5)
+    return {"idea": 7.0, "structured": 8.6, "validated": 9.4, "document": 9.7}.get(stage, 8.5)
 
 
 def _score_band(score: float) -> str:
@@ -492,11 +514,13 @@ def _evidence_score(text: str, evidence_keywords: list[str], stage: str, is_file
     total = len(evidence_keywords)
     ratio = hit / max(total, 1)
     base = _stage_baseline(stage, is_file=is_file)
-    boost = ratio * (3.4 if is_file else 2.8)
-    if hit >= 3:
+    boost = ratio * (5.2 if is_file else 4.2)
+    if hit >= 5:
+        boost += 1.0
+    elif hit >= 3:
         boost += 0.5
     elif hit == 0:
-        boost -= 0.18 if stage == "idea" else 0.45
+        boost -= 0.6 if stage == "idea" else 0.9
     return max(0.0, min(_stage_ceiling(stage, is_file=is_file), base + boost))
 
 
@@ -753,13 +777,19 @@ def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
         result = llm.chat_json(
             system_prompt=(
                 "你是创业项目评审专家。请对以下每个评分维度打 0-10 分，并给出**中文**评分依据。\n"
-                "评分原则：\n"
-                "- 一份完整的商业计划书通常在 5-8 分\n"
-                "- 只有维度完全缺失时才打 <3 分\n"
-                "- 只有有特别充分的证据支撑时才打 >8 分\n"
-                "- reason 必须具体说明「学生提供了什么/缺少什么」，不要泛泛说「不够完善」\n\n"
+                "评分原则（按真实质量打，不要锚定中段 5-6 分）：\n"
+                "- 1-2 分：该维度内容完全缺失，或只出现名词但没有任何展开\n"
+                "- 3-4 分：有概念但无细节、无数据、无证据来源（典型早期想法）\n"
+                "- 5-6 分：有细节描述但缺量化数字或证据来源\n"
+                "- 7-8 分：有细节 + 量化数字 + 至少一处证据来源（调研/案例/对照）\n"
+                "- 9-10 分：有细节 + 量化 + 多处证据 + 替代方案分析 / SOTA 对比 / 实验结论\n"
+                "打分要求：\n"
+                "- 请给出真实区分度的分数，不要把大多数维度都压到 5-6 分\n"
+                "- 只要某维度已有细节+量化+证据，就应该 7 分起步，不用等『特别充分』才给高分\n"
+                "- reason 必须引用学生原文片段（直接抄 3-10 个字），并指出落在哪一档、为什么\n"
+                "- reason 严禁出现「不够完善」「有待加强」这类空话\n\n"
                 f"评分维度：\n{rubric_desc}\n\n"
-                '输出 JSON：{"scores": [{"item": "...", "score": 0-10, "reason": "一句话中文依据，引用学生内容"}]}'
+                '输出 JSON：{"scores": [{"item": "...", "score": 0-10, "reason": "引用原文+分档理由"}]}'
             ),
             user_prompt=f"请评估以下项目内容（模式={mode}）：\n\n{text[:4000]}",
             temperature=0.2,
@@ -876,23 +906,30 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
 
     if llm_scores:
         llm_map = {s["item"]: s for s in llm_scores}
+        _default_by_stage = {"idea": 2.0, "structured": 3.5, "validated": 4.5, "document": 5.0}
+        fallback_score = _default_by_stage.get(project_stage, 3.0)
         for row in active_rubrics:
             llm_s = llm_map.get(row["item"])
             if llm_s:
-                dim_score = max(0.0, min(10.0, float(llm_s.get("score", 5))))
+                dim_score = max(0.0, min(10.0, float(llm_s.get("score", fallback_score))))
                 rubric.append({
                     "item": row["item"],
                     "score": round(dim_score, 2),
                     "status": "risk" if dim_score < 5.0 else "ok",
                     "weight": row["weight"],
                     "reason": llm_s.get("reason", ""),
+                    "source": "llm",
                     "evidence_chain": get_rubric_evidence_chain(row["item"]),
                     "common_mistakes": get_rubric_error_pool(row["item"]),
                 })
             else:
                 rubric.append({
-                    "item": row["item"], "score": 5.0,
-                    "status": "ok", "weight": row["weight"],
+                    "item": row["item"],
+                    "score": fallback_score,
+                    "status": "risk" if fallback_score < 5.0 else "ok",
+                    "weight": row["weight"],
+                    "reason": f"LLM 未对该维度评分，按项目阶段({project_stage})默认 {fallback_score} 分",
+                    "source": "stage_default",
                 })
             weighted_total += rubric[-1]["score"] * row["weight"]
             total_weight += row["weight"]
@@ -928,16 +965,27 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
                 "status": "risk" if dim_score < 5.0 else "ok",
                 "weight": row["weight"],
                 "reason": reason,
+                "source": "rule_based",
                 "evidence_chain": get_rubric_evidence_chain(row["item"]),
                 "common_mistakes": get_rubric_error_pool(row["item"]),
             })
             weighted_total += dim_score * row["weight"]
             total_weight += row["weight"]
 
-    overall_score = round(weighted_total / total_weight, 2) if total_weight else 0.0
-    stage_floor = {"idea": 4.2, "structured": 5.0, "validated": 5.9, "document": 6.2}.get(project_stage, 4.8)
-    stage_ceiling = {"idea": 6.4, "structured": 7.9, "validated": 8.9, "document": 9.3}.get(project_stage, 8.1)
-    overall_score = round(min(stage_ceiling, max(stage_floor, overall_score)), 2)
+    overall_raw = round(weighted_total / total_weight, 2) if total_weight else 0.0
+    stage_floor = {"idea": 1.5, "structured": 3.0, "validated": 5.0, "document": 5.5}.get(project_stage, 2.5)
+    stage_ceiling = {"idea": 7.5, "structured": 9.0, "validated": 9.6, "document": 9.8}.get(project_stage, 8.5)
+    overall_score = round(min(stage_ceiling, max(stage_floor, overall_raw)), 2)
+    source_breakdown: dict[str, int] = {}
+    for r in rubric:
+        key = str(r.get("source", "unknown"))
+        source_breakdown[key] = source_breakdown.get(key, 0) + 1
+    logger.info(
+        "[diagnosis] stage=%s mode=%s comp=%s len=%d raw=%.2f clipped=%.2f floor=%.2f ceil=%.2f source=%s rules=%d",
+        project_stage, mode, competition_type, text_len,
+        overall_raw, overall_score, stage_floor, stage_ceiling,
+        source_breakdown, len(triggered_rules),
+    )
     high_rules = [r for r in triggered_rules if r["severity"] == "high"]
     primary_rule = high_rules[0]["id"] if high_rules else (triggered_rules[0]["id"] if triggered_rules else "NONE")
 

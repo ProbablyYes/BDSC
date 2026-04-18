@@ -195,6 +195,14 @@ const MODE_WELCOME: Record<string, { title: string; desc: string; hints: Array<{
   },
 };
 
+function escapeHtmlClient(s: any): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function parseServerTime(value?: string) {
   if (!value) return null;
   const normalized = /Z$|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`;
@@ -514,7 +522,17 @@ export default function StudentPage() {
   const [bpMoreOpen, setBpMoreOpen] = useState(false);
   const [bpAcceptAllBusy, setBpAcceptAllBusy] = useState(false);
   const [bpUpgradeToast, setBpUpgradeToast] = useState("");
+  const [bpOutlineOpen, setBpOutlineOpen] = useState(false);
+  const [bpOutlinePinned, setBpOutlinePinned] = useState(false);
+  const [bpFinalizeBusy, setBpFinalizeBusy] = useState(false);
+  const [bpSnapshotBusy, setBpSnapshotBusy] = useState(false);
+  const [bpSnapshotOpen, setBpSnapshotOpen] = useState(false);
+  const [bpSnapshots, setBpSnapshots] = useState<any[]>([]);
+  const [bpSnapshotLoading, setBpSnapshotLoading] = useState(false);
+  const [bpTeacherComments, setBpTeacherComments] = useState<any[]>([]);
+  const [bpCommentsOpen, setBpCommentsOpen] = useState(false);
   const bpMoreRef = useRef<HTMLDivElement>(null);
+  const bpOutlineHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bpReadRootRef = useRef<HTMLDivElement>(null);
   const bpSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const modeWelcome = MODE_WELCOME[mode] ?? MODE_WELCOME.coursework;
@@ -640,6 +658,77 @@ export default function StudentPage() {
     });
     return () => observer.disconnect();
   }, [bpViewMode, businessPlan?.plan_id, businessPlan?.sections?.length]);
+
+  // ── 拉教师批注 ────────────────────────────────────────────────
+  useEffect(() => {
+    const pid = businessPlan?.plan_id;
+    if (!pid) { setBpTeacherComments([]); return; }
+    (async () => {
+      try {
+        const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(pid)}/comments`);
+        const data = await resp.json();
+        setBpTeacherComments(Array.isArray(data?.comments) ? data.comments : []);
+      } catch {
+        setBpTeacherComments([]);
+      }
+    })();
+  }, [businessPlan?.plan_id, businessPlan?.updated_at]);
+
+  // ── 把教师批注注入到阅读视图（DOM 后处理）────────────────────
+  useEffect(() => {
+    if (bpViewMode !== "read") return;
+    const root = bpReadRootRef.current;
+    if (!root) return;
+    const timer = setTimeout(() => {
+      root.querySelectorAll("mark.bp-tch-mark").forEach((el) => {
+        const parent = el.parentNode;
+        if (!parent) return;
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+        parent.normalize();
+      });
+      const sections = root.querySelectorAll<HTMLElement>("[data-section-id]");
+      const orphans: Record<string, any[]> = {};
+      sections.forEach((secEl) => {
+        const sid = secEl.dataset.sectionId || "";
+        const list = bpTeacherComments.filter((c: any) => c.section_id === sid && (c.status || "open") === "open");
+        list.forEach((c: any) => {
+          if (!c.quote) { (orphans[sid] = orphans[sid] || []).push(c); return; }
+          const walker = document.createTreeWalker(secEl, NodeFilter.SHOW_TEXT, {
+            acceptNode: (n: Node) => (n as Text).data.includes(c.quote) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+          });
+          const tn = walker.nextNode() as Text | null;
+          if (!tn) { (orphans[sid] = orphans[sid] || []).push(c); return; }
+          const idx = tn.data.indexOf(c.quote);
+          if (idx < 0) { (orphans[sid] = orphans[sid] || []).push(c); return; }
+          const range = document.createRange();
+          range.setStart(tn, idx); range.setEnd(tn, idx + c.quote.length);
+          const mark = document.createElement("mark");
+          mark.className = `bp-tch-mark bp-tch-${c.annotation_type || "suggestion"}`;
+          mark.setAttribute("data-comment-id", c.comment_id);
+          const label = c.annotation_type === "issue" ? "问题" : c.annotation_type === "praise" ? "肯定" : "建议";
+          mark.setAttribute("title", `教师${label}（${c.teacher_name || "老师"}）：${c.content}`);
+          try { range.surroundContents(mark); } catch { (orphans[sid] = orphans[sid] || []).push(c); }
+        });
+        secEl.querySelectorAll(".bp-tch-orphans").forEach((el) => el.remove());
+        const op = orphans[sid] || [];
+        if (op.length) {
+          const box = document.createElement("div");
+          box.className = "bp-tch-orphans";
+          box.innerHTML = `<b>教师建议（${op.length}）：</b>` + op.map((c: any) =>
+            `<div>· ${c.annotation_type === "issue" ? "[问题]" : c.annotation_type === "praise" ? "[肯定]" : "[建议]"} ${escapeHtmlClient(c.content)}</div>`
+          ).join("");
+          const h = secEl.querySelector("h2, h3");
+          if (h && h.parentElement === secEl) {
+            secEl.insertBefore(box, h.nextSibling);
+          } else {
+            secEl.insertBefore(box, secEl.firstChild);
+          }
+        }
+      });
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [bpTeacherComments, bpViewMode, businessPlan?.plan_id, businessPlan?.sections]);
 
   useEffect(() => {
     if (!activeBpSectionId) return;
@@ -954,11 +1043,27 @@ export default function StudentPage() {
       } else if (e.key.toLowerCase() === "a" && e.shiftKey && businessPlan?.plan_id) {
         e.preventDefault();
         if ((businessPlan.pending_revisions ?? []).length > 0) acceptAllRevisions();
+      } else if (e.key === "/" && !e.shiftKey) {
+        e.preventDefault();
+        setBpOutlineOpen((v) => !v);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [rightTab, businessPlan?.plan_id, businessPlan?.version_tier, businessPlan?.pending_revisions]);
+
+  useEffect(() => {
+    try {
+      const pinned = localStorage.getItem("bp_outline_pinned") === "1";
+      setBpOutlinePinned(pinned);
+      if (pinned) setBpOutlineOpen(true);
+    } catch { /* noop */ }
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("bp_outline_pinned", bpOutlinePinned ? "1" : "0"); } catch { /* noop */ }
+    if (bpOutlinePinned) setBpOutlineOpen(true);
+  }, [bpOutlinePinned]);
 
   async function submitDeepenAnswers() {
     if (!businessPlan?.plan_id || !bpDeepenSectionId) return;
@@ -991,6 +1096,103 @@ export default function StudentPage() {
       setBpError(err?.message || "深化失败");
     } finally {
       setBpDeepenSubmitting(false);
+    }
+  }
+
+  async function finalizeBusinessPlan() {
+    if (!businessPlan?.plan_id || bpFinalizeBusy) return;
+    setBpFinalizeBusy(true);
+    setBpUpgradeToast("正在润色为正式稿（生成执行摘要与每章小结）…");
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/finalize`,
+        { method: "POST" },
+      );
+      const data = (await resp.json()) as BusinessPlanResponse;
+      if (data?.plan) {
+        setBusinessPlan(data.plan);
+        setBpReadiness(data.readiness ?? null);
+        setBpUpgradeToast("已完成润色：开篇执行摘要 + 每章本章小结已到位。");
+        setTimeout(() => setBpUpgradeToast(""), 3600);
+      } else {
+        setBpUpgradeToast("润色失败，请稍后重试。");
+        setTimeout(() => setBpUpgradeToast(""), 3600);
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "润色失败");
+    } finally {
+      setBpFinalizeBusy(false);
+    }
+  }
+
+  async function createSnapshot() {
+    if (!businessPlan?.plan_id || bpSnapshotBusy) return;
+    const label = typeof window !== "undefined"
+      ? (window.prompt("为当前版本取一个名字（可留空，建议 10 字以内）", "") || "").trim()
+      : "";
+    setBpSnapshotBusy(true);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/snapshots`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ label }),
+        },
+      );
+      const data = await resp.json();
+      if (data?.status === "ok") {
+        setBpUpgradeToast(`已保存快照${data?.snapshot?.label ? `：${data.snapshot.label}` : ""}`);
+        setTimeout(() => setBpUpgradeToast(""), 3200);
+      } else {
+        setBpUpgradeToast("保存快照失败");
+        setTimeout(() => setBpUpgradeToast(""), 3000);
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "保存快照失败");
+    } finally {
+      setBpSnapshotBusy(false);
+    }
+  }
+
+  async function openSnapshotHistory() {
+    if (!businessPlan?.plan_id) return;
+    setBpSnapshotOpen(true);
+    setBpSnapshotLoading(true);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/snapshots`,
+      );
+      const data = await resp.json();
+      setBpSnapshots(Array.isArray(data?.snapshots) ? data.snapshots : []);
+    } catch {
+      setBpSnapshots([]);
+    } finally {
+      setBpSnapshotLoading(false);
+    }
+  }
+
+  async function rollbackToSnapshot(snapId: string) {
+    if (!businessPlan?.plan_id) return;
+    if (!window.confirm("确认回滚到该版本？系统会先自动保存当前内容的兜底快照。")) return;
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/snapshots/${encodeURIComponent(snapId)}/rollback`,
+        { method: "POST" },
+      );
+      const data = (await resp.json()) as BusinessPlanResponse;
+      if (data?.plan) {
+        setBusinessPlan(data.plan);
+        setBpReadiness(data.readiness ?? null);
+        setBpSnapshotOpen(false);
+        setBpUpgradeToast("已回滚到所选版本。");
+        setTimeout(() => setBpUpgradeToast(""), 3000);
+      } else {
+        setBpUpgradeToast("回滚失败，请稍后重试。");
+        setTimeout(() => setBpUpgradeToast(""), 3000);
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "回滚失败");
     }
   }
 
@@ -1301,7 +1503,10 @@ export default function StudentPage() {
     try {
       const r = await fetch(`${API_BASE}/api/conversations/${encodeURIComponent(cid)}?project_id=${encodeURIComponent(projectId)}`);
       const d = await r.json();
-      const rawMsgs = d.messages ?? [];
+      const rawMsgsAll = d.messages ?? [];
+      // silent 消息（如计划书深化沉淀 kind=deepen_addon）不在聊天流渲染，
+      // 但保留在对话 JSON 中供后续 agent 读取
+      const rawMsgs = rawMsgsAll.filter((m: any) => !m?.silent && m?.kind !== "deepen_addon");
       const msgs: ChatMessage[] = rawMsgs.map((m: any) => ({
         role: m.role as "user" | "assistant",
         text: m.content ?? "",
@@ -1671,21 +1876,31 @@ export default function StudentPage() {
 
   const rubric = useMemo(() => {
     if (resultHistory.length === 0) return latestResult?.diagnosis?.rubric ?? [];
-    const merged: Record<string, { item: string; scores: number[]; weight: number }> = {};
+    const merged: Record<string, { item: string; scores: number[]; weight: number; reason?: string; source?: string }> = {};
     for (const r of resultHistory) {
       for (const row of r?.diagnosis?.rubric ?? []) {
         if (!merged[row.item]) merged[row.item] = { item: row.item, scores: [], weight: row.weight ?? 0 };
         merged[row.item].scores.push(row.score);
+        merged[row.item].reason = row.reason ?? merged[row.item].reason;
+        merged[row.item].source = row.source ?? merged[row.item].source;
+        merged[row.item].weight = row.weight ?? merged[row.item].weight;
       }
     }
-    return Object.values(merged).map((m) => ({
-      item: m.item,
-      score: Math.round(Math.max(...m.scores) * 100) / 100,
-      bestScore: Math.round(Math.max(...m.scores) * 100) / 100,
-      prevScore: m.scores.length > 1 ? Math.round(m.scores[m.scores.length - 2] * 100) / 100 : null,
-      trend: m.scores.length > 1 ? (m.scores[m.scores.length - 1] > m.scores[m.scores.length - 2] ? "up" : m.scores[m.scores.length - 1] < m.scores[m.scores.length - 2] ? "down" : "same") : null,
-      weight: m.weight,
-    }));
+    return Object.values(merged).map((m) => {
+      const latest = m.scores[m.scores.length - 1];
+      const best = Math.max(...m.scores);
+      const prev = m.scores.length > 1 ? m.scores[m.scores.length - 2] : null;
+      return {
+        item: m.item,
+        score: Math.round(latest * 100) / 100,
+        bestScore: Math.round(best * 100) / 100,
+        prevScore: prev !== null ? Math.round(prev * 100) / 100 : null,
+        trend: prev !== null ? (latest > prev ? "up" : latest < prev ? "down" : "same") : null,
+        weight: m.weight,
+        reason: m.reason,
+        source: m.source,
+      };
+    });
   }, [resultHistory, latestResult]);
 
   const currentVideoRecord = useMemo(
@@ -3134,16 +3349,46 @@ export default function StudentPage() {
                                 </div>
                                 {maturityNextGap.length > 0 && (
                                   <div className="bp-maturity-gaps">
-                                    <div className="bp-maturity-gap-title">距离下一档还差：</div>
-                                    {maturityNextGap.slice(0, 3).map((g: any, idx: number) => (
-                                      <div key={idx} className="bp-maturity-gap">
-                                        <div className="bp-maturity-gap-reason">{g.field_label || g.field}</div>
-                                        <div className="bp-maturity-gap-sugg">{g.suggestion}</div>
-                                      </div>
-                                    ))}
+                                    <div className="bp-maturity-gap-title">
+                                      距离下一档还差：
+                                      <span className="bp-maturity-gap-hint">点击任意建议即可填入对话</span>
+                                    </div>
+                                    {maturityNextGap.slice(0, 4).map((g: any, idx: number) => {
+                                      const dim = (g.dimension || g.dim || "") as string;
+                                      const dimLabel = dim === "skeleton" ? "骨架" : dim === "agent_density" || dim === "agent" ? "智能体" : dim === "coherence" ? "逻辑" : "";
+                                      const suggestion: string = g.suggestion || "";
+                                      const fieldLabel: string = g.field_label || g.field || "";
+                                      return (
+                                        <button
+                                          key={idx}
+                                          type="button"
+                                          className={`bp-maturity-gap is-clickable dim-${dim || "misc"}`}
+                                          onClick={() => {
+                                            if (suggestion) {
+                                              setInput(suggestion);
+                                              setBpMaturityOpen(false);
+                                              setTimeout(() => {
+                                                textareaRef.current?.focus();
+                                                textareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                                              }, 80);
+                                            }
+                                          }}
+                                          title="点击把这条问题填入下方对话输入框"
+                                        >
+                                          <div className="bp-maturity-gap-reason">
+                                            {dimLabel && <span className={`bp-maturity-dim-tag dim-${dim || "misc"}`}>{dimLabel}</span>}
+                                            {fieldLabel}
+                                          </div>
+                                          <div className="bp-maturity-gap-sugg">{suggestion}</div>
+                                        </button>
+                                      );
+                                    })}
                                   </div>
                                 )}
-                                <button className="bp-maturity-close" onClick={() => setBpMaturityOpen(false)}>关闭</button>
+                                <div className="bp-maturity-foot">
+                                  <span className="bp-maturity-foot-tip">评分由骨架(60) + 智能体信息(30) + 逻辑(10)加权，实时更新</span>
+                                  <button className="bp-maturity-close" onClick={() => setBpMaturityOpen(false)}>关闭</button>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -3219,6 +3464,46 @@ export default function StudentPage() {
                                       <span className="bp-fab-lbl">忽略全部修订 ({pendingCount})</span>
                                     </button>
                                   )}
+                                  <div className="bp-fab-sep" />
+                                  <button
+                                    className="bp-fab-item bp-fab-accent"
+                                    onClick={() => { setBpMoreOpen(false); finalizeBusinessPlan(); }}
+                                    disabled={bpFinalizeBusy || !plan?.plan_id}
+                                    title="添加执行摘要 + 每章本章小结，让内容更像正式 BP"
+                                  >
+                                    <span className="bp-fab-ic">✨</span>
+                                    <span className="bp-fab-lbl">{bpFinalizeBusy ? "润色中…" : "润色为正式稿"}</span>
+                                  </button>
+                                  <button
+                                    className="bp-fab-item bp-fab-ghost"
+                                    onClick={() => { setBpMoreOpen(false); createSnapshot(); }}
+                                    disabled={bpSnapshotBusy || !plan?.plan_id}
+                                    title="手动保存当前版本以便随时回滚"
+                                  >
+                                    <span className="bp-fab-ic">📌</span>
+                                    <span className="bp-fab-lbl">{bpSnapshotBusy ? "保存中…" : "保存当前版本"}</span>
+                                  </button>
+                                  <button
+                                    className="bp-fab-item bp-fab-ghost"
+                                    onClick={() => { setBpMoreOpen(false); openSnapshotHistory(); }}
+                                    disabled={!plan?.plan_id}
+                                  >
+                                    <span className="bp-fab-ic">🕘</span>
+                                    <span className="bp-fab-lbl">版本历史</span>
+                                  </button>
+                                  <button
+                                    className="bp-fab-item bp-fab-ghost"
+                                    onClick={() => { setBpMoreOpen(false); setBpCommentsOpen(true); }}
+                                    title="查看教师批注与建议"
+                                  >
+                                    <span className="bp-fab-ic">💬</span>
+                                    <span className="bp-fab-lbl">
+                                      教师建议
+                                      {bpTeacherComments.filter((c: any) => (c.status || "open") === "open").length > 0 && (
+                                        <span className="bp-fab-badge">{bpTeacherComments.filter((c: any) => (c.status || "open") === "open").length}</span>
+                                      )}
+                                    </span>
+                                  </button>
                                   <div className="bp-fab-sep" />
                                   <button className="bp-fab-item bp-fab-ghost" onClick={() => { setBpMoreOpen(false); exportBusinessPlan("docx"); }} disabled={bpExportBusy}>
                                     <span className="bp-fab-ic">↓</span><span className="bp-fab-lbl">{bpExportBusy ? "导出中…" : "导出 docx"}</span>
@@ -3318,11 +3603,37 @@ export default function StudentPage() {
                     const activeId = activeBpSectionId || selectedBpSection?.section_id;
                     return (
                       <>
-                        {/* ═ 右浮大纲（仅阅读模式） ═ */}
+                        {/* ═ 右浮大纲（仅阅读模式，默认收起手柄式） ═ */}
                         {bpViewMode === "read" && (
-                          <aside className="bp-right-outline" aria-label="章节大纲">
+                          <aside
+                            className={`bp-right-outline ${bpOutlineOpen ? "is-open" : ""} ${bpOutlinePinned ? "is-pinned" : ""}`}
+                            aria-label="章节大纲"
+                            onMouseEnter={() => {
+                              if (bpOutlineHoverTimer.current) { clearTimeout(bpOutlineHoverTimer.current); bpOutlineHoverTimer.current = null; }
+                              setBpOutlineOpen(true);
+                            }}
+                            onMouseLeave={() => {
+                              if (bpOutlinePinned) return;
+                              if (bpOutlineHoverTimer.current) clearTimeout(bpOutlineHoverTimer.current);
+                              bpOutlineHoverTimer.current = setTimeout(() => setBpOutlineOpen(false), 400);
+                            }}
+                          >
+                            <button
+                              className="bp-ro-handle"
+                              onClick={() => setBpOutlineOpen((v) => !v)}
+                              title={bpOutlineOpen ? "收起目录（Ctrl+/）" : "展开目录（Ctrl+/）"}
+                              aria-label="切换目录"
+                            >
+                              <span className="bp-ro-handle-text">目 录</span>
+                              <span className="bp-ro-handle-arrow">{bpOutlineOpen ? "›" : "‹"}</span>
+                            </button>
                             <div className="bp-ro-head">
-                              <span className="bp-ro-title">章节</span>
+                              <span className="bp-ro-title">章节目录</span>
+                              <button
+                                className={`bp-ro-pin ${bpOutlinePinned ? "is-on" : ""}`}
+                                onClick={() => setBpOutlinePinned((v) => !v)}
+                                title={bpOutlinePinned ? "取消固定（再次悬停可收起）" : "固定显示（不自动收起）"}
+                              >📌</button>
                               <button className="bp-ro-expand" onClick={() => setBpDrawerOpen(true)} title="展开完整目录">⤢</button>
                             </div>
                             <div className="bp-ro-list">
@@ -3587,6 +3898,113 @@ export default function StudentPage() {
                                 )}
                               </div>
                             </aside>
+                          </>
+                        )}
+
+                        {bpSnapshotOpen && (
+                          <>
+                            <div className="bp-dialog-mask" onClick={() => setBpSnapshotOpen(false)} />
+                            <div className="bp-dialog bp-dialog-snapshots" role="dialog" aria-label="版本历史">
+                              <div className="bp-dialog-head">
+                                <strong>版本历史</strong>
+                                <button className="bp-dialog-close" onClick={() => setBpSnapshotOpen(false)} aria-label="关闭">×</button>
+                              </div>
+                              <div className="bp-dialog-body">
+                                {bpSnapshotLoading ? (
+                                  <div className="bp-dialog-hint">读取快照中…</div>
+                                ) : bpSnapshots.length === 0 ? (
+                                  <div className="bp-dialog-hint">暂无已保存的版本。可在 FAB 菜单使用「保存当前版本」手动存档。</div>
+                                ) : (
+                                  <div className="bp-snap-list">
+                                    {bpSnapshots.map((snap: any) => (
+                                      <div key={snap.snap_id} className="bp-snap-row">
+                                        <div className="bp-snap-main">
+                                          <div className="bp-snap-label">{snap.label || "（无标注）"}</div>
+                                          <div className="bp-snap-meta">
+                                            {snap.created_at ? String(snap.created_at).slice(0, 19).replace("T", " ") : "-"}
+                                            <span className="bp-snap-sep">·</span>
+                                            {snap.section_count ?? 0} 章
+                                            <span className="bp-snap-sep">·</span>
+                                            {(snap.word_count ?? 0).toLocaleString()} 字
+                                            {snap.version_tier && (
+                                              <><span className="bp-snap-sep">·</span>{snap.version_tier === "full" ? "正式版" : snap.version_tier === "basic" ? "基础版" : "草稿"}</>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="bp-snap-actions">
+                                          <button
+                                            className="tch-sm-btn"
+                                            onClick={() => rollbackToSnapshot(snap.snap_id)}
+                                          >回滚到此版本</button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="bp-snap-tip">回滚前系统会自动保存当前内容的兜底快照，最多保留 50 条。</div>
+                              </div>
+                              <div className="bp-dialog-foot">
+                                <button className="tch-sm-btn" onClick={() => setBpSnapshotOpen(false)}>关闭</button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {bpCommentsOpen && (
+                          <>
+                            <div className="bp-dialog-mask" onClick={() => setBpCommentsOpen(false)} />
+                            <div className="bp-dialog bp-dialog-comments" role="dialog" aria-label="教师建议">
+                              <div className="bp-dialog-head">
+                                <strong>教师建议与批注</strong>
+                                <button className="bp-dialog-close" onClick={() => setBpCommentsOpen(false)} aria-label="关闭">×</button>
+                              </div>
+                              <div className="bp-dialog-body">
+                                {bpTeacherComments.length === 0 ? (
+                                  <div className="bp-dialog-hint">教师尚未留下批注。</div>
+                                ) : (
+                                  <div className="bp-tch-list">
+                                    {sections.map((sec) => {
+                                      const list = bpTeacherComments.filter((c: any) => c.section_id === sec.section_id);
+                                      if (!list.length) return null;
+                                      return (
+                                        <div key={sec.section_id} className="bp-tch-group">
+                                          <div className="bp-tch-group-title">
+                                            <button
+                                              type="button"
+                                              className="bp-tch-group-jump"
+                                              onClick={() => {
+                                                setBpCommentsOpen(false);
+                                                const el = bpSectionRefs.current[sec.section_id];
+                                                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                              }}
+                                            >{sec.display_title || sec.title}</button>
+                                          </div>
+                                          {list.map((c: any) => {
+                                            const label = c.annotation_type === "issue" ? "问题" : c.annotation_type === "praise" ? "肯定" : "建议";
+                                            return (
+                                              <div key={c.comment_id} className={`bp-tch-card type-${c.annotation_type} ${c.status === "resolved" ? "resolved" : ""}`}>
+                                                <div className="bp-tch-card-head">
+                                                  <span className={`bp-tch-card-tag tag-${c.annotation_type}`}>{label}</span>
+                                                  <span className="bp-tch-card-author">{c.teacher_name || c.teacher_id || "老师"}</span>
+                                                  <span className="bp-tch-card-time">{String(c.created_at || "").slice(5, 16).replace("T", " ")}</span>
+                                                </div>
+                                                {c.quote && (
+                                                  <blockquote className="bp-tch-card-quote">"{String(c.quote).slice(0, 80)}{String(c.quote).length > 80 ? "…" : ""}"</blockquote>
+                                                )}
+                                                <div className="bp-tch-card-content">{c.content}</div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="bp-dialog-foot">
+                                <button className="tch-sm-btn" onClick={() => setBpCommentsOpen(false)}>关闭</button>
+                              </div>
+                            </div>
                           </>
                         )}
 
@@ -3894,12 +4312,24 @@ export default function StudentPage() {
                                     <span className="sc-dim-level" style={{color: clr}}>{levelLabel}</span>
                                   </div>
                                   <div className="sc-dim-bar-wrap">
-                                    <div className="sc-dim-bar-track"><div className="sc-dim-bar-fill" style={{width:`${pct}%`, background: clr}} /></div>
+                                    <div className="sc-dim-bar-track">
+                                      <div className="sc-dim-bar-fill" style={{width:`${pct}%`, background: clr}} />
+                                      {typeof r.bestScore === "number" && r.bestScore > r.score && (
+                                        <div
+                                          className="sc-dim-bar-best"
+                                          title={`历史最高 ${r.bestScore}`}
+                                          style={{left: `${Math.min(100, (r.bestScore / 10) * 100)}%`}}
+                                        />
+                                      )}
+                                    </div>
                                     <span className="sc-dim-score" style={{color: clr}}>{r.score}</span>
                                   </div>
-                                  {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}{r.prev_score != null ? ` (${r.prev_score}→${r.score})` : ""}</span>}
+                                  {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}{r.prevScore != null ? ` (${r.prevScore}→${r.score})` : ""}</span>}
                             </summary>
                                 {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
+                                {typeof r.bestScore === "number" && r.bestScore > r.score && (
+                                  <div className="sc-dim-best-hint">历史最高：{r.bestScore}（点击外侧竖线查看）</div>
+                                )}
                           </details>
                         );
                       })}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
-type Tab = "overview" | "assistant" | "conversation-analytics" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition";
+type Tab = "overview" | "assistant" | "conversation-analytics" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition" | "student-plans";
 type TeamView = "comparison" | "team-detail" | "student-detail" | "project-detail";
 
 // 风险规则名称映射
@@ -553,47 +553,36 @@ export default function TeacherPage() {
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedLogicalProjectId, setSelectedLogicalProjectId] = useState("");
 
-  const [studentPlansOpen, setStudentPlansOpen] = useState(false);
-  const [studentPlansInput, setStudentPlansInput] = useState("");
+  // ── 学生计划书 Tab 数据源（按学生聚合，告别输入 proj-xxx） ──
+  const [studentPlansTeams, setStudentPlansTeams] = useState<any[]>([]);
   const [studentPlansLoading, setStudentPlansLoading] = useState(false);
   const [studentPlansError, setStudentPlansError] = useState("");
-  const [studentPlansList, setStudentPlansList] = useState<any[]>([]);
+  const [studentPlansQuery, setStudentPlansQuery] = useState("");
+  const [selectedBpStudent, setSelectedBpStudent] = useState<string>("");
 
-  const loadStudentPlansFor = useCallback(async (projectId: string) => {
-    const pid = projectId.trim();
-    if (!pid) {
-      setStudentPlansList([]);
-      setStudentPlansError("请先输入或选择一个项目 ID。");
+  const loadStudentPlans = useCallback(async (teacherIdIn: string) => {
+    const tid = (teacherIdIn || "").trim();
+    if (!tid) {
+      setStudentPlansTeams([]);
+      setStudentPlansError("尚未识别到当前教师身份，请登录后重试。");
       return;
     }
     setStudentPlansLoading(true);
     setStudentPlansError("");
     try {
-      const data = await api(`/api/teacher/project/${encodeURIComponent(pid)}/business-plans`);
-      const rows = Array.isArray(data?.plans) ? data.plans : [];
-      setStudentPlansList(rows);
+      const data = await api(`/api/teacher/student-plans?teacher_id=${encodeURIComponent(tid)}`);
+      const rows = Array.isArray(data?.teams) ? data.teams : [];
+      setStudentPlansTeams(rows);
       if (rows.length === 0) {
-        setStudentPlansError("该项目下暂无学生计划书。");
+        setStudentPlansError("当前没有学生计划书。一旦有学生生成草稿，会自动出现在这里。");
       }
     } catch (err: any) {
       setStudentPlansError(err?.message || "获取学生计划书列表失败。");
-      setStudentPlansList([]);
+      setStudentPlansTeams([]);
     } finally {
       setStudentPlansLoading(false);
     }
   }, []);
-
-  const openStudentPlansPanel = useCallback(() => {
-    const pid = (selectedProject || "").trim();
-    setStudentPlansInput(pid);
-    setStudentPlansOpen(true);
-    if (pid) {
-      void loadStudentPlansFor(pid);
-    } else {
-      setStudentPlansList([]);
-      setStudentPlansError("");
-    }
-  }, [selectedProject, loadStudentPlansFor]);
   const [expandedSubmission, setExpandedSubmission] = useState<number | null>(null);
 
   // 班级页面状态
@@ -2839,6 +2828,7 @@ export default function TeacherPage() {
     { id: "project", label: "项目" },
     { id: "submissions", label: "学生提交" },
     { id: "feedback", label: "材料反馈" },
+    { id: "student-plans", label: "学生计划书" },
   ];
 
   const teacherProjectCatalog = useMemo(() => {
@@ -3289,14 +3279,6 @@ export default function TeacherPage() {
 
             <div className="dock-sep" />
 
-            {/* 学生计划书（只读） */}
-            <button type="button" className="dock-item" onClick={openStudentPlansPanel}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><line x1="8" y1="7" x2="16" y2="7" /><line x1="8" y1="11" x2="16" y2="11" /></svg>
-              <span className="dock-tooltip">查看学生计划书（只读）</span>
-            </button>
-
-            <div className="dock-sep" />
-
             {/* Theme toggle */}
             <button type="button" className="dock-item" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} suppressHydrationWarning>
               {theme === "dark" ? (
@@ -3315,111 +3297,6 @@ export default function TeacherPage() {
           </div>
         </div>
       </header>
-
-      {/* ── 学生计划书浏览器（只读入口） ── */}
-      {studentPlansOpen && (
-        <div
-          style={{
-            position: "fixed", inset: 0, zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(3, 9, 25, 0.58)", backdropFilter: "blur(3px)",
-          }}
-          onClick={() => setStudentPlansOpen(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "min(720px, 92vw)", maxHeight: "82vh", overflow: "hidden",
-              background: "var(--panel)", color: "var(--text)", borderRadius: 14,
-              border: "1px solid var(--border)", boxShadow: "0 18px 60px rgba(0,0,0,0.45)",
-              display: "flex", flexDirection: "column",
-            }}
-          >
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>学生计划书 · 只读预览</div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>按项目 ID 查询；所有编辑操作在学生端完成。</div>
-              </div>
-              <button type="button" onClick={() => setStudentPlansOpen(false)} style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18 }}>×</button>
-            </div>
-            <div style={{ padding: "14px 20px", display: "flex", gap: 8, alignItems: "center", borderBottom: "1px solid var(--border)" }}>
-              <input
-                type="text"
-                placeholder="输入项目 ID（如 proj_xxx）"
-                value={studentPlansInput}
-                onChange={(e) => setStudentPlansInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") void loadStudentPlansFor(studentPlansInput); }}
-                style={{
-                  flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)",
-                  background: "var(--input-bg, rgba(255,255,255,0.03))", color: "var(--text)", fontSize: 13,
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => void loadStudentPlansFor(studentPlansInput)}
-                disabled={studentPlansLoading}
-                style={{
-                  padding: "8px 14px", borderRadius: 8, border: "1px solid var(--accent)",
-                  background: "var(--accent)", color: "#fff", fontSize: 13, cursor: "pointer",
-                  opacity: studentPlansLoading ? 0.6 : 1,
-                }}
-              >
-                {studentPlansLoading ? "查询中..." : "查询"}
-              </button>
-            </div>
-            <div style={{ padding: "12px 20px 20px", overflow: "auto" }}>
-              {studentPlansError && (
-                <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(255, 99, 99, 0.08)", color: "#ff8a8a", fontSize: 12, marginBottom: 10 }}>
-                  {studentPlansError}
-                </div>
-              )}
-              {studentPlansList.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {studentPlansList.map((row) => (
-                    <div
-                      key={row.plan_id}
-                      style={{
-                        padding: 12, borderRadius: 10, border: "1px solid var(--border)",
-                        background: "var(--bg-subtle, rgba(255,255,255,0.02))", display: "flex",
-                        alignItems: "center", justifyContent: "space-between", gap: 12,
-                      }}
-                    >
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {row.project_name || "未命名项目"} <span style={{ color: "var(--text-muted)", fontWeight: 400, marginLeft: 6, fontSize: 11 }}>#{row.plan_id}</span>
-                        </div>
-                        <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginBottom: 2 }}>
-                          版本：{row.version_tier || "-"} · 成熟度：{row.readiness_score ?? "-"}/100 {row.readiness_tier ? `(${row.readiness_tier})` : ""}
-                        </div>
-                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                          对话 ID：{row.conversation_id || "-"} · 更新：{row.updated_at ? String(row.updated_at).slice(0, 19).replace("T", " ") : "-"}
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                        <a
-                          href={`/business-plan/${encodeURIComponent(row.plan_id)}/print?viewOnly=1`}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            padding: "7px 12px", borderRadius: 8, border: "1px solid var(--accent)",
-                            background: "transparent", color: "var(--accent)", fontSize: 12, textDecoration: "none",
-                          }}
-                        >
-                          只读预览
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {!studentPlansLoading && !studentPlansError && studentPlansList.length === 0 && (
-                <div style={{ color: "var(--text-muted)", fontSize: 12, padding: "16px 4px" }}>
-                  输入项目 ID 后可查询该项目已生成的所有计划书，点击右侧「只读预览」即可查看。
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Logout Confirm Modal ── */}
       {showLogoutConfirm && (
@@ -3469,6 +3346,10 @@ export default function TeacherPage() {
                 }
                 if (t.id === "feedback") {
                   if (!teamData) loadTeams();
+                }
+                if (t.id === "student-plans") {
+                  const tid = currentUser?.user_id || teacherId || "";
+                  void loadStudentPlans(tid);
                 }
               }}>
               {t.label}
@@ -5714,6 +5595,142 @@ export default function TeacherPage() {
               
               {successMessage && <SuccessToast message={successMessage} onClose={() => setSuccessMessage("")} />}
               {errorMessage && <ErrorToast message={errorMessage} onClose={() => setErrorMessage("")} />}
+            </div>
+          )}
+
+          {/* ── 学生计划书（按学生分组，替代旧的 proj-xxx Modal） ── */}
+          {tab === "student-plans" && (
+            <div className="tch-panel fade-up bp-sp-panel">
+              <div className="bp-sp-head">
+                <div>
+                  <h2 style={{ margin: 0 }}>学生计划书</h2>
+                  <div className="bp-sp-sub">按学生分组查看所有商业计划书；点击「打开批注」直接进入划线批注页。</div>
+                </div>
+                <div className="bp-sp-head-actions">
+                  <input
+                    className="bp-sp-search"
+                    type="text"
+                    placeholder="按学生姓名 / 学号搜索…"
+                    value={studentPlansQuery}
+                    onChange={(e) => setStudentPlansQuery(e.target.value)}
+                  />
+                  <button
+                    className="tch-sm-btn"
+                    onClick={() => void loadStudentPlans(currentUser?.user_id || teacherId || "")}
+                    disabled={studentPlansLoading}
+                  >
+                    {studentPlansLoading ? "刷新中…" : "刷新"}
+                  </button>
+                </div>
+              </div>
+              {studentPlansError && (
+                <div className="bp-sp-err">{studentPlansError}</div>
+              )}
+              {!studentPlansLoading && !studentPlansError && studentPlansTeams.length === 0 && (
+                <div className="bp-sp-empty">当前没有找到任何学生计划书。</div>
+              )}
+              <div className="bp-sp-body">
+                {studentPlansTeams.map((team: any) => {
+                  const q = studentPlansQuery.trim().toLowerCase();
+                  const filtered = (team.students || []).filter((s: any) => {
+                    if (!q) return true;
+                    return (
+                      String(s.display_name || "").toLowerCase().includes(q) ||
+                      String(s.student_id_code || "").toLowerCase().includes(q)
+                    );
+                  });
+                  if (filtered.length === 0) return null;
+                  return (
+                    <div key={team.team_id} className="bp-sp-team-block">
+                      <div className="bp-sp-team-title">{team.team_name}</div>
+                      <div className="bp-sp-grid">
+                        <aside className="bp-sp-left">
+                          {filtered.map((stu: any) => (
+                            <button
+                              key={stu.student_id}
+                              className={`bp-sp-stu ${selectedBpStudent === stu.student_id ? "is-active" : ""}`}
+                              onClick={() => setSelectedBpStudent(stu.student_id)}
+                              title={stu.display_name}
+                            >
+                              <div className="bp-sp-stu-name">{stu.display_name}</div>
+                              <div className="bp-sp-stu-meta">
+                                {stu.student_id_code ? `学号 ${stu.student_id_code} · ` : ""}
+                                {(stu.plans || []).length} 份
+                                {(() => {
+                                  const unresolved = (stu.plans || []).reduce((acc: number, p: any) => acc + (p.unresolved_count || 0), 0);
+                                  return unresolved > 0 ? <span className="bp-sp-stu-badge">{unresolved}</span> : null;
+                                })()}
+                              </div>
+                            </button>
+                          ))}
+                        </aside>
+                        <section className="bp-sp-right">
+                          {(() => {
+                            const stu = filtered.find((s: any) => s.student_id === selectedBpStudent) || filtered[0];
+                            if (!stu) return <div className="bp-sp-empty">该团队内暂无计划书。</div>;
+                            const plans: any[] = stu.plans || [];
+                            return (
+                              <>
+                                <div className="bp-sp-right-head">
+                                  <div>
+                                    <div className="bp-sp-right-name">{stu.display_name}</div>
+                                    <div className="bp-sp-right-meta">项目 {stu.project_id}</div>
+                                  </div>
+                                  <div className="bp-sp-right-count">{plans.length} 份计划书</div>
+                                </div>
+                                <div className="bp-sp-plan-list">
+                                  {plans.map((p: any) => (
+                                    <div key={p.plan_id} className="bp-sp-plan-card">
+                                      <div className="bp-sp-plan-main">
+                                        <div className="bp-sp-plan-title">
+                                          {p.project_name || "未命名项目"}
+                                          <span className={`bp-sp-plan-tier tier-${p.version_tier || "draft"}`}>
+                                            {p.version_tier === "full" ? "正式版" : p.version_tier === "basic" ? "基础版" : "草稿"}
+                                          </span>
+                                        </div>
+                                        <div className="bp-sp-plan-meta">
+                                          更新 {p.updated_at ? String(p.updated_at).slice(0, 16).replace("T", " ") : "-"}
+                                          <span className="bp-sp-sep">·</span>
+                                          {(p.word_count || 0).toLocaleString()} 字
+                                          <span className="bp-sp-sep">·</span>
+                                          成熟度 {p.readiness_score ?? "-"}/100
+                                          {p.comment_count > 0 && (
+                                            <>
+                                              <span className="bp-sp-sep">·</span>
+                                              <span className="bp-sp-plan-cmt">
+                                                {p.comment_count} 条建议
+                                                {p.unresolved_count > 0 ? `（${p.unresolved_count} 未解决）` : ""}
+                                              </span>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="bp-sp-plan-actions">
+                                        <a
+                                          className="tch-sm-btn bp-sp-btn-primary"
+                                          href={`/business-plan/${encodeURIComponent(p.plan_id)}/annotate?teacher_id=${encodeURIComponent(currentUser?.user_id || teacherId || "")}&teacher_name=${encodeURIComponent(currentUser?.display_name || "")}`}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >打开批注</a>
+                                        <a
+                                          className="tch-sm-btn"
+                                          href={`/business-plan/${encodeURIComponent(p.plan_id)}/print?viewOnly=1`}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >只读预览</a>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </section>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

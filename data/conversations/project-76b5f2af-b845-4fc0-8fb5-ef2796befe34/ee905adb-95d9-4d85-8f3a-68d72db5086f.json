@@ -1,0 +1,1290 @@
+{
+  "conversation_id": "ee905adb-95d9-4d85-8f3a-68d72db5086f",
+  "project_id": "project-76b5f2af-b845-4fc0-8fb5-ef2796befe34",
+  "student_id": "stu002",
+  "title": "无人机配送项目市场分析讲解",
+  "summary": "请提供更详细描述",
+  "created_at": "2026-04-09T21:40:29.571744+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "老师，我正在做一个名为 DroneFarm 的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？",
+      "timestamp": "2026-04-09T21:42:42.518836+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "好的，这个问题提得非常核心，也是很多创业项目初期最容易出现偏差的地方。我们一步步来拆解。\n\nTAM/SAM/SOM，你可以把它理解成一个**市场金字塔**，它最大的作用就是帮你从“星辰大海”的想象，一步步落到“第一口井”在哪里，让投资人看到你既有远见，又有脚踏实地的计划。\n\n- **TAM (Total Addressable Market，总潜在市场)**：这是理论上的最大蛋糕。对于你的无人机配送项目，它可能是**全球/中国即时配送市场的总规模**，或者**所有适合用无人机运输的货物价值总和**。这个数字很大，用来展示行业的天花板和吸引力。\n\n- **SAM (Serviceable Addressable Market，可服务市场)**：这是TAM里，你的**技术、产品、商业模式**能够有效触达并服务的那一部分。这是最关键的一层，也是最容易犯错的一层。你不能说“所有快递都是我的SAM”，这不现实。你需要聚焦。\n\n- **SOM (Serviceable Obtainable Market，可获得市场)**：这是你创业初期（比如前3年）**真正有信心和能力拿下**的SAM份额。它非常具体，是你商业计划的起点。\n\n现在，我们把这些概念套到你的 **DroneFarm** 项目上。你最大的风险，就是把这三层搞混了，比如用TAM的万亿数字去忽悠，但说不清自己到底要从哪里开始吃。\n\n---\n\n### 我们来看看一个清晰的案例是怎么做的\n\n背景信息里提到的“求是鹰眼反无人机系统”项目，它的市场分析思路就非常值得你借鉴。它同样是无人机相关领域，但逻辑非常清晰：\n\n1.  **宏观背景 (类似TAM的语境)**：它提到了“低空经济”开放带来的**千亿级爆发期**。这说明了行业的趋势和潜力。\n2.  **聚焦的SAM**：它没有说“所有无人机安全问题我都能解决”，而是精准锁定为 **“需要主动防御的机场、核电站、重大活动场所”**。这非常具体，痛点明确，客户画像清晰。\n3.  **支撑SOM的依据**：它凭什么能拿下这些客户？因为它有**技术壁垒（多模态融合算法）** 和 **成本优势（较国外系统降低40%）**。这就是它初期能获取市场份额（SOM）的硬核理由。\n\n你看，这是一个从 **“大趋势” -> “具体场景” -> “我的独特优势”** 的完美收敛。\n\n---\n\n### 现在，轮到你来定义DroneFarm的市场金字塔了\n\n你不能只告诉我项目叫“无人机配送”，这太宽泛了。我们需要从你最想解决的**具体痛点**开始倒推。来，我们做个选择题，或者你也可以告诉我新的想法：\n\n> **你的无人机配送，核心是要解决以下哪个场景的“不可替代性”问题？**\n> 1.  **城市紧急医疗配送**（如血包、检测样本、急救药品），追求的是**分钟级时效**，传统交通无法保证。\n> 2.  **偏远地区/复杂地形物流**（如山丘、海岛、农村），解决的是**“最后一公里”无法通达**或成本极高的问题。\n> 3.  **封闭/半封闭园区内部物流**（如大型工业园区、校园、度假区），追求的是**内部流转自动化与高效**。\n> 4.  **城市高端即时配送**（如生鲜、文件、商务餐），在拥堵城市中提供**确定性更强的时效**。\n\n**选一个你最想做的，或者你认为最有价值的。** 这个选择，就直接决定了你**SAM**的边界。\n\n比如，如果你选 **1. 城市紧急医疗配送**，那么你的市场金字塔可能是这样的：\n\n```mermaid\ngraph TD\n    A[TAM总潜在市场<br>（例如：中国城市医疗物流总规模）] --> B[SAM可服务市场<br>（例如：一二线城市<br>三甲医院间的<br>紧急医疗物品空中配送需求）];\n    B --> C[SOM可获得市场<br>（例如：第1-2年，<br>与1-2家头部三甲医院合作，<br>开通3-5条核心样本配送航线）];\n```\n\n你看，这样一层层下来，是不是清晰多了？TAM很大，但SAM已经聚焦到“一二线城市三甲医院间的紧急物品”，而SOM更是具体到“前两年搞定1-2家医院，跑通几条航线”。\n\n**你的任务就是把这个图填上属于DroneFarm的具体内容。** 先别急着找具体数字，先把这三层的**文字定义**想清楚。定义清楚了，数字调研才有方向。\n\n想一下，然后告诉我你的初步想法？我们再来讨论每一层具体该怎么估算和论证。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "intent_shape": "single",
+          "intent_reason": "关键词命中 专业概念辅导/通俗讲解；判定为单一主问题；主意图归类为 learning_concept",
+          "confidence": 0.9,
+          "engine": "rule",
+          "pipeline": [
+            "tutor"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "coach",
+            "tutor"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "激活2个维度+自动补充引导维度→共5个(method_bridge, probing_questions, status_judgment, strategy_directions, action_plan)。缺失方向: 核心瓶颈识别, 结构层原因, 反直觉洞察/挑战, 评委/老师判断标准",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 2,
+          "rag_case_ids": [
+            "case_1135e29de95e",
+            "case_83d252dd4946"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "【项目状态判断】\n你的DroneFarm项目目前处于**早期构思阶段**，整体逻辑存在**严重缺口**，核心问题在于市场分析的基础框架（TAM/SAM/SOM）完全缺失，这直接导致项目落地的可行性无法评估，风险很高。\n\n系统诊断你的最高风险是H4（TAM/SAM/SOM口径混乱），这非常关键。TAM/SAM/SOM是量化市场机会的标尺，没有它，你的项目就像没有地图的航行。TAM（总潜在市场）指全球所有可能使用无人机配送的场景；SAM（可服务市场）是你的技术方案能触达的那部分TAM，比如特定城市或特定品类（如医疗急救）；SOM（可获得市场）则是你创业初期能实际吃下的份额。\n\n你可以参考背景信息中“求是鹰眼反无人机系统”案例的市场分析思路。那个项目同样面向无人机相关领域，它明确将市场机遇锚定在“低空经济”开放带来的**千亿级爆发期**，并清晰指出了自身的技术壁垒（多模态融合算法）和成本优势（较国外系统降低40%）。这为你提供了具体范本：你的TAM可以基于“即时配送”或“乡村物流”等万亿级市场估算；SAM需要聚焦于你的技术方案（如特定航程、载重）能服务的具体区域和行业；SOM则要务实，考虑你首年能签约的试点客户或覆盖的社区数量。对比来看，你目前仅有项目名称，缺乏任何市场量化数据，这是项目逻辑链上的致命断点。\n\n此外，参考案例普遍在“问题定义”、“方案可行性”、“市场与竞争”等维度有扎实论述，而你的描述过短，这些维度全部空白。你需要立即补全：DroneFarm具体解决什么配送痛点（如偏远地区药品急送）？你的无人机方案在技术、法规、成本上如何实现？目标客户是谁？只有补上这些，尤其是清晰量化TAM/SAM/SOM，你的项目逻辑才能通顺，进入可被评估的下一个阶段。\n\n【粗粒度策略方向】\n你的DroneFarm项目当前面临的核心风险是H4，即TAM/SAM/SOM口径混乱，这直接关系到投资人如何判断你的市场天花板和实际切入点。TAM是理论上的总潜在市场，SAM是你有能力服务的细分市场，SOM则是你短期内能实际获取的市场份额。口径混乱会导致市场估算虚高，让方案显得不切实际。\n\n从参考案例看，它们都清晰地界定了市场层次。例如，“求是鹰眼反无人机系统”在分析市场时，将“低空经济开放带来的安防需求”作为宏观背景（类似TAM），但明确将“需要主动防御的机场、核电站、重大活动场所”作为核心服务市场（SAM），并依托其技术团队和成本优势来估算初期能拿下的客户（SOM）。这种从宏观趋势到具体客户群的逐层收敛，是你可以直接借鉴的。你的无人机配送项目，不能简单地说“所有快递和外卖市场都是我的”，而应像“元界创生”项目那样，从具体痛点（如偏远地区时效、特殊物品急送）出发，锁定一个高价值、可验证的初始细分市场。\n\n基于此，你有两条策略方向可选：\n\n**策略一：聚焦高价值、高痛点的垂直场景，做深做透。** 这是更稳健、更易验证的打法。你可以参考“求是鹰眼”锁定核心场景的思路。例如，将你的SAM明确界定为“城市内医疗急救用品（如血包、检测样本）的即时配送”或“高端商圈/产业园区的文件、餐食即时配送”。这样，你的TAM可以是城市物流市场，SAM是这个垂直场景，SOM则是你通过试点合作（如与一家三甲医院或一个大型科技园区）在1-2年内能覆盖的订单量。这种口径清晰，能快速获得用户证据，规避H4风险。\n\n**策略二：以技术或模式创新定义新市场，但需明确落地路径。** 这更偏向“元界创生”项目的路径，它不满足于做工具，而是想定义“元宇宙内容生成协议”。对应到你的项目，如果你的无人机配送在技术（如超视距自主飞行）或模式（如分布式无人机驿站网络）上有颠覆性创新，你可以将TAM定义为“重构短途即时物流网络”。那么，你的SAM可能是“采用新型低空物流网络的电商平台或本地生活服务平台”，SOM则是与1-2个平台达成试点协议，为其特定线路提供服务。这条路径想象空间大，但必须像案例一样，在方案可行性（Solution Feasibility）上有过硬的技术支撑和清晰的阶段性目标，否则会加剧H4和H5（方案可行性）风险。\n\n【启发式追问】\n你的问题核心在于如何将通用的TAM/SAM/SOM框架具体化到你的无人机配送项目，而当前最大的风险是口径混乱，这意味着你可能在定义目标市场时边界不清，导致市场规模估算失真，直接影响投资者对你项目可行性的判断。参考案例“元界创生”在市场分析中做得很好，它没有泛泛而谈“元宇宙市场”，而是精准锁定为“沉浸式交互空间市场”，并进一步将自身定位为“元宇宙内容生成协议”标准制定者，这使其TAM（工具市场）和SAM（协议标准市场）的层次非常清晰。你的DroneFarm项目同样需要这种递进式的精准切割。\n\n首先，你需要明确你的“无人机配送”究竟服务于哪些不可替代的场景？是城市内的紧急医疗用品递送、偏远地区的物流最后一公里，还是工业园区内的零件运输？参考案例“求是鹰眼”的痛点锁定在“低空经济”开放下的“黑飞”威胁，这是一个由政策和技术趋势催生的具体、高痛点的细分市场。你的TAM不应是“全球物流市场”那么庞大而模糊，而应是与无人机技术特性强相关的“即时配送与特殊场景物流市场”。例如，你可以思考：在现有物流体系中，有哪些货物因其特性（如紧急、易腐、地形限制）使得传统陆运成本极高或时效无法满足，从而构成了无人机配送的“可服务市场”（SAM）？\n\n其次，考虑你的初始切入点（SOM）与SAM的关联。你的SOM是你第一年或前三年 realistically 能拿下的客户和区域。这需要基于你团队的能力、资源以及监管环境来设定。“元界创生”的方案从“降低3D建模门槛”这个具体痛点切入，其SOM很可能是第一批愿意尝鲜AIGC工具的独立开发者或小型工作室，而不是直接去撼动大型游戏公司。对于DroneFarm，你的SOM是某个城市的特定园区，还是某条固定的医疗航线？你需要论证为什么是这个起点，以及从这里如何扩展到更大的SAM。例如，如果选择某工业园区，是因为那里空域管理相对简单、需求明确（零件配送），且能与你初期的技术验证周期匹配吗？\n\n最后，审视你的SOM到SAM再到TAM的扩张逻辑是否连贯。一个常见的混乱是将不同层次的市场简单叠加。“求是鹰眼”的市场分析展示了清晰的逻辑：千亿级“低空经济”开放（TAM背景）催生了反无人机这个细分市场（SAM），而它的技术优势（多模态融合）使其能在其中占据一席之地（SOM）。你的扩张路径是什么？是从一条航线到一个城市网络，还是从一种货物（如医疗样本）扩展到多种货物（生鲜、电商包裹）？这每一步的壁垒（技术、合规、运营）是什么？你需要确保你的SOM选择能为你攻克这些壁垒、进入更大的SAM积累必要的资本和数据，而不是一个孤立、无法复制的试点。",
+            "tools_used": [
+              "dim_analysis"
+            ],
+            "hyper_context_sent": ""
+          },
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "课程导师",
+            "analysis": "【方法论桥接】\nTAM/SAM/SOM是评估市场规模的金字塔模型，用于量化你的商业机会。TAM（总潜在市场）是理论上你的产品或服务在全球范围内能服务的最大需求总量。SAM（可服务市场）是TAM中你的商业模式和产品形态能够实际触达并服务的部分。SOM（可获得市场）是你计划在初期（如3-5年）能够实际占领的SAM份额。你的DroneFarm项目当前最高风险是H4，即这三个口径混乱，这会导致你对市场机会的判断失真，进而影响融资和资源分配。\n\n具体到你的无人机配送项目，你需要基于服务类型和地理范围来分层定义。TAM可以参照全球或你目标国家（如中国）的即时配送、物流末端配送市场总规模，这是一个万亿级的广阔市场。SAM则需要聚焦：你的技术方案是解决农村、山区等特殊地形配送，还是城市内的生鲜、医疗紧急配送？参考案例“元界创生”将SAM精准锁定在“需要快速生成3D交互空间的企业客户”，而非整个3D建模市场。你也必须明确，比如你的SAM是“中国三线以上城市的高时效生鲜即时配送市场”。SOM则更具体，是你首年计划进入的1-2个试点城市中，你能实际触达的客户（如特定区域的连锁超市、医院）所产生的市场规模，这需要结合你的运营能力和竞争格局来估算。参考案例“求是鹰眼”在分析竞争优势时，强调了其技术能降低成本40%，这就是支撑其夺取SOM份额的关键依据。你的SOM分析必须同样具体，不能只说“占据SAM的1%”，而要说明凭借什么（如特定路线的成本优势、与某类客户的独家合作）在哪个具体区域能实现多少营收。避免将TAM的宏大数字直接当作你的机会，这是目前你文本过短、结构缺口所反映的核心问题。",
+            "tools_used": [
+              "dim_analysis"
+            ],
+            "hyper_context_sent": ""
+          },
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [],
+          "relationships": [],
+          "structural_gaps": [
+            "文本过短"
+          ],
+          "content_strengths": [],
+          "completeness_score": 0,
+          "section_scores": {},
+          "insight": "请提供更详细描述",
+          "kg_grounding": [
+            {
+              "labels": [
+                "Project"
+              ],
+              "matched_keys": [
+                "summary"
+              ],
+              "props": {
+                "summary": "臻视赋医——面向真实临床场景的 医学影像通用增强算法研究 参 赛 赛 道 人工智能+医疗健康 申 报 人 姓 名 叶思翔 合 作 者 姓 名 韩浩楠、胡婷欣、郝进宝 林辰羿、蔡玖珅、杜嘉伟 崔月、孔怡然、袁国栋 指 导 教 师 张老师 李老师 陆老师 2025 年 7 月 1 摘要 本作品面向临床医学影像存在低质量图像",
+                "confidence": "0.9",
+                "name": "臻视赋医——面向真实临床场景的医学影像通用增强算法研究",
+                "id": "case_105359c35d4c",
+                "category": "医疗健康",
+                "source_file": "医疗健康/467896-臻视赋医——面向真实临床场景的医学影像通用增强算法研究-项目策划书-a5403ba3.pdf"
+              }
+            },
+            {
+              "labels": [
+                "Project"
+              ],
+              "matched_keys": [
+                "summary"
+              ],
+              "props": {
+                "summary": "智眸明析——眼底临床诊断报告智能标准化大模型 学 校 名 称 XXXXXX 申 报 人 姓 名 蔡玖珅 合 作 者 姓 名 杜嘉伟、韩浩楠、黄志海 袁国栋、林辰翌、孔怡然 曹博睿、叶思翔、崔月 指 导 教 师 张老师 李老师 陆老师 2025 年4 月 摘 要 在当今医疗领域，临床诊断报告的标准化是提升医疗服务质量、实",
+                "confidence": "0.9",
+                "name": "智眸明析——眼底临床诊断报告智能标准化大模型",
+                "id": "case_a59352927eac",
+                "category": "医疗健康",
+                "source_file": "医疗健康/476471-智眸明析——眼底临床_准化大模型诊断报告智能标项目策划书-7384e632.pdf"
+              }
+            }
+          ]
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书",
+            "similarity": 0.4888,
+            "score_keyword": 0.0,
+            "score_vector": 0.4888,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "risk_control:missing",
+              "risk_gap:compliance_not_covered",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H13",
+              "risk_rule:H15",
+              "risk_rule:H3",
+              "risk_rule:H4",
+              "risk_rule:H5",
+              "risk_rule:H7",
+              "risk_rule:H9",
+              "competition:internet_plus"
+            ],
+            "pain_points": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "solution": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "innovation_points": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "business_model": [],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "H10",
+              "H13",
+              "H15",
+              "H3",
+              "H4",
+              "H5",
+              "H7",
+              "H9"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 .....................................................",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "graph_solutions": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "graph_innovations": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "graph_biz_models": [],
+            "graph_markets": [
+              "随着 Web 3.0 与 5G 普及，沉浸式交互空间市场预计呈指数增长",
+              "不仅是工具提供商，更旨在构建“元宇宙内容生成协议”标准"
+            ],
+            "graph_exec_steps": [
+              "技术研发规划：积累更丰富的模型数据与算法指纹库，提升 GPU 利用率",
+              "市场推广规划：先行在红色文旅与教育培训领域落地"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H9",
+                "name": "增长逻辑跳跃",
+                "severity": "medium"
+              },
+              {
+                "id": "H4",
+                "name": "TAM/SAM/SOM口径混乱",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 0,
+            "graph_evidence_samples": [],
+            "rule_overlap": {
+              "shared": [
+                "H4",
+                "H5"
+              ],
+              "only_in_case": [
+                "H10",
+                "H13",
+                "H15",
+                "H3",
+                "H7",
+                "H9"
+              ],
+              "only_in_student": [
+                "H14"
+              ]
+            }
+          },
+          {
+            "case_id": "case_83d252dd4946",
+            "category": "科技创新",
+            "project_name": "求是鹰眼反无人机系统",
+            "similarity": 0.4711,
+            "score_keyword": 0.0,
+            "score_vector": 0.4711,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "risk_control:missing",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Business Model Consistency",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Team & Execution",
+              "rubric:Presentation Quality",
+              "risk_rule:H3",
+              "risk_rule:H5"
+            ],
+            "pain_points": [
+              "无人机“黑飞”威胁剧增",
+              "探测技术单一：传统雷达对“小慢低”目标易漏判，易受环境干扰",
+              "全天候作业能力差：现有系统在夜间或复杂天气下识别率断崖式下跌"
+            ],
+            "solution": [
+              "多源异类传感器融合技术：集成声纹识别、射频监测、视频检测与雷达探测",
+              "构建“求是鹰眼”系统：实现空域内无人机目标的发现、识别、定位、跟踪及反制",
+              "智能干扰反制：支持干扰阻断、电子围栏及链路劫持，确保目标迫降或返航"
+            ],
+            "innovation_points": [
+              "四位一体探测架构：声纹、视觉、射频、雷达互补，解决复杂环境下“找不准”的问题",
+              "基于深度学习的目标识别：采用轻量化神经网络提升图像帧的实时抓取与识别精度",
+              "独创的“声-视”联动算法：通过声源定位自动引导摄像头转动锁定目标"
+            ],
+            "business_model": [],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "H3",
+              "H5"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": true
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "1 “求是鹰眼”反无人机系统 杭州岸鹰科技有限公司（拟） 商业计划书(Business Plan)",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "无人机“黑飞”威胁剧增",
+              "探测技术单一：传统雷达对“小慢低”目标易漏判，易受环境干扰",
+              "全天候作业能力差：现有系统在夜间或复杂天气下识别率断崖式下跌"
+            ],
+            "graph_solutions": [
+              "多源异类传感器融合技术：集成声纹识别、射频监测、视频检测与雷达探测",
+              "构建“求是鹰眼”系统：实现空域内无人机目标的发现、识别、定位、跟踪及反制",
+              "智能干扰反制：支持干扰阻断、电子围栏及链路劫持，确保目标迫降或返航"
+            ],
+            "graph_innovations": [
+              "四位一体探测架构：声纹、视觉、射频、雷达互补，解决复杂环境下“找不准”的问题",
+              "基于深度学习的目标识别：采用轻量化神经网络提升图像帧的实时抓取与识别精度",
+              "独创的“声-视”联动算法：通过声源定位自动引导摄像头转动锁定目标"
+            ],
+            "graph_biz_models": [],
+            "graph_markets": [
+              "行业机遇：随着“低空经济”开放，反无人机市场预计将迎来千亿级爆发期",
+              "竞争优势：技术依托专业研发团队，具备先发的“多模态融合算法”壁垒，成本较国外系统降低 40%",
+              "市场地位：定位为“高性价比、全时域反无人机专家”，重点切入民用安防的中高端市场"
+            ],
+            "graph_exec_steps": [
+              "研发迭代期：完成声纹库扩充与视觉算法的端侧算力优化",
+              "试点验证期：在特定机场或监狱开展实地挂网测试，获取真实场景下的探测数据",
+              "规模推广期：通过安防代理渠道及政务招投标，实现全国范围内的品牌铺开"
+            ],
+            "graph_rules": [
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Business Model Consistency",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Team & Execution",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Risk Control",
+              "Financial Logic"
+            ],
+            "graph_evidence_count": 0,
+            "graph_evidence_samples": [],
+            "rule_overlap": {
+              "shared": [
+                "H5"
+              ],
+              "only_in_case": [
+                "H3"
+              ],
+              "only_in_student": [
+                "H14",
+                "H4"
+              ]
+            }
+          }
+        ],
+        "web_search": {},
+        "hypergraph_student": {},
+        "hyper_consistency_issues": [],
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 7.3,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS10",
+            "name": "TAM/SAM/SOM混乱",
+            "match_score": 7.3,
+            "probing_layers": [
+              "口径检验: 你说的市场规模是TAM还是SAM？你实际能触达的市场(SOM)有多大？",
+              "自下而上估算: 请用'单价×目标用户数×复购频次'来估算你第一年的实际可获得市场。",
+              "增长合理性: 从SOM到SAM，你的增长路径是什么？每一步需要什么资源？"
+            ],
+            "expected_evidence": [
+              "TAM/SAM/SOM三层估算",
+              "自下而上的市场测算",
+              "增长路径规划"
+            ],
+            "counterfactual": "一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "市场规模口径谬误",
+              "大数幻觉谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "TAM/SAM/SOM 口径校验 + 增长合理性",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 3.0,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": []
+          }
+        ],
+        "pressure_test_trace": {},
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "kb_utilization": {
+          "retrieval_mode": "vector",
+          "total_kb_cases": 95,
+          "excluded_history_count": 0,
+          "hits_count": 2,
+          "neo4j_enriched": true,
+          "neo4j_enriched_count": 2,
+          "category_filter": "科技创新",
+          "top_k_requested": 3
+        },
+        "rag_enrichment_insight": "风险对比: H14(你独有), H4(你独有)——参考案例中都没有触发这些规则，说明这可能是你项目特有的薄弱环节。\n参考案例普遍覆盖的维度: Problem Definition, Solution Feasibility, Market & Competition, Innovation & Differentiation, Presentation Quality。",
+        "neo4j_graph_hits": [],
+        "incremental_stats": {},
+        "dim_results": {
+          "method_bridge": {
+            "dim": "method_bridge",
+            "value": "TAM/SAM/SOM是评估市场规模的金字塔模型，用于量化你的商业机会。TAM（总潜在市场）是理论上你的产品或服务在全球范围内能服务的最大需求总量。SAM（可服务市场）是TAM中你的商业模式和产品形态能够实际触达并服务的部分。SOM（可获得市场）是你计划在初期（如3-5年）能够实际占领的SAM份额。你的DroneFarm项目当前最高风险是H4，即这三个口径混乱，这会导致你对市场机会的判断失真，进而影响融资和资源分配。\n\n具体到你的无人机配送项目，你需要基于服务类型和地理范围来分层定义。TAM可以参照全球或你目标国家（如中国）的即时配送、物流末端配送市场总规模，这是一个万亿级的广阔市场。SAM则需要聚焦：你的技术方案是解决农村、山区等特殊地形配送，还是城市内的生鲜、医疗紧急配送？参考案例“元界创生”将SAM精准锁定在“需要快速生成3D交互空间的企业客户”，而非整个3D建模市场。你也必须明确，比如你的SAM是“中国三线以上城市的高时效生鲜即时配送市场”。SOM则更具体，是你首年计划进入的1-2个试点城市中，你能实际触达的客户（如特定区域的连锁超市、医院）所产生的市场规模，这需要结合你的运营能力和竞争格局来估算。参考案例“求是鹰眼”在分析竞争优势时，强调了其技术能降低成本40%，这就是支撑其夺取SOM份额的关键依据。你的SOM分析必须同样具体，不能只说“占据SAM的1%”，而要说明凭借什么（如特定路线的成本优势、与某类客户的独家合作）在哪个具体区域能实现多少营收。避免将TAM的宏大数字直接当作你的机会，这是目前你文本过短、结构缺口所反映的核心问题。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "tutor",
+            "challenges": [],
+            "hyper_context_sent": ""
+          },
+          "status_judgment": {
+            "dim": "status_judgment",
+            "value": "你的DroneFarm项目目前处于**早期构思阶段**，整体逻辑存在**严重缺口**，核心问题在于市场分析的基础框架（TAM/SAM/SOM）完全缺失，这直接导致项目落地的可行性无法评估，风险很高。\n\n系统诊断你的最高风险是H4（TAM/SAM/SOM口径混乱），这非常关键。TAM/SAM/SOM是量化市场机会的标尺，没有它，你的项目就像没有地图的航行。TAM（总潜在市场）指全球所有可能使用无人机配送的场景；SAM（可服务市场）是你的技术方案能触达的那部分TAM，比如特定城市或特定品类（如医疗急救）；SOM（可获得市场）则是你创业初期能实际吃下的份额。\n\n你可以参考背景信息中“求是鹰眼反无人机系统”案例的市场分析思路。那个项目同样面向无人机相关领域，它明确将市场机遇锚定在“低空经济”开放带来的**千亿级爆发期**，并清晰指出了自身的技术壁垒（多模态融合算法）和成本优势（较国外系统降低40%）。这为你提供了具体范本：你的TAM可以基于“即时配送”或“乡村物流”等万亿级市场估算；SAM需要聚焦于你的技术方案（如特定航程、载重）能服务的具体区域和行业；SOM则要务实，考虑你首年能签约的试点客户或覆盖的社区数量。对比来看，你目前仅有项目名称，缺乏任何市场量化数据，这是项目逻辑链上的致命断点。\n\n此外，参考案例普遍在“问题定义”、“方案可行性”、“市场与竞争”等维度有扎实论述，而你的描述过短，这些维度全部空白。你需要立即补全：DroneFarm具体解决什么配送痛点（如偏远地区药品急送）？你的无人机方案在技术、法规、成本上如何实现？目标客户是谁？只有补上这些，尤其是清晰量化TAM/SAM/SOM，你的项目逻辑才能通顺，进入可被评估的下一个阶段。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "coach",
+            "challenges": [],
+            "hyper_context_sent": ""
+          },
+          "strategy_directions": {
+            "dim": "strategy_directions",
+            "value": "你的DroneFarm项目当前面临的核心风险是H4，即TAM/SAM/SOM口径混乱，这直接关系到投资人如何判断你的市场天花板和实际切入点。TAM是理论上的总潜在市场，SAM是你有能力服务的细分市场，SOM则是你短期内能实际获取的市场份额。口径混乱会导致市场估算虚高，让方案显得不切实际。\n\n从参考案例看，它们都清晰地界定了市场层次。例如，“求是鹰眼反无人机系统”在分析市场时，将“低空经济开放带来的安防需求”作为宏观背景（类似TAM），但明确将“需要主动防御的机场、核电站、重大活动场所”作为核心服务市场（SAM），并依托其技术团队和成本优势来估算初期能拿下的客户（SOM）。这种从宏观趋势到具体客户群的逐层收敛，是你可以直接借鉴的。你的无人机配送项目，不能简单地说“所有快递和外卖市场都是我的”，而应像“元界创生”项目那样，从具体痛点（如偏远地区时效、特殊物品急送）出发，锁定一个高价值、可验证的初始细分市场。\n\n基于此，你有两条策略方向可选：\n\n**策略一：聚焦高价值、高痛点的垂直场景，做深做透。** 这是更稳健、更易验证的打法。你可以参考“求是鹰眼”锁定核心场景的思路。例如，将你的SAM明确界定为“城市内医疗急救用品（如血包、检测样本）的即时配送”或“高端商圈/产业园区的文件、餐食即时配送”。这样，你的TAM可以是城市物流市场，SAM是这个垂直场景，SOM则是你通过试点合作（如与一家三甲医院或一个大型科技园区）在1-2年内能覆盖的订单量。这种口径清晰，能快速获得用户证据，规避H4风险。\n\n**策略二：以技术或模式创新定义新市场，但需明确落地路径。** 这更偏向“元界创生”项目的路径，它不满足于做工具，而是想定义“元宇宙内容生成协议”。对应到你的项目，如果你的无人机配送在技术（如超视距自主飞行）或模式（如分布式无人机驿站网络）上有颠覆性创新，你可以将TAM定义为“重构短途即时物流网络”。那么，你的SAM可能是“采用新型低空物流网络的电商平台或本地生活服务平台”，SOM则是与1-2个平台达成试点协议，为其特定线路提供服务。这条路径想象空间大，但必须像案例一样，在方案可行性（Solution Feasibility）上有过硬的技术支撑和清晰的阶段性目标，否则会加剧H4和H5（方案可行性）风险。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "coach",
+            "challenges": [],
+            "hyper_context_sent": ""
+          },
+          "probing_questions": {
+            "dim": "probing_questions",
+            "value": "你的问题核心在于如何将通用的TAM/SAM/SOM框架具体化到你的无人机配送项目，而当前最大的风险是口径混乱，这意味着你可能在定义目标市场时边界不清，导致市场规模估算失真，直接影响投资者对你项目可行性的判断。参考案例“元界创生”在市场分析中做得很好，它没有泛泛而谈“元宇宙市场”，而是精准锁定为“沉浸式交互空间市场”，并进一步将自身定位为“元宇宙内容生成协议”标准制定者，这使其TAM（工具市场）和SAM（协议标准市场）的层次非常清晰。你的DroneFarm项目同样需要这种递进式的精准切割。\n\n首先，你需要明确你的“无人机配送”究竟服务于哪些不可替代的场景？是城市内的紧急医疗用品递送、偏远地区的物流最后一公里，还是工业园区内的零件运输？参考案例“求是鹰眼”的痛点锁定在“低空经济”开放下的“黑飞”威胁，这是一个由政策和技术趋势催生的具体、高痛点的细分市场。你的TAM不应是“全球物流市场”那么庞大而模糊，而应是与无人机技术特性强相关的“即时配送与特殊场景物流市场”。例如，你可以思考：在现有物流体系中，有哪些货物因其特性（如紧急、易腐、地形限制）使得传统陆运成本极高或时效无法满足，从而构成了无人机配送的“可服务市场”（SAM）？\n\n其次，考虑你的初始切入点（SOM）与SAM的关联。你的SOM是你第一年或前三年 realistically 能拿下的客户和区域。这需要基于你团队的能力、资源以及监管环境来设定。“元界创生”的方案从“降低3D建模门槛”这个具体痛点切入，其SOM很可能是第一批愿意尝鲜AIGC工具的独立开发者或小型工作室，而不是直接去撼动大型游戏公司。对于DroneFarm，你的SOM是某个城市的特定园区，还是某条固定的医疗航线？你需要论证为什么是这个起点，以及从这里如何扩展到更大的SAM。例如，如果选择某工业园区，是因为那里空域管理相对简单、需求明确（零件配送），且能与你初期的技术验证周期匹配吗？\n\n最后，审视你的SOM到SAM再到TAM的扩张逻辑是否连贯。一个常见的混乱是将不同层次的市场简单叠加。“求是鹰眼”的市场分析展示了清晰的逻辑：千亿级“低空经济”开放（TAM背景）催生了反无人机这个细分市场（SAM），而它的技术优势（多模态融合）使其能在其中占据一席之地（SOM）。你的扩张路径是什么？是从一条航线到一个城市网络，还是从一种货物（如医疗样本）扩展到多种货物（生鲜、电商包裹）？这每一步的壁垒（技术、合规、运营）是什么？你需要确保你的SOM选择能为你攻克这些壁垒、进入更大的SAM积累必要的资本和数据，而不是一个孤立、无法复制的试点。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "coach",
+            "challenges": [],
+            "hyper_context_sent": ""
+          }
+        },
+        "agent_hyper_details": [],
+        "diagnosis": {
+          "mode": "coursework",
+          "competition_type": "",
+          "overall_score": 5.0,
+          "score_band": "早期可塑",
+          "project_stage": "structured",
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "triggered_rules": [
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "fallacy_label": "大数幻觉谬误",
+              "severity": "high",
+              "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "matched_keywords": [
+                "tam",
+                "sam",
+                "som"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "market_sizing_logic"
+              ],
+              "quote": "的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？",
+              "trigger_message": "原文片段：“的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？” → 触发「TAM/SAM/SOM口径混乱」，因为提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "impact": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。",
+              "fix_task": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "linked_task": {
+                "title": "补齐证据并完成一次压力测试",
+                "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+                "acceptance_criteria": [
+                  "新增3条可验证证据",
+                  "完成1轮压力测试问答",
+                  "更新修正后的版本说明"
+                ],
+                "template_guideline": [
+                  "先明确当前最高风险点是什么",
+                  "补至少3条能直接支撑该点的证据",
+                  "用评委视角做一轮反问并更新答案"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "X_tam",
+                  "kind": "metric",
+                  "label": "TAM",
+                  "description": "总体可服务市场总量"
+                },
+                {
+                  "id": "X_sam",
+                  "kind": "metric",
+                  "label": "SAM",
+                  "description": "产品理论可覆盖的细分市场"
+                },
+                {
+                  "id": "X_som",
+                  "kind": "metric",
+                  "label": "SOM",
+                  "description": "在现实约束下可获得的市场份额"
+                }
+              ]
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "high",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Chain_Edge",
+                "Stakeholder_Solution_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "老师，我正在做一个名为 DroneFarm 的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？",
+              "trigger_message": "原文片段：“老师，我正在做一个名为 DroneFarm 的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "linked_task": {
+                "title": "用一种最低成本的方法验证真实需求",
+                "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+                "acceptance_criteria": [
+                  "明确1个待验证判断",
+                  "完成1种验证动作",
+                  "拿到可复述的行为证据或反证"
+                ],
+                "template_guideline": [
+                  "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+                  "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+                  "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事断裂谬误",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Value_Loop_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "narrative_structure_logic"
+              ],
+              "quote": "老师，我正在做一个名为 DroneFarm 的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？",
+              "trigger_message": "原文片段：“老师，我正在做一个名为 DroneFarm 的无人机配送项目，我想了解什么是 TAM/SAM/SOM？我应该怎么根据我的项目来写这部分内容？” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "linked_task": {
+                "title": "补齐证据并完成一次压力测试",
+                "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+                "acceptance_criteria": [
+                  "新增3条可验证证据",
+                  "完成1轮压力测试问答",
+                  "更新修正后的版本说明"
+                ],
+                "template_guideline": [
+                  "先明确当前最高风险点是什么",
+                  "补至少3条能直接支撑该点的证据",
+                  "用评委视角做一轮反问并更新答案"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 4.07,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力"
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ]
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 4.07,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ]
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.65,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合"
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设"
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试"
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果"
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ]
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 4.65,
+              "status": "risk",
+              "weight": 0.15,
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构"
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性"
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成"
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ]
+            },
+            {
+              "item": "Market & Competition",
+              "score": 6.7,
+              "status": "ok",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局"
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图"
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵"
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ]
+            },
+            {
+              "item": "Financial Logic",
+              "score": 4.65,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析"
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间"
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ]
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.65,
+              "status": "risk",
+              "weight": 0.1,
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒"
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位"
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品"
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图"
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析"
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ]
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.65,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度"
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险"
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单"
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告"
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ]
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.5,
+              "status": "risk",
+              "weight": 0.05,
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构"
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ]
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成诊断（27条规则 + 9项Rubric）。",
+          "info_sufficient": true
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "template_guideline": [
+            "先明确当前最高风险点是什么",
+            "补至少3条能直接支撑该点的证据",
+            "用评委视角做一轮反问并更新答案"
+          ],
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ]
+        },
+        "execution_trace": {},
+        "exploration_state": {
+          "phase": "direction",
+          "filled_slots": {
+            "target_user": true
+          },
+          "missing_slots": [
+            "pain_point",
+            "solution",
+            "business_model",
+            "competition"
+          ],
+          "next_question_slot": "pain_point",
+          "n_filled": 1
+        }
+      },
+      "timestamp": "2026-04-09T21:42:42.924017+08:00"
+    }
+  ],
+  "exploration_state": {
+    "phase": "direction",
+    "filled_slots": {
+      "target_user": true
+    },
+    "missing_slots": [
+      "pain_point",
+      "solution",
+      "business_model",
+      "competition"
+    ],
+    "next_question_slot": "pain_point",
+    "n_filled": 1
+  }
+}

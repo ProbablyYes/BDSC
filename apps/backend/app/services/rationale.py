@@ -52,6 +52,41 @@ class ContributingEvidence:
 
 
 @dataclass
+class ReasoningStep:
+    """推理链单步：明确这一步是怎么影响最终分数/结论的。
+
+    kind:
+      - "base"      基线分（例如阶段基线）
+      - "evidence"  证据命中（加分）
+      - "rule"      规则触发（扣分 / 警告）
+      - "baseline"  基准对比（与团队均值、历史等比较）
+      - "adjust"    夹子、上下限修正
+    """
+    kind: str
+    label: str
+    delta: float = 0.0
+    severity: str = ""      # info / warn / critical
+    source_message_id: str = ""
+    agent_name: str = ""
+    quote: str = ""
+    detail: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {k: v for k, v in asdict(self).items() if v is not None and v != ""}
+
+
+@dataclass
+class RationaleBaseline:
+    """基准对比，例如团队均值、历史均值。"""
+    name: str
+    value: float | str
+    comparison: str = ""     # 如 "+0.8" / "高于团队均值"
+
+    def to_dict(self) -> dict[str, Any]:
+        return {k: v for k, v in asdict(self).items() if v is not None and v != ""}
+
+
+@dataclass
 class Rationale:
     field: str
     value: float | str
@@ -59,6 +94,8 @@ class Rationale:
     formula_display: str = ""
     inputs: list[RationaleInput] = field(default_factory=list)
     contributing_evidence: list[ContributingEvidence] = field(default_factory=list)
+    reasoning_steps: list[ReasoningStep] = field(default_factory=list)
+    baseline: RationaleBaseline | None = None
     teacher_override: dict[str, Any] | None = None
     note: str = ""
 
@@ -75,6 +112,10 @@ class Rationale:
             out["inputs"] = [i.to_dict() for i in self.inputs]
         if self.contributing_evidence:
             out["contributing_evidence"] = [e.to_dict() for e in self.contributing_evidence]
+        if self.reasoning_steps:
+            out["reasoning_steps"] = [s.to_dict() for s in self.reasoning_steps]
+        if self.baseline:
+            out["baseline"] = self.baseline.to_dict()
         if self.teacher_override:
             out["teacher_override"] = self.teacher_override
         if self.note:
@@ -255,13 +296,70 @@ def build_portrait_rationale(
     )
 
 
+def steps_to_dicts(steps: list[ReasoningStep] | list[dict] | None) -> list[dict]:
+    """规范化 reasoning_steps：支持传入 dataclass 或 dict。"""
+    if not steps:
+        return []
+    out: list[dict] = []
+    for s in steps:
+        if isinstance(s, ReasoningStep):
+            out.append(s.to_dict())
+        elif isinstance(s, dict):
+            out.append({k: v for k, v in s.items() if v is not None and v != ""})
+    return out
+
+
+def build_steps_formula_display(
+    title: str,
+    final_value: float | str,
+    steps: list[dict] | list[ReasoningStep],
+    baseline: dict | None = None,
+) -> str:
+    """把 reasoning_steps 渲染成人话版 formula_display。"""
+    step_dicts = steps_to_dicts(steps)
+    lines: list[str] = [f"{title} = {final_value}"]
+    for s in step_dicts:
+        kind = s.get("kind", "")
+        label = s.get("label", "")
+        delta = s.get("delta", 0)
+        sym = "·"
+        if kind == "base":
+            sym = "基线"
+        elif kind == "evidence":
+            sym = "+证据"
+        elif kind == "rule":
+            sym = "-规则"
+        elif kind == "baseline":
+            sym = "基准"
+        elif kind == "adjust":
+            sym = "调整"
+        if delta:
+            try:
+                lines.append(f"  {sym} {label}  {float(delta):+.2f}")
+            except Exception:
+                lines.append(f"  {sym} {label}  {delta}")
+        else:
+            lines.append(f"  {sym} {label}")
+    if baseline:
+        bn = baseline.get("name") or "基准"
+        bv = baseline.get("value", "")
+        bc = baseline.get("comparison", "")
+        lines.append(f"  参考基准·{bn}={bv}  {bc}")
+    lines.append(f"→ {final_value}")
+    return "\n".join(lines)
+
+
 __all__ = [
     "Rationale",
     "RationaleInput",
     "ContributingEvidence",
+    "ReasoningStep",
+    "RationaleBaseline",
     "build_rubric_rationale",
     "build_overall_rationale",
     "build_maturity_field_rationale",
     "build_risk_rationale",
     "build_portrait_rationale",
+    "steps_to_dicts",
+    "build_steps_formula_display",
 ]

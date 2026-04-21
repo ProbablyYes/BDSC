@@ -7,7 +7,7 @@
   "status": "accepted",
   "version_tier": "full",
   "created_at": "2026-04-17T21:53:37.723999+08:00",
-  "updated_at": "2026-04-21T11:06:44.771753+08:00",
+  "updated_at": "2026-04-21T12:37:28.881321+08:00",
   "sections": [
     {
       "section_id": "overview",
@@ -1081,7 +1081,7 @@
     "latest_user_message": "好，我先尝试聚焦一个MVP场景，并补充一些我调研得到的初步信息：\n\n1. MVP场景选择\n我选择从「PDF论文/课件 → 自动生成结构化摘要 + Anki卡片」这个场景切入。\n因为：\n\n学生复习时大量使用PDF资料（课件/论文）\n相比语音和PPT，PDF处理路径更清晰\n能直接对应“考试复习”这个刚需场景\n\n2. 初步用户观察（非正式调研）\n我问了3个同学（计算机、经管、医学）：\n\n他们复习时都会用",
     "message_count": 8
   },
-  "version": 25,
+  "version": 26,
   "previous_version": {
     "plan_id": "6d322e87",
     "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
@@ -1091,7 +1091,7 @@
     "status": "accepted",
     "version_tier": "full",
     "created_at": "2026-04-17T21:53:37.723999+08:00",
-    "updated_at": "2026-04-21T11:06:42.209627+08:00",
+    "updated_at": "2026-04-21T11:06:44.771753+08:00",
     "sections": [
       {
         "section_id": "overview",
@@ -2165,7 +2165,7 @@
       "latest_user_message": "好，我先尝试聚焦一个MVP场景，并补充一些我调研得到的初步信息：\n\n1. MVP场景选择\n我选择从「PDF论文/课件 → 自动生成结构化摘要 + Anki卡片」这个场景切入。\n因为：\n\n学生复习时大量使用PDF资料（课件/论文）\n相比语音和PPT，PDF处理路径更清晰\n能直接对应“考试复习”这个刚需场景\n\n2. 初步用户观察（非正式调研）\n我问了3个同学（计算机、经管、医学）：\n\n他们复习时都会用",
       "message_count": 8
     },
-    "version": 24,
+    "version": 25,
     "upgrade_report": {
       "mode": "full",
       "requested": [
@@ -2196,7 +2196,7 @@
       "timestamp": "2026-04-18T00:14:19.865793+08:00"
     },
     "competition_unlocked": true,
-    "coaching_mode": "project",
+    "coaching_mode": "competition",
     "competition_agenda": []
   },
   "upgrade_report": {
@@ -2229,6 +2229,6 @@
     "timestamp": "2026-04-18T00:14:19.865793+08:00"
   },
   "competition_unlocked": true,
-  "coaching_mode": "competition",
+  "coaching_mode": "project",
   "competition_agenda": []
 }

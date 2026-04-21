@@ -542,6 +542,46 @@ export default function StudentProfilePage() {
   const [convPortraitDetail, setConvPortraitDetail] = useState<any>(null);
   const [convCardWhy, setConvCardWhy] = useState<string | null>(null);
 
+  // 学号编辑状态
+  const [sidEditing, setSidEditing] = useState(false);
+  const [sidInput, setSidInput] = useState("");
+  const [sidSaving, setSidSaving] = useState(false);
+  const [sidError, setSidError] = useState<string | null>(null);
+  const [sidSuccess, setSidSuccess] = useState<string | null>(null);
+
+  async function saveStudentId() {
+    const v = sidInput.trim();
+    if (!/^[A-Za-z0-9_-]{4,32}$/.test(v)) {
+      setSidError("学号格式不合法（仅允许字母/数字/_- 共 4-32 位）");
+      return;
+    }
+    setSidSaving(true);
+    setSidError(null);
+    setSidSuccess(null);
+    try {
+      const resp = await fetch(`${API}/api/auth/me/student-id`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user.user_id, student_id: v }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        setSidError(typeof data?.detail === "string" ? data.detail : "保存失败");
+      } else if (data?.user) {
+        const merged = { ...user, ...data.user };
+        localStorage.setItem("va_user", JSON.stringify(merged));
+        setUser(merged);
+        setSidEditing(false);
+        setSidInput("");
+        setSidSuccess("学号已保存，后续新会话会自动生成 P-学号-NN 的项目编号");
+      }
+    } catch {
+      setSidError("网络异常，请稍后重试");
+    } finally {
+      setSidSaving(false);
+    }
+  }
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem("va_user");
@@ -591,6 +631,30 @@ export default function StudentProfilePage() {
   }, [submissions]);
 
   const totalMsgs = useMemo(() => conversations.reduce((a: number, c: any) => a + (c.message_count ?? 0), 0), [conversations]);
+
+  // 每个会话对应的项目编号（从 submissions 中提取）
+  const convToProjectId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const sub of submissions as any[]) {
+      const cid = sub?.conversation_id;
+      const lid = sub?.logical_project_id;
+      if (cid && lid && !map.has(cid)) {
+        map.set(cid, String(lid));
+      }
+    }
+    return map;
+  }, [submissions]);
+
+  // 格式化项目编号：P-学号-NN 强调样式；其它 UUID 显示为 #短哈希
+  function renderProjectBadge(logicalId: string | undefined, conversationId?: string) {
+    const lid = String(logicalId || convToProjectId.get(String(conversationId ?? "")) || "").trim();
+    if (!lid) return <span className="profile-pid-badge profile-pid-empty" title="该会话暂未分配项目编号">项目编号 —</span>;
+    if (/^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid)) {
+      return <span className="profile-pid-badge profile-pid-standard" title="规范项目编号（P-学号-序号）">{lid}</span>;
+    }
+    const short = lid.length > 8 ? `#${lid.slice(0, 8)}` : `#${lid}`;
+    return <span className="profile-pid-badge profile-pid-legacy" title={`历史会话：${lid}`}>{short}</span>;
+  }
 
   if (!user) {
     return (
@@ -892,7 +956,10 @@ export default function StudentProfilePage() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                     </div>
                     <div className="prof-conv-content">
-                      <span className="profile-conv-title">{c.title || "新对话"}</span>
+                      <div className="prof-conv-head">
+                        <span className="profile-conv-title">{c.title || "新对话"}</span>
+                        {renderProjectBadge(undefined, c.conversation_id)}
+                      </div>
                       <span className="profile-conv-meta">{c.message_count ?? 0} 条消息 · {formatBjTime(c.created_at)}</span>
                     </div>
                   </Link>
@@ -900,6 +967,57 @@ export default function StudentProfilePage() {
               </div>
             ) : <p className="profile-empty-hint">暂无对话记录，去工作台开始你的第一次对话吧</p>}
           </section>
+
+          {/* Student ID Editor — 学生独占 */}
+          {user.role === "student" && (
+            <section className="profile-section fade-up">
+              <h3>学号与项目编号</h3>
+              <div className="profile-sid-card">
+                <div className="profile-sid-desc">
+                  填入学号后，之后新开的会话将自动获得规范项目编号
+                  <code className="profile-sid-example">P-学号-NN</code>
+                  便于老师按编号批改。填写为选填项，不影响已有会话，学号全局唯一。
+                </div>
+                {user.student_id && !sidEditing ? (
+                  <div className="profile-sid-row">
+                    <div className="profile-sid-current">
+                      <span className="profile-sid-label">当前学号</span>
+                      <code className="profile-sid-value">{user.student_id}</code>
+                    </div>
+                    <button
+                      className="profile-sid-edit-btn"
+                      onClick={() => { setSidInput(user.student_id || ""); setSidEditing(true); setSidError(null); setSidSuccess(null); }}
+                    >修改</button>
+                  </div>
+                ) : (
+                  <div className="profile-sid-edit">
+                    <input
+                      className="profile-sid-input"
+                      placeholder="请输入学号（字母/数字/_- 共 4-32 位）"
+                      value={sidInput}
+                      onChange={(e) => setSidInput(e.target.value)}
+                      disabled={sidSaving}
+                      maxLength={32}
+                    />
+                    <button
+                      className="profile-sid-save-btn"
+                      onClick={saveStudentId}
+                      disabled={sidSaving || !sidInput.trim()}
+                    >{sidSaving ? "保存中…" : "保存"}</button>
+                    {sidEditing && user.student_id && (
+                      <button
+                        className="profile-sid-cancel-btn"
+                        onClick={() => { setSidEditing(false); setSidInput(""); setSidError(null); }}
+                        disabled={sidSaving}
+                      >取消</button>
+                    )}
+                  </div>
+                )}
+                {sidError && <div className="profile-sid-error">{sidError}</div>}
+                {sidSuccess && <div className="profile-sid-success">{sidSuccess}</div>}
+              </div>
+            </section>
+          )}
 
           {/* Account Info */}
           <section className="profile-section fade-up">

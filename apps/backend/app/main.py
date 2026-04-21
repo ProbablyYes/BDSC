@@ -59,6 +59,7 @@ from app.schemas import (
     SmsLoginPayload,
     SmsSendPayload,
     SmsSendResponse,
+    SetStudentIdPayload,
     StudentInterventionViewPayload,
     TeamCreatePayload,
     TeamJoinPayload,
@@ -323,6 +324,39 @@ def auth_change_password(payload: AuthPasswordChangePayload) -> AuthUserResponse
     if not user:
         raise HTTPException(status_code=400, detail="原密码错误或账号不存在")
     return AuthUserResponse(status="ok", user=user)
+
+
+@app.patch("/api/auth/me/student-id", response_model=AuthUserResponse)
+def auth_set_student_id(payload: SetStudentIdPayload) -> AuthUserResponse:
+    """学生在个人中心填入/修改学号（选填，全局唯一）。"""
+    try:
+        updated = user_store.set_student_id(payload.user_id, payload.student_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    if not updated:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return AuthUserResponse(status="ok", user=updated)
+
+
+@app.get("/api/project/by-display-id/{display_id}")
+def project_by_display_id(display_id: str) -> dict:
+    """根据项目编号 P-学号-NN 反查 project_id / conversation_id，便于老师按编号跳转。"""
+    target = (display_id or "").strip()
+    if not target:
+        raise HTTPException(status_code=400, detail="项目编号不能为空")
+    for project in json_store.list_projects():
+        pid = str(project.get("project_id") or "")
+        for row in reversed(project.get("submissions", []) or []):
+            if str(row.get("logical_project_id", "")) == target:
+                return {
+                    "status": "ok",
+                    "display_id": target,
+                    "project_id": pid,
+                    "conversation_id": row.get("conversation_id"),
+                    "user_id": pid[len("project-"):] if pid.startswith("project-") else None,
+                    "submitted_at": row.get("submitted_at"),
+                }
+    raise HTTPException(status_code=404, detail=f"未找到项目编号 {target}")
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -1887,10 +1921,12 @@ def _infer_project_phase(text: str, next_task: dict | None = None, kg_analysis: 
 
 def _derive_logical_project_id(project_state: dict, conversation_id: str | None, message: str, project_id: str) -> str:
     subs = project_state.get("submissions", []) or []
+    # 1) 同一会话已有提交 → 沿用原 logical_project_id（老/新都走这一条，保证不回溯历史编号）
     if conversation_id:
         for row in reversed(subs):
             if row.get("conversation_id") == conversation_id and row.get("logical_project_id"):
                 return str(row.get("logical_project_id"))
+    # 2) 主题相似聚合（保留老逻辑）
     terms = _topic_terms(message)
     if conversation_id and terms:
         for row in reversed(subs[-12:]):
@@ -1903,6 +1939,21 @@ def _derive_logical_project_id(project_state: dict, conversation_id: str | None,
             overlap_ratio = len(overlap) / len(terms) if terms else 0
             if len(overlap) >= 5 and overlap_ratio >= 0.4 and row.get("logical_project_id"):
                 return str(row.get("logical_project_id"))
+    # 3) 新会话 + 用户已填学号 → 生成 P-{学号}-{NN}
+    #    project_id 约定为 `project-{user_id}`，据此查用户是否已配置学号
+    try:
+        owner_uid = ""
+        if isinstance(project_id, str) and project_id.startswith("project-"):
+            owner_uid = project_id[len("project-"):]
+        if owner_uid:
+            owner = user_store.get_by_id(owner_uid) or {}
+            sid = str(owner.get("student_id") or "").strip()
+            if sid:
+                serial = user_store.allocate_project_serial(owner_uid)
+                return f"P-{sid}-{serial:02d}"
+    except Exception:
+        pass  # 任何异常都回退到下面的兜底，保证主链路不受影响
+    # 4) 兜底：沿用老逻辑 = conversation_id 或 project_id
     return conversation_id or project_id
 
 
@@ -3085,6 +3136,23 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     assistant_message = result.get("assistant_message", "")
     nodes_visited = result.get("nodes_visited", [])
     agents_called = result.get("agents_called", [])
+
+    # ── 给 KG 实体/关系补 source_message_id（{conv_id}#{turn_index}），
+    #     配合 graph_workflow 里写入的 source_span，可以点实体跳回原消息 ──
+    try:
+        _conv_obj_for_msgid = conv_store.get(payload.project_id, conv_id) or {}
+        _msgs_for_id = list(_conv_obj_for_msgid.get("messages") or [])
+        _next_user_turn = len(_msgs_for_id)  # 这一条 user 消息即将被追加
+        _user_msg_id = f"{conv_id}#{_next_user_turn}"
+        if isinstance(kg_analysis, dict):
+            for _ent in kg_analysis.get("entities", []) or []:
+                if isinstance(_ent, dict) and not _ent.get("source_message_id"):
+                    _ent["source_message_id"] = _user_msg_id
+            for _rel in kg_analysis.get("relationships", []) or []:
+                if isinstance(_rel, dict) and not _rel.get("source_message_id"):
+                    _rel["source_message_id"] = _user_msg_id
+    except Exception as _tx:
+        logger.info("kg source_message_id enrich failed: %s", _tx)
 
     hyper_insight = result.get("hypergraph_insight", {})
     hyper_student = result.get("hypergraph_student", {})
@@ -10346,10 +10414,12 @@ def teacher_project_evidence_trace_v2(project_id: str, logical_project_id: str =
 
     # 2) 综合分分组 —— 把最近一次 diagnosis 的 overall_rationale 拿出来
     overall_group = None
+    tier1_groups: list[dict] = []
     last_sub = filtered_subs[-1] if filtered_subs else None
+    last_diag_obj: dict = {}
     if last_sub:
-        last_diag = last_sub.get("diagnosis") or {}
-        overall_rat = last_diag.get("overall_rationale")
+        last_diag_obj = last_sub.get("diagnosis") or {}
+        overall_rat = last_diag_obj.get("overall_rationale")
         if overall_rat:
             overall_group = {
                 "conclusion_type": "overall",
@@ -10358,12 +10428,57 @@ def teacher_project_evidence_trace_v2(project_id: str, logical_project_id: str =
                 "rationale": overall_rat,
                 "evidence": [],
             }
+        # ── Tier 1：挂上 project_phase / bottleneck / summary / next_task 的 rationale ──
+        for tier1_key, tier1_label, tier1_rat_key in [
+            ("project_phase", "项目阶段判定", "project_phase_rationale"),
+            ("bottleneck", "核心瓶颈", "bottleneck_rationale"),
+            ("summary", "诊断总结", "summary_rationale"),
+        ]:
+            rat = last_diag_obj.get(tier1_rat_key)
+            if rat:
+                tier1_groups.append({
+                    "conclusion_type": "tier1",
+                    "conclusion_key": tier1_key,
+                    "label": tier1_label,
+                    "rationale": rat,
+                    "evidence": [],
+                })
+        # next_task 的 rationale 放在 next_task.rationale 里
+        last_next = last_sub.get("next_task") or {}
+        if isinstance(last_next, dict) and last_next.get("rationale"):
+            tier1_groups.append({
+                "conclusion_type": "tier1",
+                "conclusion_key": "next_task",
+                "label": "下一步任务",
+                "rationale": last_next.get("rationale"),
+                "evidence": [],
+            })
+
+    # ── 把每个 rubric 维度的 rationale（含 reasoning_steps）挂到分组 ──
+    if last_diag_obj:
+        for _rb in (last_diag_obj.get("rubric") or []):
+            if not isinstance(_rb, dict):
+                continue
+            _item = str(_rb.get("item") or "")
+            if not _item or _item not in rubric_groups:
+                # 如果有 rubric 但没有证据也露出 rationale
+                if _item and _rb.get("rationale"):
+                    rubric_groups[_item] = {
+                        "conclusion_type": "rubric",
+                        "conclusion_key": _item,
+                        "label": _item,
+                        "evidence": [],
+                    }
+            if _item and _rb.get("rationale") and _item in rubric_groups:
+                rubric_groups[_item]["rationale"] = _rb.get("rationale")
+                rubric_groups[_item]["score"] = _rb.get("score")
 
     all_cids = list({cid for cid in sub_to_cid.values() if cid})
     payload = {
         "project_id": project_id,
         "logical_project_id": logical_project_id,
         "overall": overall_group,
+        "tier1_groups": tier1_groups,
         "rubric_groups": sorted(rubric_groups.values(), key=lambda g: -len(g["evidence"])),
         "rule_groups": sorted(rule_groups.values(), key=lambda g: -len(g["evidence"])),
         "total_evidence": sum(len(g["evidence"]) for g in rubric_groups.values())

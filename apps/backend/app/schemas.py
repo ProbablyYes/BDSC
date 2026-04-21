@@ -252,6 +252,11 @@ class AuthPasswordChangePayload(BaseModel):
     new_password: str = Field(min_length=6, max_length=64)
 
 
+class SetStudentIdPayload(BaseModel):
+    user_id: str = Field(min_length=1, max_length=128)
+    student_id: str = Field(min_length=4, max_length=32, pattern=r"^[A-Za-z0-9_-]{4,32}$")
+
+
 class AuthUserResponse(BaseModel):
     status: str = "ok"
     user: dict = Field(default_factory=dict)

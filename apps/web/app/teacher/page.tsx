@@ -518,6 +518,449 @@ function BoxPlotChart({
   );
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// 项目历史聚合工具（纯前端）：从 submissions 抽 九维趋势 / 规则频次 / 实体 top / 阶段演变
+// 所有数据都来自已有 submission 的 diagnosis，不新跑 LLM
+// ══════════════════════════════════════════════════════════════════════════
+type ProjectHistoryAgg = {
+  totalRounds: number;
+  startedAt: string | null;
+  endedAt: string | null;
+  rubricTrend: Record<string, { label: string; points: Array<{ t: string; value: number; max: number }>; latest: number; max: number }>;
+  overallTrend: Array<{ t: string; value: number }>;
+  ruleFrequency: Array<{ rule_id: string; rule_name: string; severity: string; hit_count: number; rounds: number }>;
+  entityTop: Array<{ label: string; type: string; count: number }>;
+  stageTimeline: Array<{ t: string; stage: string }>;
+  latestSubmission: any | null;
+  latestDiagnosis: any | null;
+};
+
+function aggregateProjectHistory(submissions: any[]): ProjectHistoryAgg {
+  const sorted = [...(submissions || [])].sort((a, b) => {
+    const ta = a?.created_at ? new Date(a.created_at).getTime() : 0;
+    const tb = b?.created_at ? new Date(b.created_at).getTime() : 0;
+    return ta - tb;
+  });
+  const rubricTrend: ProjectHistoryAgg["rubricTrend"] = {};
+  const overallTrend: ProjectHistoryAgg["overallTrend"] = [];
+  const ruleCounter = new Map<string, { rule_id: string; rule_name: string; severity: string; hit_count: number; rounds: Set<number> }>();
+  const entityCounter = new Map<string, { label: string; type: string; count: number }>();
+  const stageTimeline: ProjectHistoryAgg["stageTimeline"] = [];
+
+  sorted.forEach((sub: any, idx: number) => {
+    const diag = sub?.diagnosis || sub?.rubric_assessment || {};
+    const t = sub?.created_at || "";
+    // 九维 rubric
+    const items = diag?.rubric_items || diag?.rubric_assessment?.rubric_items || [];
+    (items || []).forEach((it: any) => {
+      const key = String(it?.item_id || it?.dimension || it?.label || "").trim();
+      if (!key) return;
+      if (!rubricTrend[key]) {
+        rubricTrend[key] = { label: String(it?.item_name || it?.label || key), points: [], latest: 0, max: Number(it?.max_score || 5) };
+      }
+      const val = Number(it?.score ?? 0);
+      const mx = Number(it?.max_score ?? 5);
+      rubricTrend[key].points.push({ t, value: val, max: mx });
+      rubricTrend[key].latest = val;
+      if (mx) rubricTrend[key].max = mx;
+      rubricTrend[key].label = String(it?.item_name || it?.label || rubricTrend[key].label);
+    });
+    // overall
+    const overall = Number(diag?.overall_weighted_score ?? diag?.overall_score ?? sub?.latest_score ?? NaN);
+    if (!Number.isNaN(overall) && overall !== 0) overallTrend.push({ t, value: overall });
+    // 规则
+    const rules = diag?.triggered_rules || diag?.pattern_warnings || [];
+    (rules || []).forEach((r: any) => {
+      const rid = String(r?.rule_id || r?.pattern_id || r?.id || r?.warning || "").trim();
+      if (!rid) return;
+      const ex = ruleCounter.get(rid) || { rule_id: rid, rule_name: String(r?.rule_name || r?.name || rid), severity: String(r?.severity || "info"), hit_count: 0, rounds: new Set() };
+      ex.hit_count += Number(r?.hit_count || 1);
+      ex.rounds.add(idx);
+      if (r?.severity) ex.severity = String(r.severity);
+      if (r?.rule_name) ex.rule_name = String(r.rule_name);
+      ruleCounter.set(rid, ex);
+    });
+    // 实体
+    const kg = sub?.kg_analysis || diag?.kg || {};
+    const ents = kg?.entities || kg?.nodes || [];
+    (ents || []).forEach((e: any) => {
+      const lbl = String(e?.label || e?.name || "").trim();
+      if (!lbl) return;
+      const type = String(e?.type || e?.entity_type || "Entity");
+      const k = `${lbl}::${type}`;
+      const ex = entityCounter.get(k) || { label: lbl, type, count: 0 };
+      ex.count += 1;
+      entityCounter.set(k, ex);
+    });
+    // 阶段
+    const stage = diag?.project_phase?.value || diag?.project_phase || diag?.maturity?.stage || "";
+    if (stage) stageTimeline.push({ t, stage: String(stage) });
+  });
+
+  const ruleFrequency = Array.from(ruleCounter.values())
+    .map((r) => ({ rule_id: r.rule_id, rule_name: r.rule_name, severity: r.severity, hit_count: r.hit_count, rounds: r.rounds.size }))
+    .sort((a, b) => b.hit_count - a.hit_count)
+    .slice(0, 10);
+  const entityTop = Array.from(entityCounter.values()).sort((a, b) => b.count - a.count).slice(0, 12);
+
+  const latestSubmission = sorted.length ? sorted[sorted.length - 1] : null;
+  const latestDiagnosis = latestSubmission?.diagnosis || latestSubmission?.rubric_assessment || null;
+
+  return {
+    totalRounds: sorted.length,
+    startedAt: sorted.length ? (sorted[0]?.created_at || null) : null,
+    endedAt: sorted.length ? (sorted[sorted.length - 1]?.created_at || null) : null,
+    rubricTrend,
+    overallTrend,
+    ruleFrequency,
+    entityTop,
+    stageTimeline,
+    latestSubmission,
+    latestDiagnosis,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 轻量 Sparkline —— 用于 TeamRadarDimensionPanel / ProjectHistoryStrip
+// ══════════════════════════════════════════════════════════════════════════
+function Sparkline({ points, width = 120, height = 28, color = "var(--accent)", max, showDots = true }:
+  { points: number[]; width?: number; height?: number; color?: string; max?: number; showDots?: boolean }) {
+  if (!points || points.length === 0) {
+    return <span style={{ color: "var(--text-muted)", fontSize: 11 }}>—</span>;
+  }
+  if (points.length === 1) {
+    return <span style={{ color: "var(--text-muted)", fontSize: 11 }}>仅 1 轮</span>;
+  }
+  const mx = max || Math.max(1, ...points);
+  const mn = Math.min(0, ...points);
+  const pad = 2;
+  const w = width - pad * 2;
+  const h = height - pad * 2;
+  const xs = points.map((_, i) => pad + (i / (points.length - 1)) * w);
+  const ys = points.map((v) => pad + h - ((v - mn) / (mx - mn || 1)) * h);
+  const path = xs.map((x, i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${ys[i].toFixed(1)}`).join(" ");
+  const last = points.length - 1;
+  const first = 0;
+  const trend = points[last] - points[first];
+  const trendColor = trend > 0.1 ? "var(--tch-success)" : trend < -0.1 ? "var(--tch-danger)" : "var(--text-muted)";
+  const uid = `sl${Math.random().toString(36).slice(2, 7)}`;
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "inline-block", verticalAlign: "middle" }}>
+      <defs><linearGradient id={uid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity="0.3" /><stop offset="100%" stopColor={color} stopOpacity="0" /></linearGradient></defs>
+      <path d={`${path} L ${xs[last]} ${height - pad} L ${xs[first]} ${height - pad} Z`} fill={`url(#${uid})`} />
+      <path d={path} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      {showDots && <circle cx={xs[last]} cy={ys[last]} r={2.6} fill={trendColor} stroke="var(--bg-primary)" strokeWidth={1} />}
+    </svg>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TeamRadarDimensionPanel —— 雷达下方的维度 tab 栏 + inline 详情
+// 取代原来悬停抖动的 .tch-why-pop
+// ══════════════════════════════════════════════════════════════════════════
+type TeamRadarDim = {
+  key: string;
+  label: string;
+  score: number;
+  max: number;
+  rationale?: any;
+  evidence_quotes?: string[];
+  revision_suggestion?: string;
+  trend?: number[]; // 历史分数 sparkline
+};
+function TeamRadarDimensionPanel({
+  dimensions,
+  onOverride,
+  onJumpMessage,
+  defaultSelected,
+}: {
+  dimensions: TeamRadarDim[];
+  onOverride?: (d: TeamRadarDim) => void;
+  onJumpMessage?: (m: string) => void;
+  defaultSelected?: string[];
+}) {
+  const [selected, setSelected] = useState<string[]>(() => {
+    if (defaultSelected && defaultSelected.length) return defaultSelected;
+    return dimensions.length ? [dimensions[0].key] : [];
+  });
+  if (!dimensions || dimensions.length === 0) return null;
+  const toggle = (k: string) => {
+    setSelected((cur) => {
+      if (cur.includes(k)) return cur.length === 1 ? cur : cur.filter((x) => x !== k);
+      if (cur.length >= 3) return [...cur.slice(1), k];
+      return [...cur, k];
+    });
+  };
+  const chosen = dimensions.filter((d) => selected.includes(d.key));
+  return (
+    <div className="team-dim-wrap">
+      <div className="team-dim-tabs" role="tablist">
+        {dimensions.map((d) => {
+          const on = selected.includes(d.key);
+          const ratio = d.max ? d.score / d.max : 0;
+          const band = ratio >= 0.7 ? "good" : ratio >= 0.5 ? "mid" : "weak";
+          return (
+            <button
+              key={d.key}
+              role="tab"
+              aria-selected={on}
+              className={`team-dim-chip ${on ? "on" : ""} band-${band}`}
+              onClick={() => toggle(d.key)}
+              title={`${d.label} · ${d.score}/${d.max}`}
+            >
+              <span className="team-dim-chip-label">{d.label}</span>
+              <span className="team-dim-chip-score">{d.score.toFixed ? d.score.toFixed(1) : d.score}</span>
+              <span className="team-dim-chip-ring" style={{
+                background: `conic-gradient(var(--accent) ${Math.round(ratio * 360)}deg, var(--bg-elevated) 0)`,
+              }} />
+            </button>
+          );
+        })}
+      </div>
+      <div className="team-dim-panel-grid" style={{ gridTemplateColumns: chosen.length > 1 ? `repeat(${chosen.length}, minmax(0,1fr))` : "1fr" }}>
+        {chosen.map((d) => (
+          <div key={d.key} className="team-dim-panel">
+            <div className="team-dim-panel-head">
+              <div>
+                <div className="team-dim-panel-title">{d.label}</div>
+                <div className="team-dim-panel-sub">
+                  <strong>{d.score.toFixed ? d.score.toFixed(1) : d.score}</strong>
+                  <span>/ {d.max}</span>
+                  {d.trend && d.trend.length > 1 && (
+                    <span className="team-dim-panel-spark"><Sparkline points={d.trend} max={d.max} width={80} height={22} /></span>
+                  )}
+                </div>
+              </div>
+              {onOverride && (
+                <button type="button" className="team-dim-override" onClick={() => onOverride(d)} title="订正此维度">✎ 订正</button>
+              )}
+            </div>
+            {d.rationale ? (
+              <RationaleCard rationale={d.rationale as Rationale} compact onJumpMessage={onJumpMessage} />
+            ) : (
+              <div className="team-dim-panel-empty">这个维度暂时没有推理链；可以查看下方的证据原文。</div>
+            )}
+            {(d.evidence_quotes || []).length > 0 && (
+              <div className="team-dim-quotes">
+                <div className="team-dim-quotes-title">原文证据</div>
+                {(d.evidence_quotes || []).slice(0, 3).map((q, i) => (
+                  <div key={i} className="team-dim-quote">"{q}"</div>
+                ))}
+              </div>
+            )}
+            {d.revision_suggestion && (
+              <div className="team-dim-suggest">
+                <span className="team-dim-suggest-tag">建议</span>{d.revision_suggestion}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ProjectHistoryStrip —— 项目 tab 顶部历史趋势条
+// ══════════════════════════════════════════════════════════════════════════
+function ProjectHistoryStrip({ agg }: { agg: ProjectHistoryAgg }) {
+  if (!agg || agg.totalRounds === 0) {
+    return (
+      <div className="proj-history-strip empty">
+        <span>暂无历史诊断 · 等待第一次提交</span>
+      </div>
+    );
+  }
+  const overallPts = agg.overallTrend.map((p) => p.value);
+  const rubricKeys = Object.keys(agg.rubricTrend).slice(0, 9);
+  const startLbl = agg.startedAt ? formatBJTime(agg.startedAt) : "";
+  const endLbl = agg.endedAt ? formatBJTime(agg.endedAt) : "";
+  return (
+    <div className="proj-history-strip">
+      <div className="proj-history-strip-head">
+        <div className="proj-history-strip-title">
+          <span className="proj-history-strip-dot" />
+          历史趋势
+          <span className="proj-history-strip-sub">{agg.totalRounds} 轮诊断 · {startLbl} → {endLbl}</span>
+        </div>
+        {overallPts.length > 1 && (
+          <div className="proj-history-strip-overall">
+            <span>综合分</span>
+            <Sparkline points={overallPts} max={10} width={160} height={28} color="var(--tch-warning)" />
+            <strong>{overallPts[overallPts.length - 1].toFixed(2)}</strong>
+          </div>
+        )}
+      </div>
+      {rubricKeys.length > 0 && (
+        <div className="proj-history-strip-dims">
+          {rubricKeys.map((k) => {
+            const dim = agg.rubricTrend[k];
+            const pts = dim.points.map((p) => p.value);
+            const latest = pts[pts.length - 1] || 0;
+            const first = pts[0] || 0;
+            const delta = latest - first;
+            return (
+              <div key={k} className="proj-history-strip-dim">
+                <div className="proj-history-strip-dim-label">{dim.label}</div>
+                <Sparkline points={pts} max={dim.max} width={92} height={24} />
+                <div className="proj-history-strip-dim-num">
+                  <strong>{latest.toFixed(1)}</strong>
+                  {pts.length > 1 && (
+                    <span className={`proj-history-strip-delta ${delta > 0 ? "up" : delta < 0 ? "down" : "flat"}`}>
+                      {delta > 0 ? "▲" : delta < 0 ? "▼" : "·"} {Math.abs(delta).toFixed(1)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ProjectTreeSidebar —— 左侧 团队 > 学生 > 项目 折叠导航 + 类别 badge
+// ══════════════════════════════════════════════════════════════════════════
+type ProjTreeNode = {
+  teamId: string;
+  teamName: string;
+  isMine?: boolean;
+  students: Array<{
+    studentId: string;
+    displayName: string;
+    projects: Array<{ projectId: string; projectName: string; logicalId?: string; score?: number; category?: string; riskCount?: number }>;
+  }>;
+};
+function ProjectTreeSidebar({
+  tree,
+  selectedLogicalId,
+  selectedProjectId,
+  categories,
+  activeCategory,
+  onSelectCategory,
+  onSelectProject,
+  search,
+  onSearch,
+}: {
+  tree: ProjTreeNode[];
+  selectedLogicalId?: string;
+  selectedProjectId?: string;
+  categories: Array<{ category: string; count: number }>;
+  activeCategory?: string;
+  onSelectCategory: (cat: string) => void;
+  onSelectProject: (teamId: string, studentId: string, projectId: string, logicalId?: string) => void;
+  search: string;
+  onSearch: (v: string) => void;
+}) {
+  const [openTeams, setOpenTeams] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    tree.forEach((t) => { if (t.isMine) init[t.teamId] = true; });
+    return init;
+  });
+  const [openStudents, setOpenStudents] = useState<Record<string, boolean>>({});
+  const toggleTeam = (id: string) => setOpenTeams((x) => ({ ...x, [id]: !x[id] }));
+  const toggleStudent = (id: string) => setOpenStudents((x) => ({ ...x, [id]: !x[id] }));
+  const kw = (search || "").trim().toLowerCase();
+  const match = (s: string) => !kw || (s || "").toLowerCase().includes(kw);
+  return (
+    <aside className="proj-tree-sidebar">
+      <div className="proj-tree-search">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => onSearch(e.target.value)}
+          placeholder="搜索项目 / 学生"
+          className="proj-tree-search-input"
+        />
+      </div>
+      {categories.length > 0 && (
+        <div className="proj-category-filter">
+          <button
+            type="button"
+            className={`proj-category-badge ${!activeCategory ? "on" : ""}`}
+            onClick={() => onSelectCategory("")}
+          >全部<span>{categories.reduce((s, c) => s + c.count, 0)}</span></button>
+          {categories.map((c) => (
+            <button
+              type="button"
+              key={c.category}
+              className={`proj-category-badge ${activeCategory === c.category ? "on" : ""}`}
+              onClick={() => onSelectCategory(c.category)}
+            >{c.category || "未分类"}<span>{c.count}</span></button>
+          ))}
+        </div>
+      )}
+      <div className="proj-tree-list">
+        {tree.map((team) => {
+          const hasMatchInTeam = !kw || match(team.teamName) || team.students.some((s) => match(s.displayName) || s.projects.some((p) => match(p.projectName)));
+          if (!hasMatchInTeam) return null;
+          const open = openTeams[team.teamId];
+          const teamTotal = team.students.reduce((s, st) => s + st.projects.length, 0);
+          return (
+            <div key={team.teamId} className={`proj-tree-team ${team.isMine ? "mine" : ""}`}>
+              <button type="button" className={`proj-tree-team-head ${open ? "open" : ""}`} onClick={() => toggleTeam(team.teamId)}>
+                <span className="proj-tree-chev">{open ? "▾" : "▸"}</span>
+                <span className="proj-tree-team-name">{team.teamName}</span>
+                {team.isMine && <span className="proj-tree-mine-tag">我的</span>}
+                <span className="proj-tree-count">{team.students.length}人 · {teamTotal}项目</span>
+              </button>
+              {open && (
+                <div className="proj-tree-students">
+                  {team.students.map((st) => {
+                    const sKey = `${team.teamId}:${st.studentId}`;
+                    const sOpen = openStudents[sKey] !== false; // 默认展开
+                    const sMatch = !kw || match(st.displayName) || st.projects.some((p) => match(p.projectName));
+                    if (!sMatch) return null;
+                    const projFiltered = st.projects.filter((p) => !activeCategory || (p.category || "") === activeCategory).filter((p) => match(p.projectName));
+                    if (projFiltered.length === 0) return null;
+                    return (
+                      <div key={sKey} className="proj-tree-student">
+                        <button type="button" className={`proj-tree-student-head ${sOpen ? "open" : ""}`} onClick={() => toggleStudent(sKey)}>
+                          <span className="proj-tree-chev">{sOpen ? "▾" : "▸"}</span>
+                          <span className="proj-tree-student-name">{st.displayName}</span>
+                          <span className="proj-tree-count">{projFiltered.length}</span>
+                        </button>
+                        {sOpen && (
+                          <div className="proj-tree-projects">
+                            {projFiltered.map((p) => {
+                              const active = (selectedLogicalId && p.logicalId && selectedLogicalId === p.logicalId) || (selectedProjectId && selectedProjectId === p.projectId);
+                              const risk = p.riskCount || 0;
+                              const scoreBand = typeof p.score === "number" ? (p.score >= 7 ? "good" : p.score >= 5 ? "mid" : "weak") : "none";
+                              return (
+                                <button
+                                  key={p.projectId}
+                                  type="button"
+                                  className={`proj-tree-project ${active ? "active" : ""}`}
+                                  onClick={() => onSelectProject(team.teamId, st.studentId, p.projectId, p.logicalId)}
+                                  title={p.projectName}
+                                >
+                                  <span className={`proj-tree-project-dot band-${scoreBand}`} />
+                                  <span className="proj-tree-project-name">{p.projectName}</span>
+                                  {typeof p.score === "number" && <span className="proj-tree-project-score">{p.score.toFixed(1)}</span>}
+                                  {risk > 0 && <span className="proj-tree-project-risk" title={`命中 ${risk} 条风险`}>{risk}</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {tree.length === 0 && (
+          <div className="proj-tree-empty">暂无项目 · 等待学生提交</div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 export default function TeacherPage() {
   const currentUser = useAuth("teacher");
   const [tab, setTab] = useState<Tab>("overview");
@@ -645,6 +1088,10 @@ export default function TeacherPage() {
   const [projectBoardCategory, setProjectBoardCategory] = useState("全部项目");
   const [projectBoardSort, setProjectBoardSort] = useState<"risk" | "score" | "improvement" | "submissions">("risk");
   const [projectCompareSelection, setProjectCompareSelection] = useState<string[]>([]);
+  // 项目 tab 新版聚合视图：树导航搜索关键词 + 类别筛选 + 视图切换（新版 / 经典）
+  const [projTreeSearch, setProjTreeSearch] = useState("");
+  const [projTreeCategory, setProjTreeCategory] = useState("");
+  const [projViewMode, setProjViewMode] = useState<"aggregate" | "classic">("aggregate");
 
   // 饼状图悬浮状态
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
@@ -681,6 +1128,57 @@ export default function TeacherPage() {
     targetKey: "",
     aiValue: null,
   });
+  // 源消息跳转弹窗：根据 {conv_id}#{turn_index} 拉对应消息后展示
+  const [msgPeek, setMsgPeek] = useState<{
+    open: boolean;
+    messageId: string;
+    conversationId: string;
+    content: string;
+    role: string;
+    loading: boolean;
+  }>({
+    open: false,
+    messageId: "",
+    conversationId: "",
+    content: "",
+    role: "",
+    loading: false,
+  });
+  const handleJumpMessage = useCallback(async (messageId: string) => {
+    if (!messageId) return;
+    const [convId, turnStr] = String(messageId).split("#");
+    const turnIdx = Number(turnStr || "0");
+    setMsgPeek({
+      open: true,
+      messageId,
+      conversationId: convId || "",
+      content: "",
+      role: "",
+      loading: true,
+    });
+    if (!convId || !selectedProject) {
+      setMsgPeek((s) => ({ ...s, loading: false, content: "（无法定位源消息：缺失 conversation_id）" }));
+      return;
+    }
+    try {
+      const data = await api(`/api/conversations/${encodeURIComponent(selectedProject)}/${encodeURIComponent(convId)}`);
+      const messages = (data && (data.messages || data.conversation?.messages)) || [];
+      const m = messages[turnIdx] || null;
+      if (!m) {
+        setMsgPeek((s) => ({ ...s, loading: false, content: "（未找到该轮消息，可能是索引已偏移）" }));
+        return;
+      }
+      setMsgPeek((s) => ({
+        ...s,
+        loading: false,
+        content: String(m.content || ""),
+        role: String(m.role || ""),
+      }));
+    } catch (_e) {
+      setMsgPeek((s) => ({ ...s, loading: false, content: "（加载失败）" }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProject]);
   const [projectWorkbenchSummary, setProjectWorkbenchSummary] = useState<any>(null);
   const [projectCaseBenchmark, setProjectCaseBenchmark] = useState<any>(null);
   const [projectStructuredReport, setProjectStructuredReport] = useState<any>(null);
@@ -3714,7 +4212,20 @@ export default function TeacherPage() {
                                 <span>{s.student_name || s.display_name || s.student_id || "未知学生"}</span>
                                 <span className="ov-activity-type">{s.source_type === "dialogue" ? "💬 对话" : s.source_type === "file" ? "📄 文件" : s.source_type || "提交"}</span>
                               </div>
-                              <div className="ov-activity-detail">{s.project_id}{s.filename ? ` · ${s.filename}` : ""}{s.bottleneck ? ` · ${(s.bottleneck as string).slice(0, 50)}` : ""}</div>
+                              <div className="ov-activity-detail">
+                                {(() => {
+                                  const lid = String(s.logical_project_id || "");
+                                  const isStd = /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+                                  return isStd ? (
+                                    <code className="tch-pid-inline standard" title="规范项目编号">{lid}</code>
+                                  ) : lid && lid !== s.project_id ? (
+                                    <code className="tch-pid-inline legacy" title="历史会话编号">#{lid.slice(0, 8)}</code>
+                                  ) : (
+                                    <span>{s.project_id}</span>
+                                  );
+                                })()}
+                                {s.filename ? ` · ${s.filename}` : ""}{s.bottleneck ? ` · ${(s.bottleneck as string).slice(0, 50)}` : ""}
+                              </div>
                             </div>
                             <div className="ov-activity-score" style={{ color: Number(s.overall_score) >= 7 ? "var(--tch-success)" : Number(s.overall_score) >= 5 ? "var(--tch-warning)" : "var(--tch-danger)" }}>
                               {Number(s.overall_score).toFixed(1)}
@@ -6065,65 +6576,32 @@ export default function TeacherPage() {
                   </div>
 
                   <h3 style={{ marginTop: 24, marginBottom: 12 }}>各维度评分详情</h3>
-                  <div className="tch-table" style={{ animation: "fade-in 0.5s ease-out" }}>
-                    <div className="tch-table-header">
-                      <span>维度</span><span>得分</span><span>权重</span><span>修改建议</span>
-                    </div>
-                    {rubricAssessment.rubric_items.length === 0 ? (
-                      <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 20 }}>暂无评分数据</p>
-                    ) : (
-                      rubricAssessment.rubric_items.map((item: any, idx: number) => (
-                        <div 
-                          key={item.item_id} 
-                          className="tch-table-row tch-rubric-row-rich"
-                          style={{
-                            animation: `fade-in 0.3s ease-out ${idx * 0.05}s both`,
-                            backgroundColor: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success-soft)" : 
-                                           Number(item.score) >= item.max_score * 0.5 ? "var(--tch-warning-soft)" : "var(--tch-danger-soft)",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <span><strong>{item.item_id}</strong> {item.item_name}</span>
-                          <span style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
-                            <strong style={{ color: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success)" : "var(--tch-warning)" }}>
-                              {item.score}/{item.max_score}
-                            </strong>
-                            {item.rationale && (
-                              <button
-                                type="button"
-                                className="tch-why-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setRubricWhyOpen((cur) => cur === item.item_id ? null : item.item_id);
-                                }}
-                                title="查看这个分数是如何算出来的"
-                                aria-label="查看分数推导"
-                              >?</button>
-                            )}
-                            {rubricWhyOpen === item.item_id && item.rationale && (
-                              <div className="tch-why-pop" onClick={(e) => e.stopPropagation()}>
-                                <div className="tch-why-pop-head">
-                                  <span className="tch-why-pop-title">{item.item_name} · 评分推导</span>
-                                  <button className="tch-why-pop-close" onClick={() => setRubricWhyOpen(null)}>×</button>
-                                </div>
-                                <RationaleCard rationale={item.rationale as Rationale} compact />
-                                {(item.evidence_quotes || []).length > 0 && (
-                                  <div className="tch-why-pop-quotes">
-                                    <div className="tch-why-pop-quotes-title">证据引用</div>
-                                    {(item.evidence_quotes || []).slice(0, 2).map((q: string, i: number) => (
-                                      <div key={i} className="tch-why-pop-quote">“{q}”</div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </span>
-                          <span>{(item.weight * 100).toFixed(0)}%</span>
-                          <span style={{ fontSize: "0.9em", color: "var(--text-secondary)" }}>{item.revision_suggestion}</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                  {/* 雷达维度面板：点击维度 chip 展开 inline 推理链，支持多维对比，取代原来的浮动弹窗 */}
+                  {rubricAssessment.rubric_items.length === 0 ? (
+                    <p style={{ color: "var(--text-muted)", fontSize: 12, padding: 20 }}>暂无评分数据</p>
+                  ) : (
+                    <TeamRadarDimensionPanel
+                      dimensions={rubricAssessment.rubric_items.map((item: any) => ({
+                        key: String(item.item_id || item.item_name || ""),
+                        label: `${item.item_id || ""} ${item.item_name || ""}`.trim(),
+                        score: Number(item.score || 0),
+                        max: Number(item.max_score || 5),
+                        rationale: item.rationale,
+                        evidence_quotes: item.evidence_quotes || [],
+                        revision_suggestion: item.revision_suggestion,
+                      }))}
+                      onJumpMessage={handleJumpMessage}
+                      onOverride={(d) => setOverrideDrawer({
+                        open: true,
+                        title: `订正 Rubric：${d.label}`,
+                        projectId: selectedProject,
+                        conversationId: undefined,
+                        targetType: "rubric",
+                        targetKey: d.key,
+                        aiValue: d.score ?? "",
+                      })}
+                    />
+                  )}
 
                   {projectDiagnosis?.fix_strategies && projectDiagnosis.fix_strategies.length > 0 && (
                     <>
@@ -6354,10 +6832,325 @@ export default function TeacherPage() {
           {/* ── 班级管理 ── */}
           {tab === "project" && (
             <div className="tch-panel fade-up" style={{ maxWidth: "none" }}>
-              <h2>项目工作台</h2>
-              <p className="tch-desc">这里不再只是项目跳转页，而是老师从大批项目中提炼重点、比较差异、再进入单项目深钻的分析台。</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div>
+                  <h2 style={{ marginBottom: 4 }}>项目工作台</h2>
+                  <p className="tch-desc" style={{ marginBottom: 0 }}>{projViewMode === "aggregate" ? "左侧按团队 › 学生 › 项目折叠；右侧聚合该项目的全历史诊断（复用最新一轮 submission + 历史趋势，不再重跑 LLM）。" : "分析台：从大批项目中提炼重点、比较差异、再进入单项目深钻。"}</p>
+                </div>
+                <div className="tch-view-switch">
+                  <button type="button" className={`tch-view-switch-btn ${projViewMode === "aggregate" ? "on" : ""}`} onClick={() => setProjViewMode("aggregate")}>聚合视图</button>
+                  <button type="button" className={`tch-view-switch-btn ${projViewMode === "classic" ? "on" : ""}`} onClick={() => setProjViewMode("classic")}>经典视图</button>
+                </div>
+              </div>
 
-              {teacherProjectCatalog.length === 0 ? (
+              {/* ══════════ 新版聚合视图：左侧树 + 右侧项目详情 ══════════ */}
+              {projViewMode === "aggregate" && (() => {
+                const allTeams = [...((teamData?.my_teams) || []), ...((teamData?.other_teams) || [])];
+                // 构造树：团队 → 学生 → 项目
+                const tree: ProjTreeNode[] = allTeams.map((t: any) => ({
+                  teamId: t.team_id,
+                  teamName: t.team_name,
+                  isMine: !!t.is_mine,
+                  students: (t.students || []).map((s: any) => ({
+                    studentId: s.student_id,
+                    displayName: s.display_name || s.student_id,
+                    projects: (s.projects || []).map((p: any) => {
+                      const subs = p.submissions || [];
+                      const riskCount = subs.reduce((acc: number, x: any) => acc + normalizeRuleList(x.triggered_rules).length, 0);
+                      return {
+                        projectId: p.project_id,
+                        projectName: p.project_name || "未命名项目",
+                        logicalId: p.logical_project_id || "",
+                        score: Number(p.latest_score ?? p.overall_score ?? 0),
+                        category: p.category || p.project_category || "",
+                        riskCount,
+                      };
+                    }),
+                  })).filter((s: any) => (s.projects || []).length > 0),
+                })).filter((t) => t.students.length > 0);
+
+                // 从树里收集所有类别（做去重）
+                const catCounter = new Map<string, number>();
+                tree.forEach((t) => t.students.forEach((s) => s.projects.forEach((p) => {
+                  const k = p.category || "未分类";
+                  catCounter.set(k, (catCounter.get(k) || 0) + 1);
+                })));
+                const categories = Array.from(catCounter.entries()).map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count);
+
+                // 定位当前选中的项目和学生
+                let activeTeam: any = null;
+                let activeStudent: any = null;
+                let activeProject: any = null;
+                for (const t of allTeams) {
+                  for (const s of t.students || []) {
+                    for (const p of s.projects || []) {
+                      const lpidMatch = selectedLogicalProjectId && p.logical_project_id && p.logical_project_id === selectedLogicalProjectId;
+                      const pidMatch = selectedProject && p.project_id === selectedProject;
+                      if (lpidMatch || pidMatch) {
+                        activeTeam = t; activeStudent = s; activeProject = p;
+                        break;
+                      }
+                    }
+                    if (activeProject) break;
+                  }
+                  if (activeProject) break;
+                }
+                if (!activeProject && tree.length > 0 && tree[0].students.length > 0 && tree[0].students[0].projects.length > 0) {
+                  const firstProj = tree[0].students[0].projects[0];
+                  const t0 = allTeams.find((x: any) => x.team_id === tree[0].teamId);
+                  const s0 = t0?.students?.find((x: any) => x.student_id === tree[0].students[0].studentId);
+                  const p0 = s0?.projects?.find((x: any) => x.project_id === firstProj.projectId);
+                  activeTeam = t0; activeStudent = s0; activeProject = p0;
+                }
+
+                const subs = activeProject?.submissions || [];
+                const agg = aggregateProjectHistory(subs);
+                const latestSub: any = agg.latestSubmission || subs[subs.length - 1] || null;
+                const latestDiag: any = agg.latestDiagnosis || latestSub?.diagnosis || activeProject?.latest_diagnosis || {};
+                const latestRubric: any[] = (latestDiag.rubric_items || latestDiag.rubric_assessment?.rubric_items || []);
+                const latestOverallScore = Number(latestDiag.overall_weighted_score ?? latestDiag.overall_score ?? activeProject?.latest_score ?? 0);
+                const latestOverallRationale = latestDiag.overall_rationale || latestDiag.rubric_assessment?.overall_rationale;
+                const tier1 = [
+                  latestDiag.project_phase_rationale && { key: "phase", label: "项目阶段", rationale: latestDiag.project_phase_rationale },
+                  latestDiag.bottleneck_rationale && { key: "bottleneck", label: "核心瓶颈", rationale: latestDiag.bottleneck_rationale },
+                  latestDiag.current_summary_rationale && { key: "summary", label: "项目总结", rationale: latestDiag.current_summary_rationale },
+                  latestDiag.next_task_rationale && { key: "next_task", label: "下一步任务", rationale: latestDiag.next_task_rationale },
+                ].filter(Boolean) as Array<{ key: string; label: string; rationale: any }>;
+                const latestKg = latestSub?.kg_analysis || latestDiag?.kg || {};
+                const latestEntities: any[] = latestKg.entities || latestKg.nodes || [];
+                const latestRules: any[] = latestDiag.triggered_rules || latestDiag.pattern_warnings || [];
+
+                return (
+                  <div className="proj-shell">
+                    <ProjectTreeSidebar
+                      tree={tree}
+                      selectedLogicalId={selectedLogicalProjectId}
+                      selectedProjectId={selectedProject}
+                      categories={categories}
+                      activeCategory={projTreeCategory}
+                      onSelectCategory={setProjTreeCategory}
+                      onSelectProject={(teamId, studentId, projectId, logicalId) => {
+                        setSelectedTeamId(teamId);
+                        setSelectedTeamStudentId(studentId);
+                        setSelectedTeamProjectId(projectId);
+                        if (logicalId) setSelectedLogicalProjectId(logicalId);
+                        if (projectId) setSelectedProject(projectId);
+                      }}
+                      search={projTreeSearch}
+                      onSearch={setProjTreeSearch}
+                    />
+                    <div className="proj-detail-root">
+                      {!activeProject ? (
+                        <div className="proj-name-card empty">
+                          <p style={{ color: "var(--text-muted)", textAlign: "center", padding: 40, flex: 1, margin: 0 }}>从左侧选择一个项目查看聚合诊断</p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* ── 项目名片 ── */}
+                          <div className="proj-name-card">
+                            <div className="proj-name-card-left">
+                              <div className="proj-name-card-eyebrow">
+                                {activeTeam?.team_name} · {activeStudent?.display_name}
+                              </div>
+                              <h3 className="proj-name-card-title">{activeProject.project_name || "未命名项目"}</h3>
+                              <div className="proj-name-card-meta">
+                                {(activeProject.category || activeProject.project_category) && (
+                                  <span className="proj-name-card-meta-tag category">{activeProject.category || activeProject.project_category}</span>
+                                )}
+                                <span className="proj-name-card-meta-tag">{subs.length} 轮诊断</span>
+                                {activeProject.latest_phase && <span className="proj-name-card-meta-tag">{activeProject.latest_phase}</span>}
+                                {activeProject.logical_project_id && <span className="proj-name-card-meta-tag" style={{ fontFamily: "monospace", fontSize: 10 }}>{String(activeProject.logical_project_id).slice(0, 12)}</span>}
+                              </div>
+                              {(activeProject.current_summary || activeProject.latest_diagnosis?.current_summary) && (
+                                <p className="proj-name-card-summary">{activeProject.current_summary || activeProject.latest_diagnosis?.current_summary}</p>
+                              )}
+                            </div>
+                            <div className="proj-name-card-right">
+                              <div className="proj-name-card-score-big">
+                                <strong>{latestOverallScore.toFixed(2)}</strong>
+                                <span>最新综合分 / 10</span>
+                              </div>
+                              <div className="proj-name-card-actions">
+                                <button
+                                  type="button"
+                                  className="proj-name-card-btn primary"
+                                  onClick={() => latestOverallRationale && setOverrideDrawer({
+                                    open: true,
+                                    title: `订正综合分 · ${activeProject.project_name || ""}`,
+                                    projectId: activeProject.project_id,
+                                    conversationId: undefined,
+                                    targetType: "overall",
+                                    targetKey: "overall",
+                                    aiValue: latestOverallScore,
+                                  })}
+                                  disabled={!latestOverallRationale}
+                                >订正综合分</button>
+                                <button
+                                  type="button"
+                                  className="proj-name-card-btn"
+                                  onClick={() => { setTab("rubric"); setSelectedProject(activeProject.project_id); }}
+                                >打开详细评分</button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* ── 历史趋势条 ── */}
+                          <ProjectHistoryStrip agg={agg} />
+
+                          {/* ── Tier 1：顶层结论 ── */}
+                          {tier1.length > 0 && (
+                            <div className="proj-detail-section">
+                              <div className="proj-detail-section-head">
+                                <div className="proj-detail-section-title">
+                                  顶层结论推理 <span className="proj-detail-section-tier-tag">TIER 1</span>
+                                </div>
+                                <div className="proj-detail-section-desc">每条结论都带完整推理链，可点击跳回源消息 / 订正</div>
+                              </div>
+                              <div className="proj-detail-section-body">
+                                {tier1.map((t) => (
+                                  <details key={t.key} open>
+                                    <summary style={{ cursor: "pointer", padding: "6px 0", fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+                                      {t.label}
+                                      <button
+                                        type="button"
+                                        className="team-dim-override"
+                                        style={{ marginLeft: 10 }}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          setOverrideDrawer({
+                                            open: true,
+                                            title: `订正 ${t.label}`,
+                                            projectId: activeProject.project_id,
+                                            conversationId: undefined,
+                                            targetType: t.key,
+                                            targetKey: t.key,
+                                            aiValue: t.rationale?.value,
+                                          });
+                                        }}
+                                      >✎ 订正</button>
+                                    </summary>
+                                    <RationaleCard rationale={t.rationale as Rationale} compact onJumpMessage={handleJumpMessage} />
+                                  </details>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* ── Tier 2：九维评分 ── */}
+                          {latestRubric.length > 0 && (
+                            <div className="proj-detail-section">
+                              <div className="proj-detail-section-head">
+                                <div className="proj-detail-section-title">
+                                  九维评分推导 <span className="proj-detail-section-tier-tag">TIER 2</span>
+                                </div>
+                                <div className="proj-detail-section-desc">点击 chip 查看具体「证据 → 分数贡献」；支持多维对比</div>
+                              </div>
+                              <TeamRadarDimensionPanel
+                                dimensions={latestRubric.map((item: any) => ({
+                                  key: String(item.item_id || item.item_name || ""),
+                                  label: `${item.item_id || ""} ${item.item_name || ""}`.trim(),
+                                  score: Number(item.score || 0),
+                                  max: Number(item.max_score || 5),
+                                  rationale: item.rationale,
+                                  evidence_quotes: item.evidence_quotes || [],
+                                  revision_suggestion: item.revision_suggestion,
+                                  trend: agg.rubricTrend[String(item.item_id || "")]?.points.map((p) => p.value),
+                                }))}
+                                onJumpMessage={handleJumpMessage}
+                                onOverride={(d) => setOverrideDrawer({
+                                  open: true,
+                                  title: `订正 ${d.label}`,
+                                  projectId: activeProject.project_id,
+                                  conversationId: undefined,
+                                  targetType: "rubric",
+                                  targetKey: d.key,
+                                  aiValue: d.score ?? "",
+                                })}
+                              />
+                            </div>
+                          )}
+
+                          {/* ── Tier 2：规则命中（历史频次） ── */}
+                          {agg.ruleFrequency.length > 0 && (
+                            <div className="proj-detail-section">
+                              <div className="proj-detail-section-head">
+                                <div className="proj-detail-section-title">
+                                  风险规则命中 <span className="proj-detail-section-tier-tag">TIER 2</span>
+                                </div>
+                                <div className="proj-detail-section-desc">基于全历史诊断的规则频次，出现轮次越多越值得干预</div>
+                              </div>
+                              <div className="proj-risk-table">
+                                <div className="proj-risk-table-head">
+                                  <span>规则</span><span>名称</span><span>次数</span><span>轮次</span><span></span>
+                                </div>
+                                {agg.ruleFrequency.map((r) => {
+                                  const sev = (r.severity || "info").toLowerCase();
+                                  return (
+                                    <div key={r.rule_id} className="proj-risk-table-row">
+                                      <span><span className={`proj-risk-sev ${sev}`} />{r.rule_id}</span>
+                                      <span>{r.rule_name || getRuleDisplayName(r.rule_id)}</span>
+                                      <span style={{ fontWeight: 600 }}>{r.hit_count}</span>
+                                      <span>{r.rounds}</span>
+                                      <span>
+                                        <button
+                                          type="button"
+                                          className="team-dim-override"
+                                          onClick={() => setOverrideDrawer({
+                                            open: true,
+                                            title: `订正风险 · ${r.rule_id}`,
+                                            projectId: activeProject.project_id,
+                                            conversationId: undefined,
+                                            targetType: "risk_rule",
+                                            targetKey: r.rule_id,
+                                            aiValue: r.hit_count,
+                                          })}
+                                        >✎</button>
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* ── Tier 5：KG / 超图命中实体 ── */}
+                          {(agg.entityTop.length > 0 || latestEntities.length > 0) && (
+                            <div className="proj-detail-section">
+                              <div className="proj-detail-section-head">
+                                <div className="proj-detail-section-title">
+                                  知识图谱 / 超图命中 <span className="proj-detail-section-tier-tag">TIER 5</span>
+                                </div>
+                                <div className="proj-detail-section-desc">按历史出现频次聚合的实体，点击可看来源 extraction_rule</div>
+                              </div>
+                              <div className="proj-ent-chips">
+                                {(agg.entityTop.length > 0 ? agg.entityTop : latestEntities.slice(0, 12).map((e: any) => ({ label: e.label || e.name, type: e.type || "Entity", count: 1 }))).map((e: any, i: number) => (
+                                  <span key={`${e.label}-${i}`} className="proj-ent-chip" title={`${e.type} · 出现 ${e.count} 次`}>
+                                    <span>{e.label}</span>
+                                    <span className="proj-ent-chip-type">{e.type}</span>
+                                    <span className="proj-ent-chip-count">{e.count}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {subs.length === 0 && (
+                            <div className="proj-detail-section">
+                              <p style={{ color: "var(--text-muted)", textAlign: "center", padding: 20, margin: 0 }}>
+                                该项目还没有提交记录 · 等待第一次诊断
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ══════════ 经典视图：保留原 legacy 长页 ══════════ */}
+              {projViewMode === "classic" && teacherProjectCatalog.length === 0 ? (
                 <div className="project-launchpad">
                   <div className="project-launch-card">
                     <div className="tm-project-cover-label">Project Intelligence Deck</div>
@@ -6365,7 +7158,7 @@ export default function TeacherPage() {
                     <p className="tch-desc" style={{ marginBottom: 0 }}>请先让老师名下团队产生学生项目记录；系统会自动把这些项目收束成目录，不再要求手输 ID。</p>
                   </div>
                 </div>
-              ) : (
+              ) : (projViewMode === "classic") ? (
                 (() => {
                   const activeBoardCategory =
                     projectBoardCategories.find((item: any) => item.category === projectBoardCategory)
@@ -7437,9 +8230,51 @@ export default function TeacherPage() {
                                           </button>
                                         </summary>
                                         <div className="tet-group-body">
-                                          <RationaleCard rationale={projectEvidenceTraceV2.overall.rationale as Rationale} compact />
+                                          <RationaleCard rationale={projectEvidenceTraceV2.overall.rationale as Rationale} compact onJumpMessage={handleJumpMessage} />
                                         </div>
                                       </details>
+                                    )}
+                                    {/* ── Tier 1：项目阶段 / 核心瓶颈 / 总结 / 下一步任务的推理链 ── */}
+                                    {(projectEvidenceTraceV2.tier1_groups || []).length > 0 && (
+                                      <div className="tet-section">
+                                        <div className="tet-section-title">顶层结论推理（{(projectEvidenceTraceV2.tier1_groups || []).length} 条）</div>
+                                        {(projectEvidenceTraceV2.tier1_groups || []).map((g: any) => (
+                                          <details key={g.conclusion_key} className="tet-group tet-group-tier1">
+                                            <summary>
+                                              <span className="tet-group-tag tet-group-tag-tier1">Tier 1</span>
+                                              <span className="tet-group-label">{g.label}</span>
+                                              {g.rationale?.value !== undefined && (
+                                                <span className="tet-group-meta">值：{String(g.rationale.value)}</span>
+                                              )}
+                                              <button
+                                                type="button"
+                                                className="tet-override-btn"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  setOverrideDrawer({
+                                                    open: true,
+                                                    title: `订正 ${g.label}`,
+                                                    projectId: selectedProject,
+                                                    conversationId: undefined,
+                                                    targetType: g.conclusion_key,
+                                                    targetKey: g.conclusion_key,
+                                                    aiValue: g.rationale?.value ?? "",
+                                                  });
+                                                }}
+                                                title="老师订正此结论"
+                                              >
+                                                订正
+                                              </button>
+                                            </summary>
+                                            <div className="tet-group-body">
+                                              {g.rationale ? (
+                                                <RationaleCard rationale={g.rationale as Rationale} compact onJumpMessage={handleJumpMessage} />
+                                              ) : null}
+                                            </div>
+                                          </details>
+                                        ))}
+                                      </div>
                                     )}
                                     {(projectEvidenceTraceV2.rubric_groups || []).length > 0 && (
                                       <div className="tet-section">
@@ -7472,12 +8307,26 @@ export default function TeacherPage() {
                                               </button>
                                             </summary>
                                             <div className="tet-group-body">
+                                              {g.rationale ? (
+                                                <RationaleCard
+                                                  rationale={g.rationale as Rationale}
+                                                  compact
+                                                  onJumpMessage={handleJumpMessage}
+                                                />
+                                              ) : null}
                                               {(g.evidence || []).slice(0, 5).map((ev: any, ei: number) => (
                                                 <div key={ei} className="tet-evidence-item">
                                                   <div className="tet-ev-quote">“{(ev.quote || "").slice(0, 160)}”</div>
                                                   <div className="tet-ev-meta">
                                                     {ev.source_message_id && (
-                                                      <span className="tet-ev-mid" title="源消息">msg {String(ev.source_message_id).split("#").pop()}</span>
+                                                      <button
+                                                        type="button"
+                                                        className="tet-ev-mid tet-ev-mid-btn"
+                                                        title="跳到源消息"
+                                                        onClick={() => handleJumpMessage(ev.source_message_id)}
+                                                      >
+                                                        msg {String(ev.source_message_id).split("#").pop()} →
+                                                      </button>
                                                     )}
                                                     {ev.source_message_role && <span className="tet-ev-role">{ev.source_message_role}</span>}
                                                     {typeof ev.source_message_confidence === "number" && (
@@ -7539,7 +8388,14 @@ export default function TeacherPage() {
                                                   <div className="tet-ev-quote">“{(ev.quote || "").slice(0, 160)}”</div>
                                                   <div className="tet-ev-meta">
                                                     {ev.source_message_id && (
-                                                      <span className="tet-ev-mid" title="源消息">msg {String(ev.source_message_id).split("#").pop()}</span>
+                                                      <button
+                                                        type="button"
+                                                        className="tet-ev-mid tet-ev-mid-btn"
+                                                        title="跳到源消息"
+                                                        onClick={() => handleJumpMessage(ev.source_message_id)}
+                                                      >
+                                                        msg {String(ev.source_message_id).split("#").pop()} →
+                                                      </button>
                                                     )}
                                                     {ev.source_message_role && <span className="tet-ev-role">{ev.source_message_role}</span>}
                                                     {typeof ev.source_message_confidence === "number" && (
@@ -7742,7 +8598,7 @@ export default function TeacherPage() {
                     </>
                   );
                 })()
-              )}
+              ) : null}
             </div>
           )}
 
@@ -8864,17 +9720,59 @@ export default function TeacherPage() {
                                   <div className="tch-conclusion-body">
                                     {tp.strength_rationale && (
                                       <div style={{ marginBottom: 8 }}>
-                                        <RationaleCard rationale={tp.strength_rationale as Rationale} compact title="强项维度" />
+                                        <RationaleCard
+                                          rationale={tp.strength_rationale as Rationale}
+                                          compact
+                                          title="强项维度"
+                                          onJumpMessage={handleJumpMessage}
+                                          onEdit={() => setOverrideDrawer({
+                                            open: true,
+                                            title: `订正强项维度 · ${card.project_name || card.project_id || ""}`,
+                                            projectId: card.project_id || selectedProject,
+                                            conversationId: undefined,
+                                            targetType: "portrait_strength",
+                                            targetKey: "strength",
+                                            aiValue: (tp.strength_rationale as any)?.value ?? (tp.top_strengths || []).join("、"),
+                                          })}
+                                        />
                                       </div>
                                     )}
                                     {tp.weakness_rationale && (
                                       <div style={{ marginBottom: 8 }}>
-                                        <RationaleCard rationale={tp.weakness_rationale as Rationale} compact title="弱项维度" />
+                                        <RationaleCard
+                                          rationale={tp.weakness_rationale as Rationale}
+                                          compact
+                                          title="弱项维度"
+                                          onJumpMessage={handleJumpMessage}
+                                          onEdit={() => setOverrideDrawer({
+                                            open: true,
+                                            title: `订正弱项维度 · ${card.project_name || card.project_id || ""}`,
+                                            projectId: card.project_id || selectedProject,
+                                            conversationId: undefined,
+                                            targetType: "portrait_weakness",
+                                            targetKey: "weakness",
+                                            aiValue: (tp.weakness_rationale as any)?.value ?? (tp.top_weaknesses || []).join("、"),
+                                          })}
+                                        />
                                       </div>
                                     )}
                                     {tp.growth_rationale && (
                                       <div>
-                                        <RationaleCard rationale={tp.growth_rationale as Rationale} compact title="成长轨迹" />
+                                        <RationaleCard
+                                          rationale={tp.growth_rationale as Rationale}
+                                          compact
+                                          title="成长轨迹"
+                                          onJumpMessage={handleJumpMessage}
+                                          onEdit={() => setOverrideDrawer({
+                                            open: true,
+                                            title: `订正成长轨迹 · ${card.project_name || card.project_id || ""}`,
+                                            projectId: card.project_id || selectedProject,
+                                            conversationId: undefined,
+                                            targetType: "portrait_growth",
+                                            targetKey: "growth",
+                                            aiValue: (tp.growth_rationale as any)?.value ?? "",
+                                          })}
+                                        />
                                       </div>
                                     )}
                                   </div>
@@ -9073,7 +9971,7 @@ export default function TeacherPage() {
                                               <span>{h.item_cn} · 推导</span>
                                               <button onClick={() => setTeamHeatWhyOpen(null)}>×</button>
                                             </div>
-                                            <RationaleCard rationale={h.rationale as Rationale} compact />
+                                            <RationaleCard rationale={h.rationale as Rationale} compact onJumpMessage={handleJumpMessage} />
                                           </div>
                                         )}
                                       </div>
@@ -9489,6 +10387,66 @@ export default function TeacherPage() {
                       ))}
                     </div>
 
+                    {/* ── 学生分项目 mini radar 卡片（点击跳项目 tab） ── */}
+                    {projects.length > 0 && (
+                      <div className="ov-chart-card" style={{ marginTop: 12 }}>
+                        <h3>该学生的项目组合</h3>
+                        <p className="tch-desc">每个卡片是一个项目的能力画像缩影，点击可跳到「项目」tab 看完整历史诊断。</p>
+                        <div className="team-sp-grid">
+                          {projects.map((p: any) => {
+                            const subs = (p.submissions || []);
+                            const diag: any = p.latest_diagnosis || (subs[subs.length - 1]?.diagnosis) || {};
+                            const items: any[] = diag.rubric_items || diag.rubric_assessment?.rubric_items || [];
+                            const maxS = Math.max(5, ...items.map((it: any) => Number(it.max_score || 5)));
+                            const radarData = items.slice(0, 9).map((it: any) => ({
+                              label: String(it.item_id || it.item_name || "").slice(0, 4),
+                              value: Number(it.score || 0),
+                              max: maxS,
+                            }));
+                            const score = Number(p.latest_score ?? p.overall_score ?? 0);
+                            const band = score >= 7 ? "good" : score >= 5 ? "mid" : "weak";
+                            const riskCount = subs.reduce((s: number, x: any) => s + normalizeRuleList(x.triggered_rules).length, 0);
+                            const category = p.category || p.project_category || "";
+                            const logicalId = p.logical_project_id || "";
+                            return (
+                              <button
+                                key={p.project_id}
+                                type="button"
+                                className="team-sp-card"
+                                onClick={() => {
+                                  if (logicalId) setSelectedLogicalProjectId(logicalId);
+                                  if (p.project_id) setSelectedProject(p.project_id);
+                                  setTab("project");
+                                }}
+                                title={p.project_name}
+                              >
+                                <div className="team-sp-card-head">
+                                  <div>
+                                    <div className="team-sp-card-name">{p.project_name || "未命名项目"}</div>
+                                    <div className="team-sp-card-student">
+                                      {subs.length} 轮 · {category || "未分类"}
+                                    </div>
+                                  </div>
+                                  <span className={`team-sp-card-score ${band}`}>{score.toFixed(1)}</span>
+                                </div>
+                                <div className="team-sp-card-radar">
+                                  {radarData.length >= 3 ? (
+                                    <RadarChart data={radarData} size={150} />
+                                  ) : (
+                                    <div style={{ padding: "20px 0", color: "var(--text-muted)", fontSize: 11 }}>数据不足</div>
+                                  )}
+                                </div>
+                                <div className="team-sp-card-foot">
+                                  <span>风险 {riskCount}</span>
+                                  <span className="team-sp-card-jump">进入项目详情 →</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* ── Student Portrait Section ── */}
                     {(() => {
                       const diagCard = diagnosisCards.find((c: any) => c.team_id === selectedTeamId);
@@ -9530,48 +10488,37 @@ export default function TeacherPage() {
                                 </div>
                               )}
                             </div>
-                            <div className="tm-portrait-col">
+                            <div className="tm-portrait-col" style={{ gridColumn: "span 2" }}>
                               <div className="tm-portrait-label">
-                                评审维度热力图
-                                <span className="tm-portrait-bars-hint">（点击查看推导）</span>
+                                评审维度雷达 · 点击 chip 看推导
                               </div>
-                              <div className="tm-rubric-heat">
-                                {rubricHeat.map((r: any) => {
-                                  const isOpen = stuHeatWhyOpen === r.item;
-                                  return (
-                                    <div
-                                      key={r.item}
-                                      className={`tm-rubric-heat-row ${r.rationale ? "is-clickable" : ""} ${isOpen ? "is-open" : ""}`}
-                                      onClick={() => {
-                                        if (!r.rationale) return;
-                                        setStuHeatWhyOpen((cur) => cur === r.item ? null : r.item);
-                                      }}
-                                      style={{ cursor: r.rationale ? "pointer" : "default", position: "relative" }}
-                                      title={r.rationale ? "查看推导过程" : ""}
-                                    >
-                                      <span className="tm-rubric-heat-name">{r.item}</span>
-                                      <div className="tm-rubric-heat-bar-track">
-                                        <div
-                                          className="tm-rubric-heat-bar"
-                                          style={{
-                                            width: `${(r.avg_score / maxRubric) * 100}%`,
-                                            background: r.avg_score >= 7 ? "#22c55e" : r.avg_score >= 5 ? "#eab308" : "#ef4444",
-                                          }}
-                                        />
-                                      </div>
-                                      <span className="tm-rubric-heat-val">{r.avg_score}</span>
-                                      {isOpen && r.rationale && (
-                                        <div className="tm-bar-why-pop" onClick={(e) => e.stopPropagation()}>
-                                          <div className="tm-bar-why-head">
-                                            <span>{r.item} · 推导</span>
-                                            <button onClick={() => setStuHeatWhyOpen(null)}>×</button>
-                                          </div>
-                                          <RationaleCard rationale={r.rationale as Rationale} compact />
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                              {/* 左雷达 + 右 inline 维度面板，替代原来的点击悬浮弹窗 */}
+                              <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 16, alignItems: "flex-start" }}>
+                                <RadarChart
+                                  data={rubricHeat.map((r: any) => ({ label: r.item, value: Number(r.avg_score || 0), max: maxRubric }))}
+                                  size={220}
+                                />
+                                <TeamRadarDimensionPanel
+                                  dimensions={rubricHeat.map((r: any) => ({
+                                    key: String(r.item || ""),
+                                    label: String(r.item || ""),
+                                    score: Number(r.avg_score || 0),
+                                    max: maxRubric,
+                                    rationale: r.rationale,
+                                    evidence_quotes: r.evidence_quotes || [],
+                                    revision_suggestion: r.revision_suggestion,
+                                  }))}
+                                  onJumpMessage={handleJumpMessage}
+                                  onOverride={(d) => setOverrideDrawer({
+                                    open: true,
+                                    title: `订正 ${stu.display_name} · ${d.label}`,
+                                    projectId: activeProject?.project_id || "",
+                                    conversationId: undefined,
+                                    targetType: "rubric",
+                                    targetKey: d.key,
+                                    aiValue: d.score ?? "",
+                                  })}
+                                />
                               </div>
                             </div>
                             {growth.length >= 2 && (
@@ -9695,6 +10642,16 @@ export default function TeacherPage() {
                                   <span>{p.project_phase || "持续迭代"}</span>
                                   <span>{p.submission_count} 次迭代</span>
                                   <span>{p.latest_score}/10</span>
+                                  {(() => {
+                                    const lid = String(p.logical_project_id || "");
+                                    if (!lid) return null;
+                                    const isStd = /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+                                    return (
+                                      <code className={`tch-pid-inline ${isStd ? "standard" : "legacy"}`} title={isStd ? "规范项目编号" : "历史会话编号"}>
+                                        {isStd ? lid : `#${lid.slice(0, 8)}`}
+                                      </code>
+                                    );
+                                  })()}
                                 </div>
                                 <div className="tm-case-inline-summary" style={{ marginTop: 8 }}>{p.current_summary || "暂无项目摘要"}</div>
                                 <div className="tm-corridor-tags" style={{ marginTop: 10 }}>
@@ -9906,6 +10863,25 @@ export default function TeacherPage() {
                 }, {}));
                 return (
                   <>
+                    {/* 新版聚合视图入口：引导老师把"全历史诊断 / 九维推理链 / 订正"操作移到项目 tab */}
+                    <div className="tm-redirect-banner">
+                      <div className="tm-redirect-banner-body">
+                        <span className="tm-redirect-banner-tag">NEW</span>
+                        <span>
+                          项目 tab 的「聚合视图」已上线，支持 <b>全历史诊断 · 九维推理链 · 一键订正</b>。这里仍保留单轮快照，方便老师快速对比。
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="tch-view-switch-btn on"
+                        onClick={() => {
+                          if (proj.logical_project_id) setSelectedLogicalProjectId(proj.logical_project_id);
+                          if (proj.project_id) setSelectedProject(proj.project_id);
+                          setTab("project");
+                          setProjViewMode("aggregate");
+                        }}
+                      >进入聚合视图 →</button>
+                    </div>
                     <div className="tm-project-cover">
                       <div>
                         <div className="tm-project-cover-label">项目诊断封面</div>
@@ -9914,6 +10890,18 @@ export default function TeacherPage() {
                           <span>{stu.display_name}</span>
                           <span>{proj.project_phase || "持续迭代"}</span>
                           <span>{proj.submission_count} 次迭代</span>
+                          {(() => {
+                            const lid = String(proj.logical_project_id || "");
+                            if (!lid) return null;
+                            const isStd = /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+                            return (
+                              <span title={isStd ? "规范项目编号" : "历史会话编号"}>
+                                <code className={`tch-pid-inline ${isStd ? "standard" : "legacy"}`}>
+                                  {isStd ? lid : `#${lid.slice(0, 8)}`}
+                                </code>
+                              </span>
+                            );
+                          })()}
                         </div>
                         <div className="tm-case-summary" style={{ marginTop: 14 }}>
                           <div className="tm-case-summary-title">一句话理解项目</div>
@@ -9998,7 +10986,27 @@ export default function TeacherPage() {
                         )}
                         {(latestKg.entities || []).length > 0 && (
                           <div className="tm-chip-cloud">
-                            {(latestKg.entities || []).slice(0, 8).map((e: any, idx: number) => <span key={idx} className="tm-smart-chip">{e.label || e.id}</span>)}
+                            {(latestKg.entities || []).slice(0, 8).map((e: any, idx: number) => {
+                              const span = e.source_span || null;
+                              const tipParts = [];
+                              if (e.extraction_rule) tipParts.push(`抽取规则：${e.extraction_rule}`);
+                              if (span?.quote) tipParts.push(`原文：${span.quote}`);
+                              if (e.source_message_id) tipParts.push(`源消息：${String(e.source_message_id).split("#").pop()}（点击跳转）`);
+                              const tip = tipParts.join("\n");
+                              const clickable = !!e.source_message_id;
+                              return (
+                                <span
+                                  key={idx}
+                                  className={`tm-smart-chip${clickable ? " tm-smart-chip-link" : ""}`}
+                                  title={tip || undefined}
+                                  onClick={clickable ? () => handleJumpMessage(e.source_message_id) : undefined}
+                                  style={clickable ? { cursor: "pointer" } : undefined}
+                                >
+                                  {e.label || e.id}
+                                  {clickable ? <span className="tm-smart-chip-arrow">↗</span> : null}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
                         {hyperLibrary?.overview && (
@@ -10775,6 +11783,36 @@ export default function TeacherPage() {
         }
       `}
       </style>
+      {/* ── 源消息 Peek Modal：支持从 RationaleCard 跳转查看原文 ── */}
+      {msgPeek.open && (
+        <div
+          className="msg-peek-backdrop"
+          onClick={() => setMsgPeek((s) => ({ ...s, open: false }))}
+        >
+          <div
+            className="msg-peek-panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="msg-peek-head">
+              <span className="msg-peek-badge">{msgPeek.role || "message"}</span>
+              <span className="msg-peek-id">#{msgPeek.messageId}</span>
+              <button
+                className="msg-peek-close"
+                onClick={() => setMsgPeek((s) => ({ ...s, open: false }))}
+              >
+                关闭
+              </button>
+            </div>
+            <div className="msg-peek-body">
+              {msgPeek.loading ? (
+                <div className="msg-peek-loading">正在定位源消息…</div>
+              ) : (
+                <pre className="msg-peek-content">{msgPeek.content}</pre>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <AiOverrideDrawer
         open={overrideDrawer.open}
         title={overrideDrawer.title}

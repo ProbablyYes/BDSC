@@ -26,8 +26,8 @@
     "password_salt": "bc67925c77ec4b0128472e01e819991c",
     "password_hash": "1857838b74f8475c7b959af2c332197bee7ffc35332b71f4d4e9d67ea2204198",
     "created_at": "2026-03-26T01:40:21.284834",
-    "updated_at": "2026-04-21T08:32:41.174227+08:00",
-    "last_login": "2026-04-21T08:32:41.174227+08:00"
+    "updated_at": "2026-04-21T15:25:34.096200+08:00",
+    "last_login": "2026-04-21T15:25:34.096200+08:00"
   },
   {
     "user_id": "34dfb3d0-f976-42cc-a96f-16c32c79a7ad",
@@ -265,16 +265,17 @@
     "role": "student",
     "display_name": "小猪",
     "email": "654321",
-    "student_id": "None",
+    "student_id": "1120233400",
     "class_id": "None",
     "cohort_id": "None",
     "bio": "",
     "password_salt": "f209dfdace7a20d0733a84a24b5df135",
     "password_hash": "d287c45405da5e406b3493f12a20962ef49394d9c5a511837b3331e82e5f108d",
     "status": "active",
-    "last_login": "2026-04-21T09:40:15.188899+08:00",
+    "last_login": "2026-04-21T12:35:51.255900+08:00",
     "created_at": "2026-04-08T11:33:50.900316+08:00",
-    "updated_at": "2026-04-21T09:40:15.188899+08:00"
+    "updated_at": "2026-04-21T13:09:36.137337+08:00",
+    "project_serial_counter": 0
   },
   {
     "user_id": "81bf0d7f-b536-4d04-be59-eea4d1751960",

@@ -460,6 +460,11 @@ export default function StudentPage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
+  // Conversation -> logical_project_id 映射（用于在 topbar / 列表显示项目编号）
+  const [convToLogicalId, setConvToLogicalId] = useState<Record<string, string>>({});
+  const [sidBannerDismissed, setSidBannerDismissed] = useState(false);
+  const [pidCopied, setPidCopied] = useState(false);
+
   // document review (now with PDF viewer)
   const [docReview, setDocReview] = useState<{ filename: string; sections: any[]; annotations: any[]; fileUrl?: string } | null>(null);
   const [docReviewOpen, setDocReviewOpen] = useState(false);
@@ -641,6 +646,43 @@ export default function StudentPage() {
   }, [projectId]);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
+
+  // 拉取 submissions 用于构建 conversation → logical_project_id 映射
+  const loadLogicalIdMap = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const r = await fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}/submissions`);
+      const d = await r.json();
+      const map: Record<string, string> = {};
+      for (const sub of (d.submissions ?? []) as any[]) {
+        const cid = sub?.conversation_id;
+        const lid = sub?.logical_project_id;
+        if (cid && lid && !map[cid]) map[cid] = String(lid);
+      }
+      setConvToLogicalId(map);
+    } catch { /* ignore */ }
+  }, [projectId]);
+
+  useEffect(() => { loadLogicalIdMap(); }, [loadLogicalIdMap]);
+  // 每次用户新对话产生 latestResult 时，也可能要刷新 mapping
+  useEffect(() => {
+    if (latestResult) loadLogicalIdMap();
+  }, [latestResult, loadLogicalIdMap]);
+
+  const currentLogicalProjectId = useMemo(() => {
+    if (!conversationId) return "";
+    return convToLogicalId[conversationId] || "";
+  }, [conversationId, convToLogicalId]);
+
+  function copyProjectId() {
+    const v = currentLogicalProjectId;
+    if (!v) return;
+    try {
+      navigator.clipboard?.writeText(v);
+      setPidCopied(true);
+      setTimeout(() => setPidCopied(false), 1500);
+    } catch { /* ignore */ }
+  }
 
   const selectedBpSection = useMemo(
     () => (businessPlan?.sections ?? []).find((item) => item.section_id === bpSelectedSectionId) ?? (businessPlan?.sections ?? [])[0] ?? null,
@@ -2560,6 +2602,31 @@ export default function StudentPage() {
             <button type="button" className={`topbar-mode-opt${mode === "competition" ? " active" : ""}`} onClick={() => setMode("competition")}>竞赛冲刺</button>
             <button type="button" className={`topbar-mode-opt${mode === "learning" ? " active" : ""}`} onClick={() => setMode("learning")}>项目教练</button>
           </div>
+          {conversationId && (
+            (() => {
+              const lid = currentLogicalProjectId;
+              const isStd = !!lid && /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+              return (
+                <button
+                  type="button"
+                  className={`topbar-pid-pill${isStd ? " standard" : lid ? " legacy" : " empty"}`}
+                  onClick={copyProjectId}
+                  disabled={!lid}
+                  title={lid ? (isStd ? "规范项目编号 · 点击复制" : "历史会话编号 · 点击复制") : "尚未分配项目编号（填入学号后新会话会自动生成）"}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.7 1.7"/>
+                    <path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.7-1.7"/>
+                  </svg>
+                  <span className="topbar-pid-label">项目编号</span>
+                  <code className="topbar-pid-value">
+                    {isStd ? lid : lid ? `#${lid.slice(0, 8)}` : "—"}
+                  </code>
+                  {pidCopied && <span className="topbar-pid-copied">已复制</span>}
+                </button>
+              );
+            })()
+          )}
           {overallScore !== null && <span className="topbar-score">{overallScore}<small>/10</small></span>}
           {pitchTimerRunning && (
             <div className={`pitch-timer-display ${pitchTimer <= 30 ? "urgent" : pitchTimer <= 60 ? "warning" : ""}`}>
@@ -2697,6 +2764,20 @@ export default function StudentPage() {
           </Link>
         </div>
       </header>
+
+      {/* ── 学号软性提示 banner（未填学号时显示） ── */}
+      {currentUser?.role === "student" && !currentUser?.student_id && !sidBannerDismissed && (
+        <div className="stu-sid-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span className="stu-sid-banner-text">
+            还没填写学号。填入后，新开的会话会自动获得规范项目编号 <code>P-学号-NN</code>，便于老师按编号批改。
+          </span>
+          <Link href="/student/profile" className="stu-sid-banner-btn">去个人中心填写</Link>
+          <button type="button" className="stu-sid-banner-close" onClick={() => setSidBannerDismissed(true)} title="暂不提醒">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      )}
 
       {/* ── Team Panel ── */}
       {teamPanelOpen && (
@@ -3102,7 +3183,16 @@ export default function StudentPage() {
                     </button>
                   </div>
                   <span className="conv-preview">{c.last_message || "等待 AI 归纳..."}</span>
-                  <span className="conv-meta">{c.message_count}条 · {formatBjTime(c.created_at, true)}</span>
+                  <span className="conv-meta">
+                    {(() => {
+                      const lid = convToLogicalId[c.conversation_id];
+                      if (lid && /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid)) {
+                        return <span className="conv-pid-tag standard" title="规范项目编号">{lid}</span>;
+                      }
+                      return null;
+                    })()}
+                    {c.message_count}条 · {formatBjTime(c.created_at, true)}
+                  </span>
                 </div>
               ))}
               {filteredConvs.length === 0 && <p className="conv-empty">{searchQuery ? "未找到匹配的对话" : "暂无历史对话"}</p>}
@@ -4426,9 +4516,19 @@ export default function StudentPage() {
                                       <div style={{ fontSize: 12, color: "var(--text-muted, #9aa3b2)", letterSpacing: 3, marginBottom: 10 }}>BUSINESS PLAN</div>
                                       <div className="bp-cover-title">{realTitle}</div>
                                       <div style={{ fontSize: 13, color: "var(--text-muted, #9aa3b2)", display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: 12 }}>
-                                        <span>负责人：{businessPlan.cover_info?.student_or_team || currentUser?.display_name || currentUser?.user_id || "—"}</span>
+                                        <span>负责人：{businessPlan.cover_info?.student_or_team || currentUser?.display_name || "—"}</span>
                                         {classId && <span>班级：{classId}</span>}
                                         <span>日期：{businessPlan.cover_info?.date || new Date().toISOString().slice(0, 10)}</span>
+                                        {(() => {
+                                          const lid = currentLogicalProjectId;
+                                          if (!lid) return null;
+                                          const isStd = /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+                                          return (
+                                            <span title={isStd ? "规范项目编号" : "历史会话编号"}>
+                                              项目编号：<code style={{ color: isStd ? "#a78bfa" : "#9aa3b2", fontFamily: "ui-monospace, SF Mono, Menlo, monospace" }}>{isStd ? lid : `#${lid.slice(0, 8)}`}</code>
+                                            </span>
+                                          );
+                                        })()}
                                       </div>
                                     </div>
                                   );
@@ -5566,68 +5666,12 @@ export default function StudentPage() {
                           </div>
                         )}
 
-                        {/* KG Quality Metrics Card */}
-                        {kgAnalysis?.kg_quality && (() => {
-                          const kq = kgAnalysis.kg_quality;
-                          const kqMetrics = [
-                            { key: "entity_specificity", label: "实体特异性", max: 10, desc: "实体命名和属性的具体程度" },
-                            { key: "relationship_density", label: "关系密度", max: 1, desc: "实体间关系的丰富程度" },
-                            { key: "dimension_balance", label: "维度均衡度", max: 1, desc: "不同类型实体的均衡分布" },
-                            { key: "cross_validation_index", label: "交叉验证", max: 1, desc: "KG与评分维度的相关性" },
-                            { key: "extraction_confidence", label: "抽取置信度", max: 10, desc: "综合抽取可信度" },
-                          ];
-                          const overallKq = Math.round(
-                            ((Number(kq.extraction_confidence ?? 0) / 10) * 40
-                            + Number(kq.dimension_balance ?? 0) * 25
-                            + (Number(kq.entity_specificity ?? 0) / 10) * 20
-                            + Math.max(0, Number(kq.cross_validation_index ?? 0)) * 15) * 10
-                          ) / 10;
-                          return (
-                            <div className="kg-quality-section">
-                              <h5>知识图谱质量评估 <span className="ht-title-sub">综合 {overallKq}/100</span></h5>
-                              <p className="ht-guide-sub">基于实体特异性、关系密度和信息熵的量化分析，评估知识图谱抽取质量。</p>
-                              <div className="kg-quality-cards">
-                                {kqMetrics.map(m => {
-                                  const v = Number(kq[m.key] ?? 0);
-                                  const pct = m.key === "cross_validation_index"
-                                    ? Math.max(0, Math.min(100, (v + 1) / 2 * 100))
-                                    : Math.min(100, (v / m.max) * 100);
-                                  const barColor = pct >= 70 ? "#22c55e" : pct >= 40 ? "#f59e0b" : "#ef4444";
-                                  return (
-                                    <div key={m.key} className="ht-metric-row" title={kq.formulas?.[m.key] ?? m.desc}>
-                                      <span className="ht-metric-label">{m.label}</span>
-                                      <div className="ht-metric-bar"><div className="ht-metric-fill" style={{ width: `${pct}%`, background: barColor }} /></div>
-                                      <span className="ht-metric-val">{m.max === 1 ? (v * 100).toFixed(1) + "%" : v.toFixed(1)}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              {kq.type_distribution && Object.keys(kq.type_distribution).length > 0 && (
-                                <div className="kg-type-dist">
-                                  <h6 className="ht-sub-title">实体类型分布</h6>
-                                  <div className="kg-type-bars">
-                                    {Object.entries(kq.type_distribution as Record<string, number>).sort(([, a], [, b]) => (b as number) - (a as number)).map(([type, count]) => {
-                                      const maxCount = Math.max(...Object.values(kq.type_distribution as Record<string, number>));
-                                      const w = ((count as number) / maxCount) * 100;
-                                      return (
-                                        <div key={type} className="kg-dist-row">
-                                          <span className="kg-dist-label">{typeNames[type] ?? type}</span>
-                                          <div className="kg-dist-bar"><div className="kg-dist-fill" style={{ width: `${w}%`, background: typeColors[type] ?? "#6ba3d6" }} /></div>
-                                          <span className="kg-dist-count">{count as number}</span>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
+                        {/* 知识图谱质量评估已迁移至首页『知识库与知识图谱』→『质量评估』标签页，此处仅保留业务梳理信息 */}
 
                         {/* KB Search Story (Module 3c) */}
                         {(() => {
                           const kbU = latestResult?.agent_trace?.kb_utilization ?? latestResult?.kb_utilization ?? {};
-                          const totalKb = 96;
+                          const totalKb = Number((kbStats as any)?.neo4j?.total_projects ?? (kbStats as any)?.rag?.corpus_count ?? 0);
                           const ragHits = kbU.hits_count ?? 0;
                           if (!ragHits) return null;
                           const neoOk = kbU.neo4j_enriched ?? false;
@@ -5752,23 +5796,43 @@ export default function StudentPage() {
                       ["风控", dims.risk_controls ?? 0],
                     ];
                     const maxDim = Math.max(...dimEntries.map(d => d[1]), 1);
-                    const KB_STATIC = {
-                      projects: 96, nodes: 2492, relationships: 7144,
-                      categories: 13, rag: 96, edgeFamilies: 45,
-                      hyperNodes: 166, hyperEdges: 360,
-                      riskRules: 27, rubricItems: 9,
+                    const hyperLocal = ((kbStats as any)?.hypergraph_local) || {};
+                    const hyperDb = (n as any)?.hypergraph || {};
+                    const ragCount = Number((kbStats as any)?.rag?.corpus_count ?? 0);
+                    // 超图本体的权威静态定义（77 家族 / 95 模式 / 15 分组），来自后端 ontology_totals
+                    const ontologyTotals = (hyperLocal as any)?.ontology_totals || {};
+                    const totalFamilies = Number(ontologyTotals.families ?? 77);
+                    const totalPatterns = Number(ontologyTotals.patterns ?? 95);
+                    const totalGroups = Number(ontologyTotals.groups ?? 15);
+                    // 本次生成的超图实例数量（命中家族种数 / 超边数 / 节点数）
+                    const hitFamilyCount = hyperLocal.family_counts ? Object.keys(hyperLocal.family_counts).length : 0;
+                    const KB_LIVE = {
+                      projects: Number(n.total_projects ?? 0),
+                      nodes: Number(n.total_nodes ?? 0),
+                      relationships: Number(n.total_relationships ?? 0),
+                      categories: Number(n.total_categories ?? (Array.isArray(cats) ? cats.length : 0)),
+                      rag: ragCount || Number(n.total_projects ?? 0),
+                      edgeFamilies: totalFamilies,
+                      edgePatterns: totalPatterns,
+                      edgeGroups: totalGroups,
+                      hitFamilies: hitFamilyCount,
+                      hyperNodes: Number(hyperLocal.node_count ?? hyperDb.nodes ?? 0),
+                      hyperEdges: Number(hyperLocal.edge_count ?? hyperDb.edges ?? 0),
+                      riskRules: Number(n.risk_rules ?? 0),
+                      rubricItems: Number(n.rubric_items ?? 0),
                     };
                     return (
                       <div className="kb-global-stats">
                         <h5>知识库全局概览</h5>
                         <div className="kb-gs-summary">
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.projects}</div><div className="kb-gs-label">标准案例</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.nodes}</div><div className="kb-gs-label">图谱节点</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.relationships}</div><div className="kb-gs-label">知识关系</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.categories}</div><div className="kb-gs-label">项目类别</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.rag}</div><div className="kb-gs-label">RAG语料</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.edgeFamilies}</div><div className="kb-gs-label">超边家族</div></div>
-                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_STATIC.hyperEdges}</div><div className="kb-gs-label">超图超边</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_LIVE.projects}</div><div className="kb-gs-label">标准案例</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_LIVE.nodes}</div><div className="kb-gs-label">图谱节点</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_LIVE.relationships}</div><div className="kb-gs-label">知识关系</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_LIVE.categories}</div><div className="kb-gs-label">项目类别</div></div>
+                          <div className="kb-gs-card"><div className="kb-gs-num">{KB_LIVE.rag}</div><div className="kb-gs-label">RAG语料</div></div>
+                          <div className="kb-gs-card" title="超图本体定义的超边家族总数（静态：77 条跨维语义类）"><div className="kb-gs-num">{KB_LIVE.edgeFamilies}</div><div className="kb-gs-label">超边家族</div></div>
+                          <div className="kb-gs-card" title="超图本体评分锚点模式总数（静态：95 条理想/风险/中性诊断模式）"><div className="kb-gs-num">{KB_LIVE.edgePatterns}</div><div className="kb-gs-label">超边模式</div></div>
+                          <div className="kb-gs-card" title="本项目已生成的超边实例数量（动态：随对话与诊断积累）"><div className="kb-gs-num">{KB_LIVE.hyperEdges}</div><div className="kb-gs-label">本项目超边</div></div>
                         </div>
                         <details className="kb-gs-details" open>
                           <summary>类别分布 ({cats.length})</summary>
@@ -5803,7 +5867,7 @@ export default function StudentPage() {
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
-                              <span>Neo4j 图检索: {KB_STATIC.nodes} 节点 · {KB_STATIC.relationships} 关系</span>
+                              <span>Neo4j 图检索: {KB_LIVE.nodes} 节点 · {KB_LIVE.relationships} 关系</span>
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
@@ -5811,11 +5875,11 @@ export default function StudentPage() {
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
-                              <span>超图分析: {KB_STATIC.hyperNodes} 节点 / {KB_STATIC.hyperEdges} 超边 / {KB_STATIC.edgeFamilies} 家族</span>
+                              <span>超图本体: {KB_LIVE.edgeFamilies} 家族 · {KB_LIVE.edgePatterns} 模式 · {KB_LIVE.edgeGroups} 分组（本项目已实例化 {KB_LIVE.hyperEdges} 超边 / {KB_LIVE.hyperNodes} 节点{KB_LIVE.hitFamilies ? ` · 命中 ${KB_LIVE.hitFamilies} 类家族` : ""}）</span>
                             </div>
                             <div className="kb-gs-arch-row">
                               <span className="kb-gs-arch-dot" style={{background: "#10b981"}} />
-                              <span>风险规则: {KB_STATIC.riskRules} · 评分标准: {KB_STATIC.rubricItems} 维度</span>
+                              <span>风险规则: {KB_LIVE.riskRules} · 评分标准: {KB_LIVE.rubricItems} 维度</span>
                             </div>
                           </div>
                         </details>
@@ -6113,116 +6177,7 @@ export default function StudentPage() {
                         </div>
                       )}
 
-                      {/* ── 7c. Quality Metrics Radar + Family Heatmap ── */}
-                      {(() => {
-                        const qm = hyperStudent?.quality_metrics;
-                        if (!qm) return null;
-                        const metrics = [
-                          { key: "depth_weighted_coverage", label: "深度覆盖", max: 10 },
-                          { key: "template_completion_score", label: "闭环完成", max: 10 },
-                          { key: "consistency_health_score", label: "一致性健康", max: 10 },
-                          { key: "information_entropy", label: "信息熵", max: 1 },
-                          { key: "cross_dimension_ratio", label: "跨维度比", max: 1 },
-                          { key: "family_group_balance", label: "族群均衡", max: 1 },
-                          { key: "hub_concentration", label: "Hub集中度", max: 1 },
-                          { key: "graph_density", label: "图密度", max: 1 },
-                        ];
-                        const cx = 120, cy = 120, R = 95, n = metrics.length;
-                        const angleStep = (2 * Math.PI) / n;
-                        const pts = metrics.map((m, i) => {
-                          const v = Number(qm[m.key] ?? 0);
-                          const ratio = Math.min(1, v / m.max);
-                          const angle = i * angleStep - Math.PI / 2;
-                          return { x: cx + R * ratio * Math.cos(angle), y: cy + R * ratio * Math.sin(angle), ratio, label: m.label, value: v, max: m.max };
-                        });
-                        const polygon = pts.map(p => `${p.x},${p.y}`).join(" ");
-
-                        const dimDepths = qm.dim_depths ?? {};
-                        const dimList = Object.entries(dimDepths) as [string, number][];
-                        const dimNames: Record<string, string> = {
-                          stakeholder: "目标用户", pain_point: "痛点", solution: "解决方案",
-                          innovation: "创新点", market: "市场", competitor: "竞争",
-                          business_model: "商业模式", execution_step: "执行", risk_control: "风控",
-                          technology: "技术", resource: "资源", team: "团队",
-                          evidence: "证据", risk: "风险", channel: "渠道",
-                        };
-                        const depthColor = (d: number) => d >= 2.5 ? "#22c55e" : d >= 1.5 ? "#f59e0b" : d >= 0.5 ? "#fb923c" : "#e5e7eb";
-
-                        const overallScore = Math.round(
-                          (Number(qm.depth_weighted_coverage ?? 0) / 10 * 25
-                          + Number(qm.template_completion_score ?? 0) / 10 * 20
-                          + Number(qm.consistency_health_score ?? 0) / 10 * 20
-                          + Number(qm.information_entropy ?? 0) * 15
-                          + Number(qm.family_group_balance ?? 0) * 10
-                          + Number(qm.cross_dimension_ratio ?? 0) * 10) * 10
-                        ) / 10;
-
-                        return (
-                          <div className="ht-section ht-quality-section">
-                            <h5 className="ht-title">超图质量评估 <span className="ht-title-sub">综合 {overallScore}/100</span></h5>
-                            <p className="ht-guide-sub">基于图论与信息论的量化指标体系，从结构完整性、逻辑一致性和信息丰富度多维度评估超图质量。雷达图面积越大，超图质量越高。</p>
-
-                            <div className="ht-quality-grid">
-                              <div className="ht-radar-wrap">
-                                <svg width="240" height="240" viewBox="0 0 240 240">
-                                  {[0.25, 0.5, 0.75, 1].map(r => (
-                                    <polygon key={r} points={metrics.map((_, i) => {
-                                      const a = i * angleStep - Math.PI / 2;
-                                      return `${cx + R * r * Math.cos(a)},${cy + R * r * Math.sin(a)}`;
-                                    }).join(" ")} fill="none" stroke="var(--border)" strokeWidth="0.5" opacity="0.5" />
-                                  ))}
-                                  {metrics.map((_, i) => {
-                                    const a = i * angleStep - Math.PI / 2;
-                                    return <line key={i} x1={cx} y1={cy} x2={cx + R * Math.cos(a)} y2={cy + R * Math.sin(a)} stroke="var(--border)" strokeWidth="0.5" opacity="0.3" />;
-                                  })}
-                                  <polygon points={polygon} fill="rgba(99,102,241,0.2)" stroke="#6366f1" strokeWidth="2" />
-                                  {pts.map((p, i) => (
-                                    <g key={i}>
-                                      <circle cx={p.x} cy={p.y} r="3" fill="#6366f1" />
-                                      <text x={cx + (R + 14) * Math.cos(i * angleStep - Math.PI / 2)} y={cy + (R + 14) * Math.sin(i * angleStep - Math.PI / 2)} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill="var(--text-muted)">{p.label}</text>
-                                    </g>
-                                  ))}
-                                </svg>
-                              </div>
-
-                              <div className="ht-metric-cards">
-                                {metrics.map(m => {
-                                  const v = Number(qm[m.key] ?? 0);
-                                  const pct = Math.min(100, (v / m.max) * 100);
-                                  const barColor = pct >= 70 ? "#22c55e" : pct >= 40 ? "#f59e0b" : "#ef4444";
-                                  return (
-                                    <div key={m.key} className="ht-metric-row" title={qm.formulas?.[m.key] ?? ""}>
-                                      <span className="ht-metric-label">{m.label}</span>
-                                      <div className="ht-metric-bar"><div className="ht-metric-fill" style={{ width: `${pct}%`, background: barColor }} /></div>
-                                      <span className="ht-metric-val">{m.max === 1 ? (v * 100).toFixed(1) + "%" : v.toFixed(1)}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            {dimList.length > 0 && (
-                              <div className="ht-dim-depth-grid">
-                                <h6 className="ht-sub-title">维度深度热力图</h6>
-                                <div className="ht-depth-cells">
-                                  {dimList.map(([k, d]) => (
-                                    <div key={k} className="ht-depth-cell" style={{ background: depthColor(d) }} title={`${dimNames[k] ?? k}: depth=${d}`}>
-                                      <span className="ht-depth-name">{(dimNames[k] ?? k).slice(0, 3)}</span>
-                                      <span className="ht-depth-val">{typeof d === "number" ? d.toFixed(1) : d}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                                <div className="ht-depth-legend">
-                                  <span><span className="ht-legend-sq" style={{ background: "#22c55e" }} />深度≥2.5</span>
-                                  <span><span className="ht-legend-sq" style={{ background: "#f59e0b" }} />≥1.5</span>
-                                  <span><span className="ht-legend-sq" style={{ background: "#fb923c" }} />≥0.5</span>
-                                  <span><span className="ht-legend-sq" style={{ background: "#e5e7eb" }} />未覆盖</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
+                      {/* 超图质量评估（雷达图 + 维度深度热力图）已迁移至首页『知识库与知识图谱』→『质量评估』标签页 */}
 
                       {/* ── 8. Collapsible Details ── */}
                       <details className="ht-details-panel">
@@ -6306,7 +6261,9 @@ export default function StudentPage() {
                             <summary className="ht-lib-summary">
                               超图知识库
                               <span className="ht-lib-pills">
-                                <span>45 家族</span><span>{hyperLibrary.overview.edge_count ?? 360} 超边</span><span>{hyperLibrary.overview.node_count ?? 166} 节点</span>
+                                <span title="超图本体总家族数（静态）">{Number(((kbStats as any)?.hypergraph_local?.ontology_totals?.families) ?? 77)} 家族</span>
+                                <span title="超图本体评分锚点模式数（静态）">{Number(((kbStats as any)?.hypergraph_local?.ontology_totals?.patterns) ?? 95)} 模式</span>
+                                <span title="本项目已实例化的超边数量（动态）">本项目 {Number(hyperLibrary.overview.edge_count ?? 0)} 超边</span>
                               </span>
                             </summary>
                             <div className="ht-lib-body">
@@ -6527,7 +6484,9 @@ export default function StudentPage() {
                           <summary className="ht-lib-summary">
                             超图知识库
                             <span className="ht-lib-pills">
-                              <span>45 家族</span><span>{hyperLibrary.overview.edge_count ?? 360} 超边</span><span>{hyperLibrary.overview.node_count ?? 166} 节点</span>
+                              <span title="超图本体总家族数（静态）">{Number(((kbStats as any)?.hypergraph_local?.ontology_totals?.families) ?? 77)} 家族</span>
+                              <span title="超图本体评分锚点模式数（静态）">{Number(((kbStats as any)?.hypergraph_local?.ontology_totals?.patterns) ?? 95)} 模式</span>
+                              <span title="本项目已实例化的超边数量（动态）">本项目 {Number(hyperLibrary.overview.edge_count ?? 0)} 超边</span>
                             </span>
                           </summary>
                           <div className="ht-lib-body">
@@ -6594,7 +6553,7 @@ export default function StudentPage() {
                 return (
                 <div className="right-section cs-panel">
                   <h4>案例参考</h4>
-                  <p className="cs-desc">从 <strong>96</strong> 个标准案例库中检索到 <strong>{hitCount}</strong> 个参考{enriched ? `，其中 ${enrichedCount} 个经图谱深度增强` : ""}</p>
+                  <p className="cs-desc">从 <strong>{Number((kbStats as any)?.neo4j?.total_projects ?? (kbStats as any)?.rag?.corpus_count ?? 0) || "—"}</strong> 个标准案例库中检索到 <strong>{hitCount}</strong> 个参考{enriched ? `，其中 ${enrichedCount} 个经图谱深度增强` : ""}</p>
 
                   {/* ── 1. Graph-Based Cross-Project Insights (TOP PRIORITY) ── */}
                   {gHits.length > 0 && (

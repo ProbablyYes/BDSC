@@ -12,6 +12,7 @@ export interface VaUser {
   cohort_id?: string;
   bio?: string;
   created_at?: string;
+  project_serial_counter?: number;
 }
 
 /**

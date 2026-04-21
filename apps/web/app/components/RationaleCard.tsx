@@ -39,6 +39,23 @@ export type TeacherOverride = {
   created_at?: string;
 };
 
+export type ReasoningStep = {
+  kind?: string;               // "base" | "evidence" | "rule" | "adjust" | "aggregate"
+  label: string;
+  delta?: number;              // 对最终值的贡献（正负）
+  severity?: string;           // info / warn / block / boost
+  source_message_id?: string;
+  agent_name?: string;
+  quote?: string;
+  detail?: string;
+};
+
+export type RationaleBaseline = {
+  name: string;
+  value: string | number;
+  comparison?: string;
+};
+
 export type Rationale = {
   field: string;
   value: string | number;
@@ -46,6 +63,8 @@ export type Rationale = {
   formula_display?: string;
   inputs?: RationaleInput[];
   contributing_evidence?: ContributingEvidence[];
+  reasoning_steps?: ReasoningStep[];
+  baseline?: RationaleBaseline;
   teacher_override?: TeacherOverride;
   note?: string;
 };
@@ -106,7 +125,71 @@ export function RationaleCard({
       ) : null}
       {expanded ? (
         <>
-          {rationale.formula_display ? (
+          {/* ── 推理链瀑布：按步骤一条条交代分数从哪里来 ── */}
+          {rationale.reasoning_steps && rationale.reasoning_steps.length > 0 ? (
+            <div className="rc-steps">
+              <div className="rc-section-title">推理链</div>
+              <ol className="rc-step-list">
+                {rationale.reasoning_steps.map((step, i) => {
+                  const d = typeof step.delta === "number" ? step.delta : null;
+                  const deltaSign = d === null ? "" : d > 0 ? "+" : "";
+                  const deltaClass =
+                    d === null
+                      ? "rc-step-delta rc-step-delta-neutral"
+                      : d > 0
+                      ? "rc-step-delta rc-step-delta-pos"
+                      : d < 0
+                      ? "rc-step-delta rc-step-delta-neg"
+                      : "rc-step-delta rc-step-delta-neutral";
+                  const severity = (step.severity || "").toLowerCase();
+                  const kind = (step.kind || "").toLowerCase();
+                  return (
+                    <li key={i} className={`rc-step rc-step-${kind || "info"} rc-sev-${severity || "info"}`}>
+                      <div className="rc-step-main">
+                        <span className="rc-step-idx">{i + 1}</span>
+                        {step.kind ? <span className="rc-step-kind">{step.kind}</span> : null}
+                        <span className="rc-step-label">{step.label}</span>
+                        {d !== null ? (
+                          <span className={deltaClass}>
+                            {deltaSign}
+                            {d.toFixed(2)}
+                          </span>
+                        ) : null}
+                        {step.source_message_id && onJumpMessage ? (
+                          <button
+                            className="rc-jump tiny"
+                            onClick={() => onJumpMessage(step.source_message_id!)}
+                            title="跳到触发这一步的学生原话"
+                          >
+                            跳 →
+                          </button>
+                        ) : null}
+                      </div>
+                      {step.agent_name || step.detail || step.quote ? (
+                        <div className="rc-step-sub">
+                          {step.agent_name ? (
+                            <span className="rc-step-agent">by {step.agent_name}</span>
+                          ) : null}
+                          {step.detail ? <span className="rc-step-detail">{step.detail}</span> : null}
+                          {step.quote ? (
+                            <span className="rc-step-quote" title={step.quote}>
+                              "{step.quote.length > 80 ? `${step.quote.slice(0, 80)}…` : step.quote}"
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ol>
+              {rationale.baseline ? (
+                <div className="rc-baseline">
+                  参考基线：{rationale.baseline.name} = {String(rationale.baseline.value)}
+                  {rationale.baseline.comparison ? ` · ${rationale.baseline.comparison}` : ""}
+                </div>
+              ) : null}
+            </div>
+          ) : rationale.formula_display ? (
             <pre className="rc-formula">{rationale.formula_display}</pre>
           ) : rationale.formula ? (
             <div className="rc-formula-mono"><code>{rationale.formula}</code></div>

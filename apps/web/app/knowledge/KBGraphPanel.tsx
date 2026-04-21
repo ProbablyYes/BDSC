@@ -3523,7 +3523,7 @@ export default function KBGraphPanel({ onClose }: Props) {
                     <div className="hg-stat-label">风险规则</div>
                   </div>
                   <div className="hg-stat-card hg-stat-families">
-                    <div className="hg-stat-value">{hyperData.stats.total_families ?? 45}</div>
+                    <div className="hg-stat-value">{hyperData.stats.total_families ?? 77}</div>
                     <div className="hg-stat-label">超边家族</div>
                   </div>
                 </div>

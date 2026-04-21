@@ -3182,6 +3182,36 @@ def gather_context_node(state: WorkflowState) -> dict:
             kg.get("section_scores", {}),
             _rubric_data,
         )
+        # ── 可追溯性：给每个实体 / 关系挂 source_span + rule 名 ──
+        # 即使没有 message_id，也至少记录命中原文位置 + 抽取规则，
+        # 教师端可以看到"这个实体是从学生原话哪一段推出来的"。
+        try:
+            _msg_raw = str(state.get("message") or "")
+            _lower = _msg_raw.lower()
+            for _ent in kg.get("entities", []) or []:
+                if not isinstance(_ent, dict):
+                    continue
+                _lbl = str(_ent.get("label") or "").strip()
+                if not _lbl:
+                    continue
+                _idx = _lower.find(_lbl.lower())
+                if _idx >= 0:
+                    _start = max(0, _idx - 12)
+                    _end = min(len(_msg_raw), _idx + len(_lbl) + 12)
+                    _ent.setdefault("source_span", {
+                        "quote": _msg_raw[_start:_end].replace("\n", " ")[:120],
+                        "offset": _idx,
+                        "length": len(_lbl),
+                    })
+                    _ent.setdefault("extraction_rule", "llm_entity_extraction")
+                else:
+                    # 未在原文中精确命中（可能是 LLM 归纳），标记为推断
+                    _ent.setdefault("extraction_rule", "llm_inferred")
+            for _rel in kg.get("relationships", []) or []:
+                if isinstance(_rel, dict):
+                    _rel.setdefault("extraction_rule", "llm_relation_extraction")
+        except Exception as _exc:
+            logger.info("kg source_span enrichment skipped: %s", _exc)
         return {"kg_analysis": kg}
 
     def _task_web(n_results: int = 3):
@@ -5754,6 +5784,57 @@ def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
     return ordered, reasoning
 
 
+def _merge_next_task(base: dict | None, override: dict | None) -> dict:
+    """浅合并 next_task：保留 diagnosis 基础任务（template_guideline / acceptance_criteria），
+    仅在 override 有值时覆盖；并把 override 的 steps 映射为 template_guideline。
+
+    这样 planner 生成的具体步骤会作为 template_guideline 展示给学生/老师看，
+    避免老逻辑里 planner 直接把整个 next_task 替换掉、丢失诊断兜底的模板指引。
+    """
+    if not isinstance(override, dict) or not override:
+        return dict(base or {})
+    merged = dict(base or {})
+    for k in ("title", "description", "source"):
+        val = override.get(k)
+        if isinstance(val, str) and val.strip():
+            merged[k] = val
+    # steps → template_guideline
+    o_steps = override.get("steps")
+    if isinstance(o_steps, list) and o_steps:
+        merged["template_guideline"] = [str(s).strip() for s in o_steps if str(s).strip()][:6]
+    elif isinstance(override.get("template_guideline"), list) and override["template_guideline"]:
+        merged["template_guideline"] = [str(s).strip() for s in override["template_guideline"] if str(s).strip()][:6]
+    # acceptance_criteria
+    o_ac = override.get("acceptance_criteria")
+    if isinstance(o_ac, list) and o_ac:
+        merged["acceptance_criteria"] = [str(s).strip() for s in o_ac if str(s).strip()][:6]
+    # deferred
+    if isinstance(override.get("deferred"), list):
+        merged["deferred"] = [str(s).strip() for s in override["deferred"] if str(s).strip()][:5]
+    # merge rationale reasoning_steps if both present
+    base_rat = merged.get("rationale") if isinstance(merged.get("rationale"), dict) else None
+    if base_rat and (o_steps or override.get("title")):
+        new_steps = list(base_rat.get("reasoning_steps") or [])
+        if override.get("title"):
+            new_steps.append({
+                "kind": "evidence",
+                "label": f"行动规划智能体进一步具象化 → {override.get('title', '')}",
+                "detail": (override.get("description") or "")[:120],
+                "agent_name": "行动规划师 Planner",
+            })
+        for step in (o_steps or [])[:4]:
+            new_steps.append({
+                "kind": "evidence",
+                "label": str(step)[:120],
+                "agent_name": "行动规划师 Planner",
+                "severity": "info",
+            })
+        base_rat["reasoning_steps"] = new_steps
+        base_rat["value"] = merged.get("title", base_rat.get("value", ""))
+        merged["rationale"] = base_rat
+    return merged
+
+
 def _extract_planner_next_task(dim_results: dict[str, dict]) -> dict | None:
     """Parse structured action_plan output into a next_task dict."""
     import re
@@ -5972,7 +6053,7 @@ def run_role_agents_node(state: WorkflowState) -> dict:
         result_a.update(agent_outputs)
         _planner_next = _extract_planner_next_task(dim_results)
         if _planner_next:
-            result_a["next_task"] = _planner_next
+            result_a["next_task"] = _merge_next_task(state.get("next_task"), _planner_next)
         return result_a
 
     # ── Path B: Many dimensions (3+) → per-dim parallel LLM calls ──
@@ -6102,7 +6183,7 @@ def run_role_agents_node(state: WorkflowState) -> dict:
     result_b.update(agent_outputs)
     _planner_next = _extract_planner_next_task(dim_results)
     if _planner_next:
-        result_b["next_task"] = _planner_next
+        result_b["next_task"] = _merge_next_task(state.get("next_task"), _planner_next)
     return result_b
 
     # (V2 legacy code removed — V3 dim-driven paths above handle all cases)

@@ -395,6 +395,7 @@ class UserStorage:
             "created_at": user.get("created_at"),
             "status": user.get("status", "active"),
             "last_login": user.get("last_login", ""),
+            "project_serial_counter": int(user.get("project_serial_counter", 0) or 0),
         }
 
     def get_by_id(self, user_id: str) -> dict | None:
@@ -429,12 +430,16 @@ class UserStorage:
 
         salt, password_hash = self._hash_password(str(payload.get("password", "")))
         now = _now_iso()
+        raw_sid = str(payload.get("student_id", "")).strip() or None
+        if raw_sid:
+            if any(str(u.get("student_id", "")).strip() == raw_sid for u in users):
+                raise ValueError("学号已被占用")
         user = {
             "user_id": str(uuid4()),
             "role": payload.get("role", "student"),
             "display_name": str(payload.get("display_name", "")).strip() or email.split("@")[0],
             "email": email,
-            "student_id": str(payload.get("student_id", "")).strip() or None,
+            "student_id": raw_sid,
             "class_id": str(payload.get("class_id", "")).strip() or None,
             "cohort_id": str(payload.get("cohort_id", "")).strip() or None,
             "bio": str(payload.get("bio", "")).strip(),
@@ -444,6 +449,7 @@ class UserStorage:
             "last_login": "",
             "created_at": now,
             "updated_at": now,
+            "project_serial_counter": 0,
         }
         users.append(user)
         self._save(users)
@@ -527,6 +533,12 @@ class UserStorage:
                 user["display_name"] = str(payload["display_name"]).strip()
             if "student_id" in payload:
                 v = str(payload["student_id"] or "").strip()
+                if v:
+                    for other in users:
+                        if other is user:
+                            continue
+                        if str(other.get("student_id", "")).strip() == v:
+                            raise ValueError("学号已被占用")
                 user["student_id"] = v or None
             if "class_id" in payload:
                 v = str(payload["class_id"] or "").strip()
@@ -566,6 +578,51 @@ class UserStorage:
             return self._public_user(user)
         return None
 
+    def set_student_id(self, user_id: str, student_id: str) -> dict:
+        """为指定用户设置/修改学号，做全局唯一性校验。"""
+        import re
+        sid = str(student_id or "").strip()
+        if not sid:
+            raise ValueError("学号不能为空")
+        if not re.match(r"^[A-Za-z0-9_-]{4,32}$", sid):
+            raise ValueError("学号格式不合法（仅允许字母/数字/_- 共4-32位）")
+        users = self._load()
+        target_idx = None
+        for idx, user in enumerate(users):
+            if user.get("user_id") != user_id:
+                continue
+            target_idx = idx
+        if target_idx is None:
+            raise ValueError("用户不存在")
+        for idx, other in enumerate(users):
+            if idx == target_idx:
+                continue
+            if str(other.get("student_id", "")).strip() == sid:
+                raise ValueError("学号已被占用")
+        user = users[target_idx]
+        user["student_id"] = sid
+        user["updated_at"] = _now_iso()
+        if "project_serial_counter" not in user:
+            user["project_serial_counter"] = 0
+        users[target_idx] = user
+        self._save(users)
+        return self._public_user(user)
+
+    def allocate_project_serial(self, user_id: str) -> int:
+        """原子自增用户的 project_serial_counter，返回新值（从 1 开始）。"""
+        users = self._load()
+        for idx, user in enumerate(users):
+            if user.get("user_id") != user_id:
+                continue
+            current = int(user.get("project_serial_counter", 0) or 0)
+            next_serial = current + 1
+            user["project_serial_counter"] = next_serial
+            user["updated_at"] = _now_iso()
+            users[idx] = user
+            self._save(users)
+            return next_serial
+        raise ValueError("用户不存在")
+
     def admin_create_user(self, payload: dict) -> tuple[dict, str | None]:
         users = self._load()
         email = str(payload.get("email", "")).strip().lower()
@@ -579,12 +636,15 @@ class UserStorage:
             raw_password = "".join(secrets.choice(alphabet) for _ in range(10))
         salt, password_hash = self._hash_password(raw_password)
         now = _now_iso()
+        raw_sid = str(payload.get("student_id", "")).strip() or None
+        if raw_sid and any(str(u.get("student_id", "")).strip() == raw_sid for u in users):
+            raise ValueError("学号已被占用")
         user = {
             "user_id": str(uuid4()),
             "role": payload.get("role", "student"),
             "display_name": str(payload.get("display_name", "")).strip() or email.split("@")[0],
             "email": email,
-            "student_id": str(payload.get("student_id", "")).strip() or None,
+            "student_id": raw_sid,
             "class_id": str(payload.get("class_id", "")).strip() or None,
             "cohort_id": str(payload.get("cohort_id", "")).strip() or None,
             "bio": str(payload.get("bio", "")).strip(),
@@ -594,6 +654,7 @@ class UserStorage:
             "last_login": "",
             "created_at": now,
             "updated_at": now,
+            "project_serial_counter": 0,
         }
         users.append(user)
         self._save(users)

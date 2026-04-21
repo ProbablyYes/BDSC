@@ -3665,6 +3665,12 @@ class HypergraphService:
             "node_count": len(self._hypergraph.nodes) if self._hypergraph else 0,
             "family_counts": dict(self._family_counts),
             "rebuilt": len(self._records) > 0,
+            # 本体静态定义（与项目实例无关，教学面板要展示这些权威口径）
+            "ontology_totals": {
+                "families": len(EDGE_FAMILY_LABELS),
+                "groups": len(EDGE_FAMILY_GROUPS),
+                "patterns": len(_HYPEREDGE_TEMPLATES),
+            },
         }
 
     # ── In-memory hypergraph → force-graph viz data ───────────
@@ -4340,6 +4346,44 @@ class HypergraphService:
                 pass
 
         # ── Pattern matching against teaching hypergraph ──
+        # 为「触发原因可追溯」预计算：每个维度对应的首个实体 → example_quote
+        _dim_to_example: dict[str, str] = {}
+        for _dim, _ents in dim_entities.items():
+            if _ents:
+                _dim_to_example[_dim] = str(_ents[0])[:80]
+        # 维度 → rubric 名称映射（用于 target_dimension，教师端知道这条命中
+        # 为哪个 rubric 打分/扣分提供依据）
+        _DIM_TO_RUBRIC = {
+            "stakeholder": "Problem Definition",
+            "pain_point": "Problem Definition",
+            "evidence": "User Evidence Strength",
+            "solution": "Solution Feasibility",
+            "business_model": "Business Model Consistency",
+            "market": "Market & Competition",
+            "competitor": "Market & Competition",
+            "technology": "Solution Feasibility",
+            "resource": "Team & Execution",
+            "team": "Team & Execution",
+            "execution_step": "Team & Execution",
+            "risk_control": "Business Model Consistency",
+            "innovation": "Innovation & Differentiation",
+            "channel": "Business Model Consistency",
+        }
+
+        def _example_quote_for(rec_type: str, dims_hint: list[str]) -> str:
+            for d in dims_hint:
+                if d in _dim_to_example:
+                    return f"{DIMENSIONS.get(d, d)}：{_dim_to_example[d]}"
+            for d, q in _dim_to_example.items():
+                return f"{DIMENSIONS.get(d, d)}：{q}"
+            return ""
+
+        def _target_dim_for(dims_hint: list[str]) -> str:
+            for d in dims_hint:
+                if d in _DIM_TO_RUBRIC:
+                    return _DIM_TO_RUBRIC[d]
+            return ""
+
         pattern_warnings = []
         pattern_strengths = []
         if self._records:
@@ -4396,6 +4440,9 @@ class HypergraphService:
                             ctx_parts.append(f"你的项目目前缺少 {_missing_dims_text}")
                         if _present_dims_text:
                             ctx_parts.append(f"已有 {_present_dims_text}")
+                        rec_dims_hint = list(getattr(rec, "dimensions", []) or [])
+                        target_dim = _target_dim_for(rec_dims_hint + missing_dims_list)
+                        example_q = _example_quote_for(rec.type, rec_dims_hint + missing_dims_list)
                         pattern_warnings.append({
                             "pattern_id": rec.hyperedge_id,
                             "warning": rec.teaching_note,
@@ -4404,12 +4451,27 @@ class HypergraphService:
                             "edge_type": rec.type,
                             "project_context": "；".join(ctx_parts) if ctx_parts else "",
                             "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                            "example_quote": example_q,
+                            "target_dimension": target_dim,
+                            "triggered_patterns": [
+                                {
+                                    "pattern_id": rec.hyperedge_id,
+                                    "family": rec.type,
+                                    "rule": rid,
+                                    "example_quote": example_q,
+                                    "target_dimension": target_dim,
+                                }
+                                for rid in sorted(overlap)[:4]
+                            ],
                         })
                 elif rec.type in {"Value_Loop_Edge", "User_Pain_Fit_Edge", "Evidence_Grounding_Edge"}:
                     if category and rec.category == category and coverage_score >= 6:
                         related_ents = []
                         for d in ["stakeholder", "pain_point", "solution", "evidence"]:
                             related_ents.extend(dim_entities.get(d, [])[:2])
+                        rec_dims_hint = list(getattr(rec, "dimensions", []) or ["stakeholder", "pain_point", "solution"])
+                        target_dim = _target_dim_for(rec_dims_hint)
+                        example_q = _example_quote_for(rec.type, rec_dims_hint)
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
@@ -4417,12 +4479,23 @@ class HypergraphService:
                             "edge_type": rec.type,
                             "related_entities": related_ents[:4],
                             "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                            "example_quote": example_q,
+                            "target_dimension": target_dim,
+                            "triggered_patterns": [{
+                                "pattern_id": rec.hyperedge_id,
+                                "family": rec.type,
+                                "example_quote": example_q,
+                                "target_dimension": target_dim,
+                            }],
                         })
                 elif rec.type in {"Market_Competition_Edge", "Execution_Gap_Edge", "Compliance_Safety_Edge", "Innovation_Validation_Edge"}:
                     if (not category or rec.category == category):
                         related_ents = []
                         for d in dim_entities:
                             related_ents.extend(dim_entities[d][:1])
+                        rec_dims_hint = list(getattr(rec, "dimensions", []) or [])
+                        target_dim = _target_dim_for(rec_dims_hint)
+                        example_q = _example_quote_for(rec.type, rec_dims_hint)
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
@@ -4430,6 +4503,14 @@ class HypergraphService:
                             "edge_type": rec.type,
                             "related_entities": related_ents[:4],
                             "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                            "example_quote": example_q,
+                            "target_dimension": target_dim,
+                            "triggered_patterns": [{
+                                "pattern_id": rec.hyperedge_id,
+                                "family": rec.type,
+                                "example_quote": example_q,
+                                "target_dimension": target_dim,
+                            }],
                         })
 
         # ── Missing dimension recommendations (with project-specific hints) ──
@@ -4491,6 +4572,10 @@ class HypergraphService:
             dims = tmpl.get("dimensions", [])
             missing_t = [d for d in dims if not dim_presence.get(d)]
             status = "complete" if not missing_t else ("partial" if len(missing_t) < len(dims) else "missing")
+            # 为每个被命中/部分命中的模板挂 example_quote + target_dimension，
+            # 让教师端可以看到『这个模板命中了学生说的哪一句话 / 影响哪个 rubric』
+            example_q = _example_quote_for(tmpl.get("id", ""), dims)
+            target_dim = _target_dim_for(dims)
             template_matches.append({
                 "id": tmpl.get("id"),
                 "name": tmpl.get("name"),
@@ -4500,6 +4585,8 @@ class HypergraphService:
                 "status": status,
                 "pattern_type": tmpl.get("pattern_type", "neutral"),
                 "linked_rules": list(tmpl.get("linked_rules", [])),
+                "example_quote": example_q,
+                "target_dimension": target_dim,
             })
 
         # ── Consistency rules over dimensions + raw text ──

@@ -241,8 +241,8 @@
     "password_salt": "cefd3d27d87f41c1db0a1c949b6e613c",
     "password_hash": "aa3f08e31f9b9dd10f7d136a0ac82bb720568d3c9e3d681d94c25f72af1f25b0",
     "created_at": "2026-03-31T16:11:13.274205+08:00",
-    "updated_at": "2026-04-21T16:07:48.639811+08:00",
-    "last_login": "2026-04-21T16:07:48.639775+08:00"
+    "updated_at": "2026-04-21T22:31:32.458596+08:00",
+    "last_login": "2026-04-21T22:31:32.458565+08:00"
   },
   {
     "user_id": "f2d66084-5486-4395-8abf-81034512ddf4",
@@ -289,9 +289,9 @@
     "password_salt": "edade240d8d00de5e5e51992135114d6",
     "password_hash": "761ce51eab13394f6311f08b3f953979b75a5cc47a9b3aea267bb1a8d3592c02",
     "status": "active",
-    "last_login": "2026-04-21T15:54:48.049762+08:00",
+    "last_login": "2026-04-21T23:33:45.207343+08:00",
     "created_at": "2026-04-09T16:49:14.991910+08:00",
-    "updated_at": "2026-04-21T15:54:48.049807+08:00"
+    "updated_at": "2026-04-21T23:33:45.207364+08:00"
   },
   {
     "user_id": "276368a5-6780-44e8-8a1a-cccffda08a73",
@@ -369,9 +369,9 @@
     "password_salt": "7651ac6e8db031b45a95497f78233f60",
     "password_hash": "fef952a1727240b1161764beb29183f2bf8a108a70aae3b851ebae54e4060d36",
     "status": "active",
-    "last_login": "2026-04-20T18:31:41.353644+08:00",
+    "last_login": "2026-04-21T23:25:02.858993+08:00",
     "created_at": "2026-04-09T17:47:05.955253+08:00",
-    "updated_at": "2026-04-20T18:31:41.353671+08:00"
+    "updated_at": "2026-04-21T23:25:02.859027+08:00"
   },
   {
     "user_id": "76b5f2af-b845-4fc0-8fb5-ef2796befe34",
@@ -497,9 +497,9 @@
     "password_salt": "dd1b8fb1afffa1392713b3909c7d0239",
     "password_hash": "139c02fe59721553670bad30a18b7c2c3a65eb777951bef639114ea7667fc84d",
     "status": "active",
-    "last_login": "2026-04-14T11:57:28.389832+08:00",
+    "last_login": "2026-04-21T19:29:09.301733+08:00",
     "created_at": "2026-04-09T18:01:27.024532+08:00",
-    "updated_at": "2026-04-14T11:57:28.389869+08:00"
+    "updated_at": "2026-04-21T19:29:09.301813+08:00"
   },
   {
     "user_id": "02b518f5-6db2-4068-9d0a-def491f3e6d1",
@@ -562,5 +562,56 @@
     "status": "active",
     "team_names": [],
     "last_login": ""
+  },
+  {
+    "user_id": "95adedbd-1996-447c-b056-3063e6309045",
+    "role": "student",
+    "display_name": "stu010",
+    "email": "stu010",
+    "student_id": "stu010",
+    "class_id": null,
+    "cohort_id": null,
+    "bio": "",
+    "password_salt": "96a99c1bfa25e40c32a8d2315feac36a",
+    "password_hash": "0bb8bdef9dc85e2c8d062cb3867d9da4607f414b5c7482faef26f3bbbe193e98",
+    "status": "active",
+    "last_login": "2026-04-21T21:54:39.271101+08:00",
+    "created_at": "2026-04-21T19:35:08.994067+08:00",
+    "updated_at": "2026-04-21T21:54:39.271166+08:00",
+    "project_serial_counter": 1
+  },
+  {
+    "user_id": "71cc02db-850b-48bc-bdaa-6e80ab6ca1bb",
+    "role": "student",
+    "display_name": "stu011",
+    "email": "stu011",
+    "student_id": "stu011",
+    "class_id": null,
+    "cohort_id": null,
+    "bio": "",
+    "password_salt": "d9c88928cdd96f0d996a2ca2cf82345f",
+    "password_hash": "b190378cd6ea537f8195ecfadfb1994d292e22f86e0f52a02b55f362a34bd13e",
+    "status": "active",
+    "last_login": "",
+    "created_at": "2026-04-21T19:35:09.189879+08:00",
+    "updated_at": "2026-04-21T19:35:09.189879+08:00",
+    "project_serial_counter": 0
+  },
+  {
+    "user_id": "88d2adcd-43be-4ee2-ba6d-a487bce13252",
+    "role": "student",
+    "display_name": "stu012",
+    "email": "stu012",
+    "student_id": "stu012",
+    "class_id": null,
+    "cohort_id": null,
+    "bio": "",
+    "password_salt": "2044d9cba4a68ddde1b83920e6cc681d",
+    "password_hash": "5359be9c5f0b8e1248f49f6c07c5d34e3bbe6155617f5a2cb110044f710002e1",
+    "status": "active",
+    "last_login": "",
+    "created_at": "2026-04-21T19:35:09.385920+08:00",
+    "updated_at": "2026-04-21T19:35:09.385920+08:00",
+    "project_serial_counter": 0
   }
 ]

@@ -681,13 +681,17 @@ def _infer_project_stage_with_signals(text: str, is_file: bool = False) -> tuple
 
     if is_file and text_len >= 800:
         stage = "document"
-    elif evidence_hits >= 4 and business_hits >= 3:
+    elif (
+        (evidence_hits >= 3 and business_hits >= 2)
+        or (evidence_hits >= 2 and business_hits >= 2 and execution_hits >= 1)
+    ):
         stage = "validated"
     elif (
-        business_hits >= 2
-        or execution_hits >= 2
-        or text_len >= 350
-        or (number_hits >= 3 and business_hits >= 2 and text_len >= 400)
+        business_hits >= 1
+        or execution_hits >= 1
+        or text_len >= 250
+        or (evidence_hits >= 1 and text_len >= 180)
+        or (number_hits >= 2 and text_len >= 260)
     ):
         stage = "structured"
     else:
@@ -1108,6 +1112,8 @@ def run_diagnosis(
     mode: str = "coursework",
     competition_type: str = "",
     structured_signals: dict[str, float] | None = None,
+    current_text: str = "",
+    stage_history: list[str] | None = None,
 ) -> DiagnosisResult:
     """
     structured_signals: 外部量化证据映射 {rule_id: score 0-1}。
@@ -1115,15 +1121,46 @@ def run_diagnosis(
       当 signals[rule_id] ≥ 0.5 时：
         - 即使关键词没命中，也视作该规则"有证据支撑"，给对应维度加分（非扣分）
         - 已命中规则可降低其惩罚系数（算作已补偿）
+
+    current_text: 当轮学生原文（非累积语料）。仅用于短消息判断：
+      当累积语料为空 **且** 当轮文本 < 50 字时才返回空诊断。
+      为空时回退为 input_text（向后兼容）。
+
+    stage_history: 最近 N 轮的 project_stage（旧→新）。用于做阶段投票 +
+      "历史最高兜底"，避免同一项目在 idea/structured/validated 之间跳档。
+      为空时维持当轮推断结果不变。
     """
     normalized_text = input_text.lower()
     is_file = "[" + "上传文件:" in input_text
     text_len = len(normalized_text)
-    project_stage, stage_signals = _infer_project_stage_with_signals(normalized_text, is_file=is_file)
+    cur_stage, stage_signals = _infer_project_stage_with_signals(normalized_text, is_file=is_file)
+
+    if stage_history:
+        try:
+            from collections import Counter as _Counter
+            _hist = [str(s) for s in (stage_history or []) if s]
+            _STAGE_ORDER = {"idea": 0, "structured": 1, "validated": 2, "document": 3}
+            vote_pool = _hist + [cur_stage]
+            vote_top = _Counter(vote_pool).most_common(1)[0][0]
+            hi = max(vote_pool, key=lambda s: _STAGE_ORDER.get(s, 0))
+            if _STAGE_ORDER.get(hi, 0) > _STAGE_ORDER.get(vote_top, 0):
+                project_stage = hi
+            else:
+                project_stage = vote_top
+        except Exception:
+            project_stage = cur_stage
+    else:
+        project_stage = cur_stage
+
     active_rubrics = _get_rubrics(competition_type)
     structured_signals = structured_signals or {}
 
-    if not is_file and text_len < 50:
+    _current_raw = current_text if current_text else input_text
+    _current_len = len(_current_raw.lower())
+    _is_short_current = (not is_file) and _current_len < 50
+    _is_short_cumulative = (not is_file) and text_len < 50
+
+    if _is_short_current and _is_short_cumulative:
         return DiagnosisResult(
             diagnosis={
                 "mode": mode,
@@ -1251,7 +1288,7 @@ def run_diagnosis(
 
     if llm_scores:
         llm_map = {s["item"]: s for s in llm_scores}
-        _default_by_stage = {"idea": 2.0, "structured": 3.5, "validated": 4.5, "document": 5.0}
+        _default_by_stage = {"idea": 3.0, "structured": 4.5, "validated": 5.5, "document": 6.0}
         fallback_score = _default_by_stage.get(project_stage, 3.0)
         for row in active_rubrics:
             llm_s = llm_map.get(row["item"])
@@ -1260,10 +1297,10 @@ def run_diagnosis(
             for r_id in row.get("rules", []):
                 sv = float(structured_signals.get(r_id, 0.0) or 0.0)
                 if sv >= 0.7:
-                    sig_bonus_llm += 0.6
+                    sig_bonus_llm += 0.8
                 elif sv >= 0.5:
-                    sig_bonus_llm += 0.3
-            sig_bonus_llm = min(sig_bonus_llm, 1.5)
+                    sig_bonus_llm += 0.5
+            sig_bonus_llm = min(sig_bonus_llm, 2.5)
             # 命中/缺失证据（LLM 分支也给出，便于前端展示）
             matched_evidence_llm = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
             missing_evidence_llm = [kw for kw in row["evidence"] if kw.lower() not in normalized_text]
@@ -1342,10 +1379,10 @@ def run_diagnosis(
                     continue  # 已在 penalty 里处理
                 sig_val = float(structured_signals.get(r_id, 0.0) or 0.0)
                 if sig_val >= 0.7:
-                    signal_bonus += 0.9
+                    signal_bonus += 1.2
                 elif sig_val >= 0.5:
-                    signal_bonus += 0.5
-            signal_bonus = min(signal_bonus, 2.0)
+                    signal_bonus += 0.7
+            signal_bonus = min(signal_bonus, 3.0)
             dim_score = max(0.0, min(10.0, ev_score + length_bonus + signal_bonus - penalties))
 
             if dim_rules:
@@ -1533,12 +1570,15 @@ def run_diagnosis(
                  "impact": f"{r['impact']:+.2f}"}
                 for r in linked_rules if triggered_rule_by_id.get(r["rule_id"], {}).get("quote")
             ],
-            "note": f"阶段：{stage_label_cn} · 来源：{src}",
+            "note": (
+                f"阶段：{stage_label_cn} · 来源：{src} · "
+                f"基于累积语料（{text_len} 字符）"
+            ),
         }
 
     overall_raw = round(weighted_total / total_weight, 2) if total_weight else 0.0
-    stage_floor = {"idea": 1.5, "structured": 3.0, "validated": 5.0, "document": 5.5}.get(project_stage, 2.5)
-    stage_ceiling = {"idea": 7.5, "structured": 9.0, "validated": 9.6, "document": 9.8}.get(project_stage, 8.5)
+    stage_floor = {"idea": 2.0, "structured": 3.5, "validated": 5.5, "document": 6.0}.get(project_stage, 2.5)
+    stage_ceiling = {"idea": 8.0, "structured": 9.3, "validated": 9.7, "document": 9.9}.get(project_stage, 9.0)
     overall_score = round(min(stage_ceiling, max(stage_floor, overall_raw)), 2)
     source_breakdown: dict[str, int] = {}
     for r in rubric:
@@ -1727,12 +1767,17 @@ def run_diagnosis(
         })
     else:
         clip_note = f"原始加权平均 {overall_raw:.2f} 落在阶段区间内，不再修正"
+    _corpus_note = (
+        f"评分基于项目累积语料（{text_len} 字符）"
+        f"{'；阶段由最近 ' + str(len(stage_history or []) + 1) + ' 轮投票合成' if stage_history else ''}"
+    )
     overall_rationale = {
         "field": "overall",
         "value": overall_score,
         "formula": "clip(Σ(rubric_i × w_i) / Σw_i, stage_floor, stage_ceiling)",
         "formula_display": (
             f"综合分 = 按 9 个维度加权平均后，再夹到阶段允许区间。\n"
+            f"{_corpus_note}\n"
             f"项目处于「{stage_label_cn}」→ 区间 [{stage_floor}, {stage_ceiling}]\n"
             f"加权平均 = ({parts_display}) ÷ {total_weight:.1f} = {overall_raw:.2f}\n"
             f"{clip_note}\n"
@@ -1740,12 +1785,14 @@ def run_diagnosis(
         ),
         "reasoning_steps": overall_steps,
         "inputs": overall_inputs,
-        "note": f"项目阶段 {project_stage} · 触发 {len(triggered_rules)} 条风险",
+        "note": f"项目阶段 {project_stage} · 触发 {len(triggered_rules)} 条风险 · {_corpus_note}",
         "stage_floor": stage_floor,
         "stage_ceiling": stage_ceiling,
         "raw_score": overall_raw,
         "project_stage": project_stage,
         "project_stage_cn": stage_label_cn,
+        "corpus_chars": text_len,
+        "stage_history": list(stage_history or []),
     }
 
     project_stage_rationale = _build_stage_rationale(project_stage, stage_label_cn, stage_signals)

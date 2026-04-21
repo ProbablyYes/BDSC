@@ -2193,17 +2193,34 @@ export default function StudentPage() {
         merged[row.item].latestRow = row; // 每次循环覆盖，最终持有"最后一次提交"的整行
       }
     }
+    // ── 跨轮累积展示：最近 3 轮 0.5 / 0.3 / 0.2 加权平均 ──
+    const SMOOTH_W = [0.5, 0.3, 0.2] as const;
     return Object.values(merged).map((m) => {
-      const latest = m.scores[m.scores.length - 1];
-      const best = Math.max(...m.scores);
-      const prev = m.scores.length > 1 ? m.scores[m.scores.length - 2] : null;
+      const s = m.scores;
+      const latest = s[s.length - 1];
+      const best = Math.max(...s);
+      const prev = s.length > 1 ? s[s.length - 2] : null;
+      const last3 = s.slice(-3);
+      const ws = SMOOTH_W.slice(0, last3.length);
+      const wsum = ws.reduce((a, b) => a + b, 0) || 1;
+      // last3 是旧→新，权重 0.2 / 0.3 / 0.5（新的权重大）
+      const smoothed = last3.reduce((acc, v, i) => {
+        const w = SMOOTH_W[last3.length - 1 - i] ?? 0;
+        return acc + v * (w / wsum);
+      }, 0);
+      // rawHistory：新→旧（RationaleCard.smoothing 约定）
+      const rawHistory = last3.slice().reverse().map((v) => Math.round(v * 100) / 100);
       const latestRow: any = m.latestRow || {};
       return {
         item: m.item,
-        score: Math.round(latest * 100) / 100,
+        score: Math.round(smoothed * 100) / 100,
+        rawLatest: Math.round(latest * 100) / 100,
         bestScore: Math.round(best * 100) / 100,
         prevScore: prev !== null ? Math.round(prev * 100) / 100 : null,
         trend: prev !== null ? (latest > prev ? "up" : latest < prev ? "down" : "same") : null,
+        smoothedFromTurns: last3.length,
+        rawHistory,
+        smoothWeights: SMOOTH_W.slice(0, last3.length),
         weight: m.weight,
         reason: m.reason,
         source: m.source,
@@ -2543,9 +2560,41 @@ export default function StudentPage() {
     return all.length > 0 ? all[all.length - 1] : "";
   }, [resultHistory, latestResult]);
   const overallScore = useMemo(() => {
-    const scores = resultHistory.map((r) => r?.diagnosis?.overall_score).filter((s) => s != null);
-    return scores.length > 0 ? scores[scores.length - 1] : latestResult?.diagnosis?.overall_score ?? null;
+    const scores = resultHistory
+      .map((r) => r?.diagnosis?.overall_score)
+      .filter((s): s is number => typeof s === "number" && !Number.isNaN(s));
+    if (scores.length === 0) {
+      const latest = latestResult?.diagnosis?.overall_score;
+      return typeof latest === "number" ? latest : null;
+    }
+    // 跨轮累积平滑：最近 3 轮 0.5 / 0.3 / 0.2 加权平均
+    const SMOOTH_W = [0.5, 0.3, 0.2];
+    const last3 = scores.slice(-3);
+    const ws = SMOOTH_W.slice(0, last3.length);
+    const wsum = ws.reduce((a, b) => a + b, 0) || 1;
+    const smoothed = last3.reduce((acc, v, i) => {
+      const w = SMOOTH_W[last3.length - 1 - i] ?? 0;
+      return acc + v * (w / wsum);
+    }, 0);
+    return Math.round(smoothed * 100) / 100;
   }, [resultHistory, latestResult]);
+
+  // 综合分平滑 meta：给证据对照用（新→旧）
+  const overallSmoothing = useMemo(() => {
+    const scores = resultHistory
+      .map((r) => r?.diagnosis?.overall_score)
+      .filter((s): s is number => typeof s === "number" && !Number.isNaN(s));
+    if (scores.length < 2 || overallScore === null) return null;
+    const last3 = scores.slice(-3);
+    const rawHistory = last3.slice().reverse().map((v) => Math.round(v * 100) / 100);
+    const W = [0.5, 0.3, 0.2].slice(0, last3.length);
+    return {
+      displayValue: overallScore,
+      turns: last3.length,
+      weights: W,
+      rawHistory,
+    };
+  }, [resultHistory, overallScore]);
   const scoreBand = latestResult?.diagnosis?.score_band ?? "";
   const projectStage = latestResult?.diagnosis?.project_stage ?? "";
   const gradingPrinciples: string[] = latestResult?.diagnosis?.grading_principles ?? [];
@@ -5139,6 +5188,14 @@ export default function StudentPage() {
                           <div className="sc-hero-meta">
                             {projectStageLabel && <span className="sc-meta-chip">{projectStageLabel}</span>}
                             {scoreBand && <span className="sc-meta-chip">{scoreBand}</span>}
+                            {resultHistory.length >= 2 && (
+                              <span
+                                className="sc-meta-chip muted"
+                                title="为避免单轮抖动，单项分数与综合分均以最近 3 轮加权平均（权重 0.5 / 0.3 / 0.2，最新轮最大）。后端诊断本身基于项目累积语料。"
+                              >
+                                最近 3 轮加权 · 0.5/0.3/0.2
+                              </span>
+                            )}
                             {highDims.length > 0 && <div className="sc-meta-row"><span className="sc-meta-good">{highDims.length} 项达标</span></div>}
                             {lowDims.length > 0 && <div className="sc-meta-row"><span className="sc-meta-warn">{lowDims.length} 项需补强</span></div>}
                           </div>
@@ -5209,8 +5266,26 @@ export default function StudentPage() {
                                   // 无论 hasRich 与否都渲染——保底显示一个"得分 = X"迷你推导，
                                   // 让学生始终能看到这个分数至少怎么写出来的。
                                   const weight = Number(r.weight ?? 0);
+                                  const rawHistory: number[] = Array.isArray(r.rawHistory) ? r.rawHistory : [];
+                                  const smoothWeights: number[] = Array.isArray(r.smoothWeights) ? r.smoothWeights : [];
+                                  const smoothTurns = Number(r.smoothedFromTurns || 0);
                                   return (
                                     <div className="sc-dim-breakdown">
+                                      {/* 平滑前后对照（仅在跨轮平滑时出现） */}
+                                      {smoothTurns >= 2 && rawHistory.length >= smoothTurns ? (
+                                        <div className="rc-smoothing-note" style={{ marginBottom: 8 }}>
+                                          <span className="rc-smoothing-label">展示分</span>
+                                          <span className="rc-smoothing-formula">
+                                            {Number(r.score).toFixed(2)} = {rawHistory.slice(0, smoothTurns).map((v, i) => (
+                                              <span key={i}>
+                                                {i > 0 ? " + " : ""}
+                                                {(smoothWeights[i] ?? 0).toFixed(1)}×{Number(v).toFixed(2)}
+                                              </span>
+                                            ))}
+                                          </span>
+                                          <span className="rc-smoothing-hint">最近 {smoothTurns} 轮加权 · 下方为最新一轮原值推导</span>
+                                        </div>
+                                      ) : null}
                                       {/* 分数构成条 */}
                                       <div className="sc-dim-breakdown-title">分数怎么算出来的</div>
                                       <div className="sc-dim-breakdown-row">
@@ -5333,6 +5408,20 @@ export default function StudentPage() {
                                 <span className="sc-overall-rat-title">综合分 {finalScore} / 10 · 怎么算出来的</span>
                                 {stageCn && <span className="sc-overall-rat-stage">{stageCn}</span>}
                               </div>
+                              {overallSmoothing && overallSmoothing.turns >= 2 ? (
+                                <div className="rc-smoothing-note" style={{ marginBottom: 8 }}>
+                                  <span className="rc-smoothing-label">展示分</span>
+                                  <span className="rc-smoothing-formula">
+                                    {overallSmoothing.displayValue.toFixed(2)} = {overallSmoothing.rawHistory.slice(0, overallSmoothing.turns).map((v, i) => (
+                                      <span key={i}>
+                                        {i > 0 ? " + " : ""}
+                                        {(overallSmoothing.weights[i] ?? 0).toFixed(1)}×{v.toFixed(2)}
+                                      </span>
+                                    ))}
+                                  </span>
+                                  <span className="rc-smoothing-hint">最近 {overallSmoothing.turns} 轮加权 · 下方为最新一轮原值推导</span>
+                                </div>
+                              ) : null}
                               <div className="sc-overall-rat-desc">
                                 综合分 = 按 9 个维度加权平均后，再夹到「{stageCn || "当前阶段"}」允许区间
                                 <b> [{floor}, {ceil}]</b>。

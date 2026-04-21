@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
 import { RationaleCard, EvidencePopover, type Rationale } from "../components/RationaleCard";
 import { AiOverrideDrawer } from "../components/AiOverrideDrawer";
+import KBGraphPanel from "../knowledge/KBGraphPanel";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 type Tab = "overview" | "assistant" | "conversation-analytics" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition" | "student-plans";
@@ -966,6 +967,7 @@ export default function TeacherPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [assistantView, setAssistantView] = useState<"queue" | "assessment" | "intervention" | "conversation" | "impact">("queue");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [kbPanelOpen, setKbPanelOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
   const [teacherId, setTeacherId] = useState("teacher-001");
   const [classId, setClassId] = useState("");
@@ -3831,6 +3833,12 @@ export default function TeacherPage() {
               <span className="dock-tooltip">聊天室 — 与学生和小文沟通</span>
             </Link>
 
+            {/* Knowledge Graph — 与学生端同一面板（知识库 · KG · 超图 · 质量评估） */}
+            <button type="button" className={`dock-item${kbPanelOpen ? " active" : ""}`} onClick={() => setKbPanelOpen(v => !v)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M9 14l-2.5 3M15 14l2.5 3"/><circle cx="12" cy="12" r="1.5"/></svg>
+              <span className="dock-tooltip">知识图谱</span>
+            </button>
+
             <div className="dock-sep" />
 
             {/* Theme toggle */}
@@ -3851,6 +3859,15 @@ export default function TeacherPage() {
           </div>
         </div>
       </header>
+
+      {/* ── KG Explorer Panel (与学生端同一面板，slides in below TopBar) ── */}
+      {kbPanelOpen && (
+        <div className="kb-panel-overlay">
+          <div className="kb-panel-container">
+            <KBGraphPanel onClose={() => setKbPanelOpen(false)} />
+          </div>
+        </div>
+      )}
 
       {/* ── Logout Confirm Modal ── */}
       {showLogoutConfirm && (
@@ -4279,11 +4296,42 @@ export default function TeacherPage() {
 
                   {/* ── 知识库全景 (静态数据 + 交互设计) ── */}
                   {(() => {
-                    const KB_STRIP = [
-                      { v: 96, l: "标准案例" }, { v: 13, l: "领域类别" },
-                      { v: 9, l: "评分维度" }, { v: 27, l: "风险规则" },
-                      { v: 96, l: "RAG 语料" }, { v: 7144, l: "知识关系" },
-                      { v: 45, l: "超边家族" }, { v: 166, l: "超图节点" }, { v: 360, l: "超图超边" },
+                    // ── 从 /api/kb-stats 取实时值，取不到时回落到权威静态口径 ──
+                    const neo4j: any = kbStats?.neo4j ?? {};
+                    const hyperLocal: any = kbStats?.hypergraph_local ?? {};
+                    const ontTotals: any = hyperLocal?.ontology_totals ?? {};
+                    const rag: any = kbStats?.rag ?? {};
+                    const live = {
+                      cases: Number(neo4j?.total_projects ?? neo4j?.project_count ?? rag?.corpus_count ?? 0),
+                      categories: Number(neo4j?.total_categories ?? neo4j?.category_count ?? 0),
+                      rubric: Number(neo4j?.total_rubrics ?? 9),
+                      riskRules: Number(neo4j?.total_risk_rules ?? 27),
+                      ragCorpus: Number(rag?.corpus_count ?? 0),
+                      relations: Number(neo4j?.total_relationships ?? neo4j?.relationship_count ?? 0),
+                      hyperFamilies: Number(ontTotals?.families ?? 0),
+                      hyperPatterns: Number(ontTotals?.patterns ?? 0),
+                      hyperNodes: Number(hyperLocal?.node_count ?? 0),
+                      hyperEdges: Number(hyperLocal?.edge_count ?? 0),
+                    };
+                    // 静态权威口径（离线也能显示合理数字）
+                    const FALLBACK = {
+                      cases: 111, categories: 13, rubric: 9, riskRules: 27,
+                      ragCorpus: 111, relations: 7144,
+                      hyperFamilies: 77, hyperPatterns: 95,
+                      hyperNodes: 166, hyperEdges: 360,
+                    };
+                    const pick = (k: keyof typeof FALLBACK) => (live[k] > 0 ? live[k] : FALLBACK[k]);
+                    const KB_STRIP: Array<{ v: number; l: string; live?: boolean }> = [
+                      { v: pick("cases"), l: "标准案例", live: live.cases > 0 },
+                      { v: pick("categories"), l: "领域类别", live: live.categories > 0 },
+                      { v: pick("rubric"), l: "评分维度" },
+                      { v: pick("riskRules"), l: "风险规则" },
+                      { v: pick("ragCorpus"), l: "RAG 语料", live: live.ragCorpus > 0 },
+                      { v: pick("relations"), l: "知识关系", live: live.relations > 0 },
+                      { v: pick("hyperFamilies"), l: "超边家族", live: live.hyperFamilies > 0 },
+                      { v: pick("hyperPatterns"), l: "超边模式", live: live.hyperPatterns > 0 },
+                      { v: pick("hyperNodes"), l: "超图节点", live: live.hyperNodes > 0 },
+                      { v: pick("hyperEdges"), l: "超图超边", live: live.hyperEdges > 0 },
                     ];
                     const dimItems = [
                       { label: "痛点", val: 252 }, { label: "方案", val: 252 },
@@ -4347,14 +4395,19 @@ export default function TeacherPage() {
                     <div className="ov-section kb-pano">
                       <div className="kb-pano-header">
                         <h3>知识库全景</h3>
-                        <span className="kb-pano-sub">AI 助手以 96 个标准案例、7,144 条知识关系、45 个超边家族、360 条超图超边、27 条风险规则 + 34 条一致性规则为底座，为学生提供精准引导</span>
+                        <span className="kb-pano-sub">
+                          AI 助手以 {pick("cases")} 个标准案例、{pick("relations").toLocaleString()} 条知识关系、{pick("hyperFamilies")} 个超边家族 × {pick("hyperPatterns")} 个超边模式、{pick("riskRules")} 条风险规则 + 34 条一致性规则为底座，为学生提供精准引导
+                        </span>
                       </div>
 
                       {/* ── 1. 指标条 ── */}
                       <div className="kb-strip">
                         {KB_STRIP.map(s => (
-                          <div key={s.l} className="kb-strip-item">
-                            <div className="kb-strip-num" style={{ color: "var(--accent)" }}>{s.v}</div>
+                          <div key={s.l} className="kb-strip-item" title={s.live ? "实时值来自 /api/kb-stats" : "静态权威口径（离线回落值）"}>
+                            <div className="kb-strip-num" style={{ color: "var(--accent)" }}>
+                              {s.v.toLocaleString()}
+                              {s.live ? <span className="kb-strip-live-dot" aria-label="实时"></span> : null}
+                            </div>
                             <div className="kb-strip-label">{s.l}</div>
                           </div>
                         ))}
@@ -6907,8 +6960,52 @@ export default function TeacherPage() {
                 const agg = aggregateProjectHistory(subs);
                 const latestSub: any = agg.latestSubmission || subs[subs.length - 1] || null;
                 const latestDiag: any = agg.latestDiagnosis || latestSub?.diagnosis || activeProject?.latest_diagnosis || {};
-                const latestRubric: any[] = (latestDiag.rubric_items || latestDiag.rubric_assessment?.rubric_items || []);
-                const latestOverallScore = Number(latestDiag.overall_weighted_score ?? latestDiag.overall_score ?? activeProject?.latest_score ?? 0);
+                // ── 跨轮累积平滑：最近 3 轮 0.5 / 0.3 / 0.2 加权平均（旧→新，新的权重最大） ──
+                const SMOOTH_W = [0.5, 0.3, 0.2];
+                const smoothLast3 = (vals: number[]): number | null => {
+                  const arr = vals.filter((v) => typeof v === "number" && !Number.isNaN(v));
+                  if (arr.length === 0) return null;
+                  const last3 = arr.slice(-3);
+                  const ws = SMOOTH_W.slice(0, last3.length);
+                  const wsum = ws.reduce((a, b) => a + b, 0) || 1;
+                  return last3.reduce((acc, v, i) => acc + v * ((SMOOTH_W[last3.length - 1 - i] ?? 0) / wsum), 0);
+                };
+                const _rawLatestRubric: any[] = (latestDiag.rubric_items || latestDiag.rubric_assessment?.rubric_items || []);
+                const latestRubric: any[] = (() => {
+                  if (subs.length < 2 || _rawLatestRubric.length === 0) return _rawLatestRubric;
+                  // 从 agg.rubricTrend 里按 item_id 对齐取最近 3 轮值
+                  return _rawLatestRubric.map((it: any) => {
+                    const key = String(it?.item_id || it?.dimension || it?.label || "").trim();
+                    const tr = key ? agg.rubricTrend[key] : undefined;
+                    if (!tr || !tr.points?.length) return it;
+                    const vals = tr.points.map((p) => Number(p.value)).filter((v) => !Number.isNaN(v));
+                    const smoothed = smoothLast3(vals);
+                    if (smoothed == null) return it;
+                    return { ...it, score: Math.round(smoothed * 100) / 100, raw_score: it.score, smoothed_from_turns: Math.min(3, vals.length) };
+                  });
+                })();
+                const _rawOverall = Number(latestDiag.overall_weighted_score ?? latestDiag.overall_score ?? activeProject?.latest_score ?? 0);
+                const latestOverallScore = (() => {
+                  if (!agg.overallTrend || agg.overallTrend.length < 2) return _rawOverall;
+                  const vals = agg.overallTrend.map((p) => Number(p.value));
+                  const sm = smoothLast3(vals);
+                  return sm == null ? _rawOverall : Math.round(sm * 100) / 100;
+                })();
+                const overallSmoothed = agg.overallTrend && agg.overallTrend.length >= 2;
+                // ── 综合分平滑 meta（新→旧）——给 RationaleCard.smoothing 和 sc-overall-rationale 内联对照用 ──
+                const overallSmoothingMeta: { displayValue: number; turns: number; weights: number[]; rawHistory: number[] } | null = (() => {
+                  if (!overallSmoothed) return null;
+                  const vals = (agg.overallTrend || []).map((p) => Number(p.value)).filter((v) => !Number.isNaN(v));
+                  if (vals.length < 2) return null;
+                  const last3 = vals.slice(-3);
+                  const W = [0.5, 0.3, 0.2].slice(0, last3.length);
+                  return {
+                    displayValue: latestOverallScore,
+                    turns: last3.length,
+                    weights: W,
+                    rawHistory: last3.slice().reverse().map((v) => Math.round(v * 100) / 100),
+                  };
+                })();
                 const latestOverallRationale = latestDiag.overall_rationale || latestDiag.rubric_assessment?.overall_rationale;
                 const tier1 = [
                   latestDiag.project_phase_rationale && { key: "phase", label: "项目阶段", rationale: latestDiag.project_phase_rationale },
@@ -6994,7 +7091,9 @@ export default function TeacherPage() {
                             <div className="proj-name-card-right">
                               <div className="proj-name-card-score-big">
                                 <strong>{latestOverallScore.toFixed(2)}</strong>
-                                <span>最新综合分 / 10</span>
+                                <span>
+                                  {overallSmoothed ? "综合分（最近 3 轮加权·0.5/0.3/0.2）" : "最新综合分 / 10"}
+                                </span>
                               </div>
                               <div className="proj-name-card-actions">
                                 <button
@@ -7104,7 +7203,11 @@ export default function TeacherPage() {
                             const med = active.filter((r: any) => r.severity === "medium").length;
                             const low = active.filter((r: any) => r.severity === "low").length;
                             const total = active.length;
-                            const healthScore = total === 0 ? 100 : Math.max(10, Math.round(100 - high * 12 - med * 5 - low * 2));
+                            const W_HIGH = 12, W_MED = 5, W_LOW = 2;
+                            const deductions = high * W_HIGH + med * W_MED + low * W_LOW;
+                            const rawScore = 100 - deductions;
+                            const clamped = Math.max(10, rawScore);
+                            const healthScore = total === 0 ? 100 : Math.round(clamped);
                             const circumference = 2 * Math.PI * 32;
                             const strokeDashoffset = circumference * (1 - healthScore / 100);
                             const healthColor = healthScore >= 70 ? "#22c55e" : healthScore >= 40 ? "#f59e0b" : "#ef4444";
@@ -7137,7 +7240,7 @@ export default function TeacherPage() {
                                   >✎ 订正整体</button>
                                 </summary>
                                 <div className="proj-detail-section-body right-section" style={{ padding: 0 }}>
-                                  {/* 风险概览条（健康分环 + 三档统计） */}
+                                  {/* 风险概览条（健康分环 + 三档统计 + 分数推导） */}
                                   {latestRules.length > 0 && (
                                     <div className="risk-summary-bar">
                                       <div className="risk-health-row">
@@ -7162,6 +7265,81 @@ export default function TeacherPage() {
                                           </div>
                                         </div>
                                       </div>
+                                      {/* ── 健康分的推导过程（点开可见） ── */}
+                                      <details className="risk-health-derive">
+                                        <summary className="risk-health-derive-head">
+                                          <span className="risk-health-derive-title">健康分是怎么算出来的？</span>
+                                          <span className="risk-health-derive-hint">点击展开公式</span>
+                                        </summary>
+                                        <div className="risk-health-derive-body">
+                                          <div className="risk-health-formula">
+                                            <span className="rhf-label">公式</span>
+                                            <code className="rhf-code">
+                                              健康分 = max(10, 100 − 高危×{W_HIGH} − 中等×{W_MED} − 轻微×{W_LOW})
+                                            </code>
+                                          </div>
+                                          <div className="risk-health-steps">
+                                            <div className="rhs-row rhs-head">
+                                              <span>档位</span><span>命中</span><span>单位扣分</span><span>本档扣分</span>
+                                            </div>
+                                            <div className="rhs-row">
+                                              <span><span className="risk-dot high" /> 高危</span>
+                                              <span className="rhs-count">{high}</span>
+                                              <span className="rhs-unit">−{W_HIGH}</span>
+                                              <span className="rhs-delta">−{high * W_HIGH}</span>
+                                            </div>
+                                            <div className="rhs-row">
+                                              <span><span className="risk-dot medium" /> 中等</span>
+                                              <span className="rhs-count">{med}</span>
+                                              <span className="rhs-unit">−{W_MED}</span>
+                                              <span className="rhs-delta">−{med * W_MED}</span>
+                                            </div>
+                                            <div className="rhs-row">
+                                              <span><span className="risk-dot low" /> 轻微</span>
+                                              <span className="rhs-count">{low}</span>
+                                              <span className="rhs-unit">−{W_LOW}</span>
+                                              <span className="rhs-delta">−{low * W_LOW}</span>
+                                            </div>
+                                            <div className="rhs-row rhs-sum">
+                                              <span>合计扣分</span>
+                                              <span></span>
+                                              <span></span>
+                                              <span className="rhs-delta">−{deductions}</span>
+                                            </div>
+                                          </div>
+                                          <div className="risk-health-final">
+                                            <div className="rhfinal-step">
+                                              <span className="rhfinal-expr">100 − {deductions}</span>
+                                              <span className="rhfinal-eq">=</span>
+                                              <span className="rhfinal-val">{rawScore}</span>
+                                              <span className="rhfinal-tag">原始分</span>
+                                            </div>
+                                            {rawScore < 10 ? (
+                                              <div className="rhfinal-step">
+                                                <span className="rhfinal-expr">max(10, {rawScore})</span>
+                                                <span className="rhfinal-eq">=</span>
+                                                <span className="rhfinal-val" style={{ color: healthColor }}>{healthScore}</span>
+                                                <span className="rhfinal-tag">下限兜底</span>
+                                              </div>
+                                            ) : (
+                                              <div className="rhfinal-step">
+                                                <span className="rhfinal-expr">四舍五入</span>
+                                                <span className="rhfinal-eq">=</span>
+                                                <span className="rhfinal-val" style={{ color: healthColor }}>{healthScore}</span>
+                                                <span className="rhfinal-tag">最终健康分</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="risk-health-band">
+                                            <div className={`rhband-seg ${healthScore < 40 ? "rhband-active" : ""}`}><span>&lt; 40</span><em>危险</em></div>
+                                            <div className={`rhband-seg ${healthScore >= 40 && healthScore < 70 ? "rhband-active" : ""}`}><span>40–69</span><em>偏弱</em></div>
+                                            <div className={`rhband-seg ${healthScore >= 70 ? "rhband-active" : ""}`}><span>≥ 70</span><em>健康</em></div>
+                                          </div>
+                                          <div className="risk-health-note">
+                                            <strong>权重说明：</strong>高危规则对项目致命（如"解决方案与痛点不匹配"）→ 每条扣 {W_HIGH} 分；中等（如"缺证据"）→ 每条扣 {W_MED} 分；轻微（如"表述不清"）→ 每条扣 {W_LOW} 分。扣分下限设在 10 分，避免多条叠加后直接归零。该分数仅衡量<em>当轮未修复</em>的风险负担，已解决的规则（{resolvedCount} 条）不参与扣分。
+                                          </div>
+                                        </div>
+                                      </details>
                                     </div>
                                   )}
 
@@ -7527,6 +7705,20 @@ export default function TeacherPage() {
                                           <span className="sc-overall-rat-title">综合分 {finalScore.toFixed(1)} / 10 · 怎么算出来的</span>
                                           {stageCn && <span className="sc-overall-rat-stage">{stageCn}</span>}
                                         </div>
+                                        {overallSmoothingMeta && overallSmoothingMeta.turns >= 2 ? (
+                                          <div className="rc-smoothing-note" style={{ marginBottom: 8 }}>
+                                            <span className="rc-smoothing-label">展示分</span>
+                                            <span className="rc-smoothing-formula">
+                                              {overallSmoothingMeta.displayValue.toFixed(2)} = {overallSmoothingMeta.rawHistory.slice(0, overallSmoothingMeta.turns).map((v, i) => (
+                                                <span key={i}>
+                                                  {i > 0 ? " + " : ""}
+                                                  {(overallSmoothingMeta.weights[i] ?? 0).toFixed(1)}×{v.toFixed(2)}
+                                                </span>
+                                              ))}
+                                            </span>
+                                            <span className="rc-smoothing-hint">最近 {overallSmoothingMeta.turns} 轮加权 · 下方为最新一轮原值推导</span>
+                                          </div>
+                                        ) : null}
                                         <div className="sc-overall-rat-desc">
                                           综合分 = 按 {latestRubricStudent.length} 个维度加权平均后，再夹到「{stageCn || "当前阶段"}」允许区间
                                           <b> [{floor}, {ceil}]</b>。

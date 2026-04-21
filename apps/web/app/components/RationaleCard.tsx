@@ -69,6 +69,13 @@ export type Rationale = {
   note?: string;
 };
 
+export type SmoothingMeta = {
+  displayValue: number;   // 最终展示的平滑分
+  turns: number;          // 参与平滑的轮次
+  weights: number[];      // 权重数组（新→旧），如 [0.5, 0.3, 0.2]
+  rawHistory: number[];   // 对应原始分（新→旧）
+};
+
 export interface RationaleCardProps {
   rationale: Rationale;
   title?: string;
@@ -76,6 +83,7 @@ export interface RationaleCardProps {
   onJumpMessage?: (messageId: string) => void;
   onEdit?: () => void;
   className?: string;
+  smoothing?: SmoothingMeta;
 }
 
 export function RationaleCard({
@@ -85,9 +93,16 @@ export function RationaleCard({
   onJumpMessage,
   onEdit,
   className = "",
+  smoothing,
 }: RationaleCardProps) {
   const [expanded, setExpanded] = useState(!compact);
   const override = rationale.teacher_override;
+  const showSmoothing =
+    !!smoothing &&
+    smoothing.turns >= 2 &&
+    Array.isArray(smoothing.rawHistory) &&
+    Array.isArray(smoothing.weights) &&
+    smoothing.rawHistory.length >= smoothing.turns;
 
   return (
     <div className={`rc-card ${compact ? "rc-compact" : ""} ${override ? "rc-has-override" : ""} ${className}`}>
@@ -115,6 +130,23 @@ export function RationaleCard({
             {expanded ? "收起来源" : "展开来源"}
           </button>
         </div>
+        {showSmoothing ? (
+          <div className="rc-smoothing-note">
+            <span className="rc-smoothing-label">展示分</span>
+            <span className="rc-smoothing-formula">
+              {smoothing!.displayValue.toFixed(2)} ={" "}
+              {smoothing!.rawHistory.slice(0, smoothing!.turns).map((v, i) => (
+                <span key={i}>
+                  {i > 0 ? " + " : ""}
+                  {(smoothing!.weights[i] ?? 0).toFixed(1)}×{v.toFixed(2)}
+                </span>
+              ))}
+            </span>
+            <span className="rc-smoothing-hint">
+              最近 {smoothing!.turns} 轮加权 · 下方为最新一轮原值推导
+            </span>
+          </div>
+        ) : null}
       </div>
       {override ? (
         <div className="rc-override-band">

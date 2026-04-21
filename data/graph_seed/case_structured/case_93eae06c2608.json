@@ -63,17 +63,74 @@
     "risk_control:missing",
     "rubric:Problem Definition",
     "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
     "rubric:Market & Competition",
     "rubric:Innovation & Differentiation",
     "rubric:Presentation Quality",
-    "risk_rule:H11",
+    "risk_rule:H10",
     "risk_rule:H15",
     "risk_rule:H3",
     "risk_rule:H5",
-    "risk_rule:H6",
-    "risk_rule:H9"
+    "risk_rule:H8"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_93eae06c2608_e1",
+      "type": "user_evidence",
+      "quote": "华宸 AI 智评平台是面向高校毕业论文全生命周期的一站式质量管理解决方案",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_93eae06c2608_e2",
+      "type": "user_evidence",
+      "quote": "AI 工具滥用导致论文代写、数据伪造、抄袭等学术不端行为频发，严重威胁学术诚信",
+      "chunk_id": "C4",
+      "source_unit": "page_9"
+    },
+    {
+      "id": "case_93eae06c2608_e3",
+      "type": "business_model_evidence",
+      "quote": "项目市场谋略聚焦三层渗透：通过 SEO/SEM 优化和社交媒体矩阵展示产品迭代，实现线上精准营销、在学术研讨会、校园讲座中演示功能优势，进行线下场景推广、与“文才学堂”等平台深度绑定，嵌入教育生态链，进行生态合作",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_93eae06c2608_e4",
+      "type": "business_model_evidence",
+      "quote": "设计阶梯式定价模型，结合新基建降低算力边际成本至 0.8 元/万字，确保服务可及性",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_93eae06c2608_e5",
+      "type": "market_analysis_evidence",
+      "quote": "中国教育科技市场规模 2023 年达 25 亿人民币，年增速 47%，其中高校采购占比 58%",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_93eae06c2608_e6",
+      "type": "market_analysis_evidence",
+      "quote": "全球高校 AI 检测工具渗透率约 18%，但专业级解决方案覆盖率不足 5%。竞争格局：头部企业占据 72%市场份额",
+      "chunk_id": "C8",
+      "source_unit": "page_13"
+    },
+    {
+      "id": "case_93eae06c2608_e7",
+      "type": "risk_evidence",
+      "quote": "经济下行压力下，高职院校预算缩减可能影响采购决策",
+      "chunk_id": "C8",
+      "source_unit": "page_13"
+    },
+    {
+      "id": "case_93eae06c2608_e8",
+      "type": "risk_evidence",
+      "quote": "误判导致学生申诉纠纷，可能引发法律诉讼。检测结果被滥用为“学术监控工具”，引发公众舆论反弹",
+      "chunk_id": "C9",
+      "source_unit": "page_14"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -89,7 +146,7 @@
     },
     {
       "rubric_item": "Business Model Consistency",
-      "covered": false
+      "covered": true
     },
     {
       "rubric_item": "Market & Competition",
@@ -123,67 +180,66 @@
   "engine": "hypernetx",
   "generated_at": "2026-03-29T10:05:25Z",
   "risk_flags": [
-    "H11",
+    "H10",
     "H15",
     "H3",
     "H5",
-    "H6",
-    "H9"
+    "H8"
   ],
   "rubric_items_detail": [
     {
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "需求真实具体，有用户场景支撑，如GPT-4等大模型升级速度远超现有检测工具的更新周期，导致误报率高。"
+      "reason": "明确指出了AI工具滥用导致的学术不端问题，以及现有检测工具的迭代滞后和误报率高问题。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
       "score": 3.0,
-      "reason": "缺乏用户访谈、问卷等原始证据，仅描述了需求背景。"
+      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "技术路线明确，采用知识图谱+实体链接技术，动态特征库和垂直领域自适应，但未详细说明资源匹配情况。"
+      "reason": "提出了知识图谱+实体链接、动态特征库和垂直领域自适应等技术方案，但未详细说明资源匹配情况。"
     },
     {
       "item": "Business Model Consistency",
-      "covered": false,
-      "score": 4.0,
-      "reason": "未明确描述客户、价值主张、渠道、营收、成本等商业闭环。"
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出了面向高校毕业论文全生命周期的一站式质量管理解决方案，但未详细说明具体营收和成本结构。"
     },
     {
       "item": "Market & Competition",
       "covered": true,
       "score": 7.0,
-      "reason": "描述了AIGC引发学术诚信危机，全球教育界对AI检测的需求增长，但未详细分析竞品。"
+      "reason": "提供了中国教育科技市场规模和全球高校AI检测工具渗透率的数据，但未详细分析具体竞品。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
-      "score": 3.0,
-      "reason": "未提供单位经济模型或财务预测。"
+      "score": 4.0,
+      "reason": "提到了阶梯式定价模型和算力边际成本，但未提供详细的财务分析和单位经济数据。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "强调了创新点，如知识图谱驱动的实体链接、双层推理环路和多模态证据融合。"
+      "reason": "强调了知识图谱驱动的实体链接、双层推理环路和多模态证据融合等创新点。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
       "score": 5.0,
-      "reason": "团队成员较多，但未明确描述各自能力和里程碑。"
+      "reason": "列出了团队成员和指导教师，但未详细说明团队能力和具体里程碑。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "材料结构完整，描述清晰，但缺乏具体数据支撑。"
+      "reason": "材料结构完整，但部分内容缺乏详细数据支撑。"
     }
   ],
   "risk_rule_details": [
@@ -192,105 +248,105 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "目标用户与价值主张匹配，未发现错位。"
+      "reason": "目标用户与价值主张匹配，未发现明显错位。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及具体获客渠道，但未见难以触达目标用户的证据。"
+      "reason": "提出了SEO/SEM优化、社交媒体矩阵、学术研讨会和校园讲座等获客渠道，未发现明显不可达问题。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
-      "evidence": "AIGC引发学术诚信危机，全球教育界对AI检测的需求呈现爆发式增长",
-      "reason": "提到需求增长但未验证用户支付意愿。"
+      "evidence": "设计阶梯式定价模型，结合新基建降低算力边际成本至 0.8 元/万字，确保服务可及性",
+      "reason": "提到定价模型但未提供用户支付意愿验证。"
     },
     {
       "id": "H4",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "市场规模口径描述合理，未见混乱。"
+      "reason": "市场规模口径合理，未发现明显混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
       "severity": "high",
-      "evidence": "检测工具迭代滞后：GPT-4等大模型升级速度远超现有检测工具的更新周期 误报率高：过度敏感易误伤原创内容，宽松则导致漏检率大幅上升",
-      "reason": "缺乏用户访谈、问卷等需求验证证据。"
+      "evidence": "AI 工具滥用导致论文代写、数据伪造、抄袭等学术不端行为频发，严重威胁学术诚信",
+      "reason": "缺乏具体的用户访谈、问卷或其他需求验证证据。"
     },
     {
       "id": "H6",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "AIGC引发学术诚信危机，全球教育界对AI检测的需求呈现爆发式增长",
-      "reason": "声称需求增长但未详细分析竞品。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提供了全球高校AI检测工具渗透率和竞争格局的数据，未发现明显不可比问题。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "创新点明确，如知识图谱驱动的实体链接、双层推理环路和多模态证据融合。"
+      "reason": "创新点有具体技术方案支撑，未发现不可验证问题。"
     },
     {
       "id": "H8",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "",
-      "reason": "未提供财务数据，但未见单位经济不成立的描述。"
+      "triggered": true,
+      "severity": "high",
+      "evidence": "设计阶梯式定价模型，结合新基建降低算力边际成本至 0.8 元/万字，确保服务可及性",
+      "reason": "未提供详细的财务数据，无法判断单位经济是否成立。"
     },
     {
       "id": "H9",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "AIGC引发学术诚信危机，全球教育界对AI检测的需求呈现爆发式增长",
-      "reason": "出现自上而下估算，如需求呈现爆发式增长。"
-    },
-    {
-      "id": "H10",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及具体时间表或里程碑，但未见明显不现实的描述。"
+      "reason": "未发现明显的自上而下估算问题。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目市场谋略聚焦三层渗透：通过 SEO/SEM 优化和社交媒体矩阵展示产品迭代，实现线上精准营销、在学术研讨会、校园讲座中演示功能优势，进行线下场景推广、与“文才学堂”等平台深度绑定，嵌入教育生态链，进行生态合作",
+      "reason": "未提供具体的时间表和里程碑，难以判断可交付性。"
     },
     {
       "id": "H11",
-      "triggered": true,
-      "severity": "high",
-      "evidence": "需实时跟进国家关于 AIGC 监管的最新法律法规（如《生成式人工智能服务管理暂行办法》）",
-      "reason": "涉及高风险领域但未详细说明合规措施。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，未发现合规/伦理缺口。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "技术路线描述合理，未见资源不匹配的证据。"
+      "reason": "技术方案与现有资源匹配，未发现明显不匹配问题。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及具体实验设计，但未见不合格的描述。"
+      "reason": "未提到实验/测试，因此不存在实验设计不合格问题。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "材料结构完整，未见叙事断裂。"
+      "reason": "材料结构完整，未发现叙事断裂问题。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
-      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、财务逻辑等。",
-      "reason": "多个关键 Rubric 维度缺乏支撑证据。"
+      "evidence": "中国教育科技市场规模 2023 年达 25 亿人民币，年增速 47%，其中高校采购占比 58%",
+      "reason": "多个关键Rubric维度（如用户证据强度、财务逻辑、团队与执行）缺乏支撑证据。"
     }
   ],
   "分类": [

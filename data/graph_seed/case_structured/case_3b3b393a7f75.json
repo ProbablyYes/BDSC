@@ -1,0 +1,331 @@
+{
+  "case_id": "case_3b3b393a7f75",
+  "document_id": "doc_d0e0fc5bf203",
+  "source": {
+    "file_path": "工业制造/造纸化学品生产_第四届“挑战杯”创业计划竞赛.doc",
+    "file_name": "造纸化学品生产_第四届“挑战杯”创业计划竞赛.doc",
+    "category": "工业制造",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1627,
+    "full_text_chars": 56725,
+    "core_text_chars": 720,
+    "appendix_start_index": 100,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 1628,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1628,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "九天化工",
+    "target_users": [
+      "人为本，以科技为源泉，以用户为导向，以市场为准则，必能在不远的将来有所作为，腾于九天。",
+      "而我国造纸工业也将通过不断的深化革新，励精图治，必将大有作为，重铸造纸大国的辉煌！"
+    ],
+    "pain_points": [
+      "造纸行业存在市场需求增长与人均消费量低的矛盾。",
+      "造纸行业存在社会对纸品消费层次提高与企业技术水平滞后的矛盾。",
+      "造纸行业存在可持续发展需求与生产污染问题难以解决的矛盾。",
+      "造纸行业存在企业发展要求与实际利润空间逐渐萎缩的矛盾。"
+    ],
+    "solution": [
+      "立足于高校科研背景，专注于造纸化学品研发，致力于实现造纸化学品研制的高档化、产业化和规模化。"
+    ],
+    "innovation_points": [
+      "致力于实现造纸化学品研制的高档化、产业化和规模化。"
+    ],
+    "business_model": [
+      "立足于高校科研背景，专注于造纸化学品研发，谋求顾客、社会、员工和企业的最大满意度。"
+    ],
+    "market_analysis": [
+      "造纸行业存在庞大且持续增长的市场需求。"
+    ],
+    "execution_plan": [
+      "企业通过稳步发展，坚持以人为本，以科技为源泉，以用户为导向，以市场为准则。"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:工业制造",
+    "education_level:unknown",
+    "doc_type:doc",
+    "risk_control:missing",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Market & Competition",
+    "risk_rule:H15",
+    "risk_rule:H5",
+    "risk_rule:H7"
+  ],
+  "evidence": [
+    {
+      "id": "case_3b3b393a7f75_e1",
+      "type": "user_evidence",
+      "quote": "造纸行业存在的诸多悖论：庞大而且持续增长的市场需求与微小的人均消费；社会对于纸品消费层次的不断提高与企业技术水平的滞后；人们对于可持续发展的迫切需要与生产污染问题的难以解决；企业的生存和发展要求与实际利润空间的逐渐萎缩。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_3b3b393a7f75_e2",
+      "type": "business_model_evidence",
+      "quote": "我们创立的“九天化工”将立足于高校科研背景；着眼于造纸行业现状；专注于造纸化学品研发；谋求顾客，社会，员工和企业的最大满意度。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_3b3b393a7f75_e3",
+      "type": "innovation_points_evidence",
+      "quote": "实现造纸化学品研制的高档化、产业化和规模化必然能为造纸行业的发展带来更多的契机和动力。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_3b3b393a7f75_e4",
+      "type": "market_analysis_evidence",
+      "quote": "庞大而且持续增长的市场需求。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_3b3b393a7f75_e5",
+      "type": "execution_plan_evidence",
+      "quote": "我们的企业通过稳步发展，坚持以人为本，以科技为源泉，以用户为导向，以市场为准则。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": false
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": false
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": false
+    }
+  ],
+  "summary": "前 言 我们的困惑 造纸术，作为我国四大发明之一，曾经代表了一个民族的强盛，见证了一个文明 的辉煌，也述尽了无数国人对于“中华上国”的自豪。随着历史的车轮驶进现代，早 已盛况不在，造纸工业已逐渐成为技术含量低下的代表，生态环境意识淡薄的象征 ，低层次无序竞争市场的缩影，媒体舆论屡屡批评的对象。今昔对比，不得不令人 深思。 现状与对策 我们不妨来看看造纸行业存在的诸多悖论：庞大而且持续增长的市场需求与微小 的人均消费；社会对于纸品消费层次的不断提高与企业技术水平的滞后；人们对于 可持续发展的迫切需要与生产污染问题的难以解决；企业的生存和发展要求与实际 利润空间的逐渐萎缩，每年巨额的外汇进口和国家的外汇安全等等。种种问题集于 一身，造纸业面临着哈姆雷特式的抉择：生存还是死亡？综合诸家之言我们认为造 纸业的复兴需要上中下三个因素：上需国家政策的引导和软环境的建设，中靠造纸 企业自身的结构转型和创新发展，下有配套行业的协作支持必能使造纸业重现辉煌 。其中作为造纸配套行业的造纸化学品行业更应首当其冲，成为振兴造纸工业的支 柱力量之一。 我们认为：实现造纸化学品研制的高档化、产业化和规模化必然能为",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:12:39Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
+  ],
+  "risk_flags": [
+    "H15",
+    "H5",
+    "H7"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本详细描述了造纸行业存在的多个矛盾和问题，包括市场需求增长与人均消费量低、社会对纸品消费层次提高与企业技术水平滞后、可持续发展需求与生产污染问题难以解决、企业发展要求与实际利润空间逐渐萎缩等。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中没有提供具体的用户访谈、问卷或行为数据等原始证据来支持需求的真实性。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": false,
+      "score": 4.0,
+      "reason": "文本提到专注于造纸化学品研发，但没有具体描述技术路线和资源匹配情况，也未说明是否存在过度设计。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中提到谋求顾客、社会、员工和企业的最大满意度，但没有具体说明客户、价值主张、渠道、营收、成本等形成闭环的商业模式。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了造纸行业庞大的市场需求和存在的问题，但没有具体提到市场规模的口径（TAM/SAM/SOM）和竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中没有提到具体的财务逻辑，如单位经济、LTV、CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": false,
+      "score": 5.0,
+      "reason": "文本提到实现造纸化学品研制的高档化、产业化和规模化，但没有具体说明创新点和差异化优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中提到企业通过稳步发展，坚持以人为本，以科技为源泉，但没有具体描述团队能力和执行计划。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": false,
+      "score": 4.0,
+      "reason": "文本结构较为完整，但缺乏具体数据和说服力，整体展示质量有待提高。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到谋求顾客、社会、员工和企业的最大满意度，但没有具体说明目标用户与价值主张的匹配情况。",
+      "reason": "文本中没有明确提到目标用户与价值主张不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有具体提到获客渠道。",
+      "reason": "文本中没有提到获客渠道的问题。"
+    },
+    {
+      "id": "H3",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到定价或收费。",
+      "reason": "文本中没有提到定价或收费的问题。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到造纸行业存在庞大的市场需求，但没有具体说明市场规模的口径。",
+      "reason": "文本中没有提到市场规模口径混乱的问题。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "文本中提到造纸行业存在的多个矛盾和问题，但没有提供具体的用户访谈、问卷或其他需求验证证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到竞品分析。",
+      "reason": "文本中没有提到竞品分析的问题。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到实现造纸化学品研制的高档化、产业化和规模化，但没有具体说明创新点和差异化优势。",
+      "reason": "强调创新但缺少可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到具体的财务逻辑。",
+      "reason": "文本中没有提到单位经济不成立的问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到具体的增长逻辑。",
+      "reason": "文本中没有提到增长逻辑跳跃的问题。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到具体的时间表或里程碑。",
+      "reason": "文本中没有提到里程碑不可交付的问题。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到涉及高风险领域的合规或伦理问题。",
+      "reason": "文本中没有提到合规或伦理缺口的问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到立足于高校科研背景，专注于造纸化学品研发，但没有具体描述技术路线和资源匹配情况。",
+      "reason": "文本中没有提到技术路线与资源不匹配的问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中没有提到实验或测试。",
+      "reason": "文本中没有提到实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本结构较为完整，但缺乏具体数据和说服力。",
+      "reason": "文本中没有提到路演叙事断裂的问题。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、方案可行性、商业模式一致性、财务逻辑、创新与差异化、团队与执行等。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据。"
+    }
+  ]
+}

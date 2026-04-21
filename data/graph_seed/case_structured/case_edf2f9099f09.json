@@ -1,0 +1,340 @@
+{
+  "case_id": "case_edf2f9099f09",
+  "document_id": "doc_da9f1f8874a0",
+  "source": {
+    "file_path": "环境保护/智能节能基站专用空调创业项目_挑战杯获奖作品.doc",
+    "file_name": "智能节能基站专用空调创业项目_挑战杯获奖作品.doc",
+    "category": "环境保护",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1598,
+    "full_text_chars": 55538,
+    "core_text_chars": 785,
+    "appendix_start_index": 83,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 1599,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1599,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "领航智能节能基站专用空调",
+    "target_users": [
+      "中国移动、中国联通、中国电信等通信运营商"
+    ],
+    "pain_points": [
+      "目前基站使用的家用空调改良型分体式空调存在显热比低、风量小、运行控制能力差等缺陷",
+      "通讯基站在空调上耗电的比例平均接近50%，是节能减排的主要瓶颈"
+    ],
+    "solution": [
+      "提供基于专利技术“双进风智能节能柜式空调”的基站专用空调产品，由智能控制器、传感器、进风装置、出风装置、防护罩等组件构成"
+    ],
+    "innovation_points": [
+      "采用“双进风智能节能柜式空调”专利技术，该技术在国内具有唯一性，已取得国家专利"
+    ],
+    "business_model": [],
+    "market_analysis": [
+      "市场基础为三大通信运营商拥有的超过104.9万个2G网络通信基站",
+      "中国移动已合作开发节能空调但节能效果仅25%，中国联通和中国电信尚未进行相关研究，存在市场机会"
+    ],
+    "execution_plan": [],
+    "risk_control": [
+      "【通用风险控制】10．风险对策 92 目前我国三大通信运营商拥有2G网络的通信基站共计达104.9万个，由于基站内的设备在运行时会产生巨大的热量，为了使基站的温度保持在机房设施"
+    ]
+  },
+  "tags": [
+    "category:环境保护",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "risk_rule:H10",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_edf2f9099f09_e1",
+      "type": "user_evidence",
+      "quote": "目前我国三大通信运营商拥有2G网络的通信基站共计达104.9万个",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_edf2f9099f09_e2",
+      "type": "user_evidence",
+      "quote": "中国移动率先采取了多种措施对基站空调系统进行改造，并成功合作开发基站用节能型空调，但根据其发布的数据报告，目前只可节约能耗25%，而另外两家运营商——中国联通和中国电信则没有进行相关方面的研究。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_edf2f9099f09_e3",
+      "type": "business_model_evidence",
+      "quote": "通讯基站在空调上耗电的比例平均接近50％。“节能减排、低碳环保”已经成为全球通讯基站的共识。空调作为通讯基站的辅助系统是节能减排的突破口。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_edf2f9099f09_e4",
+      "type": "business_model_evidence",
+      "quote": "领航新科技有限责任公司，依托专利技术《双进风智能节能柜式空调》，利用先进技术，使得通信基站空调节能可达50%-70%",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_edf2f9099f09_e5",
+      "type": "innovation_points_evidence",
+      "quote": "本技术在国内具有唯一性，已取得国家专利（相关专利信息：专利名称：双进风智能节能柜式空调；专利申请号：200620097099.2）。",
+      "chunk_id": "C2",
+      "source_unit": "段落77"
+    },
+    {
+      "id": "case_edf2f9099f09_e6",
+      "type": "solution_evidence",
+      "quote": "领航智能节能基站专用空调是由智能控制器、传感器、进风装置、出风装置、防护罩",
+      "chunk_id": "C3",
+      "source_unit": "段落83"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": false
+    }
+  ],
+  "summary": "目 录 湖北工业大学工程技术学院 I 领航新科技创业项目书 I 目 录 II 1 执行总结 5 2 产品 9 3 市场分析 14 4 营销策略 23 5 公司战略 36 6 生产物流管理 48 7 组织和人力资源管理 64 8．投资分析 78 9．财务分析 81 10．风险对策 92 目前我国三大通信运营商拥有2G网络的通信基站共计达104.9万个，由于基站内的设 备在运行时会产生巨大的热量，为了使基站的温度保持在机房设施适合的温度条件下， 必须使用空调进行降温，而目前各基站使用的均是家用空调改良而来的舒适型分体式空 调，该类空调的设计思路是以人体舒适度为核心，但用于基站时，暴露出显热比低、风 量小、运行控制能力差等缺陷。根据最新《中国科技财富通讯》的调查统计，通讯基站在 空调上耗电的比例平均接近50％。“节能减排、低碳环保”已经成为全球通讯基站的共识 。空调作为通讯基站的辅助系统是节能减排的突破口。 采用节能空调，降低基站空调能耗是现今通信基站机房环境节能的研究热点，虽然为 降低基站空调的能耗，中国移动率先采取了多种措施对基站空调系统进行改造，并成功 合作开发基站用节能型空调，但根据",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:15:27Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H14",
+    "H15",
+    "H3",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了基站空调存在的显热比低、风量小、运行控制能力差等缺陷，以及空调耗电比例高，是节能减排的主要瓶颈。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到通讯基站在空调上耗电的比例平均接近50%，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目基于专利技术“双进风智能节能柜式空调”提供解决方案，技术在国内具有唯一性，已取得国家专利。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细描述客户、价值主张、渠道、营收、成本等形成闭环的具体内容。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了市场基础数据，指出三大通信运营商拥有超过104.9万个2G网络通信基站，并分析了中国移动的节能空调效果，指出了市场机会。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供单位经济分析，也未说明LTV和CAC等财务指标。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目强调了其技术在国内的唯一性，并已取得国家专利，具有明显的竞争优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未详细描述团队能力和执行计划，里程碑和可交付物不明确。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目材料结构较为完整，但部分关键信息缺乏详细说明，数据说服力不足。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了目标用户（通信运营商）和价值主张（节能空调），两者匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体获客渠道，但目标用户明确，且市场基础较大。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "项目未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了明确的市场基础数据，口径合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目客观分析了中国移动的节能空调效果，并指出了市场机会。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目强调了技术的唯一性和专利，具有可验证性。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "根据描述可以判断 LTV <= CAC 或长期亏损。",
+      "reason": "项目未提供单位经济分析，无法判断LTV和CAC等财务指标。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
+      "reason": "项目未详细描述团队能力和执行计划，里程碑和可交付物不明确。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目基于专利技术，技术路线与资源匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及实验/测试，但技术已取得专利。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "叙事结构残缺或跳跃，无法形成完整故事线。",
+      "reason": "项目材料结构较为完整，但部分关键信息缺乏详细说明，叙事不连贯。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "项目在用户证据强度、商业模式一致性、财务逻辑、团队与执行、材料展示质量等维度缺乏充分证据。"
+    }
+  ]
+}

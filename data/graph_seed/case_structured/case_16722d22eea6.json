@@ -1,0 +1,356 @@
+{
+  "case_id": "case_16722d22eea6",
+  "document_id": "doc_a2298b8cae01",
+  "source": {
+    "file_path": "农业发展/自动化孵化鸡蛋—捷惠创业计划书.doc",
+    "file_name": "自动化孵化鸡蛋—捷惠创业计划书.doc",
+    "category": "农业发展",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1565,
+    "full_text_chars": 46914,
+    "core_text_chars": 37486,
+    "appendix_start_index": 1198,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 1566,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1566,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "全自动鸡胚疫苗注射机",
+    "target_users": [
+      "大型养鸡场和孵化厂，如圣农集团、吉林德大等拥有自养种鸡场和孵化厂的龙头企业",
+      "为散户、个体户、专业户提供雏鸡的中小型孵化厂和种鸡厂",
+      "年产雏鸡25万羽以上的孵化场"
+    ],
+    "pain_points": [
+      "国内孵化厂主要采用人工注射疫苗，工作量大、条件恶劣、效率低下，需要耗费大量劳动力和工时",
+      "禽流感等疫病多发，强制免疫政策要求高，传统人工免疫存在滞后性，雏鸡在产生免疫前易受交叉感染",
+      "国外同类自动注射设备价格昂贵，且不适应国内孵化场的生产条件，导致国内该产品市场基本空白"
+    ],
+    "solution": [
+      "研发生产全自动鸡胚疫苗注射机，对孵化17-19天的种蛋进行自动化疫苗注射，使雏鸡破壳即具备免疫力",
+      "设备采用非接触式红外线温度传感器自动检测剔除死蛋和无受精蛋，并集成高压消毒、免疫注射、封口处理及气动移蛋系统",
+      "提供36枚型注射机，注射效率达3万枚/小时，剂量精确一致，并可接受客户定制尺寸"
+    ],
+    "innovation_points": [
+      "针对国内孵化场需求设计，克服了国外进口设备不能适应我国孵化场要求的缺陷，采用价格便宜的钢结构以降低成本",
+      "运用鸡胚免疫接种法，结合红外检测、气动控制等技术实现全自动注射，相比传统方法免疫效果提高约15%",
+      "将高成本的检测环节与主机分离配套销售，以降低成本"
+    ],
+    "business_model": [
+      "公司初期主要采用人员营销的模式，在较远地区建立代售点并设立代理商",
+      "预计投资收回期为18个月，内含报酬率64.45%，第二年盈利129.35万元"
+    ],
+    "market_analysis": [
+      "我国家禽业年需雏禽约140亿羽且持续增长，孵化免疫工作量繁重，初步预测全自动注射机市场空间超过3亿元人民币",
+      "市场基本空白，国外产品因价格高且不适应国内条件而滞销，国内目前主要依赖人工注射",
+      "目标市场可细分为年产500万羽以上的大型养殖孵化场、200-500万羽的中型场以及200万羽以下的小型场，其中大中型场是导入期重点开拓对象"
+    ],
+    "execution_plan": [
+      "公司选址在河北廊坊经济技术开发区，初期采取租赁厂房形式，实行自主生产，以装配为主购进零件",
+      "导入期以河北及周边山东、河南等养鸡密集区为重点，以大型规模养鸡场和养殖孵化场为第一客户",
+      "计划4年内实施品牌战略到同心多元化战略，后期推出鸭鹅胚免疫注射机等配套设备，并在成长期向全国扩张设立销售点"
+    ],
+    "risk_control": [
+      "【通用风险控制】针对市场接受度风险，计划通过免费试用和经营租赁模式降低客户初始投入，并建设试点企业以产生良好的市场连带效应"
+    ]
+  },
+  "tags": [
+    "category:农业发展",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Financial Logic",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H13",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_16722d22eea6_e1",
+      "type": "user_evidence",
+      "quote": "大型孵化企业和自主供应鸡苗的养鸡场——河欣种禽作为我们的第一客户。",
+      "chunk_id": "C2",
+      "source_unit": "段落23"
+    },
+    {
+      "id": "case_16722d22eea6_e2",
+      "type": "user_evidence",
+      "quote": "为散户、个体户、专业户提供雏鸡的孵化厂、种鸡厂无疑是我们产品巨大的吸纳市场。",
+      "chunk_id": "C7",
+      "source_unit": "段落139"
+    },
+    {
+      "id": "case_16722d22eea6_e3",
+      "type": "user_evidence",
+      "quote": "根据成本计算，年孵化雏鸡在25万以上的孵化场都可以是我们的客户,是我们开发的市场。",
+      "chunk_id": "C10",
+      "source_unit": "段落213"
+    },
+    {
+      "id": "case_16722d22eea6_e4",
+      "type": "business_model_evidence",
+      "quote": "产品初期以免费试用的方式打开市场，对资金流小的孵化场实行经营租赁的独特模式，全面开发客户。",
+      "chunk_id": "C3",
+      "source_unit": "段落44"
+    },
+    {
+      "id": "case_16722d22eea6_e5",
+      "type": "business_model_evidence",
+      "quote": "公司初期主要采用人员营销销的模式，在离公司较远的地区建立代售点，并设立代理商。",
+      "chunk_id": "C3",
+      "source_unit": "段落44"
+    },
+    {
+      "id": "case_16722d22eea6_e6",
+      "type": "business_model_evidence",
+      "quote": "预计投资收回期为18个月，内含报酬率64.45%。公司起步阶段亏损期1年，第二年盈利129.35万元。",
+      "chunk_id": "C4",
+      "source_unit": "段落64"
+    },
+    {
+      "id": "case_16722d22eea6_e7",
+      "type": "risk_evidence",
+      "quote": "产品初期以免费试用的方式打开市场，对资金流小的孵化场实行经营租赁的独特模式，全面开发客户。宣传以专业促销为主，进行产品展示和产品试用推广为营销重点，把第一客户和河北大中孵化厂建设成为试点企业。以便产生良好的连带效应。",
+      "chunk_id": "C3",
+      "source_unit": "段落44"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": true
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "Chapter1计划摘要 捷惠自动设备有限责任公司致力于自动化设备的研发，秉着“为客户服务，替客户思 考，行客户便利”的研发理念，不断研发出新的适合客户需求的创新产品。目前公司致力 于研发、生产全自动鸡胚疫苗注射机，经过多次改装与更新，已经研制出高效、无菌、 自动的鸡胚疫苗注射设备，现阶段的任务是宣传，推广，销售以及不断升级。 捷惠的宗旨是“信赖实用，客户第一，效率优先，提高品质，降低成本”。公司现阶段的 目标是创建中国鸡胚免疫设备第一品牌，以全自动鸡胚疫苗注射机打开销售市场，为中 国家禽养殖免疫预防普及化，规模化作出应有的贡献。 公司实行品牌战略到多元化战略的战略方针，初期通过鸡胚疫苗注射机打开市场为企业 创造利润,创建企业品牌，利用4年的时间通过产品升级来优化品牌，打造品牌，形成品 牌优势后，以品牌打造本产品有关的其它产品，4年后实施同心多元化发展的战略。 [pic] 公司目前主要产品是鸡胚疫苗注射机，拥有自主知识产权。本产品由机电工程学院研究 室赵明岩老师主持研发，由生命科学院提供生物方面支持。经过两次重大改进历时1年半 时间。它对孵化17—19天的鸡胚进行免疫注射,使孵化出的雏",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:10:29Z",
+  "分类": [
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H13",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "需求真实具体，有用户场景支撑，如大型养鸡场和孵化厂的需求。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "技术路线与资源匹配，但未详细说明具体的技术实现细节。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "客户、价值主张、渠道、营收、成本形成闭环，但未详细说明成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "TAM/SAM/SOM 口径合理，竞品分析客观，指出国外产品价格高且不适应国内条件。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": true,
+      "score": 7.0,
+      "reason": "单位经济成立，预计投资收回期为18个月，内含报酬率64.45%，但未提供详细的财务模型。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "有可验证的竞争优势，如非接触式红外线温度传感器、剂量精确一致等。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 6.0,
+      "reason": "团队能力匹配目标，有明确的里程碑，但未详细说明团队成员的具体背景。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "BP/路演结构完整，数据有说服力，但部分信息略显简略。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "主要获客渠道包括人员营销、代售点和代理商，未发现难以触达目标用户的问题。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "产品初期以免费试用的方式打开市场，对资金流小的孵化场实行经营租赁的独特模式，全面开发客户。",
+      "reason": "提到定价/收费模式，但未提供用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "TAM/SAM/SOM 口径合理，未发现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "国内孵化厂主要采用人工注射疫苗，工作量大、条件恶劣、效率低下，需要耗费大量劳动力和工时。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "竞品分析客观，指出国外产品价格高且不适应国内条件。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点可验证，如非接触式红外线温度传感器、剂量精确一致等。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "单位经济成立，预计投资收回期为18个月，内含报酬率64.45%。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现增长逻辑跳跃，市场细分明确。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "时间表/里程碑现实，未发现不可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，未发现合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配，未发现不匹配问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "经过多次改装与更新，已经研制出高效、无菌、自动的鸡胚疫苗注射设备。",
+      "reason": "提到实验/测试但缺少样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "叙事结构完整，未发现断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "各关键 Rubric 维度均有支撑证据。"
+    }
+  ]
+}

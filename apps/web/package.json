@@ -14,15 +14,18 @@
     "@chatscope/chat-ui-kit-styles": "^1.4.0",
     "mermaid": "^11.13.0",
     "next": "^14.2.15",
+    "papaparse": "^5.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-force-graph-2d": "^1.29.1",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.12.0",
     "@types/node": "^22.15.0",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "typescript": "^5.8.3"

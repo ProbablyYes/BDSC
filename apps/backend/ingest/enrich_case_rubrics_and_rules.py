@@ -47,6 +47,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         )
     )
     parser.add_argument(
+        "--case-json",
+        type=str,
+        default=None,
+        help="指定单个 case_*.json 文件，仅处理该文件（优先级最高）",
+    )
+    parser.add_argument(
         "--min-quality",
         choices=["A", "B"],
         default="B",
@@ -330,6 +336,40 @@ def enrich_cases(argv: list[str] | None = None) -> None:
         print("LLM disabled: missing llm_api_key/llm_base_url; aborting enrichment.")
         return
 
+    # 新增：如指定 --case-json，仅处理该文件
+    if args.case_json:
+        case_path = Path(args.case_json)
+        if not case_path.exists():
+            print(f"指定的 case_json 文件不存在: {case_path}")
+            return
+        try:
+            case_data = json.loads(case_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            print(f"读取 case_json 失败: {exc}")
+            return
+        risk_flags, rubric_coverage, rubric_items_full, risk_rules_full = _run_case_diagnosis(
+            case_data,
+            llm=llm,
+            model_name=args.llm_model,
+        )
+        if not risk_flags and not rubric_coverage:
+            print("skip (no diagnostic signal)")
+            return
+        case_data["risk_flags"] = risk_flags
+        case_data["rubric_coverage"] = rubric_coverage
+        case_data["rubric_items_detail"] = rubric_items_full
+        case_data["risk_rule_details"] = risk_rules_full
+        case_data["tags"] = _refresh_tags(
+            case_data.get("tags", []), rubric_coverage=rubric_coverage, risk_flags=risk_flags
+        )
+        case_path.write_text(
+            json.dumps(case_data, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        print(f"updated {case_path.name} | risks={len(risk_flags)}, rubrics={len(rubric_coverage)}")
+        print("rubric/risk enrichment done.")
+        return
+
+    # 默认批量模式
     rows = read_metadata(metadata_path)
     included: List[Dict[str, Any]] = []
     for row in rows:

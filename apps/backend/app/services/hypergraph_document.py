@@ -16,7 +16,7 @@ from typing import Any
 
 import hypernetx as hnx
 from app.services.document_parser import ParsedDocument, TextSegment, parse_document
-
+import textract
 
 @dataclass
 class DocumentNode:
@@ -72,9 +72,22 @@ class HypergraphDocument:
 
     @classmethod
     def from_file(cls, file_path: Path, max_pdf_pages: int = 80) -> HypergraphDocument:
-        """Parse file and convert to HypergraphDocument."""
-        parsed = parse_document(file_path, max_pdf_pages=max_pdf_pages)
-        return cls.from_parsed_document(parsed)
+        """Parse file and convert to HypergraphDocument. Support .doc via textract if needed."""
+        import re
+        suffix = file_path.suffix.lower()
+        if suffix == ".doc":
+            # textract returns bytes
+            text = textract.process(str(file_path)).decode("utf-8", errors="ignore")
+            # Minimal ParsedDocument mockup for .doc
+            from app.services.document_parser import ParsedDocument, TextSegment
+            # Split by paragraphs: support \r, \n, \r\n
+            paras = [p.strip() for p in re.split(r"\r?\n|\r", text) if p.strip()]
+            segments = [TextSegment(index=i, source_unit=f"段落{i+1}", text=p) for i, p in enumerate(paras)]
+            parsed = ParsedDocument(file_path=file_path, doc_type="doc", segments=segments)
+            return cls.from_parsed_document(parsed)
+        else:
+            parsed = parse_document(file_path, max_pdf_pages=max_pdf_pages)
+            return cls.from_parsed_document(parsed)
 
     def _build_from_segments(self, segments: list[TextSegment]) -> None:
         """Build hypergraph structure from document segments."""

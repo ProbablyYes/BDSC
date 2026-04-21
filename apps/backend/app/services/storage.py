@@ -426,7 +426,10 @@ class UserStorage:
         if not email:
             raise ValueError("邮箱不能为空")
         if any(str(user.get("email", "")).strip().lower() == email for user in users):
-            raise ValueError("该邮箱已注册")
+            raise ValueError("该账号名已存在")
+        display_name = str(payload.get("display_name", "")).strip()
+        if display_name and any(str(user.get("display_name", "")).strip() == display_name for user in users):
+            raise ValueError("用户名已存在")
 
         salt, password_hash = self._hash_password(str(payload.get("password", "")))
         now = _now_iso()
@@ -629,7 +632,10 @@ class UserStorage:
         if not email:
             raise ValueError("邮箱不能为空")
         if any(str(user.get("email", "")).strip().lower() == email for user in users):
-            raise ValueError("该邮箱已注册")
+            raise ValueError("该账号名已存在")
+        display_name = str(payload.get("display_name", "")).strip()
+        if display_name and any(str(user.get("display_name", "")).strip() == display_name for user in users):
+            raise ValueError("用户名已存在")
         raw_password = str(payload.get("password") or "").strip()
         if not raw_password:
             alphabet = string.ascii_letters + string.digits

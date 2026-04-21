@@ -42,11 +42,34 @@ export default function RegisterPage() {
         body: JSON.stringify({ role, display_name: displayName.trim(), email: email.trim(), password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.detail ?? "注册失败");
+      if (!res.ok) {
+        let duplicate = false;
+        if (typeof data?.detail === "string") {
+          if (data.detail.includes("该账号名已存在")) {
+            setError("该账号名已存在");
+            duplicate = true;
+          } else if (data.detail.includes("用户名已存在")) {
+            setError("用户名已存在");
+            duplicate = true;
+          } else {
+            setError(data?.detail ?? "注册失败");
+          }
+        } else {
+          setError("注册失败");
+        }
+        setLoading(false);
+        if (duplicate) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
+        }
+        return;
+      }
       localStorage.setItem("va_user", JSON.stringify(data.user));
       router.push(role === "teacher" ? "/teacher" : role === "admin" ? "/admin" : "/student");
     } catch (err: any) {
       setError(err?.message ?? "注册失败");
+      setLoading(false);
     }
     setLoading(false);
   }

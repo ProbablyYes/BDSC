@@ -76,7 +76,29 @@
     "risk_rule:H3",
     "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_cff87cf39446_e1",
+      "type": "user_evidence",
+      "quote": "工业园区水质管理面临“前端检测难（成分复杂、溯源困难、数据滞后）、后端治理贵（技术僵化、成本失控、资源回用率低）”的双重困境。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_cff87cf39446_e2",
+      "type": "user_evidence",
+      "quote": "传统检测技术依赖大型仪器，存在成本高、周期长、精度不足等问题；治理技术则受限于效率低、能耗高，难以满足“十四五”规划中工业废水循环利用的要求。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_cff87cf39446_e3",
+      "type": "business_model_evidence",
+      "quote": "本项目创新性提出“精准感知-靶向治理-资源回用”全链条解决方案，核心技术包括三大模块：1、微流控纸芯片技术（μPAD）：国内首创第七代纸芯片技术，通过激光雕刻、自动化滴液等工艺迭代，实现日产2000片、单片成本仅0.5元。依托毛细驱动原理与抗环境干扰设备（暗场+稳恒光源+工业相机），1分钟内可同步检测16种离子（如Cu2+、Ni2+、Cr6+等），检测极限达ppm量级，精度0.5μM，较传统方法成本降低80%。支持现场快速溯源，适配复杂工业废水场景。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -135,8 +157,8 @@
     {
       "item": "Problem Definition",
       "covered": true,
-      "score": 8.0,
-      "reason": "详细描述了检测不精准、治理依赖人工、协同效率低等痛点，并提供了具体用户场景。"
+      "score": 9.0,
+      "reason": "详细描述了传统水质检测与治理的痛点，包括检测不精准、治理依赖人工、协同效率低等，有明确的用户场景支撑。"
     },
     {
       "item": "User Evidence Strength",
@@ -147,44 +169,44 @@
     {
       "item": "Solution Feasibility",
       "covered": true,
-      "score": 7.0,
-      "reason": "技术路线包括纸芯片开发、深度学习网络和协同控制算法，与项目目标匹配。"
+      "score": 8.0,
+      "reason": "提出了AI驱动的检测系统、智能决策调控和协同系统架构，技术路线清晰，资源匹配度较高。"
     },
     {
       "item": "Business Model Consistency",
       "covered": false,
       "score": 4.0,
-      "reason": "未详细描述客户、价值主张、渠道、营收、成本等形成闭环的具体内容。"
+      "reason": "未详细描述客户、价值主张、渠道、营收、成本等商业模型闭环。"
     },
     {
       "item": "Market & Competition",
       "covered": true,
       "score": 7.0,
-      "reason": "描述了市场需求和竞争格局，指出市场上缺乏集成检测与智能治理的综合解决方案。"
+      "reason": "描述了市场需求增长和竞争格局，指出市场上缺乏集成检测与智能治理的综合解决方案。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
       "score": 3.0,
-      "reason": "未提供单位经济模型或财务预测的具体数据。"
+      "reason": "未提供单位经济模型或财务预测，无法判断LTV与CAC等关键财务指标。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
-      "score": 8.0,
-      "reason": "强调了AI驱动的检测系统、智能决策调控和协同系统架构的创新点。"
+      "score": 9.0,
+      "reason": "强调了微流控纸芯片技术、深度学习网络和协同控制算法的创新点，具有明显的竞争优势。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
       "score": 4.0,
-      "reason": "未详细描述团队背景和执行计划，里程碑较为模糊。"
+      "reason": "未提供团队背景、能力匹配度及具体里程碑计划。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
-      "score": 7.0,
-      "reason": "PPT展示结构完整，但部分内容较为简略。"
+      "score": 8.0,
+      "reason": "PPT展示结构完整，技术数据有说服力。"
     }
   ],
   "risk_rule_details": [
@@ -193,14 +215,14 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "目标用户与价值主张匹配，未发现错位。"
+      "reason": "目标用户与价值主张匹配度较高，未发现明显错位。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及具体获客渠道，但未表明难以触达目标用户。"
+      "reason": "未提及具体获客渠道，但未见难以触达目标用户的证据。"
     },
     {
       "id": "H3",
@@ -214,84 +236,84 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "市场规模口径描述合理，未发现混乱。"
+      "reason": "市场规模口径描述较为合理，未见明显混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
       "severity": "high",
-      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
-      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
+      "evidence": "未提供用户访谈、问卷或其他需求验证证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
     },
     {
       "id": "H6",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "竞品分析客观，指出市场上缺乏集成检测与智能治理的综合解决方案。"
+      "reason": "竞品分析较为客观，未见明显失真。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "创新点有技术支撑，未发现不可验证的情况。"
+      "reason": "创新点有具体技术支撑，可验证性较高。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提供财务数据，但未发现单位经济不成立的描述。"
+      "reason": "未提供财务数据，但未见单位经济不成立的直接证据。"
     },
     {
       "id": "H9",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未发现自上而下估算的增长逻辑。"
+      "reason": "未见自上而下估算的增长逻辑。"
     },
     {
       "id": "H10",
       "triggered": true,
       "severity": "medium",
-      "evidence": "里程碑较为模糊，未提供具体可交付物。",
-      "reason": "里程碑描述较为模糊，缺乏具体可交付物。"
+      "evidence": "未提供具体里程碑计划。",
+      "reason": "时间表/里程碑计划不明确，缺少可交付物。"
     },
     {
       "id": "H11",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未涉及高风险领域，或未提及合规/伦理缺口。"
+      "reason": "未涉及高风险领域，未见合规/伦理缺口。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "技术路线与项目现状匹配，未发现资源不匹配的情况。"
+      "reason": "技术路线与现有资源匹配度较高，未见明显不匹配。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及实验/测试，因此不存在实验设计不合格的问题。"
+      "reason": "未提及实验/测试，但未见实验设计不合格的证据。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "路演叙事结构完整，未发现断裂。"
+      "reason": "路演叙事结构较为完整，未见明显断裂。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
-      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
-      "reason": "多个关键 Rubric 维度（如用户证据强度、商业模式一致性、财务逻辑、团队与执行）缺乏充分支撑证据。"
+      "evidence": "多个关键Rubric维度缺乏支撑证据。",
+      "reason": "多个关键Rubric维度（如用户证据强度、商业模式一致性、团队与执行）缺乏充分证据。"
     }
   ]
 }

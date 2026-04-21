@@ -1,0 +1,328 @@
+{
+  "case_id": "case_5337b81313fc",
+  "document_id": "doc_f24cbcae63a6",
+  "source": {
+    "file_path": "社会公益/大学生创业公益投资_挑战杯.doc",
+    "file_name": "大学生创业公益投资_挑战杯.doc",
+    "category": "社会公益",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1390,
+    "full_text_chars": 44410,
+    "core_text_chars": 1833,
+    "appendix_start_index": 77,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 1391,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1391,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "创思公益投资有限公司",
+    "target_users": [
+      "急需初始资金的优秀大学生创业者"
+    ],
+    "pain_points": [
+      "大学生创业项目缺乏初始资金，面临融资门槛高、需要担保等困难"
+    ],
+    "solution": [
+      "以无费用、无担保的投资模式为优质大学生创业项目提供初始资金支持"
+    ],
+    "innovation_points": [
+      "采用公益性质的投资而非捐赠，旨在激励创业并循环利用慈善资金"
+    ],
+    "business_model": [
+      "资金来源为捐赠所得，捐赠者即股东，拥有决策权和监督权",
+      "资金用于投资大学生创业项目，公司不以营利为目的，追求社会效益最大化"
+    ],
+    "market_analysis": [
+      "竞争分析：与传统投资者相比，提供更低门槛的资金支持，具有独特优势",
+      "市场需求：大学生创业项目对初始资金的需求旺盛，市场潜力巨大"
+    ],
+    "execution_plan": [],
+    "risk_control": [
+      "【通用风险控制】投资收益分析与风险分析：通过对市场和项目的评估，制定合理的投资收益预期，并进行风险分析，确保投资决策的科学性和合理性。"
+    ]
+  },
+  "tags": [
+    "category:社会公益",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_5337b81313fc_e1",
+      "type": "business_model_evidence",
+      "quote": "创思公益投资有限公司是以扶持大学生自主创业为主要服务、以社会效益最大化为目标，不以营利为目的的社会公益性企业。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_5337b81313fc_e2",
+      "type": "business_model_evidence",
+      "quote": "资金来源为捐赠所得。捐赠者即股东，资金一旦捐出即为公司所有，不再具备撤资、分红的权利。股东拥有决策权和任命管理人员的权利，可以监督资金的运行，保证资金的合理运用。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_5337b81313fc_e3",
+      "type": "solution_evidence",
+      "quote": "本公司对于优质的大学生创业项目采取投资而非捐赠的形式，但是相比社会上其他的投资者，我们无费用无担保的低门槛，对于急需初始资金的优秀创业大学生来说无疑是一个巨大的吸引。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_5337b81313fc_e4",
+      "type": "innovation_points_evidence",
+      "quote": "一种降低门槛的投资而非捐赠。目的在于激励大学生更好的创业、循环利用慈善资金。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "前言 创思取自于英文的chance，取义于英文的机会、机遇和中文的创新、思考。而创思公 益投资有限公司是以扶持大学生自主创业为主要服务、以社会效益最大化为目标，不以 营利为目的的社会公益性企业。 在融资方面，本公司是完全的公益性质，与社会上的NGO（Non-government Organization）相似，即资金来源为捐赠所得。捐赠者即股东，资金一旦捐出即为公司 所有，不再具备撤资、分红的权利。股东拥有决策权和任命管理人员的权利，可以监督 资金的运行，保证资金的合理运用。 而在运作方面，则完全是公司的运作模式。本公司对于优质的大学生创业项目采取投 资而非捐赠的形式，但是相比社会上其他的投资者，我们无费用无担保的低门槛，对于 急需初始资金的优秀创业大学生来说无疑是一个巨大的吸引。 • 公司特征 ）； • 公司创新 我们是不以营利为目的、以社会效益最大化为目标的。 一种降低门槛的投资而非捐赠。目的在于激励大学生更好的创业、循环利用慈善资金。 项目采取的是无费用无担保的投资模式，为这样的项目能够成功运作提供了有力的资金 保证。 [pic] （一）创业背景……………………………………………",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:16:04Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中明确指出了大学生创业项目缺乏初始资金的问题，并描述了融资门槛高、需要担保等具体困难。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中提到市场需求旺盛，但没有提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中描述了无费用、无担保的投资模式，但未详细说明技术路线与资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中描述了资金来源为捐赠，捐赠者即股东，拥有决策权和监督权，商业模式较为一致。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本中提到与传统投资者相比，提供更低门槛的资金支持，具有独特优势，但未提供具体市场规模数据。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中提到投资收益分析与风险分析，但未提供具体财务逻辑和单位经济数据。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本中强调了无费用无担保的低门槛投资模式，具有明显的创新与差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中未提及团队成员的具体能力和执行计划。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 6.0,
+      "reason": "文本结构较为完整，但缺乏具体数据和细节支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中描述了目标用户为急需初始资金的优秀创业大学生，价值主张为无费用无担保的低门槛投资模式。",
+      "reason": "目标用户与价值主张匹配。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到捐赠者即股东，拥有决策权和监督权，可以监督资金的运行。",
+      "reason": "主要获客渠道为捐赠者，渠道可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中提到投资模式为无费用无担保，但未提供用户支付意愿验证。",
+      "reason": "提到定价/收费但缺少用户支付意愿验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到大学生创业项目对初始资金的需求旺盛，市场潜力巨大。",
+      "reason": "市场规模口径合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "文本中提到市场需求旺盛，但没有提供具体的用户访谈、问卷或其他需求验证证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到与传统投资者相比，提供更低门槛的资金支持，具有独特优势。",
+      "reason": "竞品分析较为客观。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中强调了无费用无担保的低门槛投资模式，具有明显的创新与差异化。",
+      "reason": "创新点可验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "文本中提到公司不以营利为目的，追求社会效益最大化，但未提供具体财务逻辑和单位经济数据。",
+      "reason": "根据描述可以判断长期可能亏损。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中提到通过对市场和项目的评估，制定合理的投资收益预期。",
+      "reason": "增长逻辑合理。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "文本中未提及团队成员的具体能力和执行计划。",
+      "reason": "时间表/里程碑明显不现实或缺少可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中未涉及高风险领域。",
+      "reason": "不涉及高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中描述了无费用、无担保的投资模式，但未详细说明技术路线与资源匹配情况。",
+      "reason": "技术路线与资源匹配情况未详细说明，但未见明显不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本中未提到具体实验/测试。",
+      "reason": "不涉及具体实验/测试。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "文本结构较为完整，但缺乏具体数据和细节支撑。",
+      "reason": "路演叙事结构较为完整。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "文本中多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、财务逻辑、团队与执行。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据。"
+    }
+  ]
+}

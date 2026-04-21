@@ -77,14 +77,26 @@
     "rubric:Innovation & Differentiation",
     "rubric:Presentation Quality",
     "risk_rule:H10",
-    "risk_rule:H13",
     "risk_rule:H15",
     "risk_rule:H3",
-    "risk_rule:H5",
-    "risk_rule:H6",
-    "risk_rule:H8"
+    "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_f1742ebcac9e_e1",
+      "type": "user_evidence",
+      "quote": "针对多源异构数据湖面临的数据“脏” 、关系“乱” 、训练“缓”三大挑战",
+      "chunk_id": "C3",
+      "source_unit": "page_10"
+    },
+    {
+      "id": "case_f1742ebcac9e_e2",
+      "type": "user_evidence",
+      "quote": "项目立足数据要素全生命周期管理，构建“质量筑基-价值发现-效能跃升”三位一体的智能计算体系，致力于破解数据湖向智能生产力转化的核心瓶颈。",
+      "chunk_id": "C3",
+      "source_unit": "page_10"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -135,12 +147,9 @@
   "generated_at": "2026-03-29T10:01:26Z",
   "risk_flags": [
     "H10",
-    "H13",
     "H15",
     "H3",
-    "H5",
-    "H6",
-    "H8"
+    "H5"
   ],
   "rubric_items_detail": [
     {
@@ -171,7 +180,7 @@
       "item": "Market & Competition",
       "covered": true,
       "score": 7.0,
-      "reason": "项目分析了政务数据湖市场的年增长率，并提到政策环境的支持，但未详细分析竞品。"
+      "reason": "项目分析了政务数据湖市场的年增长率和政策环境，但未提供详细的竞品分析。"
     },
     {
       "item": "Financial Logic",
@@ -183,7 +192,7 @@
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "项目强调了核心子集优选算法、多模态智算引擎等创新点，并提供了技术突破的证据。"
+      "reason": "项目强调了核心子集优选算法、多模态智算引擎等创新点，并提供了技术突破的具体数据。"
     },
     {
       "item": "Team & Execution",
@@ -195,7 +204,7 @@
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "项目材料结构较为完整，但部分细节描述不够具体。"
+      "reason": "项目材料结构较为完整，但部分数据缺乏具体支撑。"
     }
   ],
   "risk_rule_details": [
@@ -204,28 +213,28 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目目标用户与价值主张匹配，未发现明显错位。"
+      "reason": "项目未出现目标用户与价值主张明显不匹配的情况。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未提及具体获客渠道，但未表明难以触达目标用户。"
+      "reason": "项目未提到获客渠道问题。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
       "evidence": "提到定价/收费但缺少用户支付意愿验证。",
-      "reason": "项目提到了私有化部署的运维支撑与后期扩容，但未提供用户支付意愿的验证。"
+      "reason": "项目提到了私有化部署的运维支撑与后期扩容等收费服务，但未提供用户支付意愿的验证。"
     },
     {
       "id": "H4",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目对市场规模的口径较为合理，未发现混乱。"
+      "reason": "项目对市场规模的口径较为合理，未出现混乱。"
     },
     {
       "id": "H5",
@@ -236,24 +245,24 @@
     },
     {
       "id": "H6",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "声称“无竞品/无竞争对手”或竞品分析明显失真。",
-      "reason": "项目未详细分析竞品，仅提到政策环境的支持。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未声称无竞品或无竞争对手，但竞品分析不够详细。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目提供了核心子集优选算法、多模态智算引擎等创新点的验证。"
+      "reason": "项目提供了核心子集优选算法、多模态智算引擎等可验证的创新点。"
     },
     {
       "id": "H8",
-      "triggered": true,
-      "severity": "high",
-      "evidence": "根据描述可以判断 LTV <= CAC 或长期亏损。",
-      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立，存在潜在风险。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
     },
     {
       "id": "H9",
@@ -274,35 +283,35 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目提到了数据合规性审查与网络安全防护，未发现合规/伦理缺口。"
+      "reason": "项目提到了数据合规性审查与网络安全防护。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目技术方案与资源匹配情况未详细说明，但未发现明显不匹配。"
+      "reason": "项目未提到技术路线与资源不匹配的情况。"
     },
     {
       "id": "H13",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "提到实验/测试但缺少样本量与评价指标。",
-      "reason": "项目提到了算法突破和多模态对齐，但未详细说明实验设计与评价指标。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提到实验/测试的具体设计。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目材料结构较为完整，未发现叙事断裂。"
+      "reason": "项目材料结构较为完整，未出现叙事断裂。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
       "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
-      "reason": "项目在用户证据强度、财务逻辑、团队与执行等维度缺乏充分证据。"
+      "reason": "项目在用户证据强度、财务逻辑、团队与执行等维度缺乏充分的支撑证据。"
     }
   ],
   "分类": [

@@ -465,15 +465,23 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
 
     created_users: list[dict[str, Any]] = []
     password_list: list[dict[str, str]] = []
+    duplicate_accounts: list[str] = []
+    duplicate_names: list[str] = []
 
     for i in range(count):
         seq = start_index + i
         account = f"{prefix}{seq:03d}"
         email = account  # 现有系统以 email 字段作为登录账号
 
-        # Avoid partial success: if any account already exists, abort.
         if user_store.get_by_email(email):
-            raise HTTPException(status_code=400, detail=f"账号 {account} 已存在，批量创建已取消")
+            duplicate_accounts.append(account)
+            continue
+        # 检查昵称唯一
+        display_name = account
+        users = user_store._load()
+        if display_name and any(str(u.get("display_name", "")).strip() == display_name for u in users):
+            duplicate_names.append(display_name)
+            continue
 
         raw_password = f"{account}{password_suffix or '123'}"
         payload_single = {
@@ -487,7 +495,12 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
         try:
             user, _temp_password = user_store.admin_create_user(payload_single)
         except ValueError as e:  # pragma: no cover - defensive
-            raise HTTPException(status_code=400, detail=str(e))
+            msg = str(e)
+            if "用户名已存在" in msg:
+                duplicate_names.append(display_name)
+            else:
+                duplicate_accounts.append(account)
+            continue
 
         uid = str(user.get("user_id", ""))
         if role == "student" and uid:
@@ -532,13 +545,20 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
                     invite_code=team_invite_code if i == 0 else None,
                 )
             except ValueError as e:  # pragma: no cover - validation
-                raise HTTPException(status_code=400, detail=str(e))
+                pass  # skip team creation error for batch
 
     return {
         "status": "ok",
         "count": len(created_users),
         "users": created_users,
         "passwords": password_list,
+        "duplicates": duplicate_accounts,
+        "duplicate_names": duplicate_names,
+        "duplicate_message": (
+            ("该账号名已存在" if duplicate_accounts else "") +
+            ("，" if duplicate_accounts and duplicate_names else "") +
+            ("用户名已存在" if duplicate_names else "")
+        ),
     }
 
 
@@ -571,6 +591,15 @@ def admin_update_user(user_id: str, payload: AdminUserUpdatePayload) -> dict:
 
 @app.delete("/api/admin/users/{user_id}")
 def admin_delete_user(user_id: str) -> dict:
+    # 先查找该用户是否为教师，若是则删除其所有团队
+    user = user_store.get_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if user.get("role") == "teacher":
+        # 删除该教师所有团队
+        teams = team_store.list_by_teacher(user_id)
+        for t in teams:
+            team_store.delete_team(t.get("team_id"), user_id)
     ok = user_store.delete_user(user_id)
     if not ok:
         raise HTTPException(status_code=404, detail="用户不存在")
@@ -10597,3 +10626,840 @@ def teacher_project_evidence_trace_v2(project_id: str, logical_project_id: str =
     }
     return _apply_overrides_everywhere(payload, project_id, all_cids or [None])
 
+
+
+# ══════════════════════════════════════════════════════════════════
+# 学生画像 / 教师订正 / 证据溯源  ——  新增接口
+# ══════════════════════════════════════════════════════════════════
+
+def _apply_overrides_everywhere(payload: dict, project_id: str, conversation_ids: list[str | None] | None = None) -> dict:
+    """在任意返回对象上批量应用教师订正（直接 walk 所有 rationale）。"""
+    try:
+        cids: list[str | None] = conversation_ids if conversation_ids is not None else [None]
+        overrides = ai_override_store.list_many(project_id, cids)
+        if overrides:
+            _ov_walk_apply(payload, overrides)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("apply overrides failed: %s", exc)
+    return payload
+
+
+def _link_triggered_rule_messages(
+    project_id: str,
+    conversation_id: str,
+    triggered_rules: list[dict],
+) -> None:
+    """原地为每条 triggered_rule 补 source_message 信息。"""
+    if not triggered_rules or not conversation_id:
+        return
+    for rule in triggered_rules:
+        if not isinstance(rule, dict):
+            continue
+        quote = str(rule.get("quote") or "").strip()
+        if not quote:
+            continue
+        hits = evidence_linker.link_text(project_id, conversation_id, quote, top_k=1)
+        if hits:
+            h = hits[0]
+            rule["source_message_id"] = h["message_id"]
+            rule["source_message_turn"] = h["turn_index"]
+            rule["source_message_role"] = h["role"]
+            rule["source_message_excerpt"] = h["excerpt"]
+            rule["source_message_confidence"] = h["confidence"]
+
+
+# ───────────────── 学生画像 endpoints ─────────────────
+def _compute_student_health(avg_score: float, risk_count: int, submission_count: int) -> dict:
+    """单学生 0-100 健康指数（与团队同风格）。"""
+    score = 40.0
+    if avg_score > 0:
+        score = min(60, avg_score * 7)
+    activity_bonus = min(20, submission_count * 4)
+    score += activity_bonus
+    risk_penalty = min(30, risk_count * 2)
+    score = max(0, min(100, score - risk_penalty + 10))
+    score = round(score, 1)
+    if score >= 75:
+        level, label = "healthy", "表现良好"
+    elif score >= 50:
+        level, label = "warning", "一般可提升"
+    else:
+        level, label = "critical", "需重点关注"
+    return {"score": score, "level": level, "label": label}
+
+
+def _build_student_panorama(
+    submissions: list[dict],
+    rubric_heatmap: list[dict],
+    avg_score: float,
+    trend: float,
+    risk_count: int,
+    strength_dims: list[str],
+    weakness_dims: list[str],
+    scope_label: str = "全部会话",
+) -> dict:
+    """把单学生（或单会话）聚合数据整理成与团队画像同 schema 的 panorama 结构。"""
+    total_subs = len(submissions or [])
+    # Health
+    health = _compute_student_health(avg_score, risk_count, total_subs)
+
+    # rubric_heatmap 补 item_cn
+    heatmap_team_style = []
+    for rh in (rubric_heatmap or []):
+        if not isinstance(rh, dict) or not rh.get("item"):
+            continue
+        heatmap_team_style.append({
+            "item": rh["item"],
+            "item_cn": _dim_cn(rh["item"]),
+            "avg_score": rh.get("avg_score", 0),
+            "sample_count": rh.get("count", 0),
+        })
+    heatmap_team_style.sort(key=lambda h: h["avg_score"])
+
+    # 中文强/弱
+    top_strengths_cn = [_dim_cn(d) for d in (strength_dims or [])[:3]]
+    top_weaknesses_cn = [_dim_cn(d) for d in (weakness_dims or [])[:3]]
+
+    # 风险 Top3
+    rule_counter: dict[str, int] = {}
+    score_distribution = {"good": 0, "average": 0, "weak": 0, "no_data": 0}
+    recent_scores: list[float] = []
+    for s in (submissions or []):
+        sc = 0.0
+        diag = s.get("diagnosis") or {}
+        if isinstance(diag, dict):
+            sc = float(diag.get("overall_score", 0) or 0)
+        if not sc:
+            sc = float(s.get("overall_score", 0) or 0)
+        if sc >= 7:
+            score_distribution["good"] += 1
+        elif sc >= 5:
+            score_distribution["average"] += 1
+        elif sc > 0:
+            score_distribution["weak"] += 1
+        else:
+            score_distribution["no_data"] += 1
+        if sc > 0:
+            recent_scores.append(sc)
+        triggered = s.get("triggered_rules") or []
+        if not triggered and isinstance(diag, dict):
+            triggered = diag.get("triggered_rules") or []
+        for tr in triggered:
+            if isinstance(tr, dict):
+                rid = str(tr.get("id") or tr.get("rule_id") or "")
+            else:
+                rid = str(tr or "")
+            if rid:
+                rule_counter[rid] = rule_counter.get(rid, 0) + 1
+    risk_top3 = sorted(rule_counter.items(), key=lambda kv: kv[1], reverse=True)[:3]
+    risk_rule_top3_list = [
+        {"rule_id": rid, "count": cnt, "label": _dim_cn(rid) if rid in DIM_CN else rid}
+        for rid, cnt in risk_top3
+    ]
+
+    # Engagement（单学生语义：总提交、近 7 天节奏、最近一次）
+    engagement_stats = {
+        "total_submissions": total_subs,
+        "scored_count": len(recent_scores),
+        "risk_count": risk_count,
+    }
+
+    # trend_summary
+    if total_subs >= 4:
+        if trend > 0.3:
+            trend_summary = f"近期趋势 +{trend:.1f}，呈稳步进步"
+        elif trend < -0.3:
+            trend_summary = f"近期趋势 {trend:.1f}，需关注回落"
+        else:
+            trend_summary = f"近期波动 {trend:+.1f}，整体平稳"
+    elif total_subs > 0:
+        trend_summary = "数据量较少，暂无法判断趋势"
+    else:
+        trend_summary = "尚无诊断数据"
+
+    # detail_bullets
+    detail_bullets: list[str] = []
+    if avg_score > 0:
+        detail_bullets.append(f"{scope_label}均分 {avg_score}/10，健康指数 {health['score']}")
+    else:
+        detail_bullets.append(f"{scope_label}尚无完整打分数据，先完成一次提交即可建立画像")
+    if top_strengths_cn:
+        detail_bullets.append(f"优势维度：{'、'.join(top_strengths_cn)}")
+    if top_weaknesses_cn:
+        detail_bullets.append(f"待加强：{'、'.join(top_weaknesses_cn)}")
+    if risk_rule_top3_list:
+        detail_bullets.append(
+            "高频风险："
+            + "、".join(f"{r['rule_id']}({r['count']}次)" for r in risk_rule_top3_list)
+        )
+
+    # overall_assessment
+    parts: list[str] = []
+    if health["level"] == "healthy":
+        parts.append(f"整体表现良好（{health['score']}）")
+    elif health["level"] == "warning":
+        parts.append(f"整体中等水平（{health['score']}），有提升空间")
+    else:
+        parts.append(f"整体需要重点关注（{health['score']}）")
+    if top_strengths_cn:
+        parts.append(f"继续保持「{top_strengths_cn[0]}」优势")
+    if top_weaknesses_cn:
+        parts.append(f"优先补强「{top_weaknesses_cn[0]}」")
+    if risk_rule_top3_list:
+        parts.append(f"当前最高频风险为 {risk_rule_top3_list[0]['rule_id']}")
+    overall_assessment = "；".join(parts) + "。"
+
+    return {
+        "health_score": health["score"],
+        "health_level": health["level"],
+        "health_label": health["label"],
+        "rubric_heatmap_team": heatmap_team_style,
+        "top_strengths": top_strengths_cn,
+        "top_weaknesses": top_weaknesses_cn,
+        "risk_rule_top3": risk_rule_top3_list,
+        "engagement_stats": engagement_stats,
+        "trend_summary": trend_summary,
+        "overall_assessment": overall_assessment,
+        "detail_bullets": detail_bullets,
+        "score_distribution": score_distribution,
+    }
+
+
+@app.get("/api/student/{user_id}/portrait/overall")
+def student_portrait_overall(user_id: str) -> dict:
+    """学生总画像：跨所有会话聚合。"""
+    data = _aggregate_student_data(user_id, include_detail=True)
+    portrait = dict(data.get("portrait") or {})
+    portrait["total_submissions"] = data.get("total_submissions", 0)
+    portrait["project_count"] = data.get("project_count", 0)
+    portrait["avg_score"] = data.get("avg_score", 0.0)
+    portrait["trend"] = data.get("trend", 0.0)
+    portrait["risk_count"] = data.get("risk_count", 0)
+    portrait["latest_phase"] = data.get("latest_phase", "")
+    portrait["intent_distribution"] = data.get("intent_distribution", {}) or {}
+    portrait["intent_shape_distribution"] = data.get("intent_shape_distribution", {}) or {}
+    portrait["student_case_summary"] = data.get("student_case_summary", "") or ""
+    # 团队画像同结构字段（panorama）
+    project_id = f"project-{user_id}"
+    project = json_store.load_project(project_id)
+    all_subs = list(project.get("submissions", []) or [])
+    panorama = _build_student_panorama(
+        submissions=all_subs,
+        rubric_heatmap=portrait.get("rubric_heatmap") or [],
+        avg_score=float(data.get("avg_score", 0.0) or 0.0),
+        trend=float(data.get("trend", 0.0) or 0.0),
+        risk_count=int(data.get("risk_count", 0) or 0),
+        strength_dims=portrait.get("strength_dimensions") or [],
+        weakness_dims=portrait.get("weakness_dimensions") or [],
+        scope_label="总画像",
+    )
+    portrait.update(panorama)
+    # 汇总用：overview_rationale 说明这张画像是如何算出来的
+    portrait["overview_rationale"] = {
+        "field": "portrait:overall",
+        "value": data.get("avg_score", 0.0),
+        "formula": "avg(scores across all submissions)",
+        "formula_display": (
+            f"总画像聚合了该学生全部 {data.get('total_submissions', 0)} 条提交，"
+            f"分布在 {data.get('project_count', 0)} 个项目（会话）上。\n"
+            f"综合均分 = 全部打分的算术平均 = {data.get('avg_score', 0.0)}\n"
+            f"近中期变化 = {data.get('trend', 0.0):+.1f}\n"
+            f"健康指数 = {panorama['health_score']}（{panorama['health_label']}）"
+        ),
+        "inputs": [
+            {"label": "项目数", "value": data.get("project_count", 0)},
+            {"label": "提交数", "value": data.get("total_submissions", 0)},
+            {"label": "触发风险次数", "value": data.get("risk_count", 0)},
+            {"label": "健康指数", "value": panorama["health_score"]},
+        ],
+        "note": "默认按所有会话聚合，若要按会话单独查看请切换 Tab。",
+    }
+    all_cids = [None] + [str((c.get("conversation_id") or "")) for c in conv_store.list_conversations(project_id)]
+    return _apply_overrides_everywhere({"portrait": portrait}, project_id, all_cids)
+
+
+@app.get("/api/student/{user_id}/portrait/conversations")
+def student_portrait_conversations(user_id: str) -> dict:
+    """学生按会话的画像列表：每个会话一张卡（轻量版）。"""
+    project_id = f"project-{user_id}"
+    data = _aggregate_student_data(user_id, include_detail=True)
+    project_snapshots = data.get("project_snapshots") or []
+    # 会话列表（精简：取每个 conversation_id 最近一次画像切面）
+    convs = conv_store.list_conversations(project_id)
+    conv_meta = {str(c["conversation_id"]): c for c in convs}
+    # 把 project_snapshots 按 project_id 对齐 conversation_id（约定两者相同时）
+    cards = []
+    for snap in project_snapshots:
+        cid = str(snap.get("project_id") or "")
+        meta = conv_meta.get(cid, {}) if cid else {}
+        cards.append({
+            "conversation_id": cid,
+            "title": meta.get("title") or snap.get("project_name") or cid[:8],
+            "last_score": snap.get("latest_score", 0),
+            "project_phase": snap.get("project_phase", ""),
+            "summary": snap.get("current_summary", ""),
+            "top_risks": snap.get("top_risks", []),
+            "intent_distribution": snap.get("intent_distribution", {}),
+            "message_count": meta.get("message_count", 0),
+            "created_at": meta.get("created_at", ""),
+        })
+    return _apply_overrides_everywhere(
+        {"project_id": project_id, "cards": cards},
+        project_id,
+        [c["conversation_id"] for c in cards if c.get("conversation_id")],
+    )
+
+
+@app.get("/api/student/{user_id}/portrait/conversation/{conversation_id}")
+def student_portrait_conversation_detail(user_id: str, conversation_id: str) -> dict:
+    """单个会话的画像详情：rubric 趋势、风险、成熟度、消息数量等。"""
+    project_id = f"project-{user_id}"
+    data = _aggregate_student_data(user_id, include_detail=True)
+    proj = next((p for p in (data.get("projects") or []) if p.get("project_id") == conversation_id), None)
+    if not proj:
+        return {"status": "not_found", "conversation_id": conversation_id}
+    # 本会话的原始 submissions（用于 panorama 的风险统计）
+    proj_raw_subs = [
+        s for s in (json_store.load_project(project_id).get("submissions") or [])
+        if _safe_str(s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id") or "") == conversation_id
+    ]
+    # 本会话的 rubric heatmap
+    rubric_scores: dict[str, list[float]] = {}
+    for sub in proj.get("submissions", []):
+        diag = sub.get("diagnosis") or {}
+        for r in (diag.get("rubric") or []):
+            if isinstance(r, dict) and r.get("item"):
+                rubric_scores.setdefault(r["item"], []).append(float(r.get("score", 0) or 0))
+    heatmap = []
+    strength_dims_conv: list[str] = []
+    weakness_dims_conv: list[str] = []
+    for name, arr in rubric_scores.items():
+        avg_rs = round(sum(arr) / len(arr), 2) if arr else 0
+        if avg_rs >= 7:
+            strength_dims_conv.append(name)
+        elif avg_rs < 5:
+            weakness_dims_conv.append(name)
+        heatmap.append({
+            "item": name,
+            "avg_score": avg_rs,
+            "count": len(arr),
+            "rationale": {
+                "field": f"rubric_heatmap:{conversation_id}:{name}",
+                "value": avg_rs,
+                "formula": "avg(dim scores in this conversation)",
+                "formula_display": (
+                    f"本会话 {name} 均分 = ({' + '.join(f'{x:.1f}' for x in arr[:6])}"
+                    + (" + …" if len(arr) > 6 else "")
+                    + f") ÷ {len(arr)} = {avg_rs}"
+                ),
+                "inputs": [{"label": f"第{i+1}次", "value": round(float(x), 2)} for i, x in enumerate(arr[:10])],
+                "note": f"仅统计本会话 {len(arr)} 次评分",
+            },
+        })
+    # 本会话趋势
+    p_scores = []
+    for sub in proj.get("submissions", []):
+        sc = float(sub.get("overall_score", 0) or 0)
+        if not sc:
+            diag = sub.get("diagnosis") or {}
+            sc = float(diag.get("overall_score", 0) or 0) if isinstance(diag, dict) else 0
+        if sc > 0:
+            p_scores.append(sc)
+    conv_avg = round(sum(p_scores) / len(p_scores), 1) if p_scores else 0.0
+    conv_trend = 0.0
+    if len(p_scores) >= 4:
+        mid = len(p_scores) // 2
+        conv_trend = round(sum(p_scores[mid:]) / (len(p_scores) - mid) - sum(p_scores[:mid]) / mid, 1)
+    conv_risk_count = sum(1 for s in proj_raw_subs if (s.get("triggered_rules") or []))
+
+    panorama = _build_student_panorama(
+        submissions=proj_raw_subs,
+        rubric_heatmap=heatmap,
+        avg_score=conv_avg,
+        trend=conv_trend,
+        risk_count=conv_risk_count,
+        strength_dims=strength_dims_conv,
+        weakness_dims=weakness_dims_conv,
+        scope_label="本会话",
+    )
+    # 本会话的最近一次 maturity（从最新 bp 取）
+    try:
+        latest_bp = business_plan_service.get_latest(project_id, conversation_id) or {}
+    except Exception:
+        latest_bp = {}
+    maturity_snapshot = (latest_bp.get("readiness") or {}) if isinstance(latest_bp, dict) else {}
+    # 提供与 overall 对齐的 portrait 对象
+    portrait_payload = {
+        **panorama,
+        "avg_score": conv_avg,
+        "trend": conv_trend,
+        "risk_count": conv_risk_count,
+        "total_submissions": len(proj_raw_subs),
+        "rubric_heatmap": heatmap,
+        "strength_dimensions": strength_dims_conv,
+        "weakness_dimensions": weakness_dims_conv,
+        "latest_phase": proj.get("project_phase", ""),
+        "overview_rationale": {
+            "field": f"portrait:conversation:{conversation_id}",
+            "value": conv_avg,
+            "formula": "avg(scores in this conversation)",
+            "formula_display": (
+                f"本会话共 {len(proj_raw_subs)} 次提交，\n"
+                f"有效打分 {len(p_scores)} 次 → 均分 {conv_avg}\n"
+                f"近中期变化 {conv_trend:+.1f}\n"
+                f"健康指数 = {panorama['health_score']}（{panorama['health_label']}）"
+            ),
+            "inputs": [
+                {"label": "提交数", "value": len(proj_raw_subs)},
+                {"label": "有效打分", "value": len(p_scores)},
+                {"label": "触发风险次数", "value": conv_risk_count},
+                {"label": "健康指数", "value": panorama["health_score"]},
+            ],
+            "note": "只统计该会话（项目）内的数据",
+        },
+    }
+    payload = {
+        "conversation_id": conversation_id,
+        "project_card": proj,
+        "rubric_heatmap": heatmap,
+        "maturity_snapshot": maturity_snapshot,
+        "portrait": portrait_payload,
+    }
+    return _apply_overrides_everywhere(payload, project_id, [conversation_id, None])
+
+
+# ───────────────── 教师订正 endpoints ─────────────────
+@app.get("/api/teacher/overrides")
+def teacher_overrides_list(
+    project_id: str,
+    conversation_id: str = "",
+    target_type: str = "",
+    target_key: str = "",
+) -> dict:
+    cid = conversation_id.strip() or None
+    return {
+        "overrides": ai_override_store.list(
+            project_id,
+            cid,
+            target_type=target_type or None,
+            target_key=target_key or None,
+        )
+    }
+
+
+@app.post("/api/teacher/overrides")
+def teacher_overrides_upsert(payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        return {"status": "error", "detail": "invalid payload"}
+    try:
+        record = ai_override_store.upsert(payload)
+        return {"status": "ok", "override": record}
+    except ValueError as exc:
+        return {"status": "error", "detail": str(exc)}
+
+
+@app.delete("/api/teacher/overrides/{override_id}")
+def teacher_overrides_delete(override_id: str, project_id: str, conversation_id: str = "") -> dict:
+    cid = conversation_id.strip() or None
+    ok = ai_override_store.delete(project_id, cid, override_id)
+    return {"status": "ok" if ok else "not_found"}
+
+
+# ───────────────── 重构版 evidence-trace ─────────────────
+@app.get("/api/teacher/project/{project_id}/evidence-trace-v2")
+def teacher_project_evidence_trace_v2(project_id: str, logical_project_id: str = "") -> dict:
+    """「按结论分组」的证据树：每个 rubric 维度 / 风险规则 / 综合分 都单独成组，
+    其下挂相关证据消息（含 source_message_id）。前端可以直接树形渲染。"""
+    project_state = json_store.load_project(project_id)
+    filtered_subs = _project_submissions_by_logical_id(project_state, logical_project_id)
+    if not filtered_subs:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "error": "该项目暂无可用于证据溯源的提交记录",
+        }
+    evidence_chain = _assessment_evidence_chain(filtered_subs)
+
+    # 收集每个 submission 对应的 conversation_id，用于消息回定
+    sub_to_cid: dict[str, str] = {}
+    for sub in filtered_subs:
+        sid = str(sub.get("submission_id") or "")
+        cid = str(sub.get("conversation_id") or "")
+        if sid:
+            sub_to_cid[sid] = cid
+
+    # 1) rubric 维度分组
+    rubric_groups: dict[str, dict] = {}
+    rule_groups: dict[str, dict] = {}
+    for row in evidence_chain:
+        sid = str(row.get("submission_id") or "")
+        cid = sub_to_cid.get(sid, "")
+        quote = str(row.get("quote") or "")
+        link = None
+        if cid and quote:
+            links = evidence_linker.link_text(project_id, cid, quote, top_k=1)
+            link = links[0] if links else None
+        enriched_ev = {
+            **row,
+            "conversation_id": cid,
+            "source_message_id": (link or {}).get("message_id"),
+            "source_message_turn": (link or {}).get("turn_index"),
+            "source_message_role": (link or {}).get("role"),
+            "source_message_confidence": (link or {}).get("confidence"),
+        }
+        for rubric in (row.get("rubric_items") or []):
+            bucket = rubric_groups.setdefault(rubric, {
+                "conclusion_type": "rubric",
+                "conclusion_key": rubric,
+                "label": rubric,
+                "evidence": [],
+            })
+            bucket["evidence"].append(enriched_ev)
+        for rid in (row.get("rule_ids") or []):
+            rid_u = str(rid).upper()
+            if not rid_u:
+                continue
+            bucket = rule_groups.setdefault(rid_u, {
+                "conclusion_type": "risk",
+                "conclusion_key": rid_u,
+                "label": f"{rid_u} · {get_rule_name(rid_u)}",
+                "fallacy": RULE_FALLACY_MAP.get(rid_u, ""),
+                "edge_families": RULE_EDGE_MAP.get(rid_u, []),
+                "evidence": [],
+            })
+            bucket["evidence"].append(enriched_ev)
+
+    # 2) 综合分分组 —— 把最近一次 diagnosis 的 overall_rationale 拿出来
+    overall_group = None
+    tier1_groups: list[dict] = []
+    last_sub = filtered_subs[-1] if filtered_subs else None
+    last_diag_obj: dict = {}
+    if last_sub:
+        last_diag_obj = last_sub.get("diagnosis") or {}
+        overall_rat = last_diag_obj.get("overall_rationale")
+        if overall_rat:
+            overall_group = {
+                "conclusion_type": "overall",
+                "conclusion_key": "overall",
+                "label": "综合分",
+                "rationale": overall_rat,
+                "evidence": [],
+            }
+        # ── Tier 1：挂上 project_phase / bottleneck / summary / next_task 的 rationale ──
+        for tier1_key, tier1_label, tier1_rat_key in [
+            ("project_phase", "项目阶段判定", "project_phase_rationale"),
+            ("bottleneck", "核心瓶颈", "bottleneck_rationale"),
+            ("summary", "诊断总结", "summary_rationale"),
+        ]:
+            rat = last_diag_obj.get(tier1_rat_key)
+            if rat:
+                tier1_groups.append({
+                    "conclusion_type": "tier1",
+                    "conclusion_key": tier1_key,
+                    "label": tier1_label,
+                    "rationale": rat,
+                    "evidence": [],
+                })
+        # next_task 的 rationale 放在 next_task.rationale 里
+        last_next = last_sub.get("next_task") or {}
+        if isinstance(last_next, dict) and last_next.get("rationale"):
+            tier1_groups.append({
+                "conclusion_type": "tier1",
+                "conclusion_key": "next_task",
+                "label": "下一步任务",
+                "rationale": last_next.get("rationale"),
+                "evidence": [],
+            })
+
+    # ── 把每个 rubric 维度的 rationale（含 reasoning_steps）挂到分组 ──
+    if last_diag_obj:
+        for _rb in (last_diag_obj.get("rubric") or []):
+            if not isinstance(_rb, dict):
+                continue
+            _item = str(_rb.get("item") or "")
+            if not _item or _item not in rubric_groups:
+                # 如果有 rubric 但没有证据也露出 rationale
+                if _item and _rb.get("rationale"):
+                    rubric_groups[_item] = {
+                        "conclusion_type": "rubric",
+                        "conclusion_key": _item,
+                        "label": _item,
+                        "evidence": [],
+                    }
+            if _item and _rb.get("rationale") and _item in rubric_groups:
+                rubric_groups[_item]["rationale"] = _rb.get("rationale")
+                rubric_groups[_item]["score"] = _rb.get("score")
+
+    all_cids = list({cid for cid in sub_to_cid.values() if cid})
+    payload = {
+        "project_id": project_id,
+        "logical_project_id": logical_project_id,
+        "overall": overall_group,
+        "tier1_groups": tier1_groups,
+        "rubric_groups": sorted(rubric_groups.values(), key=lambda g: -len(g["evidence"])),
+        "rule_groups": sorted(rule_groups.values(), key=lambda g: -len(g["evidence"])),
+        "total_evidence": sum(len(g["evidence"]) for g in rubric_groups.values())
+                         + sum(len(g["evidence"]) for g in rule_groups.values()),
+    }
+    return _apply_overrides_everywhere(payload, project_id, all_cids or [None])
+
+
+
+import pandas as pd
+from fastapi import UploadFile
+# ── 批量导入用户与团队（CSV/Excel/JSON） ──────────────────────────────
+@app.post("/api/admin/users/import_csv")
+async def admin_import_users_csv(
+    file: UploadFile = File(...),
+    meta: str = Form(None),
+    data: str = Form(None),
+    request: Request = None
+):
+    """
+    支持 CSV/Excel/JSON 批量导入用户与团队，字段：account, name, role, email, team_name, invite_code, password
+    1. 解析文件或 data 字段
+    2. 校验字段完整性、格式、重复
+    3. 自动创建/合并团队，成员自动加入
+    4. 只追加新用户/团队，不做删除/覆盖
+    5. 生成导入日志，错误项单独返回
+    """
+    import os
+    import json as _json
+    from datetime import datetime
+    from pathlib import Path
+    from uuid import uuid4
+    # 1. 解析数据
+    rows = []
+    filename = file.filename
+    ext = filename.split(".")[-1].lower()
+    try:
+        if data:
+            rows = _json.loads(data)
+        elif ext == "csv":
+            df = pd.read_csv(file.file)
+            rows = df.to_dict(orient="records")
+        elif ext in ("xlsx", "xls"):  # Excel
+            df = pd.read_excel(file.file)
+            rows = df.to_dict(orient="records")
+        else:
+            raise Exception("仅支持 .csv/.xlsx/.xls 文件")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"文件解析失败: {e}")
+    if not rows or not isinstance(rows, list):
+        raise HTTPException(status_code=400, detail="未检测到有效数据")
+    # 2. 校验与处理
+    required_fields = ["account", "name", "role", "email", "team_name", "invite_code", "password"]
+    success, failed, errors = 0, 0, []
+    new_users, new_teams = [], []
+    user_ids, team_ids = set(), set()
+    users_json = (settings.data_root / "users" / "users.json")
+    teams_json = (settings.data_root / "teams" / "teams.json")
+    # 加载现有数据
+    try:
+        users_data = _json.loads(users_json.read_text("utf-8")) if users_json.exists() else []
+    except Exception:
+        users_data = []
+    try:
+        teams_data = _json.loads(teams_json.read_text("utf-8")) if teams_json.exists() else []
+    except Exception:
+        teams_data = []
+    existing_emails = set()
+    existing_names = set()
+    for u in users_data:
+        user_ids.add(str(u.get("user_id") or u.get("email") or u.get("account") or "").strip())
+        email = str(u.get("email") or "").strip().lower()
+        name = str(u.get("display_name") or u.get("name") or "").strip()
+        if email:
+            existing_emails.add(email)
+        if name:
+            existing_names.add(name)
+    for t in teams_data:
+        team_ids.add(str(t.get("team_id") or t.get("invite_code") or t.get("team_name") or "").strip())
+    # 3. 处理每一行
+    for idx, row in enumerate(rows):
+        # 字段标准化
+        item = {k: str(row.get(k, "")).strip() for k in required_fields}
+        # team_name 和 invite_code 可以为空
+        # email 和 password 可自动填充
+        if not item["account"] or not item["name"] or not item["role"]:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "account/name/role 不能为空", "item": item})
+            continue
+        if not item["email"]:
+            item["email"] = f"{item['account']}@local"
+        if not item["password"]:
+            item["password"] = f"{item['account']}+123"
+        if item["role"] not in ("student", "teacher", "admin"):
+            failed += 1
+            errors.append({"row": idx+1, "reason": "角色无效", "item": item})
+            continue
+        # 邮箱唯一
+        email_lower = item["email"].lower()
+        if email_lower in existing_emails:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "邮箱已存在", "item": item})
+            continue
+        # 姓名唯一
+        if item["name"] in existing_names:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "姓名已存在", "item": item})
+            continue
+        if item["account"] in user_ids:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "账号已存在", "item": item})
+            continue
+        # 导入后也要加入集合，防止本批次重复
+        existing_emails.add(email_lower)
+        existing_names.add(item["name"])
+        # 检查团队是否存在，不存在则创建（team_name/invite_code都为空则不创建团队）
+        team = None
+        if item["team_name"] or item["invite_code"]:
+            team = next((t for t in teams_data if (item["team_name"] and t.get("team_name") == item["team_name"]) or (item["invite_code"] and t.get("invite_code") == item["invite_code"])), None)
+            if not team:
+                team_id = f"team-{uuid4().hex[:8]}"
+                team = {
+                    "team_id": team_id,
+                    "team_name": item["team_name"],
+                    "invite_code": item["invite_code"],
+                    "teacher_id": "",
+                    "teacher_name": "",
+                    "members": [],
+                    "created_at": datetime.utcnow().isoformat(),
+                }
+                # 如果是教师，自动归属
+                if item["role"] == "teacher":
+                    team["teacher_id"] = "user-" + item["account"] if not item["account"].startswith("user-") else item["account"]
+                    team["teacher_name"] = item["name"]
+                teams_data.append(team)
+                team_ids.add(team_id)
+                new_teams.append(team)
+        # 创建用户
+        user_id = f"user-{uuid4().hex[:8]}"
+        user = {
+            "user_id": user_id,
+            "display_name": item["name"],
+            "role": item["role"],
+            "email": item["email"],
+            "password": item["password"],
+            "status": "active",
+            "team_names": [item["team_name"]] if item["team_name"] else [],
+            "last_login": "",
+        }
+        users_data.append(user)
+        user_ids.add(item["account"])
+        new_users.append(user)
+        # 加入团队：仅非教师用户加入 members
+        if team and "members" in team and item["role"] != "teacher":
+            team["members"].append({"user_id": user_id, "joined_at": datetime.utcnow().isoformat()})
+        # 如果是教师，补充团队teacher_id/teacher_name（但不加入 members）
+        if team and item["role"] == "teacher":
+            team["teacher_id"] = user_id
+            team["teacher_name"] = item["name"]
+        success += 1
+    # 4. 数据落盘
+    try:
+        users_json.write_text(_json.dumps(users_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        teams_json.write_text(_json.dumps(teams_data, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"数据写入失败: {e}")
+    # 5. 写入日志
+    logs_dir = settings.data_root / "import_logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    log_obj = {
+        "filename": filename,
+        "meta": meta,
+        "time": datetime.utcnow().isoformat(),
+        "operator": str(request.headers.get("X-User", "admin")),
+        "total": len(rows),
+        "success": success,
+        "failed": failed,
+        "errors": errors,
+        "new_users": [u["user_id"] for u in new_users],
+        "new_teams": [t["team_id"] for t in new_teams],
+    }
+    log_path = logs_dir / f"import_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid4().hex[:6]}.json"
+    log_path.write_text(_json.dumps(log_obj, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 6. 返回结果
+    return {
+        "status": "ok",
+        "filename": filename,
+        "total": len(rows),
+        "success": success,
+        "failed": failed,
+        "errors": errors,
+        "new_users": [u["user_id"] for u in new_users],
+        "new_teams": [t["team_id"] for t in new_teams],
+        "log": str(log_path.name),
+    }
+from fastapi import Body
+# 批量创建教师账号及团队（前端新UI专用）
+@app.post("/api/admin/teachers/batch_with_teams")
+def admin_batch_create_teachers_with_teams(
+    payload: dict = Body(...)
+):
+    """
+    批量创建教师账号和团队，每个教师可自定义账号、姓名、团队名、邀请码、密码。
+    前端需传入 teachers: [{account, name, team_name, invite_code, password}]
+    """
+    teachers = payload.get("teachers")
+    if not isinstance(teachers, list) or not teachers:
+        raise HTTPException(status_code=400, detail="参数格式错误：teachers 必须为非空数组")
+    results = []
+    for t in teachers:
+        account = str(t.get("account", "")).strip()
+        name = str(t.get("name", "")).strip()
+        password = str(t.get("password", "")).strip()
+        teams = t.get("teams", [])
+        if not (account and name and password and isinstance(teams, list) and teams):
+            results.append({"account": account, "success": False, "reason": "信息不完整"})
+            continue
+        # 检查账号是否已存在
+        if user_store.get_by_email(account):
+            results.append({"account": account, "success": False, "reason": "账号已存在"})
+            continue
+        # 创建教师账号
+        try:
+            user, _ = user_store.admin_create_user({
+                "role": "teacher",
+                "display_name": name,
+                "email": account,
+                "password": password,
+            })
+        except Exception as e:
+            results.append({"account": account, "success": False, "reason": f"创建账号失败: {e}"})
+            continue
+        teacher_id = user.get("user_id")
+        # 为该教师批量创建团队
+        team_results = []
+        for tm in teams:
+            team_name = str(tm.get("team_name", "")).strip()
+            invite_code = str(tm.get("invite_code", "")).strip().upper()
+            if not (team_name and invite_code):
+                team_results.append({"team_name": team_name, "success": False, "reason": "团队信息不完整"})
+                continue
+            # 检查团队邀请码是否冲突
+            if team_store.find_by_invite_code(invite_code):
+                team_results.append({"team_name": team_name, "invite_code": invite_code, "success": False, "reason": "邀请码已被占用"})
+            else:
+                try:
+                    team = team_store.create_team_with_custom_code(
+                        teacher_id=teacher_id,
+                        teacher_name=name,
+                        team_name=team_name,
+                        invite_code=invite_code,
+                    )
+                    team_results.append({
+                        "team_name": team_name,
+                        "invite_code": invite_code,
+                        "team_id": team.get("team_id"),
+                        "success": True
+                    })
+                except Exception as e:
+                    team_results.append({"team_name": team_name, "invite_code": invite_code, "success": False, "reason": f"创建团队失败: {e}"})
+        results.append({
+            "account": account,
+            "teacher_id": teacher_id,
+            "success": True,
+            "teams": team_results
+        })
+    return {"status": "ok", "results": results}

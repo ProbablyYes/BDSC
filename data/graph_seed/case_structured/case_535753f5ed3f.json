@@ -69,12 +69,39 @@
     "risk_rule:H10",
     "risk_rule:H15",
     "risk_rule:H3",
-    "risk_rule:H4",
     "risk_rule:H5",
-    "risk_rule:H6",
     "risk_rule:H9"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_535753f5ed3f_e1",
+      "type": "user_evidence",
+      "quote": "随着我国人口老龄化加剧、慢性病高发及独居老人死亡事件不断增加，如何实现高效、智能、普适的居家健康管理，成为社会急需解决的重要课题。尤其对于高龄独居老人、慢病患者、术后康复人群等特殊人群，传统接触式监测设备往往存在佩戴不便、响应滞后、智能性不足等问题，难以满足实时、多维、连续的健康守护需求。",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_535753f5ed3f_e2",
+      "type": "user_evidence",
+      "quote": "不仅老年人，慢病患者、术后康复人群、残障人士、独居人士、婴幼儿看护群体，乃至长期处于高压环境的亚健康人群，均面临“健康监测难、风险响应慢、照护方式滞后”等现实难题。传统医疗模式依赖接触式设备与线下诊疗，难以在居家环境中提供连续、无创、低成本的健康服务，健康管理的“最后一公里”仍未真正打通。",
+      "chunk_id": "C3",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_535753f5ed3f_e3",
+      "type": "business_model_evidence",
+      "quote": "本项目开发一款融合“远程感知 + AI 分析 + 移动协同”的无接触式健康监测与 AI 辅助的移动机器人，适用于家庭、养老院、医院等多场景，实现从生命体征监测到突发事件响应的全流程闭环管理。",
+      "chunk_id": "C1",
+      "source_unit": "page_6"
+    },
+    {
+      "id": "case_535753f5ed3f_e4",
+      "type": "business_model_evidence",
+      "quote": "平台基于远程光电容积描记技术（rPPG），通过普通摄像头即可实现对用户心率、HRV、呼吸频率、血压趋势等关键生理参数的非接触式实时测量。",
+      "chunk_id": "C2",
+      "source_unit": "page_7"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -127,9 +154,7 @@
     "H10",
     "H15",
     "H3",
-    "H4",
     "H5",
-    "H6",
     "H9"
   ],
   "rubric_items_detail": [
@@ -137,55 +162,55 @@
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "项目明确指出了独居老人缺乏及时陪伴与照料、传统监测设备佩戴率低、现有紧急救助体系不完善等具体痛点，并提供了用户场景支撑。"
+      "reason": "项目明确指出了独居老人、慢病患者等群体面临的健康监测难题，需求真实具体。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
       "score": 3.0,
-      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据，仅描述了痛点。"
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提出了基于rPPG的无接触式健康监测及AI预警平台，技术路线合理，但未详细说明资源匹配情况。"
+      "reason": "项目基于rPPG技术，通过普通摄像头实现非接触式健康监测，技术路线合理。"
     },
     {
       "item": "Business Model Consistency",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提出了养老院、老年公寓系统部署、智能硬件销售及APP增值会员服务等商业模式，但未详细说明成本和营收的具体构成。"
+      "reason": "项目提出了智能硬件销售、APP增值会员服务及社区养老数据中台等多元化的商业模式，形成了一定的闭环。"
     },
     {
       "item": "Market & Competition",
       "covered": false,
       "score": 4.0,
-      "reason": "项目提到了人口老龄化严重，但未提供具体的TAM/SAM/SOM数据，竞品分析也较为简略。"
+      "reason": "项目未详细说明市场规模（TAM/SAM/SOM）及竞品分析。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
       "score": 3.0,
-      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV和CAC等。"
+      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "项目强调了纯视觉无接触感知、多模态融合预警等创新点，并提供了技术方案。"
+      "reason": "项目强调了基于rPPG技术的创新点，实现了无接触式健康监测，具有差异化优势。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
       "score": 4.0,
-      "reason": "项目未详细说明团队背景和执行能力，里程碑也未明确列出。"
+      "reason": "项目未详细描述团队背景及执行计划，里程碑不明确。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "项目策划书结构完整，描述清晰，但部分细节缺乏具体数据支撑。"
+      "reason": "项目策划书结构完整，描述清晰，但缺乏具体数据支撑。"
     }
   ],
   "risk_rule_details": [
@@ -193,106 +218,106 @@
       "id": "H1",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目目标用户与价值主张匹配，未发现明显错位。"
+      "evidence": "项目明确指出了目标用户与价值主张的匹配性。",
+      "reason": "项目目标用户与价值主张匹配良好。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目提出了多终端联动的获客渠道，未发现难以有效触达目标用户的情况。"
+      "evidence": "项目提出了多终端联动的解决方案，包括手机APP、桌面机、智能床头、机器人等。",
+      "reason": "项目提出的多终端联动方案有助于有效触达目标用户。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
-      "evidence": "智能硬件销售（智能床头、机器人）及APP增值会员服务",
-      "reason": "项目提到了智能硬件销售和APP增值会员服务，但未提供用户支付意愿的验证证据。"
+      "evidence": "项目提到智能硬件销售及APP增值会员服务，但未提供用户支付意愿的验证。",
+      "reason": "项目提到定价/收费但缺少用户支付意愿验证。"
     },
     {
       "id": "H4",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "人口老龄化严重",
-      "reason": "项目仅提到人口老龄化严重，但未提供具体的TAM/SAM/SOM数据，口径较为混乱。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未详细说明市场规模的口径，但未出现口径混乱的情况。",
+      "reason": "项目未详细说明市场规模口径，但未出现口径混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
       "severity": "high",
-      "evidence": "传统监测设备（如手环）佩戴率低、充电繁琐、易产生排斥感",
-      "reason": "项目描述了痛点，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+      "evidence": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。",
+      "reason": "项目缺乏用户访谈、问卷或其他需求验证证据。"
     },
     {
       "id": "H6",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "传统监测设备（如手环）佩戴率低、充电繁琐、易产生排斥感",
-      "reason": "项目提到传统监测设备的问题，但未详细对比现有竞品，竞品分析明显失真。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未声称无竞品，但未提供详细的竞品分析。",
+      "reason": "项目未声称无竞品，但竞品分析不充分。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目提供了纯视觉无接触感知、多模态融合预警等可验证的创新点。"
+      "evidence": "项目强调了基于rPPG技术的创新点，并提供了具体的技术实现方案。",
+      "reason": "项目创新点有具体的技术实现方案支撑。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
+      "evidence": "项目未提供具体的财务数据，但未出现明显的单位经济不成立的情况。",
+      "reason": "项目未提供财务数据，但未出现明显的单位经济不成立。"
     },
     {
       "id": "H9",
       "triggered": true,
       "severity": "medium",
-      "evidence": "只要拿下 1% 市场",
-      "reason": "项目在描述市场潜力时出现了‘只要拿下 1% 市场’等自上而下估算的表述。"
+      "evidence": "项目提到‘只要拿下1%市场’等自上而下的估算。",
+      "reason": "项目出现了自上而下的市场增长估算。"
     },
     {
       "id": "H10",
       "triggered": true,
       "severity": "medium",
-      "evidence": "时间表/里程碑明显不现实或缺少可交付物",
-      "reason": "项目未详细列出时间表和里程碑，缺少可交付物的具体描述。"
+      "evidence": "项目未详细描述团队背景及执行计划，里程碑不明确。",
+      "reason": "项目里程碑不明确，缺乏可交付物。"
     },
     {
       "id": "H11",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目未涉及高风险领域，未发现合规/伦理缺口。"
+      "evidence": "项目未涉及高风险领域的合规/伦理问题。",
+      "reason": "项目未涉及高风险领域的合规/伦理问题。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目技术路线合理，未发现技术路线与资源不匹配的情况。"
+      "evidence": "项目基于rPPG技术，技术路线与资源匹配。",
+      "reason": "项目技术路线与资源匹配。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目未提到具体的实验/测试，但未发现实验设计不合格的情况。"
+      "evidence": "项目未提到具体的实验/测试，但未出现实验设计不合格的情况。",
+      "reason": "项目未提到具体的实验/测试，但未出现实验设计不合格。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目策划书结构完整，未发现叙事断裂的情况。"
+      "evidence": "项目策划书结构完整，描述清晰。",
+      "reason": "项目策划书结构完整，描述清晰。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
-      "evidence": "多个关键 Rubric 维度缺乏支撑证据",
-      "reason": "项目在用户证据强度、市场与竞争、财务逻辑、团队与执行等多个关键维度缺乏充分的支撑证据。"
+      "evidence": "项目在多个关键Rubric维度（如用户证据强度、市场与竞争、团队与执行）缺乏支撑证据。",
+      "reason": "项目多个关键Rubric维度缺乏支撑证据。"
     }
   ]
 }

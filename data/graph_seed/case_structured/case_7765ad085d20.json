@@ -1,0 +1,339 @@
+{
+  "case_id": "case_7765ad085d20",
+  "document_id": "doc_e8fc28e0a864",
+  "source": {
+    "file_path": "社会公益/老年心理健康保健计划—新夕阳股份有限责任公司创业计划书.doc",
+    "file_name": "老年心理健康保健计划—新夕阳股份有限责任公司创业计划书.doc",
+    "category": "社会公益",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 2363,
+    "full_text_chars": 73693,
+    "core_text_chars": 68212,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 2364,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 2364,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "夕阳无限老年心理健康保健计划",
+    "target_users": [
+      "马上面临退休的老年人，因工作胜任感下降和角色转变而产生失落与焦虑的人群。",
+      "刚刚退休的老年人，因生活方式转变、身体机能衰退及人际疏远而面临适应困难和孤独感的人群。",
+      "退休后长期不适应、存在广泛性焦虑甚至轻度抑郁，心理机能持续衰减的老年人。"
+    ],
+    "pain_points": [
+      "退休前后社会角色转变导致失落、焦虑和不确定感，难以找到合适的新活动方式与社会角色。",
+      "生活方式由紧张转为清闲引发不适应，身体与心理机能（记忆、推理、理解）衰减导致敏感、焦虑和孤独感。",
+      "人际疏远和家庭关系问题加重孤独感，长期心境障碍可能引发冠心病、高血压等心身疾病。"
+    ],
+    "solution": [
+      "提供每月四次的团体咨询辅导课程，针对心理孤独、沟通障碍等主题，通过讨论与互动活动营造团体动力，促进老年人自我成长。",
+      "提供个体咨询辅导，包括家庭咨询、上门咨询和热线咨询三种形式，针对有心理问题的老年人进行个案性辅导与治疗。",
+      "运营老年俱乐部，每周一至五下午和晚上提供绘画、计算机、英语、膳食运动等团体活动，丰富老年人业余生活。"
+    ],
+    "innovation_points": [
+      "将团体咨询、个体咨询、认知干预和老年俱乐部有机整合，形成综合性的心理健康保健服务模式。",
+      "针对老年人特点改造传统咨询，运用认知老化干预方法、晚年抑郁的认知行为疗法等专业技术，并注重场所的舒适与亲切感设计。",
+      "通过活动、课程和俱乐部相结合的方式实现心理学技术的柔性护理，以老年人可接受的形式在寓教于乐中改善心理状态。"
+    ],
+    "business_model": [
+      "公司选择直营连锁方式运营，保证服务质量，树立良好形象，拟在未来五年内总计建立五家直营连锁店。",
+      "在价格方面，公司综合考虑各方面因素，制定了公司和顾客双方都能接受的较为合理的服务价格。",
+      "营销运用3P模型，依据政府政策支持，与非营利组织合作扩大影响力，与老年产品企业联盟提高行业发言权。"
+    ],
+    "market_analysis": [
+      "以北京地区为例，55-65岁非农业老年人口约73.7万人，保守估计因心理问题导致社会适应不良的老年人至少9.6万人。",
+      "竞品如老年大学缺乏心理干预且课程不灵活，敬老院仅关注生理健康且服务质量低，老年公馆收费昂贵且缺乏心理保养。",
+      "传统个体咨询不易被老年人接受且环境不符要求，传统团体咨询缺乏针对老年人团体动力的科学指导与认知老化干预。"
+    ],
+    "execution_plan": [
+      "公司采用直营连锁方式运营，计划在未来五年内总计建立五家直营连锁店，以保障服务质量和树立品牌形象。",
+      "发展初期采取体验营销策略打开目标市场，中长期采取品牌营销策略稳定并发展顾客，并始终执行会员制度与广告宣传。",
+      "人员方面将招聘专业化的心理咨询人员与亲切化的店堂服务人员，并通过技术培训、模拟演练等方式确保服务质量。"
+    ],
+    "risk_control": [
+      "【通用风险控制】公司面临资源、研发、市场、管理、生产、成本控制、竞争、财务、政策、破产等风险。",
+      "【通用风险控制】应对措施包括从人员、物品、金钱、制度等方面全盘定期进行风险评估，以财务管理、成本管理和预算管理为主进行风险防范，并建立科学的风险管理系统将风险控制在最低限度。"
+    ]
+  },
+  "tags": [
+    "category:社会公益",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_7765ad085d20_e1",
+      "type": "user_evidence",
+      "quote": "目标客户：过渡期老年人——马上面临退休的老年人、刚刚退休的老年人以及虽然退休很长时间但依然存在很多心理问题和不适应症状的老年人。",
+      "chunk_id": "C3",
+      "source_unit": "段落98"
+    },
+    {
+      "id": "case_7765ad085d20_e2",
+      "type": "business_model_evidence",
+      "quote": "公司选择直营连锁方式运营，保证服务质量，树立良好形象，拟在未来五年内总计建立五家直营连锁店。在价格方面，公司综合考虑各方面因素，制定了公司和顾客双方都能接受的较为合理的服务价格。",
+      "chunk_id": "C5",
+      "source_unit": "段落139"
+    },
+    {
+      "id": "case_7765ad085d20_e3",
+      "type": "business_model_evidence",
+      "quote": "营销运用3P模型——Public，Private，Partnership，即政府，非营利组织，联盟商。公司依据政府的政策支持，政策倾斜，并与非营利组织合作，扩大企业在老年人群体中的影响力，与老年产品企业联盟，提高行业发言权。",
+      "chunk_id": "C5",
+      "source_unit": "段落139"
+    },
+    {
+      "id": "case_7765ad085d20_e4",
+      "type": "risk_evidence",
+      "quote": "风险分析：根据公司经营活动的性质、经营方式和所处的社会、法律、政治环境，公司面临资源风险、研发风险、市场风险、管理风险、生产风险、成本控制风险、竞争风险、财务风险、政策风险、破产风险等诸多风险。应对措施：从人员、物品、金钱、制度等方面全盘定期进行风险评估。以财务管理、成本管理和预算管理为主，进行风险防范。建立科学的风险管理系统，将风险控制在最低限度，为公司稳固运营提供保障。",
+      "chunk_id": "C7",
+      "source_unit": "段落181"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "目 录 公司名称：新夕阳股份有限责任公司 公司宗旨：黄昏无限好，唯我新夕阳。 服务宗旨：寸草心献给父母，夕阳情挥洒晚年。 服务理念：真正的用爱关注，真正的用心服务。 企业愿景：最优质的老年服务，最过硬的老年品牌。 基本模式：公司将传统的团体咨询规划为几个主题定期为老年人提供干预，同时结合个 体咨询有针对性地解决老年人的个案问题，渐进式地改善离退休期老年人的心 理抑郁和心理孤独；公司将认知老化干预技术设置为课程模式，对离退休老年 人的推理、记忆和理解能力进行培训与强化，以加强老年人社会再适应、再学 习能力；为老年人提供俱乐部活动，在俱乐部中老年人可以享受有关养生、计 算机基础、英文知识、业余爱好等方面的培训，同时还为老年人提供运动、交 友的平台，以丰富老年人的业余生活，提高老年人的生活质量；公司将团体咨 询、个体咨询、认知干预和老年俱乐部有机的结合起来，促进老年人心境和基 本智能的双重改善，从而切实地提高老年人积极的生活态度和适应社会的基本 技能。公司充分挖掘心理学的多渠道服务方式，提高综合盈利能力，为公司的 长期经营打下基础，同时提高了抗风险能力。 老年心理保健计划为过渡期的老年人提供",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T15:28:49Z",
+  "分类": [
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "详细描述了老年人在退休前后面临的心理问题，包括失落、焦虑、孤独等，有具体的用户场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "没有提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出了团体咨询、个体咨询和老年俱乐部等多种解决方案，技术路线与资源匹配度较高。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 6.0,
+      "reason": "商业模式较为完整，包括服务定价、营销策略和直营连锁运营，但具体细节和闭环验证不足。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提供了市场估算和竞品分析，但竞品分析较为简略，缺乏深入对比。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "提到定价但未提供具体的财务模型和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "强调了针对老年人心理问题的创新解决方案，包括认知老化干预和团体动力营造。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到招聘专业人员和培训计划，但具体团队背景和执行里程碑不明确。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "BP 结构完整，服务理念和愿景清晰，但部分数据和逻辑需要进一步验证。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配度较高，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到与政府、非营利组织和老年产品企业合作，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "在价格方面，公司综合考虑各方面因素，制定了公司和顾客双方都能接受的较为合理的服务价格。",
+      "reason": "提到定价但未提供用户支付意愿的具体验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场规模估算较为合理，未发现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "马上面临退休的老年人，因工作胜任感下降和角色转变而产生失落与焦虑的人群。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提供了竞品分析，虽然较为简略，但未发现不可比的情况。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到了认知老化干预和团体动力营造等创新点，并有具体实施方案。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "公司选择直营连锁方式运营，保证服务质量，树立良好形象，拟在未来五年内总计建立五家直营连锁店。",
+      "reason": "未提供具体的财务模型，难以判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "公司选择直营连锁方式运营，保证服务质量，树立良好形象，拟在未来五年内总计建立五家直营连锁店。",
+      "reason": "时间表和里程碑较为模糊，缺乏具体可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未涉及高风险领域，未发现合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与项目现状匹配度较高。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提到实验/测试，因此不存在实验设计不合格的问题。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "BP 结构较为完整，未发现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "以北京地区为例，55-65岁非农业老年人口约73.7万人，保守估计因心理问题导致社会适应不良的老年人至少9.6万人。",
+      "reason": "多个关键 Rubric 维度（用户证据强度、财务逻辑、团队与执行）缺乏充分支撑证据。"
+    }
+  ]
+}

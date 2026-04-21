@@ -68,12 +68,48 @@
     "rubric:Business Model Consistency",
     "rubric:Market & Competition",
     "rubric:Innovation & Differentiation",
-    "rubric:Team & Execution",
     "rubric:Presentation Quality",
+    "risk_rule:H10",
     "risk_rule:H3",
     "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_83d252dd4946_e1",
+      "type": "user_evidence",
+      "quote": "初期目标市场为沿海地区旅客吞吐量较大的的机场等，以保护其免受无人机‘黑飞’的威胁。中长期目标将扩展到全国一二线城市地区的机场、政府机关大楼、大型企业等重要场所甚至私人豪宅",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_83d252dd4946_e2",
+      "type": "user_evidence",
+      "quote": "无人机‘黑飞’、‘滥飞’事件频发，严重危害个人隐私安全、公共场所安全、航空安全以及国家安全",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_83d252dd4946_e3",
+      "type": "business_model_evidence",
+      "quote": "目前的反无人机设备大多采用单一传感器，或使用大功率的雷达进行探测。但前者功能单一、探测距离及精度非常有限，而后者由于雷达的成本过高，辐射功率过大，实际应用场景受限",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_83d252dd4946_e4",
+      "type": "business_model_evidence",
+      "quote": "该系统融合了音频、视频、射频三种探测技术以及电子干扰技术，同时具备检测、定位、识别和反制无人机的能力",
+      "chunk_id": "C2",
+      "source_unit": "page_9"
+    },
+    {
+      "id": "case_83d252dd4946_e5",
+      "type": "business_model_evidence",
+      "quote": "根据市场研究机构 Markets&Markets 发布的‘反无人机市场报告’预测，反无人机市场的年复合增长率已经达到 24%，到 2022 年，反无人机市场总额将达到 11.4 亿美元，其中，亚太地区的反无人机系统需求将占全球市场的 30%",
+      "chunk_id": "C2",
+      "source_unit": "page_9"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -105,7 +141,7 @@
     },
     {
       "rubric_item": "Team & Execution",
-      "covered": true
+      "covered": false
     },
     {
       "rubric_item": "Presentation Quality",
@@ -123,6 +159,7 @@
   "engine": "hypernetx",
   "generated_at": "2026-03-29T10:39:54Z",
   "risk_flags": [
+    "H10",
     "H3",
     "H5"
   ],
@@ -131,55 +168,55 @@
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "文本详细描述了无人机‘黑飞’威胁剧增的问题，以及现有探测技术的不足，包括单一探测技术易漏判、夜间或复杂天气下识别率低等。"
+      "reason": "项目明确指出了无人机‘黑飞’、‘滥飞’对个人隐私、公共场所、航空及国家安全的威胁，且有具体场景支撑。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
-      "score": 2.0,
-      "reason": "文本中没有提供具体的用户访谈、问卷或其他需求验证证据。"
+      "score": 3.0,
+      "reason": "项目未提供用户访谈、问卷或其他需求验证的具体证据。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "文本描述了多源异类传感器融合技术、智能干扰反制、四位一体探测架构、基于深度学习的目标识别等技术方案，但未详细说明资源匹配情况。"
+      "reason": "项目提出了多源异类传感器融合技术，包括声纹识别、射频监测、视频检测与雷达探测，以及智能干扰反制技术，技术路线较为合理。"
     },
     {
       "item": "Business Model Consistency",
       "covered": true,
       "score": 7.0,
-      "reason": "文本提到了客户（政府及核心要害部门、低空隐私敏感的个人）、价值主张（高性价比、全时域反无人机专家）、渠道（安防代理渠道及政务招投标）、营收（未具体提及）、成本（成本较国外系统降低40%）。"
+      "reason": "项目定位为‘高性价比、全时域反无人机专家’，目标市场明确，通过安防代理渠道及政务招投标实现品牌铺开，商业模式较为一致。"
     },
     {
       "item": "Market & Competition",
       "covered": true,
       "score": 8.0,
-      "reason": "文本描述了反无人机市场的行业机遇，预计将迎来千亿级爆发期，并提到了竞争优势和技术壁垒。"
+      "reason": "项目引用了市场研究机构的数据，预测反无人机市场将快速增长，且分析了现有设备的不足，突出了自身竞争优势。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
-      "score": 3.0,
-      "reason": "文本中未具体提及单位经济模型，也未提供LTV、CAC等财务指标。"
+      "score": 4.0,
+      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV、CAC 等。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
-      "score": 8.0,
-      "reason": "文本强调了多模态融合算法、声-视联动算法等创新点，并提到了成本优势。"
+      "score": 9.0,
+      "reason": "项目强调了多模态融合算法、‘声-视’联动算法等创新点，且有具体技术实现描述。"
     },
     {
       "item": "Team & Execution",
-      "covered": true,
-      "score": 7.0,
-      "reason": "文本提到了专业研发团队，并描述了研发迭代、试点验证、规模推广等清晰的里程碑。"
+      "covered": false,
+      "score": 5.0,
+      "reason": "项目提到技术依托专业研发团队，但未具体介绍团队成员背景及执行计划的里程碑。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "文本结构完整，描述了项目背景、技术方案、市场分析、商业模式和执行计划。"
+      "reason": "项目材料结构较为完整，引用了市场研究数据，但未提供详细的财务分析。"
     }
   ],
   "risk_rule_details": [
@@ -187,106 +224,106 @@
       "id": "H1",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中提到目标用户为政府及核心要害部门、低空隐私敏感的个人，价值主张为高性价比、全时域反无人机专家，两者匹配。",
-      "reason": "目标用户与价值主张匹配。"
+      "evidence": "项目定位为‘高性价比、全时域反无人机专家’，目标市场明确为机场、政府机关大楼、大型企业等重要场所。",
+      "reason": "目标用户与价值主张匹配，未见明显错位。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中提到通过安防代理渠道及政务招投标实现全国范围内的品牌铺开。",
-      "reason": "主要获客渠道明确。"
+      "evidence": "项目计划通过安防代理渠道及政务招投标实现品牌铺开。",
+      "reason": "主要获客渠道明确，未见难以触达目标用户的情况。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
-      "evidence": "文本中提到成本较国外系统降低40%，但未提供用户支付意愿验证。",
-      "reason": "提到成本优势但缺少用户支付意愿验证。"
+      "evidence": "项目提到定价/收费但未提供用户支付意愿验证的具体证据。",
+      "reason": "项目未提供用户支付意愿验证的证据。"
     },
     {
       "id": "H4",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中描述了反无人机市场的行业机遇，预计将迎来千亿级爆发期，并提到了TAM/SAM/SOM的合理口径。",
-      "reason": "市场规模口径合理。"
+      "evidence": "项目引用了市场研究机构的数据，预测反无人机市场将快速增长，且分析了现有设备的不足。",
+      "reason": "市场规模口径合理，未见混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
       "severity": "high",
-      "evidence": "文本中没有提供具体的用户访谈、问卷或其他需求验证证据。",
-      "reason": "缺乏用户需求验证证据。"
+      "evidence": "项目未提供用户访谈、问卷或其他需求验证的具体证据。",
+      "reason": "缺乏用户需求验证的具体证据。"
     },
     {
       "id": "H6",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中提到了竞争优势和技术壁垒，但未声称无竞品。",
-      "reason": "竞品分析合理。"
+      "evidence": "项目分析了现有设备的不足，突出了自身竞争优势。",
+      "reason": "竞品分析较为客观，未见明显失真。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中提到了多模态融合算法、声-视联动算法等创新点，并描述了技术方案。",
-      "reason": "创新点有技术方案支撑。"
+      "evidence": "项目强调了多模态融合算法、‘声-视’联动算法等创新点，且有具体技术实现描述。",
+      "reason": "创新点有具体技术实现描述，可验证。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中未具体提及单位经济模型，但未提供证据表明LTV <= CAC或长期亏损。",
-      "reason": "缺乏单位经济模型的具体描述。"
+      "evidence": "项目未提供具体的财务数据，但未见明显的单位经济不成立的描述。",
+      "reason": "未见明显的单位经济不成立的描述。"
     },
     {
       "id": "H9",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中描述了从研发迭代到试点验证再到规模推广的详细计划，未出现‘只要拿下1%市场’等自上而下估算。",
-      "reason": "增长逻辑合理。"
+      "evidence": "项目未出现‘只要拿下 1% 市场’等自上而下估算的描述。",
+      "reason": "未见明显的增长逻辑跳跃。"
     },
     {
       "id": "H10",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "文本中描述了研发迭代、试点验证、规模推广等清晰的里程碑。",
-      "reason": "里程碑清晰可交付。"
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目提到研发迭代期、试点验证期、规模推广期，但未提供具体的时间表和可交付物。",
+      "reason": "里程碑描述较为笼统，缺乏具体的时间表和可交付物。"
     },
     {
       "id": "H11",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中未涉及隐私、医疗、金融等高风险领域。",
-      "reason": "不涉及高风险领域。"
+      "evidence": "项目未涉及隐私、医疗、金融等高风险领域。",
+      "reason": "项目未涉及高风险领域，未见合规/伦理缺口。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中描述了多源异类传感器融合技术、智能干扰反制等技术方案，未提及其对资源要求超出项目现状。",
-      "reason": "技术路线与资源匹配。"
+      "evidence": "项目提出了多源异类传感器融合技术，技术路线较为合理，未见明显资源不匹配。",
+      "reason": "技术路线与资源匹配，未见明显问题。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中提到在特定机场或监狱开展实地挂网测试，获取真实场景下的探测数据，但未详细说明样本量与评价指标。",
-      "reason": "实验设计合理，但细节不足。"
+      "evidence": "项目提到实地挂网测试，但未详细描述样本量与评价指标。",
+      "reason": "实验设计描述较为笼统，但未见明显不合格。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本结构完整，描述了项目背景、技术方案、市场分析、商业模式和执行计划。",
-      "reason": "路演叙事结构完整。"
+      "evidence": "项目材料结构较为完整，未见叙事断裂。",
+      "reason": "路演叙事结构较为完整，未见明显断裂。"
     },
     {
       "id": "H15",
       "triggered": false,
       "severity": "low",
-      "evidence": "文本中大部分关键Rubric维度均有较充分的证据支撑。",
-      "reason": "关键维度覆盖较充分。"
+      "evidence": "项目在多个关键 Rubric 维度提供了较充分的证据。",
+      "reason": "项目在多个维度提供了较充分的证据，未见明显覆盖不足。"
     }
   ],
   "分类": [

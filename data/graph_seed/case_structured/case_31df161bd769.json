@@ -1,0 +1,322 @@
+{
+  "case_id": "case_31df161bd769",
+  "document_id": "doc_680564b3435e",
+  "source": {
+    "file_path": "金融经济/贸易公司商业企划书.doc",
+    "file_name": "贸易公司商业企划书.doc",
+    "category": "金融经济",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 244,
+    "full_text_chars": 6717,
+    "core_text_chars": 6013,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 245,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 245,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "贸易公司",
+    "target_users": [
+      "如何建设公司外贸形象，可以由委托专业的网络公司、广告公司按照客户的旨意进行设计、策划，当然公司外贸形象的建设，也是逐步发展，不断完善的，不可能一步到位。",
+      "上海市外贸行业协会现有会员在5000家企业左右（包括浦东新区外贸协会），外贸协会的主要功能为企业提供市场最新动态，邀请相关主管部门，如海关、税务、商检、外汇局主",
+      "由于外贸协会和政府的关系密切，在企业遭受困难，由协会出面， 有利于困难顺利解决；",
+      "另外，随着国际贸易争端纷起，反倾销案件的增多，在外贸"
+    ],
+    "pain_points": [
+      "际注意事项等。",
+      "由于外贸协会和政府的关系密切，在企业遭受困难，由协会出面， 有利于困难顺利解决；",
+      "另外，随着国际贸易争端纷起，反倾销案件的增多，在外贸协会的组织下的积极应诉，据统计获胜的案件很多。",
+      "产品部：主要负责产品管理及下单生产、寻找供应商交接沟通、临时调配主要配合营运部运作。"
+    ],
+    "solution": [],
+    "innovation_points": [],
+    "business_model": [
+      "公司基本要求应该是业务熟练，专业知识强，服务效率高，收费合理。",
+      "由于外贸公司的日常邮件多，费用较大，选择合适的国际快递公司可以有效节约费用。",
+      "通过对全球主要快递公司的考察，UPS收费相对便宜（可以打折到73%），时间上也比较快，一般在2-3个工作日可以到达全球各地。",
+      "唯一的缺点是货物的重量由UPS在事后帐单中告之。",
+      "公司形象是开拓外贸业务时公司的“名片”，外商往往是通过企业形象来逐渐了解其未来合作伙伴的。",
+      "一个有实力，让外商感觉可信赖的公司，不仅可以加快合作的进程，而且也有利于将来业务量的不断拓展。"
+    ],
+    "market_analysis": [
+      "具有竞争性，回报率也较高。",
+      "国际市场的开拓，是一个企业的实力的体现。",
+      "国内比较有影响的生产型或贸易性企业，都积极、连续性的参加有影响的国际会展，以抢占市场份额。",
+      "当然，参展会展，必须精心准备，包括赠送给客户的样品、公司的产品介绍资料、人员的素质，都要高标准、严要求。",
+      "②、政府组团。",
+      "参加国外区域性会展。"
+    ],
+    "execution_plan": [
+      "外贸平台建设涉及工商、税务、海关、外汇局、商检局等行政机关的注册登记，整个流程办理约需2个月时间。",
+      "创业初期业务量不大，可一人多职，例如业务员可负责单证处理。"
+    ],
+    "risk_control": [
+      "【通用风险控制】针对新客户寄样产生高额国际快递费用的风险，计划根据具体情况采取运费到付方式，以考察对方诚意，因为真正采购商通常不在意支付快递费。",
+      "【通用风险控制】针对打样成本增加的风险，计划向客户预先收取打样费，待将来正式下单后视情况扣除该笔费用，以控制成本并对双方有利。"
+    ]
+  },
+  "tags": [
+    "category:金融经济",
+    "education_level:unknown",
+    "doc_type:doc",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Team & Execution",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H7"
+  ],
+  "evidence": [
+    {
+      "id": "case_31df161bd769_e1",
+      "type": "risk_evidence",
+      "quote": "但是对于一些新客户，根据具体情况，可以采取到付的方法。这样做的好处可以考察对方是否真正有诚意。因为真正的采购商一般不会在意支付快递费用的。",
+      "chunk_id": "C8",
+      "source_unit": "段落184"
+    },
+    {
+      "id": "case_31df161bd769_e2",
+      "type": "risk_evidence",
+      "quote": "由于打样不是大批量生产，往往产生原料的大量浪费，使得打样成本增加；如果客户要求打样的定单较多，累计费用也是一笔大的投入。对此，我们可以向客户预先收取打样费；待将来正式下定单后，我们可以视情况扣除该笔打样费用，这样对双方都有利。",
+      "chunk_id": "C8",
+      "source_unit": "段落184"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": false
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": false
+    }
+  ],
+  "summary": "贸易公司创办商业企划书 装修：2万-5万 办公使用物品3万-6万（含展厅展柜） 公司注册费用：5万 周转资金：15万-20万 二．外贸平台的建设 外贸平台的建设涉及以下领域： 行政机关的注册、登记。包括工商、税务、海关、外汇局、商检局完成相关手续的 办理；整个流程办理结束大概2个月时间。 （负责核销、退税）、单证员，质检员组成。人员的数量依据业务量而定；在公 司创业初期，由于业务量不大，可以一人多职，如业务员可以负责单证的处理。 从实际操作看，目前大多数外贸公司的相关业务都是委托中介公司来完成的，如 货物的进出口报关，商品法定检验及办理货物运输保险，可以省时省事。但选择合适 的中介公司对外贸公司非常重要；好的中介公司可以促进外贸业务的发展。选择中介 公司基本要求应该是业务熟练，专业知识强，服务效率高，收费合理。 由于外贸公司的日常邮件多，费用较大，选择合适的国际快递公司可以有效节约 费用。通过对全球主要快递公司的考察，UPS收费相对便宜（可以打折到73%），时间 上也比较快，一般在2-3个工作日可以到达全球各地。唯一的缺点是货物的重量 由UPS在事后帐单中告之。 公司形象是开拓外贸业务",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:18:49Z",
+  "分类": [
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
+  ],
+  "risk_flags": [
+    "H14",
+    "H15",
+    "H3",
+    "H5",
+    "H7"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提到了公司形象建设和国际快递费用节约等需求，但缺乏具体用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "没有提供用户访谈、问卷或其他需求验证的原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "提出了通过专业公司设计公司形象和选择合适的国际快递公司来解决问题，方案合理。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到了公司形象和国际快递的选择，但未形成完整的商业模式闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 5.0,
+      "reason": "提到了外贸协会的会员数量和国际会展，但缺乏对市场和竞争对手的具体分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到了一些成本节约措施，但未提供详细的财务逻辑和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提到具体的创新点或差异化优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提到了团队的初步构架和职责分配，但未详细说明团队成员的具体能力和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": false,
+      "score": 5.0,
+      "reason": "材料结构较为完整，但缺乏具体数据和说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到了通过外贸协会和国际会展等渠道触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "公司基本要求应该是业务熟练，专业知识强，服务效率高，收费合理。",
+      "reason": "提到了收费合理，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现市场规模口径混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "公司形象是开拓外贸业务时公司的“名片”，外商往往是通过企业形象来逐渐了解其未来合作伙伴的。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证的原始证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未声称无竞品或无竞争对手，但竞品分析不足。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "具有竞争性，回报率也较高。",
+      "reason": "强调了竞争性和高回报率，但未提供可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提供足够的财务数据来判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现自上而下估算的情况。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到了初步的团队构架和职责分配，但未详细说明里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未涉及高风险领域的合规或伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提到技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提到实验或测试的具体设计。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "贸易公司创办商业企划书 装修：2万-5万 办公使用物品3万-6万（含展厅展柜） 公司注册费用：5万 周转资金：15万-20万",
+      "reason": "材料结构较为完整，但部分信息跳跃，如成本估算与具体业务之间的联系不明确。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "公司形象是开拓外贸业务时公司的“名片”，外商往往是通过企业形象来逐渐了解其未来合作伙伴的。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、商业模式一致性、市场与竞争等。"
+    }
+  ]
+}

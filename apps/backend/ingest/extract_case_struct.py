@@ -1268,10 +1268,12 @@ def build_case_record(
     core = filter_noisy_segments(core_segments(parsed, appendix_idx))
     core_text = text_from_segments(core)
 
-    # 保护性回退：当 appendix_start_index 过小导致正文几乎全部被当作附录时，
-    # 退回到“整篇文档作为核心正文”，避免只剩封面/目录这类极短文本。
+    # 保护性回退：
+    # 1. PDF：当 appendix_start_index 过小导致正文几乎全部被当作附录时，退回到 full_text
+    # 2. DOC：如果 core_text 过短（<500），也退回到 full_text
     full_len = len(full_text)
     core_len = len(core_text)
+    fallback_needed = False
     if (
         appendix_idx is not None
         and detected_doc_type == "pdf"
@@ -1279,9 +1281,14 @@ def build_case_record(
         and core_len < 1000
         and (full_len == 0 or core_len < 0.15 * full_len)
     ):
+        fallback_needed = True
+    # doc 类型特殊回退逻辑
+    if detected_doc_type == "doc" and core_len < 500 and full_len > core_len:
+        fallback_needed = True
+    if fallback_needed:
         print(
-            f"  [warn] appendix_start_index={appendix_idx} cuts too much content for {row.get('file_path', '')} "
-            f"(core_chars={core_len}, full_chars={full_len}), fallback to full document as core.",
+            f"  [warn] fallback to full document as core for {row.get('file_path', '')} "
+            f"(core_chars={core_len}, full_chars={full_len}, doc_type={detected_doc_type})",
             flush=True,
         )
         core = filter_noisy_segments(parsed.segments)

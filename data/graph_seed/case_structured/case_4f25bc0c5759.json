@@ -1,0 +1,330 @@
+{
+  "case_id": "case_4f25bc0c5759",
+  "document_id": "doc_ffb2f3e2eba6",
+  "source": {
+    "file_path": "文旅文创/湖北工业大学  书画艺术品电子商务系统项目计划书.docx",
+    "file_name": "湖北工业大学  书画艺术品电子商务系统项目计划书.docx",
+    "category": "文旅文创",
+    "doc_type": "docx",
+    "parse_quality": "B",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 722,
+    "full_text_chars": 43148,
+    "core_text_chars": 1410,
+    "appendix_start_index": 177,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 723,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 723,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "书画艺术品电子商务系统",
+    "target_users": [
+      "未成名的书画艺术家，特别是每年约40万的高校美术毕业生",
+      "艺术品消费市场上数量日益庞大的中低档收入人群"
+    ],
+    "pain_points": [
+      "传统书画艺术品销售渠道（如拍卖会、画廊）交易成本高、销售半径小、交易手续繁琐",
+      "互联网艺术品销售渠道存在艺术品真伪难辨、市场信用缺失、网络安全性差、定价过高的问题",
+      "以上两种渠道均聚焦书画艺术品高端市场，忽视了未成名艺术家和中低档收入人群"
+    ],
+    "solution": [
+      "创办《艺术+》杂志，包装宣传400余名艺术家",
+      "建立由认证系统和交易平台组成的书画艺术品电子商务系统",
+      "认证系统通过第三方公证和公司认证保证画源独一无二且具真实性",
+      "交易平台以网络为依托实现书画艺术品的展示和售卖，并已申请软件著作权"
+    ],
+    "innovation_points": [
+      "聚焦被忽视的未成名艺术家和中低档艺术品消费市场",
+      "建立包含第三方公证和公司认证的认证系统，解决艺术品网络销售中的真伪与信用问题"
+    ],
+    "business_model": [
+      "前端市场为未成名的艺术家，后端市场为中低档收入的顾客群",
+      "核心收入来源于书画艺术品销售，采用先销售后向艺术家付款的模式，例如以平均50元/平尺购入，400元/平尺售出",
+      "计划出让15%的股份，引进400万元风险投资"
+    ],
+    "market_analysis": [
+      "书画艺术品市场存在高端市场渠道成本高、互联网渠道信用缺失等痛点，中低端市场存在巨大空白",
+      "目标细分市场为未成名艺术家（年约40万高校美术毕业生）和中低档收入艺术品消费人群",
+      "项目上线一个月销售700平尺，营业额28万元，验证了中低档市场的消费潜力"
+    ],
+    "execution_plan": [
+      "2014年4月底至6月初，项目上线运营一个月，完成初步销售验证",
+      "2015年计划引进风险投资，并与北京、上海、浙江、江苏四地艺术家签约",
+      "2016年计划与广东、辽宁、河南、陕西四地艺术家签约，累积签约艺术家目标达5000人以上",
+      "2018年规划在纽约、巴黎、伦敦等城市签约艺术家并建立仓库",
+      "2021年计划完成股份制改造并实现上市"
+    ],
+    "risk_control": [
+      "【通用风险控制】2015年元月，公司计划出让15%的股份，引进深圳达晨创业投资有限公司400万元风险资金，计划2015年与北京、上海、浙江、江苏4地的艺术家签约。"
+    ]
+  },
+  "tags": [
+    "category:文旅文创",
+    "education_level:unknown",
+    "doc_type:docx",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:User Evidence Strength",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Financial Logic",
+    "rubric:Innovation & Differentiation",
+    "rubric:Team & Execution",
+    "rubric:Presentation Quality",
+    "risk_rule:H6",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_4f25bc0c5759_e1",
+      "type": "user_evidence",
+      "quote": "完全忽视了不计其数的未成名书画艺术家（以每年40万左右的高校美术毕业生为主）和艺术品消费市场上数量日益庞大的中低档收入人群。",
+      "chunk_id": "C1",
+      "source_unit": "paragraph_6"
+    },
+    {
+      "id": "case_4f25bc0c5759_e2",
+      "type": "business_model_evidence",
+      "quote": "公司前端市场为未成名的艺术家，后端市场为中低档收入的顾客群。2014年4月底至6月初，项目上线运营1个月，项目产品共计销售700平尺，平均售价400元/平尺（购入价平均50元/平尺，售出后再向艺术家付款），共计营业额28万元，产品实现营业利润10.75万元。",
+      "chunk_id": "C2",
+      "source_unit": "paragraph_33"
+    },
+    {
+      "id": "case_4f25bc0c5759_e3",
+      "type": "business_model_evidence",
+      "quote": "2015年元月，公司计划出让15%的股份，引进深圳达晨创业投资有限公司400万元风险资金",
+      "chunk_id": "C2",
+      "source_unit": "paragraph_33"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": true
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": true
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": true
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "保密协议 本项目计划书属商业机密，所有权属于湖北壹峰文化传媒有限公司。其所涉及内容和资料只限于已签署投资意向的投资者使用。收到本计划书后，收件人应即刻确认，并遵守以下的规定： 湖北壹峰文化传媒有限公司 2014年4月 摘 要 湖北壹峰文化传媒有限公司成立于2009年，注册资金为300万元人民币。其中本校已毕业学生黄缙自筹120万元入股，占40%股份，在校学生蔡青投入资金90万元入股，占30%股份，导师周峰现金入股90万元，占30%股份。公司成立初期主要业务为：家装设计、平面设计、广告设计等。自2013年12月底，公司营业额84.8万元，公司净资产339.42万元。在公司运营中尤其是在家装设计中，绝大部分客户都要求将中低档价位的书画艺术品设计到家装之中以提高家装品味。公司敏感的发现了这一新的市场需求，于2013年下半年年底，公司将经营重点转向书画艺术品销售。 书画艺术品，不同于可无限复制的书画工艺品，它是艺术家独特灵感的体现，具有非再生性、唯一性，以及很高的收藏价值。当今书画艺术品销售渠道主要有以下两种：一是以纸媒体、拍卖会展会、画廊等为代表的传统销售渠道，此类销售渠道存在交易成本高，销",
+  "confidence": 0.7,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:13:39Z",
+  "分类": [
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H6",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了传统书画艺术品销售渠道和互联网销售渠道存在的问题，以及中低端市场的空白。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了上线一个月的销售数据，验证了中低档市场的消费潜力。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了认证系统和交易平台的解决方案，并已申请软件著作权。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目描述了前端市场为未成名艺术家，后端市场为中低档收入顾客群，收入来源于书画艺术品销售。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目分析了书画艺术品市场的高端渠道和互联网渠道的问题，但未详细说明竞品情况。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提供了初步的销售数据和利润情况，但未详细说明长期的财务模型。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目强调了认证系统和交易平台的创新点，但未提供详细的验证数据。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目团队成员背景较为清晰，但里程碑计划较为宏大，需进一步验证。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构较为完整，提供了初步的销售数据和未来规划。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目明确描述了目标用户和价值主张的匹配。",
+      "reason": "项目描述了目标用户和价值主张的匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了通过网络平台和杂志宣传的方式触达目标用户。",
+      "reason": "项目提出了有效的获客渠道。"
+    },
+    {
+      "id": "H3",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了初步的销售数据，验证了用户支付意愿。",
+      "reason": "项目提供了初步的销售数据，验证了用户支付意愿。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目描述了目标市场的规模和细分市场。",
+      "reason": "项目描述了目标市场的规模和细分市场，未发现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了上线一个月的销售数据，验证了市场需求。",
+      "reason": "项目提供了初步的销售数据，验证了市场需求。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目未详细说明竞品情况，仅提到传统渠道和互联网渠道的问题。",
+      "reason": "项目未详细说明竞品情况，仅提到传统渠道和互联网渠道的问题。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了认证系统和交易平台的创新点，并提供了初步的销售数据。",
+      "reason": "项目提出了认证系统和交易平台的创新点，并提供了初步的销售数据。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了初步的销售数据和利润情况，显示单位经济成立。",
+      "reason": "项目提供了初步的销售数据和利润情况，显示单位经济成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "项目计划在2018年扩展到国际城市，但未详细说明增长逻辑。",
+      "reason": "项目计划在2018年扩展到国际城市，但未详细说明增长逻辑。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了详细的里程碑计划，包括签约艺术家和融资计划。",
+      "reason": "项目提供了详细的里程碑计划，包括签约艺术家和融资计划。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未涉及高风险领域，未发现合规/伦理缺口。",
+      "reason": "项目未涉及高风险领域，未发现合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提出了认证系统和交易平台的技术方案，未发现技术路线与资源不匹配。",
+      "reason": "项目提出了认证系统和交易平台的技术方案，未发现技术路线与资源不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提供了初步的销售数据，未提到实验设计。",
+      "reason": "项目提供了初步的销售数据，未提到实验设计。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目材料结构较为完整，提供了初步的销售数据和未来规划。",
+      "reason": "项目材料结构较为完整，提供了初步的销售数据和未来规划。"
+    },
+    {
+      "id": "H15",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目在多个关键 Rubric 维度提供了较充分的证据。",
+      "reason": "项目在多个关键 Rubric 维度提供了较充分的证据。"
+    }
+  ]
+}

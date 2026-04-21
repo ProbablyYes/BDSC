@@ -16,7 +16,6 @@ from typing import Any
 
 import hypernetx as hnx
 from app.services.document_parser import ParsedDocument, TextSegment, parse_document
-import textract
 
 @dataclass
 class DocumentNode:
@@ -76,6 +75,13 @@ class HypergraphDocument:
         import re
         suffix = file_path.suffix.lower()
         if suffix == ".doc":
+            try:
+                import textract  # type: ignore
+            except ImportError as exc:  # pragma: no cover - optional dependency path
+                raise RuntimeError(
+                    "Parsing legacy .doc files requires the optional 'textract' dependency. "
+                    "Install the legacy-doc requirements first."
+                ) from exc
             # textract returns bytes
             text = textract.process(str(file_path)).decode("utf-8", errors="ignore")
             # Minimal ParsedDocument mockup for .doc

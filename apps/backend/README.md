@@ -26,6 +26,19 @@ uv run uvicorn app.main:app --reload --port 8000
 
 > 如果看到 `tool.uv.dev-dependencies` 的 warning，说明是旧字段提示。项目已升级为 `dependency-groups.dev`，可忽略旧终端中残留提示。
 
+如果服务器侧更习惯 `pip` / `requirements.txt` 部署，也可以直接使用：
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+可选依赖文件：
+
+- `requirements.txt`：后端核心依赖，适合默认部署
+- `requirements-all.txt`：包含 OCR / PDF 导出等可选能力
+- `requirements-legacy-doc.txt`：仅用于老式 `.doc` 解析；由于 `textract` 与现代 `pip/uv` 兼容性较差，默认部署不建议安装
+
 ## 当前内置 4 个 Agent
 
 1. `student_learning` 学习导师

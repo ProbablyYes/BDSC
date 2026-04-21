@@ -2725,6 +2725,49 @@ _PROJECT_FACT_GROUNDING_SIGNALS = frozenset([
 ])
 
 
+def _build_cumulative_corpus(
+    state: "WorkflowState",
+    current_msg: str,
+    cap: int = 6000,
+    history_limit: int = 24,
+) -> tuple[str, list[str], int]:
+    """跨轮累积语料构建器（为 run_diagnosis / 超图 提供统一输入）。
+
+    取最近 history_limit 条对话消息中所有角色=user 的原文，按时间顺序拼接，
+    并追加当轮 current_msg。总字符数超过 cap 时截取最近 cap 字符（保留近因）。
+    同时顺带收集最近 3 轮的 diagnosis.project_stage，用于阶段投票。
+
+    返回 (cumulative_text, stage_history, turn_count)
+    """
+    parts: list[str] = []
+    stage_hist: list[str] = []
+    msgs = state.get("conversation_messages") if isinstance(state, dict) else None
+    if not isinstance(msgs, list):
+        msgs = []
+    for hm in msgs[-history_limit:]:
+        if not isinstance(hm, dict):
+            continue
+        if hm.get("role") == "user":
+            txt = str(hm.get("content", "") or "").strip()
+            if txt:
+                parts.append(txt)
+        trace = hm.get("agent_trace") if isinstance(hm, dict) else None
+        if isinstance(trace, dict):
+            diag = trace.get("diagnosis")
+            if isinstance(diag, dict):
+                ps = diag.get("project_stage")
+                if ps:
+                    stage_hist.append(str(ps))
+    current_msg = str(current_msg or "").strip()
+    if current_msg:
+        parts.append(current_msg)
+    turn_count = len(parts)
+    corpus = "\n".join(parts)
+    if len(corpus) > cap:
+        corpus = corpus[-cap:]
+    return corpus, stage_hist[-3:], turn_count
+
+
 def _merge_historical_entities(
     current_entities: list[dict],
     current_rels: list[dict],
@@ -2837,26 +2880,40 @@ def gather_context_node(state: WorkflowState) -> dict:
 
     comp_type = state.get("competition_type", "")
     struct_signals = state.get("structured_signals") or {}
+
+    cumulative_text, stage_hist, corpus_turn_count = _build_cumulative_corpus(state, msg)
     diag_obj = run_diagnosis(
-        input_text=msg,
+        input_text=cumulative_text,
         mode=mode,
         competition_type=comp_type,
         structured_signals=struct_signals,
+        current_text=msg,
+        stage_history=stage_hist,
     )
     diag_data: dict = diag_obj.diagnosis
     next_task: dict = diag_obj.next_task
-    cat = infer_category(msg)
+    try:
+        diag_data.setdefault("corpus_meta", {
+            "turns": int(corpus_turn_count),
+            "chars": len(cumulative_text),
+            "stage_history": list(stage_hist),
+        })
+    except Exception:
+        pass
+    cat = infer_category(cumulative_text or msg)
     rules = diag_data.get("triggered_rules", []) or []
     rule_ids = [r.get("id", "") for r in rules if isinstance(r, dict)]
-    top_rule = _top_triggered_rule(diag_data, msg)
+    top_rule = _top_triggered_rule(diag_data, cumulative_text or msg)
     top_fallacy = str(top_rule.get("fallacy_label") or "")
     # v2: merge rule-derived families + intent-derived + keyword-derived so all 77
     # hyperedge families have retrieval paths instead of only top_rule's subset.
+    # Cross-turn stability: edge family routing consumes cumulative text so the
+    # hypergraph doesn't flip when the current round is a short follow-up.
     from app.services.diagnosis_engine import get_preferred_edge_families
     preferred_edge_types = get_preferred_edge_families(
         rule_ids=rule_ids,
         intent=intent,
-        message=msg,
+        message=cumulative_text or msg,
     )
     if not preferred_edge_types:
         preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])

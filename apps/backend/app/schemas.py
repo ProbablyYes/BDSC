@@ -112,6 +112,7 @@ class ProjectSnapshotResponse(BaseModel):
     project_id: str
     latest_student_submission: dict | None = None
     teacher_feedback: list[dict] = Field(default_factory=list)
+    video_analyses: list[dict] = Field(default_factory=list)
     graph_signals: dict = Field(default_factory=dict)
 
 
@@ -249,6 +250,11 @@ class AuthPasswordChangePayload(BaseModel):
     email: str = Field(min_length=1, max_length=100)
     current_password: str = Field(min_length=6, max_length=64)
     new_password: str = Field(min_length=6, max_length=64)
+
+
+class SetStudentIdPayload(BaseModel):
+    user_id: str = Field(min_length=1, max_length=128)
+    student_id: str = Field(min_length=4, max_length=32, pattern=r"^[A-Za-z0-9_-]{4,32}$")
 
 
 class AuthUserResponse(BaseModel):
@@ -446,3 +452,140 @@ class BudgetAISuggestPayload(BaseModel):
 
 class BudgetAIChatPayload(BaseModel):
     question: str = ""
+
+
+# ── Business Plan ─────────────────────────────────────────────────────
+
+class BusinessPlanGeneratePayload(BaseModel):
+    project_id: str
+    student_id: str = ""
+    conversation_id: str = ""
+    allow_low_confidence: bool = False
+    # 生成模式：coursework（课程辅导）、competition（竞赛冲刺）、learning（项目教练）
+    mode: Literal["coursework", "competition", "learning"] = "learning"
+
+
+class BusinessPlanSectionUpdatePayload(BaseModel):
+    content: str = ""
+    field_map: dict = Field(default_factory=dict)
+    display_title: str | None = None
+
+
+class BusinessPlanExportPayload(BaseModel):
+    export_mode: Literal["clean_final", "revision_marked"] = "clean_final"
+    export_format: Literal["docx", "pdf"] = "docx"
+    cover_info: dict = Field(default_factory=dict)
+
+
+class BusinessPlanUpgradePayload(BaseModel):
+    mode: Literal["basic", "full"] = "full"
+
+
+class BusinessPlanExpandAnswer(BaseModel):
+    question_id: str = ""
+    question_text: str = ""
+    text: str = ""
+
+
+class BusinessPlanExpandPayload(BaseModel):
+    answers: list[BusinessPlanExpandAnswer] = Field(default_factory=list)
+    merge_strategy: Literal["append", "rewrite"] = "append"
+
+
+class BusinessPlanResponse(BaseModel):
+    status: str = "ok"
+    plan: dict | None = None
+    readiness: dict = Field(default_factory=dict)
+
+
+class BusinessPlanQuestionsResponse(BaseModel):
+    status: str = "ok"
+    questions: list[dict] = Field(default_factory=list)
+
+
+class BusinessPlanSuggestionsResponse(BaseModel):
+    status: str = "ok"
+    suggestions: list[dict] = Field(default_factory=list)
+
+
+# ── 竞赛分支 / 教师评分 / 计划书对比 ────────────────────────────
+class BusinessPlanForkCompetitionPayload(BaseModel):
+    # 可选 override 的竞赛类型（用于定向优化，例如 "互联网+"、"挑战杯"）
+    competition_type: str = ""
+    # 是否强制重新抽取 KB 参考模板
+    refresh_kb_reference: bool = True
+
+
+class BusinessPlanRubricScore(BaseModel):
+    section_id: str
+    score: float = Field(ge=0, le=10)
+    weight: float = Field(ge=0, le=5, default=1.0)
+    comment: str = ""
+
+
+class BusinessPlanGradingPayload(BaseModel):
+    teacher_id: str = ""
+    teacher_name: str = ""
+    overall_score: float = Field(ge=0, le=100)
+    grade: Literal["A", "B", "C", "D", "E"] = "B"
+    passed: bool = True
+    summary: str = ""
+    strengths: list[str] = Field(default_factory=list)
+    improvements: list[str] = Field(default_factory=list)
+    rubric: list[BusinessPlanRubricScore] = Field(default_factory=list)
+
+
+class BusinessPlanGradingResponse(BaseModel):
+    status: str = "ok"
+    grading: dict | None = None
+
+
+class BusinessPlanComparePayload(BaseModel):
+    plan_ids: list[str] = Field(min_length=2, max_length=5)
+    focus_sections: list[str] = Field(default_factory=list)
+    # 是否调用 LLM 产出差异建议（若关闭仅给出结构化 diff）
+    use_llm: bool = True
+
+
+class BusinessPlanCompareResponse(BaseModel):
+    status: str = "ok"
+    comparison: dict | None = None
+
+
+# ── 竞赛教练模式 / 议题板 ────────────────────────────────────────
+class BusinessPlanCoachingModePayload(BaseModel):
+    mode: Literal["project", "competition"] = "project"
+
+
+class BusinessPlanAgendaApplyPayload(BaseModel):
+    agenda_ids: list[str] = Field(default_factory=list)
+    target_section_map: dict[str, str] = Field(default_factory=dict)
+
+
+class BusinessPlanAgendaPatchPayload(BaseModel):
+    status: Literal["pending", "applied", "dismissed"] | None = None
+    section_id_hint: str | None = None
+
+
+# ── Finance Report ────────────────────────────────────────────────────
+
+class FinanceReportGeneratePayload(BaseModel):
+    user_id: str = Field(min_length=1)
+    plan_id: str | None = None
+    project_id: str | None = None
+    conversation_id: str | None = None
+    industry_hint: str = ""
+    context_text: str = ""
+    use_llm_explain: bool = True
+
+
+class FinanceReportResponse(BaseModel):
+    status: str = "ok"
+    report: dict | None = None
+    detail: str = ""
+
+
+class FinanceReportStatusResponse(BaseModel):
+    status: str = "idle"
+    detail: str = ""
+    updated_at: str = ""

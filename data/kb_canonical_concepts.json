@@ -1,0 +1,58 @@
+{
+  "version": "v1",
+  "updated_at": "2026-04-20",
+  "description": "创新创业项目书『频繁且重要必须有』的核心概念清单。每条概念给出：所属组、重要性（1-3）、关键词别名、在图中要搜索的 Neo4j Label、以及判定『出现频次足够』的最小阈值。后端逐条扫图得命中数，再算三种覆盖率（binary / threshold / weighted）。不使用通配兜底，漏掉的要透明披露。",
+  "methodology_note": "关键词匹配遵循『包含即计数（contains match）』，使用 toLower 归一化。仅统计在指定 Neo4j Label 的 name 属性上的命中。这是弱监督完整性代理（Paulheim 2017），不是严格语义检索。",
+  "groups": [
+    {"key": "pain",          "label": "痛点",        "order": 1, "theory": "Lean Canvas Problem / Design Thinking Empathize"},
+    {"key": "solution",      "label": "方案",        "order": 2, "theory": "Lean Canvas Solution / Product Mechanism"},
+    {"key": "business_model","label": "商业模式",    "order": 3, "theory": "Business Model Canvas (Osterwalder 2010)"},
+    {"key": "market",        "label": "市场",        "order": 4, "theory": "Porter 5 Forces / STP / TAM-SAM-SOM"},
+    {"key": "team",          "label": "团队",        "order": 5, "theory": "Lean Canvas Unfair Advantage / Resource-Based View"},
+    {"key": "risk",          "label": "风控·合规",   "order": 6, "theory": "Enterprise Risk Management / Compliance"},
+    {"key": "innovation",    "label": "创新点",      "order": 7, "theory": "Schumpeter Innovation Theory / IP Moat"}
+  ],
+  "concepts": [
+    {"id": "pain_01",  "name": "用户痛点",       "group": "pain",           "importance": 3, "min_freq": 10, "search_labels": ["PainPoint"],          "keywords": ["痛点", "难点", "困扰", "问题", "挑战"]},
+    {"id": "pain_02",  "name": "需求未被满足",   "group": "pain",           "importance": 3, "min_freq": 5,  "search_labels": ["PainPoint"],          "keywords": ["需求", "无法满足", "未被满足", "匮乏", "缺失"]},
+    {"id": "pain_03",  "name": "效率瓶颈",       "group": "pain",           "importance": 2, "min_freq": 5,  "search_labels": ["PainPoint"],          "keywords": ["效率", "耗时", "慢", "繁琐", "低效", "瓶颈"]},
+    {"id": "pain_04",  "name": "成本过高",       "group": "pain",           "importance": 2, "min_freq": 5,  "search_labels": ["PainPoint"],          "keywords": ["成本高", "昂贵", "代价", "高成本", "开销大"]},
+    {"id": "pain_05",  "name": "现有方案不足",   "group": "pain",           "importance": 2, "min_freq": 5,  "search_labels": ["PainPoint"],          "keywords": ["现有", "传统", "难以", "不足", "局限"]},
+
+    {"id": "sol_01",   "name": "核心功能",       "group": "solution",       "importance": 3, "min_freq": 10, "search_labels": ["Solution"],           "keywords": ["系统", "平台", "产品", "工具", "服务"]},
+    {"id": "sol_02",   "name": "技术机制",       "group": "solution",       "importance": 3, "min_freq": 5,  "search_labels": ["Solution"],           "keywords": ["算法", "模型", "引擎", "技术", "AI", "神经网络"]},
+    {"id": "sol_03",   "name": "产品形态",       "group": "solution",       "importance": 2, "min_freq": 5,  "search_labels": ["Solution"],           "keywords": ["APP", "小程序", "硬件", "SaaS", "设备", "Web"]},
+    {"id": "sol_04",   "name": "差异化优势",     "group": "solution",       "importance": 2, "min_freq": 3,  "search_labels": ["Solution", "InnovationPoint"], "keywords": ["差异化", "独特", "独家", "护城河", "优势"]},
+    {"id": "sol_05",   "name": "实施路径",       "group": "solution",       "importance": 1, "min_freq": 3,  "search_labels": ["ExecutionStep"],      "keywords": ["步骤", "阶段", "路径", "迭代", "实施"]},
+
+    {"id": "bm_01",    "name": "收费方式",       "group": "business_model", "importance": 3, "min_freq": 5,  "search_labels": ["BusinessModelAspect"], "keywords": ["收费", "付费", "订阅", "会员", "佣金", "服务费"]},
+    {"id": "bm_02",    "name": "客单价·ARPU",    "group": "business_model", "importance": 2, "min_freq": 3,  "search_labels": ["BusinessModelAspect"], "keywords": ["客单价", "单价", "ARPU", "人均", "元/月", "元/年"]},
+    {"id": "bm_03",    "name": "成本结构",       "group": "business_model", "importance": 3, "min_freq": 5,  "search_labels": ["BusinessModelAspect"], "keywords": ["成本", "支出", "开支", "COGS", "固定成本"]},
+    {"id": "bm_04",    "name": "毛利·盈利",     "group": "business_model", "importance": 2, "min_freq": 3,  "search_labels": ["BusinessModelAspect"], "keywords": ["毛利", "利润", "盈利", "净利", "毛利率"]},
+    {"id": "bm_05",    "name": "规模化路径",     "group": "business_model", "importance": 2, "min_freq": 3,  "search_labels": ["BusinessModelAspect"], "keywords": ["规模", "扩张", "复制", "放量", "scale", "规模化"]},
+    {"id": "bm_06",    "name": "渠道·分发",     "group": "business_model", "importance": 2, "min_freq": 3,  "search_labels": ["BusinessModelAspect"], "keywords": ["渠道", "代理", "分销", "入驻", "经销商"]},
+    {"id": "bm_07",    "name": "获客·转化",     "group": "business_model", "importance": 2, "min_freq": 3,  "search_labels": ["BusinessModelAspect"], "keywords": ["获客", "CAC", "转化", "引流", "推广"]},
+    {"id": "bm_08",    "name": "留存·复购",     "group": "business_model", "importance": 2, "min_freq": 3,  "search_labels": ["BusinessModelAspect"], "keywords": ["留存", "复购", "续费", "LTV", "粘性"]},
+
+    {"id": "mkt_01",   "name": "市场规模·TAM",   "group": "market",         "importance": 3, "min_freq": 5,  "search_labels": ["Market"],             "keywords": ["市场规模", "TAM", "SAM", "SOM", "亿元", "万亿"]},
+    {"id": "mkt_02",   "name": "目标用户",       "group": "market",         "importance": 3, "min_freq": 10, "search_labels": ["Stakeholder", "Market"], "keywords": ["用户", "客户", "人群", "受众", "群体"]},
+    {"id": "mkt_03",   "name": "竞争格局",       "group": "market",         "importance": 2, "min_freq": 5,  "search_labels": ["Market"],             "keywords": ["竞争", "竞品", "对手", "同行", "市场格局"]},
+    {"id": "mkt_04",   "name": "替代品分析",     "group": "market",         "importance": 2, "min_freq": 3,  "search_labels": ["Market"],             "keywords": ["替代", "对比", "相比", "优于", "区别于"]},
+    {"id": "mkt_05",   "name": "市场趋势",       "group": "market",         "importance": 1, "min_freq": 3,  "search_labels": ["Market"],             "keywords": ["趋势", "增长率", "CAGR", "发展", "未来"]},
+    {"id": "mkt_06",   "name": "进入壁垒",       "group": "market",         "importance": 2, "min_freq": 3,  "search_labels": ["Market", "RiskControlPoint"], "keywords": ["壁垒", "门槛", "准入", "认证", "资质"]},
+
+    {"id": "team_01",  "name": "创始人·核心成员", "group": "team",          "importance": 2, "min_freq": 3,  "search_labels": ["Stakeholder"],        "keywords": ["创始人", "CEO", "创始", "团队", "核心成员"]},
+    {"id": "team_02",  "name": "专业背景",       "group": "team",           "importance": 2, "min_freq": 3,  "search_labels": ["Stakeholder"],        "keywords": ["教授", "博士", "硕士", "专家", "科研人员", "研究员"]},
+    {"id": "team_03",  "name": "团队分工",       "group": "team",           "importance": 1, "min_freq": 2,  "search_labels": ["Stakeholder", "ExecutionStep"], "keywords": ["分工", "负责", "配置", "架构师", "工程师"]},
+    {"id": "team_04",  "name": "行业资源",       "group": "team",           "importance": 2, "min_freq": 2,  "search_labels": ["Stakeholder"],        "keywords": ["资源", "合作", "背书", "产业", "联盟"]},
+
+    {"id": "risk_01",  "name": "技术风险",       "group": "risk",           "importance": 2, "min_freq": 3,  "search_labels": ["RiskControlPoint"],   "keywords": ["技术风险", "失败", "不稳定", "研发"]},
+    {"id": "risk_02",  "name": "合规·监管",     "group": "risk",           "importance": 3, "min_freq": 3,  "search_labels": ["RiskControlPoint"],   "keywords": ["合规", "监管", "法律", "政策", "许可", "审批"]},
+    {"id": "risk_03",  "name": "数据·隐私安全", "group": "risk",           "importance": 2, "min_freq": 3,  "search_labels": ["RiskControlPoint"],   "keywords": ["数据安全", "隐私", "加密", "脱敏", "个人信息"]},
+    {"id": "risk_04",  "name": "资金风险",       "group": "risk",           "importance": 1, "min_freq": 2,  "search_labels": ["RiskControlPoint"],   "keywords": ["资金", "现金流", "融资", "亏损", "财务风险"]},
+    {"id": "risk_05",  "name": "市场·执行风险", "group": "risk",           "importance": 1, "min_freq": 2,  "search_labels": ["RiskControlPoint"],   "keywords": ["市场风险", "执行风险", "进度", "验收", "不达预期"]},
+
+    {"id": "inn_01",   "name": "技术创新",       "group": "innovation",     "importance": 3, "min_freq": 5,  "search_labels": ["InnovationPoint"],    "keywords": ["技术创新", "首创", "原创", "突破", "自研"]},
+    {"id": "inn_02",   "name": "模式创新",       "group": "innovation",     "importance": 2, "min_freq": 3,  "search_labels": ["InnovationPoint", "BusinessModelAspect"], "keywords": ["模式创新", "新模式", "商业模式", "机制", "范式"]}
+  ]
+}

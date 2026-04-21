@@ -458,6 +458,366 @@ _HYPEREDGE_TEMPLATES: list[dict[str, Any]] = [
         "pattern_type": "ideal",
         "linked_rules": ["H5", "H13"],
     },
+    {
+        "id": "T51_narrative_evidence_chain",
+        "name": "叙事证据链",
+        "dimensions": ["stakeholder", "pain_point", "evidence", "solution"],
+        "description": "叙事逻辑有证据支撑",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H13"],
+    },
+    {
+        "id": "T52_stage_narrative_fit",
+        "name": "阶段叙事匹配",
+        "dimensions": ["execution_step", "stakeholder", "evidence", "business_model"],
+        "description": "当前阶段叙事与目标一致",
+        "pattern_type": "ideal",
+        "linked_rules": ["H14"],
+    },
+    {
+        "id": "T53_pmf_validation",
+        "name": "产品市场匹配验证",
+        "dimensions": ["stakeholder", "pain_point", "solution", "evidence"],
+        "description": "通过证据验证PMF",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T54_user_segmentation_evidence",
+        "name": "用户分层证据",
+        "dimensions": ["stakeholder", "market", "evidence", "channel"],
+        "description": "用户细分有数据支撑",
+        "pattern_type": "risk",
+        "linked_rules": ["H4", "H5"],
+    },
+    {
+        "id": "T55_assumption_evidence_gap",
+        "name": "假设证据缺口",
+        "dimensions": ["pain_point", "solution", "evidence", "risk"],
+        "description": "关键假设缺少验证证据",
+        "pattern_type": "risk",
+        "linked_rules": ["H5", "H7"],
+    },
+    {
+        "id": "T56_risk_cascade_chain",
+        "name": "风险级联链",
+        "dimensions": ["risk", "risk_control", "business_model", "execution_step"],
+        "description": "风险可能级联影响商业逻辑",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H14"],
+    },
+    {
+        "id": "T57_resource_milestone_fit",
+        "name": "资源里程碑匹配",
+        "dimensions": ["resource", "team", "execution_step", "evidence"],
+        "description": "资源配置与里程碑节点对齐",
+        "pattern_type": "ideal",
+        "linked_rules": ["H10", "H12"],
+    },
+    {
+        "id": "T58_execution_feedback",
+        "name": "执行反馈闭环",
+        "dimensions": ["execution_step", "evidence", "solution", "stakeholder"],
+        "description": "执行结果反馈至方案迭代",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H10"],
+    },
+    {
+        "id": "T59_data_privacy_chain",
+        "name": "数据隐私链",
+        "dimensions": ["stakeholder", "technology", "risk_control", "evidence"],
+        "description": "涉及用户数据时的隐私合规链路",
+        "pattern_type": "risk",
+        "linked_rules": ["H11"],
+    },
+    {
+        "id": "T60_industry_compliance_path",
+        "name": "行业合规路径",
+        "dimensions": ["risk_control", "market", "execution_step", "evidence"],
+        "description": "行业法规遵从的执行路径",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H15"],
+    },
+    {
+        "id": "T61_ethical_impact_assessment",
+        "name": "伦理影响评估",
+        "dimensions": ["stakeholder", "solution", "risk", "evidence"],
+        "description": "方案对用户的伦理影响评估",
+        "pattern_type": "risk",
+        "linked_rules": ["H11"],
+    },
+    {
+        "id": "T62_cashflow_sustainability",
+        "name": "现金流可持续性",
+        "dimensions": ["business_model", "resource", "market", "evidence"],
+        "description": "现金流模型可持续性验证",
+        "pattern_type": "risk",
+        "linked_rules": ["H8", "H9"],
+    },
+    {
+        "id": "T63_unit_economics_evidence",
+        "name": "单位经济验证",
+        "dimensions": ["business_model", "evidence", "stakeholder", "channel"],
+        "description": "单位经济模型有数据支撑",
+        "pattern_type": "ideal",
+        "linked_rules": ["H8"],
+    },
+    {
+        "id": "T64_competitive_defense",
+        "name": "竞争防御策略",
+        "dimensions": ["competitor", "innovation", "resource", "business_model"],
+        "description": "面对竞品的防御壁垒策略",
+        "pattern_type": "ideal",
+        "linked_rules": ["H6", "H7"],
+    },
+    {
+        "id": "T65_innovation_moat",
+        "name": "创新护城河",
+        "dimensions": ["innovation", "technology", "evidence", "competitor"],
+        "description": "创新构建的技术护城河",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7", "H12"],
+    },
+    {
+        "id": "T66_community_driven_growth",
+        "name": "社区驱动增长",
+        "dimensions": ["stakeholder", "channel", "evidence", "solution"],
+        "description": "通过社区运营驱动用户增长",
+        "pattern_type": "ideal",
+        "linked_rules": ["H2", "H9"],
+    },
+    {
+        "id": "T67_retention_evidence",
+        "name": "留存证据链",
+        "dimensions": ["stakeholder", "solution", "evidence", "channel"],
+        "description": "用户留存有数据证据支撑",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H8"],
+    },
+    {
+        "id": "T68_partnership_value",
+        "name": "合作价值网络",
+        "dimensions": ["resource", "team", "business_model", "market"],
+        "description": "多方合作形成价值网络",
+        "pattern_type": "ideal",
+        "linked_rules": ["H10", "H12"],
+    },
+    {
+        "id": "T69_supply_chain_resilience",
+        "name": "供应链韧性",
+        "dimensions": ["resource", "solution", "technology", "risk_control"],
+        "description": "供应链抗风险能力评估",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H14"],
+    },
+    {
+        "id": "T70_platform_ecosystem",
+        "name": "平台生态动态",
+        "dimensions": ["stakeholder", "solution", "channel", "business_model"],
+        "description": "平台多边生态的动态平衡",
+        "pattern_type": "ideal",
+        "linked_rules": ["H2", "H7"],
+    },
+    {
+        "id": "T71_environmental_measurability",
+        "name": "环境可量化",
+        "dimensions": ["evidence", "stakeholder", "market", "risk"],
+        "description": "环境影响可量化可追踪",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H13"],
+    },
+    {
+        "id": "T72_governance_structure",
+        "name": "治理结构",
+        "dimensions": ["team", "risk_control", "execution_step", "evidence"],
+        "description": "治理结构透明可问责",
+        "pattern_type": "ideal",
+        "linked_rules": ["H10", "H11"],
+    },
+    {
+        "id": "T73_community_impact_loop",
+        "name": "社区影响闭环",
+        "dimensions": ["stakeholder", "pain_point", "evidence", "channel"],
+        "description": "社区影响可衡量可闭环",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H13"],
+    },
+    {
+        "id": "T74_pain_discovery_method",
+        "name": "痛点发现方法论",
+        "dimensions": ["stakeholder", "pain_point", "evidence"],
+        "description": "有系统化的痛点发现方法",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T75_scenario_decomposition",
+        "name": "场景拆解链",
+        "dimensions": ["stakeholder", "pain_point", "solution", "market"],
+        "description": "使用场景被系统拆解分析",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1"],
+    },
+    {
+        "id": "T76_need_priority_matrix",
+        "name": "需求优先级矩阵",
+        "dimensions": ["pain_point", "market", "evidence", "stakeholder"],
+        "description": "多个需求按优先级排列有据",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T77_empathy_insight",
+        "name": "共情洞察闭环",
+        "dimensions": ["stakeholder", "pain_point", "evidence", "solution"],
+        "description": "通过共情获得深层用户洞察",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T78_problem_reframe",
+        "name": "问题重构链",
+        "dimensions": ["pain_point", "innovation", "stakeholder", "evidence"],
+        "description": "重新定义问题带来创新视角",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H7"],
+    },
+    {
+        "id": "T79_ideation_evaluation",
+        "name": "创意评估矩阵",
+        "dimensions": ["innovation", "solution", "stakeholder", "evidence"],
+        "description": "创意方案有评估框架",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7"],
+    },
+    {
+        "id": "T80_concept_feasibility",
+        "name": "概念可行性筛选",
+        "dimensions": ["solution", "technology", "resource", "risk"],
+        "description": "概念阶段做可行性筛选",
+        "pattern_type": "risk",
+        "linked_rules": ["H7", "H12"],
+    },
+    {
+        "id": "T81_design_thinking_loop",
+        "name": "设计思维迭代",
+        "dimensions": ["stakeholder", "pain_point", "solution", "evidence"],
+        "description": "遵循设计思维的迭代流程",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T82_solution_architecture",
+        "name": "方案架构匹配",
+        "dimensions": ["solution", "technology", "stakeholder", "business_model"],
+        "description": "方案架构与商业目标匹配",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7", "H3"],
+    },
+    {
+        "id": "T83_creative_pivot",
+        "name": "创意方向调整",
+        "dimensions": ["innovation", "evidence", "stakeholder", "market"],
+        "description": "基于反馈调整创意方向",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T84_academic_to_market",
+        "name": "学术成果市场化",
+        "dimensions": ["technology", "innovation", "market", "evidence"],
+        "description": "学术成果有市场化路径",
+        "pattern_type": "ideal",
+        "linked_rules": ["H4", "H7"],
+    },
+    {
+        "id": "T85_industry_academia_collab",
+        "name": "产学研协同",
+        "dimensions": ["team", "technology", "resource", "innovation"],
+        "description": "产学研合作机制完善",
+        "pattern_type": "ideal",
+        "linked_rules": ["H10", "H12"],
+    },
+    {
+        "id": "T86_ip_commercialization",
+        "name": "知识产权商业化",
+        "dimensions": ["innovation", "technology", "business_model", "competitor"],
+        "description": "知识产权有商业化策略",
+        "pattern_type": "ideal",
+        "linked_rules": ["H7", "H6"],
+    },
+    {
+        "id": "T87_research_application_bridge",
+        "name": "研究应用桥接",
+        "dimensions": ["technology", "evidence", "solution", "stakeholder"],
+        "description": "研究成果桥接到实际应用",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H7"],
+    },
+    {
+        "id": "T88_tech_readiness_assessment",
+        "name": "技术成熟度评估",
+        "dimensions": ["technology", "evidence", "execution_step", "risk"],
+        "description": "技术成熟度有评估框架",
+        "pattern_type": "risk",
+        "linked_rules": ["H7", "H11"],
+    },
+    {
+        "id": "T89_data_driven_decision",
+        "name": "数据驱动决策",
+        "dimensions": ["technology", "evidence", "business_model", "solution"],
+        "description": "决策基于数据而非直觉",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H8"],
+    },
+    {
+        "id": "T90_prototype_user_validation",
+        "name": "原型用户验证",
+        "dimensions": ["solution", "stakeholder", "evidence", "execution_step"],
+        "description": "原型经过真实用户验证",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H10"],
+    },
+    {
+        "id": "T91_tech_debt_risk",
+        "name": "技术债务风险",
+        "dimensions": ["technology", "risk", "execution_step", "resource"],
+        "description": "技术债务对执行的风险评估",
+        "pattern_type": "risk",
+        "linked_rules": ["H11", "H14"],
+    },
+    {
+        "id": "T92_ux_pain_solution",
+        "name": "用户体验痛点链",
+        "dimensions": ["stakeholder", "pain_point", "solution", "evidence"],
+        "description": "从用户体验角度发现并解决痛点",
+        "pattern_type": "ideal",
+        "linked_rules": ["H1", "H5"],
+    },
+    {
+        "id": "T93_design_iteration",
+        "name": "设计迭代闭环",
+        "dimensions": ["solution", "stakeholder", "evidence", "execution_step"],
+        "description": "设计经过多轮迭代验证",
+        "pattern_type": "ideal",
+        "linked_rules": ["H5", "H10"],
+    },
+    {
+        "id": "T94_accessibility_inclusion",
+        "name": "可达性与包容性",
+        "dimensions": ["stakeholder", "solution", "risk", "evidence"],
+        "description": "产品考虑可达性和包容性",
+        "pattern_type": "risk",
+        "linked_rules": ["H1", "H11"],
+    },
+    {
+        "id": "T95_user_education_adoption",
+        "name": "用户教育与采纳",
+        "dimensions": ["stakeholder", "channel", "solution", "evidence"],
+        "description": "有用户教育策略促进采纳",
+        "pattern_type": "ideal",
+        "linked_rules": ["H2", "H5"],
+    },
 ]
 
 
@@ -813,6 +1173,151 @@ _CONSISTENCY_RULES: list[dict[str, Any]] = [
             "请给出一个社会影响的量化目标，比如'第一年覆盖XX个村/XX户'。",
         ],
     },
+    {
+        "id": "G35_no_pain_validation",
+        "description": "有痛点描述但缺少验证方法",
+        "predicate": lambda dims, ents: dims.get("pain_point") and not dims.get("evidence"),
+        "message": "提到了痛点但缺少验证方法或证据，痛点可能是主观臆断。",
+        "pressure": [
+            "你是通过什么方法发现这个痛点的？做过用户访谈或问卷吗？",
+            "有多少目标用户真正反馈过这个痛点？",
+        ],
+    },
+    {
+        "id": "G36_scenario_without_user",
+        "description": "有场景描述但缺少目标用户画像",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["场景", "情境", "应用场景"]) and not dims.get("stakeholder"),
+        "message": "描述了应用场景但缺少明确的目标用户画像。",
+        "pressure": [
+            "这个场景里的用户具体是谁？年龄、职业、行为习惯是什么？",
+        ],
+    },
+    {
+        "id": "G37_need_no_priority",
+        "description": "列举多个需求但未排列优先级",
+        "predicate": lambda dims, ents: dims.get("pain_point") and len([e for e in (ents.get("text", []) if isinstance(ents.get("text"), list) else []) if any(k in e for k in ["需求", "痛点", "问题"])]) >= 3 and not any(k in " ".join(ents.get("text", [])) for k in ["优先", "最重要", "核心", "首要"]),
+        "message": "列举了多个需求但未区分优先级，资源可能分散。",
+        "pressure": [
+            "这些需求中哪个是用户最痛的？如果只解决一个，选哪个？",
+        ],
+    },
+    {
+        "id": "G38_idea_no_evaluation",
+        "description": "有创意但缺少可行性评估",
+        "predicate": lambda dims, ents: dims.get("innovation") and not dims.get("evidence") and not dims.get("risk"),
+        "message": "提出了创新点但缺少可行性评估和风险分析。",
+        "pressure": [
+            "这个创新点的技术可行性如何验证？有没有做过小规模测试？",
+        ],
+    },
+    {
+        "id": "G39_solution_no_alternative",
+        "description": "只有一个方案没有对比选择",
+        "predicate": lambda dims, ents: dims.get("solution") and not dims.get("competitor") and not any(k in " ".join(ents.get("text", [])) for k in ["对比", "方案二", "备选", "替代方案", "比较"]),
+        "message": "只提供了一个解决方案，缺少方案对比和替代选择。",
+        "pressure": [
+            "你考虑过其他解决方案吗？为什么选择了当前方案而不是其他的？",
+        ],
+    },
+    {
+        "id": "G40_design_without_iteration",
+        "description": "提到设计但无迭代验证",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["设计", "原型", "UI", "UX", "界面"]) and not any(k in " ".join(ents.get("text", [])) for k in ["迭代", "测试", "反馈", "改进", "优化"]),
+        "message": "提到了产品设计但缺少迭代验证过程。",
+        "pressure": [
+            "你的设计经过用户测试了吗？收到了什么反馈？做了哪些改进？",
+        ],
+    },
+    {
+        "id": "G41_academic_no_market",
+        "description": "有技术成果但未讨论市场化路径",
+        "predicate": lambda dims, ents: dims.get("technology") and dims.get("innovation") and not dims.get("market") and not dims.get("business_model"),
+        "message": "有技术创新但缺少市场化路径和商业模式讨论。",
+        "pressure": [
+            "这项技术成果打算怎么走向市场？目标客户是谁？怎么收费？",
+        ],
+    },
+    {
+        "id": "G42_ip_no_protection",
+        "description": "有核心技术但未讨论知识产权保护",
+        "predicate": lambda dims, ents: dims.get("technology") and dims.get("innovation") and not any(k in " ".join(ents.get("text", [])) for k in ["专利", "知识产权", "版权", "商标", "授权", "许可"]),
+        "message": "有核心技术创新但未讨论知识产权保护策略。",
+        "pressure": [
+            "你的核心技术有没有申请专利？如何防止被模仿？",
+        ],
+    },
+    {
+        "id": "G43_no_data_validation",
+        "description": "使用数据/AI但缺少数据质量验证",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["数据", "AI", "算法", "模型", "机器学习", "深度学习"]) and not any(k in " ".join(ents.get("text", [])) for k in ["数据质量", "标注", "清洗", "验证集", "准确率", "精度"]),
+        "message": "使用数据/AI技术但缺少数据质量验证说明。",
+        "pressure": [
+            "你的训练数据从哪里来？数据质量如何保证？有没有做过准确率验证？",
+        ],
+    },
+    {
+        "id": "G44_tech_stack_no_evidence",
+        "description": "技术堆叠缺少可行性证据",
+        "predicate": lambda dims, ents: dims.get("technology") and len([e for e in (ents.get("text", []) if isinstance(ents.get("text"), list) else []) if any(k in e for k in ["技术", "框架", "平台", "系统"])]) >= 2 and not dims.get("evidence"),
+        "message": "技术方案较复杂但缺少可行性验证证据。",
+        "pressure": [
+            "你列举的技术栈是否都经过验证？有没有做过技术原型？",
+        ],
+    },
+    {
+        "id": "G45_no_ux_research",
+        "description": "有产品方案但缺少用户研究",
+        "predicate": lambda dims, ents: dims.get("solution") and dims.get("stakeholder") and not any(k in " ".join(ents.get("text", [])) for k in ["用户研究", "用户访谈", "可用性", "用户测试", "A/B", "体验"]),
+        "message": "有产品方案但缺少用户研究和体验验证。",
+        "pressure": [
+            "你做过用户研究吗？目标用户对方案的反馈如何？",
+        ],
+    },
+    {
+        "id": "G46_no_user_feedback",
+        "description": "有产品但无用户反馈机制",
+        "predicate": lambda dims, ents: dims.get("solution") and not any(k in " ".join(ents.get("text", [])) for k in ["反馈", "评价", "NPS", "满意度", "用户声音", "回访"]),
+        "message": "有产品方案但未建立用户反馈收集机制。",
+        "pressure": [
+            "你怎么收集用户反馈？有没有建立定期回访机制？",
+        ],
+    },
+    {
+        "id": "G47_privacy_no_compliance",
+        "description": "涉及用户数据但无隐私合规说明",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["用户数据", "个人信息", "隐私", "注册", "实名"]) and not any(k in " ".join(ents.get("text", [])) for k in ["合规", "GDPR", "个保法", "隐私政策", "数据保护", "脱敏"]),
+        "message": "涉及用户数据收集但未说明隐私合规措施。",
+        "pressure": [
+            "你收集了哪些用户数据？如何确保符合个人信息保护法？",
+        ],
+    },
+    {
+        "id": "G48_partnership_unvalidated",
+        "description": "依赖合作方但未验证合作可行性",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["合作", "伙伴", "联合", "战略合作", "渠道商"]) and not any(k in " ".join(ents.get("text", [])) for k in ["签约", "意向书", "已对接", "协议", "确认"]),
+        "message": "依赖外部合作方但未验证合作的实际可行性。",
+        "pressure": [
+            "你提到的合作方是否已经确认合作意向？有没有签署意向书或协议？",
+        ],
+    },
+    {
+        "id": "G49_esg_claim_no_metric",
+        "description": "声称社会价值但无量化指标",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["社会价值", "社会责任", "公益", "可持续"]) and not any(k in " ".join(ents.get("text", [])) for k in ["%", "指标", "KPI", "衡量", "量化", "人次", "覆盖率"]),
+        "message": "声称有社会价值但缺少量化衡量指标。",
+        "pressure": [
+            "你用什么指标衡量社会价值？能给出具体的数字目标吗？",
+        ],
+    },
+    {
+        "id": "G50_supply_chain_single_point",
+        "description": "供应链存在单点依赖风险",
+        "predicate": lambda dims, ents: any(k in " ".join(ents.get("text", [])) for k in ["供应商", "供应链", "采购", "原材料"]) and not any(k in " ".join(ents.get("text", [])) for k in ["备选", "多元", "替代", "多家", "分散"]),
+        "message": "供应链可能存在单点依赖风险，缺少备选方案。",
+        "pressure": [
+            "你的核心供应商只有一家吗？如果断供怎么办？有备选供应商吗？",
+        ],
+    },
 ]
 
 
@@ -837,6 +1342,7 @@ EDGE_FAMILY_GROUPS: dict[str, list[str]] = {
     ],
     "合规、监管与伦理": [
         "Compliance_Safety_Edge", "Regulatory_Landscape_Edge", "Ethical_Bias_Edge",
+        "Data_Privacy_Edge", "Industry_Compliance_Edge",
     ],
     "单位经济与财务结构": [
         "Pricing_Unit_Economics_Edge", "Cost_Structure_Edge",
@@ -854,15 +1360,112 @@ EDGE_FAMILY_GROUPS: dict[str, list[str]] = {
     ],
     "生态与多方利益": [
         "Ecosystem_Dependency_Edge", "Stakeholder_Conflict_Edge", "Ontology_Grounded_Edge",
+        "Partnership_Network_Edge", "Supply_Chain_Edge",
     ],
     "社会与ESG": [
         "Social_Impact_Edge", "ESG_Measurability_Edge",
+        "Community_Building_Edge", "Environmental_Impact_Edge", "Governance_Transparency_Edge",
+    ],
+    "问题发现与需求洞察": [
+        "Problem_Discovery_Edge", "Scenario_Analysis_Edge", "Need_Prioritization_Edge",
+        "Empathy_Map_Edge", "Insight_Validation_Edge",
+    ],
+    "创意孵化与方案设计": [
+        "Ideation_Edge", "Concept_Evaluation_Edge", "Feasibility_Screen_Edge",
+        "Design_Thinking_Edge", "Solution_Architecture_Edge",
+    ],
+    "知识转化与产学研": [
+        "Academic_Transfer_Edge", "Industry_Academia_Edge", "IP_Commercialization_Edge",
+        "Tech_Licensing_Edge", "Research_Application_Edge",
+    ],
+    "数据与技术验证": [
+        "Tech_Readiness_Edge", "Data_Quality_Edge", "Tech_Debt_Edge",
+        "API_Integration_Edge", "Prototype_Validation_Edge",
+    ],
+    "用户体验与设计思维": [
+        "UX_Research_Edge", "Design_Driven_Edge", "Accessibility_Edge",
+        "User_Education_Edge", "Feedback_Loop_Edge",
     ],
 }
 
 _FAMILY_TO_GROUP: dict[str, str] = {
     fam: grp for grp, fams in EDGE_FAMILY_GROUPS.items() for fam in fams
 }
+
+# ─────────────────────────────────────────────────────
+# Lifecycle Buckets：把 15 个分类按「创新 → 创业」链条归到 4 桶，
+# 专门用来自证：这套超图模板的选取在语义上是覆盖"创新-桥接-创业-公共"全链条的，
+# 而不只是结构上熵均衡。桶与分类是多对一、无重叠、全覆盖（静态约束，启动期自校验）。
+# ─────────────────────────────────────────────────────
+LIFECYCLE_BUCKETS: dict[str, dict[str, Any]] = {
+    "innovation": {
+        "label": "创新侧",
+        "label_en": "Innovation",
+        "rationale": "从问题发现 → 创意形成 → 技术可行性验证 → 用户体验的前半链条。对应 Design Thinking 的发散与 TRL 的技术成熟度推进。",
+        "categories": [
+            "问题发现与需求洞察",
+            "创意孵化与方案设计",
+            "数据与技术验证",
+            "用户体验与设计思维",
+        ],
+    },
+    "bridge": {
+        "label": "桥接侧",
+        "label_en": "Bridge (Innovation → Entrepreneurship)",
+        "rationale": "纯承接通路：学术成果→市场、IP 许可、差异化护城河与创新的竞争回应。对应 Triple Helix（Etzkowitz 2003）与 Porter 五力 + Moat 理论。",
+        "categories": [
+            "知识转化与产学研",
+            "产品差异化与竞争动态",
+        ],
+    },
+    "entrepreneurship": {
+        "label": "创业侧",
+        "label_en": "Entrepreneurship",
+        "rationale": "商业化执行：市场细分、单位经济、增长、团队与里程碑、生态伙伴。对应 Lean Canvas / BMC / AARRR / Platform Economics。",
+        "categories": [
+            "用户-市场-需求",
+            "单位经济与财务结构",
+            "增长、渠道与规模化",
+            "执行、团队与里程碑",
+            "生态与多方利益",
+        ],
+    },
+    "commons": {
+        "label": "公共基座",
+        "label_en": "Commons / Cross-cutting",
+        "rationale": "跨阶段的横切关注点：风险证据、合规监管、社会 ESG、价值叙事一致性。无论创新侧还是创业侧都离不开，因此不归到任何单侧。",
+        "categories": [
+            "风险、证据与评分",
+            "合规、监管与伦理",
+            "社会与ESG",
+            "价值叙事与一致性",
+        ],
+    },
+}
+
+# 推导：category → bucket key（多对一）
+_GROUP_TO_BUCKET: dict[str, str] = {
+    grp: bk for bk, bdef in LIFECYCLE_BUCKETS.items() for grp in bdef["categories"]
+}
+
+# 启动期自校验：4 桶必须无重叠且全覆盖 EDGE_FAMILY_GROUPS，否则直接报错，
+# 避免后续指标静默失真。
+_bucket_covered = set(_GROUP_TO_BUCKET.keys())
+_all_groups_set = set(EDGE_FAMILY_GROUPS.keys())
+_missing_in_bucket = _all_groups_set - _bucket_covered
+_extra_in_bucket = _bucket_covered - _all_groups_set
+if _missing_in_bucket or _extra_in_bucket:
+    raise RuntimeError(
+        f"LIFECYCLE_BUCKETS mismatch with EDGE_FAMILY_GROUPS: "
+        f"missing={sorted(_missing_in_bucket)} extra={sorted(_extra_in_bucket)}"
+    )
+# 分类数统计互斥：每个分类只能属于 1 个桶
+_bucket_dup_count = sum(len(b["categories"]) for b in LIFECYCLE_BUCKETS.values())
+if _bucket_dup_count != len(EDGE_FAMILY_GROUPS):
+    raise RuntimeError(
+        f"LIFECYCLE_BUCKETS overlap detected: total_in_buckets={_bucket_dup_count} "
+        f"but EDGE_FAMILY_GROUPS has {len(EDGE_FAMILY_GROUPS)} unique categories"
+    )
 
 EDGE_FAMILY_LABELS: dict[str, str] = {
     "Value_Loop_Edge": "价值闭环超边",
@@ -910,6 +1513,38 @@ EDGE_FAMILY_LABELS: dict[str, str] = {
     "Network_Effect_Edge": "网络效应超边",
     "Cross_Dimension_Coherence_Edge": "跨维度一致性超边",
     "ESG_Measurability_Edge": "ESG可量化超边",
+    "Data_Privacy_Edge": "数据隐私超边",
+    "Industry_Compliance_Edge": "行业合规超边",
+    "Partnership_Network_Edge": "合作网络超边",
+    "Supply_Chain_Edge": "供应链超边",
+    "Community_Building_Edge": "社区构建超边",
+    "Environmental_Impact_Edge": "环境影响超边",
+    "Governance_Transparency_Edge": "治理透明超边",
+    "Problem_Discovery_Edge": "问题发现超边",
+    "Scenario_Analysis_Edge": "场景分析超边",
+    "Need_Prioritization_Edge": "需求优先级超边",
+    "Empathy_Map_Edge": "共情图谱超边",
+    "Insight_Validation_Edge": "洞察验证超边",
+    "Ideation_Edge": "创意生成超边",
+    "Concept_Evaluation_Edge": "概念评估超边",
+    "Feasibility_Screen_Edge": "可行性筛选超边",
+    "Design_Thinking_Edge": "设计思维超边",
+    "Solution_Architecture_Edge": "方案架构超边",
+    "Academic_Transfer_Edge": "学术转化超边",
+    "Industry_Academia_Edge": "产学研合作超边",
+    "IP_Commercialization_Edge": "知识产权商业化超边",
+    "Tech_Licensing_Edge": "技术许可超边",
+    "Research_Application_Edge": "研究应用超边",
+    "Tech_Readiness_Edge": "技术成熟度超边",
+    "Data_Quality_Edge": "数据质量超边",
+    "Tech_Debt_Edge": "技术债务超边",
+    "API_Integration_Edge": "接口集成超边",
+    "Prototype_Validation_Edge": "原型验证超边",
+    "UX_Research_Edge": "用户研究超边",
+    "Design_Driven_Edge": "设计驱动超边",
+    "Accessibility_Edge": "可达性超边",
+    "User_Education_Edge": "用户教育超边",
+    "Feedback_Loop_Edge": "反馈闭环超边",
 }
 
 EDGE_PREFIX: dict[str, str] = {
@@ -958,6 +1593,38 @@ EDGE_PREFIX: dict[str, str] = {
     "Network_Effect_Edge": "he_neteffect_",
     "Cross_Dimension_Coherence_Edge": "he_coherence_",
     "ESG_Measurability_Edge": "he_esg_",
+    "Data_Privacy_Edge": "he_privacy_",
+    "Industry_Compliance_Edge": "he_indcomp_",
+    "Partnership_Network_Edge": "he_partner_",
+    "Supply_Chain_Edge": "he_supply_",
+    "Community_Building_Edge": "he_community_",
+    "Environmental_Impact_Edge": "he_envimpact_",
+    "Governance_Transparency_Edge": "he_govtrans_",
+    "Problem_Discovery_Edge": "he_probdisc_",
+    "Scenario_Analysis_Edge": "he_scenario_",
+    "Need_Prioritization_Edge": "he_needpri_",
+    "Empathy_Map_Edge": "he_empathy_",
+    "Insight_Validation_Edge": "he_insight_",
+    "Ideation_Edge": "he_ideation_",
+    "Concept_Evaluation_Edge": "he_concept_",
+    "Feasibility_Screen_Edge": "he_feasible_",
+    "Design_Thinking_Edge": "he_designth_",
+    "Solution_Architecture_Edge": "he_solarch_",
+    "Academic_Transfer_Edge": "he_acadtran_",
+    "Industry_Academia_Edge": "he_indacad_",
+    "IP_Commercialization_Edge": "he_ipcomm_",
+    "Tech_Licensing_Edge": "he_techlic_",
+    "Research_Application_Edge": "he_resapp_",
+    "Tech_Readiness_Edge": "he_techready_",
+    "Data_Quality_Edge": "he_dataqual_",
+    "Tech_Debt_Edge": "he_techdebt_",
+    "API_Integration_Edge": "he_apiint_",
+    "Prototype_Validation_Edge": "he_protoval_",
+    "UX_Research_Edge": "he_uxres_",
+    "Design_Driven_Edge": "he_designdr_",
+    "Accessibility_Edge": "he_access_",
+    "User_Education_Edge": "he_usered_",
+    "Feedback_Loop_Edge": "he_feedback_",
 }
 
 EDGE_TARGET_COUNTS: dict[str, int] = {
@@ -1006,7 +1673,684 @@ EDGE_TARGET_COUNTS: dict[str, int] = {
     "Network_Effect_Edge": 8,
     "Cross_Dimension_Coherence_Edge": 6,
     "ESG_Measurability_Edge": 6,
+    "Data_Privacy_Edge": 6,
+    "Industry_Compliance_Edge": 6,
+    "Partnership_Network_Edge": 6,
+    "Supply_Chain_Edge": 6,
+    "Community_Building_Edge": 6,
+    "Environmental_Impact_Edge": 6,
+    "Governance_Transparency_Edge": 6,
+    "Problem_Discovery_Edge": 6,
+    "Scenario_Analysis_Edge": 6,
+    "Need_Prioritization_Edge": 6,
+    "Empathy_Map_Edge": 6,
+    "Insight_Validation_Edge": 6,
+    "Ideation_Edge": 6,
+    "Concept_Evaluation_Edge": 6,
+    "Feasibility_Screen_Edge": 6,
+    "Design_Thinking_Edge": 6,
+    "Solution_Architecture_Edge": 6,
+    "Academic_Transfer_Edge": 6,
+    "Industry_Academia_Edge": 6,
+    "IP_Commercialization_Edge": 6,
+    "Tech_Licensing_Edge": 6,
+    "Research_Application_Edge": 6,
+    "Tech_Readiness_Edge": 6,
+    "Data_Quality_Edge": 6,
+    "Tech_Debt_Edge": 6,
+    "API_Integration_Edge": 6,
+    "Prototype_Validation_Edge": 6,
+    "UX_Research_Edge": 6,
+    "Design_Driven_Edge": 6,
+    "Accessibility_Edge": 6,
+    "User_Education_Edge": 6,
+    "Feedback_Loop_Edge": 6,
 }
+
+
+DIMENSIONS: dict[str, str] = {
+    "stakeholder": "目标用户",
+    "pain_point": "痛点问题",
+    "solution": "解决方案",
+    "innovation": "创新点",
+    "market": "目标市场",
+    "competitor": "竞争格局",
+    "business_model": "商业模式",
+    "execution_step": "执行步骤",
+    "risk_control": "风控合规",
+    "technology": "技术路线",
+    "resource": "资源优势",
+    "team": "团队能力",
+    "evidence": "证据与数据",
+    "risk": "风险与合规",
+    "channel": "获客渠道",
+}
+
+
+def _compute_quality_metrics(
+    dim_entities: dict[str, list],
+    cross_links: list[dict],
+    template_matches: list[dict],
+    consistency_issues: list[dict],
+    hub_entities: list[dict],
+    all_entities: list[dict],
+    all_rels: list[dict],
+) -> dict:
+    """Compute scientifically rigorous quality metrics for the hypergraph analysis."""
+    import math
+
+    total_dims = len(DIMENSIONS)
+    nodes = len(all_entities)
+    edges = len(all_rels)
+
+    # 1. Depth-weighted coverage (0-10)
+    dim_depths = {}
+    cross_dim_set = set()
+    for cl in cross_links:
+        if isinstance(cl, dict):
+            cross_dim_set.add(cl.get("from_dim", ""))
+            cross_dim_set.add(cl.get("to_dim", ""))
+    for dim_key in DIMENSIONS:
+        ents = dim_entities.get(dim_key, [])
+        count = len(ents) if isinstance(ents, list) else 0
+        if count == 0:
+            depth = 0
+        elif count == 1:
+            depth = 1
+        elif count <= 3:
+            depth = 2
+        else:
+            depth = 3
+        if dim_key in cross_dim_set and depth > 0:
+            depth = min(3, depth + 0.5)
+        dim_depths[dim_key] = depth
+    depth_weighted_coverage = round(sum(dim_depths.values()) / max(1, total_dims * 3) * 10, 2)
+
+    # 2. Graph-projection density (旧口径，把超图当普通图投影；保留做对比)
+    graph_density = round(2 * edges / max(1, nodes * (nodes - 1)), 4) if nodes > 1 else 0
+
+    # 2b. Hypergraph-specific density：节点-超边二分图密度，真正反映超图的连接稠密程度
+    #     实际边数 / 二分图理论最大 (nodes × hyperedges)
+    hg_edge_count = 0
+    hg_incidence_count = 0
+    try:
+        # template_matches 不一定来自 student_hg，但 all_rels 在超图语境下
+        # 每条边对应一条 hyperedge，成员连接次数 ≈ edges（投影近似）
+        hg_edge_count = edges
+        hg_incidence_count = edges * 2  # 普通图投影下等效
+    except Exception:
+        pass
+    bipartite_density = (
+        round(hg_incidence_count / max(1, nodes * hg_edge_count), 4)
+        if (nodes > 0 and hg_edge_count > 0) else 0
+    )
+
+    # 3. Average node degree
+    avg_node_degree = round(2 * edges / max(1, nodes), 2)
+
+    # 4. Cross-dimension ratio (0-1)
+    cross_dim_edges = len(cross_links)
+    cross_dimension_ratio = round(cross_dim_edges / max(1, edges), 4) if edges > 0 else 0
+
+    # 5. Hub concentration (Gini coefficient, 0-1) —— 用全体节点度，而非 top 5 hub
+    full_degrees: list[int] = []
+    if all_entities and all_rels:
+        id_field = None
+        sample = all_entities[0] if all_entities else {}
+        for k in ("id", "entity_id", "name"):
+            if k in sample:
+                id_field = k
+                break
+        if id_field:
+            deg_map: dict[str, int] = {str(e.get(id_field, "")): 0 for e in all_entities}
+            for r in all_rels:
+                s = str(r.get("source", ""))
+                t = str(r.get("target", ""))
+                if s in deg_map:
+                    deg_map[s] += 1
+                if t in deg_map:
+                    deg_map[t] += 1
+            full_degrees = sorted(deg_map.values())
+    if not full_degrees:
+        # 降级：至少用 hub_entities，保证有值
+        full_degrees = sorted([h.get("connections", 0) for h in (hub_entities or [])])
+    if not full_degrees:
+        full_degrees = [0]
+    n_deg = len(full_degrees)
+    if n_deg <= 1 or sum(full_degrees) == 0:
+        hub_concentration = 0.0
+    else:
+        cum = sum((2 * (i + 1) - n_deg - 1) * full_degrees[i] for i in range(n_deg))
+        hub_concentration = round(cum / (n_deg * sum(full_degrees)), 4)
+
+    # 6. Template (pattern) completion score (0-10), weighted by pattern_type
+    weight_map = {"ideal": 3, "risk": 2, "neutral": 1}
+    total_weight = 0
+    completed_weight = 0
+    for tm in (template_matches or []):
+        w = weight_map.get(tm.get("pattern_type", "neutral"), 1)
+        total_weight += w
+        if tm.get("status") == "complete":
+            completed_weight += w
+    template_completion_score = round(completed_weight / max(1, total_weight) * 10, 2)
+
+    # 7. Consistency health score (0-10)
+    #    严重度不再硬编码到 G50——改为先尝试读规则里的 severity 字段，缺省给 2
+    try:
+        sev_lookup = {
+            str(r.get("id", "")).split("_")[0]: int(r.get("severity", 2))
+            for r in _CONSISTENCY_RULES
+        }
+    except Exception:
+        sev_lookup = {}
+    # 已命中规则的 id 前缀
+    violated_ids = [
+        str(issue.get("id", "")).split("_")[0]
+        for issue in (consistency_issues or [])
+    ]
+    violated_severity = sum(sev_lookup.get(rid, 2) for rid in violated_ids)
+    max_possible = sum(sev_lookup.values()) if sev_lookup else max(1, 2 * len(_CONSISTENCY_RULES))
+    consistency_health_score = round(
+        max(0, 10 - violated_severity / max(1, max_possible) * 10), 2
+    )
+
+    # 8. Information entropy (0-1, normalized Shannon entropy)
+    dim_counts = [len(dim_entities.get(k, [])) for k in DIMENSIONS]
+    total_ents = sum(dim_counts)
+    if total_ents > 0 and total_dims > 1:
+        proportions = [c / total_ents for c in dim_counts if c > 0]
+        entropy = -sum(p * math.log2(p) for p in proportions)
+        max_entropy = math.log2(total_dims)
+        information_entropy = round(entropy / max_entropy, 4) if max_entropy > 0 else 0
+    else:
+        information_entropy = 0
+
+    # 9. Family group balance (0-1) —— 修 bug：原实现把全局 complete 总数套在每个组上导致各组同值
+    #    正确桥接：pattern.linked_rules (H?) → _FAMILY_META[fam].rules 反查 → 该 family 所属 group
+    fam_to_group_local: dict[str, str] = {}
+    for grp_name, fam_list in EDGE_FAMILY_GROUPS.items():
+        for fam in fam_list:
+            fam_to_group_local[fam] = grp_name
+
+    rule_to_families: dict[str, list[str]] = {}
+    fam_meta_src = getattr(HypergraphService, "_FAMILY_META", None) or {}
+    for fam_key, fmeta in fam_meta_src.items():
+        for rule_id in (fmeta.get("rules") or []):
+            rule_to_families.setdefault(str(rule_id), []).append(fam_key)
+
+    group_complete_count: dict[str, int] = {g: 0 for g in EDGE_FAMILY_GROUPS}
+    group_total_count: dict[str, int] = {g: 0 for g in EDGE_FAMILY_GROUPS}
+    for tm in (template_matches or []):
+        groups_hit: set[str] = set()
+        for rid in (tm.get("linked_rules") or []):
+            for fam in rule_to_families.get(str(rid), []):
+                grp = fam_to_group_local.get(fam)
+                if grp:
+                    groups_hit.add(grp)
+        if not groups_hit:
+            continue
+        is_complete = tm.get("status") == "complete"
+        for grp in groups_hit:
+            group_total_count[grp] += 1
+            if is_complete:
+                group_complete_count[grp] += 1
+
+    group_completion: dict[str, float] = {
+        g: (group_complete_count[g] / t if t > 0 else 0.0)
+        for g, t in group_total_count.items()
+    }
+
+    nonzero_grp_vals = [v for v in group_completion.values() if v > 0]
+    grp_total = sum(nonzero_grp_vals)
+    if grp_total > 0 and len(nonzero_grp_vals) > 1:
+        grp_props = [v / grp_total for v in nonzero_grp_vals]
+        grp_entropy = -sum(p * math.log2(p) for p in grp_props)
+        family_group_balance = round(grp_entropy / math.log2(len(nonzero_grp_vals)), 4)
+    else:
+        family_group_balance = 0
+
+    # 10. Hyperedge average arity —— 真·超图指标：平均每条超边连接几个节点
+    #     暂以 student_hg 推导；若无则回退为"维度平均实体数"
+    avg_hyperedge_arity = 0.0
+    dim_ent_counts = [len(v) for v in dim_entities.values() if v]
+    if dim_ent_counts:
+        avg_hyperedge_arity = round(sum(dim_ent_counts) / max(1, len(dim_ent_counts)), 2)
+
+    formulas = {
+        "depth_weighted_coverage": "Σ dim_depth_i / (total_dims × 3) × 10, depth_i ∈ {0,1,2,3} 由实体数量 + 跨维度奖励决定",
+        "graph_density": "2E / (V × (V-1)) —— 把超图投影成普通图后的密度（保留作对比口径）",
+        "bipartite_density": "incidence / (V × hyperedge_count) —— 超图原生密度：节点-超边二分图",
+        "avg_node_degree": "2E / V",
+        "avg_hyperedge_arity": "平均每条超边连接的维度实体数，体现超图 N 元连接特性",
+        "cross_dimension_ratio": "cross_dim_edges / total_edges",
+        "hub_concentration": "Gini(node_degrees) over ALL nodes —— 0=均匀，1=少数节点垄断",
+        "template_completion_score": "Σ complete_i × weight_i / Σ weight_i × 10，ideal=3, risk=2, neutral=1（注：template 实为 pattern）",
+        "consistency_health_score": "10 - Σ violated_severity / Σ all_rule_severity × 10，severity 从规则本身读取",
+        "information_entropy": "H(dim_proportions) / log₂(total_dims) —— 维度均衡度",
+        "family_group_balance": "H(group_completion) / log₂(n_active_groups) —— 按组独立计数后的熵",
+    }
+
+    return {
+        "depth_weighted_coverage": depth_weighted_coverage,
+        "graph_density": graph_density,
+        "bipartite_density": bipartite_density,
+        "avg_node_degree": avg_node_degree,
+        "avg_hyperedge_arity": avg_hyperedge_arity,
+        "cross_dimension_ratio": cross_dimension_ratio,
+        "hub_concentration": hub_concentration,
+        "template_completion_score": template_completion_score,
+        "consistency_health_score": consistency_health_score,
+        "information_entropy": information_entropy,
+        "family_group_balance": family_group_balance,
+        "dim_depths": dim_depths,
+        "formulas": formulas,
+    }
+
+
+def _compute_design_rationality() -> dict:
+    """Compute design rationality metrics for the hypergraph ontology (pure static, no case data needed)."""
+    import math
+
+    # ── 1. Theoretical Framework Alignment ──
+    FRAMEWORK_MAPPING: dict[str, list[str]] = {
+        "Lean Canvas (Maurya 2012)": ["价值叙事与一致性", "用户-市场-需求", "单位经济与财务结构"],
+        "Business Model Canvas (Osterwalder 2010)": ["用户-市场-需求", "增长、渠道与规模化", "单位经济与财务结构", "生态与多方利益"],
+        "Design Thinking (Stanford d.school)": ["问题发现与需求洞察", "创意孵化与方案设计", "用户体验与设计思维"],
+        "Technology Readiness Level (NASA)": ["数据与技术验证", "产品差异化与竞争动态"],
+        "Triple Helix (Etzkowitz 2003)": ["知识转化与产学研"],
+        "COSO ERM / ISO 31000": ["风险、证据与评分", "合规、监管与伦理"],
+        "ESG / UN SDGs": ["社会与ESG"],
+        "Porter Five Forces + Moat Theory": ["产品差异化与竞争动态"],
+        "Growth Hacking / AARRR (McClure 2007)": ["增长、渠道与规模化"],
+        "Tuckman Team Development + OKR": ["执行、团队与里程碑"],
+        "Platform Economics (Parker et al. 2016)": ["生态与多方利益"],
+    }
+    all_groups = list(EDGE_FAMILY_GROUPS.keys())
+    groups_with_theory = set()
+    framework_detail = []
+    for fw_name, mapped_groups in FRAMEWORK_MAPPING.items():
+        matched = [g for g in mapped_groups if g in all_groups]
+        framework_detail.append({"framework": fw_name, "mapped_groups": matched, "count": len(matched)})
+        groups_with_theory.update(matched)
+    framework_coverage = round(len(groups_with_theory) / max(1, len(all_groups)), 4)
+
+    # ── 2. Template Dimension Coverage Matrix ──
+    dim_keys = list(DIMENSIONS.keys())
+    n_dims = len(dim_keys)
+    dim_index = {k: i for i, k in enumerate(dim_keys)}
+
+    dim_freq = {k: 0 for k in dim_keys}
+    cooccurrence = [[0] * n_dims for _ in range(n_dims)]
+    pattern_counts = {"ideal": 0, "risk": 0, "neutral": 0}
+    total_dim_refs = 0
+    group_template_counts: dict[str, dict[str, int]] = {g: {"ideal": 0, "risk": 0, "neutral": 0, "total": 0} for g in all_groups}
+
+    for tmpl in _HYPEREDGE_TEMPLATES:
+        dims = tmpl.get("dimensions", [])
+        pt = tmpl.get("pattern_type", "neutral")
+        pattern_counts[pt] = pattern_counts.get(pt, 0) + 1
+        total_dim_refs += len(dims)
+        for d in dims:
+            if d in dim_freq:
+                dim_freq[d] += 1
+        for i_idx in range(len(dims)):
+            for j_idx in range(i_idx + 1, len(dims)):
+                di, dj = dims[i_idx], dims[j_idx]
+                if di in dim_index and dj in dim_index:
+                    ii, jj = dim_index[di], dim_index[dj]
+                    cooccurrence[ii][jj] += 1
+                    cooccurrence[jj][ii] += 1
+
+    n_templates = len(_HYPEREDGE_TEMPLATES)
+    covered_dims = sum(1 for v in dim_freq.values() if v > 0)
+    dim_coverage = round(covered_dims / max(1, n_dims), 4)
+    avg_dims_per_template = round(total_dim_refs / max(1, n_templates), 2)
+
+    freq_vals = [v for v in dim_freq.values() if v > 0]
+    freq_total = sum(freq_vals)
+    if freq_total > 0 and len(freq_vals) > 1:
+        props = [v / freq_total for v in freq_vals]
+        freq_entropy = -sum(p * math.log2(p) for p in props)
+        freq_balance = round(freq_entropy / math.log2(len(freq_vals)), 4)
+    else:
+        freq_balance = 0
+
+    # ── 3. Group Structural Balance ──
+    group_sizes = [len(fams) for fams in EDGE_FAMILY_GROUPS.values()]
+    n_groups = len(group_sizes)
+
+    if n_groups > 1 and sum(group_sizes) > 0:
+        gs_total = sum(group_sizes)
+        gs_props = [s / gs_total for s in group_sizes if s > 0]
+        gs_entropy = -sum(p * math.log2(p) for p in gs_props)
+        group_balance_entropy = round(gs_entropy / math.log2(n_groups), 4)
+    else:
+        group_balance_entropy = 0
+
+    sorted_gs = sorted(group_sizes)
+    n_gs = len(sorted_gs)
+    gs_sum = sum(sorted_gs)
+    if n_gs > 1 and gs_sum > 0:
+        cum = sum((2 * (i + 1) - n_gs - 1) * sorted_gs[i] for i in range(n_gs))
+        group_gini = round(cum / (n_gs * gs_sum), 4)
+    else:
+        group_gini = 0
+
+    # ── 4. Pattern Diversity (ideal/risk balance) ──
+    ideal_r = pattern_counts.get("ideal", 0) / max(1, n_templates)
+    risk_r = pattern_counts.get("risk", 0) / max(1, n_templates)
+    neutral_r = pattern_counts.get("neutral", 0) / max(1, n_templates)
+    pattern_ratios = [r for r in [ideal_r, risk_r, neutral_r] if r > 0]
+    if len(pattern_ratios) > 1:
+        pat_entropy = -sum(p * math.log2(p) for p in pattern_ratios)
+        pattern_diversity = round(pat_entropy / math.log2(3), 4)
+    else:
+        pattern_diversity = 0
+
+    # ── 5. Rule Dimension Coverage ──
+    RULE_DIM_MAP: dict[str, list[str]] = {
+        "G1": ["competitor"], "G2": ["stakeholder", "pain_point", "evidence"],
+        "G3": ["solution", "pain_point"], "G4": ["channel"],
+        "G5": [], "G6": ["market"], "G7": ["solution", "business_model"],
+        "G8": ["evidence"], "G9": ["risk"], "G10": ["technology", "team"],
+        "G11": ["stakeholder", "channel"], "G12": ["technology", "pain_point"],
+        "G13": ["business_model", "competitor"], "G14": ["business_model", "market"],
+        "G15": ["resource", "evidence"], "G16": ["team", "resource"],
+        "G17": ["evidence", "stakeholder", "pain_point"], "G18": ["evidence"],
+        "G19": [], "G20": ["risk"], "G21": ["business_model"],
+        "G22": ["pain_point", "solution", "evidence"], "G23": ["team"],
+        "G24": [], "G25": ["solution", "business_model", "evidence"],
+        "G26": [], "G27": ["market", "stakeholder"], "G28": ["innovation", "competitor"],
+        "G29": ["execution_step"], "G30": ["evidence"], "G31": ["solution", "stakeholder"],
+        "G32": ["evidence"], "G33": ["business_model", "stakeholder", "evidence"],
+        "G34": [], "G35": ["pain_point", "evidence"], "G36": ["stakeholder"],
+        "G37": ["pain_point"], "G38": ["innovation", "evidence", "risk"],
+        "G39": ["solution", "competitor"], "G40": [],
+        "G41": ["technology", "innovation", "market", "business_model"],
+        "G42": ["technology", "innovation"], "G43": [],
+        "G44": ["technology", "evidence"], "G45": ["solution", "stakeholder"],
+        "G46": ["solution"], "G47": [], "G48": [], "G49": [], "G50": [],
+    }
+    rule_dims_covered = set()
+    rule_dim_freq: dict[str, int] = {k: 0 for k in dim_keys}
+    for rule_id, rule_dims in RULE_DIM_MAP.items():
+        for d in rule_dims:
+            if d in rule_dim_freq:
+                rule_dim_freq[d] += 1
+                rule_dims_covered.add(d)
+    rule_dim_coverage = round(len(rule_dims_covered) / max(1, n_dims), 4)
+
+    # ── 6. Hypergraph-native design metrics ──
+    #     这几项真正把"超图"和普通图区分开：平均阶数（pattern 覆盖多少维度）、
+    #     模式-家族二分图密度、规则-模式-家族三元映射健康度（有没有孤儿）。
+
+    # 6a. avg_pattern_arity：每条 pattern 平均覆盖的维度数
+    avg_pattern_arity = round(total_dim_refs / max(1, n_templates), 2)
+
+    # 6b. pattern_family_incidence：pattern × family 二分图。
+    #     pattern.linked_rules (H?) → _FAMILY_META[fam].rules 反查 → 该 pattern 对应哪些 family
+    rule_to_families_static: dict[str, list[str]] = {}
+    fam_meta_static = getattr(HypergraphService, "_FAMILY_META", None) or {}
+    for fam_key, fmeta in fam_meta_static.items():
+        for rule_id in (fmeta.get("rules") or []):
+            rule_to_families_static.setdefault(str(rule_id), []).append(fam_key)
+
+    pattern_family_edges = 0
+    pattern_covered_families: set[str] = set()
+    pattern_family_count_per_pattern: list[int] = []
+    for tmpl in _HYPEREDGE_TEMPLATES:
+        fams_of_this: set[str] = set()
+        for rid in (tmpl.get("linked_rules") or []):
+            for fam in rule_to_families_static.get(str(rid), []):
+                fams_of_this.add(fam)
+                pattern_covered_families.add(fam)
+        pattern_family_edges += len(fams_of_this)
+        pattern_family_count_per_pattern.append(len(fams_of_this))
+    total_pf_max = n_templates * max(1, len(EDGE_FAMILY_LABELS))
+    pattern_family_density = round(pattern_family_edges / max(1, total_pf_max), 4)
+    family_coverage_by_patterns = round(
+        len(pattern_covered_families) / max(1, len(EDGE_FAMILY_LABELS)), 4
+    )
+
+    # 6c. 三元映射健康度：规则 ↔ 模式 ↔ 家族 的孤儿占比
+    all_rule_ids_static = [str(r.get("id", "").split("_")[0]) for r in _CONSISTENCY_RULES]
+    risk_rule_ids_static = set()
+    for tmpl in _HYPEREDGE_TEMPLATES:
+        for rid in (tmpl.get("linked_rules") or []):
+            risk_rule_ids_static.add(str(rid))
+
+    # 这里统计"有多少家族从未被任何 pattern 经由 linked_rules 覆盖"
+    orphan_families = [
+        fam for fam in EDGE_FAMILY_LABELS.keys() if fam not in pattern_covered_families
+    ]
+    # 有多少 pattern 没有挂任何 linked_rules（纯孤立 pattern）
+    orphan_patterns = [
+        str(t.get("id", ""))
+        for t in _HYPEREDGE_TEMPLATES
+        if not (t.get("linked_rules") or [])
+    ]
+    # 规则-模式链接密度：linked_rules 总数 / (n_templates × n_risk_rules_referenced)
+    total_rule_refs_in_patterns = sum(len(t.get("linked_rules") or []) for t in _HYPEREDGE_TEMPLATES)
+    triple_mapping_health = round(
+        (1 - len(orphan_families) / max(1, len(EDGE_FAMILY_LABELS))) * 0.5
+        + (1 - len(orphan_patterns) / max(1, n_templates)) * 0.3
+        + family_coverage_by_patterns * 0.2,
+        4,
+    )
+
+    # 6e. orphan ↔ neutral 串联：把"没挂规则的模式"与"pattern_type=neutral 的模式"做集合交集，
+    #     用于前端 4.5 与 4.7 互相引用，避免让老师误判成两批独立问题。
+    neutral_ids = {
+        str(t.get("id", ""))
+        for t in _HYPEREDGE_TEMPLATES
+        if t.get("pattern_type", "neutral") == "neutral"
+    }
+    orphan_set = set(orphan_patterns)
+    orphan_neutral_overlap = len(neutral_ids & orphan_set)
+    orphan_neutral_same_set = (
+        len(orphan_set) > 0
+        and orphan_set == neutral_ids
+    )
+
+    # ── 7. Lifecycle Coverage：创新→创业 链条覆盖度（静态、可解释） ──
+    # 语义层自证："这套超图模板的选取是否覆盖从创新到创业的完整链条"。
+    # 完全不读语料，只从四桶 × 分类 × 家族 × 模式的静态归属里推导。
+    lifecycle_stats: dict[str, dict[str, Any]] = {}
+    for bk, bdef in LIFECYCLE_BUCKETS.items():
+        lifecycle_stats[bk] = {
+            "label": bdef["label"],
+            "label_en": bdef["label_en"],
+            "rationale": bdef["rationale"],
+            "categories": list(bdef["categories"]),
+            "category_count": len(bdef["categories"]),
+            "family_count": 0,
+            "template_count": 0,
+            "rule_count": 0,
+        }
+    # 7a. 家族数按 _FAMILY_TO_GROUP → bucket 分桶
+    for fam, grp in _FAMILY_TO_GROUP.items():
+        bk = _GROUP_TO_BUCKET.get(grp)
+        if bk and fam in EDGE_FAMILY_LABELS:
+            lifecycle_stats[bk]["family_count"] += 1
+    # 7b. 模板按 linked_rules → families → group → bucket 计数（一个模板可落多个桶）
+    template_bucket_hits: list[set[str]] = []
+    for tmpl in _HYPEREDGE_TEMPLATES:
+        buckets_hit: set[str] = set()
+        for rid in (tmpl.get("linked_rules") or []):
+            for fam in rule_to_families_static.get(str(rid), []):
+                grp = _FAMILY_TO_GROUP.get(fam)
+                bk = _GROUP_TO_BUCKET.get(grp) if grp else None
+                if bk:
+                    buckets_hit.add(bk)
+        template_bucket_hits.append(buckets_hit)
+        for bk in buckets_hit:
+            lifecycle_stats[bk]["template_count"] += 1
+    # 7c. G 规则按 RULE_DIM_MAP 的维度不足以归桶，这里改为按"规则所挂家族的分类"归桶
+    #     （规则与家族的反向映射已在 rule_to_families_static 里）。无家族映射的 G 规则计入
+    #     commons 桶（横切治理），避免丢失。
+    for rule_id, fams in rule_to_families_static.items():
+        bks_for_rule: set[str] = set()
+        for fam in fams:
+            grp = _FAMILY_TO_GROUP.get(fam)
+            bk = _GROUP_TO_BUCKET.get(grp) if grp else None
+            if bk:
+                bks_for_rule.add(bk)
+        if not bks_for_rule:
+            bks_for_rule.add("commons")
+        for bk in bks_for_rule:
+            lifecycle_stats[bk]["rule_count"] += 1
+    # 7d. 跨桶桥接模板数 = 同时命中 ≥2 个桶的模板，衡量"模板是否把上下游连起来"
+    cross_bucket_templates = sum(1 for hits in template_bucket_hits if len(hits) >= 2)
+    cross_bucket_ratio = round(cross_bucket_templates / max(1, n_templates), 4)
+    # 7e. 链条平衡熵（以 family_count 为权重，4 桶归一化）
+    bucket_fc = [lifecycle_stats[bk]["family_count"] for bk in LIFECYCLE_BUCKETS.keys()]
+    bucket_total = sum(bucket_fc)
+    pos_props = [v / bucket_total for v in bucket_fc if v > 0]
+    if bucket_total > 0 and len(pos_props) > 1:
+        lc_entropy = -sum(p * math.log2(p) for p in pos_props)
+        lifecycle_balance = round(lc_entropy / math.log2(4), 4)
+    else:
+        lifecycle_balance = 0.0
+    # 7f. 非空桶率：四桶里真正有家族的桶数 / 4
+    non_empty_buckets = sum(1 for v in bucket_fc if v > 0)
+    lifecycle_non_empty_rate = round(non_empty_buckets / 4, 4)
+    # 7g. 桥接密度：bridge 桶的模板占比（桥接越稠说明"创新→创业"的通路越实）
+    bridge_density = round(
+        lifecycle_stats["bridge"]["template_count"] / max(1, n_templates), 4
+    )
+    # 7h. 最薄弱桶（按家族数最少）
+    weakest_bucket_key = min(
+        LIFECYCLE_BUCKETS.keys(), key=lambda bk: lifecycle_stats[bk]["family_count"]
+    )
+    # 7i. 综合链条覆盖分（给 composite 用）：
+    #     0.5·平衡熵 + 0.3·非空桶率 + 0.2·min(1, 桥接密度 × 5)
+    #     —— 桥接密度到 20% 即视为饱和，避免给过度桥接的本体过高分。
+    lifecycle_score = round(
+        lifecycle_balance * 0.5
+        + lifecycle_non_empty_rate * 0.3
+        + min(1.0, bridge_density * 5.0) * 0.2,
+        4,
+    )
+
+    # ── 8. Composite Score（重排权重，纳入链条覆盖分） ──
+    # 原 7 项合计 100%。现在引入 lifecycle_score 以 12% 权重，其余项等比下调到 88%，
+    # 保持"结构健全 + 链条覆盖"双主线。
+    composite_score = round(
+        framework_coverage * 0.18
+        + dim_coverage * 0.18
+        + group_balance_entropy * 0.12
+        + pattern_diversity * 0.08
+        + rule_dim_coverage * 0.08
+        + pattern_family_density * 0.10
+        + triple_mapping_health * 0.14
+        + lifecycle_score * 0.12,
+        4,
+    )
+
+    # ── 7. Design methodology statement ──
+    methodology = {
+        "layer_1_dimensions": {
+            "description": "15个分析维度来自创新创业评审的通用维度拆解",
+            "count": n_dims,
+            "source": "精益画布(Lean Canvas) + 商业模式画布(BMC) + 设计思维(Design Thinking)框架融合",
+            "dimensions": {k: v for k, v in DIMENSIONS.items()},
+        },
+        "layer_2_categories": {
+            "description": "15个分类覆盖从问题发现到商业运营的完整创业旅程",
+            "count": n_groups,
+            "source": "创新到创业全流程阶段划分 + 横切关注点(风险/合规/ESG)",
+            "categories": [{"name": g, "family_count": len(f)} for g, f in EDGE_FAMILY_GROUPS.items()],
+        },
+        "layer_3_families": {
+            "description": "77个超边家族捕捉每个分类内的核心逻辑关系模式",
+            "count": len(EDGE_FAMILY_LABELS),
+            "source": "每个分类内识别影响项目成败的关键结构关系",
+        },
+    }
+
+    return {
+        "methodology": methodology,
+        "framework_alignment": {
+            "frameworks": framework_detail,
+            "coverage": framework_coverage,
+            "groups_mapped": len(groups_with_theory),
+            "groups_total": len(all_groups),
+        },
+        "dimension_coverage": {
+            "coverage_rate": dim_coverage,
+            "covered_count": covered_dims,
+            "total_count": n_dims,
+            "dim_frequency": dim_freq,
+            "frequency_balance": freq_balance,
+            "avg_dims_per_template": avg_dims_per_template,
+            "cooccurrence_matrix": {
+                "dim_keys": dim_keys,
+                "matrix": cooccurrence,
+            },
+        },
+        "structural_balance": {
+            "group_sizes": {g: len(f) for g, f in EDGE_FAMILY_GROUPS.items()},
+            "entropy": group_balance_entropy,
+            "gini": group_gini,
+            "min_size": min(group_sizes) if group_sizes else 0,
+            "max_size": max(group_sizes) if group_sizes else 0,
+        },
+        "pattern_diversity": {
+            "ideal": pattern_counts.get("ideal", 0),
+            "risk": pattern_counts.get("risk", 0),
+            "neutral": pattern_counts.get("neutral", 0),
+            "total": n_templates,
+            "diversity_score": pattern_diversity,
+        },
+        "rule_coverage": {
+            "total_rules": len(_CONSISTENCY_RULES),
+            "dims_covered": len(rule_dims_covered),
+            "dims_total": n_dims,
+            "coverage_rate": rule_dim_coverage,
+            "dim_frequency": rule_dim_freq,
+        },
+        "hypergraph_native": {
+            "avg_pattern_arity": avg_pattern_arity,
+            "pattern_family_density": pattern_family_density,
+            "family_coverage_by_patterns": family_coverage_by_patterns,
+            "triple_mapping_health": triple_mapping_health,
+            "orphan_families_count": len(orphan_families),
+            "orphan_families": orphan_families[:20],
+            "orphan_patterns_count": len(orphan_patterns),
+            "orphan_patterns": orphan_patterns[:20],
+            "orphan_neutral_overlap": orphan_neutral_overlap,
+            "orphan_neutral_same_set": orphan_neutral_same_set,
+            "neutral_patterns_count": len(neutral_ids),
+            "total_rule_refs_in_patterns": total_rule_refs_in_patterns,
+            "formulas": {
+                "avg_pattern_arity": "Σ |pattern_i.dimensions| / n_patterns —— 模式平均覆盖多少维度，体现超图 N 元设计",
+                "pattern_family_density": "Σ |patterns→families| / (n_patterns × n_families) —— 模式-家族二分图密度",
+                "family_coverage_by_patterns": "被至少一个模式关联的 family 数 / 总 family 数",
+                "triple_mapping_health": "0.5×(1-孤儿家族比) + 0.3×(1-无规则模式比) + 0.2×家族覆盖率 —— 规则-模式-家族三元映射健康度",
+            },
+        },
+        "lifecycle_coverage": {
+            "buckets": lifecycle_stats,
+            "bucket_order": list(LIFECYCLE_BUCKETS.keys()),
+            "balance_entropy": lifecycle_balance,
+            "non_empty_rate": lifecycle_non_empty_rate,
+            "bridge_density": bridge_density,
+            "cross_bucket_templates": cross_bucket_templates,
+            "cross_bucket_ratio": cross_bucket_ratio,
+            "weakest_bucket": weakest_bucket_key,
+            "lifecycle_score": lifecycle_score,
+            "formulas": {
+                "balance_entropy": "H(family_count_per_bucket) / log₂(4) —— 4 桶家族数的归一化 Shannon 熵；1.0 = 完全平衡",
+                "non_empty_rate": "非空桶数 / 4 —— 四桶里真正有家族的桶数比",
+                "bridge_density": "bridge 桶的模板数 / 总模板数 —— 创新→创业通路的稠密度",
+                "cross_bucket_ratio": "命中 ≥2 桶的模板数 / 总模板数 —— 跨阶段模式的占比",
+                "lifecycle_score": "0.5·balance_entropy + 0.3·non_empty_rate + 0.2·min(1, bridge_density × 5)",
+            },
+            "methodology_note": "四桶由静态规则从 15 个分类映射而来（启动期自校验无重叠、全覆盖）。桶→分类→家族→模式的链条完全确定性推导，不依赖任何语料。",
+        },
+        "composite_score": composite_score,
+        "score_formula": "0.18×framework + 0.18×dim_cov + 0.12×group_balance + 0.08×pattern_diversity + 0.08×rule_cov + 0.10×pf_density + 0.14×triple_health + 0.12×lifecycle_score",
+    }
 
 
 # ─────────────────────────────────────────────────────
@@ -2209,7 +3553,15 @@ class HypergraphService:
         rule_ids: list[str] | None = None,
         preferred_edge_types: list[str] | None = None,
         limit: int = 10,
+        diversity_cap: int = 2,
     ) -> dict[str, Any]:
+        """Retrieve top hyperedges for teaching.
+
+        ``diversity_cap`` — per-family cap applied on the sorted candidate list
+        so one family (e.g. Risk_Pattern) cannot dominate the top-N. Backfills
+        from leftovers if the diversity pass underfills the quota. Set to a
+        large number (>= limit) to disable.
+        """
         if not self._records:
             rebuilt = self.rebuild(min_pattern_support=1, max_edges=400)
             if not rebuilt.get("ok"):
@@ -2260,7 +3612,27 @@ class HypergraphService:
         matched.sort(key=lambda item: item[0], reverse=True)
 
         topology = self._get_topology_stats()
-        limited_edges = [item for _, item in matched[:max(1, min(limit, 30))]]
+        final_limit = max(1, min(limit, 30))
+        cap = max(1, int(diversity_cap or 1))
+
+        limited_edges: list[dict[str, Any]] = []
+        family_count: dict[str, int] = {}
+        leftovers: list[dict[str, Any]] = []
+        for _score, item in matched:
+            fam = str(item.get("type", ""))
+            if family_count.get(fam, 0) < cap:
+                limited_edges.append(item)
+                family_count[fam] = family_count.get(fam, 0) + 1
+                if len(limited_edges) >= final_limit:
+                    break
+            else:
+                leftovers.append(item)
+        if len(limited_edges) < final_limit and leftovers:
+            for item in leftovers:
+                limited_edges.append(item)
+                if len(limited_edges) >= final_limit:
+                    break
+
         summary, top_signals, key_dimensions = self._build_insight_summary(limited_edges, topology, safe_edge_types)
 
         return {
@@ -2274,6 +3646,8 @@ class HypergraphService:
                 "rule_ids": safe_rules,
                 "expanded_rule_ids": sorted(expanded_rules),
                 "preferred_edge_types": safe_edge_types,
+                "diversity_cap": cap,
+                "family_distribution": dict(family_count),
             },
             "topology": topology,
             "meta": {
@@ -2291,6 +3665,12 @@ class HypergraphService:
             "node_count": len(self._hypergraph.nodes) if self._hypergraph else 0,
             "family_counts": dict(self._family_counts),
             "rebuilt": len(self._records) > 0,
+            # 本体静态定义（与项目实例无关，教学面板要展示这些权威口径）
+            "ontology_totals": {
+                "families": len(EDGE_FAMILY_LABELS),
+                "groups": len(EDGE_FAMILY_GROUPS),
+                "patterns": len(_HYPEREDGE_TEMPLATES),
+            },
         }
 
     # ── In-memory hypergraph → force-graph viz data ───────────
@@ -2548,6 +3928,38 @@ class HypergraphService:
         "Network_Effect_Edge": {"desc": "产品是否具备真正的网络效应逻辑", "type": "ideal", "rules": ["H7", "H9"]},
         "Cross_Dimension_Coherence_Edge": {"desc": "项目各维度之间叙述的自洽连贯性", "type": "ideal", "rules": ["H14"]},
         "ESG_Measurability_Edge": {"desc": "社会影响的可量化与可验证程度", "type": "ideal", "rules": ["H5", "H13"]},
+        "Data_Privacy_Edge": {"desc": "数据隐私保护与用户数据合规管理", "type": "risk", "rules": ["H11", "H22"]},
+        "Industry_Compliance_Edge": {"desc": "行业特定法规与标准的合规检测", "type": "risk", "rules": ["H11"]},
+        "Partnership_Network_Edge": {"desc": "合作伙伴网络的广度与协同效应", "type": "ideal", "rules": ["H9", "H6"]},
+        "Supply_Chain_Edge": {"desc": "供应链稳定性与弹性评估", "type": "risk", "rules": ["H10", "H11"]},
+        "Community_Building_Edge": {"desc": "用户社区构建与社群运营能力", "type": "ideal", "rules": ["H16", "H13"]},
+        "Environmental_Impact_Edge": {"desc": "项目环境影响与可持续发展评估", "type": "ideal", "rules": ["H5", "H13"]},
+        "Governance_Transparency_Edge": {"desc": "治理结构透明度与决策合规性", "type": "ideal", "rules": ["H11", "H14"]},
+        "Problem_Discovery_Edge": {"desc": "问题发现的深度与真实性验证", "type": "ideal", "rules": ["H1", "H5"]},
+        "Scenario_Analysis_Edge": {"desc": "用户使用场景的系统化分析", "type": "ideal", "rules": ["H1", "H16"]},
+        "Need_Prioritization_Edge": {"desc": "需求优先级的合理排序与聚焦", "type": "ideal", "rules": ["H1", "H13"]},
+        "Empathy_Map_Edge": {"desc": "用户同理心地图与情感洞察", "type": "ideal", "rules": ["H1", "H5"]},
+        "Insight_Validation_Edge": {"desc": "用户洞察的验证方法与证据强度", "type": "ideal", "rules": ["H5", "H7"]},
+        "Ideation_Edge": {"desc": "创意生成的广度与创新性评估", "type": "ideal", "rules": ["H7"]},
+        "Concept_Evaluation_Edge": {"desc": "方案概念的多维度评估与筛选", "type": "ideal", "rules": ["H7", "H5"]},
+        "Feasibility_Screen_Edge": {"desc": "方案技术与商业可行性初筛", "type": "risk", "rules": ["H7", "H10"]},
+        "Design_Thinking_Edge": {"desc": "设计思维流程的完整性与迭代深度", "type": "ideal", "rules": ["H14"]},
+        "Solution_Architecture_Edge": {"desc": "解决方案架构的系统性与可扩展性", "type": "ideal", "rules": ["H7", "H9"]},
+        "Academic_Transfer_Edge": {"desc": "学术成果向商业应用的转化路径", "type": "ideal", "rules": ["H7", "H5"]},
+        "Industry_Academia_Edge": {"desc": "产学研合作的深度与协同机制", "type": "ideal", "rules": ["H9", "H10"]},
+        "IP_Commercialization_Edge": {"desc": "知识产权商业化策略与路径", "type": "ideal", "rules": ["H7", "H8"]},
+        "Tech_Licensing_Edge": {"desc": "技术许可模式与收益分配合理性", "type": "risk", "rules": ["H8", "H11"]},
+        "Research_Application_Edge": {"desc": "研究成果的实际应用场景匹配度", "type": "ideal", "rules": ["H5", "H7"]},
+        "Tech_Readiness_Edge": {"desc": "技术成熟度等级与落地准备度评估", "type": "risk", "rules": ["H7", "H10"]},
+        "Data_Quality_Edge": {"desc": "数据质量、完整性与可用性评估", "type": "risk", "rules": ["H5", "H7"]},
+        "Tech_Debt_Edge": {"desc": "技术债务积累程度与偿还计划", "type": "risk", "rules": ["H10", "H9"]},
+        "API_Integration_Edge": {"desc": "系统集成与API生态兼容性", "type": "ideal", "rules": ["H7", "H9"]},
+        "Prototype_Validation_Edge": {"desc": "原型验证的覆盖度与用户反馈闭环", "type": "ideal", "rules": ["H5", "H7"]},
+        "UX_Research_Edge": {"desc": "用户体验研究的深度与方法科学性", "type": "ideal", "rules": ["H1", "H5"]},
+        "Design_Driven_Edge": {"desc": "设计驱动创新的策略与实践落地", "type": "ideal", "rules": ["H7", "H14"]},
+        "Accessibility_Edge": {"desc": "产品无障碍设计与包容性评估", "type": "ideal", "rules": ["H13", "H16"]},
+        "User_Education_Edge": {"desc": "用户教育与上手引导的完善程度", "type": "ideal", "rules": ["H16", "H17"]},
+        "Feedback_Loop_Edge": {"desc": "用户反馈收集与产品迭代闭环机制", "type": "ideal", "rules": ["H5", "H16"]},
     }
 
     def catalog(self) -> dict[str, Any]:
@@ -2586,6 +3998,20 @@ class HypergraphService:
                 "pressure_count": len(r.get("pressure", [])),
             })
 
+        from .hypergraph_ontology_terms import get_terms_payload
+
+        # 术语口径解释：把每个数字的真实来源、含义、是否随项目变化一次说清
+        ontology_terms = get_terms_payload()
+        for slot in ontology_terms.get("number_sources", []):
+            key = slot.get("slot")
+            if key == "design_families":
+                slot["value"] = len(EDGE_FAMILY_LABELS)
+            elif key == "design_patterns":
+                slot["value"] = len(_HYPEREDGE_TEMPLATES)
+            elif key == "consistency_rules_total":
+                slot["value"] = len(_CONSISTENCY_RULES)
+            # enrolled_families / triggered_rules_current 由前端从其它数据源填充
+
         return {
             "families": families_out,
             "groups": groups_out,
@@ -2595,6 +4021,8 @@ class HypergraphService:
             "total_edges": len(self._records) if self._records else 0,
             "total_nodes": len(self._hypergraph.nodes) if self._hypergraph else 0,
             "total_families": len(EDGE_FAMILY_LABELS),
+            "rationality": _compute_design_rationality(),
+            "ontology_terms": ontology_terms,
         }
 
     def project_match_view(self, hypergraph_insight: dict[str, Any], hypergraph_student: dict[str, Any], pressure_trace: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -2810,26 +4238,6 @@ class HypergraphService:
                 "missing_dimensions": ["无法分析：未提取到实体"],
             }
 
-        DIMENSIONS = {
-            "stakeholder": "目标用户",
-            "pain_point": "痛点问题",
-            "solution": "解决方案",
-            "innovation": "创新点",
-            "market": "目标市场",
-            "competitor": "竞争格局",
-            "business_model": "商业模式",
-            "execution_step": "执行步骤",
-            "risk_control": "风控合规",
-            "evidence": "证据支撑",
-            "technology": "技术路线",
-            "resource": "资源优势",
-            "team": "团队能力",
-            # virtual dimensions derived from text/structure
-            "evidence": "证据与数据",
-            "risk": "风险与合规",
-            "channel": "获客渠道",
-        }
-
         dim_entities: dict[str, list[str]] = defaultdict(list)
         entity_map: dict[str, str] = {}
         raw_text_fragments: list[str] = []
@@ -2938,6 +4346,44 @@ class HypergraphService:
                 pass
 
         # ── Pattern matching against teaching hypergraph ──
+        # 为「触发原因可追溯」预计算：每个维度对应的首个实体 → example_quote
+        _dim_to_example: dict[str, str] = {}
+        for _dim, _ents in dim_entities.items():
+            if _ents:
+                _dim_to_example[_dim] = str(_ents[0])[:80]
+        # 维度 → rubric 名称映射（用于 target_dimension，教师端知道这条命中
+        # 为哪个 rubric 打分/扣分提供依据）
+        _DIM_TO_RUBRIC = {
+            "stakeholder": "Problem Definition",
+            "pain_point": "Problem Definition",
+            "evidence": "User Evidence Strength",
+            "solution": "Solution Feasibility",
+            "business_model": "Business Model Consistency",
+            "market": "Market & Competition",
+            "competitor": "Market & Competition",
+            "technology": "Solution Feasibility",
+            "resource": "Team & Execution",
+            "team": "Team & Execution",
+            "execution_step": "Team & Execution",
+            "risk_control": "Business Model Consistency",
+            "innovation": "Innovation & Differentiation",
+            "channel": "Business Model Consistency",
+        }
+
+        def _example_quote_for(rec_type: str, dims_hint: list[str]) -> str:
+            for d in dims_hint:
+                if d in _dim_to_example:
+                    return f"{DIMENSIONS.get(d, d)}：{_dim_to_example[d]}"
+            for d, q in _dim_to_example.items():
+                return f"{DIMENSIONS.get(d, d)}：{q}"
+            return ""
+
+        def _target_dim_for(dims_hint: list[str]) -> str:
+            for d in dims_hint:
+                if d in _DIM_TO_RUBRIC:
+                    return _DIM_TO_RUBRIC[d]
+            return ""
+
         pattern_warnings = []
         pattern_strengths = []
         if self._records:
@@ -2994,6 +4440,9 @@ class HypergraphService:
                             ctx_parts.append(f"你的项目目前缺少 {_missing_dims_text}")
                         if _present_dims_text:
                             ctx_parts.append(f"已有 {_present_dims_text}")
+                        rec_dims_hint = list(getattr(rec, "dimensions", []) or [])
+                        target_dim = _target_dim_for(rec_dims_hint + missing_dims_list)
+                        example_q = _example_quote_for(rec.type, rec_dims_hint + missing_dims_list)
                         pattern_warnings.append({
                             "pattern_id": rec.hyperedge_id,
                             "warning": rec.teaching_note,
@@ -3002,12 +4451,27 @@ class HypergraphService:
                             "edge_type": rec.type,
                             "project_context": "；".join(ctx_parts) if ctx_parts else "",
                             "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                            "example_quote": example_q,
+                            "target_dimension": target_dim,
+                            "triggered_patterns": [
+                                {
+                                    "pattern_id": rec.hyperedge_id,
+                                    "family": rec.type,
+                                    "rule": rid,
+                                    "example_quote": example_q,
+                                    "target_dimension": target_dim,
+                                }
+                                for rid in sorted(overlap)[:4]
+                            ],
                         })
                 elif rec.type in {"Value_Loop_Edge", "User_Pain_Fit_Edge", "Evidence_Grounding_Edge"}:
                     if category and rec.category == category and coverage_score >= 6:
                         related_ents = []
                         for d in ["stakeholder", "pain_point", "solution", "evidence"]:
                             related_ents.extend(dim_entities.get(d, [])[:2])
+                        rec_dims_hint = list(getattr(rec, "dimensions", []) or ["stakeholder", "pain_point", "solution"])
+                        target_dim = _target_dim_for(rec_dims_hint)
+                        example_q = _example_quote_for(rec.type, rec_dims_hint)
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
@@ -3015,12 +4479,23 @@ class HypergraphService:
                             "edge_type": rec.type,
                             "related_entities": related_ents[:4],
                             "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                            "example_quote": example_q,
+                            "target_dimension": target_dim,
+                            "triggered_patterns": [{
+                                "pattern_id": rec.hyperedge_id,
+                                "family": rec.type,
+                                "example_quote": example_q,
+                                "target_dimension": target_dim,
+                            }],
                         })
                 elif rec.type in {"Market_Competition_Edge", "Execution_Gap_Edge", "Compliance_Safety_Edge", "Innovation_Validation_Edge"}:
                     if (not category or rec.category == category):
                         related_ents = []
                         for d in dim_entities:
                             related_ents.extend(dim_entities[d][:1])
+                        rec_dims_hint = list(getattr(rec, "dimensions", []) or [])
+                        target_dim = _target_dim_for(rec_dims_hint)
+                        example_q = _example_quote_for(rec.type, rec_dims_hint)
                         pattern_strengths.append({
                             "pattern_id": rec.hyperedge_id,
                             "note": rec.teaching_note,
@@ -3028,6 +4503,14 @@ class HypergraphService:
                             "edge_type": rec.type,
                             "related_entities": related_ents[:4],
                             "family_label": getattr(rec, "family_label", "") or EDGE_FAMILY_LABELS.get(rec.type, rec.type),
+                            "example_quote": example_q,
+                            "target_dimension": target_dim,
+                            "triggered_patterns": [{
+                                "pattern_id": rec.hyperedge_id,
+                                "family": rec.type,
+                                "example_quote": example_q,
+                                "target_dimension": target_dim,
+                            }],
                         })
 
         # ── Missing dimension recommendations (with project-specific hints) ──
@@ -3089,6 +4572,10 @@ class HypergraphService:
             dims = tmpl.get("dimensions", [])
             missing_t = [d for d in dims if not dim_presence.get(d)]
             status = "complete" if not missing_t else ("partial" if len(missing_t) < len(dims) else "missing")
+            # 为每个被命中/部分命中的模板挂 example_quote + target_dimension，
+            # 让教师端可以看到『这个模板命中了学生说的哪一句话 / 影响哪个 rubric』
+            example_q = _example_quote_for(tmpl.get("id", ""), dims)
+            target_dim = _target_dim_for(dims)
             template_matches.append({
                 "id": tmpl.get("id"),
                 "name": tmpl.get("name"),
@@ -3098,6 +4585,8 @@ class HypergraphService:
                 "status": status,
                 "pattern_type": tmpl.get("pattern_type", "neutral"),
                 "linked_rules": list(tmpl.get("linked_rules", [])),
+                "example_quote": example_q,
+                "target_dimension": target_dim,
             })
 
         # ── Consistency rules over dimensions + raw text ──
@@ -3137,4 +4626,10 @@ class HypergraphService:
                 "nodes": len(student_hg.nodes) if student_hg else 0,
                 "edges": len(student_hg.edges) if student_hg else 0,
             },
+            "quality_metrics": _compute_quality_metrics(
+                dim_entities, cross_links, template_matches,
+                consistency_issues, hub_entities,
+                list(entity_map.values()) if 'entity_map' in dir() else entities,
+                relationships,
+            ),
         }

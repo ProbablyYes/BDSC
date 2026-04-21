@@ -1,0 +1,570 @@
+{
+  "project_id": "e2e_finance_probe",
+  "submissions": [
+    {
+      "student_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+      "conversation_id": "6c6fcc41-9384-4371-b550-6071587d6a8a",
+      "class_id": null,
+      "cohort_id": null,
+      "logical_project_id": "6c6fcc41-9384-4371-b550-6071587d6a8a",
+      "project_phase": "问题定义",
+      "intent": "商业诊断",
+      "intent_confidence": 1.0,
+      "intent_shape": "single",
+      "source_type": "dialogue_turn",
+      "mode": "competition",
+      "raw_text": "我打算向大学生收月费 299 元，CAC 大概 500 块，月留存 40%。",
+      "diagnosis": {
+        "mode": "competition",
+        "overall_score": null,
+        "bottleneck": "",
+        "triggered_rules": [],
+        "rubric": [],
+        "capability_map": [
+          {
+            "stage": "痛点发现",
+            "dimension": "敏锐度与同理心",
+            "focus": "识别真需求并给出用户证据"
+          },
+          {
+            "stage": "方案策划",
+            "dimension": "创造力与可行性",
+            "focus": "验证创新点并匹配资源"
+          },
+          {
+            "stage": "商业建模",
+            "dimension": "商业逻辑性",
+            "focus": "打通价值-渠道-收入闭环"
+          },
+          {
+            "stage": "团队与资源",
+            "dimension": "协作与执行力",
+            "focus": "分工、里程碑与交付能力"
+          },
+          {
+            "stage": "路演表达",
+            "dimension": "叙事与抗压",
+            "focus": "结构完整、数据可信、问答稳定"
+          }
+        ],
+        "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+        "info_sufficient": false,
+        "project_stage": "idea",
+        "score_band": "",
+        "grading_principles": [
+          "信息太少时不做完整评分",
+          "先补全目标用户、痛点、方案三项核心信息"
+        ]
+      },
+      "next_task": {
+        "title": "描述你的项目",
+        "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+        "acceptance_criteria": [
+          "项目一句话描述",
+          "目标用户是谁",
+          "解决什么问题"
+        ]
+      },
+      "kg_analysis": {
+        "entities": [
+          {
+            "id": "e1",
+            "label": "大学生",
+            "type": "stakeholder"
+          },
+          {
+            "id": "e2",
+            "label": "收月费 299 元",
+            "type": "solution"
+          },
+          {
+            "id": "e3",
+            "label": "CAC 大概 500 块",
+            "type": "resource"
+          },
+          {
+            "id": "e4",
+            "label": "月留存 40%",
+            "type": "execution_step"
+          }
+        ],
+        "relationships": [
+          {
+            "source": "e1",
+            "target": "e2",
+            "relation": "面临"
+          },
+          {
+            "source": "e2",
+            "target": "e3",
+            "relation": "基于"
+          },
+          {
+            "source": "e2",
+            "target": "e4",
+            "relation": "影响"
+          }
+        ],
+        "structural_gaps": [
+          "缺少痛点",
+          "缺少创新",
+          "缺少技术",
+          "缺少市场",
+          "缺少竞争对手",
+          "缺少商业模式",
+          "缺少团队介绍",
+          "缺少证据"
+        ],
+        "content_strengths": [
+          "有初步的收费模式"
+        ],
+        "completeness_score": 1,
+        "section_scores": {
+          "stakeholder": 2,
+          "solution": 2,
+          "resource": 2,
+          "execution_step": 2
+        },
+        "student_identity": {},
+        "insight": "项目初步提出了收费模式，但缺乏其他关键信息，如用户痛点、解决方案、技术、市场分析等。",
+        "kg_quality": {
+          "entity_specificity": 6.12,
+          "relationship_density": 0.5,
+          "dimension_balance": 1.0,
+          "cross_validation_index": 0.0,
+          "extraction_confidence": 5.82,
+          "entity_count": 4,
+          "relationship_count": 3,
+          "type_distribution": {
+            "stakeholder": 1,
+            "solution": 1,
+            "resource": 1,
+            "execution_step": 1
+          },
+          "formulas": {
+            "entity_specificity": "avg(label_length_score + numeric_bonus + proper_noun_bonus)",
+            "relationship_density": "R / (E*(E-1)/2)",
+            "dimension_balance": "H(type_distribution) / log2(num_types)",
+            "cross_validation_index": "Pearson(kg_section_scores, rubric_scores)",
+            "extraction_confidence": "0.3*entity + 0.25*rel + 0.25*balance + 0.2*specificity"
+          }
+        }
+      },
+      "hypergraph_insight": {
+        "ok": true,
+        "summary": "当前未检索到可用的教学超边。",
+        "top_signals": [],
+        "key_dimensions": [],
+        "edges": [],
+        "matched_by": {
+          "category": "科技创新",
+          "rule_ids": [],
+          "expanded_rule_ids": [],
+          "preferred_edge_types": []
+        },
+        "topology": {
+          "hub_nodes": [
+            {
+              "node": "OntologyNode::C_user_segment",
+              "degree": 5,
+              "interpretation": "节点「C_user_segment」关联5种模式"
+            },
+            {
+              "node": "Category::科技创新",
+              "degree": 3,
+              "interpretation": "「科技创新」类别出现在3种超边中，是最活跃的赛道"
+            },
+            {
+              "node": "Category::政务治理",
+              "degree": 2,
+              "interpretation": "「政务治理」类别出现在2种超边中，是最活跃的赛道"
+            },
+            {
+              "node": "Category::医疗健康",
+              "degree": 2,
+              "interpretation": "「医疗健康」类别出现在2种超边中，是最活跃的赛道"
+            },
+            {
+              "node": "Category::环境保护",
+              "degree": 1,
+              "interpretation": "「环境保护」类别出现在1种超边中，是最活跃的赛道"
+            }
+          ],
+          "avg_edge_size": 3.8,
+          "max_edge_size": 4,
+          "family_leaderboard": [
+            {
+              "type": "Ontology_Grounded_Edge",
+              "label": "本体落地超边",
+              "count": 6
+            }
+          ]
+        },
+        "meta": {
+          "engine": "hypernetx",
+          "edge_count": 6,
+          "node_count": 15,
+          "family_counts": {
+            "Ontology_Grounded_Edge": 6
+          }
+        }
+      },
+      "hypergraph_student": {},
+      "evidence_quotes": [
+        {
+          "risk_id": "",
+          "risk_name": "",
+          "quote": "我打算向大学生收月费 299 元，CAC 大概 500 块，月留存 40%。",
+          "source": "text",
+          "filename": ""
+        }
+      ],
+      "matched_teacher_interventions": [],
+      "agent_outputs": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "business_model",
+          "intent_shape": "single",
+          "intent_reason": "讨论了定价、用户获取成本和留存率等商业模式问题；判定为单一主问题；主意图归类为 business_model",
+          "confidence": 1.0,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[信息补全]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前进入信息补全阶段，先不调用角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 0,
+          "rag_case_ids": [],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "大学生",
+              "type": "stakeholder"
+            },
+            {
+              "id": "e2",
+              "label": "收月费 299 元",
+              "type": "solution"
+            },
+            {
+              "id": "e3",
+              "label": "CAC 大概 500 块",
+              "type": "resource"
+            },
+            {
+              "id": "e4",
+              "label": "月留存 40%",
+              "type": "execution_step"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "面临"
+            },
+            {
+              "source": "e2",
+              "target": "e3",
+              "relation": "基于"
+            },
+            {
+              "source": "e2",
+              "target": "e4",
+              "relation": "影响"
+            }
+          ],
+          "structural_gaps": [
+            "缺少痛点",
+            "缺少创新",
+            "缺少技术",
+            "缺少市场",
+            "缺少竞争对手",
+            "缺少商业模式",
+            "缺少团队介绍",
+            "缺少证据"
+          ],
+          "content_strengths": [
+            "有初步的收费模式"
+          ],
+          "completeness_score": 1,
+          "section_scores": {
+            "stakeholder": 2,
+            "solution": 2,
+            "resource": 2,
+            "execution_step": 2
+          },
+          "student_identity": {},
+          "insight": "项目初步提出了收费模式，但缺乏其他关键信息，如用户痛点、解决方案、技术、市场分析等。",
+          "kg_quality": {
+            "entity_specificity": 6.12,
+            "relationship_density": 0.5,
+            "dimension_balance": 1.0,
+            "cross_validation_index": 0.0,
+            "extraction_confidence": 5.82,
+            "entity_count": 4,
+            "relationship_count": 3,
+            "type_distribution": {
+              "stakeholder": 1,
+              "solution": 1,
+              "resource": 1,
+              "execution_step": 1
+            },
+            "formulas": {
+              "entity_specificity": "avg(label_length_score + numeric_bonus + proper_noun_bonus)",
+              "relationship_density": "R / (E*(E-1)/2)",
+              "dimension_balance": "H(type_distribution) / log2(num_types)",
+              "cross_validation_index": "Pearson(kg_section_scores, rubric_scores)",
+              "extraction_confidence": "0.3*entity + 0.25*rel + 0.25*balance + 0.2*specificity"
+            }
+          }
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "summary": "当前未检索到可用的教学超边。",
+          "top_signals": [],
+          "key_dimensions": [],
+          "edges": [],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [],
+            "expanded_rule_ids": [],
+            "preferred_edge_types": []
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "OntologyNode::C_user_segment",
+                "degree": 5,
+                "interpretation": "节点「C_user_segment」关联5种模式"
+              },
+              {
+                "node": "Category::科技创新",
+                "degree": 3,
+                "interpretation": "「科技创新」类别出现在3种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "Category::政务治理",
+                "degree": 2,
+                "interpretation": "「政务治理」类别出现在2种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "Category::医疗健康",
+                "degree": 2,
+                "interpretation": "「医疗健康」类别出现在2种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "Category::环境保护",
+                "degree": 1,
+                "interpretation": "「环境保护」类别出现在1种超边中，是最活跃的赛道"
+              }
+            ],
+            "avg_edge_size": 3.8,
+            "max_edge_size": 4,
+            "family_leaderboard": [
+              {
+                "type": "Ontology_Grounded_Edge",
+                "label": "本体落地超边",
+                "count": 6
+              }
+            ]
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 6,
+            "node_count": 15,
+            "family_counts": {
+              "Ontology_Grounded_Edge": 6
+            }
+          }
+        },
+        "rag_cases": [],
+        "web_search": {
+          "searched": true,
+          "query": "创业项目 商业模式 定价 渠道 学生收月费 CAC",
+          "results": [
+            {
+              "title": "什么是 CAC、CRC？从获客成本和留客成本的角度读懂客户成功 - 知乎",
+              "snippet": "首先，计算 CAC 可以帮助团队找到回报率更高的获客和转化方式。你可以计算不同营销渠道或销售方式所产生的 CAC，并进行对比，来指导商业化团队如何更高效地运作。用我们之前举过的广告投放和内容营销 CAC 的例子来说就是：公司发现在内容营销上的投入产出比更高，便会不断调整两种获客渠道的资金投入比例，以最终达到全局最优的投入产出比（ROI）。 · 其次，对 CAC 进行分析有助于优化公司的商业化战略。",
+              "url": "https://zhuanlan.zhihu.com/p/532990526"
+            },
+            {
+              "title": "如何计算获客成本CAC（线上，线下）？ - 知乎",
+              "snippet": "意思是如果CAC与CRC与每年客户的付费来说，是有个约束关系的。如果我们需要设置收回成本的时间，比如n=18个月，CAC=n*（每年付费-CRC）/12，由于客户平均每年付费/客单价其实一定时间内也是恒定的，翻译过来就是：CRC与续费率控制的有多好，CAC就能有多大的边界施展。再翻译一下就是：当防守能力足够强的时候，进攻也许可以不惜一切代价。",
+              "url": "https://zhuanlan.zhihu.com/p/88728333"
+            }
+          ],
+          "summary": "- 首先，计算 CAC 可以帮助团队找到回报率更高的获客和转化方式。你可以计算不同营销渠道或销售方式所产生的 CAC，并进行对比，来指导商业化团队如何更高效地运作。用我们之前举过的广告投放和内容营销 CAC 的例子来说就是：公司发现在内容营销上的投入产出比更高，便会不断调整两种获客渠道的资金投入比例，以最终达到全局最优的投入产出比（ROI）。 · 其次，对 CAC 进行分析有助于优化公司的商业化战略。\n- 意思是如果CAC与CRC与每年客户的付费来说，是有个约束关系的。如果我们需要设置收回成本的时间，比如n=18个月，CAC=n*（每年付费-CRC）/12，由于客户平均每年付费/客单价其实一定时间内也是恒定的，翻译过来就是：CRC与续费率控制的有多好，CAC就能有多大的边界施展。再翻译一下就是：当防守能力足够强的时候，进攻也许可以不惜一切代价。"
+        },
+        "hypergraph_student": {},
+        "hyper_consistency_issues": [],
+        "critic": null,
+        "challenge_strategies": [],
+        "pressure_test_trace": {
+          "fallacy_label": "",
+          "fallacy_rule_id": "",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "",
+          "selected_strategy_id": "",
+          "strategy_logic": "",
+          "generated_question": "如果把你现在这句话拆开来看，哪一个前提其实还没有被真正证明？你准备用什么证据补上它？",
+          "consistency_pressure_questions": [],
+          "evidence_quotes": []
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "kb_utilization": {
+          "dual_channel": {
+            "vector_hits": 0,
+            "graph_hits": 0,
+            "graph_details": []
+          },
+          "incremental_stats": {
+            "total_accumulated": 4,
+            "new_this_turn": 4,
+            "total_rels": 3,
+            "project_maturity": "exploring",
+            "readiness_score": 2,
+            "message_chars": 38,
+            "filled_slots": 1,
+            "vague_hits": 0,
+            "concrete_hits": 0
+          }
+        },
+        "rag_enrichment_insight": "",
+        "neo4j_graph_hits": [],
+        "incremental_stats": {},
+        "dim_results": {},
+        "agent_hyper_details": [],
+        "finance_advisory": {
+          "triggered": true,
+          "hits": [
+            "pricing",
+            "unit_econ"
+          ],
+          "cards": [
+            {
+              "module": "rationality",
+              "title": "财务假设合理性",
+              "inputs": {
+                "industry": "教育",
+                "monthly_price": 299.0,
+                "monthly_retention": 0.4,
+                "cac": 99.0
+              },
+              "outputs": {
+                "checks": [
+                  {
+                    "field": "monthly_price",
+                    "value": 299.0,
+                    "range": [
+                      29,
+                      99
+                    ],
+                    "level": "red",
+                    "note": "月价 299.0 远高于行业区间 [29, 99]"
+                  },
+                  {
+                    "field": "cac",
+                    "value": 99.0,
+                    "range": [
+                      30,
+                      120
+                    ],
+                    "level": "green",
+                    "note": "CAC 99.0 落在行业区间 [30, 120]"
+                  },
+                  {
+                    "field": "monthly_retention",
+                    "value": 0.4,
+                    "range": [
+                      0.7,
+                      0.9
+                    ],
+                    "level": "red",
+                    "note": "月留存率 0.4 远低于行业区间 [0.7, 0.9]"
+                  }
+                ],
+                "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
+                "baseline": {
+                  "cac_range": [
+                    30,
+                    120
+                  ],
+                  "monthly_price_range": [
+                    29,
+                    99
+                  ],
+                  "monthly_retention": [
+                    0.7,
+                    0.9
+                  ],
+                  "gross_margin": [
+                    0.6,
+                    0.85
+                  ]
+                }
+              },
+              "verdict": {
+                "level": "red",
+                "score": 0.25,
+                "reason": "月价 299.0 远高于行业区间 [29, 99]；月留存率 0.4 远低于行业区间 [0.7, 0.9]"
+              },
+              "framework_explain": "**行业基准对比**（教育）：用头部项目的中位区间做锚，判断你的假设是否在同行合理范围。\n- 月价 [[29, 99]]\n- CAC [[30, 120]]\n- 月留存 [[0.7, 0.9]]\n- 毛利率 [[0.6, 0.85]]\n\n教育类看重留存与续费，CAC 对价格敏感度高",
+              "suggestions": [
+                "月价 299.0 远高于行业区间 [29, 99]——需要用用户调研或成本拆解补充证据",
+                "月留存率 0.4 远低于行业区间 [0.7, 0.9]——需要用用户调研或成本拆解补充证据"
+              ],
+              "missing_inputs": [],
+              "evidence_for_diagnosis": {
+                "H3": 0.25
+              }
+            }
+          ],
+          "evidence_for_diagnosis": {
+            "H3": 0.25
+          },
+          "industry": "教育"
+        }
+      },
+      "submission_id": "bff7ca70-0ab0-4c3f-b331-dc59f2439fb8",
+      "created_at": "2026-04-18T19:24:31.451845+08:00"
+    }
+  ],
+  "teacher_feedback": [],
+  "teacher_assistant_reviews": [],
+  "teacher_interventions": [],
+  "teacher_annotations": [],
+  "teacher_feedback_files": [],
+  "teacher_document_edits": [],
+  "video_analyses": [],
+  "business_plans": []
+}

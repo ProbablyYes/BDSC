@@ -1,0 +1,141 @@
+{
+  "industries": {
+    "教育": {
+      "industry": "教育",
+      "baseline": {
+        "cac_range": [
+          30,
+          120
+        ],
+        "monthly_price_range": [
+          29,
+          99
+        ],
+        "monthly_retention": [
+          0.7,
+          0.9
+        ],
+        "gross_margin": [
+          0.6,
+          0.85
+        ],
+        "avg_user_lifetime_months": 9,
+        "note": "教育类看重留存与续费，CAC 对价格敏感度高"
+      },
+      "source": "seed",
+      "updated_at": "2026-04-21T01:13:05+00:00",
+      "evidence": []
+    },
+    "SaaS": {
+      "industry": "SaaS",
+      "baseline": {
+        "cac_range": [
+          200,
+          1500
+        ],
+        "monthly_price_range": [
+          99,
+          999
+        ],
+        "monthly_retention": [
+          0.85,
+          0.97
+        ],
+        "gross_margin": [
+          0.7,
+          0.85
+        ],
+        "avg_user_lifetime_months": 24,
+        "note": "SaaS 关键看净收入留存（NRR）和回本周期"
+      },
+      "source": "seed",
+      "updated_at": "2026-04-21T01:13:05+00:00",
+      "evidence": []
+    },
+    "电商": {
+      "industry": "电商",
+      "baseline": {
+        "cac_range": [
+          40,
+          200
+        ],
+        "monthly_price_range": [
+          50,
+          300
+        ],
+        "monthly_retention": [
+          0.3,
+          0.7
+        ],
+        "gross_margin": [
+          0.15,
+          0.4
+        ],
+        "avg_user_lifetime_months": 6,
+        "note": "电商以复购频次为核心，毛利率普遍较薄"
+      },
+      "source": "seed",
+      "updated_at": "2026-04-21T01:13:05+00:00",
+      "evidence": []
+    },
+    "硬件": {
+      "industry": "硬件",
+      "baseline": {
+        "cac_range": [
+          80,
+          400
+        ],
+        "monthly_price_range": [
+          199,
+          2999
+        ],
+        "monthly_retention": [
+          0.5,
+          0.8
+        ],
+        "gross_margin": [
+          0.2,
+          0.45
+        ],
+        "avg_user_lifetime_months": 18,
+        "note": "硬件重资产，注意库存 / 售后 / 供应链成本"
+      },
+      "source": "seed",
+      "updated_at": "2026-04-21T01:13:05+00:00",
+      "evidence": []
+    },
+    "社会公益": {
+      "industry": "社会公益",
+      "baseline": {
+        "cac_range": [
+          10,
+          80
+        ],
+        "monthly_price_range": [
+          0,
+          0
+        ],
+        "monthly_retention": [
+          0.4,
+          0.75
+        ],
+        "gross_margin": [
+          0,
+          0
+        ],
+        "avg_user_lifetime_months": 12,
+        "cost_per_beneficiary_range": [
+          50,
+          500
+        ],
+        "note": "公益项目不适用 LTV/CAC 口径，应看单位受益人成本与可持续性",
+        "is_nonprofit": true
+      },
+      "source": "seed",
+      "updated_at": "2026-04-21T01:13:05+00:00",
+      "evidence": []
+    }
+  },
+  "created_at": "2026-04-21T01:13:05+00:00",
+  "note": "Seed baselines from finance_analyst.INDUSTRY_BASELINES"
+}

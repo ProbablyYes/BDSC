@@ -108,13 +108,42 @@ def project_coach_agent(input_text: str, mode: str = "coursework") -> dict[str, 
                 diagnosis["bottleneck"] = str(llm_patch["bottleneck_refined"])
             if llm_patch.get("socratic_questions"):
                 diagnosis["socratic_questions"] = _json_list(llm_patch.get("socratic_questions"))
-            next_task = {
-                "title": str(llm_patch.get("next_task_title") or next_task.get("title") or ""),
-                "description": str(llm_patch.get("next_task_description") or next_task.get("description") or ""),
-                "acceptance_criteria": _json_list(llm_patch.get("acceptance_criteria")) or next_task.get(
-                    "acceptance_criteria", []
-                ),
-            }
+            # 浅合并：保留原 next_task 的 template_guideline / rationale / linked rule，
+            # 只覆盖 LLM 明确给出的字段。
+            merged_next_task: dict[str, Any] = dict(next_task or {})
+            llm_title = str(llm_patch.get("next_task_title") or "").strip()
+            llm_desc = str(llm_patch.get("next_task_description") or "").strip()
+            llm_ac = _json_list(llm_patch.get("acceptance_criteria"))
+            if llm_title:
+                merged_next_task["title"] = llm_title
+            if llm_desc:
+                merged_next_task["description"] = llm_desc
+            if llm_ac:
+                merged_next_task["acceptance_criteria"] = llm_ac
+            # 若 LLM 同时给了 steps（兼容旧 JSON schema），映射为 template_guideline
+            llm_steps = _json_list(llm_patch.get("steps"))
+            if llm_steps:
+                merged_next_task["template_guideline"] = llm_steps[:6]
+            # 更新 rationale：把 LLM 教练的产出作为新的推理链步骤
+            base_rat = merged_next_task.get("rationale") if isinstance(merged_next_task.get("rationale"), dict) else None
+            if base_rat and (llm_title or llm_desc):
+                steps_acc = list(base_rat.get("reasoning_steps") or [])
+                steps_acc.append({
+                    "kind": "evidence",
+                    "label": f"项目教练智能体细化任务 → {merged_next_task.get('title', '')}",
+                    "detail": (merged_next_task.get("description") or "")[:120],
+                    "agent_name": "项目教练 Coach",
+                })
+                for st in (llm_ac or [])[:4]:
+                    steps_acc.append({
+                        "kind": "evidence",
+                        "label": f"验收标准：{str(st)[:80]}",
+                        "agent_name": "项目教练 Coach",
+                    })
+                base_rat["reasoning_steps"] = steps_acc
+                base_rat["value"] = merged_next_task.get("title", base_rat.get("value", ""))
+                merged_next_task["rationale"] = base_rat
+            next_task = merged_next_task
 
     return {
         "agent": "project_coach",
@@ -136,6 +165,7 @@ def competition_advisor_agent(input_text: str, mode: str = "coursework") -> dict
         rubric_rows.append(
             {
                 "item": row["item"],
+                "estimated_score_0_10": round(score, 2),
                 "estimated_score_0_5": round(score / 2, 1),
                 "missing_evidence": "需要补充可验证证据链" if row["status"] == "risk" else "证据基础可继续增强",
                 "minimal_fix_24h": "补充至少2条数据证据并更新对照表",

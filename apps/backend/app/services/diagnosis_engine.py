@@ -1,15 +1,41 @@
 from dataclasses import dataclass
 import json
+import logging
 import re
 from pathlib import Path
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 from app.services.kg_ontology import (
     get_rule_ontology_nodes,
     get_rule_tasks,
     get_rubric_error_pool,
     get_rubric_evidence_chain,
 )
+# ─────────────────────────────────────────────────────
+# 规则 → 归属 agent（用于证据链追溯，前端显示「哪位智能体做的推断」）
+# 无强依赖；按 RULE_EDGE_MAP 的家族主要领域粗映射。
+# ─────────────────────────────────────────────────────
+RULE_AGENT_MAP: dict[str, str] = {
+    "H1": "用户痛点 Agent", "H5": "用户痛点 Agent", "H23": "创新挖掘 Agent",
+    "H2": "渠道运营 Agent", "H18": "增长数据 Agent", "H27": "渠道运营 Agent",
+    "H3": "财务商业 Agent", "H8": "财务商业 Agent", "H26": "财务商业 Agent",
+    "H4": "市场洞察 Agent", "H19": "市场洞察 Agent",
+    "H6": "竞品分析 Agent", "H16": "竞品分析 Agent", "H17": "竞品分析 Agent",
+    "H7": "技术方案 Agent", "H12": "技术方案 Agent",
+    "H9": "规模验证 Agent",
+    "H10": "执行落地 Agent", "H21": "执行落地 Agent", "H24": "执行落地 Agent",
+    "H11": "合规风控 Agent", "H22": "合规风控 Agent",
+    "H13": "数据洞察 Agent",
+    "H14": "表达呈现 Agent",
+    "H15": "证据评审 Agent", "H20": "证据评审 Agent",
+    "H25": "团队组织 Agent",
+}
+
+
+def _agent_for_rule(rule_id: str) -> str:
+    return RULE_AGENT_MAP.get((rule_id or "").upper(), "综合诊断 Agent")
 
 
 RULES = [
@@ -138,35 +164,212 @@ RULE_FALLACY_MAP: dict[str, str] = {
     "H27": "增长渠道未验证谬误",
 }
 
+# ─────────────────────────────────────────────────────
+# 诊断规则 → 超图家族 映射（v2，对齐 77 家族体系）
+#
+# 设计原则：
+#   1. 命名对齐 hypergraph_service.EDGE_FAMILY_LABELS（77 家族当前命名）
+#   2. 每条规则点亮 3~6 个相关家族，打破"只引用风险/价值"偏置
+#   3. 与 KEYWORD_FAMILY_MAP / INTENT_FAMILY_MAP 叠加后覆盖全部 77 家族
+#   4. 同一家族允许出现在多条规则里（表达家族的多源触发性）
+#
+# 历史债（v1 问题）：v1 使用的 Stakeholder_Solution_Edge / Evidence_Chain_Edge /
+# Competitive_Landscape_Edge / Innovation_Differentiation_Edge / Financial_Logic_Edge /
+# Execution_Dependency_Edge 六个名字在 77 家族体系里已被改名/拆分，导致 type_hit
+# 永远为 False，只有 Value_Loop / Risk_Pattern 能拿到加分，产生偏置。
+# ─────────────────────────────────────────────────────
 RULE_EDGE_MAP: dict[str, list[str]] = {
-    "H1": ["Value_Loop_Edge", "Stakeholder_Solution_Edge"],
-    "H2": ["Value_Loop_Edge", "Risk_Pattern_Edge"],
-    "H3": ["Value_Loop_Edge", "Risk_Pattern_Edge"],
-    "H4": ["Risk_Pattern_Edge"],
-    "H5": ["Evidence_Chain_Edge", "Stakeholder_Solution_Edge"],
-    "H6": ["Competitive_Landscape_Edge", "Risk_Pattern_Edge"],
-    "H7": ["Innovation_Differentiation_Edge", "Evidence_Chain_Edge"],
-    "H8": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
-    "H9": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
-    "H10": ["Execution_Dependency_Edge"],
-    "H11": ["Risk_Pattern_Edge"],
-    "H12": ["Execution_Dependency_Edge", "Risk_Pattern_Edge"],
-    "H13": ["Evidence_Chain_Edge"],
-    "H14": ["Value_Loop_Edge"],
-    "H15": ["Evidence_Chain_Edge"],
-    "H16": ["Competitive_Landscape_Edge"],
-    "H17": ["Competitive_Landscape_Edge", "Risk_Pattern_Edge"],
-    "H18": ["Financial_Logic_Edge"],
-    "H24": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
-    "H25": ["Execution_Dependency_Edge", "Risk_Pattern_Edge"],
-    "H26": ["Financial_Logic_Edge"],
-    "H27": ["Value_Loop_Edge", "Risk_Pattern_Edge"],
-    "H19": ["Financial_Logic_Edge", "Risk_Pattern_Edge"],
-    "H20": ["Evidence_Chain_Edge", "Risk_Pattern_Edge"],
-    "H21": ["Execution_Dependency_Edge"],
-    "H22": ["Risk_Pattern_Edge"],
-    "H23": ["Innovation_Differentiation_Edge", "Stakeholder_Solution_Edge"],
+    "H1": ["Value_Loop_Edge", "User_Pain_Fit_Edge", "Market_Segmentation_Edge",
+           "Need_Prioritization_Edge", "Empathy_Map_Edge"],
+    "H2": ["Channel_Conversion_Edge", "User_Journey_Edge", "Demand_Supply_Match_Edge",
+           "Risk_Pattern_Edge"],
+    "H3": ["Pricing_Unit_Economics_Edge", "Revenue_Sustainability_Edge",
+           "Evidence_Grounding_Edge", "Trust_Adoption_Edge"],
+    "H4": ["Market_Segmentation_Edge", "Metric_Definition_Edge",
+           "Scenario_Analysis_Edge", "Risk_Pattern_Edge"],
+    "H5": ["Evidence_Grounding_Edge", "Insight_Validation_Edge", "UX_Research_Edge",
+           "Problem_Discovery_Edge", "Empathy_Map_Edge"],
+    "H6": ["Market_Competition_Edge", "Substitute_Migration_Edge",
+           "Competitive_Response_Edge", "Switching_Cost_Edge", "IP_Moat_Edge"],
+    "H7": ["Innovation_Validation_Edge", "Prototype_Validation_Edge",
+           "Tech_Readiness_Edge", "Concept_Evaluation_Edge", "Research_Application_Edge"],
+    "H8": ["Pricing_Unit_Economics_Edge", "Cost_Structure_Edge",
+           "Revenue_Sustainability_Edge", "Risk_Pattern_Edge"],
+    "H9": ["Demand_Supply_Match_Edge", "Assumption_Stack_Edge", "Scenario_Analysis_Edge",
+           "Scalability_Bottleneck_Edge", "Network_Effect_Edge"],
+    "H10": ["Milestone_Dependency_Edge", "Execution_Gap_Edge", "Feasibility_Screen_Edge",
+            "MVP_Scope_Edge", "Solution_Architecture_Edge"],
+    "H11": ["Compliance_Safety_Edge", "Data_Privacy_Edge", "Ethical_Bias_Edge",
+            "Regulatory_Landscape_Edge", "Industry_Compliance_Edge",
+            "Governance_Transparency_Edge"],
+    "H12": ["Tech_Readiness_Edge", "Tech_Debt_Edge", "Resource_Leverage_Edge",
+            "Feasibility_Screen_Edge", "API_Integration_Edge", "Solution_Architecture_Edge"],
+    "H13": ["Insight_Validation_Edge", "Metric_Definition_Edge",
+            "Prototype_Validation_Edge", "Data_Quality_Edge"],
+    "H14": ["Presentation_Narrative_Edge", "Cross_Dimension_Coherence_Edge",
+            "Value_Loop_Edge", "User_Education_Edge"],
+    "H15": ["Rule_Rubric_Tension_Edge", "Evidence_Grounding_Edge",
+            "Cross_Dimension_Coherence_Edge", "Feedback_Loop_Edge"],
+    "H16": ["Substitute_Migration_Edge", "Market_Competition_Edge",
+            "Assumption_Stack_Edge", "Competitive_Response_Edge"],
+    "H17": ["Switching_Cost_Edge", "Substitute_Migration_Edge", "Trust_Adoption_Edge",
+            "Retention_Workflow_Embed_Edge"],
+    "H18": ["Metric_Definition_Edge", "Revenue_Sustainability_Edge",
+            "Channel_Conversion_Edge", "Data_Flywheel_Edge"],
+    "H19": ["Market_Segmentation_Edge", "Demand_Supply_Match_Edge",
+            "Metric_Definition_Edge", "Scenario_Analysis_Edge"],
+    "H20": ["Evidence_Grounding_Edge", "Assumption_Stack_Edge",
+            "Insight_Validation_Edge", "Risk_Pattern_Edge"],
+    "H21": ["Execution_Gap_Edge", "Milestone_Dependency_Edge",
+            "Team_Capability_Gap_Edge", "Founder_Risk_Edge"],
+    "H22": ["Risk_Pattern_Edge", "Scenario_Analysis_Edge",
+            "Governance_Transparency_Edge", "Compliance_Safety_Edge", "Pivot_Signal_Edge"],
+    "H23": ["Value_Loop_Edge", "User_Pain_Fit_Edge", "Innovation_Validation_Edge",
+            "Academic_Transfer_Edge", "Ideation_Edge", "Design_Thinking_Edge"],
+    "H24": ["Funding_Stage_Fit_Edge", "Stage_Goal_Fit_Edge",
+            "Revenue_Sustainability_Edge", "Pivot_Signal_Edge"],
+    "H25": ["Team_Capability_Gap_Edge", "Founder_Risk_Edge",
+            "Stakeholder_Conflict_Edge", "Governance_Transparency_Edge",
+            "Partnership_Network_Edge"],
+    "H26": ["Cost_Structure_Edge", "Pricing_Unit_Economics_Edge",
+            "Supply_Chain_Edge", "Metric_Definition_Edge"],
+    "H27": ["Channel_Conversion_Edge", "Network_Effect_Edge",
+            "Partnership_Network_Edge", "Data_Flywheel_Edge",
+            "Community_Building_Edge", "Ecosystem_Dependency_Edge"],
 }
+
+
+# ─────────────────────────────────────────────────────
+# 关键词 → 超图家族 兜底映射
+#
+# 专门点亮那些 H 规则不易覆盖到的"领域特化"家族（学术转化、ESG、设计等）。
+# 当学生消息命中任一关键词即把对应家族塞进 preferred_edge_types。
+# ─────────────────────────────────────────────────────
+KEYWORD_FAMILY_MAP: dict[str, list[str]] = {
+    # 本体/概念锚定：总是有效（学生用到抽象概念时激活）
+    "本体": ["Ontology_Grounded_Edge"],
+    "概念": ["Ontology_Grounded_Edge"],
+    "定义": ["Ontology_Grounded_Edge", "Metric_Definition_Edge"],
+    # 社会价值 / ESG / 公益
+    "公益": ["Social_Impact_Edge", "Community_Building_Edge"],
+    "社会": ["Social_Impact_Edge", "ESG_Measurability_Edge"],
+    "ESG": ["ESG_Measurability_Edge", "Environmental_Impact_Edge", "Governance_Transparency_Edge"],
+    "esg": ["ESG_Measurability_Edge", "Environmental_Impact_Edge"],
+    "环保": ["Environmental_Impact_Edge", "ESG_Measurability_Edge"],
+    "可持续": ["Environmental_Impact_Edge", "Revenue_Sustainability_Edge"],
+    "碳排": ["Environmental_Impact_Edge", "ESG_Measurability_Edge"],
+    # 产学研 / 学术转化 / IP
+    "论文": ["Academic_Transfer_Edge", "Research_Application_Edge", "Industry_Academia_Edge"],
+    "科研": ["Academic_Transfer_Edge", "Research_Application_Edge"],
+    "学术": ["Academic_Transfer_Edge", "Industry_Academia_Edge"],
+    "专利": ["IP_Moat_Edge", "IP_Commercialization_Edge", "Tech_Licensing_Edge"],
+    "知识产权": ["IP_Moat_Edge", "IP_Commercialization_Edge"],
+    "技术转让": ["Tech_Licensing_Edge", "IP_Commercialization_Edge"],
+    "产学研": ["Industry_Academia_Edge", "Academic_Transfer_Edge"],
+    # 设计 / 用户体验 / 可达性
+    "设计": ["Design_Driven_Edge", "Design_Thinking_Edge", "UX_Research_Edge"],
+    "UI": ["Design_Driven_Edge", "UX_Research_Edge"],
+    "用户体验": ["UX_Research_Edge", "Design_Driven_Edge", "Feedback_Loop_Edge"],
+    "无障碍": ["Accessibility_Edge", "User_Education_Edge"],
+    "易用": ["Accessibility_Edge", "UX_Research_Edge"],
+    # 时机窗口
+    "时机": ["Timing_Window_Edge"],
+    "窗口期": ["Timing_Window_Edge"],
+    "先发": ["Timing_Window_Edge", "Competitive_Response_Edge"],
+    # 教育用户 / 反馈
+    "培训": ["User_Education_Edge"],
+    "教育用户": ["User_Education_Edge"],
+    "反馈": ["Feedback_Loop_Edge", "UX_Research_Edge"],
+    # 供应链 / 生态
+    "供应链": ["Supply_Chain_Edge", "Ecosystem_Dependency_Edge"],
+    "上游": ["Supply_Chain_Edge", "Partnership_Network_Edge"],
+    "生态": ["Ecosystem_Dependency_Edge", "Partnership_Network_Edge"],
+    # 创意/发散
+    "创意": ["Ideation_Edge", "Design_Thinking_Edge"],
+    "设计思维": ["Design_Thinking_Edge", "Ideation_Edge"],
+    # 架构/技术
+    "架构": ["Solution_Architecture_Edge", "Tech_Readiness_Edge"],
+    "接口": ["API_Integration_Edge", "Solution_Architecture_Edge"],
+    "API": ["API_Integration_Edge"],
+    "技术债": ["Tech_Debt_Edge", "Feasibility_Screen_Edge"],
+    # 场景/旅程
+    "场景": ["Scenario_Analysis_Edge", "User_Journey_Edge"],
+    "用户旅程": ["User_Journey_Edge", "Channel_Conversion_Edge"],
+}
+
+
+# ─────────────────────────────────────────────────────
+# 意图 → 超图家族 兜底映射
+#
+# 当学生意图明确（如 pressure_test / learning_concept），让对应家族优先出现。
+# ─────────────────────────────────────────────────────
+INTENT_FAMILY_MAP: dict[str, list[str]] = {
+    "pressure_test": [
+        "Risk_Pattern_Edge", "Assumption_Stack_Edge", "Scenario_Analysis_Edge",
+        "Evidence_Grounding_Edge", "Pivot_Signal_Edge",
+    ],
+    "learning_concept": [
+        "Ontology_Grounded_Edge", "Design_Thinking_Edge", "Ideation_Edge",
+        "Problem_Discovery_Edge", "Concept_Evaluation_Edge",
+    ],
+    "business_plan_feedback": [
+        "Value_Loop_Edge", "Cross_Dimension_Coherence_Edge",
+        "Presentation_Narrative_Edge", "Rule_Rubric_Tension_Edge",
+    ],
+    "competition_strategy": [
+        "Market_Competition_Edge", "Competitive_Response_Edge", "IP_Moat_Edge",
+        "Timing_Window_Edge", "Innovation_Validation_Edge",
+    ],
+    "fundraising": [
+        "Funding_Stage_Fit_Edge", "Revenue_Sustainability_Edge",
+        "Pricing_Unit_Economics_Edge", "Founder_Risk_Edge",
+    ],
+    "social_impact": [
+        "Social_Impact_Edge", "ESG_Measurability_Edge",
+        "Community_Building_Edge", "Environmental_Impact_Edge",
+    ],
+}
+
+
+def get_preferred_edge_families(
+    rule_ids: list[str] | None = None,
+    intent: str | None = None,
+    message: str | None = None,
+    cap_per_source: int = 6,
+) -> list[str]:
+    """Assemble diverse preferred edge families from rules + intent + keywords.
+
+    Ensures retrieval is not biased by a single source. Returns deduplicated,
+    order-preserved list where:
+      - first come rule-derived families (they fire when student text actually
+        triggered a diagnosis),
+      - then intent-derived families,
+      - then keyword-derived families (weakest signal).
+    """
+    collected: list[str] = []
+    seen: set[str] = set()
+
+    def _push(fams: list[str]) -> None:
+        count = 0
+        for fam in fams:
+            if not fam or fam in seen:
+                continue
+            collected.append(fam)
+            seen.add(fam)
+            count += 1
+            if count >= cap_per_source:
+                break
+
+    for rid in rule_ids or []:
+        _push(RULE_EDGE_MAP.get(str(rid), []))
+    if intent:
+        _push(INTENT_FAMILY_MAP.get(str(intent), []))
+    if message:
+        msg = str(message)
+        for kw, fams in KEYWORD_FAMILY_MAP.items():
+            if kw in msg:
+                _push(fams)
+    return collected
 
 RULE_STRATEGY_MAP: dict[str, list[str]] = {
     "H1": ["broad_competition_logic"],
@@ -449,30 +652,151 @@ def _rule_penalty(severity: str, stage: str, is_file: bool = False) -> float:
 
 
 def _infer_project_stage(text: str, is_file: bool = False) -> str:
-    evidence_hits = sum(1 for k in ["访谈", "问卷", "样本", "数据", "实验", "验证", "原型", "mvp"] if _fuzzy_match(k, text))
-    business_hits = sum(1 for k in ["市场规模", "tam", "sam", "som", "定价", "商业模式", "渠道", "收入", "成本"] if _fuzzy_match(k, text))
-    execution_hits = sum(1 for k in ["团队", "里程碑", "时间表", "技术路线", "落地", "执行"] if _fuzzy_match(k, text))
+    stage, _ = _infer_project_stage_with_signals(text, is_file=is_file)
+    return stage
+
+
+def _infer_project_stage_with_signals(text: str, is_file: bool = False) -> tuple[str, dict]:
+    """返回 (stage, signals) —— signals 里含各信号词命中数，用于 rationale。"""
+    evidence_keys = [
+        "访谈", "问卷", "样本", "数据", "实验", "验证", "原型", "mvp",
+        "调研", "田野", "试点", "poc", "用户测试", "留存", "dau", "内测",
+    ]
+    business_keys = [
+        "市场规模", "tam", "sam", "som", "定价", "商业模式", "渠道",
+        "收入", "成本", "毛利", "财务", "客单价", "盈利模式", "变现",
+    ]
+    execution_keys = [
+        "团队", "里程碑", "时间表", "技术路线", "落地", "执行",
+        "分工", "负责人", "路线图", "计划表",
+    ]
+    evidence_hit_kw = [k for k in evidence_keys if _fuzzy_match(k, text)]
+    business_hit_kw = [k for k in business_keys if _fuzzy_match(k, text)]
+    execution_hit_kw = [k for k in execution_keys if _fuzzy_match(k, text)]
+    evidence_hits = len(evidence_hit_kw)
+    business_hits = len(business_hit_kw)
+    execution_hits = len(execution_hit_kw)
     text_len = len(text)
+    number_hits = len(re.findall(r"\d+(?:\.\d+)?%?", text))
 
     if is_file and text_len >= 800:
-        return "document"
-    if evidence_hits >= 4 and business_hits >= 3:
-        return "validated"
-    if business_hits >= 2 or execution_hits >= 2 or text_len >= 350:
-        return "structured"
-    return "idea"
+        stage = "document"
+    elif evidence_hits >= 4 and business_hits >= 3:
+        stage = "validated"
+    elif (
+        business_hits >= 2
+        or execution_hits >= 2
+        or text_len >= 350
+        or (number_hits >= 3 and business_hits >= 2 and text_len >= 400)
+    ):
+        stage = "structured"
+    else:
+        stage = "idea"
+    signals = {
+        "evidence_hits": evidence_hits,
+        "business_hits": business_hits,
+        "execution_hits": execution_hits,
+        "evidence_hit_kw": evidence_hit_kw[:6],
+        "business_hit_kw": business_hit_kw[:6],
+        "execution_hit_kw": execution_hit_kw[:6],
+        "text_len": text_len,
+        "number_hits": number_hits,
+        "is_file": is_file,
+    }
+    return stage, signals
+
+
+def _build_stage_rationale(stage: str, stage_label_cn: str, signals: dict) -> dict:
+    """返回 project_stage rationale：解释为什么判定为这个阶段。"""
+    steps: list[dict] = []
+    evidence_hit_kw = signals.get("evidence_hit_kw") or []
+    business_hit_kw = signals.get("business_hit_kw") or []
+    execution_hit_kw = signals.get("execution_hit_kw") or []
+    text_len = signals.get("text_len", 0)
+    number_hits = signals.get("number_hits", 0)
+    is_file = bool(signals.get("is_file", False))
+
+    steps.append({
+        "kind": "base",
+        "label": "阶段判定依据：证据词 / 商业词 / 执行词 命中数 + 文本长度",
+        "detail": (
+            f"证据词命中 {signals.get('evidence_hits', 0)}；"
+            f"商业词命中 {signals.get('business_hits', 0)}；"
+            f"执行词命中 {signals.get('execution_hits', 0)}；"
+            f"文本长度 {text_len}；数字 {number_hits}"
+        ),
+    })
+    if evidence_hit_kw:
+        steps.append({
+            "kind": "evidence",
+            "label": f"命中证据词：{ '、'.join(evidence_hit_kw) }",
+            "severity": "info",
+        })
+    if business_hit_kw:
+        steps.append({
+            "kind": "evidence",
+            "label": f"命中商业词：{ '、'.join(business_hit_kw) }",
+            "severity": "info",
+        })
+    if execution_hit_kw:
+        steps.append({
+            "kind": "evidence",
+            "label": f"命中执行词：{ '、'.join(execution_hit_kw) }",
+            "severity": "info",
+        })
+
+    if stage == "document":
+        steps.append({
+            "kind": "adjust",
+            "label": "上传文件且长度 ≥ 800 字，判为「文档化阶段」",
+            "detail": "文件级别输入默认视为完整计划书结构",
+        })
+    elif stage == "validated":
+        steps.append({
+            "kind": "adjust",
+            "label": "证据词 ≥4 且商业词 ≥3，判为「已验证阶段」",
+            "detail": "同时出现多种用户证据与商业要素",
+        })
+    elif stage == "structured":
+        steps.append({
+            "kind": "adjust",
+            "label": "触发了结构化阈值（商业词 ≥2 或 执行词 ≥2 或 长度 ≥350）",
+            "detail": "已具备初步逻辑但证据尚未完全闭环",
+        })
+    else:
+        steps.append({
+            "kind": "adjust",
+            "label": "未满足更高阶段阈值 → 判为「想法萌芽期」",
+            "detail": "建议先补用户证据或商业闭环",
+        })
+
+    return {
+        "field": "project_stage",
+        "value": stage_label_cn,
+        "formula": "threshold(evidence_hits, business_hits, execution_hits, text_len, is_file)",
+        "formula_display": (
+            f"当前阶段 = {stage_label_cn}（{stage}）\n"
+            f"证据词命中 {signals.get('evidence_hits', 0)}；"
+            f"商业词命中 {signals.get('business_hits', 0)}；"
+            f"执行词命中 {signals.get('execution_hits', 0)}；"
+            f"文本长度 {text_len}"
+            + ("（文件级输入）" if is_file else "")
+        ),
+        "reasoning_steps": steps,
+        "note": f"text_len={text_len} · number_hits={number_hits}",
+    }
 
 
 def _stage_baseline(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 5.9, "validated": 5.6, "structured": 5.2, "idea": 4.7}.get(stage, 5.2)
-    return {"idea": 4.1, "structured": 5.0, "validated": 5.9, "document": 6.3}.get(stage, 4.8)
+        return {"document": 5.5, "validated": 5.0, "structured": 4.0, "idea": 2.5}.get(stage, 4.0)
+    return {"idea": 2.0, "structured": 3.8, "validated": 5.2, "document": 6.0}.get(stage, 3.5)
 
 
 def _stage_ceiling(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 9.3, "validated": 8.8, "structured": 8.2, "idea": 7.5}.get(stage, 8.2)
-    return {"idea": 6.9, "structured": 8.1, "validated": 8.9, "document": 9.1}.get(stage, 8.0)
+        return {"document": 9.8, "validated": 9.5, "structured": 8.8, "idea": 7.5}.get(stage, 8.5)
+    return {"idea": 7.0, "structured": 8.6, "validated": 9.4, "document": 9.7}.get(stage, 8.5)
 
 
 def _score_band(score: float) -> str:
@@ -492,11 +816,13 @@ def _evidence_score(text: str, evidence_keywords: list[str], stage: str, is_file
     total = len(evidence_keywords)
     ratio = hit / max(total, 1)
     base = _stage_baseline(stage, is_file=is_file)
-    boost = ratio * (3.4 if is_file else 2.8)
-    if hit >= 3:
+    boost = ratio * (5.2 if is_file else 4.2)
+    if hit >= 5:
+        boost += 1.0
+    elif hit >= 3:
         boost += 0.5
     elif hit == 0:
-        boost -= 0.18 if stage == "idea" else 0.45
+        boost -= 0.6 if stage == "idea" else 0.9
     return max(0.0, min(_stage_ceiling(stage, is_file=is_file), base + boost))
 
 
@@ -739,7 +1065,7 @@ def _impact_message(rule_id: str, rule_name: str) -> str:
 
 
 def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
-    """Use LLM to intelligently score each rubric dimension for uploaded files."""
+    """Use LLM to score each rubric dimension with per-item justification."""
     try:
         from app.services.llm_client import LlmClient
         llm = LlmClient()
@@ -747,19 +1073,27 @@ def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
             return None
 
         rubric_desc = "\n".join(
-            f"- {r['item']} (weight {r['weight']}): evidence={r['evidence']}"
+            f"- {r['item']}（权重{r['weight']}）：需要的证据={r['evidence']}"
             for r in RUBRICS
         )
         result = llm.chat_json(
             system_prompt=(
-                "You are a startup project evaluator. Score each rubric dimension 0-10.\n"
-                "Be fair and nuanced: a complete business plan typically scores 5-8.\n"
-                "Only give <3 if the dimension is completely missing.\n"
-                "Only give >8 if there is exceptional evidence.\n\n"
-                f"Rubric dimensions:\n{rubric_desc}\n\n"
-                'Output JSON: {"scores": [{"item": "...", "score": 0-10, "reason": "one sentence"}]}'
+                "你是创业项目评审专家。请对以下每个评分维度打 0-10 分，并给出**中文**评分依据。\n"
+                "评分原则（按真实质量打，不要锚定中段 5-6 分）：\n"
+                "- 1-2 分：该维度内容完全缺失，或只出现名词但没有任何展开\n"
+                "- 3-4 分：有概念但无细节、无数据、无证据来源（典型早期想法）\n"
+                "- 5-6 分：有细节描述但缺量化数字或证据来源\n"
+                "- 7-8 分：有细节 + 量化数字 + 至少一处证据来源（调研/案例/对照）\n"
+                "- 9-10 分：有细节 + 量化 + 多处证据 + 替代方案分析 / SOTA 对比 / 实验结论\n"
+                "打分要求：\n"
+                "- 请给出真实区分度的分数，不要把大多数维度都压到 5-6 分\n"
+                "- 只要某维度已有细节+量化+证据，就应该 7 分起步，不用等『特别充分』才给高分\n"
+                "- reason 必须引用学生原文片段（直接抄 3-10 个字），并指出落在哪一档、为什么\n"
+                "- reason 严禁出现「不够完善」「有待加强」这类空话\n\n"
+                f"评分维度：\n{rubric_desc}\n\n"
+                '输出 JSON：{"scores": [{"item": "...", "score": 0-10, "reason": "引用原文+分档理由"}]}'
             ),
-            user_prompt=f"Evaluate this project content (mode={mode}):\n\n{text[:4000]}",
+            user_prompt=f"请评估以下项目内容（模式={mode}）：\n\n{text[:4000]}",
             temperature=0.2,
         )
         if result and "scores" in result:
@@ -769,12 +1103,25 @@ def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
     return None
 
 
-def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: str = "") -> DiagnosisResult:
+def run_diagnosis(
+    input_text: str,
+    mode: str = "coursework",
+    competition_type: str = "",
+    structured_signals: dict[str, float] | None = None,
+) -> DiagnosisResult:
+    """
+    structured_signals: 外部量化证据映射 {rule_id: score 0-1}。
+      来源：finance_guard / finance_report_service 的 evidence_for_diagnosis。
+      当 signals[rule_id] ≥ 0.5 时：
+        - 即使关键词没命中，也视作该规则"有证据支撑"，给对应维度加分（非扣分）
+        - 已命中规则可降低其惩罚系数（算作已补偿）
+    """
     normalized_text = input_text.lower()
     is_file = "[" + "上传文件:" in input_text
     text_len = len(normalized_text)
-    project_stage = _infer_project_stage(normalized_text, is_file=is_file)
+    project_stage, stage_signals = _infer_project_stage_with_signals(normalized_text, is_file=is_file)
     active_rubrics = _get_rubrics(competition_type)
+    structured_signals = structured_signals or {}
 
     if not is_file and text_len < 50:
         return DiagnosisResult(
@@ -809,6 +1156,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
             matched_kws = [k for k in rule.get("keywords", []) if _fuzzy_match(k, normalized_text)]
             missing_reqs = [k for k in rule.get("requires", []) if not _fuzzy_match(k, normalized_text)]
             quote = _extract_trigger_quote(input_text, rule)
+            score_impact = round(_rule_penalty(rule["severity"], project_stage, is_file=is_file), 2)
+            agent_name = _agent_for_rule(rule["id"])
             triggered_rules.append({
                 "id": rule["id"],
                 "name": rule["name"],
@@ -824,11 +1173,29 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
                 "trigger_message": f"原文片段：“{quote}” → 触发「{rule['name']}」，因为{rule.get('explanation', '')}",
                 "impact": _impact_message(rule["id"], rule["name"]),
                 "fix_task": rule.get("fix_hint", ""),
+                # ── Rationale 兼容字段（供教师/学生 UI 追溯到底是如何推断的） ──
+                "agent_name": agent_name,
+                "score_impact": -score_impact,
+                "inference_chain": [
+                    {"step": "input", "text": (quote or "")[:200]},
+                    {"step": "keyword_hit", "keywords": matched_kws, "detail": "匹配到敏感关键词"},
+                    *(
+                        [{"step": "required_missing", "missing": missing_reqs,
+                          "detail": "缺少必要佐证字段"}]
+                        if missing_reqs else []
+                    ),
+                    {"step": "rule_trigger", "rule_id": rule["id"], "rule_name": rule["name"],
+                     "agent": agent_name, "severity": rule["severity"]},
+                    {"step": "score_impact", "delta": -score_impact, "scope": "overall",
+                     "detail": f"扣 {score_impact:.2f} 分"},
+                ],
             })
 
     evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑", "原型", "内测", "实验"] if _fuzzy_match(k, normalized_text))
     if evidence_hits < 1 and not is_file and text_len > 220 and project_stage != "idea":
         h15 = next((r for r in RULES if r["id"] == "H15"), {})
+        h15_quote = re.sub(r"\s+", " ", input_text).strip()[:120]
+        h15_impact = round(_rule_penalty("medium", project_stage, is_file=is_file), 2)
         triggered_rules.append({
             "id": "H15", "name": "评分项证据覆盖不足", "severity": "medium",
             "fallacy_label": RULE_FALLACY_MAP.get("H15", "评分项证据覆盖不足"),
@@ -837,10 +1204,20 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
             "matched_keywords": [], "missing_requires": [],
             "preferred_edge_types": RULE_EDGE_MAP.get("H15", []),
             "preferred_strategy_ids": RULE_STRATEGY_MAP.get("H15", []),
-            "quote": re.sub(r"\s+", " ", input_text).strip()[:120],
+            "quote": h15_quote,
             "trigger_message": f"原文整体信息仍偏概括，触发「评分项证据覆盖不足」，因为{h15.get('explanation', '')}",
             "impact": _impact_message("H15", "评分项证据覆盖不足"),
             "fix_task": h15.get("fix_hint", ""),
+            "agent_name": _agent_for_rule("H15"),
+            "score_impact": -h15_impact,
+            "inference_chain": [
+                {"step": "input", "text": h15_quote},
+                {"step": "evidence_scan", "detail": f"在原文中检索 TAM/访谈/样本等关键词，命中 {evidence_hits} 项"},
+                {"step": "rule_trigger", "rule_id": "H15", "rule_name": "评分项证据覆盖不足",
+                 "agent": _agent_for_rule("H15"), "severity": "medium"},
+                {"step": "score_impact", "delta": -h15_impact, "scope": "overall",
+                 "detail": f"扣 {h15_impact:.2f} 分"},
+            ],
         })
 
     unique_triggered = {r["id"]: r for r in triggered_rules}
@@ -862,9 +1239,10 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
             "template_guideline": task.get("template_guideline", []),
         }
 
-    # ── LLM-based scoring for uploaded files ──
+    # ── LLM-based scoring: uploaded files OR substantial project text ──
     llm_scores = None
-    if is_file and text_len > 200:
+    _use_llm = (is_file and text_len > 200) or (text_len > 400 and project_stage not in ("idea",))
+    if _use_llm:
         llm_scores = _llm_rubric_score(input_text, mode)
 
     rubric: list[dict] = []
@@ -873,24 +1251,67 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
 
     if llm_scores:
         llm_map = {s["item"]: s for s in llm_scores}
+        _default_by_stage = {"idea": 2.0, "structured": 3.5, "validated": 4.5, "document": 5.0}
+        fallback_score = _default_by_stage.get(project_stage, 3.0)
         for row in active_rubrics:
             llm_s = llm_map.get(row["item"])
+            # 本维度 signals 强证据 bonus
+            sig_bonus_llm = 0.0
+            for r_id in row.get("rules", []):
+                sv = float(structured_signals.get(r_id, 0.0) or 0.0)
+                if sv >= 0.7:
+                    sig_bonus_llm += 0.6
+                elif sv >= 0.5:
+                    sig_bonus_llm += 0.3
+            sig_bonus_llm = min(sig_bonus_llm, 1.5)
+            # 命中/缺失证据（LLM 分支也给出，便于前端展示）
+            matched_evidence_llm = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
+            missing_evidence_llm = [kw for kw in row["evidence"] if kw.lower() not in normalized_text]
+            dim_rules_llm = [r for r in triggered_rules if r["id"] in row["rules"]]
             if llm_s:
-                dim_score = max(0.0, min(10.0, float(llm_s.get("score", 5))))
+                base_llm = float(llm_s.get("score", fallback_score))
+                dim_score = max(0.0, min(10.0, base_llm + sig_bonus_llm))
+                reason = llm_s.get("reason", "")
+                if sig_bonus_llm > 0.2:
+                    reason = (reason + "；" if reason else "") + f"财务模块量化证据(+{round(sig_bonus_llm, 1)})"
                 rubric.append({
                     "item": row["item"],
                     "score": round(dim_score, 2),
                     "status": "risk" if dim_score < 5.0 else "ok",
                     "weight": row["weight"],
-                    "reason": llm_s.get("reason", ""),
-                    # 结构化证据链 & 常见错误池，保证每个评分维度可追溯
+                    "reason": reason,
+                    "source": "llm",
+                    "base_score": round(base_llm, 2),
+                    "signal_bonus": round(sig_bonus_llm, 2),
+                    "rule_penalty": 0.0,
+                    "length_bonus": 0.0,
+                    "evidence_bonus": 0.0,
+                    "matched_evidence": matched_evidence_llm,
+                    "missing_evidence": missing_evidence_llm,
+                    "dim_rules": [{"id": r["id"], "name": r["name"], "severity": r.get("severity", "")} for r in dim_rules_llm],
                     "evidence_chain": get_rubric_evidence_chain(row["item"]),
                     "common_mistakes": get_rubric_error_pool(row["item"]),
                 })
             else:
+                final_fallback = min(10.0, fallback_score + sig_bonus_llm)
+                reason = f"LLM 未对该维度评分，按项目阶段({project_stage})默认 {fallback_score} 分"
+                if sig_bonus_llm > 0.2:
+                    reason += f"；+ 财务模块证据({round(sig_bonus_llm, 1)})"
                 rubric.append({
-                    "item": row["item"], "score": 5.0,
-                    "status": "ok", "weight": row["weight"],
+                    "item": row["item"],
+                    "score": round(final_fallback, 2),
+                    "status": "risk" if final_fallback < 5.0 else "ok",
+                    "weight": row["weight"],
+                    "reason": reason,
+                    "source": "stage_default",
+                    "base_score": round(fallback_score, 2),
+                    "signal_bonus": round(sig_bonus_llm, 2),
+                    "rule_penalty": 0.0,
+                    "length_bonus": 0.0,
+                    "evidence_bonus": 0.0,
+                    "matched_evidence": matched_evidence_llm,
+                    "missing_evidence": missing_evidence_llm,
+                    "dim_rules": [{"id": r["id"], "name": r["name"], "severity": r.get("severity", "")} for r in dim_rules_llm],
                 })
             weighted_total += rubric[-1]["score"] * row["weight"]
             total_weight += row["weight"]
@@ -898,38 +1319,336 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
         length_bonus = min(1.0, text_len / 2200) if is_file else min(0.6, text_len / 700)
         for row in active_rubrics:
             ev_score = _evidence_score(normalized_text, row["evidence"], stage=project_stage, is_file=is_file)
-            penalties = sum(
-                _rule_penalty(r["severity"], project_stage, is_file=is_file)
-                for r in triggered_rules if r["id"] in row["rules"]
-            )
+            matched_evidence = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
+            missing_evidence = [kw for kw in row["evidence"] if kw.lower() not in normalized_text]
+            dim_rules = [r for r in triggered_rules if r["id"] in row["rules"]]
+            # ── 外部结构化证据：命中规则的 signals 越高，penalty 越小 ──
+            penalties = 0.0
+            for r in dim_rules:
+                base_pen = _rule_penalty(r["severity"], project_stage, is_file=is_file)
+                sig_val = float(structured_signals.get(r["id"], 0.0) or 0.0)
+                if sig_val >= 0.7:
+                    base_pen *= 0.25  # 已经有深度财务证据，仅保留 25% 扣分
+                elif sig_val >= 0.5:
+                    base_pen *= 0.55
+                elif sig_val >= 0.3:
+                    base_pen *= 0.8
+                penalties += base_pen
             penalties = min(penalties, 1.15 if project_stage == "idea" else 1.45 if project_stage == "structured" else 1.8)
-            dim_score = max(0.0, min(10.0, ev_score + length_bonus - penalties))
+            # ── 未命中规则，也可以通过 signals 反向加分（该维度关联的规则里有强证据）──
+            signal_bonus = 0.0
+            for r_id in row.get("rules", []):
+                if r_id in [r["id"] for r in dim_rules]:
+                    continue  # 已在 penalty 里处理
+                sig_val = float(structured_signals.get(r_id, 0.0) or 0.0)
+                if sig_val >= 0.7:
+                    signal_bonus += 0.9
+                elif sig_val >= 0.5:
+                    signal_bonus += 0.5
+            signal_bonus = min(signal_bonus, 2.0)
+            dim_score = max(0.0, min(10.0, ev_score + length_bonus + signal_bonus - penalties))
+
+            if dim_rules:
+                reason = "；".join(
+                    f"触发{r['name']}(-{round(_rule_penalty(r['severity'], project_stage, is_file=is_file), 1)})"
+                    for r in dim_rules[:2]
+                )
+            elif len(matched_evidence) >= len(row["evidence"]) * 0.6:
+                reason = f"证据较充分，覆盖了{', '.join(matched_evidence[:3])}"
+            elif missing_evidence:
+                reason = f"缺少{', '.join(missing_evidence[:3])}相关证据"
+            else:
+                reason = ""
+            if signal_bonus > 0.1:
+                reason = (reason + "；" if reason else "") + f"财务分析模块已补充量化证据(+{round(signal_bonus, 1)})"
+
             rubric.append({
                 "item": row["item"],
                 "score": round(dim_score, 2),
                 "status": "risk" if dim_score < 5.0 else "ok",
                 "weight": row["weight"],
+                "reason": reason,
+                "source": "rule_based",
+                "base_score": round(ev_score, 2),
+                "evidence_bonus": round(ev_score, 2),
+                "length_bonus": round(length_bonus, 2),
+                "signal_bonus": round(signal_bonus, 2),
+                "rule_penalty": round(penalties, 2),
+                "matched_evidence": matched_evidence,
+                "missing_evidence": missing_evidence,
+                "dim_rules": [{"id": r["id"], "name": r["name"], "severity": r.get("severity", "")} for r in dim_rules],
                 "evidence_chain": get_rubric_evidence_chain(row["item"]),
                 "common_mistakes": get_rubric_error_pool(row["item"]),
             })
             weighted_total += dim_score * row["weight"]
             total_weight += row["weight"]
 
-    overall_score = round(weighted_total / total_weight, 2) if total_weight else 0.0
-    stage_floor = {"idea": 4.2, "structured": 5.0, "validated": 5.9, "document": 6.2}.get(project_stage, 4.8)
-    stage_ceiling = {"idea": 6.4, "structured": 7.9, "validated": 8.9, "document": 9.3}.get(project_stage, 8.1)
-    overall_score = round(min(stage_ceiling, max(stage_floor, overall_score)), 2)
+    # ── 给每个 rubric 条目挂 rationale：解释这一维度分数的计算来源 ──
+    stage_label_cn = {
+        "idea": "想法萌芽期",
+        "structured": "结构化阶段",
+        "validated": "已验证阶段",
+        "document": "文档化阶段",
+    }.get(project_stage, f"阶段 {project_stage}")
+    # 按 rule_id 快速找到 triggered rule（为了拿 quote / agent_name）
+    triggered_rule_by_id = {tr["id"]: tr for tr in triggered_rules}
+    active_rubrics_by_item = {row["item"]: row for row in active_rubrics}
+    for r_entry in rubric:
+        row = active_rubrics_by_item.get(r_entry["item"], {})
+        linked_rules = [
+            {"rule_id": tr["id"], "rule_name": tr["name"], "impact": tr.get("score_impact", 0)}
+            for tr in triggered_rules if tr["id"] in (row.get("rules") or [])
+        ][:4]
+        base_score = float(r_entry.get("base_score", 0.0) or 0.0)
+        signal_bonus = float(r_entry.get("signal_bonus", 0.0) or 0.0)
+        length_bonus = float(r_entry.get("length_bonus", 0.0) or 0.0)
+        rule_penalty = float(r_entry.get("rule_penalty", 0.0) or 0.0)
+        matched_ev = r_entry.get("matched_evidence") or []
+        missing_ev = r_entry.get("missing_evidence") or []
+        src = r_entry.get("source", "unknown")
+
+        # ── 构造 reasoning_steps（推理链）：一条条交代这个分怎么来的 ──
+        reasoning_steps: list[dict] = []
+        if src == "llm":
+            reasoning_steps.append({
+                "kind": "base",
+                "label": f"LLM 按「{stage_label_cn}」对该维度评分",
+                "delta": round(base_score, 2),
+                "detail": f"基础分 {base_score:.2f}",
+            })
+        elif src == "stage_default":
+            reasoning_steps.append({
+                "kind": "base",
+                "label": f"LLM 未对该维度打分，按阶段「{stage_label_cn}」默认值",
+                "delta": round(base_score, 2),
+                "detail": f"阶段默认 {base_score:.2f}",
+            })
+        else:
+            reasoning_steps.append({
+                "kind": "base",
+                "label": f"证据覆盖基线（阶段：{stage_label_cn}）",
+                "delta": round(base_score, 2),
+                "detail": f"基于文本命中关键词评估，基础 {base_score:.2f}",
+            })
+            if length_bonus > 0.05:
+                reasoning_steps.append({
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": round(length_bonus, 2),
+                    "detail": f"文本完整度加成 +{length_bonus:.2f}",
+                })
+        for kw in matched_ev[:4]:
+            reasoning_steps.append({
+                "kind": "evidence",
+                "label": f"命中关键证据「{kw}」",
+                "delta": 0.0,
+                "severity": "info",
+                "detail": "文本中检测到相关表述",
+            })
+        if signal_bonus > 0.05:
+            reasoning_steps.append({
+                "kind": "evidence",
+                "label": "财务/量化模块补充证据",
+                "delta": round(signal_bonus, 2),
+                "severity": "info",
+                "detail": f"外部结构化信号加成 +{signal_bonus:.2f}",
+            })
+        for lr in linked_rules:
+            imp = float(lr.get("impact", 0.0) or 0.0)
+            tr = triggered_rule_by_id.get(lr["rule_id"], {})
+            reasoning_steps.append({
+                "kind": "rule",
+                "label": f"触发风险 {lr['rule_id']}·{lr['rule_name']}",
+                "delta": round(imp, 2),
+                "severity": tr.get("severity", "medium"),
+                "agent_name": tr.get("agent_name", ""),
+                "quote": (tr.get("quote") or "")[:120],
+                "detail": tr.get("explanation", "") or tr.get("trigger_message", ""),
+            })
+        if not linked_rules and missing_ev and src == "rule_based":
+            reasoning_steps.append({
+                "kind": "adjust",
+                "label": f"尚未出现「{ '、'.join(missing_ev[:3]) }」相关证据",
+                "delta": 0.0,
+                "detail": "未额外加分也未扣分",
+            })
+        if rule_penalty > 0.05:
+            reasoning_steps.append({
+                "kind": "adjust",
+                "label": f"以上扣分合计",
+                "delta": -round(rule_penalty, 2),
+                "detail": f"扣分累计 {rule_penalty:.2f} 分",
+            })
+
+        # 基于 reasoning_steps 渲染 formula_display（保留旧 lines 形态，兼容老前端）
+        lines: list[str] = [f"{r_entry['item']} = {r_entry['score']:.2f} / 10"]
+        for st in reasoning_steps:
+            kd = st.get("kind", "")
+            lb = st.get("label", "")
+            dt = st.get("delta", 0)
+            try:
+                dtf = float(dt)
+            except Exception:
+                dtf = 0.0
+            if kd in ("base", "baseline"):
+                lines.append(f"  基线 · {lb} = {dtf:.2f}")
+            elif kd == "evidence":
+                lines.append(f"  +证据 · {lb}" + (f"  +{dtf:.2f}" if abs(dtf) > 0.01 else ""))
+            elif kd == "rule":
+                lines.append(f"  ⚠ 规则 · {lb}  {dtf:+.2f}")
+            elif kd == "adjust":
+                if abs(dtf) > 0.01:
+                    lines.append(f"  调整 · {lb}  {dtf:+.2f}")
+                else:
+                    lines.append(f"  说明 · {lb}")
+        lines.append(f"→ 最终 {r_entry['score']:.2f}")
+
+        r_entry["rationale"] = {
+            "field": f"rubric:{r_entry['item']}",
+            "value": r_entry["score"],
+            "formula": "base_evidence + bonuses − rule_penalties",
+            "formula_display": "\n".join(lines),
+            "reasoning_steps": reasoning_steps,
+            "inputs": (
+                [
+                    {"label": "基础分", "value": round(base_score, 2),
+                     "impact": f"+{base_score:.2f}"},
+                ]
+                + ([{"label": "文本长度", "value": round(length_bonus, 2),
+                     "impact": f"+{length_bonus:.2f}"}] if length_bonus > 0.05 else [])
+                + ([{"label": "量化证据", "value": round(signal_bonus, 2),
+                     "impact": f"+{signal_bonus:.2f}"}] if signal_bonus > 0.05 else [])
+                + [
+                    {"label": f"风险 {r['rule_id']}", "value": r["rule_name"],
+                     "rule_id": r["rule_id"], "impact": f"{r['impact']:+.2f}"}
+                    for r in linked_rules
+                ]
+                + [{"label": "权重", "value": row.get("weight", 1.0),
+                    "impact": f"×{row.get('weight', 1.0)}"}]
+            ),
+            "contributing_evidence": [
+                {"excerpt": (triggered_rule_by_id.get(r["rule_id"], {}).get("quote") or "")[:120],
+                 "rule_id": r["rule_id"],
+                 "agent": triggered_rule_by_id.get(r["rule_id"], {}).get("agent_name", ""),
+                 "impact": f"{r['impact']:+.2f}"}
+                for r in linked_rules if triggered_rule_by_id.get(r["rule_id"], {}).get("quote")
+            ],
+            "note": f"阶段：{stage_label_cn} · 来源：{src}",
+        }
+
+    overall_raw = round(weighted_total / total_weight, 2) if total_weight else 0.0
+    stage_floor = {"idea": 1.5, "structured": 3.0, "validated": 5.0, "document": 5.5}.get(project_stage, 2.5)
+    stage_ceiling = {"idea": 7.5, "structured": 9.0, "validated": 9.6, "document": 9.8}.get(project_stage, 8.5)
+    overall_score = round(min(stage_ceiling, max(stage_floor, overall_raw)), 2)
+    source_breakdown: dict[str, int] = {}
+    for r in rubric:
+        key = str(r.get("source", "unknown"))
+        source_breakdown[key] = source_breakdown.get(key, 0) + 1
+    logger.info(
+        "[diagnosis] stage=%s mode=%s comp=%s len=%d raw=%.2f clipped=%.2f floor=%.2f ceil=%.2f source=%s rules=%d",
+        project_stage, mode, competition_type, text_len,
+        overall_raw, overall_score, stage_floor, stage_ceiling,
+        source_breakdown, len(triggered_rules),
+    )
     high_rules = [r for r in triggered_rules if r["severity"] == "high"]
     primary_rule = high_rules[0]["id"] if high_rules else (triggered_rules[0]["id"] if triggered_rules else "NONE")
 
+    # ── bottleneck + rationale ──
+    bottleneck_steps: list[dict] = []
+    lowest_rubric = min(rubric, key=lambda r: float(r.get("score", 10.0))) if rubric else None
     if high_rules:
         bottleneck = f"当前最高风险为 {high_rules[0]['id']}（{high_rules[0]['name']}），会直接影响项目落地可行性。"
+        bottleneck_steps.append({
+            "kind": "rule",
+            "label": f"检测到高严重性风险 {high_rules[0]['id']}·{high_rules[0]['name']}",
+            "severity": "critical",
+            "agent_name": high_rules[0].get("agent_name", ""),
+            "quote": (high_rules[0].get("quote") or "")[:120],
+            "detail": high_rules[0].get("explanation", ""),
+        })
+        if lowest_rubric:
+            bottleneck_steps.append({
+                "kind": "evidence",
+                "label": f"最低维度 {lowest_rubric['item']} = {lowest_rubric['score']:.2f}",
+                "detail": "可作为瓶颈突破口",
+            })
     elif triggered_rules:
         bottleneck = f"当前主要短板为 {triggered_rules[0]['id']}（{triggered_rules[0]['name']}），需要先补证据。"
+        bottleneck_steps.append({
+            "kind": "rule",
+            "label": f"未检测到高风险，取首条触发规则 {triggered_rules[0]['id']}·{triggered_rules[0]['name']}",
+            "severity": triggered_rules[0].get("severity", "medium"),
+            "agent_name": triggered_rules[0].get("agent_name", ""),
+            "quote": (triggered_rules[0].get("quote") or "")[:120],
+        })
+        if lowest_rubric:
+            bottleneck_steps.append({
+                "kind": "evidence",
+                "label": f"最低维度 {lowest_rubric['item']} = {lowest_rubric['score']:.2f}",
+            })
     else:
         bottleneck = "未检测到高风险规则，建议进入下一轮压力测试和精细化验证。"
+        if lowest_rubric:
+            bottleneck_steps.append({
+                "kind": "evidence",
+                "label": f"最低维度 {lowest_rubric['item']} = {lowest_rubric['score']:.2f}（可作为下一轮改进焦点）",
+            })
+        else:
+            bottleneck_steps.append({
+                "kind": "base",
+                "label": "无规则命中且 rubric 未产出，仅提示继续推进验证",
+            })
+    bottleneck_rationale = {
+        "field": "bottleneck",
+        "value": bottleneck,
+        "formula": "select_highest_severity_rule ∨ lowest_rubric",
+        "formula_display": "\n".join(
+            ["瓶颈选择：优先看高风险规则；若无，则看最低 rubric 维度。"]
+            + [f"· {s.get('label', '')}" for s in bottleneck_steps]
+        ),
+        "reasoning_steps": bottleneck_steps,
+        "note": f"触发 {len(triggered_rules)} 条规则（高风险 {len(high_rules)} 条）",
+    }
 
     next_task = _suggest_next_task(primary_rule)
+    # ── next_task rationale ──
+    next_task_steps: list[dict] = []
+    if primary_rule == "NONE":
+        next_task_steps.append({
+            "kind": "base",
+            "label": "没有命中规则 → 使用通用下一步任务模板",
+            "detail": "建议补齐证据并完成一次压力测试",
+        })
+    else:
+        pr_name = next((r.get("name", "") for r in triggered_rules if r.get("id") == primary_rule), "")
+        next_task_steps.append({
+            "kind": "base",
+            "label": f"以最关键风险 {primary_rule}·{pr_name} 作为任务选取依据",
+            "detail": "优先看高严重性规则，若无则取首条命中",
+        })
+    next_task_steps.append({
+        "kind": "evidence",
+        "label": f"匹配任务模板 → {next_task.get('title', '')}",
+        "detail": next_task.get("description", "")[:120],
+    })
+    for step in (next_task.get("template_guideline") or [])[:4]:
+        next_task_steps.append({
+            "kind": "evidence",
+            "label": step,
+            "severity": "info",
+        })
+    next_task["rationale"] = {
+        "field": "next_task",
+        "value": next_task.get("title", ""),
+        "formula": "suggest_next_task(primary_rule_id)",
+        "formula_display": (
+            f"下一步任务 = {next_task.get('title', '')}\n"
+            f"依据：{primary_rule}（{'主风险' if primary_rule != 'NONE' else '无风险命中'}）\n"
+            f"描述：{(next_task.get('description') or '')[:120]}"
+        ),
+        "reasoning_steps": next_task_steps,
+        "note": f"基于规则 {primary_rule} 触发的任务模板",
+    }
     # 将风险规则与 KG 本体节点关联，方便前端/教师追踪“依据从何而来”。
     triggered_with_ontology: list[dict] = []
     for r in triggered_rules:
@@ -943,13 +1662,125 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
         triggered_with_ontology.append(enriched)
 
     comp_label = {"internet_plus": "互联网+", "challenge_cup": "挑战杯", "dachuang": "大创"}.get(competition_type, "")
+
+    # ── overall rationale：展示加权公式 + 阶段 floor/ceiling 夹子 ──
+    overall_inputs: list[dict] = []
+    overall_steps: list[dict] = []
+    overall_steps.append({
+        "kind": "base",
+        "label": f"项目阶段=「{stage_label_cn}」，区间基线 [{stage_floor}, {stage_ceiling}]",
+        "delta": 0.0,
+        "detail": f"项目阶段决定分数最终可接受区间",
+    })
+    for r_entry in rubric:
+        w = float(r_entry.get("weight", 1.0) or 1.0)
+        sc = float(r_entry.get("score", 0.0) or 0.0)
+        overall_inputs.append({
+            "label": f"rubric·{r_entry['item']}",
+            "value": round(sc, 2),
+            "weight": w,
+            "impact": f"+{sc * w:.2f}",
+        })
+        overall_steps.append({
+            "kind": "evidence",
+            "label": f"{r_entry['item']} {sc:.2f} × 权重 {w:.2f}",
+            "delta": round(sc * w, 2),
+            "detail": f"该维度贡献 {sc * w:+.2f}",
+        })
+    for tr in triggered_with_ontology:
+        overall_inputs.append({
+            "label": f"风险·{tr['id']}",
+            "value": tr.get("name", ""),
+            "weight": -1.0,
+            "rule_id": tr["id"],
+            "impact": f"（已计入单维度扣分）",
+        })
+        overall_steps.append({
+            "kind": "rule",
+            "label": f"风险 {tr['id']}·{tr.get('name', '')}（已计入单维度）",
+            "delta": 0.0,
+            "severity": tr.get("severity", "medium"),
+            "agent_name": tr.get("agent_name", ""),
+            "quote": (tr.get("quote") or "")[:120],
+            "detail": tr.get("impact", ""),
+        })
+    parts_display = " + ".join(
+        f"{r['score']:.1f}×{r.get('weight', 1.0):.1f}" for r in rubric
+    ) or "0"
+    # 人话版综合分说明
+    clip_note = ""
+    if overall_raw < stage_floor:
+        clip_note = f"原始加权平均 {overall_raw:.2f} 低于阶段下限 {stage_floor}，被抬到 {stage_floor}"
+        overall_steps.append({
+            "kind": "adjust",
+            "label": f"阶段下限夹子 ↑",
+            "delta": round(stage_floor - overall_raw, 2),
+            "detail": clip_note,
+        })
+    elif overall_raw > stage_ceiling:
+        clip_note = f"原始加权平均 {overall_raw:.2f} 超过阶段上限 {stage_ceiling}，被压到 {stage_ceiling}"
+        overall_steps.append({
+            "kind": "adjust",
+            "label": f"阶段上限夹子 ↓",
+            "delta": round(stage_ceiling - overall_raw, 2),
+            "detail": clip_note,
+        })
+    else:
+        clip_note = f"原始加权平均 {overall_raw:.2f} 落在阶段区间内，不再修正"
+    overall_rationale = {
+        "field": "overall",
+        "value": overall_score,
+        "formula": "clip(Σ(rubric_i × w_i) / Σw_i, stage_floor, stage_ceiling)",
+        "formula_display": (
+            f"综合分 = 按 9 个维度加权平均后，再夹到阶段允许区间。\n"
+            f"项目处于「{stage_label_cn}」→ 区间 [{stage_floor}, {stage_ceiling}]\n"
+            f"加权平均 = ({parts_display}) ÷ {total_weight:.1f} = {overall_raw:.2f}\n"
+            f"{clip_note}\n"
+            f"最终综合分 = {overall_score}"
+        ),
+        "reasoning_steps": overall_steps,
+        "inputs": overall_inputs,
+        "note": f"项目阶段 {project_stage} · 触发 {len(triggered_rules)} 条风险",
+        "stage_floor": stage_floor,
+        "stage_ceiling": stage_ceiling,
+        "raw_score": overall_raw,
+        "project_stage": project_stage,
+        "project_stage_cn": stage_label_cn,
+    }
+
+    project_stage_rationale = _build_stage_rationale(project_stage, stage_label_cn, stage_signals)
+
+    summary_text = (
+        f"已按 V2.0 规则集完成{'「' + comp_label + '」赛道权重下的' if comp_label else ''}诊断"
+        f"（{len(RULES)}条规则 + {len(active_rubrics)}项Rubric）。"
+    )
+    summary_rationale = {
+        "field": "current_summary",
+        "value": summary_text,
+        "formula": "compose(mode, competition_type, rule_count, rubric_count)",
+        "formula_display": (
+            f"摘要 = 以 {mode} 模式" + (f"、{comp_label} 赛道权重" if comp_label else "")
+            + f"，跑完 {len(RULES)} 条规则 + {len(active_rubrics)} 项 Rubric 后的诊断总览。"
+        ),
+        "reasoning_steps": [
+            {"kind": "base", "label": f"模式 mode = {mode}"},
+            {"kind": "evidence", "label": f"赛道 {comp_label or '通用'}"},
+            {"kind": "evidence", "label": f"规则库 {len(RULES)} 条 + Rubric {len(active_rubrics)} 项"},
+            {"kind": "adjust", "label": f"触发 {len(triggered_rules)} 条规则 · 综合分 {overall_score}"},
+        ],
+        "note": "本摘要是自动生成的诊断总览，可被老师订正。",
+    }
+
     diagnosis = {
         "mode": mode,
         "competition_type": competition_type,
         "overall_score": overall_score,
         "score_band": _score_band(overall_score),
+        "overall_rationale": overall_rationale,
         "project_stage": project_stage,
+        "project_stage_rationale": project_stage_rationale,
         "bottleneck": bottleneck,
+        "bottleneck_rationale": bottleneck_rationale,
         "triggered_rules": triggered_with_ontology,
         "rubric": rubric,
         "capability_map": CAPABILITY_MAP,
@@ -958,10 +1789,8 @@ def run_diagnosis(input_text: str, mode: str = "coursework", competition_type: s
             "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
             "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上",
         ],
-        "summary": (
-            f"已按 V2.0 规则集完成{'「' + comp_label + '」赛道权重下的' if comp_label else ''}诊断"
-            f"（{len(RULES)}条规则 + {len(active_rubrics)}项Rubric）。"
-        ),
+        "summary": summary_text,
+        "summary_rationale": summary_rationale,
         "info_sufficient": True,
     }
     return DiagnosisResult(diagnosis=diagnosis, next_task=next_task)

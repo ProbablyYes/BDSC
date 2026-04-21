@@ -4,26 +4,66 @@ version = "0.1.0"
 description = "Innovation and entrepreneurship agent backend."
 readme = "README.md"
 requires-python = ">=3.10"
+# 核心依赖：缺任何一个都会让应用无法启动或核心功能失效
 dependencies = [
+  # --- Web 框架 / 参数解析 ---
   "fastapi>=0.116.0",
   "uvicorn>=0.35.0",
   "python-multipart>=0.0.20",
   "pydantic>=2.11.0",
   "pydantic-settings>=2.10.0",
+  # --- 文档解析（docx / pdf / pptx 上传件）---
   "python-docx>=1.2.0",
   "pypdf>=5.9.0",
   "python-pptx>=1.0.2",
+  # --- KG / 超图 ---
   "neo4j>=5.28.0",
-  "openai>=1.109.1",
   "hypernetx>=2.4.0",
+  # --- LLM / Agent 编排 ---
+  "openai>=1.109.1",
+  "langgraph>=0.2.0",
+  # --- 数据处理 ---
   "fastjsonschema>=2.21.2",
   "pandas<3",
-  "langgraph>=0.2.0",
   "numpy>=2.2.6",
+  # --- 网页检索（计划书行业数据） ---
   "ddgs>=9.11.3",
+]
+
+# 可选功能：按需安装，缺失时相应功能会降级或禁用，但应用仍可启动
+[project.optional-dependencies]
+# 扫描件 / 图片 OCR：services/ocr.py 按 try-except 软加载
+ocr = [
+  "pdf2image>=1.17.0",
+  "pytesseract>=0.3.10",
+  "pillow>=10.0.0",
+]
+
+# 本地 docx → pdf 转换（仅支持装了 MS Word / LibreOffice 的环境）
+# 若不装，前端会退回到浏览器打印 PDF 方案
+pdf-export = [
+  "docx2pdf>=0.1.8",
+]
+
+# 同时装上所有可选能力
+all = [
+  "pdf2image>=1.17.0",
+  "pytesseract>=0.3.10",
+  "pillow>=10.0.0",
+  "docx2pdf>=0.1.8",
 ]
 
 [dependency-groups]
 dev = [
   "pytest>=8.3.0",
 ]
+
+# 使用说明：
+#   # 仅核心（推荐默认部署）：
+#   uv sync
+#
+#   # 补装 OCR 能力（需要系统侧额外安装 poppler、tesseract）：
+#   uv sync --extra ocr
+#
+#   # 一键装齐全部可选依赖：
+#   uv sync --extra all

@@ -158,6 +158,7 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
 
   const theme = useMemo(() => THEME_STYLES[design.theme] || THEME_STYLES.default, [design.theme]);
   const orientation = design.layout?.orientation === "landscape" ? "landscape" : "portrait";
+  const layoutVariant = design.layout?.grid || "default";
   const isEditable = mode === "edit" && !!onChange;
 
   const sectionEntries = useMemo(
@@ -552,10 +553,10 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
   return (
     <div className="poster-preview-root">
       <div className="poster-toolbar">
-        <span className="poster-toolbar-title">大赛展演海报</span>
+        <span className="poster-toolbar-title">当前海报方案</span>
         <div className="poster-toolbar-actions">
           <button type="button" className="poster-btn" onClick={handleCopyAll}>
-            {copied ? "✓ 文案已复制" : "复制全部文案"}
+            {copied ? "已复制海报文案" : "复制海报文案"}
           </button>
           <button
             type="button"
@@ -563,7 +564,7 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
             onClick={handlePrintPoster}
             title="仅导出当前海报为 PDF 或打印"
           >
-            打印/导出
+            导出为 PDF / 打印
           </button>
         </div>
       </div>
@@ -604,7 +605,7 @@ export default function PosterPreview({ design, onChange, mode = "view" }: Props
           }}
         />
         <div
-          className={`poster-main-grid ${orientation === "portrait" ? "poster-portrait" : "poster-landscape"}`}
+          className={`poster-main-grid ${orientation === "portrait" ? "poster-portrait" : "poster-landscape"} ${layoutVariant === "story_focus" ? "poster-layout-story" : ""} ${layoutVariant === "data_focus" ? "poster-layout-data" : ""}`}
           style={{
             position: "relative",
             zIndex: 1,

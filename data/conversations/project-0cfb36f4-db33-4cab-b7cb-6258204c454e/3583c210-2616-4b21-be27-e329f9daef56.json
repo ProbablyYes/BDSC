@@ -1,0 +1,106 @@
+{
+  "conversation_id": "3583c210-2616-4b21-be27-e329f9daef56",
+  "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "student_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "title": "演示·场景2 · 定价 299/月偏高（pricing 红）",
+  "summary": "月费 299 显著高于教育 C 端区间，pricing_framework 触发",
+  "created_at": "2026-04-18T20:44:34+08:00",
+  "seed_tag": "finance_demo_v1",
+  "seed_scenario_idx": 2,
+  "messages": [
+    {
+      "role": "user",
+      "content": "我打算向大学生收月费 299 元，每月新增用户大概 1000 人，转化率 3%。",
+      "timestamp": "2026-04-18T20:44:34+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "先帮你做一个快速的定价体检——大学生为主的教育 C 端产品，月费 299 元属于偏高区间，即使 3% 的转化率也会在获客后被价格拦住。\n\n（详见下方财务守望卡片，红/黄为需要重点处理的信号。）\n\n建议先做一个价格敏感度测试：把 99/199/299 三档放给 50 位目标用户选，看支付意愿曲线再决定是否真的要走高价。",
+      "timestamp": "2026-04-18T20:44:40+08:00",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "engine": "seed",
+          "pipeline": [
+            "demo"
+          ]
+        },
+        "seed_tag": "finance_demo_v1",
+        "demo_note": "本条为 finance_guard 离线演示会话，用于教学展示，不参与真实诊断评分。",
+        "finance_advisory": {
+          "triggered": true,
+          "hits": [
+            "pricing",
+            "unit_econ"
+          ],
+          "cards": [
+            {
+              "module": "rationality",
+              "title": "财务假设合理性",
+              "inputs": {
+                "industry": "教育",
+                "monthly_price": 299.0
+              },
+              "outputs": {
+                "checks": [
+                  {
+                    "field": "monthly_price",
+                    "value": 299.0,
+                    "range": [
+                      29,
+                      99
+                    ],
+                    "level": "red",
+                    "note": "月价 299.0 远高于行业区间 [29, 99]"
+                  }
+                ],
+                "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
+                "baseline": {
+                  "cac_range": [
+                    30,
+                    120
+                  ],
+                  "monthly_price_range": [
+                    29,
+                    99
+                  ],
+                  "monthly_retention": [
+                    0.7,
+                    0.9
+                  ],
+                  "gross_margin": [
+                    0.6,
+                    0.85
+                  ]
+                }
+              },
+              "verdict": {
+                "level": "red",
+                "score": 0.25,
+                "reason": "月价 299.0 远高于行业区间 [29, 99]"
+              },
+              "framework_explain": "**行业基准对比**（教育）：用头部项目的中位区间做锚，判断你的假设是否在同行合理范围。\n- 月价 [[29, 99]]\n- CAC [[30, 120]]\n- 月留存 [[0.7, 0.9]]\n- 毛利率 [[0.6, 0.85]]\n\n教育类看重留存与续费，CAC 对价格敏感度高",
+              "suggestions": [
+                "月价 299.0 远高于行业区间 [29, 99]——需要用用户调研或成本拆解补充证据"
+              ],
+              "missing_inputs": [],
+              "evidence_for_diagnosis": {
+                "H3": 0.5
+              },
+              "baseline_meta": {
+                "industry": "教育",
+                "source": "seed",
+                "updated_at": "2026-04-18T12:48:34+00:00",
+                "evidence_count": 0
+              }
+            }
+          ],
+          "evidence_for_diagnosis": {
+            "H3": 0.5
+          },
+          "industry": "教育"
+        }
+      }
+    }
+  ]
+}

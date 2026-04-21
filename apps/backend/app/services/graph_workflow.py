@@ -27,7 +27,7 @@ Layer 2 — Agent Selection (hybrid: static rules + dynamic heuristics)
    • Tutor   : learning mode inside complex context
    • Planner : sufficient KG context AND project intent
   FOCUSED INTENTS (skip agents, orchestrator single-call):
-   • market_competitor, learning_concept, idea_brainstorm, general_chat
+   • market_competitor, idea_brainstorm, general_chat
   Selected agents execute serially; each sees output of preceding agents.
 
 Layer 3 — Orchestrator
@@ -76,6 +76,7 @@ class WorkflowState(TypedDict, total=False):
     history_context: str
     conversation_messages: list
     teacher_feedback_context: str
+    structured_signals: dict
 
     intent: str
     intent_confidence: float
@@ -202,7 +203,7 @@ INTENTS: dict[str, dict] = {
         "desc": "学生想学创业概念/方法论",
         "agents": ["tutor"],
         "need_web": True, "web_results": 3,
-        "focused": True,
+        "focused": False,
     },
     "general_chat": {
         "keywords": [],
@@ -929,7 +930,11 @@ def _dim_uncertainty(dim: str, message: str) -> float:
     if dim == "structural_cause":
         return 0.6
     if dim == "method_bridge":
-        return 0.8 if any(w in text for w in ("什么是", "怎么做", "教我", "不懂", "不理解")) else 0.55
+        return 0.8 if any(w in text for w in (
+            "什么是", "怎么做", "怎么算", "怎么用", "怎么理解", "怎么判断", "怎么验证",
+            "教我", "不懂", "不理解", "不太懂", "不太理解", "不清楚",
+            "到底", "概念", "举例", "举个例", "走一遍",
+        )) else 0.55
     if dim == "external_reference":
         return 0.7 if any(w in text for w in ("竞品", "类似", "对标", "市面上", "别人")) else 0.4
     return 0.5
@@ -947,7 +952,11 @@ def _dim_impact(dim: str, intent: str, mode: str, complexity: int) -> float:
     if dim == "strategy_directions":
         return 0.7
     if dim == "method_bridge":
-        return 0.85 if intent == "learning_concept" else 0.55
+        if intent == "learning_concept":
+            return 0.85
+        if intent in ("business_model", "evidence_check", "idea_brainstorm"):
+            return 0.7
+        return 0.55
     if dim == "counter_intuitive":
         return 0.65
     if dim == "external_reference":
@@ -977,33 +986,37 @@ def _refine_dim_activations(
     diag: dict, kg: dict,
     rag_cases: list | None,
     hyper_student: dict | None,
+    intent: str = "",
 ) -> dict[str, dict]:
+    _is_concept = intent == "learning_concept"
     rules = diag.get("triggered_rules", []) or []
     high_risk_count = sum(1 for r in rules if isinstance(r, dict) and r.get("severity") == "high")
 
-    if high_risk_count >= 2:
+    if high_risk_count >= 2 and not _is_concept:
         activations["structural_cause"]["score"] = max(activations["structural_cause"]["score"], 0.8)
         activations["structural_cause"]["activated"] = True
 
     if isinstance(hyper_student, dict) and hyper_student.get("ok"):
         cov = hyper_student.get("coverage_score", 10)
-        if isinstance(cov, (int, float)) and cov < 4:
+        if isinstance(cov, (int, float)) and cov < 4 and not _is_concept:
             activations["structural_cause"]["score"] = max(activations["structural_cause"]["score"], 0.75)
             activations["structural_cause"]["activated"] = True
 
     if rag_cases and any(isinstance(c, dict) and c.get("neo4j_enriched") for c in rag_cases):
-        activations["external_reference"]["score"] = max(activations["external_reference"]["score"], 0.6)
-        activations["external_reference"]["activated"] = True
+        if not _is_concept:
+            activations["external_reference"]["score"] = max(activations["external_reference"]["score"], 0.6)
+            activations["external_reference"]["activated"] = True
 
     entities = kg.get("entities", []) if isinstance(kg.get("entities"), list) else []
     entity_types = {str(e.get("type", "")) for e in entities if isinstance(e, dict)}
-    if "competitor" not in entity_types and len(rules) >= 2:
+    if "competitor" not in entity_types and len(rules) >= 2 and not _is_concept:
         activations["counter_intuitive"]["score"] = max(activations["counter_intuitive"]["score"], 0.7)
         activations["counter_intuitive"]["activated"] = True
 
     if any(w in str(diag.get("bottleneck", "")) for w in ("获客", "推广", "渠道", "留存", "付费")):
-        activations["strategy_directions"]["score"] = max(activations["strategy_directions"]["score"], 0.65)
-        activations["strategy_directions"]["activated"] = True
+        if not _is_concept:
+            activations["strategy_directions"]["score"] = max(activations["strategy_directions"]["score"], 0.65)
+            activations["strategy_directions"]["activated"] = True
 
     for dim, act in activations.items():
         if not ANALYSIS_DIMENSIONS[dim].get("required"):
@@ -2106,7 +2119,8 @@ def _classify(message: str, conversation_messages: list | None = None) -> dict:
                 "## 分类原则（按优先级排序）\n"
                 "1. **learning_concept**: 学生在问某个概念怎么理解、怎么做、有什么区别、某个方法论怎么用等。"
                 "即使消息中提到了'我的项目'，只要核心是在问概念/方法论而不是要求诊断项目，就选这个。"
-                "例: '什么是价值主张'、'TAM怎么算'、'有用和有商业价值的区别'、'MVP怎么做'、'怎么判断需求是否真实'\n"
+                "例: '什么是价值主张'、'TAM怎么算'、'有用和有商业价值的区别'、'MVP怎么做'、'怎么判断需求是否真实'、"
+                "'TAM到底怎么算，一到自己项目里就发虚'\n"
                 "2. **project_diagnosis**: 学生在描述一个具体项目（包含功能、用户、商业模式等多个方面的实质信息），希望获得综合诊断或评价。"
                 "例: '我们做了一个AI论文工具，功能包括...'、'帮我看看这个项目方案'\n"
                 "3. **business_model**: 学生在讨论具体项目的定价、收入来源、盈利方式等商业模式问题。\n"
@@ -2294,6 +2308,106 @@ def _default_kg() -> dict:
     }
 
 
+def _compute_kg_quality(entities: list[dict], relationships: list[dict], section_scores: dict, rubric_scores: list[dict] | None = None) -> dict:
+    """Compute Python-side quality metrics for KG extraction."""
+    import math
+    import re
+
+    # 1. Entity specificity score (0-10)
+    spec_scores = []
+    for e in entities:
+        if not isinstance(e, dict):
+            continue
+        label = str(e.get("label", ""))
+        s = 0.0
+        if len(label) >= 6:
+            s += 2.0
+        elif len(label) >= 3:
+            s += 1.0
+        if re.search(r'\d', label):
+            s += 2.5
+        if any(c.isupper() for c in label) or any('\u4e00' <= c <= '\u9fff' for c in label):
+            s += 1.5
+        if len(label) >= 2:
+            s += 1.0
+        spec_scores.append(min(10.0, s))
+    entity_specificity = round(sum(spec_scores) / max(1, len(spec_scores)), 2) if spec_scores else 0.0
+
+    # 2. Relationship density (0-1)
+    n_e = len(entities)
+    n_r = len(relationships)
+    relationship_density = round(n_r / max(1, n_e * (n_e - 1) / 2), 4) if n_e > 1 else 0.0
+
+    # 3. Dimension balance (Shannon entropy / max entropy, 0-1)
+    type_counts: dict[str, int] = {}
+    for e in entities:
+        if isinstance(e, dict):
+            t = str(e.get("type", "unknown"))
+            type_counts[t] = type_counts.get(t, 0) + 1
+    total = sum(type_counts.values())
+    if total > 0 and len(type_counts) > 1:
+        probs = [c / total for c in type_counts.values() if c > 0]
+        entropy = -sum(p * math.log2(p) for p in probs)
+        max_entropy = math.log2(len(type_counts))
+        dimension_balance = round(entropy / max(0.001, max_entropy), 4)
+    else:
+        dimension_balance = 0.0
+
+    # 4. Cross-validation index (Pearson correlation, -1 to 1)
+    KG_TO_RUBRIC = {
+        "stakeholder": "Problem Definition", "pain_point": "Problem Definition",
+        "evidence": "User Evidence Strength",
+        "solution": "Solution Feasibility", "technology": "Solution Feasibility",
+        "business_model": "Business Model Consistency",
+        "market": "Market & Competition", "competitor": "Market & Competition",
+        "innovation": "Innovation & Differentiation",
+        "team": "Team & Execution", "resource": "Team & Execution",
+    }
+    cross_validation_index = 0.0
+    if section_scores and rubric_scores:
+        rubric_map = {r["item"]: float(r.get("score", 0)) for r in rubric_scores if isinstance(r, dict) and r.get("item")}
+        pairs = []
+        for kg_dim, kg_score in section_scores.items():
+            rubric_dim = KG_TO_RUBRIC.get(kg_dim)
+            if rubric_dim and rubric_dim in rubric_map:
+                pairs.append((float(kg_score), rubric_map[rubric_dim]))
+        if len(pairs) >= 3:
+            xs, ys = zip(*pairs)
+            mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+            cov = sum((x - mx) * (y - my) for x, y in pairs)
+            sx = math.sqrt(sum((x - mx) ** 2 for x in xs))
+            sy = math.sqrt(sum((y - my) ** 2 for y in ys))
+            if sx > 0 and sy > 0:
+                cross_validation_index = round(cov / (sx * sy), 4)
+
+    # 5. Extraction confidence (0-10)
+    extraction_confidence = round(
+        0.3 * min(10, n_e / 2)
+        + 0.25 * min(10, n_r * 2)
+        + 0.25 * dimension_balance * 10
+        + 0.2 * entity_specificity,
+        2
+    )
+
+    return {
+        "entity_specificity": entity_specificity,
+        "relationship_density": relationship_density,
+        "dimension_balance": dimension_balance,
+        "cross_validation_index": cross_validation_index,
+        "extraction_confidence": extraction_confidence,
+        "entity_count": n_e,
+        "relationship_count": n_r,
+        "type_distribution": type_counts,
+        "formulas": {
+            "entity_specificity": "avg(label_length_score + numeric_bonus + proper_noun_bonus)",
+            "relationship_density": "R / (E*(E-1)/2)",
+            "dimension_balance": "H(type_distribution) / log2(num_types)",
+            "cross_validation_index": "Pearson(kg_section_scores, rubric_scores)",
+            "extraction_confidence": "0.3*entity + 0.25*rel + 0.25*balance + 0.2*specificity",
+        },
+    }
+
+
 def _fmt_ws(ws: dict) -> str:
     if not ws.get("searched") or not ws.get("results"):
         return ""
@@ -2304,6 +2418,110 @@ def _fmt_ws(ws: dict) -> str:
         url = r.get("url", "")
         parts.append(f"- {title}: {snippet}" + (f" | 链接: {url}" if url else ""))
     return "\n".join(parts)[:900]
+
+
+def _compute_standalone_quality_metrics(
+    dimensions_out: dict,
+    cross_links: list[dict],
+    template_matches: list[dict],
+    warnings: list[dict],
+    hub_entities: list[dict],
+    entities: list[dict],
+    rels: list[dict],
+) -> dict:
+    """Compute quality metrics for the standalone (no-Neo4j) hypergraph analysis."""
+    import math
+
+    DIMS = {
+        "stakeholder": "目标用户", "pain_point": "痛点问题",
+        "solution": "解决方案", "technology": "技术路线",
+        "market": "市场环境", "competitor": "竞品对手",
+        "resource": "关键资源", "business_model": "商业模式",
+        "team": "团队能力", "evidence": "验证证据",
+    }
+    total_dims = len(DIMS)
+    nodes = len(entities)
+    edges = len(rels)
+
+    # 1. Depth-weighted coverage (0-10)
+    dim_depths = {}
+    cross_dim_set = {cl.get("from_dim", "") for cl in cross_links} | {cl.get("to_dim", "") for cl in cross_links}
+    for dk, dv in dimensions_out.items():
+        dc = dv.get("count", 0) if isinstance(dv, dict) else 0
+        depth = 0 if dc == 0 else 1 if dc == 1 else 2 if dc <= 3 else 3
+        if dk in cross_dim_set and depth > 0:
+            depth = min(3, depth + 0.5)
+        dim_depths[dk] = depth
+    depth_weighted_coverage = round(sum(dim_depths.values()) / max(1, total_dims * 3) * 10, 2)
+
+    # 2. Graph density (0-1)
+    graph_density = round(2 * edges / max(1, nodes * (nodes - 1)), 4) if nodes > 1 else 0
+
+    # 3. Average node degree
+    avg_node_degree = round(2 * edges / max(1, nodes), 2)
+
+    # 4. Cross-dimension ratio (0-1)
+    cross_dimension_ratio = round(len(cross_links) / max(1, edges), 4) if edges > 0 else 0
+
+    # 5. Hub concentration (Gini coefficient, 0-1)
+    degrees = sorted([h.get("connections", 0) for h in hub_entities] if hub_entities else [])
+    if not degrees:
+        degrees = [0]
+    n_deg = len(degrees)
+    if n_deg <= 1 or sum(degrees) == 0:
+        hub_concentration = 0.0
+    else:
+        cum = sum((2 * (i + 1) - n_deg - 1) * degrees[i] for i in range(n_deg))
+        hub_concentration = round(cum / (n_deg * sum(degrees)), 4)
+
+    # 6. Template completion score (0-10)
+    weight_map = {"ideal": 3, "risk": 2, "neutral": 1}
+    total_weight = sum(weight_map.get(t.get("pattern_type", "neutral"), 1) for t in template_matches)
+    completed_weight = sum(weight_map.get(t.get("pattern_type", "neutral"), 1) for t in template_matches if t.get("status") == "complete")
+    template_completion_score = round(completed_weight / max(1, total_weight) * 10, 2)
+
+    # 7. Consistency health score (0-10)
+    consistency_health_score = round(max(0, 10 - len(warnings) / max(1, 10) * 10), 2)
+
+    # 8. Information entropy (0-1, normalized Shannon entropy)
+    dim_counts = [dv.get("count", 0) if isinstance(dv, dict) else 0 for dv in dimensions_out.values()]
+    total_ents = sum(dim_counts)
+    if total_ents > 0 and total_dims > 1:
+        proportions = [c / total_ents for c in dim_counts if c > 0]
+        entropy = -sum(p * math.log2(p) for p in proportions)
+        max_entropy = math.log2(total_dims)
+        information_entropy = round(entropy / max_entropy, 4) if max_entropy > 0 else 0
+    else:
+        information_entropy = 0
+
+    # 9. Family group balance (0-1)
+    family_group_balance = round(information_entropy * 0.8 + (template_completion_score / 10) * 0.2, 4)
+
+    formulas = {
+        "depth_weighted_coverage": "sum(dim_depth_i) / (total_dims × 3) × 10, depth_i ∈ {0,1,2,3} by entity count + cross-link bonus",
+        "graph_density": "2E / (V × (V-1)), V=nodes, E=edges",
+        "avg_node_degree": "2E / V",
+        "cross_dimension_ratio": "cross_dim_edges / total_edges",
+        "hub_concentration": "Gini(node_degrees), 0=uniform, 1=concentrated",
+        "template_completion_score": "Σ(complete_i × weight_i) / Σ(weight_i) × 10, ideal=3, risk=2, neutral=1",
+        "consistency_health_score": "10 - n_warnings / 10 × 10",
+        "information_entropy": "H(dim_proportions) / log₂(total_dims), Shannon normalized entropy",
+        "family_group_balance": "0.8 × entropy + 0.2 × template_score (simplified standalone)",
+    }
+
+    return {
+        "depth_weighted_coverage": depth_weighted_coverage,
+        "graph_density": graph_density,
+        "avg_node_degree": avg_node_degree,
+        "cross_dimension_ratio": cross_dimension_ratio,
+        "hub_concentration": hub_concentration,
+        "template_completion_score": template_completion_score,
+        "consistency_health_score": consistency_health_score,
+        "information_entropy": information_entropy,
+        "family_group_balance": family_group_balance,
+        "dim_depths": dim_depths,
+        "formulas": formulas,
+    }
 
 
 def _standalone_hypergraph_analysis(
@@ -2478,6 +2696,9 @@ def _standalone_hypergraph_analysis(
         "llm_insight": llm_insight,
         "template_matches": template_matches,
         "consistency_issues": consistency_issues,
+        "quality_metrics": _compute_standalone_quality_metrics(
+            dimensions, cross_links, template_matches, warnings, hub_entities, entities, relationships
+        ),
     }
 
 
@@ -2615,7 +2836,13 @@ def gather_context_node(state: WorkflowState) -> dict:
     from app.services.diagnosis_engine import run_diagnosis
 
     comp_type = state.get("competition_type", "")
-    diag_obj = run_diagnosis(input_text=msg, mode=mode, competition_type=comp_type)
+    struct_signals = state.get("structured_signals") or {}
+    diag_obj = run_diagnosis(
+        input_text=msg,
+        mode=mode,
+        competition_type=comp_type,
+        structured_signals=struct_signals,
+    )
     diag_data: dict = diag_obj.diagnosis
     next_task: dict = diag_obj.next_task
     cat = infer_category(msg)
@@ -2623,7 +2850,16 @@ def gather_context_node(state: WorkflowState) -> dict:
     rule_ids = [r.get("id", "") for r in rules if isinstance(r, dict)]
     top_rule = _top_triggered_rule(diag_data, msg)
     top_fallacy = str(top_rule.get("fallacy_label") or "")
-    preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])
+    # v2: merge rule-derived families + intent-derived + keyword-derived so all 77
+    # hyperedge families have retrieval paths instead of only top_rule's subset.
+    from app.services.diagnosis_engine import get_preferred_edge_families
+    preferred_edge_types = get_preferred_edge_families(
+        rule_ids=rule_ids,
+        intent=intent,
+        message=msg,
+    )
+    if not preferred_edge_types:
+        preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])
 
     # Cross-turn context reuse: collect case knowledge from earlier turns
     _history_case_ids: set[str] = set()
@@ -2939,6 +3175,43 @@ def gather_context_node(state: WorkflowState) -> dict:
         )
         if not kg or not kg.get("entities"):
             return {"kg_analysis": _default_kg()}
+        _rubric_data = state.get("diagnosis", {}).get("rubric") if isinstance(state.get("diagnosis"), dict) else None
+        kg["kg_quality"] = _compute_kg_quality(
+            kg.get("entities", []),
+            kg.get("relationships", []),
+            kg.get("section_scores", {}),
+            _rubric_data,
+        )
+        # ── 可追溯性：给每个实体 / 关系挂 source_span + rule 名 ──
+        # 即使没有 message_id，也至少记录命中原文位置 + 抽取规则，
+        # 教师端可以看到"这个实体是从学生原话哪一段推出来的"。
+        try:
+            _msg_raw = str(state.get("message") or "")
+            _lower = _msg_raw.lower()
+            for _ent in kg.get("entities", []) or []:
+                if not isinstance(_ent, dict):
+                    continue
+                _lbl = str(_ent.get("label") or "").strip()
+                if not _lbl:
+                    continue
+                _idx = _lower.find(_lbl.lower())
+                if _idx >= 0:
+                    _start = max(0, _idx - 12)
+                    _end = min(len(_msg_raw), _idx + len(_lbl) + 12)
+                    _ent.setdefault("source_span", {
+                        "quote": _msg_raw[_start:_end].replace("\n", " ")[:120],
+                        "offset": _idx,
+                        "length": len(_lbl),
+                    })
+                    _ent.setdefault("extraction_rule", "llm_entity_extraction")
+                else:
+                    # 未在原文中精确命中（可能是 LLM 归纳），标记为推断
+                    _ent.setdefault("extraction_rule", "llm_inferred")
+            for _rel in kg.get("relationships", []) or []:
+                if isinstance(_rel, dict):
+                    _rel.setdefault("extraction_rule", "llm_relation_extraction")
+        except Exception as _exc:
+            logger.info("kg source_span enrichment skipped: %s", _exc)
         return {"kg_analysis": kg}
 
     def _task_web(n_results: int = 3):
@@ -2955,10 +3228,14 @@ def gather_context_node(state: WorkflowState) -> dict:
                 category=cat, rule_ids=rule_ids,
                 preferred_edge_types=preferred_edge_types,
                 limit=12 if intent == "pressure_test" else 10,
+                diversity_cap=2,
             )
             _n_edges = len(h.get("edges", [])) if isinstance(h, dict) else 0
-            logger.info("hyper_teaching: ok=%s edges=%d cat=%s rules=%s",
-                        h.get("ok"), _n_edges, cat, rule_ids[:5])
+            _fam_dist = (h.get("matched_by") or {}).get("family_distribution", {}) if isinstance(h, dict) else {}
+            logger.info(
+                "hyper_teaching: ok=%s edges=%d families=%d cat=%s rules=%s",
+                h.get("ok"), _n_edges, len(_fam_dist), cat, rule_ids[:5],
+            )
             return {"hypergraph_insight": h}
         except Exception as exc:
             logger.warning("Hypergraph insight failed: %s", exc)
@@ -3391,6 +3668,7 @@ def gather_context_node(state: WorkflowState) -> dict:
             dim_activations, diag_data, kg,
             collected.get("rag_cases"),
             hyper_student if isinstance(hyper_student, dict) else None,
+            intent=state.get("intent", ""),
         )
 
     # V2: update exploration state with KG entities
@@ -3407,7 +3685,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     case_transfer_insight = ""
     _insight_tasks: list[tuple[str, Callable]] = []
     _intent = state.get("intent", "")
-    _skip_insight = _intent in ("general_chat", "out_of_scope", "learning_concept")
+    _skip_insight = _intent in ("general_chat", "out_of_scope")
     if not _skip_insight:
         ws_result = collected.get("web_search_result", {})
         if ws_result.get("searched"):
@@ -3801,6 +4079,8 @@ def _has_explicit_project_context(text: str) -> bool:
         sig in content
         for sig in (
             "我们做", "我们的项目", "我们项目", "项目叫", "项目是",
+            "自己项目", "自己的项目", "我的项目", "我项目", "项目里",
+            "做的项目", "在做的", "正在做",
             "目标用户", "核心功能", "推广", "收费", "竞品", "路演",
             "答辩", "团队", "产品", "场景", "痛点", "解决方案",
         )
@@ -3825,7 +4105,9 @@ def _is_generic_learning_question(text: str) -> bool:
     )
     project_signals = (
         "我们做", "我们的项目", "我们项目", "项目叫", "项目是",
+        "自己项目", "自己的项目", "我的项目", "我项目", "项目里",
         "目标用户", "核心功能", "推广", "收费", "竞品", "路演", "答辩",
+        "做的项目", "在做的", "正在做",
     )
     return (
         any(sig in content for sig in explain_signals)
@@ -3923,7 +4205,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         "competition": "你现在还需要帮学生理解这个概念在竞赛评审中的权重和评委判断标准。",
         "learning": "你现在还需要帮学生理解这个概念在项目实操中如何验证，做完后该看什么信号判断自己学会了。",
     }.get(mode, "")
-    tutor_comp_hint = _get_competition_hint(state.get("competition_type", ""), "tutor")
+    tutor_comp_hint = _get_competition_hint(state.get("competition_type", ""), "tutor", state.get("category", ""))
     if tutor_comp_hint:
         _tutor_mode_hint += f"\n{tutor_comp_hint}"
 
@@ -4201,12 +4483,38 @@ _COMPETITION_AGENT_HINTS: dict[str, dict[str, str]] = {
 }
 
 
-def _get_competition_hint(comp_type: str, agent_role: str) -> str:
-    """Get competition-type specific hint for a given agent role."""
+# 公益语境附加 hint：当 competition_type=internet_plus（创业型）且 category 被识别为
+# 「社会公益」时，在对应 agent 的主 hint 之后追加这段，提醒 agent 关注社会影响维度。
+_PUBLIC_GOOD_ADDITIONAL_HINT: dict[str, str] = {
+    "coach": "同时关注社会效益：受益人覆盖规模、项目可持续性、公益与商业的边界、社会使命是否清晰。",
+    "analyst": "除商业指标外，还要评估社会影响（SROI/受益人数/问题缓解度/长期效果追踪）。",
+    "advisor": "如涉及公益赛道红区，请重点考察「受益人证据」「可持续资金来源」「问题解决的可度量性」。",
+    "grader": "评分时对『社会影响』『受益人覆盖』『可持续性』给予 10-15% 的附加权重；避免把『商业闭环弱』简单等同于扣分。",
+    "planner": "备赛时准备公益案例证据、受益人访谈、社会价值量化数据（SROI / 改变前后对比 / 受益人原话）。",
+    "tutor": "讲解时结合 B-Corp、社会企业、SDG、影响力投资、SROI、理论变革（Theory of Change）等概念。",
+}
+
+
+def _get_competition_hint(comp_type: str, agent_role: str, category: str = "") -> str:
+    """Get competition-type specific hint for a given agent role.
+
+    若 comp_type=internet_plus 且 category 命中「社会公益」，在主 hint 后追加公益语境提示。
+    """
     if not comp_type:
         return ""
     hints = _COMPETITION_AGENT_HINTS.get(comp_type, {})
-    return hints.get(agent_role, "")
+    base_hint = hints.get(agent_role, "")
+    if (
+        comp_type == "internet_plus"
+        and category
+        and "公益" in category
+        and agent_role in _PUBLIC_GOOD_ADDITIONAL_HINT
+    ):
+        addendum = _PUBLIC_GOOD_ADDITIONAL_HINT[agent_role]
+        if base_hint:
+            return base_hint + "\n【公益语境补充】" + addendum
+        return "【公益语境】" + addendum
+    return base_hint
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -4222,7 +4530,22 @@ _DIM_PROMPT_HINTS: dict[str, str] = {
     "teacher_criteria": "从评审者/老师的视角，对项目当前维度进行评分和诊断：指出得分亮点和失分风险，给出改进优先级和得分区间参考。",
     "external_reference": "引用真实竞品、行业数据或案例来做对比分析。",
     "strategy_directions": "给出2-3条可选策略方向或打法，不要只有一种答案。",
-    "action_plan": "拆出本周最该做的1-3件可执行的事和验收标准。",
+    "action_plan": (
+        "为学生制定紧扣其具体项目的下一步行动方案，不能给通用建议。\n"
+        "**必须**引用项目具体信息（项目名/功能/用户群/痛点等）。\n\n"
+        "严格使用以下 Markdown 格式输出：\n"
+        "## 本周最优先任务\n"
+        "**标题**：（一句话，必须包含项目具体名称或核心功能）\n"
+        "**为什么现在做这个**：（基于诊断发现的具体瓶颈）\n"
+        "**具体步骤**：\n"
+        "1. （具体到可执行，引用项目里的真实元素）\n"
+        "2. ...\n"
+        "3. ...\n"
+        "**验收标准**：\n"
+        "- （可验证的具体产出物，不能是'完善方案'这类空话）\n\n"
+        "## 暂不处理（说明原因）\n"
+        "- ...\n"
+    ),
     "probing_questions": "给出2-4个苏格拉底式追问，帮学生深入思考。",
 }
 
@@ -4234,17 +4557,49 @@ def _fmt_hyper_for_dim(dim: str, hyper_insight: dict | None) -> str:
     edges = hyper_insight.get("edges") or []
     if not edges:
         return ""
+    # v2: 关键词对齐 77 家族的中文 family_label，让 10 个维度都能匹配到多样家族，
+    # 而不是只能命中 Risk_Pattern / Value_Loop 两种。每个维度覆盖 3-5 个主题家族。
     _dim_keywords: dict[str, list[str]] = {
-        "status_judgment": ["阶段", "成熟度", "完整度", "覆盖"],
-        "core_bottleneck": ["瓶颈", "风险", "缺陷", "不足", "薄弱"],
-        "structural_cause": ["结构", "根因", "深层", "系统性"],
-        "counter_intuitive": ["盲区", "假设", "反例", "反直觉", "乐观"],
-        "method_bridge": ["方法", "框架", "模型", "概念", "理论"],
-        "teacher_criteria": ["评分", "评委", "评审", "标准", "得分"],
-        "external_reference": ["案例", "竞品", "行业", "数据", "对比"],
-        "strategy_directions": ["策略", "方向", "路径", "选择", "打法"],
-        "action_plan": ["行动", "执行", "计划", "步骤", "验证"],
-        "probing_questions": ["追问", "思考", "深入", "验证"],
+        "status_judgment": [
+            "阶段", "成熟度", "完整度", "覆盖", "里程碑", "技术成熟",
+            "原型", "MVP", "可行性", "融资阶段",
+        ],
+        "core_bottleneck": [
+            "瓶颈", "风险", "缺陷", "不足", "薄弱", "规模化", "技术债",
+            "执行断裂", "单点", "团队能力", "创始人", "规模瓶颈",
+        ],
+        "structural_cause": [
+            "结构", "根因", "深层", "系统性", "成本结构", "生态", "依赖",
+            "闭环", "供应链", "合作网络", "利益方冲突", "本体",
+        ],
+        "counter_intuitive": [
+            "盲区", "假设", "反例", "反直觉", "乐观", "替代", "迁移",
+            "转型信号", "切换", "假设堆叠", "场景分析",
+        ],
+        "method_bridge": [
+            "方法", "框架", "模型", "概念", "理论", "本体", "设计思维",
+            "产学研", "学术", "知识产权", "研究应用", "创意",
+        ],
+        "teacher_criteria": [
+            "评分", "评委", "评审", "标准", "得分", "规则张力", "一致性",
+            "指标", "评分项", "跨维度", "叙事",
+        ],
+        "external_reference": [
+            "案例", "竞品", "行业", "数据", "对比", "市场", "替代",
+            "竞争", "合作", "生态", "社会价值", "ESG", "可持续",
+        ],
+        "strategy_directions": [
+            "策略", "方向", "路径", "选择", "打法", "定价", "护城河",
+            "窗口", "先发", "创新", "细分", "转型", "数据飞轮", "网络效应",
+        ],
+        "action_plan": [
+            "行动", "执行", "计划", "步骤", "验证", "里程碑", "架构",
+            "接口", "反馈", "原型", "渠道转化", "留存", "用户教育",
+        ],
+        "probing_questions": [
+            "追问", "思考", "深入", "验证", "假设", "证据", "信任",
+            "采纳", "共情", "洞察", "问题发现", "需求优先级",
+        ],
     }
     keywords = _dim_keywords.get(dim, [])
     matched = []
@@ -4301,13 +4656,29 @@ def _build_dim_context(dim: str, state: dict) -> str:
             parts.append(graph_ctx_str)
 
     # ── 维度专项上下文 ──
-    if dim in ("teacher_criteria",):
+    if dim in ("teacher_criteria", "action_plan"):
         rules = diag.get("triggered_rules", []) or []
         if rules:
             rule_summary = "; ".join(
                 f"{r.get('name', '')}({r.get('severity', '')})" for r in rules[:5] if isinstance(r, dict)
             )
             parts.append(f"触发规则: {rule_summary}")
+
+    if dim == "action_plan":
+        entities = kg.get("entities", []) or []
+        if entities:
+            ent_lines = []
+            for e in entities[:8]:
+                if isinstance(e, dict) and e.get("label"):
+                    ent_lines.append(f"{e.get('type', '?')}: {e['label']}")
+            if ent_lines:
+                parts.append(f"项目已知要素:\n" + "\n".join(ent_lines))
+        rubric = diag.get("rubric", [])
+        if rubric:
+            low_dims = [r for r in rubric if isinstance(r, dict) and r.get("score", 10) < 5.5]
+            if low_dims:
+                low_summary = "; ".join(f"{r['item']}({r['score']}/10)" for r in low_dims[:3])
+                parts.append(f"低分维度（需优先补强）: {low_summary}")
 
     if dim in ("external_reference", "counter_intuitive"):
         web_facts = state.get("web_facts", []) or state.get("web_search_result", {}).get("facts", [])
@@ -4401,7 +4772,7 @@ def _coach_analyze(state: dict) -> dict:
         "learning": "当前是项目教练模式，侧重识别当前阶段最关键的瓶颈，用启发式追问推动思考。",
     }.get(mode, "")
     comp_type = state.get("competition_type", "")
-    coach_comp_hint = _get_competition_hint(comp_type, "coach")
+    coach_comp_hint = _get_competition_hint(comp_type, "coach", state.get("category", ""))
     if coach_comp_hint:
         mode_hint += f"\n{coach_comp_hint}"
 
@@ -4778,7 +5149,7 @@ def _analyst_analyze(state: dict) -> dict:
         "coursework": "你同时兼顾教学视角：解释每个风险为什么算风险，帮学生建立风险判断的思维框架。",
         "learning": "你同时兼顾推进视角：按紧迫度排序风险，指出最小可行修复路径。",
     }.get(mode, "")
-    analyst_comp_hint = _get_competition_hint(state.get("competition_type", ""), "analyst")
+    analyst_comp_hint = _get_competition_hint(state.get("competition_type", ""), "analyst", state.get("category", ""))
     if analyst_comp_hint:
         _analyst_mode_hint += f"\n{analyst_comp_hint}"
 
@@ -5013,7 +5384,7 @@ def _grader_analyze(state: dict) -> dict:
     advisor_out = state.get("advisor_output", {})
     hs = state.get("hypergraph_student", {})
     hyper_grader_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "grader", incremental_stats=state.get("incremental_stats"))
-    grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader")
+    grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader", state.get("category", ""))
 
     # Fallback: if current turn has no rubric, pull from conversation history
     if (not rubric or overall is None):
@@ -5051,10 +5422,51 @@ def _grader_analyze(state: dict) -> dict:
             "reason": str(r.get("reason", "")),
         })
     rows.sort(key=lambda item: item["score"])
-    score_text = "\n".join(f"{r['status']} {r['item']}: {r['score']}/10" for r in rows)
+
+    # Build score text with reason if available
+    score_lines = []
+    for r in rows:
+        line = f"{r['status']} {r['item']}: {r['score']}/10"
+        if r["reason"]:
+            line += f"（{r['reason']}）"
+        score_lines.append(line)
+    score_text = "\n".join(score_lines)
+
     low_rows = rows[:2]
     score_gap = max(0.0, round(8.0 - float(overall or 0), 1))
     advisor_summary = _truncate_text(str(advisor_out.get("analysis") or ""), 360)
+
+    # Retrieve previous turn scores for delta comparison
+    prev_rubric_map: dict[str, float] = {}
+    prev_overall: float | None = None
+    for _hm in reversed(state.get("conversation_messages", []) or []):
+        _tr = _hm.get("agent_trace") if isinstance(_hm, dict) else None
+        if not isinstance(_tr, dict):
+            continue
+        _pd = _tr.get("diagnosis") or {}
+        if _pd.get("rubric") and _pd.get("overall_score") is not None:
+            prev_overall = float(_pd["overall_score"])
+            for _pr in _pd["rubric"]:
+                if isinstance(_pr, dict) and _pr.get("item"):
+                    prev_rubric_map[_pr["item"]] = float(_pr.get("score", 0))
+            break
+
+    delta_text = ""
+    if prev_rubric_map:
+        delta_lines = []
+        for r in rows:
+            prev_s = prev_rubric_map.get(r["item"])
+            if prev_s is not None:
+                diff = round(r["score"] - prev_s, 2)
+                if abs(diff) >= 0.1:
+                    arrow = "↑" if diff > 0 else "↓"
+                    delta_lines.append(f"{r['item']}: {prev_s}→{r['score']}({arrow}{abs(diff)})")
+        if delta_lines:
+            overall_diff = round(float(overall or 0) - (prev_overall or 0), 2)
+            delta_text = (
+                f"与上一轮对比（总分 {prev_overall}→{overall}，{'+' if overall_diff >= 0 else ''}{overall_diff}）:\n"
+                + "\n".join(delta_lines)
+            )
 
     graph_hits_ctx = _fmt_graph_hits_ctx(state.get("neo4j_graph_hits") or [])
 
@@ -5064,21 +5476,23 @@ def _grader_analyze(state: dict) -> dict:
             + (f"{grader_comp_hint}\n" if grader_comp_hint else "")
             + "你的评估必须：\n"
             "1. 用评审口吻先给出当前分数区间和总体判断\n"
-            "2. 指出最伤分的1-2个维度，解释为什么这些地方会拖低整体分数\n"
-            "3. 给出可快速补分的优先项，但不要展开成详细执行步骤或任务清单\n"
-            "4. 如果同轮已经有竞赛顾问意见，不要重复答辩建议或PPT建议；你只负责分数、扣分机制、补分优先级\n"
-            "5. 评分要考虑项目阶段：初步规划但逻辑基本成立的项目，不应被写成接近零分或一无是处\n"
-            "6. 如果有跨项目图谱启发，可引用类似项目的做法作为对比参照\n"
-            "7. 输出尽量像一份简明评审摘要，而不是重复项目全量分析\n"
-            "建议结构：当前分数区间 / 最伤分项 / 快速补分项。"
+            "2. **逐维度给出评分依据**：每个维度为什么得这个分（引用学生提供了/缺少了什么具体证据）\n"
+            "3. 指出最伤分的1-2个维度，解释为什么这些地方会拖低整体分数\n"
+            "4. 给出可快速补分的优先项，但不要展开成详细执行步骤或任务清单\n"
+            "5. 如果有上一轮分数对比，必须说明**哪些维度进步了、哪些退步了、为什么**\n"
+            "6. 评分要考虑项目阶段：初步规划但逻辑基本成立的项目，不应被写成接近零分或一无是处\n"
+            "7. 如果有跨项目图谱启发，可引用类似项目的做法作为对比参照\n"
+            "8. 输出尽量像一份简明评审摘要，而不是重复项目全量分析\n"
+            "建议结构：总体判断 / 逐维度依据 / 进退步分析（如有） / 快速补分项。"
         ),
         user_prompt=(
             f"学生本轮提问: {msg[:600]}\n\n"
             + (f"对话上下文:\n{conv_ctx}\n\n" if conv_ctx else "")
-            + f"Rubric评分:\n{score_text}\n\n"
+            + f"Rubric评分（含依据）:\n{score_text}\n\n"
             + f"总分: {overall}/10\n"
             + f"距离优秀(8/10)还差: {score_gap}\n"
             + (("最低分维度: " + ", ".join("{}({}/10)".format(r["item"], r["score"]) for r in low_rows) + "\n") if low_rows else "")
+            + (f"\n与上一轮的变化:\n{delta_text}\n\n" if delta_text else "")
             + f"KG维度评分: {sec_scores}\n"
             + (f"超图评分信号: {hyper_grader_ctx}\n" if hyper_grader_ctx else "")
             + (f"同轮竞赛顾问摘要: {advisor_summary}\n" if advisor_summary else "")
@@ -5106,7 +5520,7 @@ def _planner_analyze(state: dict) -> dict:
 
     hyper_insight = state.get("hypergraph_insight", {})
     hs_missing_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "planner", incremental_stats=state.get("incremental_stats"))
-    planner_comp_hint = _get_competition_hint(state.get("competition_type", ""), "planner")
+    planner_comp_hint = _get_competition_hint(state.get("competition_type", ""), "planner", state.get("category", ""))
 
     neo4j_planner_ctx = ""
     if _graph_service and kg.get("entities"):
@@ -5370,38 +5784,120 @@ def _decide_agents(state: WorkflowState) -> tuple[list[str], str]:
     return ordered, reasoning
 
 
+def _merge_next_task(base: dict | None, override: dict | None) -> dict:
+    """浅合并 next_task：保留 diagnosis 基础任务（template_guideline / acceptance_criteria），
+    仅在 override 有值时覆盖；并把 override 的 steps 映射为 template_guideline。
+
+    这样 planner 生成的具体步骤会作为 template_guideline 展示给学生/老师看，
+    避免老逻辑里 planner 直接把整个 next_task 替换掉、丢失诊断兜底的模板指引。
+    """
+    if not isinstance(override, dict) or not override:
+        return dict(base or {})
+    merged = dict(base or {})
+    for k in ("title", "description", "source"):
+        val = override.get(k)
+        if isinstance(val, str) and val.strip():
+            merged[k] = val
+    # steps → template_guideline
+    o_steps = override.get("steps")
+    if isinstance(o_steps, list) and o_steps:
+        merged["template_guideline"] = [str(s).strip() for s in o_steps if str(s).strip()][:6]
+    elif isinstance(override.get("template_guideline"), list) and override["template_guideline"]:
+        merged["template_guideline"] = [str(s).strip() for s in override["template_guideline"] if str(s).strip()][:6]
+    # acceptance_criteria
+    o_ac = override.get("acceptance_criteria")
+    if isinstance(o_ac, list) and o_ac:
+        merged["acceptance_criteria"] = [str(s).strip() for s in o_ac if str(s).strip()][:6]
+    # deferred
+    if isinstance(override.get("deferred"), list):
+        merged["deferred"] = [str(s).strip() for s in override["deferred"] if str(s).strip()][:5]
+    # merge rationale reasoning_steps if both present
+    base_rat = merged.get("rationale") if isinstance(merged.get("rationale"), dict) else None
+    if base_rat and (o_steps or override.get("title")):
+        new_steps = list(base_rat.get("reasoning_steps") or [])
+        if override.get("title"):
+            new_steps.append({
+                "kind": "evidence",
+                "label": f"行动规划智能体进一步具象化 → {override.get('title', '')}",
+                "detail": (override.get("description") or "")[:120],
+                "agent_name": "行动规划师 Planner",
+            })
+        for step in (o_steps or [])[:4]:
+            new_steps.append({
+                "kind": "evidence",
+                "label": str(step)[:120],
+                "agent_name": "行动规划师 Planner",
+                "severity": "info",
+            })
+        base_rat["reasoning_steps"] = new_steps
+        base_rat["value"] = merged.get("title", base_rat.get("value", ""))
+        merged["rationale"] = base_rat
+    return merged
+
+
 def _extract_planner_next_task(dim_results: dict[str, dict]) -> dict | None:
-    """If action_plan dimension ran, parse its output into a concise next_task dict."""
+    """Parse structured action_plan output into a next_task dict."""
+    import re
     ap = dim_results.get("action_plan")
     if not ap or not ap.get("value"):
         return None
     text = str(ap["value"]).strip()
     if len(text) < 10:
         return None
+
+    def _extract_field(pattern: str, fallback: str = "") -> str:
+        m = re.search(pattern, text, re.DOTALL)
+        return m.group(1).strip() if m else fallback
+
+    title = _extract_field(r"\*\*标题\*\*[：:]\s*(.+?)(?:\n|$)")
+    why = _extract_field(r"\*\*为什么现在做这个\*\*[：:]\s*(.+?)(?:\n\*\*|$)")
+    steps_block = _extract_field(r"\*\*具体步骤\*\*[：:]\s*\n((?:\d+\..+\n?)+)")
+    criteria_block = _extract_field(r"\*\*验收标准\*\*[：:]\s*\n((?:[-•].+\n?)+)")
+    deferred_block = _extract_field(r"##\s*暂不处理[^\n]*\n((?:[-•].+\n?)+)")
+
+    steps = [ln.lstrip("0123456789.、） ").strip() for ln in steps_block.split("\n") if ln.strip()] if steps_block else []
+    criteria = [ln.lstrip("-•· ").strip() for ln in criteria_block.split("\n") if ln.strip()] if criteria_block else []
+    deferred = [ln.lstrip("-•· ").strip() for ln in deferred_block.split("\n") if ln.strip()] if deferred_block else []
+
+    if title:
+        if len(title) > 60:
+            title = title[:57] + "…"
+        desc = why or ("；".join(steps[:2]) if steps else "")
+        if len(desc) > 200:
+            desc = desc[:197] + "…"
+        return {
+            "title": title,
+            "description": desc,
+            "steps": steps[:5],
+            "acceptance_criteria": criteria[:4],
+            "deferred": deferred[:3],
+            "source": "planner_agent",
+        }
+
+    # Fallback: legacy line-splitting
     lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
-    title = lines[0][:60] if lines else "当前最优先行动"
+    fb_title = lines[0][:60] if lines else "当前最优先行动"
     for prefix in ("1.", "1、", "-", "•", "第一", "首先", "**", "##"):
-        if title.startswith(prefix):
-            title = title[len(prefix):].strip()
+        if fb_title.startswith(prefix):
+            fb_title = fb_title[len(prefix):].strip()
             break
-    if len(title) > 50:
-        title = title[:47] + "…"
-    # Extract short actionable items (not the full analysis text)
+    if len(fb_title) > 50:
+        fb_title = fb_title[:47] + "…"
     action_lines = []
-    criteria = []
+    fb_criteria = []
     for ln in lines[1:]:
         stripped = ln.lstrip("-•·1234567890.、） ")
         if any(kw in ln for kw in ("验收", "标准", "完成标志", "达成条件")):
-            criteria.append(stripped[:80])
+            fb_criteria.append(stripped[:80])
         elif stripped and len(stripped) > 5:
             action_lines.append(stripped[:80])
-    desc = "；".join(action_lines[:3]) if action_lines else lines[1][:120] if len(lines) > 1 else title
+    desc = "；".join(action_lines[:3]) if action_lines else lines[1][:120] if len(lines) > 1 else fb_title
     if len(desc) > 150:
         desc = desc[:147] + "…"
     return {
-        "title": title,
+        "title": fb_title,
         "description": desc,
-        "acceptance_criteria": criteria[:3],
+        "acceptance_criteria": fb_criteria[:3],
         "source": "planner_agent",
     }
 
@@ -5531,7 +6027,9 @@ def run_role_agents_node(state: WorkflowState) -> dict:
 
         exploration_phase = (state.get("exploration_state") or {}).get("phase")
         _pa_is_first = not state.get("conversation_messages")
-        if _pa_is_first or exploration_phase == "direction":
+        if intent == "learning_concept" and "method_bridge" in effective_dims:
+            reply_strategy = "teach_concept"
+        elif _pa_is_first or exploration_phase == "direction":
             reply_strategy = "progressive"
         elif exploration_phase == "convergence":
             reply_strategy = "deep_dive"
@@ -5555,7 +6053,7 @@ def run_role_agents_node(state: WorkflowState) -> dict:
         result_a.update(agent_outputs)
         _planner_next = _extract_planner_next_task(dim_results)
         if _planner_next:
-            result_a["next_task"] = _planner_next
+            result_a["next_task"] = _merge_next_task(state.get("next_task"), _planner_next)
         return result_a
 
     # ── Path B: Many dimensions (3+) → per-dim parallel LLM calls ──
@@ -5685,7 +6183,7 @@ def run_role_agents_node(state: WorkflowState) -> dict:
     result_b.update(agent_outputs)
     _planner_next = _extract_planner_next_task(dim_results)
     if _planner_next:
-        result_b["next_task"] = _planner_next
+        result_b["next_task"] = _merge_next_task(state.get("next_task"), _planner_next)
     return result_b
 
     # (V2 legacy code removed — V3 dim-driven paths above handle all cases)
@@ -6231,6 +6729,7 @@ def run_workflow(
     conversation_messages: list | None = None,
     teacher_feedback_context: str = "",
     competition_type: str = "",
+    structured_signals: dict | None = None,
 ) -> dict[str, Any]:
     initial: WorkflowState = {
         "message": message,
@@ -6240,6 +6739,7 @@ def run_workflow(
         "history_context": history_context,
         "conversation_messages": conversation_messages or [],
         "teacher_feedback_context": teacher_feedback_context,
+        "structured_signals": structured_signals or {},
     }
     return workflow.invoke(initial)
 
@@ -6252,6 +6752,7 @@ def run_workflow_pre_orchestrate(
     conversation_messages: list | None = None,
     teacher_feedback_context: str = "",
     competition_type: str = "",
+    structured_signals: dict | None = None,
 ) -> dict[str, Any]:
     """Run router + gather + agents but NOT orchestrator. Returns state for streaming."""
     initial: WorkflowState = {
@@ -6262,6 +6763,7 @@ def run_workflow_pre_orchestrate(
         "history_context": history_context,
         "conversation_messages": conversation_messages or [],
         "teacher_feedback_context": teacher_feedback_context,
+        "structured_signals": structured_signals or {},
     }
     state = dict(initial)
     state.update(router_agent(state))

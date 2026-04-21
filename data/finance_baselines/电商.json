@@ -1,0 +1,26 @@
+{
+  "industry": "电商",
+  "baseline": {
+    "cac_range": [
+      40,
+      200
+    ],
+    "monthly_price_range": [
+      50,
+      300
+    ],
+    "monthly_retention": [
+      0.3,
+      0.7
+    ],
+    "gross_margin": [
+      0.15,
+      0.4
+    ],
+    "avg_user_lifetime_months": 6,
+    "note": "电商以复购频次为核心，毛利率普遍较薄"
+  },
+  "source": "seed",
+  "updated_at": "2026-04-18T12:48:34+00:00",
+  "evidence": []
+}

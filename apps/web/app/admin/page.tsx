@@ -2437,16 +2437,30 @@ export default function AdminPage() {
                       <h3>高风险项目清单</h3>
                       <div className="admin-table">
                         <div className="admin-table-header">
-                          <span>项目ID</span><span>项目名</span><span>类别</span><span>风险数</span>
+                          <span>项目编号</span><span>项目名</span><span>类别</span><span>风险数</span>
                         </div>
-                        {dashboard.high_risk_projects.slice(0, 10).map((p: any) => (
-                          <div key={p.project_id} className="admin-table-row">
-                            <span className="admin-cell-primary">{p.project_id}</span>
-                            <span>{p.project_name || "—"}</span>
-                            <span>{p.category || "—"}</span>
-                            <span><span className="admin-risk-count">{p.risk_count}</span></span>
-                          </div>
-                        ))}
+                        {dashboard.high_risk_projects.slice(0, 10).map((p: any) => {
+                          const lid = String(p.logical_project_id || "");
+                          const isStd = /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+                          return (
+                            <div key={p.project_id} className="admin-table-row">
+                              <span className="admin-cell-primary">
+                                {isStd ? (
+                                  <code className="admin-pid-std" title="规范项目编号">{lid}</code>
+                                ) : lid ? (
+                                  <code className="admin-pid-legacy" title={`历史会话：${lid}`}>#{lid.slice(0, 8)}</code>
+                                ) : (
+                                  <code className="admin-pid-legacy" title={`物理项目ID：${p.project_id}`}>
+                                    {p.project_id?.startsWith("project-") ? `#${p.project_id.slice(8, 16)}` : p.project_id}
+                                  </code>
+                                )}
+                              </span>
+                              <span>{p.project_name || "—"}</span>
+                              <span>{p.category || "—"}</span>
+                              <span><span className="admin-risk-count">{p.risk_count}</span></span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

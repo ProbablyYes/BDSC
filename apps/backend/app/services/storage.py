@@ -1,5 +1,7 @@
 import json
+import logging
 import secrets
+import shutil
 import string
 from hashlib import pbkdf2_hmac
 from datetime import datetime, timedelta, timezone
@@ -7,11 +9,49 @@ from pathlib import Path
 from uuid import uuid4
 
 
+logger = logging.getLogger(__name__)
+
+
 BJ_TZ = timezone(timedelta(hours=8))
 
 
 def _now_iso() -> str:
     return datetime.now(BJ_TZ).isoformat()
+
+
+def _safe_read_json(path: Path, *, default, label: str = ""):
+    """
+    安全读取 JSON。
+    - 文件不存在 → 返回 default
+    - 文件为空 → 返回 default
+    - 解析失败 → 备份坏文件到 <name>.broken-<ts>.json 并抛出 RuntimeError，
+      这样调用方（登录 / 列表接口）会返回 500 明确报错，而不是假装里面没数据
+      导致"账号都登不上却无任何提示"的隐匿故障。
+    """
+    try:
+        if not path.exists():
+            return default
+        raw = path.read_text(encoding="utf-8").strip()
+        if not raw:
+            return default
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        backup = path.with_name(f"{path.name}.broken-{int(datetime.now().timestamp())}.json")
+        try:
+            shutil.copy2(path, backup)
+        except Exception:  # noqa: BLE001
+            pass
+        logger.error(
+            "[storage] JSON 损坏: %s (label=%s) 已备份到 %s；错误：%s",
+            path, label or path.name, backup, exc,
+        )
+        raise RuntimeError(
+            f"持久化文件损坏：{path.name}（label={label or path.name}）。"
+            f"原文件已备份为 {backup.name}，请人工检查后再启动。"
+        ) from exc
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("[storage] 读 %s 出错: %s", path, exc)
+        raise
 
 
 class JsonStorage:
@@ -35,6 +75,7 @@ class JsonStorage:
                 "teacher_feedback_files": [],
                 "teacher_document_edits": [],
                 "video_analyses": [],
+                "business_plans": [],
             }
         data = json.loads(target.read_text(encoding="utf-8"))
         # new确保新增字段存在
@@ -50,6 +91,8 @@ class JsonStorage:
             data["teacher_document_edits"] = []
         if "video_analyses" not in data:
             data["video_analyses"] = []
+        if "business_plans" not in data:
+            data["business_plans"] = []
         return data
 
     def save_project(self, project_id: str, payload: dict) -> None:
@@ -172,6 +215,35 @@ class JsonStorage:
             except Exception:  # noqa: BLE001
                 continue
         return projects
+
+    def upsert_business_plan_meta(self, project_id: str, plan_meta: dict) -> dict:
+        data = self.load_project(project_id)
+        items = data.setdefault("business_plans", [])
+        plan_id = str(plan_meta.get("plan_id") or uuid4())
+        target_idx = -1
+        for idx, item in enumerate(items):
+            if item.get("plan_id") == plan_id:
+                target_idx = idx
+                break
+        if target_idx >= 0:
+            existing = items[target_idx]
+            items[target_idx] = {
+                **existing,
+                **plan_meta,
+                "plan_id": plan_id,
+                "updated_at": _now_iso(),
+            }
+            saved = items[target_idx]
+        else:
+            saved = {
+                **plan_meta,
+                "plan_id": plan_id,
+                "created_at": _now_iso(),
+                "updated_at": _now_iso(),
+            }
+            items.append(saved)
+        self.save_project(project_id, data)
+        return saved
 
 
 class ConversationStorage:
@@ -299,10 +371,8 @@ class UserStorage:
             self.target.write_text("[]", encoding="utf-8")
 
     def _load(self) -> list[dict]:
-        try:
-            return json.loads(self.target.read_text(encoding="utf-8"))
-        except Exception:  # noqa: BLE001
-            return []
+        data = _safe_read_json(self.target, default=[], label="users.json")
+        return list(data) if isinstance(data, list) else []
 
     def _save(self, users: list[dict]) -> None:
         self.target.write_text(json.dumps(users, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -325,6 +395,7 @@ class UserStorage:
             "created_at": user.get("created_at"),
             "status": user.get("status", "active"),
             "last_login": user.get("last_login", ""),
+            "project_serial_counter": int(user.get("project_serial_counter", 0) or 0),
         }
 
     def get_by_id(self, user_id: str) -> dict | None:
@@ -362,12 +433,16 @@ class UserStorage:
 
         salt, password_hash = self._hash_password(str(payload.get("password", "")))
         now = _now_iso()
+        raw_sid = str(payload.get("student_id", "")).strip() or None
+        if raw_sid:
+            if any(str(u.get("student_id", "")).strip() == raw_sid for u in users):
+                raise ValueError("学号已被占用")
         user = {
             "user_id": str(uuid4()),
             "role": payload.get("role", "student"),
             "display_name": str(payload.get("display_name", "")).strip() or email.split("@")[0],
             "email": email,
-            "student_id": str(payload.get("student_id", "")).strip() or None,
+            "student_id": raw_sid,
             "class_id": str(payload.get("class_id", "")).strip() or None,
             "cohort_id": str(payload.get("cohort_id", "")).strip() or None,
             "bio": str(payload.get("bio", "")).strip(),
@@ -377,6 +452,7 @@ class UserStorage:
             "last_login": "",
             "created_at": now,
             "updated_at": now,
+            "project_serial_counter": 0,
         }
         users.append(user)
         self._save(users)
@@ -460,6 +536,12 @@ class UserStorage:
                 user["display_name"] = str(payload["display_name"]).strip()
             if "student_id" in payload:
                 v = str(payload["student_id"] or "").strip()
+                if v:
+                    for other in users:
+                        if other is user:
+                            continue
+                        if str(other.get("student_id", "")).strip() == v:
+                            raise ValueError("学号已被占用")
                 user["student_id"] = v or None
             if "class_id" in payload:
                 v = str(payload["class_id"] or "").strip()
@@ -499,6 +581,51 @@ class UserStorage:
             return self._public_user(user)
         return None
 
+    def set_student_id(self, user_id: str, student_id: str) -> dict:
+        """为指定用户设置/修改学号，做全局唯一性校验。"""
+        import re
+        sid = str(student_id or "").strip()
+        if not sid:
+            raise ValueError("学号不能为空")
+        if not re.match(r"^[A-Za-z0-9_-]{4,32}$", sid):
+            raise ValueError("学号格式不合法（仅允许字母/数字/_- 共4-32位）")
+        users = self._load()
+        target_idx = None
+        for idx, user in enumerate(users):
+            if user.get("user_id") != user_id:
+                continue
+            target_idx = idx
+        if target_idx is None:
+            raise ValueError("用户不存在")
+        for idx, other in enumerate(users):
+            if idx == target_idx:
+                continue
+            if str(other.get("student_id", "")).strip() == sid:
+                raise ValueError("学号已被占用")
+        user = users[target_idx]
+        user["student_id"] = sid
+        user["updated_at"] = _now_iso()
+        if "project_serial_counter" not in user:
+            user["project_serial_counter"] = 0
+        users[target_idx] = user
+        self._save(users)
+        return self._public_user(user)
+
+    def allocate_project_serial(self, user_id: str) -> int:
+        """原子自增用户的 project_serial_counter，返回新值（从 1 开始）。"""
+        users = self._load()
+        for idx, user in enumerate(users):
+            if user.get("user_id") != user_id:
+                continue
+            current = int(user.get("project_serial_counter", 0) or 0)
+            next_serial = current + 1
+            user["project_serial_counter"] = next_serial
+            user["updated_at"] = _now_iso()
+            users[idx] = user
+            self._save(users)
+            return next_serial
+        raise ValueError("用户不存在")
+
     def admin_create_user(self, payload: dict) -> tuple[dict, str | None]:
         users = self._load()
         email = str(payload.get("email", "")).strip().lower()
@@ -515,12 +642,15 @@ class UserStorage:
             raw_password = "".join(secrets.choice(alphabet) for _ in range(10))
         salt, password_hash = self._hash_password(raw_password)
         now = _now_iso()
+        raw_sid = str(payload.get("student_id", "")).strip() or None
+        if raw_sid and any(str(u.get("student_id", "")).strip() == raw_sid for u in users):
+            raise ValueError("学号已被占用")
         user = {
             "user_id": str(uuid4()),
             "role": payload.get("role", "student"),
             "display_name": str(payload.get("display_name", "")).strip() or email.split("@")[0],
             "email": email,
-            "student_id": str(payload.get("student_id", "")).strip() or None,
+            "student_id": raw_sid,
             "class_id": str(payload.get("class_id", "")).strip() or None,
             "cohort_id": str(payload.get("cohort_id", "")).strip() or None,
             "bio": str(payload.get("bio", "")).strip(),
@@ -530,6 +660,7 @@ class UserStorage:
             "last_login": "",
             "created_at": now,
             "updated_at": now,
+            "project_serial_counter": 0,
         }
         users.append(user)
         self._save(users)
@@ -605,10 +736,8 @@ class TeamStorage:
             self.target.write_text("[]", encoding="utf-8")
 
     def _load(self) -> list[dict]:
-        try:
-            return json.loads(self.target.read_text(encoding="utf-8"))
-        except Exception:
-            return []
+        data = _safe_read_json(self.target, default=[], label="teams.json")
+        return list(data) if isinstance(data, list) else []
 
     def _save(self, teams: list[dict]) -> None:
         self.target.write_text(json.dumps(teams, ensure_ascii=False, indent=2), encoding="utf-8")

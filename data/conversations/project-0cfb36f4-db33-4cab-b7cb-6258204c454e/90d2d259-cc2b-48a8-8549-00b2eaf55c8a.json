@@ -1,0 +1,95 @@
+{
+  "conversation_id": "90d2d259-cc2b-48a8-8549-00b2eaf55c8a",
+  "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "student_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "title": "演示·场景5 · 公益 320 元/人（公益专用卡）",
+  "summary": "触发公益行业基线与受益人成本专用评估",
+  "created_at": "2026-04-18T20:38:34+08:00",
+  "seed_tag": "finance_demo_v1",
+  "seed_scenario_idx": 5,
+  "messages": [
+    {
+      "role": "user",
+      "content": "我们是公益项目，每服务一个留守儿童的成本是 320 元，想拿到企业捐赠。",
+      "timestamp": "2026-04-18T20:38:34+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "公益项目的底层指标和商业项目不同，我按\"每受益人成本\"这条线帮你对照了行业经验区间。\n\n（详见下方财务守望卡片，红/黄为需要重点处理的信号。）\n\n企业捐赠方最关心两件事：每元带来多少实效（ROI）、能不能持续复用。建议把 320 元拆成\"固定运营 vs 可变服务\"两部分，再准备 2-3 个亲历故事作为情感锚点。",
+      "timestamp": "2026-04-18T20:38:40+08:00",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "engine": "seed",
+          "pipeline": [
+            "demo"
+          ]
+        },
+        "seed_tag": "finance_demo_v1",
+        "demo_note": "本条为 finance_guard 离线演示会话，用于教学展示，不参与真实诊断评分。",
+        "finance_advisory": {
+          "triggered": true,
+          "hits": [
+            "nonprofit"
+          ],
+          "cards": [
+            {
+              "module": "unit_economics",
+              "title": "单位经济分析",
+              "inputs": {
+                "monthly_price": 0.0,
+                "gross_margin": 0.0,
+                "monthly_retention": 0.0,
+                "cac": 0.0,
+                "industry": "社会公益"
+              },
+              "outputs": {
+                "cost_per_beneficiary": 320.0,
+                "industry_range": [
+                  50,
+                  500
+                ],
+                "deviation_ratio": 1.16
+              },
+              "verdict": {
+                "level": "yellow",
+                "score": 0.53,
+                "reason": "单位受益人成本 ¥320，公益项目参考区间 ¥50-500（接近上限）"
+              },
+              "framework_explain": "CPB（Cost Per Beneficiary）衡量每单位捐赠换来多少实际社会影响，是公益项目效率核心指标。",
+              "suggestions": [
+                "把 CPB 与同类公益项目对比写进报告",
+                "结合「受益人生命周期影响」展示长期价值"
+              ],
+              "missing_inputs": [
+                {
+                  "field": "monthly_retention",
+                  "hint": "月留存率（0-1），可从过往项目参考",
+                  "target_tab": "biz"
+                },
+                {
+                  "field": "cac",
+                  "hint": "每获取一个付费用户的成本，含广告/人力",
+                  "target_tab": "biz"
+                }
+              ],
+              "evidence_for_diagnosis": {
+                "H8": 0.75
+              },
+              "baseline_meta": {
+                "industry": "社会公益",
+                "source": "seed",
+                "updated_at": "2026-04-18T12:48:34+00:00",
+                "evidence_count": 0
+              }
+            }
+          ],
+          "evidence_for_diagnosis": {
+            "H8": 0.75
+          },
+          "industry": "社会公益"
+        }
+      }
+    }
+  ]
+}

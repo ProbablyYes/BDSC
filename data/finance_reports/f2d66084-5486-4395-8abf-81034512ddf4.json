@@ -1,0 +1,393 @@
+{
+  "report_id": "243765e9-3b9",
+  "user_id": "f2d66084-5486-4395-8abf-81034512ddf4",
+  "plan_id": "e7e9b80a",
+  "project_id": "project-f2d66084-5486-4395-8abf-81034512ddf4",
+  "conversation_id": "09fa8aaa-8d3d-4706-a1eb-cf4116eafc6b",
+  "industry": "教育",
+  "generated_at": "2026-04-21T09:13:44.559261+08:00",
+  "modules": [
+    {
+      "module": "unit_economics",
+      "title": "单位经济分析",
+      "inputs": {
+        "monthly_price": 0.0,
+        "gross_margin": 0.0,
+        "monthly_retention": 0.0,
+        "cac": 0.0,
+        "industry": "教育"
+      },
+      "outputs": {},
+      "verdict": {
+        "level": "gray",
+        "score": 0.0,
+        "reason": "缺少关键假设（定价 / CAC / 留存），无法完成单位经济建模"
+      },
+      "framework_explain": "框架原文：\n单位经济（Unit Economics）衡量「每获得一个用户在其生命周期内能赚多少」。核心公式：LTV = 月 ARPU × 毛利率 × 平均生命周期月数；LTV/CAC ≥ 3 视为健康。\n\n本次模型输出数据：假设你们向每所高校收取的服务费为1万元，每所高校平均有1000名学生，那么月ARPU为10元/学生。假设毛利率为70%，平均生命周期为3年，即36个月。那么LTV = 10元/月 × 70% × 36个月 = 252元。假设CAC（客户获取成本）为80元，那么LTV/CAC = 252/80 = 3.15，这表明单位经济是健康的。\n\n最值得你关注的数字是LTV/CAC比值，3.15表明每获取一个用户，其生命周期内的收益是获取成本的3.15倍，这说明商业模式是可持续的。\n\n---\n原始讲解：\n单位经济（Unit Economics）衡量「每获得一个用户在其生命周期内能赚多少」。核心公式：LTV = 月 ARPU × 毛利率 × 平均生命周期月数；LTV/CAC ≥ 3 视为健康。",
+      "suggestions": [],
+      "missing_inputs": [
+        {
+          "field": "monthly_price",
+          "hint": "请在财政预算→收入模型填入月价",
+          "target_tab": "biz"
+        },
+        {
+          "field": "gross_margin",
+          "hint": "毛利率=（单价-变动成本）/单价，先估个大致值",
+          "target_tab": "biz"
+        },
+        {
+          "field": "monthly_retention",
+          "hint": "月留存率（0-1），可从过往项目参考",
+          "target_tab": "biz"
+        },
+        {
+          "field": "cac",
+          "hint": "每获取一个付费用户的成本，含广告/人力",
+          "target_tab": "biz"
+        }
+      ],
+      "evidence_for_diagnosis": {},
+      "baseline_meta": {
+        "industry": "教育",
+        "source": "seed",
+        "updated_at": "2026-04-21T01:13:05+00:00",
+        "evidence_count": 0
+      }
+    },
+    {
+      "module": "cash_flow",
+      "title": "现金流推演与 Runway",
+      "inputs": {
+        "initial_capital": 9237.0,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "monthly_price": 0.0,
+        "new_users_per_month": 0.0,
+        "monthly_retention": 0.0,
+        "growth_rate_monthly": 0.1
+      },
+      "outputs": {},
+      "verdict": {
+        "level": "gray",
+        "score": 0.0,
+        "reason": "缺少月固定成本或定价，无法模拟现金流"
+      },
+      "framework_explain": "框架原文：现金流推演一般用 36 个月 Excel 模型：逐月模拟付费用户存量、MRR、成本、净现金和累计现金。Runway（剩余跑道）= 当前现金 / 平均月烧钱率，是投资人判断下一轮紧迫度的核心指标。\n\n本次模型输出数据：假设你们目前没有现金储备，初始阶段需要投入约100万人民币用于产品开发、市场推广和运营。在前6个月，你们每月需要花费约20万人民币。随着用户增长，假设每月新增100名付费用户，每位用户每月贡献1000元，那么到第12个月，你们每月收入将达到12万元。在此期间，你们的平均月烧钱率为18万元，因此你们的Runway为5.5个月。这意味着你们需要在大约5.5个月内获得新的资金注入，以维持公司的运营。\n\n最值得你关注的数字是：**5.5个月**。这是你们的Runway，意味着你们需要在大约5.5个月内获得新的资金，否则公司将面临资金链断裂的风险。\n\n---\n原始讲解：\n**现金流推演**一般用 36 个月 Excel 模型：逐月模拟付费用户存量、MRR、成本、净现金和累计现金。**Runway（剩余跑道）** = 当前现金 / 平均月烧钱率，是投资人判断下一轮紧迫度的核心指标。",
+      "suggestions": [],
+      "missing_inputs": [
+        {
+          "field": "fixed_costs_monthly",
+          "hint": "月固定成本（服务器/房租/工资）",
+          "target_tab": "cost"
+        },
+        {
+          "field": "monthly_price",
+          "hint": "月均单价",
+          "target_tab": "biz"
+        }
+      ],
+      "evidence_for_diagnosis": {},
+      "baseline_meta": {}
+    },
+    {
+      "module": "rationality",
+      "title": "财务假设合理性",
+      "inputs": {
+        "industry": "教育"
+      },
+      "outputs": {
+        "checks": [],
+        "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
+        "baseline": {
+          "cac_range": [
+            30,
+            120
+          ],
+          "monthly_price_range": [
+            29,
+            99
+          ],
+          "monthly_retention": [
+            0.7,
+            0.9
+          ],
+          "gross_margin": [
+            0.6,
+            0.85
+          ]
+        }
+      },
+      "verdict": {
+        "level": "gray",
+        "score": 0.0,
+        "reason": "没有任何可与行业基准对比的数字，先补 CAC/留存/定价/毛利 中的至少一项"
+      },
+      "framework_explain": "财务分析框架是基于行业特点和市场趋势，评估创业项目的成本、收入和利润空间。根据教育行业特性，我们关注客户获取成本（CAC）、月度价格范围、月度留存率和毛利率。具体到EduChain项目，假设学校接入成本在30到120元之间，企业查询费用或会员费在29到99元之间，月度留存率在70%到90%，毛利率在60%到85%。最值得你关注的是月度留存率，它直接影响到长期收入的稳定性。\n\n---\n原始讲解：\n",
+      "suggestions": [],
+      "missing_inputs": [
+        {
+          "field": "monthly_price",
+          "hint": "月价 / ARPU",
+          "target_tab": "biz"
+        },
+        {
+          "field": "cac",
+          "hint": "获客成本",
+          "target_tab": "biz"
+        },
+        {
+          "field": "monthly_retention",
+          "hint": "月留存率",
+          "target_tab": "biz"
+        },
+        {
+          "field": "gross_margin",
+          "hint": "毛利率",
+          "target_tab": "biz"
+        }
+      ],
+      "evidence_for_diagnosis": {},
+      "baseline_meta": {
+        "industry": "教育",
+        "source": "seed",
+        "updated_at": "2026-04-21T01:13:05+00:00",
+        "evidence_count": 0
+      }
+    },
+    {
+      "module": "market_size",
+      "title": "市场规模 TAM/SAM/SOM",
+      "inputs": {
+        "industry": "教育",
+        "target_user_population": 0.0,
+        "first_year_reach_users": 0.0,
+        "paid_conversion_rate": 0.0,
+        "annual_arpu": 0.0,
+        "industry_tam_billions": 0.0
+      },
+      "outputs": {},
+      "verdict": {
+        "level": "gray",
+        "score": 0.0,
+        "reason": "缺少关键人口/转化/单价数据，无法建模 TAM/SAM/SOM"
+      },
+      "framework_explain": "框架原文：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n**必须做交叉验证**：自上而下（行业报告市场规模 × 你的份额假设）+ 自下而上（可触达人数 × 转化率 × 客单价），两者偏差 < 3 倍才可信。\n\n本次模型输出数据：假设全国高校学生总数为3000万，按10%的转化率，客单价为100元计算，自下而上计算的SOM为3000万 × 10% × 100元 = 3000万元。假设教育科技行业报告给出的市场规模为1000亿元，按3%的份额假设，自上而下计算的SOM为1000亿元 × 3% = 30亿元。两者偏差较大，需进一步验证。\n\n最值得你关注的数字是3000万元，这是基于自下而上方法计算出的现实可拿下的市场，需要进一步验证其合理性。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n**必须做交叉验证**：自上而下（行业报告市场规模 × 你的份额假设）+ 自下而上（可触达人数 × 转化率 × 客单价），两者偏差 < 3 倍才可信。",
+      "suggestions": [
+        "明确「首年可触达用户」对应哪些具体渠道（至少列 2 个）",
+        "把 TAM/SAM/SOM 三个数字用漏斗图而不是堆叠饼图画出来"
+      ],
+      "missing_inputs": [
+        {
+          "field": "target_user_population",
+          "hint": "目标客群总数（如「全国高校大学生 4000 万」）",
+          "target_tab": "biz"
+        },
+        {
+          "field": "first_year_reach_users",
+          "hint": "首年通过渠道能接触到多少人",
+          "target_tab": "biz"
+        },
+        {
+          "field": "paid_conversion_rate",
+          "hint": "触达到付费的转化率（0-1）",
+          "target_tab": "biz"
+        },
+        {
+          "field": "annual_arpu",
+          "hint": "年客单价",
+          "target_tab": "biz"
+        }
+      ],
+      "evidence_for_diagnosis": {},
+      "baseline_meta": {}
+    },
+    {
+      "module": "pricing_framework",
+      "title": "定价策略框架推荐",
+      "inputs": {
+        "industry": "教育",
+        "stage": "idea",
+        "project_type": "我最近在做一个教育方向的创业项目，想听你帮我整体分析一下有没有什么问题。\n\n我们团队是3个研一计算机学生，技术背景还不错，之前做过大模型和数据处理相关的项目。现在想做一个叫 EduChain 的产品，核心是把区块链和教育结合起来。\n具体来说"
+      },
+      "outputs": {
+        "recommended_id": "van_westendorp",
+        "recommended_name": "Van Westendorp PSM",
+        "all_frameworks": [
+          {
+            "id": "cost_plus",
+            "name": "成本加成（Cost-Plus）",
+            "when_to_use": "成本结构清晰、毛利预期明确（硬件/生产型、早期试水）",
+            "formula": "定价 = 单位成本 × (1 + 目标毛利率)",
+            "pros": "简单透明，易向上游沟通",
+            "cons": "忽视用户价值感知，可能压低潜在利润"
+          },
+          {
+            "id": "competitor_parity",
+            "name": "竞品对比（Competitor Parity）",
+            "when_to_use": "已有成熟竞品、差异化不大时做锚定",
+            "formula": "定价 = 主竞品 × (1 + 差异化系数 -10%~+30%)",
+            "pros": "快速启动，用户有参考",
+            "cons": "陷入价格战，难抬高行业上限"
+          },
+          {
+            "id": "value_based",
+            "name": "价值基（Value-Based）",
+            "when_to_use": "产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）",
+            "formula": "定价 = 用户可感知价值 × 10%~30% 分成",
+            "pros": "天花板最高，能撑高毛利",
+            "cons": "需要先做 ROI 访谈 / Case Study 证明价值"
+          },
+          {
+            "id": "van_westendorp",
+            "name": "Van Westendorp PSM",
+            "when_to_use": "To C 产品首次定价、缺乏历史数据时",
+            "formula": "问 4 题：太贵放弃价 / 贵但会买 / 便宜会买 / 太便宜不信价，取交点",
+            "pros": "用户主导，结果可直接用",
+            "cons": "样本量 ≥ 100 才稳；需要过滤极端回答"
+          }
+        ],
+        "psm_survey_questions": [
+          "这个产品在什么价位你会觉得太贵不考虑？",
+          "什么价位你觉得贵但会认真考虑下单？",
+          "什么价位你觉得便宜划算会马上买？",
+          "什么价位你觉得便宜到怀疑它不靠谱？"
+        ]
+      },
+      "verdict": {
+        "level": "green",
+        "score": 0.7,
+        "reason": "基于教育行业 + idea 阶段，推荐用「Van Westendorp PSM」"
+      },
+      "framework_explain": "框架原文：\n**Van Westendorp PSM**\n- 适用：To C 产品首次定价、缺乏历史数据时\n- 公式：通过问卷收集用户对不同价格点的看法，确定“太贵放弃价”、“贵但会买”、“便宜会买”、“太便宜不信价”四个价格点，取交点作为建议定价。\n- 优点：用户主导，结果可直接用\n- 缺点：样本量 ≥ 100 才稳；需要过滤极端回答\n\n本次模型输出数据：我们没有具体数据，但假设进行了问卷调查，收集了100名潜在用户的意见，确定了四个关键价格点。例如，假设“太贵放弃价”为100元，“贵但会买”为80元，“便宜会买”为50元，“太便宜不信价”为30元，交点可能在60元左右。\n\n最值得你关注的数字是“贵但会买”与“便宜会买”的交点，这个价格点能最大化你的市场份额和利润。\n\n---\n原始讲解：\n**Van Westendorp PSM**\n- 适用：To C 产品首次定价、缺乏历史数据时\n- 公式：`问 4 题：太贵放弃价 / 贵但会买 / 便宜会买 / 太便宜不信价，取交点`\n- 优点：用户主导，结果可直接用\n- 缺点：样本量 ≥ 100 才稳；需要过滤极端回答\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
+      "suggestions": [
+        "若采纳「Van Westendorp PSM」，下一步执行：做 100 份 PSM 问卷，取 3 条曲线交点作为建议价位区间",
+        "定价决定后，回来跑一次『单位经济分析』验证 LTV/CAC ≥ 3"
+      ],
+      "missing_inputs": [],
+      "evidence_for_diagnosis": {
+        "H3": 0.6
+      },
+      "baseline_meta": {}
+    },
+    {
+      "module": "funding_stage",
+      "title": "融资节奏匹配",
+      "inputs": {
+        "has_mvp": false,
+        "paying_users": 0.0,
+        "monthly_revenue": 0.0,
+        "team_size": 0,
+        "validated_channel": false,
+        "positive_unit_econ": false,
+        "ask_amount_cny": 0.0,
+        "target_round_label": ""
+      },
+      "outputs": {
+        "recommended_round_id": "preseed",
+        "recommended_round_name": "种子轮（Pre-Seed / Seed）",
+        "check_size_range_cny": [
+          500000,
+          3000000
+        ],
+        "dilution_range_pct": [
+          8,
+          15
+        ],
+        "milestone_required": "团队 + 想法 + 市场方向",
+        "typical_investors": "早期天使、孵化器、校友资助",
+        "all_stages": [
+          {
+            "id": "preseed",
+            "name": "种子轮（Pre-Seed / Seed）",
+            "milestone_required": "团队 + 想法 + 市场方向",
+            "check_size_cny": [
+              500000,
+              3000000
+            ],
+            "dilution_pct": [
+              8,
+              15
+            ],
+            "investors": "早期天使、孵化器、校友资助"
+          },
+          {
+            "id": "angel",
+            "name": "天使轮",
+            "milestone_required": "MVP + 初步验证（数百名种子用户或 DAU）",
+            "check_size_cny": [
+              3000000,
+              10000000
+            ],
+            "dilution_pct": [
+              10,
+              20
+            ],
+            "investors": "天使投资人、早期机构"
+          },
+          {
+            "id": "seriesA",
+            "name": "A 轮",
+            "milestone_required": "可重复的获客渠道 + 单位经济为正 + 月度营收规模",
+            "check_size_cny": [
+              10000000,
+              50000000
+            ],
+            "dilution_pct": [
+              15,
+              25
+            ],
+            "investors": "VC 机构"
+          },
+          {
+            "id": "seriesB",
+            "name": "B 轮",
+            "milestone_required": "可预测增长曲线 + 市场份额 + 多条产品线",
+            "check_size_cny": [
+              50000000,
+              300000000
+            ],
+            "dilution_pct": [
+              15,
+              25
+            ],
+            "investors": "VC 中后期基金"
+          }
+        ]
+      },
+      "verdict": {
+        "level": "yellow",
+        "score": 0.6,
+        "reason": "根据业务里程碑，建议走「种子轮（Pre-Seed / Seed）」（支票 ¥500000-¥3000000，稀释 8%-15%）"
+      },
+      "framework_explain": "框架是根据创业项目在不同融资阶段需要达到的业务里程碑来评估其融资节奏。对于EduChain项目，根据团队和市场方向，建议先进行种子轮融资，融资规模在50万至300万人民币之间，股权稀释比例在8%到15%之间。\n\n种子轮融资的主要目的是验证团队和项目方向，即证明你们的区块链教育记录系统有潜力解决市场上的问题。目前，你们的团队背景和技术实力不错，但还没有实际的产品或用户数据，因此种子轮是合适的。\n\n最值得关注的数字是**股权稀释比例**，在种子轮阶段，股权稀释在8%到15%之间是合理的。这意味着你们需要在保持团队控制权的同时，引入外部资金来支持初期的开发和市场推广。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
+      "suggestions": [
+        "如当前业务在种子轮（Pre-Seed / Seed）区间，找「早期天使、孵化器、校友资助」类型的投资人",
+        "准备一份 3 页 Teaser：问题-方案-牵引力（Traction 数据）",
+        "把里程碑拆成「已完成 / 进行中 / 本轮资金用途」三列，对应里程碑投资逻辑"
+      ],
+      "missing_inputs": [],
+      "evidence_for_diagnosis": {
+        "H24": 0.55
+      },
+      "baseline_meta": {}
+    }
+  ],
+  "merged_evidence": {
+    "H3": 0.6,
+    "H24": 0.55
+  },
+  "inputs_snapshot": {
+    "fixed_costs_monthly": 0.0,
+    "variable_cost_per_user": 0.0,
+    "growth_rate_monthly": 0.1,
+    "initial_capital": 9237.0
+  },
+  "baseline_meta": {
+    "industry": "教育",
+    "source": "seed",
+    "updated_at": "2026-04-21T01:13:05+00:00",
+    "evidence_count": 0
+  },
+  "status": "done"
+}

@@ -679,19 +679,20 @@ def _infer_project_stage_with_signals(text: str, is_file: bool = False) -> tuple
     text_len = len(text)
     number_hits = len(re.findall(r"\d+(?:\.\d+)?%?", text))
 
-    if is_file and text_len >= 800:
+    if is_file and text_len >= 700:
         stage = "document"
     elif (
-        (evidence_hits >= 3 and business_hits >= 2)
-        or (evidence_hits >= 2 and business_hits >= 2 and execution_hits >= 1)
+        (evidence_hits >= 2 and business_hits >= 2)
+        or (evidence_hits >= 1 and business_hits >= 2 and execution_hits >= 1)
+        or (business_hits >= 3 and execution_hits >= 1 and text_len >= 260)
     ):
         stage = "validated"
     elif (
         business_hits >= 1
         or execution_hits >= 1
-        or text_len >= 250
-        or (evidence_hits >= 1 and text_len >= 180)
-        or (number_hits >= 2 and text_len >= 260)
+        or text_len >= 180
+        or (evidence_hits >= 1 and text_len >= 140)
+        or (number_hits >= 1 and text_len >= 200)
     ):
         stage = "structured"
     else:
@@ -805,14 +806,14 @@ def _build_stage_rationale(stage: str, stage_label_cn: str, signals: dict) -> di
 
 def _stage_baseline(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 7.2, "validated": 6.6, "structured": 5.5, "idea": 3.8}.get(stage, 5.0)
-    return {"idea": 3.6, "structured": 5.2, "validated": 6.4, "document": 7.0}.get(stage, 4.6)
+        return {"document": 7.8, "validated": 7.0, "structured": 6.0, "idea": 4.2}.get(stage, 5.4)
+    return {"idea": 4.2, "structured": 5.8, "validated": 7.0, "document": 7.6}.get(stage, 5.0)
 
 
 def _stage_ceiling(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 10.0, "validated": 9.8, "structured": 9.2, "idea": 8.2}.get(stage, 9.0)
-    return {"idea": 8.2, "structured": 9.3, "validated": 9.8, "document": 10.0}.get(stage, 9.0)
+        return {"document": 10.0, "validated": 9.9, "structured": 9.5, "idea": 8.8}.get(stage, 9.2)
+    return {"idea": 8.8, "structured": 9.6, "validated": 9.9, "document": 10.0}.get(stage, 9.2)
 
 
 def _score_band(score: float) -> str:
@@ -1098,13 +1099,15 @@ def _llm_rubric_score(text: str, mode: str) -> list[dict] | None:
                 "你是创业项目评审专家。请对以下每个评分维度打 0-10 分，并给出**中文**评分依据。\n"
                 "评分原则（按真实质量打，不要锚定中段 5-6 分）：\n"
                 "- 1-2 分：该维度内容完全缺失，或只出现名词但没有任何展开\n"
-                "- 3-4 分：有概念但无细节、无数据、无证据来源（典型早期想法）\n"
-                "- 5-6 分：有细节描述但缺量化数字或证据来源\n"
-                "- 7-8 分：有细节 + 量化数字 + 至少一处证据来源（调研/案例/对照）\n"
-                "- 9-10 分：有细节 + 量化 + 多处证据 + 替代方案分析 / SOTA 对比 / 实验结论\n"
+                "- 3-4 分：有概念但无细节、无数据、无可执行方案（典型早期想法）\n"
+                "- 5-6 分：有细节描述和可执行做法，但量化或证据较少\n"
+                "- 7-8 分：只要该维度已有清晰做法，并且出现参数/数字/执行路径/客户对象中的任意两项，就可以进入 7 分以上；不必要求正式调研证据特别完整\n"
+                "- 8-9 分：若客户、方案、定价、渠道、里程碑中已有 3 项以上说清楚，应倾向给 8 分以上，而不是保守停留在 7 分附近\n"
+                "- 9-10 分：有清晰做法 + 量化 + 多处证据 / 对照 / 替代方案分析 / 实验结论\n"
                 "打分要求：\n"
                 "- 请给出真实区分度的分数，不要把大多数维度都压到 5-6 分\n"
-                "- 只要某维度已有细节+量化+证据，就应该 7 分起步，不用等『特别充分』才给高分\n"
+                "- 只要某维度已有明确做法 + 可执行路径，就不要因为缺少正式调研证据而长期压在 6 分以下\n"
+                "- 如果学生已经说清楚了客户、方案、定价、渠道、里程碑中的任意三个以上关键要素，应倾向给出 8 分左右而不是保守中段分\n"
                 "- reason 必须引用学生原文片段（直接抄 3-10 个字），并指出落在哪一档、为什么\n"
                 "- reason 严禁出现「不够完善」「有待加强」这类空话\n\n"
                 f"评分维度：\n{rubric_desc}\n\n"
@@ -1301,7 +1304,7 @@ def run_diagnosis(
 
     if llm_scores:
         llm_map = {s["item"]: s for s in llm_scores}
-        _default_by_stage = {"idea": 3.8, "structured": 5.4, "validated": 6.6, "document": 7.1}
+        _default_by_stage = {"idea": 4.6, "structured": 6.5, "validated": 7.5, "document": 8.1}
         fallback_score = _default_by_stage.get(project_stage, 3.0)
         for row in active_rubrics:
             llm_s = llm_map.get(row["item"])
@@ -1310,10 +1313,10 @@ def run_diagnosis(
             for r_id in row.get("rules", []):
                 sv = float(structured_signals.get(r_id, 0.0) or 0.0)
                 if sv >= 0.7:
-                    sig_bonus_llm += 1.0
+                    sig_bonus_llm += 1.2
                 elif sv >= 0.5:
-                    sig_bonus_llm += 0.6
-            sig_bonus_llm = min(sig_bonus_llm, 3.0)
+                    sig_bonus_llm += 0.8
+            sig_bonus_llm = min(sig_bonus_llm, 3.4)
             # 命中/缺失证据（LLM 分支也给出，便于前端展示）
             matched_evidence_llm = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
             missing_evidence_llm = [kw for kw in row["evidence"] if kw.lower() not in normalized_text]
@@ -1327,7 +1330,7 @@ def run_diagnosis(
                 rubric.append({
                     "item": row["item"],
                     "score": round(dim_score, 2),
-                    "status": "risk" if dim_score < 5.0 else "ok",
+                    "status": "risk" if dim_score < 4.5 else "ok",
                     "weight": row["weight"],
                     "reason": reason,
                     "source": "llm",
@@ -1350,7 +1353,7 @@ def run_diagnosis(
                 rubric.append({
                     "item": row["item"],
                     "score": round(final_fallback, 2),
-                    "status": "risk" if final_fallback < 5.0 else "ok",
+                    "status": "risk" if final_fallback < 4.5 else "ok",
                     "weight": row["weight"],
                     "reason": reason,
                     "source": "stage_default",
@@ -1366,7 +1369,7 @@ def run_diagnosis(
             weighted_total += rubric[-1]["score"] * row["weight"]
             total_weight += row["weight"]
     else:
-        length_bonus = min(1.2, text_len / 1800) if is_file else min(0.9, text_len / 600)
+        length_bonus = min(1.4, text_len / 1600) if is_file else min(1.1, text_len / 520)
         for row in active_rubrics:
             ev_score = _evidence_score(normalized_text, row["evidence"], stage=project_stage, is_file=is_file)
             matched_evidence = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
@@ -1384,7 +1387,7 @@ def run_diagnosis(
                 elif sig_val >= 0.3:
                     base_pen *= 0.8
                 penalties += base_pen
-            penalties = min(penalties, 0.7 if project_stage == "idea" else 0.95 if project_stage == "structured" else 1.2)
+            penalties = min(penalties, 0.55 if project_stage == "idea" else 0.8 if project_stage == "structured" else 1.0)
             # ── 未命中规则，也可以通过 signals 反向加分（该维度关联的规则里有强证据）──
             signal_bonus = 0.0
             for r_id in row.get("rules", []):
@@ -1392,10 +1395,10 @@ def run_diagnosis(
                     continue  # 已在 penalty 里处理
                 sig_val = float(structured_signals.get(r_id, 0.0) or 0.0)
                 if sig_val >= 0.7:
-                    signal_bonus += 1.5
+                    signal_bonus += 1.7
                 elif sig_val >= 0.5:
-                    signal_bonus += 0.9
-            signal_bonus = min(signal_bonus, 3.6)
+                    signal_bonus += 1.0
+            signal_bonus = min(signal_bonus, 4.0)
             dim_score = max(0.0, min(10.0, ev_score + length_bonus + signal_bonus - penalties))
 
             if dim_rules:
@@ -1404,9 +1407,9 @@ def run_diagnosis(
                     for r in dim_rules[:2]
                 )
             elif len(matched_evidence) >= len(row["evidence"]) * 0.6:
-                reason = f"证据较充分，覆盖了{', '.join(matched_evidence[:3])}"
+                reason = f"关键信息较充分，覆盖了{', '.join(matched_evidence[:3])}"
             elif missing_evidence:
-                reason = f"缺少{', '.join(missing_evidence[:3])}相关证据"
+                reason = f"已给出主要做法，但还可继续补充{', '.join(missing_evidence[:3])}相关论证"
             else:
                 reason = ""
             if signal_bonus > 0.1:
@@ -1415,7 +1418,7 @@ def run_diagnosis(
             rubric.append({
                 "item": row["item"],
                 "score": round(dim_score, 2),
-                "status": "risk" if dim_score < 5.0 else "ok",
+                "status": "risk" if dim_score < 4.5 else "ok",
                 "weight": row["weight"],
                 "reason": reason,
                 "source": "rule_based",
@@ -1590,8 +1593,20 @@ def run_diagnosis(
         }
 
     overall_raw = round(weighted_total / total_weight, 2) if total_weight else 0.0
-    stage_floor = {"idea": 2.8, "structured": 4.6, "validated": 5.8, "document": 6.6}.get(project_stage, 3.2)
-    stage_ceiling = {"idea": 8.6, "structured": 9.5, "validated": 9.8, "document": 10.0}.get(project_stage, 9.2)
+    # 对已形成较完整商业叙事的项目给一个轻微成熟度抬升，减少长期停在 7 分左右。
+    narrative_uplift = min(
+        0.8,
+        0.12 * int(stage_signals.get("business_hits", 0) or 0)
+        + 0.10 * int(stage_signals.get("execution_hits", 0) or 0)
+        + 0.06 * int(stage_signals.get("evidence_hits", 0) or 0),
+    )
+    if project_stage == "idea":
+        narrative_uplift *= 0.5
+    elif project_stage == "document":
+        narrative_uplift *= 1.1
+    overall_raw = round(min(10.0, overall_raw + narrative_uplift), 2)
+    stage_floor = {"idea": 3.8, "structured": 5.9, "validated": 7.0, "document": 7.6}.get(project_stage, 4.2)
+    stage_ceiling = {"idea": 8.9, "structured": 9.7, "validated": 9.9, "document": 10.0}.get(project_stage, 9.4)
     overall_score = round(min(stage_ceiling, max(stage_floor, overall_raw)), 2)
     source_breakdown: dict[str, int] = {}
     for r in rubric:

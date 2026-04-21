@@ -5348,14 +5348,17 @@ export default function StudentPage() {
                                   const rawHistory: number[] = Array.isArray(r.rawHistory) ? r.rawHistory : [];
                                   const smoothWeights: number[] = Array.isArray(r.smoothWeights) ? r.smoothWeights : [];
                                   const smoothTurns = Number(r.smoothedFromTurns || 0);
+                                  const isSmoothedDisplay = smoothTurns >= 2 && rawHistory.length >= smoothTurns;
+                                  const latestDiagScore = Number(r.rawLatest ?? r.score ?? 0);
+                                  const displayScore = Number(r.score ?? 0);
                                   return (
                                     <div className="sc-dim-breakdown">
                                       {/* 平滑前后对照（仅在跨轮平滑时出现） */}
-                                      {smoothTurns >= 2 && rawHistory.length >= smoothTurns ? (
+                                      {isSmoothedDisplay ? (
                                         <div className="rc-smoothing-note" style={{ marginBottom: 8 }}>
                                           <span className="rc-smoothing-label">展示分</span>
                                           <span className="rc-smoothing-formula">
-                                            {Number(r.score).toFixed(2)} = {rawHistory.slice(0, smoothTurns).map((v, i) => (
+                                            {displayScore.toFixed(2)} = {rawHistory.slice(0, smoothTurns).map((v, i) => (
                                               <span key={i}>
                                                 {i > 0 ? " + " : ""}
                                                 {(smoothWeights[i] ?? 0).toFixed(1)}×{Number(v).toFixed(2)}
@@ -5366,7 +5369,7 @@ export default function StudentPage() {
                                         </div>
                                       ) : null}
                                       {/* 分数构成条 */}
-                                      <div className="sc-dim-breakdown-title">分数怎么算出来的</div>
+                                      <div className="sc-dim-breakdown-title">{isSmoothedDisplay ? "最新一轮诊断分怎么算出来的" : "分数怎么算出来的"}</div>
                                       <div className="sc-dim-breakdown-row">
                                         {hasRich ? (
                                           <>
@@ -5392,13 +5395,13 @@ export default function StudentPage() {
                                             )}
                                             <span className="sc-dim-breakdown-eq">=</span>
                                             <span className="sc-dim-breakdown-chip final">
-                                              得分 <b>{Number(r.score).toFixed(1)}</b>
+                                              {isSmoothedDisplay ? <>最新诊断 <b>{latestDiagScore.toFixed(1)}</b></> : <>得分 <b>{displayScore.toFixed(1)}</b></>}
                                             </span>
                                           </>
                                         ) : (
                                           <>
                                             <span className="sc-dim-breakdown-chip pos" title="本次诊断给出的原始打分（未返回细化因子）">
-                                              本次得分 <b>{Number(r.score).toFixed(1)}</b>
+                                              {isSmoothedDisplay ? <>最新诊断 <b>{latestDiagScore.toFixed(1)}</b></> : <>本次得分 <b>{displayScore.toFixed(1)}</b></>}
                                             </span>
                                             {weight > 0 && (
                                               <>
@@ -5408,13 +5411,18 @@ export default function StudentPage() {
                                                 </span>
                                                 <span className="sc-dim-breakdown-eq">=</span>
                                                 <span className="sc-dim-breakdown-chip final" title="本维度对综合分的贡献">
-                                                  贡献 <b>{(Number(r.score) * weight).toFixed(2)}</b>
+                                                  {isSmoothedDisplay ? <>最新贡献 <b>{(latestDiagScore * weight).toFixed(2)}</b></> : <>贡献 <b>{(displayScore * weight).toFixed(2)}</b></>}
                                                 </span>
                                               </>
                                             )}
                                           </>
                                         )}
                                       </div>
+                                      {isSmoothedDisplay ? (
+                                        <div className="sc-dim-breakdown-note">
+                                          上方圆环和主卡显示的是最近 3 轮加权后的展示分；这里拆解的是最新一轮诊断原值，所以两者不必完全相同。
+                                        </div>
+                                      ) : null}
                                       {!hasRich && (
                                         <div className="sc-dim-breakdown-note">
                                           该次诊断未返回细化因子（基础分 / 证据加成 / 规则扣分）。重新提交后会显示完整推导链路。
@@ -5477,6 +5485,8 @@ export default function StudentPage() {
                           const ceil = Number(ovr.stage_ceiling ?? 10);
                           const raw = Number(ovr.raw_score ?? ovr.value ?? 0);
                           const finalScore = Number(ovr.value ?? 0);
+                          const displayScore = Number(overallSmoothing?.displayValue ?? finalScore);
+                          const isSmoothedDisplay = !!overallSmoothing && overallSmoothing.turns >= 2;
                           const stageCn = String(ovr.project_stage_cn || ovr.project_stage || "");
                           const clamped = raw < floor || raw > ceil;
                           // marker positions on a 0-10 scale
@@ -5484,10 +5494,12 @@ export default function StudentPage() {
                           return (
                             <div className="sc-overall-rationale">
                               <div className="sc-overall-rat-head">
-                                <span className="sc-overall-rat-title">综合分 {finalScore} / 10 · 怎么算出来的</span>
+                                <span className="sc-overall-rat-title">
+                                  {isSmoothedDisplay ? `展示分 ${displayScore.toFixed(1)} / 10 · 最新一轮原值推导` : `综合分 ${finalScore} / 10 · 怎么算出来的`}
+                                </span>
                                 {stageCn && <span className="sc-overall-rat-stage">{stageCn}</span>}
                               </div>
-                              {overallSmoothing && overallSmoothing.turns >= 2 ? (
+                              {isSmoothedDisplay ? (
                                 <div className="rc-smoothing-note" style={{ marginBottom: 8 }}>
                                   <span className="rc-smoothing-label">展示分</span>
                                   <span className="rc-smoothing-formula">
@@ -5502,6 +5514,7 @@ export default function StudentPage() {
                                 </div>
                               ) : null}
                               <div className="sc-overall-rat-desc">
+                                {isSmoothedDisplay ? <>下方展示的是最新一轮诊断分 <b>{finalScore.toFixed(2)}</b> 的推导过程。展示分用于减少单轮波动，最新一轮诊断分用于解释这一次 AI 为什么这样打分。<br /></> : null}
                                 综合分 = 按 9 个维度加权平均后，再夹到「{stageCn || "当前阶段"}」允许区间
                                 <b> [{floor}, {ceil}]</b>。
                                 加权平均算出 <b>{raw.toFixed(2)}</b>，

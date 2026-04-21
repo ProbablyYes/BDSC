@@ -51,7 +51,7 @@ RULES = [
     {"id": "H4", "name": "TAM/SAM/SOM口径混乱", "severity": "high", "keywords": ["tam", "sam", "som", "市场规模"],
      "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
      "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。"},
-    {"id": "H5", "name": "需求证据不足", "severity": "high", "requires": ["访谈", "问卷", "用户证据", "调研", "内测", "使用日志", "点击率", "预约", "转化"],
+    {"id": "H5", "name": "需求证据不足", "severity": "medium", "requires": ["访谈", "问卷", "用户证据", "调研", "内测", "使用日志", "点击率", "预约", "转化"],
      "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
      "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。"},
     {"id": "H6", "name": "竞品对比不可比", "severity": "medium", "keywords": ["无竞争对手", "没有对手", "没有竞争对手", "独一无二"],
@@ -75,13 +75,13 @@ RULES = [
     {"id": "H12", "name": "技术路线与资源不匹配", "severity": "high", "keywords": ["大模型", "芯片", "复杂硬件"],
      "explanation": "技术方案的资源需求（算力/硬件/团队能力）可能超出当前条件。",
      "fix_hint": "评估团队现有技术栈，如果要用大模型考虑用API调用而非自研训练。"},
-    {"id": "H13", "name": "实验设计不合格", "severity": "medium", "keywords": ["实验", "ab测试", "对照组"], "requires": ["样本", "指标"],
+    {"id": "H13", "name": "实验设计不合格", "severity": "low", "keywords": ["实验", "ab测试", "对照组"], "requires": ["样本", "指标"],
      "explanation": "提到了实验/测试，但缺少样本量和评价指标的说明。没有指标的实验无法得出结论。",
      "fix_hint": "明确：样本量≥多少、核心指标是什么、对照组如何设置、多长时间。"},
     {"id": "H14", "name": "路演叙事断裂", "severity": "low", "keywords": ["愿景"], "min_length": 260,
      "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
      "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。"},
-    {"id": "H15", "name": "评分项证据覆盖不足", "severity": "medium", "keywords": [],
+    {"id": "H15", "name": "评分项证据覆盖不足", "severity": "low", "keywords": [],
      "explanation": "多个评分维度缺少支撑证据，整体内容丰富度不够。补充更多数据和调研结果可以显著提分。",
      "fix_hint": "检查9个评分维度，找出得分最低的2-3项，针对性补充证据。"},
     {"id": "H16", "name": "替代方案未识别", "severity": "medium", "keywords": ["首创", "独家", "没人做", "没有替代", "没有竞争对手"],
@@ -640,13 +640,13 @@ def _is_hit_rule(rule: dict, text: str, text_len: int = 0) -> bool:
 
 
 def _rule_penalty(severity: str, stage: str, is_file: bool = False) -> float:
-    base = {"high": 0.68, "medium": 0.36}.get(severity, 0.18)
+    base = {"high": 0.52, "medium": 0.24}.get(severity, 0.10)
     stage_factor = {
-        "idea": 0.72,
-        "structured": 0.86,
-        "validated": 1.0,
-        "document": 1.0,
-    }.get(stage, 0.9)
+        "idea": 0.65,
+        "structured": 0.78,
+        "validated": 0.92,
+        "document": 0.92,
+    }.get(stage, 0.8)
     penalty = base * stage_factor
     return penalty * 0.65 if is_file else penalty
 
@@ -749,6 +749,10 @@ def _build_stage_rationale(stage: str, stage_label_cn: str, signals: dict) -> di
             "severity": "info",
         })
 
+    evidence_hits = int(signals.get("evidence_hits", 0) or 0)
+    business_hits = int(signals.get("business_hits", 0) or 0)
+    execution_hits = int(signals.get("execution_hits", 0) or 0)
+
     if stage == "document":
         steps.append({
             "kind": "adjust",
@@ -758,14 +762,22 @@ def _build_stage_rationale(stage: str, stage_label_cn: str, signals: dict) -> di
     elif stage == "validated":
         steps.append({
             "kind": "adjust",
-            "label": "证据词 ≥4 且商业词 ≥3，判为「已验证阶段」",
-            "detail": "同时出现多种用户证据与商业要素",
+            "label": "满足已验证阈值，判为「已验证阶段」",
+            "detail": (
+                "命中以下任一条件："
+                f"证据词≥3 且商业词≥2；"
+                f"或证据词≥2、商业词≥2、执行词≥1。"
+                f" 当前为证据 {evidence_hits} / 商业 {business_hits} / 执行 {execution_hits}。"
+            ),
         })
     elif stage == "structured":
         steps.append({
             "kind": "adjust",
-            "label": "触发了结构化阈值（商业词 ≥2 或 执行词 ≥2 或 长度 ≥350）",
-            "detail": "已具备初步逻辑但证据尚未完全闭环",
+            "label": "触发了结构化阈值，判为「基本成形期」",
+            "detail": (
+                "满足以下任一条件：商业词≥1、执行词≥1、长度≥250、"
+                "或证据词≥1且长度≥180、或数字≥2且长度≥260。"
+            ),
         })
     else:
         steps.append({
@@ -793,14 +805,14 @@ def _build_stage_rationale(stage: str, stage_label_cn: str, signals: dict) -> di
 
 def _stage_baseline(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 5.5, "validated": 5.0, "structured": 4.0, "idea": 2.5}.get(stage, 4.0)
-    return {"idea": 2.0, "structured": 3.8, "validated": 5.2, "document": 6.0}.get(stage, 3.5)
+        return {"document": 7.2, "validated": 6.6, "structured": 5.5, "idea": 3.8}.get(stage, 5.0)
+    return {"idea": 3.6, "structured": 5.2, "validated": 6.4, "document": 7.0}.get(stage, 4.6)
 
 
 def _stage_ceiling(stage: str, is_file: bool = False) -> float:
     if is_file:
-        return {"document": 9.8, "validated": 9.5, "structured": 8.8, "idea": 7.5}.get(stage, 8.5)
-    return {"idea": 7.0, "structured": 8.6, "validated": 9.4, "document": 9.7}.get(stage, 8.5)
+        return {"document": 10.0, "validated": 9.8, "structured": 9.2, "idea": 8.2}.get(stage, 9.0)
+    return {"idea": 8.2, "structured": 9.3, "validated": 9.8, "document": 10.0}.get(stage, 9.0)
 
 
 def _score_band(score: float) -> str:
@@ -820,13 +832,14 @@ def _evidence_score(text: str, evidence_keywords: list[str], stage: str, is_file
     total = len(evidence_keywords)
     ratio = hit / max(total, 1)
     base = _stage_baseline(stage, is_file=is_file)
-    boost = ratio * (5.2 if is_file else 4.2)
+    boost = ratio * (6.0 if is_file else 5.0)
     if hit >= 5:
-        boost += 1.0
+        boost += 1.4
     elif hit >= 3:
-        boost += 0.5
+        boost += 0.8
     elif hit == 0:
-        boost -= 0.6 if stage == "idea" else 0.9
+        # 只讲方案、暂未展开论证是常见输入方式；这里保留轻微惩罚，但不再重压总分。
+        boost -= 0.15 if stage == "idea" else 0.25
     return max(0.0, min(_stage_ceiling(stage, is_file=is_file), base + boost))
 
 
@@ -1229,12 +1242,12 @@ def run_diagnosis(
             })
 
     evidence_hits = sum(1 for k in ["访谈", "问卷", "tam", "sam", "som", "cac", "ltv", "里程碑", "原型", "内测", "实验"] if _fuzzy_match(k, normalized_text))
-    if evidence_hits < 1 and not is_file and text_len > 220 and project_stage != "idea":
+    if evidence_hits < 1 and not is_file and text_len > 450 and project_stage == "document":
         h15 = next((r for r in RULES if r["id"] == "H15"), {})
         h15_quote = re.sub(r"\s+", " ", input_text).strip()[:120]
-        h15_impact = round(_rule_penalty("medium", project_stage, is_file=is_file), 2)
+        h15_impact = round(_rule_penalty("low", project_stage, is_file=is_file), 2)
         triggered_rules.append({
-            "id": "H15", "name": "评分项证据覆盖不足", "severity": "medium",
+            "id": "H15", "name": "评分项证据覆盖不足", "severity": "low",
             "fallacy_label": RULE_FALLACY_MAP.get("H15", "评分项证据覆盖不足"),
             "explanation": h15.get("explanation", ""),
             "fix_hint": h15.get("fix_hint", ""),
@@ -1278,7 +1291,7 @@ def run_diagnosis(
 
     # ── LLM-based scoring: uploaded files OR substantial project text ──
     llm_scores = None
-    _use_llm = (is_file and text_len > 200) or (text_len > 400 and project_stage not in ("idea",))
+    _use_llm = (is_file and text_len > 180) or (text_len > 280 and project_stage not in ("idea",)) or text_len > 420
     if _use_llm:
         llm_scores = _llm_rubric_score(input_text, mode)
 
@@ -1288,7 +1301,7 @@ def run_diagnosis(
 
     if llm_scores:
         llm_map = {s["item"]: s for s in llm_scores}
-        _default_by_stage = {"idea": 3.0, "structured": 4.5, "validated": 5.5, "document": 6.0}
+        _default_by_stage = {"idea": 3.8, "structured": 5.4, "validated": 6.6, "document": 7.1}
         fallback_score = _default_by_stage.get(project_stage, 3.0)
         for row in active_rubrics:
             llm_s = llm_map.get(row["item"])
@@ -1297,10 +1310,10 @@ def run_diagnosis(
             for r_id in row.get("rules", []):
                 sv = float(structured_signals.get(r_id, 0.0) or 0.0)
                 if sv >= 0.7:
-                    sig_bonus_llm += 0.8
+                    sig_bonus_llm += 1.0
                 elif sv >= 0.5:
-                    sig_bonus_llm += 0.5
-            sig_bonus_llm = min(sig_bonus_llm, 2.5)
+                    sig_bonus_llm += 0.6
+            sig_bonus_llm = min(sig_bonus_llm, 3.0)
             # 命中/缺失证据（LLM 分支也给出，便于前端展示）
             matched_evidence_llm = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
             missing_evidence_llm = [kw for kw in row["evidence"] if kw.lower() not in normalized_text]
@@ -1353,7 +1366,7 @@ def run_diagnosis(
             weighted_total += rubric[-1]["score"] * row["weight"]
             total_weight += row["weight"]
     else:
-        length_bonus = min(1.0, text_len / 2200) if is_file else min(0.6, text_len / 700)
+        length_bonus = min(1.2, text_len / 1800) if is_file else min(0.9, text_len / 600)
         for row in active_rubrics:
             ev_score = _evidence_score(normalized_text, row["evidence"], stage=project_stage, is_file=is_file)
             matched_evidence = [kw for kw in row["evidence"] if kw.lower() in normalized_text]
@@ -1371,7 +1384,7 @@ def run_diagnosis(
                 elif sig_val >= 0.3:
                     base_pen *= 0.8
                 penalties += base_pen
-            penalties = min(penalties, 1.15 if project_stage == "idea" else 1.45 if project_stage == "structured" else 1.8)
+            penalties = min(penalties, 0.7 if project_stage == "idea" else 0.95 if project_stage == "structured" else 1.2)
             # ── 未命中规则，也可以通过 signals 反向加分（该维度关联的规则里有强证据）──
             signal_bonus = 0.0
             for r_id in row.get("rules", []):
@@ -1379,10 +1392,10 @@ def run_diagnosis(
                     continue  # 已在 penalty 里处理
                 sig_val = float(structured_signals.get(r_id, 0.0) or 0.0)
                 if sig_val >= 0.7:
-                    signal_bonus += 1.2
+                    signal_bonus += 1.5
                 elif sig_val >= 0.5:
-                    signal_bonus += 0.7
-            signal_bonus = min(signal_bonus, 3.0)
+                    signal_bonus += 0.9
+            signal_bonus = min(signal_bonus, 3.6)
             dim_score = max(0.0, min(10.0, ev_score + length_bonus + signal_bonus - penalties))
 
             if dim_rules:
@@ -1577,8 +1590,8 @@ def run_diagnosis(
         }
 
     overall_raw = round(weighted_total / total_weight, 2) if total_weight else 0.0
-    stage_floor = {"idea": 2.0, "structured": 3.5, "validated": 5.5, "document": 6.0}.get(project_stage, 2.5)
-    stage_ceiling = {"idea": 8.0, "structured": 9.3, "validated": 9.7, "document": 9.9}.get(project_stage, 9.0)
+    stage_floor = {"idea": 2.8, "structured": 4.6, "validated": 5.8, "document": 6.6}.get(project_stage, 3.2)
+    stage_ceiling = {"idea": 8.6, "structured": 9.5, "validated": 9.8, "document": 10.0}.get(project_stage, 9.2)
     overall_score = round(min(stage_ceiling, max(stage_floor, overall_raw)), 2)
     source_breakdown: dict[str, int] = {}
     for r in rubric:

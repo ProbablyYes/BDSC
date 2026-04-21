@@ -433,10 +433,8 @@ class UserStorage:
 
         salt, password_hash = self._hash_password(str(payload.get("password", "")))
         now = _now_iso()
-        raw_sid = str(payload.get("student_id", "")).strip() or None
-        if raw_sid:
-            if any(str(u.get("student_id", "")).strip() == raw_sid for u in users):
-                raise ValueError("学号已被占用")
+        # 注册阶段不绑定学号；学号统一在个人中心通过 set_student_id() 后补填。
+        raw_sid = None
         user = {
             "user_id": str(uuid4()),
             "role": payload.get("role", "student"),

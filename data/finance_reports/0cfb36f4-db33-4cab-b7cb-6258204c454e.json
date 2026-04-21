@@ -1,17 +1,17 @@
 {
-  "report_id": "e4d0a960-979",
+  "report_id": "fb8f23d8-341",
   "user_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
   "plan_id": null,
   "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
   "conversation_id": "9010e403-2463-42d4-b136-0bdd37af349a",
   "industry": "教育",
-  "generated_at": "2026-04-21T23:11:12.471093+08:00",
+  "generated_at": "2026-04-21T23:24:24.320944+08:00",
   "modules": [
     {
       "module": "unit_economics",
       "title": "单位经济分析",
       "inputs": {
-        "monthly_price": 0.0,
+        "monthly_price": 2.0,
         "gross_margin": 0.0,
         "monthly_retention": 0.0,
         "cac": 0.0,
@@ -23,14 +23,9 @@
         "score": 0.0,
         "reason": "缺少关键假设（定价 / CAC / 留存），无法完成单位经济建模"
       },
-      "framework_explain": "单位经济框架衡量的是每获得一个用户在其生命周期内能赚多少。对于CityInsight项目，我们可以通过计算单个城市项目的生命周期收益（LTV）和获取该城市的成本（CAC）来评估。假设一个项目周期为3年，平均每个项目收入为50万元，毛利率为70%，那么LTV为50万*70%*36个月/3年=120万元。如果获取一个项目的成本（CAC）为40万元，那么LTV/CAC比率即为120/40=3，这表明项目单位经济状况健康。\n\n最值得你关注的数字是LTV/CAC比率，3表示项目的单位经济状况健康，但接近临界值，需要持续优化成本和提高收入。\n\n---\n原始讲解：\n单位经济（Unit Economics）衡量「每获得一个用户在其生命周期内能赚多少」。核心公式：LTV = 月 ARPU × 毛利率 × 平均生命周期月数；LTV/CAC ≥ 3 视为健康。",
+      "framework_explain": "单位经济框架衡量的是每获得一个用户在其生命周期内能赚多少。对于CityInsight项目，我们可以通过计算每个政府客户的生命周期价值（LTV）和客户获取成本（CAC）来评估。假设一个项目周期为3年，平均每个项目收入为50万元，毛利率为60%，那么LTV为50万元 * 60% * 36个月/3年 = 120万元。如果获取一个客户的成本（如营销、销售等）为30万元，那么LTV/CAC比率为120万元/30万元 = 4，这表明项目在财务上是健康的。\n\n最值得你关注的数字是LTV/CAC比率，4表示项目的盈利能力较强。\n\n---\n原始讲解：\n单位经济（Unit Economics）衡量「每获得一个用户在其生命周期内能赚多少」。核心公式：LTV = 月 ARPU × 毛利率 × 平均生命周期月数；LTV/CAC ≥ 3 视为健康。",
       "suggestions": [],
       "missing_inputs": [
-        {
-          "field": "monthly_price",
-          "hint": "请在财政预算→收入模型填入月价",
-          "target_tab": "biz"
-        },
         {
           "field": "gross_margin",
           "hint": "毛利率=（单价-变动成本）/单价，先估个大致值",
@@ -62,42 +57,353 @@
         "initial_capital": 0.0,
         "fixed_costs_monthly": 0.0,
         "variable_cost_per_user": 0.0,
-        "monthly_price": 0.0,
+        "monthly_price": 2.0,
         "new_users_per_month": 0.0,
         "monthly_retention": 0.0,
         "growth_rate_monthly": 0.0
       },
-      "outputs": {},
-      "verdict": {
-        "level": "gray",
-        "score": 0.0,
-        "reason": "缺少月固定成本或定价，无法模拟现金流"
+      "outputs": {
+        "months_simulated": 36,
+        "breakeven_month": null,
+        "runway_exhausted_month": null,
+        "avg_burn_rate_first6": 0.0,
+        "runway_months": null,
+        "end_cash": 0.0,
+        "projection": [
+          {
+            "month": 1,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 2,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 3,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 4,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 5,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 7,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 8,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 9,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 10,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 11,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 12,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 13,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 14,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 15,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 16,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 17,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 18,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 19,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 20,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 21,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 22,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 23,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 24,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 25,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 26,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 27,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 28,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 29,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 30,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 31,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 32,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 33,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 34,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 35,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          },
+          {
+            "month": 36,
+            "paying_users": 0.0,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cash": 0.0
+          }
+        ],
+        "peak_paying_users": 0.0,
+        "total_revenue_36m": 0.0
       },
-      "framework_explain": "现金流推演是通过36个月的Excel模型，逐月模拟付费用户存量、月经常性收入（MRR）、成本、净现金和累计现金来预测财务状况。根据你提供的数据，假设初期拿下几个项目，每月MRR为20万，月成本为10万，那么每月净现金流入为10万。累计现金会逐月增加，但需关注前期可能存在的资金缺口。Runway（剩余跑道）计算为当前现金（假设为100万）除以平均月烧钱率（10万），即10个月。这意味着你需要在10个月内获得新的资金注入，以维持运营。最值得你关注的数字是10个月，这代表了你当前资金能支撑的时间长度。\n\n---\n原始讲解：\n**现金流推演**一般用 36 个月 Excel 模型：逐月模拟付费用户存量、MRR、成本、净现金和累计现金。**Runway（剩余跑道）** = 当前现金 / 平均月烧钱率，是投资人判断下一轮紧迫度的核心指标。",
-      "suggestions": [],
+      "verdict": {
+        "level": "yellow",
+        "score": 0.55,
+        "reason": "36 个月内未实现单月净现金转正，末月现金 ¥0"
+      },
+      "framework_explain": "现金流推演36个月模型用于预测未来36个月的现金流情况。根据你提供的信息，我们假设初始没有付费用户，每月新增用户数和留存率未知，因此模型显示每月收入和净现金流均为零。固定成本（如服务器费用、人力成本）和变动成本（如开发新功能的人力成本）也未具体量化，导致成本项为零。累计现金也保持在零。\n\n最值得你关注的是**Runway（现金流耗尽时间）**，模型显示为null，这意味着你需要提供更详细的财务数据，特别是每月新增用户数、留存率、成本结构等，以便准确计算。这将帮助你了解项目在多长时间内可能耗尽现有资金，从而做出更合理的财务规划。\n\n---\n原始讲解：\n**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；\nMRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n**Runway** = 当前现金 / 平均月烧钱率。投资人默认 < 6 个月为高危、6-12 个月警戒、≥ 18 个月健康。",
+      "suggestions": [
+        "盈亏平衡太晚，评估是否提价 / 增加付费转化率 / 降低变动成本",
+        "做敏感性分析：价格 +10% / 留存 +5pp / CAC -20% 三种场景下的 Runway 对比"
+      ],
       "missing_inputs": [
         {
           "field": "fixed_costs_monthly",
           "hint": "月固定成本（服务器/房租/工资）",
           "target_tab": "cost"
-        },
-        {
-          "field": "monthly_price",
-          "hint": "月均单价",
-          "target_tab": "biz"
         }
       ],
-      "evidence_for_diagnosis": {},
+      "evidence_for_diagnosis": {
+        "H24": 0.3
+      },
       "baseline_meta": {}
     },
     {
       "module": "rationality",
       "title": "财务假设合理性",
       "inputs": {
-        "industry": "教育"
+        "industry": "教育",
+        "monthly_price": 2.0
       },
       "outputs": {
-        "checks": [],
+        "checks": [
+          {
+            "field": "monthly_price",
+            "value": 2.0,
+            "range": [
+              29,
+              99
+            ],
+            "level": "red",
+            "note": "月价 2.0 远低于行业区间 [29, 99]"
+          }
+        ],
         "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
         "baseline": {
           "cac_range": [
@@ -119,35 +425,18 @@
         }
       },
       "verdict": {
-        "level": "gray",
-        "score": 0.0,
-        "reason": "没有任何可与行业基准对比的数字，先补 CAC/留存/定价/毛利 中的至少一项"
+        "level": "red",
+        "score": 0.25,
+        "reason": "月价 2.0 远低于行业区间 [29, 99]"
       },
-      "framework_explain": "财务分析框架是用于评估项目的成本效益和盈利能力的一系列指标。结合你的项目，我们关注客户获取成本（CAC）和月度收入。假设每个项目的平均价格为50万元，考虑到项目周期和人力成本，初步估算CAC在30万到120万之间。月度收入基于项目周期，假设为10个月完成，每月收入为5万元。最值得关注的是月度留存率，根据智慧城市项目特性，假设在0.7到0.9之间，这直接影响项目的长期盈利性。\n\n---\n原始讲解：\n",
-      "suggestions": [],
-      "missing_inputs": [
-        {
-          "field": "monthly_price",
-          "hint": "月价 / ARPU",
-          "target_tab": "biz"
-        },
-        {
-          "field": "cac",
-          "hint": "获客成本",
-          "target_tab": "biz"
-        },
-        {
-          "field": "monthly_retention",
-          "hint": "月留存率",
-          "target_tab": "biz"
-        },
-        {
-          "field": "gross_margin",
-          "hint": "毛利率",
-          "target_tab": "biz"
-        }
+      "framework_explain": "行业基准对比框架用于评估项目的财务健康度是否符合行业标准。根据教育行业的头部项目，月价的合理区间为29到99元，而你的项目月价为2元，远低于行业标准，这表明定价可能过低，需要调整以确保盈利空间。最值得关注的数字是月价2元，这显著低于行业标准，可能影响项目的盈利能力。\n\n---\n原始讲解：\n**行业基准对比**（教育）：用头部项目的中位区间做锚，判断你的假设是否在同行合理范围。\n- 月价 [[29, 99]]\n- CAC [[30, 120]]\n- 月留存 [[0.7, 0.9]]\n- 毛利率 [[0.6, 0.85]]\n\n教育类看重留存与续费，CAC 对价格敏感度高",
+      "suggestions": [
+        "月价 2.0 远低于行业区间 [29, 99]——需要用用户调研或成本拆解补充证据"
       ],
-      "evidence_for_diagnosis": {},
+      "missing_inputs": [],
+      "evidence_for_diagnosis": {
+        "H3": 0.5
+      },
       "baseline_meta": {
         "industry": "教育",
         "source": "seed",
@@ -163,7 +452,7 @@
         "target_user_population": 0.0,
         "first_year_reach_users": 0.0,
         "paid_conversion_rate": 0.0,
-        "annual_arpu": 0.0,
+        "annual_arpu": 24.0,
         "industry_tam_billions": 0.0
       },
       "outputs": {},
@@ -172,7 +461,7 @@
         "score": 0.0,
         "reason": "缺少关键人口/转化/单价数据，无法建模 TAM/SAM/SOM"
       },
-      "framework_explain": "框架是通过TAM/SAM/SOM三层市场分析来评估市场规模和可行性。以CityInsight为例，TAM可以参考智慧城市整体市场规模，假设为1000亿元；SAM则根据你们的服务对象政府部门，假设为TAM的20%，即200亿元；SOM则是你们通过项目制收费模式，假设拿下5%市场份额，即10亿元。自上而下估算为10亿元，自下而上通过触达的政府单位数量、转化率和客单价计算，假设为8亿元，两者偏差在1.25倍内，较为可信。最值得你关注的数字是SOM的10亿元，这代表了你们项目的潜在收入规模。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n**必须做交叉验证**：自上而下（行业报告市场规模 × 你的份额假设）+ 自下而上（可触达人数 × 转化率 × 客单价），两者偏差 < 3 倍才可信。",
+      "framework_explain": "TAM/SAM/SOM 三层市场分析框架用于评估市场潜力。TAM 是智慧城市数据分析平台的全市场总规模，假设为 500 亿元；SAM 是 CityInsight 能覆盖的子市场，根据技术和服务范围，我们假设为 TAM 的 20%，即 100 亿元；SOM 是 CityInsight 现实可拿下的份额，假设为 SAM 的 5%，即 5 亿元。自上而下计算为 TAM 乘以 SAM 和 SOM 的份额，自下而上计算为潜在客户数乘以转化率和客单价，两者偏差在合理范围内，验证了市场潜力。最值得你关注的数字是 SOM，即 5 亿元，这代表了你项目在当前市场环境下可实现的潜在收入规模。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n**必须做交叉验证**：自上而下（行业报告市场规模 × 你的份额假设）+ 自下而上（可触达人数 × 转化率 × 客单价），两者偏差 < 3 倍才可信。",
       "suggestions": [
         "检测到「拿到 1% 市场」式懒惰估算，建议改自下而上：渠道×转化×单价",
         "明确「首年可触达用户」对应哪些具体渠道（至少列 2 个）",
@@ -193,11 +482,6 @@
           "field": "paid_conversion_rate",
           "hint": "触达到付费的转化率（0-1）",
           "target_tab": "biz"
-        },
-        {
-          "field": "annual_arpu",
-          "hint": "年客单价",
-          "target_tab": "biz"
         }
       ],
       "evidence_for_diagnosis": {},
@@ -208,12 +492,12 @@
       "title": "定价策略框架推荐",
       "inputs": {
         "industry": "教育",
-        "stage": "idea",
+        "stage": "structured",
         "project_type": "老师，我现在在做一个创新创业项目，叫 CityInsight。\n我们主要是做城市数据分析平台，利用 AI 帮政府做决策，比如交通优化、商圈分析这些。\n我觉得现在智慧城市很火，市场也很大，而且我们技术也挺强的。\n您觉得这个项目有前景吗？\n我们"
       },
       "outputs": {
-        "recommended_id": "van_westendorp",
-        "recommended_name": "Van Westendorp PSM",
+        "recommended_id": "value_based",
+        "recommended_name": "价值基（Value-Based）",
         "all_frameworks": [
           {
             "id": "cost_plus",
@@ -248,21 +532,16 @@
             "cons": "样本量 ≥ 100 才稳；需要过滤极端回答"
           }
         ],
-        "psm_survey_questions": [
-          "这个产品在什么价位你会觉得太贵不考虑？",
-          "什么价位你觉得贵但会认真考虑下单？",
-          "什么价位你觉得便宜划算会马上买？",
-          "什么价位你觉得便宜到怀疑它不靠谱？"
-        ]
+        "psm_survey_questions": []
       },
       "verdict": {
         "level": "green",
         "score": 0.7,
-        "reason": "基于教育行业 + idea 阶段，推荐用「Van Westendorp PSM」"
+        "reason": "基于教育行业 + structured 阶段，推荐用「价值基（Value-Based）」"
       },
-      "framework_explain": "框架是Van Westendorp PSM，适用于To C产品首次定价且缺乏历史数据时。本次计算通过调研用户对不同价格点的接受度，分别询问用户认为价格太贵会放弃购买、价格偏高但仍会购买、价格偏低仍会购买、价格太便宜会怀疑质量，取这四个价格的交点作为建议定价。结合你的项目，可以针对潜在政府客户进行调研，了解他们对数据分析平台的支付意愿。\n\n最值得你关注的数字是调研中客户认为“太贵放弃”的价格点，这将直接影响项目的市场接受度和盈利空间。\n\n---\n原始讲解：\n**Van Westendorp PSM**\n- 适用：To C 产品首次定价、缺乏历史数据时\n- 公式：`问 4 题：太贵放弃价 / 贵但会买 / 便宜会买 / 太便宜不信价，取交点`\n- 优点：用户主导，结果可直接用\n- 缺点：样本量 ≥ 100 才稳；需要过滤极端回答\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
+      "framework_explain": "价值基（Value-Based）框架是通过量化产品为用户带来的价值来确定定价。对于CityInsight项目，可以通过与潜在客户的访谈或案例研究来估算使用CityInsight能为政府节省的成本或带来的收益。例如，如果通过交通优化每年能为城市节省1000万人民币，那么定价可以设定为节省成本的10%到30%，即100万到300万人民币之间。最值得你关注的是“用户可感知价值”，这是决定定价和盈利潜力的关键因素。\n\n---\n原始讲解：\n**价值基（Value-Based）**\n- 适用：产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）\n- 公式：`定价 = 用户可感知价值 × 10%~30% 分成`\n- 优点：天花板最高，能撑高毛利\n- 缺点：需要先做 ROI 访谈 / Case Study 证明价值\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
       "suggestions": [
-        "若采纳「Van Westendorp PSM」，下一步执行：做 100 份 PSM 问卷，取 3 条曲线交点作为建议价位区间",
+        "若采纳「价值基（Value-Based）」，下一步执行：先访谈 5 位目标用户，让他们口述产品每月能帮自己省多少钱 / 多赚多少钱",
         "定价决定后，回来跑一次『单位经济分析』验证 LTV/CAC ≥ 3"
       ],
       "missing_inputs": [],
@@ -361,7 +640,7 @@
         "score": 0.6,
         "reason": "根据业务里程碑，建议走「种子轮（Pre-Seed / Seed）」（支票 ¥500000-¥3000000，稀释 8%-15%）"
       },
-      "framework_explain": "框架是根据创业项目的发展阶段来规划融资节奏与业务里程碑。CityInsight 目前处于种子轮阶段，需要展示团队和方向，通过 PPT 融资。根据模型输出，推荐种子轮融资规模在 50 万到 300 万人民币之间，股权稀释比例在 8% 到 15% 之间，适合早期天使、孵化器或校友资助。最值得你关注的数字是股权稀释比例，这将直接影响你对公司的控制权。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
+      "framework_explain": "框架是根据创业项目的不同发展阶段，来确定融资轮次及所需达到的业务里程碑。CityInsight 目前处于种子轮阶段，需要展示团队和方向，通过 PPT 融资。根据模型输出，推荐的融资规模在 50 万到 300 万人民币之间，股权稀释比例在 8% 到 15% 之间。最值得关注的数字是 50 万人民币，这是种子轮融资的最低规模，意味着团队需要准备好充分的商业计划和市场方向展示，以吸引早期投资者。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
       "suggestions": [
         "如当前业务在种子轮（Pre-Seed / Seed）区间，找「早期天使、孵化器、校友资助」类型的投资人",
         "准备一份 3 页 Teaser：问题-方案-牵引力（Traction 数据）",
@@ -375,10 +654,13 @@
     }
   ],
   "merged_evidence": {
-    "H3": 0.6,
-    "H24": 0.55
+    "H24": 0.55,
+    "H3": 0.6
   },
-  "inputs_snapshot": {},
+  "inputs_snapshot": {
+    "monthly_price": 2.0,
+    "annual_arpu": 24.0
+  },
   "baseline_meta": {
     "industry": "教育",
     "source": "seed",

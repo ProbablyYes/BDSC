@@ -7485,7 +7485,8 @@ export default function TeacherPage() {
 
                           {/* ── Tier 2：评分详情 · 还原学生端分析面板评分 tab 的完整推导 ── */}
                           {latestRubricStudent.length > 0 && (() => {
-                            const total = Number(latestDiag.overall_score ?? latestOverallScore ?? 0);
+                            const total = Number(latestOverallScore ?? latestDiag.overall_score ?? 0);
+                            const latestRoundTotal = Number(latestDiag.overall_score ?? total);
                             const totalColor = total >= 7 ? "#22c55e" : total >= 4 ? "#f59e0b" : "#ef4444";
                             const circumfOv = 2 * Math.PI * 42;
                             const offsetOv = circumfOv * (1 - total / 10);
@@ -7508,7 +7509,9 @@ export default function TeacherPage() {
                                     <div className="proj-detail-section-title">
                                       评分详情 · 怎么算出来的 <span className="proj-detail-section-tier-tag">TIER 2</span>
                                     </div>
-                                    <div className="proj-detail-section-desc">每个维度基础分、证据加成、规则扣分、裁剪过程一目了然，可点击展开详细推导</div>
+                                    <div className="proj-detail-section-desc">
+                                      圆环显示项目当前展示分；下方九维拆解与公式推导默认对应最新一轮诊断，用来解释这一轮 AI 为什么这样打分。
+                                    </div>
                                   </div>
                                   <button
                                     type="button"
@@ -7702,7 +7705,11 @@ export default function TeacherPage() {
                                     return (
                                       <div className="sc-overall-rationale">
                                         <div className="sc-overall-rat-head">
-                                          <span className="sc-overall-rat-title">综合分 {finalScore.toFixed(1)} / 10 · 怎么算出来的</span>
+                                          <span className="sc-overall-rat-title">
+                                            {overallSmoothingMeta && overallSmoothingMeta.turns >= 2
+                                              ? `展示分 ${total.toFixed(1)} / 10 · 最新一轮原值推导`
+                                              : `综合分 ${finalScore.toFixed(1)} / 10 · 怎么算出来的`}
+                                          </span>
                                           {stageCn && <span className="sc-overall-rat-stage">{stageCn}</span>}
                                         </div>
                                         {overallSmoothingMeta && overallSmoothingMeta.turns >= 2 ? (
@@ -7720,6 +7727,7 @@ export default function TeacherPage() {
                                           </div>
                                         ) : null}
                                         <div className="sc-overall-rat-desc">
+                                          {overallSmoothingMeta && overallSmoothingMeta.turns >= 2 ? <>下方展示的是最新一轮诊断分 <b>{finalScore.toFixed(2)}</b> 的推导；上方圆环与项目名片展示的是最近 3 轮加权后的展示分 <b>{total.toFixed(2)}</b>。<br /></> : null}
                                           综合分 = 按 {latestRubricStudent.length} 个维度加权平均后，再夹到「{stageCn || "当前阶段"}」允许区间
                                           <b> [{floor}, {ceil}]</b>。
                                           加权平均算出 <b>{raw.toFixed(2)}</b>，

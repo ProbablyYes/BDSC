@@ -488,7 +488,7 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
             "role": role,
             "display_name": account,
             "email": email,
-            "student_id": account if role == "student" else None,
+            "student_id": None,
             "password": raw_password,
         }
 

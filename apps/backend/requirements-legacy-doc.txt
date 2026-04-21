@@ -1,0 +1,14 @@
+# Optional support for legacy `.doc` parsing.
+#
+# The code path lives in `app/services/hypergraph_document.py` and is only
+# needed when you must parse old Word 97-2003 `.doc` files.
+#
+# `textract` currently has metadata compatibility issues with modern pip/uv,
+# so keep it isolated from the default server deployment requirements.
+# If you really need it, install it in a dedicated environment with an older
+# pip first, for example:
+#
+#   python -m pip install "pip<24.1"
+#   python -m pip install -r requirements-legacy-doc.txt
+#
+textract==1.6.5

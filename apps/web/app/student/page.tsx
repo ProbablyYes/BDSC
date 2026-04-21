@@ -5039,7 +5039,12 @@ export default function StudentPage() {
                         const med = active.filter((r: any) => r.severity === "medium").length;
                         const low = active.filter((r: any) => r.severity === "low").length;
                         const total = active.length;
-                        const healthScore = total === 0 ? 100 : Math.max(10, Math.round(100 - high * 12 - med * 5 - low * 2));
+                        const W_HIGH = 12;
+                        const W_MED = 5;
+                        const W_LOW = 2;
+                        const deductions = high * W_HIGH + med * W_MED + low * W_LOW;
+                        const rawScore = 100 - deductions;
+                        const healthScore = total === 0 ? 100 : Math.max(10, Math.round(rawScore));
                         const circumference = 2 * Math.PI * 32;
                         const strokeDashoffset = circumference * (1 - healthScore / 100);
                         const healthColor = healthScore >= 70 ? "#22c55e" : healthScore >= 40 ? "#f59e0b" : "#ef4444";
@@ -5067,6 +5072,80 @@ export default function StudentPage() {
                                 </div>
                               </div>
                             </div>
+                            <details className="risk-health-derive">
+                              <summary className="risk-health-derive-head">
+                                <span className="risk-health-derive-title">健康分是怎么算出来的？</span>
+                                <span className="risk-health-derive-hint">点击展开公式</span>
+                              </summary>
+                              <div className="risk-health-derive-body">
+                                <div className="risk-health-formula">
+                                  <span className="rhf-label">公式</span>
+                                  <code className="rhf-code">
+                                    健康分 = max(10, 100 − 高危×{W_HIGH} − 中等×{W_MED} − 轻微×{W_LOW})
+                                  </code>
+                                </div>
+                                <div className="risk-health-steps">
+                                  <div className="rhs-row rhs-head">
+                                    <span>档位</span><span>命中</span><span>单位扣分</span><span>本档扣分</span>
+                                  </div>
+                                  <div className="rhs-row">
+                                    <span><span className="risk-dot high" /> 高危</span>
+                                    <span className="rhs-count">{high}</span>
+                                    <span className="rhs-unit">−{W_HIGH}</span>
+                                    <span className="rhs-delta">−{high * W_HIGH}</span>
+                                  </div>
+                                  <div className="rhs-row">
+                                    <span><span className="risk-dot medium" /> 中等</span>
+                                    <span className="rhs-count">{med}</span>
+                                    <span className="rhs-unit">−{W_MED}</span>
+                                    <span className="rhs-delta">−{med * W_MED}</span>
+                                  </div>
+                                  <div className="rhs-row">
+                                    <span><span className="risk-dot low" /> 轻微</span>
+                                    <span className="rhs-count">{low}</span>
+                                    <span className="rhs-unit">−{W_LOW}</span>
+                                    <span className="rhs-delta">−{low * W_LOW}</span>
+                                  </div>
+                                  <div className="rhs-row rhs-sum">
+                                    <span>合计扣分</span>
+                                    <span></span>
+                                    <span></span>
+                                    <span className="rhs-delta">−{deductions}</span>
+                                  </div>
+                                </div>
+                                <div className="risk-health-final">
+                                  <div className="rhfinal-step">
+                                    <span className="rhfinal-expr">100 − {deductions}</span>
+                                    <span className="rhfinal-eq">=</span>
+                                    <span className="rhfinal-val">{rawScore}</span>
+                                    <span className="rhfinal-tag">原始分</span>
+                                  </div>
+                                  {rawScore < 10 ? (
+                                    <div className="rhfinal-step">
+                                      <span className="rhfinal-expr">max(10, {rawScore})</span>
+                                      <span className="rhfinal-eq">=</span>
+                                      <span className="rhfinal-val" style={{ color: healthColor }}>{healthScore}</span>
+                                      <span className="rhfinal-tag">下限兜底</span>
+                                    </div>
+                                  ) : (
+                                    <div className="rhfinal-step">
+                                      <span className="rhfinal-expr">四舍五入</span>
+                                      <span className="rhfinal-eq">=</span>
+                                      <span className="rhfinal-val" style={{ color: healthColor }}>{healthScore}</span>
+                                      <span className="rhfinal-tag">最终健康分</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="risk-health-band">
+                                  <div className={`rhband-seg ${healthScore < 40 ? "rhband-active" : ""}`}><span>&lt; 40</span><em>危险</em></div>
+                                  <div className={`rhband-seg ${healthScore >= 40 && healthScore < 70 ? "rhband-active" : ""}`}><span>40–69</span><em>偏弱</em></div>
+                                  <div className={`rhband-seg ${healthScore >= 70 ? "rhband-active" : ""}`}><span>≥ 70</span><em>健康</em></div>
+                                </div>
+                                <div className="risk-health-note">
+                                  <strong>权重说明：</strong>高危规则对项目推进影响最大，每条扣 {W_HIGH} 分；中等风险多是证据或结构缺口，每条扣 {W_MED} 分；轻微风险多是表达或细节问题，每条扣 {W_LOW} 分。已解决的规则（{resolved.length} 条）不参与本次扣分，避免历史问题持续压低当前健康度。
+                                </div>
+                              </div>
+                            </details>
                           </div>
                         );
                       })()}

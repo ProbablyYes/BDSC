@@ -6916,9 +6916,35 @@ export default function TeacherPage() {
                   latestDiag.current_summary_rationale && { key: "summary", label: "项目总结", rationale: latestDiag.current_summary_rationale },
                   latestDiag.next_task_rationale && { key: "next_task", label: "下一步任务", rationale: latestDiag.next_task_rationale },
                 ].filter(Boolean) as Array<{ key: string; label: string; rationale: any }>;
-                const latestKg = latestSub?.kg_analysis || latestDiag?.kg || {};
+                const latestKg = latestSub?.kg_analysis || latestDiag?.kg || activeProject?.latest_kg || {};
                 const latestEntities: any[] = latestKg.entities || latestKg.nodes || [];
+                const latestRelationships: any[] = latestKg.relationships || [];
+                const latestKgGaps: string[] = latestKg.structural_gaps || [];
+                const latestKgStrengths: string[] = latestKg.content_strengths || [];
                 const latestRules: any[] = latestDiag.triggered_rules || latestDiag.pattern_warnings || [];
+                // 学生端 0-10 分制的 rubric（含 base_score / signal_bonus / rule_penalty / rationale 等完整字段）
+                const latestRubricStudent: any[] = Array.isArray(latestDiag.rubric) ? latestDiag.rubric : [];
+                // 超图数据链
+                const latestHyperStudent: any = latestSub?.hypergraph_student || activeProject?.latest_hypergraph_student || {};
+                const latestHyperInsight: any = latestSub?.hypergraph_insight || activeProject?.latest_hypergraph || {};
+                const latestHyperProjectView: any = latestSub?.hypergraph_project_view || activeProject?.latest_hypergraph_project_view || {};
+                const latestHubs: any[] = latestHyperStudent.hub_entities || [];
+                const latestWarnings: any[] = latestHyperStudent.pattern_warnings || [];
+                const latestStrengthsHG: any[] = latestHyperStudent.pattern_strengths || [];
+                const latestMissingDims: any[] = latestHyperStudent.missing_dimensions || [];
+                const latestTemplateMatches: any[] = latestHyperStudent.template_matches || [];
+                const latestConsistencyIssues: any[] = latestSub?.hyper_consistency_issues || latestHyperStudent.consistency_issues || [];
+                const latestMatchedEdges: any[] = latestHyperProjectView.matched_edges || latestHyperInsight.edges || latestHyperStudent.cross_links || [];
+                const latestUsefulCards: any[] = latestHyperProjectView.useful_cards || [];
+                const latestMatchedRules: string[] = latestHyperProjectView?.process_trace?.matched_rules || [];
+                const latestTask: any = latestSub?.next_task || latestDiag.next_task || activeProject?.latest_task || {};
+                const latestOverallRat: any = latestDiag.overall_rationale || latestDiag.rubric_assessment?.overall_rationale;
+                const bottleneckText: string = typeof latestDiag.bottleneck === "string" ? latestDiag.bottleneck : (latestDiag.bottleneck?.text || "");
+                const subtitleText: string = (() => {
+                  const pick = activeProject?.current_summary || latestDiag?.current_summary || bottleneckText || latestKg.insight || "";
+                  const s = String(pick || "").trim();
+                  return s.length > 160 ? s.slice(0, 160) + "…" : s;
+                })();
 
                 return (
                   <div className="proj-shell">
@@ -6961,8 +6987,8 @@ export default function TeacherPage() {
                                 {activeProject.latest_phase && <span className="proj-name-card-meta-tag">{activeProject.latest_phase}</span>}
                                 {activeProject.logical_project_id && <span className="proj-name-card-meta-tag" style={{ fontFamily: "monospace", fontSize: 10 }}>{String(activeProject.logical_project_id).slice(0, 12)}</span>}
                               </div>
-                              {(activeProject.current_summary || activeProject.latest_diagnosis?.current_summary) && (
-                                <p className="proj-name-card-summary">{activeProject.current_summary || activeProject.latest_diagnosis?.current_summary}</p>
+                              {subtitleText && (
+                                <p className="proj-name-card-summary">{subtitleText}</p>
                               )}
                             </div>
                             <div className="proj-name-card-right">
@@ -7037,12 +7063,12 @@ export default function TeacherPage() {
                             </div>
                           )}
 
-                          {/* ── Tier 2：九维评分 ── */}
-                          {latestRubric.length > 0 && (
+                          {/* ── Tier 2：九维评分 chip 对比（与详细评分 tab 互补） ── */}
+                          {latestRubric.length > 0 && latestRubricStudent.length === 0 && (
                             <div className="proj-detail-section">
                               <div className="proj-detail-section-head">
                                 <div className="proj-detail-section-title">
-                                  九维评分推导 <span className="proj-detail-section-tier-tag">TIER 2</span>
+                                  九维评分对比 <span className="proj-detail-section-tier-tag">TIER 2</span>
                                 </div>
                                 <div className="proj-detail-section-desc">点击 chip 查看具体「证据 → 分数贡献」；支持多维对比</div>
                               </div>
@@ -7071,68 +7097,969 @@ export default function TeacherPage() {
                             </div>
                           )}
 
-                          {/* ── Tier 2：规则命中（历史频次） ── */}
-                          {agg.ruleFrequency.length > 0 && (
-                            <div className="proj-detail-section">
-                              <div className="proj-detail-section-head">
-                                <div className="proj-detail-section-title">
-                                  风险规则命中 <span className="proj-detail-section-tier-tag">TIER 2</span>
-                                </div>
-                                <div className="proj-detail-section-desc">基于全历史诊断的规则频次，出现轮次越多越值得干预</div>
-                              </div>
-                              <div className="proj-risk-table">
-                                <div className="proj-risk-table-head">
-                                  <span>规则</span><span>名称</span><span>次数</span><span>轮次</span><span></span>
-                                </div>
-                                {agg.ruleFrequency.map((r) => {
-                                  const sev = (r.severity || "info").toLowerCase();
-                                  return (
-                                    <div key={r.rule_id} className="proj-risk-table-row">
-                                      <span><span className={`proj-risk-sev ${sev}`} />{r.rule_id}</span>
-                                      <span>{r.rule_name || getRuleDisplayName(r.rule_id)}</span>
-                                      <span style={{ fontWeight: 600 }}>{r.hit_count}</span>
-                                      <span>{r.rounds}</span>
-                                      <span>
-                                        <button
-                                          type="button"
-                                          className="team-dim-override"
-                                          onClick={() => setOverrideDrawer({
-                                            open: true,
-                                            title: `订正风险 · ${r.rule_id}`,
-                                            projectId: activeProject.project_id,
-                                            conversationId: undefined,
-                                            targetType: "risk_rule",
-                                            targetKey: r.rule_id,
-                                            aiValue: r.hit_count,
-                                          })}
-                                        >✎</button>
-                                      </span>
+                          {/* ── Tier 2：风险 · 还原学生端分析面板风险 tab 的完整排版 ── */}
+                          {(latestRules.length > 0 || agg.ruleFrequency.length > 0) && (() => {
+                            const active = latestRules.filter((r: any) => !r.resolved);
+                            const high = active.filter((r: any) => r.severity === "high").length;
+                            const med = active.filter((r: any) => r.severity === "medium").length;
+                            const low = active.filter((r: any) => r.severity === "low").length;
+                            const total = active.length;
+                            const healthScore = total === 0 ? 100 : Math.max(10, Math.round(100 - high * 12 - med * 5 - low * 2));
+                            const circumference = 2 * Math.PI * 32;
+                            const strokeDashoffset = circumference * (1 - healthScore / 100);
+                            const healthColor = healthScore >= 70 ? "#22c55e" : healthScore >= 40 ? "#f59e0b" : "#ef4444";
+                            const resolvedCount = latestRules.filter((r: any) => r.resolved).length;
+                            return (
+                              <details className="proj-detail-section" open>
+                                <summary className="proj-detail-section-head">
+                                  <div>
+                                    <div className="proj-detail-section-title">
+                                      风险命中与推理 <span className="proj-detail-section-tier-tag">TIER 2</span>
                                     </div>
-                                  );
-                                })}
+                                    <div className="proj-detail-section-desc">基于风险规则库扫描，学生原话 → 推理链 → 修复建议，完整可追溯</div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="proj-section-override-btn"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setOverrideDrawer({
+                                        open: true,
+                                        title: `订正风险整体判断 · ${activeProject.project_name || ""}`,
+                                        projectId: activeProject.project_id,
+                                        conversationId: undefined,
+                                        targetType: "risk",
+                                        targetKey: "all_risks",
+                                        aiValue: latestRules.length,
+                                      });
+                                    }}
+                                  >✎ 订正整体</button>
+                                </summary>
+                                <div className="proj-detail-section-body right-section" style={{ padding: 0 }}>
+                                  {/* 风险概览条（健康分环 + 三档统计） */}
+                                  {latestRules.length > 0 && (
+                                    <div className="risk-summary-bar">
+                                      <div className="risk-health-row">
+                                        <svg width="80" height="80" viewBox="0 0 80 80" className="risk-health-ring">
+                                          <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" strokeWidth="6" />
+                                          <circle cx="40" cy="40" r="32" fill="none" stroke={healthColor} strokeWidth="6"
+                                            strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+                                            strokeLinecap="round" transform="rotate(-90 40 40)" style={{ transition: "stroke-dashoffset 0.6s ease" }} />
+                                          <text x="40" y="44" textAnchor="middle" fontSize="16" fontWeight="700" fill={healthColor}>{healthScore}</text>
+                                        </svg>
+                                        <div className="risk-health-meta">
+                                          <div className="risk-summary-stats">
+                                            <span className="risk-stat high">{high} 高危</span>
+                                            <span className="risk-stat medium">{med} 中等</span>
+                                            <span className="risk-stat low">{low} 轻微</span>
+                                            {resolvedCount > 0 && <span className="risk-stat resolved">{resolvedCount} 已解决</span>}
+                                          </div>
+                                          <div className="risk-dist-track">
+                                            {high > 0 && <div className="risk-dist-seg high" style={{ width: `${(high / Math.max(total, 1)) * 100}%` }} />}
+                                            {med > 0 && <div className="risk-dist-seg medium" style={{ width: `${(med / Math.max(total, 1)) * 100}%` }} />}
+                                            {low > 0 && <div className="risk-dist-seg low" style={{ width: `${(low / Math.max(total, 1)) * 100}%` }} />}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 逐条风险卡片 — 完整对齐学生端 .risk-detail-card */}
+                                  {latestRules.map((r: any, ri: number) => {
+                                    const sev = String(r.severity || "info").toLowerCase();
+                                    const sevLabel = ({ high: "高危", medium: "中等", low: "轻微" } as Record<string, string>)[sev] || sev;
+                                    const ruleId = r.rule_id || r.id || `R${ri + 1}`;
+                                    const ruleName = r.rule_name || r.name || getRuleDisplayName(ruleId);
+                                    const srcId = r.source_message_id;
+                                    return (
+                                      <details key={`${ruleId}-${ri}`} className={`risk-detail-card ${sev}${r.resolved ? " resolved" : ""}`} open={ri < 2 && !r.resolved}>
+                                        <summary className="risk-detail-header">
+                                          <span className="risk-id">{ruleId}</span>
+                                          <span className="risk-name">{ruleName}</span>
+                                          <span className={`risk-badge ${r.resolved ? "resolved" : sev}`}>
+                                            {r.resolved ? "已解决" : sevLabel}
+                                          </span>
+                                          {r.turnCount > 1 && !r.resolved && <span className="risk-repeat-badge">持续{r.turnCount}轮</span>}
+                                        </summary>
+                                        <div className="risk-detail-body">
+                                          {r.explanation && <p className="risk-explanation">{r.explanation}</p>}
+                                          {r.quote && (
+                                            <div className="risk-quote-block">
+                                              <span className="risk-field-label">触发原文：</span>
+                                              <blockquote className="risk-quote">{r.quote}</blockquote>
+                                              {srcId && (
+                                                <button
+                                                  type="button"
+                                                  className="tet-ev-mid-btn"
+                                                  onClick={() => handleJumpMessage(srcId)}
+                                                  title="跳回源消息"
+                                                  style={{ marginTop: 6 }}
+                                                >↗ {String(srcId).slice(0, 8)}</button>
+                                              )}
+                                            </div>
+                                          )}
+                                          {r.impact && (
+                                            <div className="risk-impact">
+                                              <span className="risk-field-label">如不处理：</span>
+                                              <p>{r.impact}</p>
+                                            </div>
+                                          )}
+                                          {(r.matched_keywords ?? []).length > 0 && (
+                                            <div className="risk-matched">
+                                              <span className="risk-field-label">触发关键词：</span>
+                                              {r.matched_keywords.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip triggered">{k}</span>)}
+                                            </div>
+                                          )}
+                                          {(r.missing_requires ?? []).length > 0 && (
+                                            <div className="risk-matched">
+                                              <span className="risk-field-label">缺失要素：</span>
+                                              {r.missing_requires.map((k: string, ki: number) => <span key={ki} className="risk-kw-chip missing">{k}</span>)}
+                                            </div>
+                                          )}
+                                          {r.fix_hint && (
+                                            <div className="risk-fix">
+                                              <span className="risk-field-label">修复建议：</span>
+                                              <p>{r.fix_hint}</p>
+                                            </div>
+                                          )}
+                                          {r.linked_task?.title && (
+                                            <div className="risk-linked-task">
+                                              <span className="risk-field-label">修复行动：</span>
+                                              <strong>{r.linked_task.title}</strong>
+                                              {r.linked_task.description && <p>{r.linked_task.description}</p>}
+                                              {(r.linked_task.acceptance_criteria ?? []).length > 0 && (
+                                                <div className="risk-lt-accept">验收：{r.linked_task.acceptance_criteria.join("；")}</div>
+                                              )}
+                                            </div>
+                                          )}
+                                          {r.competition_context && (
+                                            <div className="risk-competition-ctx">
+                                              <span className="risk-field-label">赛事参考：</span>
+                                              <p>{r.competition_context}</p>
+                                            </div>
+                                          )}
+                                          {(r.inference_chain?.length || r.agent_name || r.score_impact != null) && (
+                                            <details className="tch-conclusion" style={{ marginTop: 10 }}>
+                                              <summary>查看推理链 · {r.agent_name || "综合诊断 Agent"}{r.score_impact != null ? ` · 扣分 ${Number(r.score_impact).toFixed(2)}` : ""}</summary>
+                                              <div className="tch-conclusion-body">
+                                                {(r.inference_chain || []).map((step: any, si: number) => (
+                                                  <div key={si} style={{ padding: "6px 10px", marginBottom: 6, background: "rgba(255,255,255,0.03)", borderLeft: "2px solid rgba(139,127,216,0.4)", borderRadius: "0 6px 6px 0", fontSize: 12, lineHeight: 1.55 }}>
+                                                    <span style={{ display: "inline-block", minWidth: 80, color: "#a78bfa", fontWeight: 600, fontFamily: "ui-monospace, monospace", fontSize: 10.5, letterSpacing: "0.04em", textTransform: "uppercase" }}>{typeof step === "string" ? `#${si + 1}` : (step.step || `#${si + 1}`)}</span>
+                                                    <span style={{ color: "var(--text-secondary)" }}>
+                                                      {typeof step === "string" ? step : (step.detail || step.rule_name || step.text || (step.keywords || []).join("、") || (step.missing || []).join("、") || "")}
+                                                    </span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </details>
+                                          )}
+                                          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                                            <button
+                                              type="button"
+                                              className="team-dim-override"
+                                              onClick={() => setOverrideDrawer({
+                                                open: true,
+                                                title: `订正风险 · ${ruleId}`,
+                                                projectId: activeProject.project_id,
+                                                conversationId: undefined,
+                                                targetType: "risk_rule",
+                                                targetKey: ruleId,
+                                                aiValue: ruleName,
+                                              })}
+                                            >✎ 订正此条</button>
+                                          </div>
+                                        </div>
+                                      </details>
+                                    );
+                                  })}
+
+                                  {latestRules.length === 0 && agg.ruleFrequency.length > 0 && (
+                                    <p className="right-hint" style={{ margin: "8px 0" }}>最新一轮未命中风险规则，以下是历史累计频次。</p>
+                                  )}
+
+                                  {/* 历史累计频次小总结 */}
+                                  {agg.ruleFrequency.length > 0 && (
+                                    <details className="proj-risk-freq-summary" style={{ marginTop: 12 }}>
+                                      <summary style={{ cursor: "pointer", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", padding: "6px 0" }}>历史累计（全部 {agg.ruleFrequency.length} 条规则）</summary>
+                                      <div className="proj-risk-table" style={{ marginTop: 8 }}>
+                                        <div className="proj-risk-table-head">
+                                          <span>规则</span><span>名称</span><span>次数</span><span>轮次</span>
+                                        </div>
+                                        {agg.ruleFrequency.map((r) => {
+                                          const sv = (r.severity || "info").toLowerCase();
+                                          return (
+                                            <div key={r.rule_id} className="proj-risk-table-row">
+                                              <span><span className={`proj-risk-sev ${sv}`} />{r.rule_id}</span>
+                                              <span>{r.rule_name || getRuleDisplayName(r.rule_id)}</span>
+                                              <span style={{ fontWeight: 600 }}>{r.hit_count}</span>
+                                              <span>{r.rounds}</span>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </details>
+                                  )}
+                                </div>
+                              </details>
+                            );
+                          })()}
+
+                          {/* ── Tier 2：评分详情 · 还原学生端分析面板评分 tab 的完整推导 ── */}
+                          {latestRubricStudent.length > 0 && (() => {
+                            const total = Number(latestDiag.overall_score ?? latestOverallScore ?? 0);
+                            const totalColor = total >= 7 ? "#22c55e" : total >= 4 ? "#f59e0b" : "#ef4444";
+                            const circumfOv = 2 * Math.PI * 42;
+                            const offsetOv = circumfOv * (1 - total / 10);
+                            const n = latestRubricStudent.length;
+                            const cx = 120, cy = 120, R = 95;
+                            const angleStep = (2 * Math.PI) / n;
+                            const pt = (i: number, r: number): [number, number] => {
+                              const a = -Math.PI / 2 + i * angleStep;
+                              return [cx + R * r * Math.cos(a), cy + R * r * Math.sin(a)];
+                            };
+                            const dataPoints = latestRubricStudent.map((r: any, i: number) => pt(i, Math.min(1, Number(r.score || 0) / 10)));
+                            const polygon = dataPoints.map(([x, y]: [number, number]) => `${x},${y}`).join(" ");
+                            const highDims = latestRubricStudent.filter((r: any) => Number(r.score) >= 7);
+                            const lowDims = latestRubricStudent.filter((r: any) => Number(r.score) < 4);
+                            const pctScale = (v: number) => Math.min(100, Math.max(0, (v / 10) * 100));
+                            return (
+                              <details className="proj-detail-section" open>
+                                <summary className="proj-detail-section-head">
+                                  <div>
+                                    <div className="proj-detail-section-title">
+                                      评分详情 · 怎么算出来的 <span className="proj-detail-section-tier-tag">TIER 2</span>
+                                    </div>
+                                    <div className="proj-detail-section-desc">每个维度基础分、证据加成、规则扣分、裁剪过程一目了然，可点击展开详细推导</div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="proj-section-override-btn"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setOverrideDrawer({
+                                        open: true,
+                                        title: `订正综合评分 · ${activeProject.project_name || ""}`,
+                                        projectId: activeProject.project_id,
+                                        conversationId: undefined,
+                                        targetType: "overall",
+                                        targetKey: "overall",
+                                        aiValue: total,
+                                      });
+                                    }}
+                                  >✎ 订正整体</button>
+                                </summary>
+                                <div className="proj-detail-section-body right-section sc-panel" style={{ padding: 0 }}>
+                                  {/* Hero Ring + Meta */}
+                                  <div className="sc-hero">
+                                    <div className="sc-hero-ring-wrap">
+                                      <svg width="104" height="104" viewBox="0 0 104 104">
+                                        <circle cx="52" cy="52" r="42" fill="none" stroke="var(--border)" strokeWidth="8" />
+                                        <circle cx="52" cy="52" r="42" fill="none" stroke={totalColor} strokeWidth="8"
+                                          strokeDasharray={circumfOv} strokeDashoffset={offsetOv}
+                                          strokeLinecap="round" transform="rotate(-90 52 52)" style={{ transition: "stroke-dashoffset .5s ease" }} />
+                                        <text x="52" y="48" textAnchor="middle" fontSize="24" fontWeight="800" fill={totalColor}>{total.toFixed(1)}</text>
+                                        <text x="52" y="64" textAnchor="middle" fontSize="10" fill="var(--text-muted)">/10</text>
+                                      </svg>
+                                    </div>
+                                    <div className="sc-hero-meta">
+                                      {activeProject.latest_phase && <span className="sc-meta-chip">{activeProject.latest_phase}</span>}
+                                      {latestDiag.score_band && <span className="sc-meta-chip">{latestDiag.score_band}</span>}
+                                      {highDims.length > 0 && <div className="sc-meta-row"><span className="sc-meta-good">{highDims.length} 项达标</span></div>}
+                                      {lowDims.length > 0 && <div className="sc-meta-row"><span className="sc-meta-warn">{lowDims.length} 项需补强</span></div>}
+                                    </div>
+                                  </div>
+
+                                  {/* Radar */}
+                                  <div className="sc-radar-wrap">
+                                    <svg viewBox="0 0 240 240" className="sc-radar-svg">
+                                      {[0.25, 0.5, 0.75, 1.0].map((t) => (
+                                        <polygon key={t} points={Array.from({ length: n }, (_, i) => pt(i, t)).map(([x, y]: [number, number]) => `${x},${y}`).join(" ")} fill="none" stroke="var(--border)" strokeWidth="0.5" opacity={t === 1 ? 0.6 : 0.3} />
+                                      ))}
+                                      {latestRubricStudent.map((_: any, i: number) => {
+                                        const [ex, ey] = pt(i, 1);
+                                        return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} stroke="var(--border)" strokeWidth="0.3" strokeDasharray="2 2" />;
+                                      })}
+                                      <polygon points={polygon} fill="rgba(99,102,241,.15)" stroke="#6366f1" strokeWidth="1.5" />
+                                      {dataPoints.map(([x, y]: [number, number], i: number) => (
+                                        <circle key={i} cx={x} cy={y} r="3" fill="#6366f1" stroke="#fff" strokeWidth="1" />
+                                      ))}
+                                      {latestRubricStudent.map((r: any, i: number) => {
+                                        const [lx, ly] = pt(i, 1.18);
+                                        const sc = Number(r.score || 0);
+                                        const clr = sc >= 7 ? "#22c55e" : sc >= 4 ? "#f59e0b" : "#ef4444";
+                                        const label = String(r.item || "").length > 5 ? String(r.item).slice(0, 4) + ".." : String(r.item || "");
+                                        return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="central" fontSize="8" fontWeight="600" fill={clr}>{label}</text>;
+                                      })}
+                                    </svg>
+                                  </div>
+
+                                  {/* Dim Cards */}
+                                  <div className="sc-dim-list">
+                                    {latestRubricStudent.map((r: any) => {
+                                      const sc = Number(r.score || 0);
+                                      const pct = Math.min(100, (sc / 10) * 100);
+                                      const clr = pct >= 70 ? "#22c55e" : pct >= 40 ? "#f59e0b" : "#ef4444";
+                                      const levelLabel = pct >= 70 ? "达标" : pct >= 40 ? "一般" : "薄弱";
+                                      const base = Number(r.base_score ?? 0);
+                                      const sigBonus = Number(r.signal_bonus ?? 0);
+                                      const lenBonus = Number(r.length_bonus ?? 0);
+                                      const rulePen = Number(r.rule_penalty ?? 0);
+                                      const dimRules: any[] = Array.isArray(r.dim_rules) ? r.dim_rules : [];
+                                      const matched: string[] = Array.isArray(r.matched_evidence) ? r.matched_evidence : [];
+                                      const missing: string[] = Array.isArray(r.missing_evidence) ? r.missing_evidence : [];
+                                      const rationale = r.rationale;
+                                      const weight = Number(r.weight ?? 0);
+                                      const hasRich = base > 0 || sigBonus > 0 || lenBonus > 0 || rulePen > 0 || dimRules.length > 0 || matched.length > 0 || missing.length > 0 || rationale;
+                                      return (
+                                        <details key={r.item} className="sc-dim-card">
+                                          <summary className="sc-dim-head">
+                                            <div className="sc-dim-info">
+                                              <span className="sc-dim-name">{r.item}</span>
+                                              <span className="sc-dim-level" style={{ color: clr }}>{levelLabel}</span>
+                                            </div>
+                                            <div className="sc-dim-bar-wrap">
+                                              <div className="sc-dim-bar-track">
+                                                <div className="sc-dim-bar-fill" style={{ width: `${pct}%`, background: clr }} />
+                                              </div>
+                                              <span className="sc-dim-score" style={{ color: clr }}>{sc.toFixed(1)}</span>
+                                            </div>
+                                          </summary>
+                                          {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
+                                          <div className="sc-dim-breakdown">
+                                            <div className="sc-dim-breakdown-title">分数怎么算出来的</div>
+                                            <div className="sc-dim-breakdown-row">
+                                              {hasRich ? (
+                                                <>
+                                                  {base > 0 && (
+                                                    <span className="sc-dim-breakdown-chip pos" title="按阶段或证据覆盖得到的基础分">基础 <b>{base.toFixed(1)}</b></span>
+                                                  )}
+                                                  {lenBonus > 0.05 && (
+                                                    <span className="sc-dim-breakdown-chip pos" title="文本长度加成">文本加成 <b>+{lenBonus.toFixed(1)}</b></span>
+                                                  )}
+                                                  {sigBonus > 0.05 && (
+                                                    <span className="sc-dim-breakdown-chip pos" title="财务/量化模块证据加成">量化证据 <b>+{sigBonus.toFixed(1)}</b></span>
+                                                  )}
+                                                  {rulePen > 0.05 && (
+                                                    <span className="sc-dim-breakdown-chip neg" title="触发风险规则造成的扣分合计">规则扣分 <b>-{rulePen.toFixed(1)}</b></span>
+                                                  )}
+                                                  <span className="sc-dim-breakdown-eq">=</span>
+                                                  <span className="sc-dim-breakdown-chip final">得分 <b>{sc.toFixed(1)}</b></span>
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <span className="sc-dim-breakdown-chip pos" title="本次诊断给出的原始打分（未返回细化因子）">本次得分 <b>{sc.toFixed(1)}</b></span>
+                                                  {weight > 0 && (
+                                                    <>
+                                                      <span className="sc-dim-breakdown-eq">×</span>
+                                                      <span className="sc-dim-breakdown-chip" title="该维度在综合分中的权重">权重 <b>{weight.toFixed(2)}</b></span>
+                                                      <span className="sc-dim-breakdown-eq">=</span>
+                                                      <span className="sc-dim-breakdown-chip final" title="本维度对综合分的贡献">贡献 <b>{(sc * weight).toFixed(2)}</b></span>
+                                                    </>
+                                                  )}
+                                                </>
+                                              )}
+                                            </div>
+                                            {!hasRich && (
+                                              <div className="sc-dim-breakdown-note">该次诊断未返回细化因子（基础分 / 证据加成 / 规则扣分）。重新提交后会显示完整推导链路。</div>
+                                            )}
+                                            {dimRules.length > 0 && (
+                                              <>
+                                                <div className="sc-dim-breakdown-title">命中的风险规则</div>
+                                                <div className="sc-dim-rule-list">
+                                                  {dimRules.slice(0, 4).map((dr: any, i: number) => (
+                                                    <div key={`${dr.id}-${i}`} className={`sc-dim-rule-row sev-${dr.severity || "mid"}`}>
+                                                      <span className="sc-dim-rule-id">{dr.id}</span>
+                                                      <span className="sc-dim-rule-name">{dr.name}</span>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </>
+                                            )}
+                                            {(matched.length > 0 || missing.length > 0) && (
+                                              <>
+                                                <div className="sc-dim-breakdown-title">证据关键词</div>
+                                                <div className="sc-dim-evidence-chips">
+                                                  {matched.slice(0, 6).map((kw) => <span key={`m-${kw}`} className="sc-dim-evidence-chip matched">命中 · {kw}</span>)}
+                                                  {missing.slice(0, 4).map((kw) => <span key={`x-${kw}`} className="sc-dim-evidence-chip missing">缺 · {kw}</span>)}
+                                                </div>
+                                              </>
+                                            )}
+                                            {rationale?.formula_display && (
+                                              <details className="sc-dim-rationale">
+                                                <summary>查看详细推导</summary>
+                                                <pre className="sc-dim-rationale-text">{rationale.formula_display}</pre>
+                                              </details>
+                                            )}
+                                          </div>
+                                          <div style={{ display: "flex", justifyContent: "flex-end", padding: "4px 12px 10px" }}>
+                                            <button
+                                              type="button"
+                                              className="team-dim-override"
+                                              onClick={() => setOverrideDrawer({
+                                                open: true,
+                                                title: `订正 ${r.item}`,
+                                                projectId: activeProject.project_id,
+                                                conversationId: undefined,
+                                                targetType: "rubric",
+                                                targetKey: r.item,
+                                                aiValue: sc,
+                                              })}
+                                            >✎ 订正此项</button>
+                                          </div>
+                                        </details>
+                                      );
+                                    })}
+                                  </div>
+
+                                  {/* 综合分 · 怎么算出来的（完整还原学生端 sc-overall-rationale） */}
+                                  {latestOverallRat && (() => {
+                                    const floor = Number(latestOverallRat.stage_floor ?? 0);
+                                    const ceil = Number(latestOverallRat.stage_ceiling ?? 10);
+                                    const raw = Number(latestOverallRat.raw_score ?? latestOverallRat.value ?? total);
+                                    const finalScore = Number(latestOverallRat.value ?? total);
+                                    const stageCn = String(latestOverallRat.project_stage_cn || latestOverallRat.project_stage || "");
+                                    const clamped = raw < floor || raw > ceil;
+                                    return (
+                                      <div className="sc-overall-rationale">
+                                        <div className="sc-overall-rat-head">
+                                          <span className="sc-overall-rat-title">综合分 {finalScore.toFixed(1)} / 10 · 怎么算出来的</span>
+                                          {stageCn && <span className="sc-overall-rat-stage">{stageCn}</span>}
+                                        </div>
+                                        <div className="sc-overall-rat-desc">
+                                          综合分 = 按 {latestRubricStudent.length} 个维度加权平均后，再夹到「{stageCn || "当前阶段"}」允许区间
+                                          <b> [{floor}, {ceil}]</b>。
+                                          加权平均算出 <b>{raw.toFixed(2)}</b>，
+                                          {clamped
+                                            ? (raw < floor
+                                              ? <>被抬到下限 <b>{floor}</b></>
+                                              : <>被压到上限 <b>{ceil}</b></>)
+                                            : <>落在区间内不再修正</>
+                                          }
+                                          ，最终 <b style={{ color: finalScore >= 7 ? "#22c55e" : finalScore >= 4 ? "#f59e0b" : "#ef4444" }}>{finalScore.toFixed(1)}</b>。
+                                        </div>
+                                        <div className="sc-overall-scale-wrap">
+                                          <div className="sc-overall-scale">
+                                            <div className="sc-overall-scale-range" style={{ left: `${pctScale(floor)}%`, width: `${pctScale(ceil) - pctScale(floor)}%` }} title={`阶段区间 [${floor}, ${ceil}]`} />
+                                            <div className="sc-overall-scale-marker raw" style={{ left: `${pctScale(raw)}%` }} title={`加权平均 ${raw.toFixed(2)}`}>
+                                              <span className="sc-overall-marker-dot" />
+                                              <span className="sc-overall-marker-lbl">加权 {raw.toFixed(1)}</span>
+                                            </div>
+                                            <div className="sc-overall-scale-marker final" style={{ left: `${pctScale(finalScore)}%` }} title={`最终 ${finalScore}`}>
+                                              <span className="sc-overall-marker-dot" />
+                                              <span className="sc-overall-marker-lbl">最终 {finalScore.toFixed(1)}</span>
+                                            </div>
+                                          </div>
+                                          <div className="sc-overall-scale-axis">
+                                            <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>
+                                          </div>
+                                        </div>
+                                        {latestRubricStudent.length > 0 && (
+                                          <div className="sc-overall-contrib-wrap">
+                                            <div className="sc-overall-contrib-title">各维度贡献（得分 × 权重）</div>
+                                            <div className="sc-overall-contrib">
+                                              {latestRubricStudent.map((rr: any) => {
+                                                const w = Number(rr.weight ?? 1);
+                                                const sc2 = Number(rr.score ?? 0);
+                                                const contrib = sc2 * w;
+                                                const pctContrib = Math.min(100, (contrib / 10) * 100);
+                                                const col = sc2 >= 7 ? "#22c55e" : sc2 >= 4 ? "#f59e0b" : "#ef4444";
+                                                return (
+                                                  <div key={rr.item} className="sc-overall-contrib-row">
+                                                    <span className="sc-overall-contrib-name">{rr.item}</span>
+                                                    <div className="sc-overall-contrib-bar">
+                                                      <div className="sc-overall-contrib-fill" style={{ width: `${pctContrib}%`, background: col }} />
+                                                    </div>
+                                                    <span className="sc-overall-contrib-val">{sc2.toFixed(1)}×{w.toFixed(1)} = <b>{contrib.toFixed(2)}</b></span>
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {latestOverallRat.formula_display && (
+                                          <details className="sc-overall-rat-formula">
+                                            <summary>查看公式原文</summary>
+                                            <pre className="sc-overall-rat-text">{latestOverallRat.formula_display}</pre>
+                                          </details>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </details>
+                            );
+                          })()}
+
+                          {/* ── Tier 5：知识图谱 ── */}
+                          {(latestKg.insight || latestEntities.length > 0 || latestKgGaps.length > 0 || latestKgStrengths.length > 0 || agg.entityTop.length > 0) && (
+                            <details className="proj-detail-section" open>
+                              <summary className="proj-detail-section-head">
+                                <div>
+                                  <div className="proj-detail-section-title">
+                                    知识图谱诊断 <span className="proj-detail-section-tier-tag">TIER 5</span>
+                                  </div>
+                                  <div className="proj-detail-section-desc">项目在知识图谱中的画像、结构缺口与内容优势；实体点击可溯源</div>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="proj-section-override-btn"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setOverrideDrawer({
+                                      open: true,
+                                      title: `订正 KG 诊断 · ${activeProject.project_name || ""}`,
+                                      projectId: activeProject.project_id,
+                                      conversationId: undefined,
+                                      targetType: "kg",
+                                      targetKey: "project_kg",
+                                      aiValue: latestEntities.length,
+                                    });
+                                  }}
+                                >✎ 订正整体</button>
+                              </summary>
+                              <div className="proj-detail-section-body">
+                                <div className="proj-kg-panel">
+                                  <div className="proj-kg-left">
+                                    {latestKg.insight && (
+                                      <div className="proj-kg-insight">
+                                        <span className="proj-kg-block-label">项目画像摘要</span>
+                                        <p>{latestKg.insight}</p>
+                                      </div>
+                                    )}
+                                    {latestKgGaps.length > 0 && (
+                                      <div className="proj-kg-chip-row">
+                                        <span className="proj-kg-block-label">结构缺口</span>
+                                        <div>{latestKgGaps.map((g: string, gi: number) => <span key={gi} className="proj-gap-chip">{g}</span>)}</div>
+                                      </div>
+                                    )}
+                                    {latestKgStrengths.length > 0 && (
+                                      <div className="proj-kg-chip-row">
+                                        <span className="proj-kg-block-label">内容优势</span>
+                                        <div>{latestKgStrengths.map((s: string, si: number) => <span key={si} className="proj-strength-chip">{s}</span>)}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="proj-kg-right">
+                                    {latestEntities.length > 0 && (
+                                      <div className="proj-kg-entities">
+                                        <span className="proj-kg-block-label">抽取实体 · 共 {latestEntities.length} 个</span>
+                                        <div className="proj-kg-ent-chips">
+                                          {latestEntities.slice(0, 24).map((e: any, ei: number) => {
+                                            const label = e.label || e.name || e.text || "";
+                                            const type = e.type || "Entity";
+                                            const rule = e.extraction_rule || e.source_span || "";
+                                            const quote = e.quote || e.example_quote || "";
+                                            const srcId = e.source_message_id;
+                                            const titleAttr = [type, rule && `规则：${rule}`, quote && `原文：${quote}`].filter(Boolean).join(" · ");
+                                            return srcId ? (
+                                              <button
+                                                type="button"
+                                                key={`ent-${ei}`}
+                                                className="tm-smart-chip-link"
+                                                title={titleAttr}
+                                                onClick={() => handleJumpMessage(srcId)}
+                                              >
+                                                {label}
+                                                <span className="proj-ent-chip-type">{type}</span>
+                                              </button>
+                                            ) : (
+                                              <span key={`ent-${ei}`} className="proj-ent-chip" title={titleAttr}>
+                                                <span>{label}</span>
+                                                <span className="proj-ent-chip-type">{type}</span>
+                                              </span>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    )}
+                                    {latestRelationships.length > 0 && (
+                                      <div className="proj-kg-rels">
+                                        <span className="proj-kg-block-label">关系 · 前 {Math.min(10, latestRelationships.length)} 条</span>
+                                        <ul className="proj-kg-rel-list">
+                                          {latestRelationships.slice(0, 10).map((rel: any, i: number) => {
+                                            const src = rel.source || rel.from || rel.subject || "";
+                                            const tgt = rel.target || rel.to || rel.object || "";
+                                            const typ = rel.type || rel.predicate || "相关";
+                                            const srcMid = rel.source_message_id;
+                                            return (
+                                              <li key={i} className="proj-kg-rel-item">
+                                                <span className="proj-kg-rel-node">{src}</span>
+                                                <span className="proj-kg-rel-arrow">{typ}</span>
+                                                <span className="proj-kg-rel-node">{tgt}</span>
+                                                {srcMid && (
+                                                  <button type="button" className="tet-ev-mid-btn" onClick={() => handleJumpMessage(srcMid)} title="跳回源消息">↗</button>
+                                                )}
+                                              </li>
+                                            );
+                                          })}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {agg.entityTop.length > 0 && (
+                                      <div className="proj-kg-history">
+                                        <span className="proj-kg-block-label">历史高频实体</span>
+                                        <div className="proj-ent-chips">
+                                          {agg.entityTop.slice(0, 12).map((e: any, i: number) => (
+                                            <span key={`h-${i}`} className="proj-ent-chip" title={`${e.type} · 累计 ${e.count} 次`}>
+                                              <span>{e.label}</span>
+                                              <span className="proj-ent-chip-type">{e.type}</span>
+                                              <span className="proj-ent-chip-count">{e.count}</span>
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            </details>
                           )}
 
-                          {/* ── Tier 5：KG / 超图命中实体 ── */}
-                          {(agg.entityTop.length > 0 || latestEntities.length > 0) && (
-                            <div className="proj-detail-section">
-                              <div className="proj-detail-section-head">
-                                <div className="proj-detail-section-title">
-                                  知识图谱 / 超图命中 <span className="proj-detail-section-tier-tag">TIER 5</span>
+                          {/* ── Tier 5：超图全景诊断（还原学生端分析面板超图 tab） ── */}
+                          {(latestHyperStudent?.ok !== false && (latestHyperStudent?.dimensions || latestHubs.length > 0 || latestWarnings.length > 0 || latestMatchedEdges.length > 0 || latestHyperInsight?.summary)) && (() => {
+                            const dims = Object.entries(latestHyperStudent?.dimensions ?? {}) as [string, any][];
+                            const coveredDims = dims.filter(([, v]) => v && v.covered);
+                            const missingDims = dims.filter(([, v]) => v && !v.covered);
+                            const covScore = Number(latestHyperStudent?.coverage_score ?? 0);
+                            const circumfH = 2 * Math.PI * 38;
+                            const covOffset = circumfH * (1 - covScore / 10);
+                            const covColor = covScore >= 7 ? "#22c55e" : covScore >= 4 ? "#f59e0b" : "#ef4444";
+                            const templateComplete = latestTemplateMatches.filter((t: any) => t.status === "complete").length;
+                            return (
+                              <details className="proj-detail-section" open>
+                                <summary className="proj-detail-section-head">
+                                  <div>
+                                    <div className="proj-detail-section-title">
+                                      超图全景诊断 <span className="proj-detail-section-tier-tag">TIER 5</span>
+                                    </div>
+                                    <div className="proj-detail-section-desc">覆盖度 · 闭环 · 风险模式 · 命中超边 · Agent 接收启发</div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="proj-section-override-btn"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setOverrideDrawer({
+                                        open: true,
+                                        title: `订正超图诊断 · ${activeProject.project_name || ""}`,
+                                        projectId: activeProject.project_id,
+                                        conversationId: undefined,
+                                        targetType: "hypergraph",
+                                        targetKey: "project_hypergraph",
+                                        aiValue: latestWarnings.length,
+                                      });
+                                    }}
+                                  >✎ 订正整体</button>
+                                </summary>
+                                <div className="proj-detail-section-body right-section" style={{ padding: 0 }}>
+                                  {/* 1. Hero Ring + Stats */}
+                                  <div className="ht-hero">
+                                    <svg width="96" height="96" viewBox="0 0 96 96" className="ht-hero-ring">
+                                      <circle cx="48" cy="48" r="38" fill="none" stroke="var(--border)" strokeWidth="7" />
+                                      <circle cx="48" cy="48" r="38" fill="none" stroke={covColor} strokeWidth="7"
+                                        strokeDasharray={circumfH} strokeDashoffset={covOffset}
+                                        strokeLinecap="round" transform="rotate(-90 48 48)" style={{ transition: "stroke-dashoffset 0.6s ease" }} />
+                                      <text x="48" y="44" textAnchor="middle" fontSize="20" fontWeight="700" fill={covColor}>{covScore.toFixed(1)}</text>
+                                      <text x="48" y="58" textAnchor="middle" fontSize="9" fill="var(--text-muted)">/10</text>
+                                    </svg>
+                                    <div className="ht-hero-stats">
+                                      <div className="ht-stat"><span className="ht-stat-val">{latestHyperStudent?.covered_count ?? coveredDims.length}<small>/{latestHyperStudent?.total_dimensions ?? dims.length}</small></span><span className="ht-stat-lbl">维度覆盖</span></div>
+                                      <div className="ht-stat"><span className="ht-stat-val">{templateComplete}<small>/{latestTemplateMatches.length || 20}</small></span><span className="ht-stat-lbl">闭环完成</span></div>
+                                      <div className="ht-stat"><span className="ht-stat-val ht-warn">{latestConsistencyIssues.length}</span><span className="ht-stat-lbl">一致性问题</span></div>
+                                      <div className="ht-stat"><span className="ht-stat-val ht-risk">{latestWarnings.length}</span><span className="ht-stat-lbl">风险模式</span></div>
+                                    </div>
+                                  </div>
+
+                                  {/* 1b. Insight Overview */}
+                                  {(latestHyperInsight?.summary || (latestHyperInsight?.top_signals ?? []).length > 0 || (latestHyperInsight?.key_dimensions ?? []).length > 0) && (
+                                    <div className="ht-section ht-overview-section">
+                                      {latestHyperInsight?.summary && <p className="ht-overview-summary">{latestHyperInsight.summary}</p>}
+                                      {(latestHyperInsight?.top_signals ?? []).length > 0 && (
+                                        <div className="ht-tag-group">
+                                          <span className="ht-tag-label">关键信号</span>
+                                          {(latestHyperInsight.top_signals ?? []).map((sig: string, si: number) => <span key={si} className="ht-tag signal">{sig}</span>)}
+                                        </div>
+                                      )}
+                                      {(latestHyperInsight?.key_dimensions ?? []).length > 0 && (
+                                        <div className="ht-tag-group">
+                                          <span className="ht-tag-label">焦点维度</span>
+                                          {(latestHyperInsight.key_dimensions ?? []).map((d: string, di: number) => <span key={di} className="ht-tag dim">{d}</span>)}
+                                        </div>
+                                      )}
+                                      {(latestHyperInsight?.topology?.hub_nodes ?? []).length > 0 && (
+                                        <div className="ht-tag-group">
+                                          <span className="ht-tag-label">枢纽节点</span>
+                                          {(latestHyperInsight.topology.hub_nodes ?? []).map((h: any, hi: number) => (
+                                            <span key={hi} className="ht-tag hub" title={h.interpretation}>{h.node} ({h.degree})</span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* 2. Dimension Coverage Matrix */}
+                                  {dims.length > 0 && (
+                                    <div className="ht-section">
+                                      <h5 className="ht-title">维度覆盖矩阵</h5>
+                                      <p className="ht-guide-sub">绿色=已覆盖，灰色=待补充；数字=该维度提取到的实体数。</p>
+                                      <div className="ht-dim-grid">
+                                        {dims.map(([key, v]) => (
+                                          <div key={key} className={`ht-dim-cell ${v?.covered ? "covered" : "missing"}`}>
+                                            <div className="ht-dim-name">{(v?.name ?? key).slice(0, 4)}</div>
+                                            <div className="ht-dim-count">{v?.count ?? 0}</div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 3. Template Status Grid */}
+                                  {latestTemplateMatches.length > 0 && (
+                                    <div className="ht-section">
+                                      <h5 className="ht-title">模板闭环检测 <span className="ht-title-sub">(T1-T{latestTemplateMatches.length})</span></h5>
+                                      <p className="ht-guide-sub">绿色=完整链路，黄色=部分覆盖，红色=关键缺失。闭环越多逻辑越自洽。</p>
+                                      <div className="ht-tmpl-grid">
+                                        {latestTemplateMatches.map((t: any, ti: number) => (
+                                          <div key={ti} className={`ht-tmpl-chip ${t.status}`} title={t.name || t.id}>
+                                            <span className="ht-tmpl-id">{(t.id ?? `T${ti + 1}`).replace(/_.*/, "")}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div className="ht-tmpl-legend">
+                                        <span className="ht-legend-item"><span className="ht-legend-dot complete" />完成</span>
+                                        <span className="ht-legend-item"><span className="ht-legend-dot partial" />部分</span>
+                                        <span className="ht-legend-item"><span className="ht-legend-dot missing" />缺失</span>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 4. Consistency Issues */}
+                                  {latestConsistencyIssues.length > 0 && (
+                                    <div className="ht-section">
+                                      <h5 className="ht-title">逻辑一致性检测 <span className="ht-badge-count">{latestConsistencyIssues.length}</span></h5>
+                                      <p className="ht-guide-sub">超图引擎发现的逻辑矛盾，点击展开查看详情与压力追问。</p>
+                                      {latestConsistencyIssues.map((ci: any, idx: number) => (
+                                        <details key={idx} className="ht-ci-card">
+                                          <summary><span className="ht-ci-id">{ci.id}</span><span className="ht-ci-msg">{ci.message}</span></summary>
+                                          {(ci.pressure_questions ?? []).length > 0 && (
+                                            <div className="ht-ci-questions">{(ci.pressure_questions ?? []).map((q: string, qi: number) => <div key={qi} className="ht-ci-q">{q}</div>)}</div>
+                                          )}
+                                        </details>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* 5. Insights: Missing + Warnings + Strengths */}
+                                  {(latestMissingDims.length > 0 || latestWarnings.length > 0 || latestStrengthsHG.length > 0) && (
+                                    <div className="ht-insights-grid">
+                                      {latestMissingDims.length > 0 && (
+                                        <div className="ht-insight-card ht-card-missing">
+                                          <h5>优先补充</h5>
+                                          {latestMissingDims.map((m: any, mi: number) => (
+                                            <div key={mi} className="ht-insight-item ht-insight-rich">
+                                              <div className="ht-insight-head-row">
+                                                {m.importance && <span className={`ht-imp-badge ${m.importance}`}>{m.importance}</span>}
+                                                <span className="ht-insight-dim">{m.dimension}</span>
+                                              </div>
+                                              {m.recommendation && <p className="ht-insight-desc">{m.recommendation}</p>}
+                                              {m.action_hint && <p className="ht-action-hint">{m.action_hint}</p>}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                      {latestWarnings.length > 0 && (
+                                        <div className="ht-insight-card ht-card-warn">
+                                          <h5>风险模式</h5>
+                                          {latestWarnings.map((w: any, wi: number) => {
+                                            const srcMid = w.source_message_id;
+                                            return (
+                                              <div key={wi} className="ht-insight-item ht-insight-rich">
+                                                {w.family_label && <span className="ht-warn-family">{w.family_label}</span>}
+                                                {w.warning && <p className="ht-insight-desc">{w.warning}</p>}
+                                                {w.example_quote && <blockquote className="risk-quote" style={{ margin: "6px 0" }}>{w.example_quote}</blockquote>}
+                                                {w.project_context && <p className="ht-insight-ctx">{w.project_context}</p>}
+                                                <div className="ht-insight-meta-row">
+                                                  {w.support != null && <span className="ht-meta-support">支持度 {w.support}</span>}
+                                                  {(w.matched_rules ?? []).length > 0 && (
+                                                    <span className="ht-meta-rules">规则: {(w.matched_rules ?? []).slice(0, 3).join(", ")}</span>
+                                                  )}
+                                                  {srcMid && (
+                                                    <button type="button" className="tet-ev-mid-btn" onClick={() => handleJumpMessage(srcMid)} title="跳回源消息">↗ {String(srcMid).slice(0, 8)}</button>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                      {latestStrengthsHG.length > 0 && (
+                                        <div className="ht-insight-card ht-card-good">
+                                          <h5>优势结构</h5>
+                                          {latestStrengthsHG.map((s: any, si: number) => (
+                                            <div key={si} className="ht-insight-item ht-insight-rich">
+                                              {s.family_label && <span className="ht-strength-family">{s.family_label}</span>}
+                                              {s.note && <p className="ht-insight-desc">{s.note}</p>}
+                                              {(s.related_entities ?? []).length > 0 && (
+                                                <p className="ht-insight-ctx">涉及实体: {(s.related_entities ?? []).join("、")}</p>
+                                              )}
+                                              <div className="ht-insight-meta-row">
+                                                {s.support != null && <span className="ht-meta-support">支持度 {s.support}</span>}
+                                                {s.edge_type && <span className="ht-edge-tag">{s.edge_type}</span>}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* 6. Useful Cards */}
+                                  {latestUsefulCards.length > 0 && (
+                                    <div className="ht-section">
+                                      <h5 className="ht-title">超图核心结论</h5>
+                                      <p className="ht-guide-sub">基于项目信息和超图结构分析最值得关注的发现</p>
+                                      <div className="ht-useful-grid">
+                                        {latestUsefulCards.map((card: any, idx: number) => {
+                                          const toneLabels: Record<string, string> = { gap: "待补充", risk: "风险提醒", strength: "亮点" };
+                                          return (
+                                            <div key={idx} className={`ht-useful-card-v3 ${card.tone || ""}`}>
+                                              <div className="ht-uc3-header">
+                                                <span className="ht-uc3-title">{card.title}</span>
+                                                <span className={`ht-uc3-badge ${card.tone || ""}`}>{toneLabels[card.tone] || ""}</span>
+                                              </div>
+                                              {card.summary && <p className="ht-uc3-summary">{card.summary}</p>}
+                                              {card.reason && <p className="ht-uc3-reason">{card.reason}</p>}
+                                              {card.project_hint && <p className="ht-uc3-hint">{card.project_hint}</p>}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 7. Matched Rules */}
+                                  {latestMatchedRules.length > 0 && (
+                                    <div className="ht-section">
+                                      <h5 className="ht-title">命中教学规则 <span className="ht-title-sub">({latestMatchedRules.length})</span></h5>
+                                      <div className="ht-matched-rules">
+                                        {latestMatchedRules.map((r: string, ri: number) => <span key={ri} className="ht-rule-chip">{r}</span>)}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 8. Hub Entities + Matched Edges */}
+                                  {(latestHubs.length > 0 || latestMatchedEdges.length > 0) && (
+                                    <details className="ht-details-panel">
+                                      <summary className="ht-details-head">决策追踪与超边证据</summary>
+                                      {latestHubs.length > 0 && (
+                                        <div className="ht-hub-section">
+                                          <h6>枢纽实体</h6>
+                                          <div className="ht-hub-list">
+                                            {latestHubs.map((h: any, hi: number) => (
+                                              <div key={hi} className="ht-hub-chip"><strong>{h.entity || h.label || h.name}</strong><span>{h.connections ?? h.degree ?? h.hit_count ?? 0}维</span></div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      {latestMatchedEdges.length > 0 && (
+                                        <div className="ht-grouped-edges">
+                                          <h6>命中超边 <span className="ht-edge-total">共 {latestMatchedEdges.length} 条</span></h6>
+                                          <div className="ht-grp-edges">
+                                            {latestMatchedEdges.slice(0, 12).map((e: any, idx: number) => {
+                                              const srcMid = e.source_message_id;
+                                              return (
+                                                <div key={e.hyperedge_id || `he-${idx}`} className="ht-edge-card">
+                                                  <div className="ht-edge-card-head">
+                                                    <span className="ht-edge-family-tag">{e.family_label || e.type || e.family || "边"}</span>
+                                                    {e.support != null && <span className="ht-edge-sup">支持度 {e.support}</span>}
+                                                    {e.severity && <span className={`ht-edge-sev-tag ht-sev-${e.severity}`}>{e.severity}</span>}
+                                                    {srcMid && (
+                                                      <button type="button" className="tet-ev-mid-btn" onClick={() => handleJumpMessage(srcMid)} title="跳回源消息" style={{ marginLeft: "auto" }}>↗</button>
+                                                    )}
+                                                  </div>
+                                                  {e.teaching_note && <p className="ht-edge-note-text">{e.teaching_note}</p>}
+                                                  {(e.rules ?? []).length > 0 && (
+                                                    <div className="ht-edge-rules-row">{(e.rules as string[]).map((r: string, ri: number) => <span key={ri} className="ht-edge-rule">{r}</span>)}</div>
+                                                  )}
+                                                  {(e.nodes ?? []).length > 0 && (
+                                                    <div className="ht-edge-nodes">{(e.nodes as string[]).map((n: string, ni: number) => <span key={ni} className="ht-edge-node-tag">{n}</span>)}</div>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </details>
+                                  )}
                                 </div>
-                                <div className="proj-detail-section-desc">按历史出现频次聚合的实体，点击可看来源 extraction_rule</div>
+                              </details>
+                            );
+                          })()}
+
+                          {/* ── 下一步任务 ── */}
+                          {(latestTask?.title || latestTask?.description || (latestTask?.acceptance_criteria || []).length > 0) && (
+                            <details className="proj-detail-section" open>
+                              <summary className="proj-detail-section-head">
+                                <div>
+                                  <div className="proj-detail-section-title">
+                                    下一步任务 <span className="proj-detail-section-tier-tag">TASK</span>
+                                  </div>
+                                  <div className="proj-detail-section-desc">AI 根据当前诊断派生的优先行动，可整体订正或替换</div>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="proj-section-override-btn"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setOverrideDrawer({
+                                      open: true,
+                                      title: `订正下一步任务 · ${activeProject.project_name || ""}`,
+                                      projectId: activeProject.project_id,
+                                      conversationId: undefined,
+                                      targetType: "next_task",
+                                      targetKey: "next_task",
+                                      aiValue: latestTask.title || "",
+                                    });
+                                  }}
+                                >✎ 订正整体</button>
+                              </summary>
+                              <div className="proj-detail-section-body">
+                                <div className="proj-task-card">
+                                  {latestTask.title && <div className="proj-task-title">{latestTask.title}</div>}
+                                  {latestTask.description && <p className="proj-task-desc">{latestTask.description}</p>}
+                                  {latestTask.template_guideline && (
+                                    <div className="proj-task-template">
+                                      <span className="proj-kg-block-label">模板指引</span>
+                                      <p>{latestTask.template_guideline}</p>
+                                    </div>
+                                  )}
+                                  {(latestTask.acceptance_criteria || []).length > 0 && (
+                                    <div className="proj-task-accept">
+                                      <span className="proj-kg-block-label">验收标准</span>
+                                      <ul className="proj-task-accept-list">
+                                        {latestTask.acceptance_criteria.map((c: string, ci: number) => (
+                                          <li key={ci}><span className="proj-task-accept-bullet" />{c}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {latestDiag.next_task_rationale && (
+                                    <details className="proj-task-rationale" style={{ marginTop: 10 }}>
+                                      <summary>查看派生推理</summary>
+                                      <div style={{ marginTop: 8 }}>
+                                        <RationaleCard rationale={latestDiag.next_task_rationale as Rationale} compact onJumpMessage={handleJumpMessage} />
+                                      </div>
+                                    </details>
+                                  )}
+                                </div>
                               </div>
-                              <div className="proj-ent-chips">
-                                {(agg.entityTop.length > 0 ? agg.entityTop : latestEntities.slice(0, 12).map((e: any) => ({ label: e.label || e.name, type: e.type || "Entity", count: 1 }))).map((e: any, i: number) => (
-                                  <span key={`${e.label}-${i}`} className="proj-ent-chip" title={`${e.type} · 出现 ${e.count} 次`}>
-                                    <span>{e.label}</span>
-                                    <span className="proj-ent-chip-type">{e.type}</span>
-                                    <span className="proj-ent-chip-count">{e.count}</span>
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
+                            </details>
                           )}
 
                           {subs.length === 0 && (

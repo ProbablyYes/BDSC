@@ -1721,6 +1721,94 @@ def _safe_diagnosis(diag: Any) -> dict:
     }
 
 
+def _rich_triggered_rules(rules: Any) -> list[dict]:
+    """Preserve the full rule objects (quote / explanation / inference_chain / …)
+    needed by the teacher-side student-analysis panel. Unlike ``_normalize_rules``
+    which reduces each rule to its id string, this returns ready-to-render dicts.
+    Strings are wrapped into a minimal dict so the frontend never receives raw
+    primitives in the same array as dicts."""
+    if not rules or not isinstance(rules, list):
+        return []
+    out: list[dict] = []
+    for r in rules:
+        if isinstance(r, str):
+            out.append({"id": r, "rule_id": r})
+            continue
+        if not isinstance(r, dict):
+            continue
+        item: dict[str, Any] = {}
+        for key in (
+            "id", "rule_id", "name", "rule_name", "severity",
+            "quote", "explanation", "impact", "fix_hint",
+            "matched_keywords", "missing_requires",
+            "competition_context", "source_message_id",
+            "agent_name", "score_impact",
+        ):
+            if key in r:
+                item[key] = r.get(key)
+        chain = r.get("inference_chain")
+        if isinstance(chain, list):
+            item["inference_chain"] = [
+                step if isinstance(step, (str, dict)) else str(step)
+                for step in chain[:12]
+            ]
+        linked = r.get("linked_task")
+        if isinstance(linked, dict):
+            item["linked_task"] = {
+                "title": _safe_str(linked.get("title", "")),
+                "description": _safe_str(linked.get("description", "")),
+                "acceptance_criteria": [
+                    _safe_str(x) for x in (linked.get("acceptance_criteria") or [])[:6]
+                ],
+            }
+        if not item.get("id") and item.get("rule_id"):
+            item["id"] = item["rule_id"]
+        if not item.get("rule_id") and item.get("id"):
+            item["rule_id"] = item["id"]
+        out.append(item)
+    return out
+
+
+def _rich_diagnosis(diag: Any) -> dict:
+    """Extend ``_safe_diagnosis`` with the rich fields the teacher-side analysis
+    panel needs to render (rubric / rationale / triggered rules with full
+    context / hypergraph / next_task / etc.). Keeps scalar defaults from the
+    original helper so callers can rely on them."""
+    base = _safe_diagnosis(diag)
+    if not isinstance(diag, dict):
+        return base
+
+    def _pass_list(value: Any, limit: int | None = None) -> list[Any]:
+        if not isinstance(value, list):
+            return []
+        return value[:limit] if limit else list(value)
+
+    base["triggered_rules"] = _rich_triggered_rules(diag.get("triggered_rules", []))
+    rubric_list = _pass_list(diag.get("rubric"))
+    rubric_items = _pass_list(diag.get("rubric_items"))
+    if rubric_list:
+        base["rubric"] = rubric_list
+    if rubric_items:
+        base["rubric_items"] = rubric_items
+    rubric_assess = diag.get("rubric_assessment")
+    if isinstance(rubric_assess, dict):
+        base["rubric_assessment"] = rubric_assess
+    for key in (
+        "overall_weighted_score", "overall_score_10",
+        "overall_rationale", "project_phase_rationale",
+        "bottleneck_rationale", "current_summary_rationale",
+        "next_task_rationale", "maturity_rationale",
+        "project_phase", "current_summary", "score_band",
+        "next_task", "kg", "pattern_warnings",
+        "passed_dimensions", "failed_dimensions",
+    ):
+        if key in diag:
+            base[key] = diag.get(key)
+    if "bottleneck" in diag and isinstance(diag.get("bottleneck"), dict):
+        base["bottleneck"] = diag.get("bottleneck")
+    return base
+
+
 def _safe_kg_analysis(kg: Any) -> dict:
     if not isinstance(kg, dict):
         return {}
@@ -2268,12 +2356,17 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
             psubs.sort(key=lambda row: row.get("created_at", ""))
             p_scores = [s["_score"] for s in psubs if s["_score"] > 0]
             latest = psubs[-1] if psubs else {}
-            latest_diag = _safe_diagnosis(latest.get("diagnosis", {}))
+            latest_diag = _rich_diagnosis(latest.get("diagnosis", {}))
             latest_kg = _safe_kg_analysis(latest.get("kg_analysis", {}))
             latest_hyper = _safe_hypergraph_insight(latest.get("hypergraph_insight", {}))
             latest_hyper_student = _safe_hypergraph_student(
                 latest.get("hypergraph_student")
                 or (latest.get("agent_outputs", {}) if isinstance(latest.get("agent_outputs"), dict) else {}).get("hypergraph_student", {})
+            )
+            latest_hyper_project_view = (
+                latest.get("hypergraph_project_view")
+                if isinstance(latest.get("hypergraph_project_view"), dict)
+                else {}
             )
             latest_task = latest.get("next_task", {}) if isinstance(latest.get("next_task"), dict) else {}
             latest_phase = _safe_str(latest.get("project_phase", "")) or "持续迭代"
@@ -2308,7 +2401,8 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                 if s is latest:
                     latest_quotes = _safe_evidence_quotes(s.get("evidence_quotes", []))
             top_risks = []
-            for rid in (latest_diag.get("triggered_rules") or [])[:4]:
+            for _r in (latest_diag.get("triggered_rules") or [])[:4]:
+                rid = _r if isinstance(_r, str) else (_r.get("id") or _r.get("rule_id") or _r.get("name") or "")
                 if rid:
                     top_risks.append(rid)
             project_name = _project_label(pid, psubs)
@@ -2342,6 +2436,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                 "latest_kg": latest_kg,
                 "latest_hypergraph": latest_hyper,
                 "latest_hypergraph_student": latest_hyper_student,
+                "latest_hypergraph_project_view": latest_hyper_project_view,
                 "risk_evidence": risk_evidence[-10:],
                 "evidence_quotes": latest_quotes,
                 "phase_history": phase_history,
@@ -2362,17 +2457,33 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                         "source_type": s.get("source_type", "text"),
                         "filename": s.get("filename"),
                         "bottleneck": _safe_str(s.get("diagnosis", {}).get("bottleneck") or s.get("next_task", {}).get("bottleneck", "")),
-                        "next_task": _safe_str(s.get("next_task", {}).get("description", "") if isinstance(s.get("next_task"), dict) else s.get("next_task", "")),
-                        "triggered_rules": _normalize_rules(s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules", [])),
+                        "next_task": (
+                            s.get("next_task")
+                            if isinstance(s.get("next_task"), dict)
+                            else {"description": _safe_str(s.get("next_task", ""))}
+                        ),
+                        "triggered_rules": _rich_triggered_rules(
+                            s.get("triggered_rules") or s.get("diagnosis", {}).get("triggered_rules", [])
+                        ),
                         "text_preview": (s.get("raw_text") or "")[:80],
                         "evidence_quotes": _safe_evidence_quotes(s.get("evidence_quotes", [])),
-                        "diagnosis": _safe_diagnosis(s.get("diagnosis", {})),
+                        "diagnosis": _rich_diagnosis(s.get("diagnosis", {})),
                         "agent_outputs": _safe_agent_summary(s),
                         "kg_analysis": _safe_kg_analysis(s.get("kg_analysis", {})),
                         "hypergraph_insight": _safe_hypergraph_insight(s.get("hypergraph_insight", {})),
                         "hypergraph_student": _safe_hypergraph_student(
                             s.get("hypergraph_student")
                             or (s.get("agent_outputs", {}) if isinstance(s.get("agent_outputs"), dict) else {}).get("hypergraph_student", {})
+                        ),
+                        "hypergraph_project_view": (
+                            s.get("hypergraph_project_view")
+                            if isinstance(s.get("hypergraph_project_view"), dict)
+                            else {}
+                        ),
+                        "hyper_consistency_issues": (
+                            s.get("hyper_consistency_issues")
+                            if isinstance(s.get("hyper_consistency_issues"), list)
+                            else []
                         ),
                     }
                     for s in psubs

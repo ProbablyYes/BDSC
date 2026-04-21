@@ -1,0 +1,244 @@
+{
+  "conversation_id": "f21c1d61-a8db-43ba-a801-36ac5dd22d53",
+  "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "student_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "title": "演示·场景3 · CAC 500 + 留存 40%（单经济红）",
+  "summary": "LTV/CAC < 1，典型亏损模型，单位经济红",
+  "created_at": "2026-04-18T20:42:34+08:00",
+  "seed_tag": "finance_demo_v1",
+  "seed_scenario_idx": 3,
+  "messages": [
+    {
+      "role": "user",
+      "content": "我们的获客主要靠抖音投流，CAC 大概是 500 元/付费用户。月留存 40% 左右。",
+      "timestamp": "2026-04-18T20:42:34+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "把你之前说的 99 元/月和这次的 CAC 500、留存 40% 串起来算了一下，LTV 还不够覆盖一个用户的获客成本，这是最典型的\"越卖越亏\"。\n\n（详见下方财务守望卡片，红/黄为需要重点处理的信号。）\n\n两个方向可以平行走：一是压 CAC（把投流换成转介绍或校园 BD），二是抬留存（内容/社群/作业激励），两项任一能改到行业中位，模型才会转正。",
+      "timestamp": "2026-04-18T20:42:40+08:00",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "engine": "seed",
+          "pipeline": [
+            "demo"
+          ]
+        },
+        "seed_tag": "finance_demo_v1",
+        "demo_note": "本条为 finance_guard 离线演示会话，用于教学展示，不参与真实诊断评分。",
+        "finance_advisory": {
+          "triggered": true,
+          "hits": [
+            "pricing",
+            "unit_econ"
+          ],
+          "cards": [
+            {
+              "module": "unit_economics",
+              "title": "单位经济分析",
+              "inputs": {
+                "monthly_price": 99.0,
+                "gross_margin": 0.0,
+                "monthly_retention": 0.4,
+                "cac": 500.0,
+                "industry": "教育"
+              },
+              "outputs": {
+                "arpu": 99.0,
+                "gross_margin": 0.7,
+                "avg_lifetime_months": 1.7,
+                "ltv": 115.5,
+                "cac": 500.0,
+                "ltv_cac_ratio": 0.23,
+                "payback_period_months": 7.2
+              },
+              "verdict": {
+                "level": "red",
+                "score": 0.06,
+                "reason": "LTV/CAC = 0.23 < 1，每获一个用户都是亏的，商业模式不成立"
+              },
+              "framework_explain": "**单位经济三件套**：\n- LTV（用户终身价值）= 月 ARPU × 毛利率 × 平均生命周期月数\n- CAC（获客成本）= 获客投入 / 新增付费用户数\n- Payback（回本周期）= CAC / 月毛利\n\n投资人最先看 LTV/CAC 比，< 1 表示亏损，1-3 勉强撑，≥ 3 健康，≥ 5 优秀。",
+              "suggestions": [
+                "LTV/CAC < 1 → 优先提定价 / 降 CAC，可尝试教育行业头部的渠道组合",
+                "做一次 Van Westendorp 支付意愿问卷，验证当前定价是否有上调空间"
+              ],
+              "missing_inputs": [
+                {
+                  "field": "gross_margin",
+                  "hint": "毛利率=（单价-变动成本）/单价，先估个大致值",
+                  "target_tab": "biz"
+                }
+              ],
+              "evidence_for_diagnosis": {
+                "H8": 0.2
+              },
+              "baseline_meta": {
+                "industry": "教育",
+                "source": "seed",
+                "updated_at": "2026-04-18T12:48:34+00:00",
+                "evidence_count": 0
+              }
+            },
+            {
+              "module": "pricing_framework",
+              "title": "定价策略框架推荐",
+              "inputs": {
+                "industry": "教育",
+                "stage": "idea",
+                "project_type": "教育"
+              },
+              "outputs": {
+                "recommended_id": "van_westendorp",
+                "recommended_name": "Van Westendorp PSM",
+                "all_frameworks": [
+                  {
+                    "id": "cost_plus",
+                    "name": "成本加成（Cost-Plus）",
+                    "when_to_use": "成本结构清晰、毛利预期明确（硬件/生产型、早期试水）",
+                    "formula": "定价 = 单位成本 × (1 + 目标毛利率)",
+                    "pros": "简单透明，易向上游沟通",
+                    "cons": "忽视用户价值感知，可能压低潜在利润"
+                  },
+                  {
+                    "id": "competitor_parity",
+                    "name": "竞品对比（Competitor Parity）",
+                    "when_to_use": "已有成熟竞品、差异化不大时做锚定",
+                    "formula": "定价 = 主竞品 × (1 + 差异化系数 -10%~+30%)",
+                    "pros": "快速启动，用户有参考",
+                    "cons": "陷入价格战，难抬高行业上限"
+                  },
+                  {
+                    "id": "value_based",
+                    "name": "价值基（Value-Based）",
+                    "when_to_use": "产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）",
+                    "formula": "定价 = 用户可感知价值 × 10%~30% 分成",
+                    "pros": "天花板最高，能撑高毛利",
+                    "cons": "需要先做 ROI 访谈 / Case Study 证明价值"
+                  },
+                  {
+                    "id": "van_westendorp",
+                    "name": "Van Westendorp PSM",
+                    "when_to_use": "To C 产品首次定价、缺乏历史数据时",
+                    "formula": "问 4 题：太贵放弃价 / 贵但会买 / 便宜会买 / 太便宜不信价，取交点",
+                    "pros": "用户主导，结果可直接用",
+                    "cons": "样本量 ≥ 100 才稳；需要过滤极端回答"
+                  }
+                ],
+                "psm_survey_questions": [
+                  "这个产品在什么价位你会觉得太贵不考虑？",
+                  "什么价位你觉得贵但会认真考虑下单？",
+                  "什么价位你觉得便宜划算会马上买？",
+                  "什么价位你觉得便宜到怀疑它不靠谱？"
+                ]
+              },
+              "verdict": {
+                "level": "green",
+                "score": 0.7,
+                "reason": "基于教育行业 + idea 阶段，推荐用「Van Westendorp PSM」"
+              },
+              "framework_explain": "**Van Westendorp PSM**\n- 适用：To C 产品首次定价、缺乏历史数据时\n- 公式：`问 4 题：太贵放弃价 / 贵但会买 / 便宜会买 / 太便宜不信价，取交点`\n- 优点：用户主导，结果可直接用\n- 缺点：样本量 ≥ 100 才稳；需要过滤极端回答\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
+              "suggestions": [
+                "若采纳「Van Westendorp PSM」，下一步执行：做 100 份 PSM 问卷，取 3 条曲线交点作为建议价位区间",
+                "定价决定后，回来跑一次『单位经济分析』验证 LTV/CAC ≥ 3"
+              ],
+              "missing_inputs": [],
+              "evidence_for_diagnosis": {
+                "H3": 0.6
+              },
+              "baseline_meta": {}
+            },
+            {
+              "module": "rationality",
+              "title": "财务假设合理性",
+              "inputs": {
+                "industry": "教育",
+                "monthly_price": 99.0,
+                "monthly_retention": 0.4,
+                "cac": 500.0
+              },
+              "outputs": {
+                "checks": [
+                  {
+                    "field": "monthly_price",
+                    "value": 99.0,
+                    "range": [
+                      29,
+                      99
+                    ],
+                    "level": "green",
+                    "note": "月价 99.0 落在行业区间 [29, 99]"
+                  },
+                  {
+                    "field": "cac",
+                    "value": 500.0,
+                    "range": [
+                      30,
+                      120
+                    ],
+                    "level": "red",
+                    "note": "CAC 500.0 远高于行业区间 [30, 120]"
+                  },
+                  {
+                    "field": "monthly_retention",
+                    "value": 0.4,
+                    "range": [
+                      0.7,
+                      0.9
+                    ],
+                    "level": "red",
+                    "note": "月留存率 0.4 远低于行业区间 [0.7, 0.9]"
+                  }
+                ],
+                "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
+                "baseline": {
+                  "cac_range": [
+                    30,
+                    120
+                  ],
+                  "monthly_price_range": [
+                    29,
+                    99
+                  ],
+                  "monthly_retention": [
+                    0.7,
+                    0.9
+                  ],
+                  "gross_margin": [
+                    0.6,
+                    0.85
+                  ]
+                }
+              },
+              "verdict": {
+                "level": "red",
+                "score": 0.25,
+                "reason": "CAC 500.0 远高于行业区间 [30, 120]；月留存率 0.4 远低于行业区间 [0.7, 0.9]"
+              },
+              "framework_explain": "**行业基准对比**（教育）：用头部项目的中位区间做锚，判断你的假设是否在同行合理范围。\n- 月价 [[29, 99]]\n- CAC [[30, 120]]\n- 月留存 [[0.7, 0.9]]\n- 毛利率 [[0.6, 0.85]]\n\n教育类看重留存与续费，CAC 对价格敏感度高",
+              "suggestions": [
+                "CAC 500.0 远高于行业区间 [30, 120]——需要用用户调研或成本拆解补充证据",
+                "月留存率 0.4 远低于行业区间 [0.7, 0.9]——需要用用户调研或成本拆解补充证据"
+              ],
+              "missing_inputs": [],
+              "evidence_for_diagnosis": {
+                "H3": 0.25
+              },
+              "baseline_meta": {
+                "industry": "教育",
+                "source": "seed",
+                "updated_at": "2026-04-18T12:48:34+00:00",
+                "evidence_count": 0
+              }
+            }
+          ],
+          "evidence_for_diagnosis": {
+            "H8": 0.2,
+            "H3": 0.6
+          },
+          "industry": "教育"
+        }
+      }
+    }
+  ]
+}

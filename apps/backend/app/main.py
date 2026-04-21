@@ -34,6 +34,14 @@ from app.schemas import (
     BusinessPlanSectionUpdatePayload,
     BusinessPlanSuggestionsResponse,
     BusinessPlanUpgradePayload,
+    BusinessPlanForkCompetitionPayload,
+    BusinessPlanGradingPayload,
+    BusinessPlanGradingResponse,
+    BusinessPlanComparePayload,
+    BusinessPlanCompareResponse,
+    BusinessPlanCoachingModePayload,
+    BusinessPlanAgendaApplyPayload,
+    BusinessPlanAgendaPatchPayload,
     BudgetAIChatPayload,
     BudgetAISuggestPayload,
     BudgetCreatePayload,
@@ -66,6 +74,9 @@ from app.schemas import (
     VideoAnalysisResponse,
     PosterImageGeneratePayload,
     PosterImageGenerateResponse,
+    FinanceReportGeneratePayload,
+    FinanceReportResponse,
+    FinanceReportStatusResponse,
 )
 from app.services.diagnosis_engine import RULE_FALLACY_MAP, RULE_EDGE_MAP
 from app.services.agent_router import run_agents
@@ -80,6 +91,9 @@ from app.services.video_pitch_analyzer import VideoPitchAnalyzer
 from app.services.rag_engine import RagEngine
 from app.services.business_plan_service import BusinessPlanService, BusinessPlanStorage
 from app.services.budget_storage import BudgetStorage
+from app.services.finance_report_service import FinanceReportService
+from app.services.finance_guard import scan_message as finance_guard_scan
+from app.services import finance_baseline_service
 from app.services.chat_storage import ChatStorage
 from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
@@ -129,6 +143,14 @@ business_plan_store = BusinessPlanStorage(settings.data_root / "business_plans")
 business_plan_exports_root = settings.data_root / "exports"
 business_plan_exports_root.mkdir(parents=True, exist_ok=True)
 
+# ── 教师订正层 + 证据回定 ──
+from app.services.ai_override_store import AiOverrideStore, walk_and_apply as _ov_walk_apply  # noqa: E402
+from app.services.evidence_link import EvidenceLinker, set_default_linker  # noqa: E402
+
+ai_override_store = AiOverrideStore(settings.data_root / "ai_overrides")
+evidence_linker = EvidenceLinker(conv_store)
+set_default_linker(evidence_linker)
+
 chat_files_root = settings.data_root / "chat_files"
 chat_files_root.mkdir(parents=True, exist_ok=True)
 app.mount("/chat_files", StaticFiles(directory=str(chat_files_root)), name="chat_files")
@@ -153,6 +175,15 @@ business_plan_service = BusinessPlanService(
     storage=business_plan_store,
     json_store=json_store,
     conv_store=conv_store,
+    llm=composer_llm,
+    rag_engine=rag_engine,
+    graph_service=graph_service,
+)
+finance_report_service = FinanceReportService(
+    data_root=settings.data_root / "finance_reports",
+    budget_store=budget_store,
+    conv_store=conv_store,
+    json_store=json_store,
     llm=composer_llm,
 )
 
@@ -2340,7 +2371,29 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
         weakness_dims: list[str] = []
         for rname, rscores in rubric_scores_all.items():
             avg_rs = round(sum(rscores) / len(rscores), 1) if rscores else 0
-            rubric_heatmap.append({"item": rname, "avg_score": avg_rs, "count": len(rscores)})
+            dim_rationale = {
+                "field": f"rubric_heatmap:{rname}",
+                "value": avg_rs,
+                "formula": "avg(submission_dim_scores)",
+                "formula_display": (
+                    f"{rname} 均分 = Σ({len(rscores)} 次提交的该维度分) ÷ {len(rscores)}\n"
+                    f"= ({' + '.join(f'{s:.1f}' for s in rscores[:6])}"
+                    + (" + …" if len(rscores) > 6 else "")
+                    + f") ÷ {len(rscores)}\n"
+                    f"= {avg_rs}"
+                ),
+                "inputs": [
+                    {"label": f"提交 {i+1}", "value": round(float(s), 2)}
+                    for i, s in enumerate(rscores[:12])
+                ],
+                "note": f"近期 {len(rscores)} 次 · 均值 {avg_rs}",
+            }
+            rubric_heatmap.append({
+                "item": rname,
+                "avg_score": avg_rs,
+                "count": len(rscores),
+                "rationale": dim_rationale,
+            })
             if avg_rs >= 7:
                 strength_dims.append(rname)
             elif avg_rs < 5:
@@ -2362,10 +2415,65 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
         if growth_points and len(growth_points) >= 2:
             improvement_rate = round(growth_points[-1]["score"] - growth_points[0]["score"], 1)
 
+        strength_rationale = {
+            "field": "portrait:strength_dimensions",
+            "value": ", ".join(strength_dims) or "—",
+            "formula": "filter(rubric_heatmap where avg >= 7)",
+            "formula_display": (
+                "优势维度 = 所有 rubric 维度中均分 ≥ 7 的维度集合。\n"
+                + "\n".join(
+                    f"- {h['item']}：{h['avg_score']}（{h['count']} 次）"
+                    for h in rubric_heatmap if h["avg_score"] >= 7
+                )
+                or "当前无均分 ≥ 7 的维度，需继续夯实。"
+            ),
+            "inputs": [
+                {"label": h["item"], "value": h["avg_score"], "impact": f"{h['count']} 次提交"}
+                for h in rubric_heatmap if h["avg_score"] >= 7
+            ],
+            "note": "优势阈值：7/10",
+        }
+        weakness_rationale = {
+            "field": "portrait:weakness_dimensions",
+            "value": ", ".join(weakness_dims) or "—",
+            "formula": "filter(rubric_heatmap where avg < 5)",
+            "formula_display": (
+                "待加强维度 = 所有 rubric 维度中均分 < 5 的维度集合。\n"
+                + "\n".join(
+                    f"- {h['item']}：{h['avg_score']}（{h['count']} 次）"
+                    for h in rubric_heatmap if h["avg_score"] < 5
+                )
+                or "暂无明显短板。"
+            ),
+            "inputs": [
+                {"label": h["item"], "value": h["avg_score"], "impact": f"{h['count']} 次提交"}
+                for h in rubric_heatmap if h["avg_score"] < 5
+            ],
+            "note": "短板阈值：5/10",
+        }
+        growth_rationale = {
+            "field": "portrait:growth_trajectory",
+            "value": f"首末差 {improvement_rate:+.1f}",
+            "formula": "last_score − first_score",
+            "formula_display": (
+                f"成长轨迹：共 {len(growth_points)} 个打分点。\n"
+                f"首次 {growth_points[0]['score'] if growth_points else '—'} →"
+                f" 最新 {growth_points[-1]['score'] if growth_points else '—'}\n"
+                f"提升幅度 = {improvement_rate:+.1f}"
+            ),
+            "inputs": [
+                {"label": p.get("date", "")[:10], "value": p.get("score", 0)}
+                for p in growth_points[-6:]
+            ],
+            "note": f"平均提交间隔 {submit_interval_days} 天",
+        }
         result["portrait"] = {
             "strength_dimensions": strength_dims,
+            "strength_rationale": strength_rationale,
             "weakness_dimensions": weakness_dims,
+            "weakness_rationale": weakness_rationale,
             "growth_trajectory": growth_points[-20:],
+            "growth_rationale": growth_rationale,
             "rubric_heatmap": rubric_heatmap,
             "behavioral_pattern": {
                 "total_submissions": len(subs),
@@ -2908,6 +3016,32 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     # ── teacher feedback context ──
     tfb_ctx, matched_interventions = _build_teacher_runtime_context(project_state, payload.message)
 
+    # ── 财务结构化证据（给本轮诊断加分）──
+    # 来源：① 本学生最新 finance_report 的 merged_evidence
+    #       ② 最近一条 assistant 消息里的 finance_advisory.evidence_for_diagnosis
+    structured_signals: dict[str, float] = {}
+    try:
+        _user_key = (payload.student_id or "").strip().lower()
+        if _user_key and _user_key != "none":
+            _latest_report = finance_report_service.load_latest(_user_key)
+            if _latest_report:
+                for _k, _v in (_latest_report.get("merged_evidence") or {}).items():
+                    structured_signals[_k] = max(structured_signals.get(_k, 0.0), float(_v))
+    except Exception:
+        pass
+    try:
+        for _prev in reversed(conv_messages[-8:]):
+            if not isinstance(_prev, dict):
+                continue
+            _trace = _prev.get("agent_trace") or {}
+            _adv = _trace.get("finance_advisory") or {}
+            for _k, _v in (_adv.get("evidence_for_diagnosis") or {}).items():
+                structured_signals[_k] = max(structured_signals.get(_k, 0.0), float(_v))
+            if _adv:
+                break
+    except Exception:
+        pass
+
     # ── run LangGraph workflow ──
     result = run_workflow(
         message=payload.message,
@@ -2917,7 +3051,32 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         conversation_messages=conv_messages,
         teacher_feedback_context=tfb_ctx,
         competition_type=getattr(payload, "competition_type", "") or "",
+        structured_signals=structured_signals,
     )
+
+    # ── 对话旁路：财务守望 guard（不调 LLM，<500ms）──
+    finance_advisory: dict = {}
+    try:
+        _user_key = (payload.student_id or "").strip().lower()
+        _budget_snap = None
+        if _user_key and _user_key != "none":
+            try:
+                _plans = budget_store.list_plans(_user_key)
+                if _plans:
+                    _budget_snap = budget_store.load(_user_key, _plans[0].get("plan_id", ""))
+            except Exception:
+                _budget_snap = None
+        _industry_hint = result.get("category", "") or ""
+        finance_advisory = finance_guard_scan(
+            text=payload.message,
+            history=conv_messages,
+            budget_snapshot=_budget_snap,
+            user_id=_user_key,
+            industry_hint=_industry_hint,
+        )
+    except Exception as _fg_err:
+        logger.warning("finance_guard failed silently: %s", _fg_err)
+        finance_advisory = {}
 
     diagnosis = result.get("diagnosis", {})
     next_task = result.get("next_task", {})
@@ -2968,6 +3127,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         llm_enabled=composer_llm.enabled,
         matched_interventions=matched_interventions,
     )
+    if finance_advisory.get("triggered"):
+        agent_trace["finance_advisory"] = finance_advisory
 
     # ── persist to project state ──
     _sync_sid = payload.student_id.strip() if payload.student_id and payload.student_id.lower() != "none" else (
@@ -3034,6 +3195,22 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "exploration_state": result.get("exploration_state", {}),
         },
     }, generated_title=llm_title or None)
+
+    # ── 竞赛教练议题板：若该会话关联的计划书处于 competition 教练模式，
+    #     对本轮 assistant 回复做一次轻量议题抽取并入库 ────────────────
+    try:
+        latest_plan = business_plan_service.get_latest(payload.project_id, conv_id)
+        if latest_plan and str(latest_plan.get("coaching_mode") or "project") == "competition":
+            conv_obj = conv_store.get(payload.project_id, conv_id) or {}
+            turn_index_latest = max(len(list(conv_obj.get("messages") or [])) - 1, 0)
+            source_message_id = f"{conv_id}#{turn_index_latest}"
+            business_plan_service.extract_agenda_from_message(
+                str(latest_plan.get("plan_id") or ""),
+                assistant_text=assistant_message,
+                source_message_id=source_message_id,
+            )
+    except Exception as _agenda_exc:  # noqa: BLE001
+        logger.info("competition agenda extract failed: %s", _agenda_exc)
 
     return DialogueTurnResponse(
         project_id=payload.project_id,
@@ -6230,6 +6407,50 @@ def _assessment_rubric(latest_sub: dict) -> list[dict]:
             if not diag_item.get("status") == "ok"
             else f"该维度已初步成立，下一步应把“{item['name']}”从可讲清提升到可证明。"
         )
+        # 构建 rationale，把分数从"黑盒结果"变成可追溯的公式
+        if diag_item:
+            base_val = round(_safe_float(diag_item.get("score", 0)) / 2, 1)
+            formula_lines = [
+                f"基准分：诊断 {diag_name_map[item['id']]} 原始分 {_safe_float(diag_item.get('score', 0)):.1f}/10",
+                f"换算：{_safe_float(diag_item.get('score', 0)):.1f} ÷ 2 = {base_val:.1f}（映射到 0-5 分制）",
+                f"裁剪：max(1.0, min(5.0, {base_val:.1f})) = {score}",
+            ]
+            formula = "clip(diag_dim_score / 2, 1, 5)"
+            inputs = [
+                {"label": "诊断原始分", "value": round(_safe_float(diag_item.get("score", 0)), 1)},
+                {"label": "映射系数", "value": "÷ 2"},
+                {"label": "关键词命中", "value": keyword_hits},
+            ]
+        else:
+            penalty = 0.3 if len(triggered_rules) >= 3 else 0
+            raw = 2.4 + keyword_hits * 0.5 - penalty
+            formula_lines = [
+                f"基准分：2.4（无诊断数据时的保底起点）",
+                f"关键词命中：+{keyword_hits} × 0.5 = +{keyword_hits * 0.5:.1f}",
+                f"规则惩罚：−{penalty:.1f}（触发 ≥3 条规则时扣 0.3）" if penalty else "规则惩罚：0（当前触发规则 < 3 条）",
+                f"合计：2.4 + {keyword_hits * 0.5:.1f} − {penalty:.1f} = {raw:.1f}",
+                f"裁剪：max(1.0, min(5.0, {raw:.1f})) = {score}",
+            ]
+            formula = "clip(2.4 + kw_hits*0.5 − penalty, 1, 5)"
+            inputs = [
+                {"label": "起点基准", "value": 2.4},
+                {"label": "关键词命中", "value": keyword_hits, "impact": f"+{keyword_hits * 0.5:.1f}"},
+                {"label": "规则惩罚", "value": penalty, "impact": f"−{penalty:.1f}"},
+            ]
+        contributing = [
+            {"label": "命中关键词", "detail": "、".join(kw for kw in item["good"] if kw in raw_text) or "（无）"},
+            {"label": "触发风险规则", "detail": f"{len(triggered_rules)} 条"},
+            {"label": "可引用证据", "detail": f"{len(evidence)} 条"},
+        ]
+        rationale = {
+            "field": f"rubric:{item['id']}",
+            "value": score,
+            "formula": formula,
+            "formula_display": "\n".join(formula_lines),
+            "inputs": inputs,
+            "contributing_evidence": contributing,
+            "note": f"满分 5 · 权重 {int(item['weight'] * 100)}% · 加权贡献 {round(score * item['weight'], 2)}",
+        }
         results.append({
             "item_id": item["id"],
             "item_name": item["name"],
@@ -6239,6 +6460,7 @@ def _assessment_rubric(latest_sub: dict) -> list[dict]:
             "reason": "；".join(reason_bits) + "。",
             "revision_suggestion": revision_suggestion,
             "evidence_quotes": [q.get("quote", "") for q in evidence[:2] if q.get("quote")],
+            "rationale": rationale,
         })
     return results
 
@@ -8183,9 +8405,126 @@ def business_plan_detail(plan_id: str) -> BusinessPlanResponse:
     return BusinessPlanResponse(status="ok", plan=plan, readiness=readiness)
 
 
+# ══════════════════════════════════════════════════════════════════
+#  Finance Report API
+# ══════════════════════════════════════════════════════════════════
+
+
+def _norm_user_key(raw: str) -> str:
+    return (raw or "").strip().lower()
+
+
+@app.get("/api/finance/report/{user_id}", response_model=FinanceReportResponse)
+def finance_report_get(user_id: str) -> FinanceReportResponse:
+    key = _norm_user_key(user_id)
+    if not key:
+        return FinanceReportResponse(status="invalid_user", report=None, detail="缺少 user_id")
+    report = finance_report_service.load_latest(key)
+    if not report:
+        return FinanceReportResponse(status="not_found", report=None, detail="尚未生成财务分析报告")
+    return FinanceReportResponse(status="ok", report=report)
+
+
+@app.get("/api/finance/report/{user_id}/status", response_model=FinanceReportStatusResponse)
+def finance_report_status(user_id: str) -> FinanceReportStatusResponse:
+    key = _norm_user_key(user_id)
+    st = finance_report_service.get_status(key)
+    return FinanceReportStatusResponse(
+        status=str(st.get("status", "idle")),
+        detail=str(st.get("detail", "")),
+        updated_at=str(st.get("updated_at", "")),
+    )
+
+
+@app.post("/api/finance/report/generate", response_model=FinanceReportResponse)
+def finance_report_generate(payload: FinanceReportGeneratePayload) -> FinanceReportResponse:
+    key = _norm_user_key(payload.user_id)
+    if not key:
+        return FinanceReportResponse(status="invalid_user", report=None, detail="缺少 user_id")
+    try:
+        report = finance_report_service.generate(
+            user_id=key,
+            plan_id=payload.plan_id,
+            project_id=payload.project_id,
+            conversation_id=payload.conversation_id,
+            industry_hint=payload.industry_hint,
+            context_text=payload.context_text,
+            use_llm_explain=payload.use_llm_explain,
+        )
+        return FinanceReportResponse(status="ok", report=report)
+    except RuntimeError as exc:
+        return FinanceReportResponse(status="busy", report=None, detail=str(exc))
+    except Exception as exc:
+        logger.exception("finance_report_generate failed: %s", exc)
+        return FinanceReportResponse(status="error", report=None, detail=str(exc))
+
+
+@app.post("/api/finance/report/{user_id}/regenerate", response_model=FinanceReportResponse)
+def finance_report_regenerate(user_id: str, payload: FinanceReportGeneratePayload) -> FinanceReportResponse:
+    # 路径 user_id 优先
+    payload.user_id = user_id or payload.user_id
+    return finance_report_generate(payload)
+
+
+# ══════════════════════════════════════════════════════════════════
+#  行业财务基线 —— 老师/管理员维护接口
+# ══════════════════════════════════════════════════════════════════
+
+@app.get("/api/finance/baselines")
+def finance_baselines_list() -> dict[str, Any]:
+    """列出所有行业的基线记录（含来源、更新时间、证据）。"""
+    try:
+        finance_baseline_service.init_seed_if_missing()
+        records = finance_baseline_service.list_all_baselines()
+        return {"count": len(records), "baselines": records}
+    except Exception as exc:
+        logger.exception("finance_baselines_list failed: %s", exc)
+        return {"count": 0, "baselines": [], "error": str(exc)}
+
+
+@app.post("/api/finance/baselines/refresh")
+def finance_baselines_refresh(payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    """
+    联网刷新指定行业（或全部）的基线数据。
+    payload: {"industry": "SaaS"} 或 {"industry": "all"} 或 {} (默认 all)
+    """
+    payload = payload or {}
+    target = (payload.get("industry") or "all").strip()
+    try:
+        finance_baseline_service.init_seed_if_missing()
+        updated: list[dict] = []
+        failed: list[str] = []
+        if target == "all" or not target:
+            from app.services.finance_analyst import INDUSTRY_BASELINES
+            keys = list(INDUSTRY_BASELINES.keys())
+        else:
+            keys = [target]
+        for key in keys:
+            rec = finance_baseline_service.refresh_from_web(key)
+            if rec:
+                updated.append({
+                    "industry": key,
+                    "source": rec.get("source"),
+                    "updated_at": rec.get("updated_at"),
+                    "evidence_count": len(rec.get("evidence", []) or []),
+                })
+            else:
+                failed.append(key)
+        return {
+            "ok": True,
+            "updated": updated,
+            "failed": failed,
+            "note": "failed 表示该行业联网检索或 LLM 抽数失败，仍保留旧版缓存",
+        }
+    except Exception as exc:
+        logger.exception("finance_baselines_refresh failed: %s", exc)
+        return {"ok": False, "error": str(exc)}
+
+
 @app.post("/api/business-plan/generate", response_model=BusinessPlanResponse)
 def business_plan_generate(payload: BusinessPlanGeneratePayload) -> BusinessPlanResponse:
     result = business_plan_service.generate_plan(
+        mode=payload.mode,
         project_id=payload.project_id,
         conversation_id=payload.conversation_id,
         student_id=payload.student_id,
@@ -8478,6 +8817,187 @@ def business_plan_upgrade(plan_id: str, payload: BusinessPlanUpgradePayload) -> 
     return BusinessPlanResponse(status=str(result.get("status") or "ok"), plan=plan, readiness=readiness)
 
 
+# ── 竞赛分支：从主干 fork 出一份竞赛优化版 ─────────────────────
+@app.post("/api/business-plan/{plan_id}/fork-competition", response_model=BusinessPlanResponse)
+def business_plan_fork_competition(
+    plan_id: str,
+    payload: BusinessPlanForkCompetitionPayload,
+) -> BusinessPlanResponse:
+    result = business_plan_service.fork_for_competition(
+        plan_id,
+        competition_type=payload.competition_type,
+        refresh_kb_reference=payload.refresh_kb_reference,
+    )
+    if result.get("status") in {"not_found", "invalid"}:
+        return BusinessPlanResponse(status=str(result["status"]), plan=None, readiness={})
+    plan = result.get("plan")
+    readiness = business_plan_service.get_readiness(
+        str((plan or {}).get("project_id") or ""),
+        str((plan or {}).get("conversation_id") or ""),
+    ) if plan else {}
+    return BusinessPlanResponse(
+        status=str(result.get("status") or "ok"),
+        plan=plan,
+        readiness=readiness,
+    )
+
+
+# ── 教练模式切换（项目教练 ↔ 竞赛教练） ─────────────────────────
+@app.patch("/api/business-plan/{plan_id}/coaching-mode", response_model=BusinessPlanResponse)
+def business_plan_set_coaching_mode(
+    plan_id: str,
+    payload: BusinessPlanCoachingModePayload,
+) -> BusinessPlanResponse:
+    result = business_plan_service.set_coaching_mode(plan_id, payload.mode)
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan")
+    readiness = business_plan_service.get_readiness(
+        str((plan or {}).get("project_id") or ""),
+        str((plan or {}).get("conversation_id") or ""),
+    ) if plan else {}
+    resp = BusinessPlanResponse(
+        status=str(result.get("status") or "ok"),
+        plan=plan,
+        readiness=readiness,
+    )
+    return resp
+
+
+# ── 竞赛教练议题板 ─────────────────────────────────────────────
+@app.get("/api/business-plan/{plan_id}/agenda")
+def business_plan_list_agenda(plan_id: str, status: str = "") -> dict:
+    return business_plan_service.list_agenda(plan_id, status_filter=status)
+
+
+@app.post("/api/business-plan/{plan_id}/agenda/apply", response_model=BusinessPlanResponse)
+def business_plan_apply_agenda(
+    plan_id: str,
+    payload: BusinessPlanAgendaApplyPayload,
+) -> BusinessPlanResponse:
+    result = business_plan_service.apply_agenda(
+        plan_id,
+        agenda_ids=payload.agenda_ids,
+        target_section_map=payload.target_section_map or None,
+    )
+    if result.get("status") == "not_found":
+        return BusinessPlanResponse(status="not_found", plan=None, readiness={})
+    plan = result.get("plan")
+    readiness = business_plan_service.get_readiness(
+        str((plan or {}).get("project_id") or ""),
+        str((plan or {}).get("conversation_id") or ""),
+    ) if plan else {}
+    return BusinessPlanResponse(
+        status=str(result.get("status") or "ok"),
+        plan=plan,
+        readiness=readiness,
+    )
+
+
+@app.patch("/api/business-plan/{plan_id}/agenda/{agenda_id}")
+def business_plan_patch_agenda(
+    plan_id: str,
+    agenda_id: str,
+    payload: BusinessPlanAgendaPatchPayload,
+) -> dict:
+    return business_plan_service.patch_agenda(
+        plan_id,
+        agenda_id,
+        status=payload.status,
+        section_id_hint=payload.section_id_hint,
+    )
+
+
+# ── 所有相关分支（主干 + fork）聚合查询 ─────────────────────────
+@app.get("/api/business-plan/{plan_id}/siblings")
+def business_plan_siblings(plan_id: str) -> dict:
+    """返回同一 project+conversation 下所有计划书（主干+所有 fork），便于前端做切换。"""
+    plan = business_plan_service.get_plan(plan_id)
+    if not plan:
+        return {"status": "not_found", "plans": []}
+    project_id = str(plan.get("project_id") or "")
+    conversation_id = str(plan.get("conversation_id") or "")
+    plan_dir = business_plan_store._plan_dir(project_id, conversation_id)
+    out = []
+    for p in sorted(plan_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not data.get("plan_id"):
+            continue
+        out.append({
+            "plan_id": data.get("plan_id"),
+            "title": data.get("title"),
+            "plan_type": data.get("plan_type") or "main",
+            "fork_of": data.get("fork_of"),
+            "mode": data.get("mode") or "learning",
+            "version_tier": data.get("version_tier"),
+            "submission_status": data.get("submission_status") or "draft",
+            "updated_at": data.get("updated_at"),
+        })
+    return {"status": "ok", "plans": out}
+
+
+# ── 教师评分：POST 写入 / GET 读取 ──────────────────────────────
+@app.post("/api/business-plan/{plan_id}/grade", response_model=BusinessPlanGradingResponse)
+def business_plan_grade(
+    plan_id: str,
+    payload: BusinessPlanGradingPayload,
+) -> BusinessPlanGradingResponse:
+    result = business_plan_service.grade_plan(plan_id, payload.dict())
+    return BusinessPlanGradingResponse(
+        status=str(result.get("status") or "ok"),
+        grading=result.get("grading"),
+    )
+
+
+@app.get("/api/business-plan/{plan_id}/grading", response_model=BusinessPlanGradingResponse)
+def business_plan_grading_get(plan_id: str) -> BusinessPlanGradingResponse:
+    result = business_plan_service.get_grading(plan_id)
+    return BusinessPlanGradingResponse(
+        status=str(result.get("status") or "ok"),
+        grading=result.get("grading"),
+    )
+
+
+# ── 计划书对比 ────────────────────────────────────────────────
+@app.post("/api/business-plan/compare", response_model=BusinessPlanCompareResponse)
+def business_plan_compare(payload: BusinessPlanComparePayload) -> BusinessPlanCompareResponse:
+    result = business_plan_service.compare_plans(
+        payload.plan_ids,
+        focus_sections=payload.focus_sections,
+        use_llm=payload.use_llm,
+    )
+    return BusinessPlanCompareResponse(
+        status=str(result.get("status") or "ok"),
+        comparison=result.get("comparison"),
+    )
+
+
+# ── 教师端按分类分组的计划书列表（跨学生 + 跨项目） ─────────────
+@app.get("/api/teacher/student-plans-grouped")
+def teacher_student_plans_grouped(teacher_id: str = "", team_id: str = "") -> dict:
+    """把 teacher_student_plans 的结果拍平后，按项目品类二次分组，方便教师做跨学生对比。"""
+    base = teacher_student_plans(teacher_id=teacher_id, team_id=team_id)
+    flat: list[dict[str, Any]] = []
+    for t in base.get("teams") or []:
+        for s in t.get("students") or []:
+            for p in s.get("plans") or []:
+                flat.append({
+                    **p,
+                    "team_id": t.get("team_id"),
+                    "team_name": t.get("team_name"),
+                    "student_id": s.get("student_id"),
+                    "display_name": s.get("display_name"),
+                    "student_id_code": s.get("student_id_code"),
+                    "class_id": s.get("class_id"),
+                    "project_id": s.get("project_id"),
+                })
+    groups = business_plan_service.list_plans_grouped_by_category(flat)
+    return {"status": "ok", "groups": groups}
+
+
 @app.post(
     "/api/business-plan/{plan_id}/sections/{section_id}/deepen-questions",
     response_model=BusinessPlanQuestionsResponse,
@@ -8596,15 +9116,49 @@ def kg_search(q: str = "", subgraph: str = "", category: str = "", limit: int = 
 
 @app.get("/api/kg/quality")
 def kg_quality() -> dict:
-    """Return pre-computed KG quality evaluation report."""
+    """Return pre-computed KG quality evaluation report.
+
+    如果报告不存在或读失败：返回 status=not_generated/error，让前端
+    展示『数据未就绪』灰态而不是拿不到数据报错。
+    """
     import json as _json
+    from datetime import datetime as _dt
     quality_path = settings.data_root / "kg_quality" / "quality_report.json"
     if not quality_path.exists():
-        return {"error": "quality report not generated yet", "dimensions": []}
+        return {
+            "status": "not_generated",
+            "report_path": str(quality_path),
+            "message": "知识图谱质量报告尚未生成",
+            "hint": "在 workspace 根目录执行：python scripts/evaluate_kg_quality.py",
+            "dimensions": [],
+        }
     try:
-        return _json.loads(quality_path.read_text(encoding="utf-8"))
+        data = _json.loads(quality_path.read_text(encoding="utf-8"))
+        # 附加元信息：报告生成时间 / 距今多久 / 文件路径
+        try:
+            mtime = quality_path.stat().st_mtime
+            generated_at = _dt.fromtimestamp(mtime).isoformat(timespec="seconds")
+            age_days = round((_dt.now().timestamp() - mtime) / 86400, 1)
+        except Exception:
+            generated_at = None
+            age_days = None
+        data.setdefault("status", "ok")
+        data["report_meta"] = {
+            "generated_at": generated_at,
+            "age_days": age_days,
+            "is_stale": (age_days is not None and age_days > 7),
+            "report_path": str(quality_path),
+            "refresh_hint": "python scripts/evaluate_kg_quality.py",
+        }
+        return data
     except Exception as exc:
-        return {"error": f"failed to read quality report: {exc}"}
+        return {
+            "status": "error",
+            "error": f"failed to read quality report: {exc}",
+            "report_path": str(quality_path),
+            "hint": "请检查报告文件是否被损坏，或重新执行 scripts/evaluate_kg_quality.py 生成",
+            "dimensions": [],
+        }
 
 
 # ── Dimension Chinese Names ─────────────────────────────────
@@ -9158,7 +9712,36 @@ def teacher_team_diagnosis(teacher_id: str = "") -> dict:
         rubric_heatmap_team = []
         for rname, scores in sorted(rubric_agg.items(), key=lambda kv: sum(kv[1]) / len(kv[1]) if kv[1] else 0):
             avg_v = round(sum(scores) / len(scores), 1) if scores else 0
-            rubric_heatmap_team.append({"item": rname, "item_cn": _dim_cn(rname), "avg_score": avg_v, "sample_count": len(scores)})
+            sorted_scores = sorted(scores)
+            lo = round(sorted_scores[0], 1) if sorted_scores else 0
+            hi = round(sorted_scores[-1], 1) if sorted_scores else 0
+            zone = "优势区" if avg_v >= 7 else ("平均区" if avg_v >= 5 else "短板区")
+            dim_cn = _dim_cn(rname)
+            show_scores = [f"{s:.1f}" for s in sorted_scores[:8]]
+            more_suffix = " + …" if len(sorted_scores) > 8 else ""
+            team_rationale = {
+                "field": f"rubric_heatmap_team:{rname}",
+                "value": avg_v,
+                "formula": "avg(per_student_dim_avg) where per_student = avg(submission_scores)",
+                "formula_display": (
+                    f"团队 {dim_cn}（{rname}） 均分 = Σ(每位学生该维度均分) ÷ {len(scores)}\n"
+                    f"= ({' + '.join(show_scores)}{more_suffix}) ÷ {len(scores)}\n"
+                    f"= {avg_v}（最低 {lo} · 最高 {hi} · 样本 {len(scores)} 人）\n"
+                    f"归属：{zone}（≥7 优势 / 5-6.9 平均 / <5 短板）"
+                ),
+                "inputs": [
+                    {"label": f"学生 {i+1}", "value": round(float(s), 2)}
+                    for i, s in enumerate(sorted_scores[:12])
+                ],
+                "note": f"{zone} · {len(scores)} 人样本",
+            }
+            rubric_heatmap_team.append({
+                "item": rname,
+                "item_cn": dim_cn,
+                "avg_score": avg_v,
+                "sample_count": len(scores),
+                "rationale": team_rationale,
+            })
 
         score_distribution = {
             "good": sum(1 for sp in student_portraits if sp.get("avg_score", 0) >= 7),
@@ -9258,3 +9841,533 @@ def _compute_team_health(avg_score: float, risk_count: int, active: int, total: 
         level = "critical"
         summary = "团队需要紧急干预，多名学生存在风险。"
     return {"score": score, "level": level, "summary": summary}
+
+
+# ══════════════════════════════════════════════════════════════════
+# 学生画像 / 教师订正 / 证据溯源  ——  新增接口
+# ══════════════════════════════════════════════════════════════════
+
+def _apply_overrides_everywhere(payload: dict, project_id: str, conversation_ids: list[str | None] | None = None) -> dict:
+    """在任意返回对象上批量应用教师订正（直接 walk 所有 rationale）。"""
+    try:
+        cids: list[str | None] = conversation_ids if conversation_ids is not None else [None]
+        overrides = ai_override_store.list_many(project_id, cids)
+        if overrides:
+            _ov_walk_apply(payload, overrides)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("apply overrides failed: %s", exc)
+    return payload
+
+
+def _link_triggered_rule_messages(
+    project_id: str,
+    conversation_id: str,
+    triggered_rules: list[dict],
+) -> None:
+    """原地为每条 triggered_rule 补 source_message 信息。"""
+    if not triggered_rules or not conversation_id:
+        return
+    for rule in triggered_rules:
+        if not isinstance(rule, dict):
+            continue
+        quote = str(rule.get("quote") or "").strip()
+        if not quote:
+            continue
+        hits = evidence_linker.link_text(project_id, conversation_id, quote, top_k=1)
+        if hits:
+            h = hits[0]
+            rule["source_message_id"] = h["message_id"]
+            rule["source_message_turn"] = h["turn_index"]
+            rule["source_message_role"] = h["role"]
+            rule["source_message_excerpt"] = h["excerpt"]
+            rule["source_message_confidence"] = h["confidence"]
+
+
+# ───────────────── 学生画像 endpoints ─────────────────
+def _compute_student_health(avg_score: float, risk_count: int, submission_count: int) -> dict:
+    """单学生 0-100 健康指数（与团队同风格）。"""
+    score = 40.0
+    if avg_score > 0:
+        score = min(60, avg_score * 7)
+    activity_bonus = min(20, submission_count * 4)
+    score += activity_bonus
+    risk_penalty = min(30, risk_count * 2)
+    score = max(0, min(100, score - risk_penalty + 10))
+    score = round(score, 1)
+    if score >= 75:
+        level, label = "healthy", "表现良好"
+    elif score >= 50:
+        level, label = "warning", "一般可提升"
+    else:
+        level, label = "critical", "需重点关注"
+    return {"score": score, "level": level, "label": label}
+
+
+def _build_student_panorama(
+    submissions: list[dict],
+    rubric_heatmap: list[dict],
+    avg_score: float,
+    trend: float,
+    risk_count: int,
+    strength_dims: list[str],
+    weakness_dims: list[str],
+    scope_label: str = "全部会话",
+) -> dict:
+    """把单学生（或单会话）聚合数据整理成与团队画像同 schema 的 panorama 结构。"""
+    total_subs = len(submissions or [])
+    # Health
+    health = _compute_student_health(avg_score, risk_count, total_subs)
+
+    # rubric_heatmap 补 item_cn
+    heatmap_team_style = []
+    for rh in (rubric_heatmap or []):
+        if not isinstance(rh, dict) or not rh.get("item"):
+            continue
+        heatmap_team_style.append({
+            "item": rh["item"],
+            "item_cn": _dim_cn(rh["item"]),
+            "avg_score": rh.get("avg_score", 0),
+            "sample_count": rh.get("count", 0),
+        })
+    heatmap_team_style.sort(key=lambda h: h["avg_score"])
+
+    # 中文强/弱
+    top_strengths_cn = [_dim_cn(d) for d in (strength_dims or [])[:3]]
+    top_weaknesses_cn = [_dim_cn(d) for d in (weakness_dims or [])[:3]]
+
+    # 风险 Top3
+    rule_counter: dict[str, int] = {}
+    score_distribution = {"good": 0, "average": 0, "weak": 0, "no_data": 0}
+    recent_scores: list[float] = []
+    for s in (submissions or []):
+        sc = 0.0
+        diag = s.get("diagnosis") or {}
+        if isinstance(diag, dict):
+            sc = float(diag.get("overall_score", 0) or 0)
+        if not sc:
+            sc = float(s.get("overall_score", 0) or 0)
+        if sc >= 7:
+            score_distribution["good"] += 1
+        elif sc >= 5:
+            score_distribution["average"] += 1
+        elif sc > 0:
+            score_distribution["weak"] += 1
+        else:
+            score_distribution["no_data"] += 1
+        if sc > 0:
+            recent_scores.append(sc)
+        triggered = s.get("triggered_rules") or []
+        if not triggered and isinstance(diag, dict):
+            triggered = diag.get("triggered_rules") or []
+        for tr in triggered:
+            if isinstance(tr, dict):
+                rid = str(tr.get("id") or tr.get("rule_id") or "")
+            else:
+                rid = str(tr or "")
+            if rid:
+                rule_counter[rid] = rule_counter.get(rid, 0) + 1
+    risk_top3 = sorted(rule_counter.items(), key=lambda kv: kv[1], reverse=True)[:3]
+    risk_rule_top3_list = [
+        {"rule_id": rid, "count": cnt, "label": _dim_cn(rid) if rid in DIM_CN else rid}
+        for rid, cnt in risk_top3
+    ]
+
+    # Engagement（单学生语义：总提交、近 7 天节奏、最近一次）
+    engagement_stats = {
+        "total_submissions": total_subs,
+        "scored_count": len(recent_scores),
+        "risk_count": risk_count,
+    }
+
+    # trend_summary
+    if total_subs >= 4:
+        if trend > 0.3:
+            trend_summary = f"近期趋势 +{trend:.1f}，呈稳步进步"
+        elif trend < -0.3:
+            trend_summary = f"近期趋势 {trend:.1f}，需关注回落"
+        else:
+            trend_summary = f"近期波动 {trend:+.1f}，整体平稳"
+    elif total_subs > 0:
+        trend_summary = "数据量较少，暂无法判断趋势"
+    else:
+        trend_summary = "尚无诊断数据"
+
+    # detail_bullets
+    detail_bullets: list[str] = []
+    if avg_score > 0:
+        detail_bullets.append(f"{scope_label}均分 {avg_score}/10，健康指数 {health['score']}")
+    else:
+        detail_bullets.append(f"{scope_label}尚无完整打分数据，先完成一次提交即可建立画像")
+    if top_strengths_cn:
+        detail_bullets.append(f"优势维度：{'、'.join(top_strengths_cn)}")
+    if top_weaknesses_cn:
+        detail_bullets.append(f"待加强：{'、'.join(top_weaknesses_cn)}")
+    if risk_rule_top3_list:
+        detail_bullets.append(
+            "高频风险："
+            + "、".join(f"{r['rule_id']}({r['count']}次)" for r in risk_rule_top3_list)
+        )
+
+    # overall_assessment
+    parts: list[str] = []
+    if health["level"] == "healthy":
+        parts.append(f"整体表现良好（{health['score']}）")
+    elif health["level"] == "warning":
+        parts.append(f"整体中等水平（{health['score']}），有提升空间")
+    else:
+        parts.append(f"整体需要重点关注（{health['score']}）")
+    if top_strengths_cn:
+        parts.append(f"继续保持「{top_strengths_cn[0]}」优势")
+    if top_weaknesses_cn:
+        parts.append(f"优先补强「{top_weaknesses_cn[0]}」")
+    if risk_rule_top3_list:
+        parts.append(f"当前最高频风险为 {risk_rule_top3_list[0]['rule_id']}")
+    overall_assessment = "；".join(parts) + "。"
+
+    return {
+        "health_score": health["score"],
+        "health_level": health["level"],
+        "health_label": health["label"],
+        "rubric_heatmap_team": heatmap_team_style,
+        "top_strengths": top_strengths_cn,
+        "top_weaknesses": top_weaknesses_cn,
+        "risk_rule_top3": risk_rule_top3_list,
+        "engagement_stats": engagement_stats,
+        "trend_summary": trend_summary,
+        "overall_assessment": overall_assessment,
+        "detail_bullets": detail_bullets,
+        "score_distribution": score_distribution,
+    }
+
+
+@app.get("/api/student/{user_id}/portrait/overall")
+def student_portrait_overall(user_id: str) -> dict:
+    """学生总画像：跨所有会话聚合。"""
+    data = _aggregate_student_data(user_id, include_detail=True)
+    portrait = dict(data.get("portrait") or {})
+    portrait["total_submissions"] = data.get("total_submissions", 0)
+    portrait["project_count"] = data.get("project_count", 0)
+    portrait["avg_score"] = data.get("avg_score", 0.0)
+    portrait["trend"] = data.get("trend", 0.0)
+    portrait["risk_count"] = data.get("risk_count", 0)
+    portrait["latest_phase"] = data.get("latest_phase", "")
+    portrait["intent_distribution"] = data.get("intent_distribution", {}) or {}
+    portrait["intent_shape_distribution"] = data.get("intent_shape_distribution", {}) or {}
+    portrait["student_case_summary"] = data.get("student_case_summary", "") or ""
+    # 团队画像同结构字段（panorama）
+    project_id = f"project-{user_id}"
+    project = json_store.load_project(project_id)
+    all_subs = list(project.get("submissions", []) or [])
+    panorama = _build_student_panorama(
+        submissions=all_subs,
+        rubric_heatmap=portrait.get("rubric_heatmap") or [],
+        avg_score=float(data.get("avg_score", 0.0) or 0.0),
+        trend=float(data.get("trend", 0.0) or 0.0),
+        risk_count=int(data.get("risk_count", 0) or 0),
+        strength_dims=portrait.get("strength_dimensions") or [],
+        weakness_dims=portrait.get("weakness_dimensions") or [],
+        scope_label="总画像",
+    )
+    portrait.update(panorama)
+    # 汇总用：overview_rationale 说明这张画像是如何算出来的
+    portrait["overview_rationale"] = {
+        "field": "portrait:overall",
+        "value": data.get("avg_score", 0.0),
+        "formula": "avg(scores across all submissions)",
+        "formula_display": (
+            f"总画像聚合了该学生全部 {data.get('total_submissions', 0)} 条提交，"
+            f"分布在 {data.get('project_count', 0)} 个项目（会话）上。\n"
+            f"综合均分 = 全部打分的算术平均 = {data.get('avg_score', 0.0)}\n"
+            f"近中期变化 = {data.get('trend', 0.0):+.1f}\n"
+            f"健康指数 = {panorama['health_score']}（{panorama['health_label']}）"
+        ),
+        "inputs": [
+            {"label": "项目数", "value": data.get("project_count", 0)},
+            {"label": "提交数", "value": data.get("total_submissions", 0)},
+            {"label": "触发风险次数", "value": data.get("risk_count", 0)},
+            {"label": "健康指数", "value": panorama["health_score"]},
+        ],
+        "note": "默认按所有会话聚合，若要按会话单独查看请切换 Tab。",
+    }
+    all_cids = [None] + [str((c.get("conversation_id") or "")) for c in conv_store.list_conversations(project_id)]
+    return _apply_overrides_everywhere({"portrait": portrait}, project_id, all_cids)
+
+
+@app.get("/api/student/{user_id}/portrait/conversations")
+def student_portrait_conversations(user_id: str) -> dict:
+    """学生按会话的画像列表：每个会话一张卡（轻量版）。"""
+    project_id = f"project-{user_id}"
+    data = _aggregate_student_data(user_id, include_detail=True)
+    project_snapshots = data.get("project_snapshots") or []
+    # 会话列表（精简：取每个 conversation_id 最近一次画像切面）
+    convs = conv_store.list_conversations(project_id)
+    conv_meta = {str(c["conversation_id"]): c for c in convs}
+    # 把 project_snapshots 按 project_id 对齐 conversation_id（约定两者相同时）
+    cards = []
+    for snap in project_snapshots:
+        cid = str(snap.get("project_id") or "")
+        meta = conv_meta.get(cid, {}) if cid else {}
+        cards.append({
+            "conversation_id": cid,
+            "title": meta.get("title") or snap.get("project_name") or cid[:8],
+            "last_score": snap.get("latest_score", 0),
+            "project_phase": snap.get("project_phase", ""),
+            "summary": snap.get("current_summary", ""),
+            "top_risks": snap.get("top_risks", []),
+            "intent_distribution": snap.get("intent_distribution", {}),
+            "message_count": meta.get("message_count", 0),
+            "created_at": meta.get("created_at", ""),
+        })
+    return _apply_overrides_everywhere(
+        {"project_id": project_id, "cards": cards},
+        project_id,
+        [c["conversation_id"] for c in cards if c.get("conversation_id")],
+    )
+
+
+@app.get("/api/student/{user_id}/portrait/conversation/{conversation_id}")
+def student_portrait_conversation_detail(user_id: str, conversation_id: str) -> dict:
+    """单个会话的画像详情：rubric 趋势、风险、成熟度、消息数量等。"""
+    project_id = f"project-{user_id}"
+    data = _aggregate_student_data(user_id, include_detail=True)
+    proj = next((p for p in (data.get("projects") or []) if p.get("project_id") == conversation_id), None)
+    if not proj:
+        return {"status": "not_found", "conversation_id": conversation_id}
+    # 本会话的原始 submissions（用于 panorama 的风险统计）
+    proj_raw_subs = [
+        s for s in (json_store.load_project(project_id).get("submissions") or [])
+        if _safe_str(s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id") or "") == conversation_id
+    ]
+    # 本会话的 rubric heatmap
+    rubric_scores: dict[str, list[float]] = {}
+    for sub in proj.get("submissions", []):
+        diag = sub.get("diagnosis") or {}
+        for r in (diag.get("rubric") or []):
+            if isinstance(r, dict) and r.get("item"):
+                rubric_scores.setdefault(r["item"], []).append(float(r.get("score", 0) or 0))
+    heatmap = []
+    strength_dims_conv: list[str] = []
+    weakness_dims_conv: list[str] = []
+    for name, arr in rubric_scores.items():
+        avg_rs = round(sum(arr) / len(arr), 2) if arr else 0
+        if avg_rs >= 7:
+            strength_dims_conv.append(name)
+        elif avg_rs < 5:
+            weakness_dims_conv.append(name)
+        heatmap.append({
+            "item": name,
+            "avg_score": avg_rs,
+            "count": len(arr),
+            "rationale": {
+                "field": f"rubric_heatmap:{conversation_id}:{name}",
+                "value": avg_rs,
+                "formula": "avg(dim scores in this conversation)",
+                "formula_display": (
+                    f"本会话 {name} 均分 = ({' + '.join(f'{x:.1f}' for x in arr[:6])}"
+                    + (" + …" if len(arr) > 6 else "")
+                    + f") ÷ {len(arr)} = {avg_rs}"
+                ),
+                "inputs": [{"label": f"第{i+1}次", "value": round(float(x), 2)} for i, x in enumerate(arr[:10])],
+                "note": f"仅统计本会话 {len(arr)} 次评分",
+            },
+        })
+    # 本会话趋势
+    p_scores = []
+    for sub in proj.get("submissions", []):
+        sc = float(sub.get("overall_score", 0) or 0)
+        if not sc:
+            diag = sub.get("diagnosis") or {}
+            sc = float(diag.get("overall_score", 0) or 0) if isinstance(diag, dict) else 0
+        if sc > 0:
+            p_scores.append(sc)
+    conv_avg = round(sum(p_scores) / len(p_scores), 1) if p_scores else 0.0
+    conv_trend = 0.0
+    if len(p_scores) >= 4:
+        mid = len(p_scores) // 2
+        conv_trend = round(sum(p_scores[mid:]) / (len(p_scores) - mid) - sum(p_scores[:mid]) / mid, 1)
+    conv_risk_count = sum(1 for s in proj_raw_subs if (s.get("triggered_rules") or []))
+
+    panorama = _build_student_panorama(
+        submissions=proj_raw_subs,
+        rubric_heatmap=heatmap,
+        avg_score=conv_avg,
+        trend=conv_trend,
+        risk_count=conv_risk_count,
+        strength_dims=strength_dims_conv,
+        weakness_dims=weakness_dims_conv,
+        scope_label="本会话",
+    )
+    # 本会话的最近一次 maturity（从最新 bp 取）
+    try:
+        latest_bp = business_plan_service.get_latest(project_id, conversation_id) or {}
+    except Exception:
+        latest_bp = {}
+    maturity_snapshot = (latest_bp.get("readiness") or {}) if isinstance(latest_bp, dict) else {}
+    # 提供与 overall 对齐的 portrait 对象
+    portrait_payload = {
+        **panorama,
+        "avg_score": conv_avg,
+        "trend": conv_trend,
+        "risk_count": conv_risk_count,
+        "total_submissions": len(proj_raw_subs),
+        "rubric_heatmap": heatmap,
+        "strength_dimensions": strength_dims_conv,
+        "weakness_dimensions": weakness_dims_conv,
+        "latest_phase": proj.get("project_phase", ""),
+        "overview_rationale": {
+            "field": f"portrait:conversation:{conversation_id}",
+            "value": conv_avg,
+            "formula": "avg(scores in this conversation)",
+            "formula_display": (
+                f"本会话共 {len(proj_raw_subs)} 次提交，\n"
+                f"有效打分 {len(p_scores)} 次 → 均分 {conv_avg}\n"
+                f"近中期变化 {conv_trend:+.1f}\n"
+                f"健康指数 = {panorama['health_score']}（{panorama['health_label']}）"
+            ),
+            "inputs": [
+                {"label": "提交数", "value": len(proj_raw_subs)},
+                {"label": "有效打分", "value": len(p_scores)},
+                {"label": "触发风险次数", "value": conv_risk_count},
+                {"label": "健康指数", "value": panorama["health_score"]},
+            ],
+            "note": "只统计该会话（项目）内的数据",
+        },
+    }
+    payload = {
+        "conversation_id": conversation_id,
+        "project_card": proj,
+        "rubric_heatmap": heatmap,
+        "maturity_snapshot": maturity_snapshot,
+        "portrait": portrait_payload,
+    }
+    return _apply_overrides_everywhere(payload, project_id, [conversation_id, None])
+
+
+# ───────────────── 教师订正 endpoints ─────────────────
+@app.get("/api/teacher/overrides")
+def teacher_overrides_list(
+    project_id: str,
+    conversation_id: str = "",
+    target_type: str = "",
+    target_key: str = "",
+) -> dict:
+    cid = conversation_id.strip() or None
+    return {
+        "overrides": ai_override_store.list(
+            project_id,
+            cid,
+            target_type=target_type or None,
+            target_key=target_key or None,
+        )
+    }
+
+
+@app.post("/api/teacher/overrides")
+def teacher_overrides_upsert(payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        return {"status": "error", "detail": "invalid payload"}
+    try:
+        record = ai_override_store.upsert(payload)
+        return {"status": "ok", "override": record}
+    except ValueError as exc:
+        return {"status": "error", "detail": str(exc)}
+
+
+@app.delete("/api/teacher/overrides/{override_id}")
+def teacher_overrides_delete(override_id: str, project_id: str, conversation_id: str = "") -> dict:
+    cid = conversation_id.strip() or None
+    ok = ai_override_store.delete(project_id, cid, override_id)
+    return {"status": "ok" if ok else "not_found"}
+
+
+# ───────────────── 重构版 evidence-trace ─────────────────
+@app.get("/api/teacher/project/{project_id}/evidence-trace-v2")
+def teacher_project_evidence_trace_v2(project_id: str, logical_project_id: str = "") -> dict:
+    """「按结论分组」的证据树：每个 rubric 维度 / 风险规则 / 综合分 都单独成组，
+    其下挂相关证据消息（含 source_message_id）。前端可以直接树形渲染。"""
+    project_state = json_store.load_project(project_id)
+    filtered_subs = _project_submissions_by_logical_id(project_state, logical_project_id)
+    if not filtered_subs:
+        return {
+            "project_id": project_id,
+            "logical_project_id": logical_project_id,
+            "error": "该项目暂无可用于证据溯源的提交记录",
+        }
+    evidence_chain = _assessment_evidence_chain(filtered_subs)
+
+    # 收集每个 submission 对应的 conversation_id，用于消息回定
+    sub_to_cid: dict[str, str] = {}
+    for sub in filtered_subs:
+        sid = str(sub.get("submission_id") or "")
+        cid = str(sub.get("conversation_id") or "")
+        if sid:
+            sub_to_cid[sid] = cid
+
+    # 1) rubric 维度分组
+    rubric_groups: dict[str, dict] = {}
+    rule_groups: dict[str, dict] = {}
+    for row in evidence_chain:
+        sid = str(row.get("submission_id") or "")
+        cid = sub_to_cid.get(sid, "")
+        quote = str(row.get("quote") or "")
+        link = None
+        if cid and quote:
+            links = evidence_linker.link_text(project_id, cid, quote, top_k=1)
+            link = links[0] if links else None
+        enriched_ev = {
+            **row,
+            "conversation_id": cid,
+            "source_message_id": (link or {}).get("message_id"),
+            "source_message_turn": (link or {}).get("turn_index"),
+            "source_message_role": (link or {}).get("role"),
+            "source_message_confidence": (link or {}).get("confidence"),
+        }
+        for rubric in (row.get("rubric_items") or []):
+            bucket = rubric_groups.setdefault(rubric, {
+                "conclusion_type": "rubric",
+                "conclusion_key": rubric,
+                "label": rubric,
+                "evidence": [],
+            })
+            bucket["evidence"].append(enriched_ev)
+        for rid in (row.get("rule_ids") or []):
+            rid_u = str(rid).upper()
+            if not rid_u:
+                continue
+            bucket = rule_groups.setdefault(rid_u, {
+                "conclusion_type": "risk",
+                "conclusion_key": rid_u,
+                "label": f"{rid_u} · {get_rule_name(rid_u)}",
+                "fallacy": RULE_FALLACY_MAP.get(rid_u, ""),
+                "edge_families": RULE_EDGE_MAP.get(rid_u, []),
+                "evidence": [],
+            })
+            bucket["evidence"].append(enriched_ev)
+
+    # 2) 综合分分组 —— 把最近一次 diagnosis 的 overall_rationale 拿出来
+    overall_group = None
+    last_sub = filtered_subs[-1] if filtered_subs else None
+    if last_sub:
+        last_diag = last_sub.get("diagnosis") or {}
+        overall_rat = last_diag.get("overall_rationale")
+        if overall_rat:
+            overall_group = {
+                "conclusion_type": "overall",
+                "conclusion_key": "overall",
+                "label": "综合分",
+                "rationale": overall_rat,
+                "evidence": [],
+            }
+
+    all_cids = list({cid for cid in sub_to_cid.values() if cid})
+    payload = {
+        "project_id": project_id,
+        "logical_project_id": logical_project_id,
+        "overall": overall_group,
+        "rubric_groups": sorted(rubric_groups.values(), key=lambda g: -len(g["evidence"])),
+        "rule_groups": sorted(rule_groups.values(), key=lambda g: -len(g["evidence"])),
+        "total_evidence": sum(len(g["evidence"]) for g in rubric_groups.values())
+                         + sum(len(g["evidence"]) for g in rule_groups.values()),
+    }
+    return _apply_overrides_everywhere(payload, project_id, all_cids or [None])
+

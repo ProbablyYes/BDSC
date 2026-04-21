@@ -6,7 +6,24 @@ from typing import Any
 from neo4j import GraphDatabase
 from neo4j.exceptions import Neo4jError, ServiceUnavailable, SessionExpired
 
+from .kb_quality_extensions import (
+    augment_wilson_intervals,
+    compute_canonical_coverage,
+    compute_degree_histogram,
+    compute_lifecycle_representativeness,
+    compute_ontology_constraint_compliance,
+    compute_top_entities_per_label,
+    load_canonical_concepts,
+    load_lifecycle_map,
+    sample_traceability_chains,
+)
+
 logger = logging.getLogger(__name__)
+
+# 抑制 Neo4j 6.x 驱动对服务器端通知（如 "label does not exist" 告警）
+# 刷屏 stderr / 被前端捕获的问题。这些通知仅为提示，不影响查询结果。
+for _ln in ("neo4j.notifications", "neo4j", "neo4j.io", "neo4j.pool"):
+    logging.getLogger(_ln).setLevel(logging.ERROR)
 
 _TRANSIENT_ERRORS = (ServiceUnavailable, SessionExpired, ConnectionResetError, TimeoutError, OSError)
 
@@ -28,8 +45,7 @@ class GraphService:
     def _driver(self):
         if self._shared_driver is not None:
             return self._shared_driver
-        self._shared_driver = GraphDatabase.driver(
-            self.uri,
+        driver_kwargs: dict[str, Any] = dict(
             auth=(self.username, self.password),
             connection_timeout=15,
             max_connection_lifetime=300,
@@ -37,6 +53,17 @@ class GraphService:
             connection_acquisition_timeout=30,
             max_transaction_retry_time=30,
         )
+        # Neo4j Python driver 5.7+ / 6.x 通过 notifications_min_severity="OFF"
+        # 从源头关闭服务器端通知（避免 "label does not exist" 告警刷屏）。
+        # 兼容老版本：不支持该参数时回退到常规配置。
+        try:
+            self._shared_driver = GraphDatabase.driver(
+                self.uri,
+                notifications_min_severity="OFF",
+                **driver_kwargs,
+            )
+        except TypeError:
+            self._shared_driver = GraphDatabase.driver(self.uri, **driver_kwargs)
         return self._shared_driver
 
     def close(self):
@@ -563,7 +590,7 @@ class GraphService:
                            pains, solutions, innovations, business_models,
                            evidence_count, evidence_samples
                     ORDER BY evidence_count DESC, p.name ASC
-                    LIMIT 96
+                    LIMIT 300
                     """
                 ))
                 audit_candidates: list[dict[str, Any]] = []
@@ -1025,13 +1052,22 @@ class GraphService:
                 )
 
                 # 6. Composite
+                # v2 权重（纳入 semantic_validity 与 audit_pass_rate，替代"只看结构不看内容"）：
+                #   0.12 类别均衡 + 0.12 维度均衡 + 0.15 维度覆盖
+                # + 0.12 实体可追溯 + 0.12 项目可追溯覆盖 + 0.07 缺失控制
+                # + 0.15 语义有效性（代理）+ 0.15 规则核验通过率 = 1.00
+                semantic_overall = float(semantic_validity.get("overall_validity_score") or 0.0)
+                audit_overall = float(audit_summary.get("overall_pass_rate") or 0.0)
+                dim_coverage_val = dim_covered / max(1, n_dim_types)
                 composite = round(
-                    cat_balance * 0.20
-                    + dim_balance * 0.20
-                    + (dim_covered / n_dim_types) * 0.20
-                    + traceability_rate * 0.15
-                    + project_traceable_coverage * 0.15
-                    + adjusted_missing_control * 0.10,
+                    cat_balance * 0.12
+                    + dim_balance * 0.12
+                    + dim_coverage_val * 0.15
+                    + traceability_rate * 0.12
+                    + project_traceable_coverage * 0.12
+                    + adjusted_missing_control * 0.07
+                    + semantic_overall * 0.15
+                    + audit_overall * 0.15,
                     4,
                 )
                 score_breakdown = [
@@ -1039,51 +1075,118 @@ class GraphService:
                         "key": "category_balance",
                         "label": "类别均衡度",
                         "value": cat_balance,
-                        "weight": 0.20,
-                        "weighted_score": round(cat_balance * 20, 2),
+                        "weight": 0.12,
+                        "weighted_score": round(cat_balance * 12, 2),
                         "formula": "Shannon 熵归一化: H/log2(N)",
                     },
                     {
                         "key": "dimension_balance",
                         "label": "维度均衡度",
                         "value": dim_balance,
-                        "weight": 0.20,
-                        "weighted_score": round(dim_balance * 20, 2),
+                        "weight": 0.12,
+                        "weighted_score": round(dim_balance * 12, 2),
                         "formula": "各维度实体数分布的 Shannon 熵归一化",
                     },
                     {
                         "key": "dimension_coverage",
                         "label": "维度覆盖率",
-                        "value": round(dim_covered / max(1, n_dim_types), 4),
-                        "weight": 0.20,
-                        "weighted_score": round((dim_covered / max(1, n_dim_types)) * 20, 2),
+                        "value": round(dim_coverage_val, 4),
+                        "weight": 0.15,
+                        "weighted_score": round(dim_coverage_val * 15, 2),
                         "formula": "有实体维度数 / 总维度数",
                     },
                     {
                         "key": "traceability_rate",
                         "label": "实体可追溯率",
                         "value": traceability_rate,
-                        "weight": 0.15,
-                        "weighted_score": round(traceability_rate * 15, 2),
+                        "weight": 0.12,
+                        "weighted_score": round(traceability_rate * 12, 2),
                         "formula": "有 quote/source_unit 的实体数 / 总实体数",
                     },
                     {
                         "key": "project_traceable_coverage",
                         "label": "项目可追溯覆盖",
                         "value": project_traceable_coverage,
-                        "weight": 0.15,
-                        "weighted_score": round(project_traceable_coverage * 15, 2),
+                        "weight": 0.12,
+                        "weighted_score": round(project_traceable_coverage * 12, 2),
                         "formula": "至少含 1 条可追溯证据的项目数 / 总项目数",
                     },
                     {
                         "key": "adjusted_missing_control",
                         "label": "缺失控制（频次修正）",
                         "value": adjusted_missing_control,
-                        "weight": 0.10,
-                        "weighted_score": round(adjusted_missing_control * 10, 2),
+                        "weight": 0.07,
+                        "weighted_score": round(adjusted_missing_control * 7, 2),
                         "formula": "1 - 加权平均维度缺失率；执行步骤/风控按低频维度降低缺失惩罚",
                     },
+                    {
+                        "key": "semantic_validity",
+                        "label": "标签语义有效性",
+                        "value": round(semantic_overall, 4),
+                        "weight": 0.15,
+                        "weighted_score": round(semantic_overall * 15, 2),
+                        "formula": "0.35×边界命中率 + 0.20×(1-反例触发率) + 0.25×证据一致率 + 0.20×结构闭环率（四代理加权平均）",
+                    },
+                    {
+                        "key": "audit_pass_rate",
+                        "label": "规则核验通过率",
+                        "value": round(audit_overall, 4),
+                        "weight": 0.15,
+                        "weighted_score": round(audit_overall * 15, 2),
+                        "formula": "全体项目规则总通过数 / 规则核查总数（audit_summary.overall_pass_rate）",
+                    },
                 ]
+
+                # ── 六维扩展指标（B/E/D/A/C）──────────────────────
+                try:
+                    canonical_doc = load_canonical_concepts()
+                    canonical_coverage = compute_canonical_coverage(session, canonical_doc)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("canonical_coverage failed: %s", exc)
+                    canonical_coverage = {"error": str(exc)}
+
+                try:
+                    canonical_top_entities = compute_top_entities_per_label(
+                        session,
+                        labels=[
+                            "PainPoint", "Solution", "BusinessModelAspect", "Market",
+                            "InnovationPoint", "Stakeholder", "ExecutionStep", "RiskControlPoint",
+                        ],
+                        top_k=10,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("top_entities failed: %s", exc)
+                    canonical_top_entities = {}
+
+                try:
+                    lifecycle_doc = load_lifecycle_map()
+                    lifecycle_representativeness = compute_lifecycle_representativeness(session, lifecycle_doc)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("lifecycle_representativeness failed: %s", exc)
+                    lifecycle_representativeness = {"error": str(exc)}
+
+                try:
+                    ontology_constraints = compute_ontology_constraint_compliance(session)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("ontology_constraints failed: %s", exc)
+                    ontology_constraints = {"error": str(exc)}
+
+                try:
+                    degree_histogram = compute_degree_histogram(session)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("degree_histogram failed: %s", exc)
+                    degree_histogram = {"error": str(exc)}
+
+                try:
+                    semantic_validity["labels"] = augment_wilson_intervals(semantic_validity.get("labels") or [])
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("wilson augmentation failed: %s", exc)
+
+                try:
+                    trace_samples = sample_traceability_chains(session, k=3)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("trace_samples failed: %s", exc)
+                    trace_samples = []
 
                 rationality = {
                     "representativeness": {
@@ -1156,7 +1259,33 @@ class GraphService:
                     "framework_alignment": fw_alignment,
                     "composite_score": composite,
                     "score_breakdown": score_breakdown,
-                    "score_formula": "0.20×cat_balance + 0.20×dim_balance + 0.20×dim_coverage + 0.15×traceability_rate + 0.15×project_traceable_coverage + 0.10×adjusted_missing_control",
+                    "score_formula": "0.12×cat_balance + 0.12×dim_balance + 0.15×dim_coverage + 0.12×traceability_rate + 0.12×project_traceable_coverage + 0.07×adjusted_missing_control + 0.15×semantic_validity + 0.15×audit_pass_rate",
+                    # ── 六维扩展指标（不进入 composite，独立披露） ──
+                    "canonical_coverage": canonical_coverage,
+                    "canonical_top_entities": canonical_top_entities,
+                    "lifecycle_representativeness": lifecycle_representativeness,
+                    "ontology_constraints": ontology_constraints,
+                    "degree_histogram": degree_histogram,
+                    "trace_samples": trace_samples,
+                    "method_disclosures": {
+                        "references": [
+                            {"key": "zaveri2016", "citation": "Zaveri, A. et al. (2016). Quality assessment for Linked Data: A Survey. Semantic Web 7(1), 63-93."},
+                            {"key": "paulheim2017", "citation": "Paulheim, H. (2017). Knowledge Graph Refinement: A Survey of Approaches and Evaluation Methods. Semantic Web 8(3), 489-508."},
+                            {"key": "farber2018", "citation": "Färber, M. et al. (2018). Linked Data Quality of DBpedia, Freebase, OpenCyc, Wikidata, and YAGO. Semantic Web 9(1), 77-129."},
+                            {"key": "osterwalder2010", "citation": "Osterwalder, A. & Pigneur, Y. (2010). Business Model Generation."},
+                            {"key": "ries2011", "citation": "Ries, E. (2011). The Lean Startup."},
+                        ],
+                        "limitations": [
+                            "本项目无人工金标准（ground truth）标注，正确性采用弱监督四代理法（Paulheim 2017）。",
+                            "核心概念清单基于关键词匹配（contains），可能低估同义词未覆盖的命中；后续版本拟接入向量召回。",
+                            "行业→阶段映射是静态启发式，个别案例可能被错分；整体统计在大样本上成立。",
+                        ],
+                        "chip_types": {
+                            "hard": "硬指标（直接计数/比例/图结构）",
+                            "proxy": "代理指标（弱监督，无金标）",
+                            "sample": "抽样估计（Wilson 置信区间）",
+                        },
+                    },
                 }
 
                 return {

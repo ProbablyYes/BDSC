@@ -1,0 +1,53 @@
+{
+  "version": "v1",
+  "updated_at": "2026-04-20",
+  "description": "知识库 13 个行业分类到『创新/创业/双栖』三阶段的静态映射。映射依据：该行业在近五年的项目书中，是以『学术/科研/技术突破』为主（innovation），还是以『成熟市场产品化/商业化』为主（entrepreneurship），抑或两侧并重（both）。后端用它计算阶段项目数分布、阶段×维度热力矩阵、以及与经典创新创业理论的一致性（Spearman ρ）。",
+  "methodology_note": "这是弱监督阶段代理，不是精确的项目生命周期判定。每个行业内部仍可能混有不同阶段的项目，整体统计在大样本上成立，但个别案例可能被错分——这是公开披露的方法学局限。",
+  "stage_definitions": {
+    "innovation": {
+      "label": "创新侧",
+      "description": "学术成果 / 原创技术 / 科研突破为主导，典型阶段：原型验证、MVP、学术转化前。",
+      "theory_basis": "Schumpeter 创新理论 / Triple Helix（Etzkowitz 2003）"
+    },
+    "entrepreneurship": {
+      "label": "创业侧",
+      "description": "成熟行业的市场化运营 / 商业模式探索 / 规模化扩张为主导，典型阶段：PMF 已达、商业闭环已成。",
+      "theory_basis": "Lean Startup（Ries 2011）/ BMC（Osterwalder 2010）"
+    },
+    "both": {
+      "label": "双栖侧",
+      "description": "既有学术/技术属性又高度依赖市场化运营（如医疗、教育），典型阶段：创新 + 商业并行。",
+      "theory_basis": "Stage-Gate Model / Innovation Ecosystem"
+    }
+  },
+  "categories": [
+    {"name": "科技创新", "stage": "innovation",      "rationale": "纯科研/硬科技方向，典型是学术成果转化早期或 IP 孵化阶段。"},
+    {"name": "医疗健康", "stage": "both",            "rationale": "同时依赖医学原创（创新侧）与医院/药企商业化路径（创业侧），两侧并重。"},
+    {"name": "工业制造", "stage": "entrepreneurship","rationale": "成熟工业链条，重点在产能、渠道、质控，典型商业化阶段。"},
+    {"name": "教育服务", "stage": "both",            "rationale": "既有教学方法创新（创新侧），也有 B2B/B2C 的课程与平台商业化（创业侧）。"},
+    {"name": "交通运输", "stage": "entrepreneurship","rationale": "基础设施型行业，重规模化运营、牌照、网络协同，典型创业侧。"},
+    {"name": "智能制造", "stage": "both",            "rationale": "工业 + AI 融合，既有算法/硬件创新，也有产线落地商业化，两侧并重。"},
+    {"name": "环境保护", "stage": "both",            "rationale": "ESG 与环保科技既依赖技术原创，也需商业化闭环才可持续，两侧并重。"},
+    {"name": "农业发展", "stage": "entrepreneurship","rationale": "农产品链条 / 农技服务以规模化、渠道、供应链为主导，典型创业侧。"},
+    {"name": "政务治理", "stage": "both",            "rationale": "智慧城市 / 公共服务创新 既涉及政府侧技术突破，也涉及项目交付运营，两侧并重。"},
+    {"name": "文旅文创", "stage": "entrepreneurship","rationale": "以 IP 运营 / 体验消费 / 场景化商业为主，典型创业侧。"},
+    {"name": "社会公益", "stage": "both",            "rationale": "公益项目既需模式创新（创新侧）也需可持续运营（创业侧），具跨界属性。"},
+    {"name": "金融经济", "stage": "entrepreneurship","rationale": "金融科技与经济应用以产品化、合规、规模化为主，典型创业侧。"},
+    {"name": "其他",     "stage": "both",            "rationale": "未明确归类的项目，保守按双栖处理，避免强制二选一造成偏差。"}
+  ],
+  "theoretical_expectations": {
+    "note": "每个阶段在 9 大维度上的理论预期『相对侧重分』——值越大越应该在该阶段密集出现（0-3 量表）。用于计算实际观察与理论的 Spearman 相关系数。",
+    "innovation": {
+      "pain_points": 3, "solutions": 3, "innovations": 3, "stakeholders": 2, "evidence": 2,
+      "business_models": 1, "markets": 1, "execution_steps": 2, "risk_controls": 1
+    },
+    "entrepreneurship": {
+      "pain_points": 2, "solutions": 2, "innovations": 1, "stakeholders": 2, "evidence": 2,
+      "business_models": 3, "markets": 3, "execution_steps": 3, "risk_controls": 2
+    },
+    "both": {
+      "pain_points": 2, "solutions": 2, "innovations": 2, "stakeholders": 2, "evidence": 2,
+      "business_models": 2, "markets": 2, "execution_steps": 2, "risk_controls": 2
+    }
+  }
+}

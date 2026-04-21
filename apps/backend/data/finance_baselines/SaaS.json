@@ -1,0 +1,26 @@
+{
+  "industry": "SaaS",
+  "baseline": {
+    "cac_range": [
+      200,
+      1500
+    ],
+    "monthly_price_range": [
+      99,
+      999
+    ],
+    "monthly_retention": [
+      0.85,
+      0.97
+    ],
+    "gross_margin": [
+      0.7,
+      0.85
+    ],
+    "avg_user_lifetime_months": 24,
+    "note": "SaaS 关键看净收入留存（NRR）和回本周期"
+  },
+  "source": "seed",
+  "updated_at": "2026-04-21T01:13:05+00:00",
+  "evidence": []
+}

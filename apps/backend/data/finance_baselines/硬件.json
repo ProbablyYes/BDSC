@@ -1,0 +1,26 @@
+{
+  "industry": "硬件",
+  "baseline": {
+    "cac_range": [
+      80,
+      400
+    ],
+    "monthly_price_range": [
+      199,
+      2999
+    ],
+    "monthly_retention": [
+      0.5,
+      0.8
+    ],
+    "gross_margin": [
+      0.2,
+      0.45
+    ],
+    "avg_user_lifetime_months": 18,
+    "note": "硬件重资产，注意库存 / 售后 / 供应链成本"
+  },
+  "source": "seed",
+  "updated_at": "2026-04-21T01:13:05+00:00",
+  "evidence": []
+}

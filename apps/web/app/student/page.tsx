@@ -5,22 +5,26 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
 import PosterPreview, { type PosterDesign } from "./PosterPreview";
+import FinanceAdvisoryCard from "./FinanceAdvisoryCard";
+import FinanceReportView from "./FinanceReportView";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
 import remarkGfm from "remark-gfm";
 import { useAuth, logout } from "../hooks/useAuth";
 import BudgetPanel from "../budget/BudgetPanel";
 import KBGraphPanel from "../knowledge/KBGraphPanel";
+import { RationaleCard, type Rationale } from "../components/RationaleCard";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
-type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number };
+type ChatMessage = { role: "user" | "assistant"; text: string; ts?: string; id: number; advisory?: unknown };
 type RightTab =
   | "agents"
   | "task"
   | "bp"
   | "risk"
   | "score"
+  | "finance"
   | "kg"
   | "hyper"
   | "cases"
@@ -97,11 +101,16 @@ type BusinessPlan = {
   title: string;
   status: string;
   version_tier?: "draft" | "basic" | "full";
+  plan_type?: "main" | "competition_fork";
+  fork_of?: string | null;
+  mode?: "coursework" | "competition" | "learning";
+  submission_status?: "draft" | "submitted" | "graded";
   sections: BpSection[];
   pending_revisions?: BpRevision[];
   revision_badge_count?: number;
   cover_info?: Record<string, any>;
   knowledge_base?: Record<string, any>;
+  kb_reference?: Record<string, any>;
   maturity?: BpMaturity;
   upgrade_report?: BpUpgradeReport;
   updated_at?: string;
@@ -531,6 +540,28 @@ export default function StudentPage() {
   const [bpSnapshotLoading, setBpSnapshotLoading] = useState(false);
   const [bpTeacherComments, setBpTeacherComments] = useState<any[]>([]);
   const [bpCommentsOpen, setBpCommentsOpen] = useState(false);
+  const [bpSiblings, setBpSiblings] = useState<Array<{plan_id:string; title?:string; plan_type?:string; fork_of?:string|null; mode?:string; version_tier?:string; submission_status?:string; updated_at?:string}>>([]);
+  // 竞赛教练议题板
+  const [bpAgendaItems, setBpAgendaItems] = useState<Array<{
+    agenda_id: string;
+    plan_id?: string;
+    conversation_id?: string;
+    source_message_id?: string;
+    jury_tag?: string;
+    section_id_hint?: string;
+    title?: string;
+    gist?: string;
+    evidence_hint?: string;
+    status?: string;
+    created_at?: string;
+  }>>([]);
+  const [bpAgendaBusy, setBpAgendaBusy] = useState(false);
+  const [bpAgendaSelected, setBpAgendaSelected] = useState<Set<string>>(new Set());
+  const [bpAgendaExpanded, setBpAgendaExpanded] = useState<Set<string>>(new Set());
+  const [bpForkBusy, setBpForkBusy] = useState(false);
+  const [bpGrading, setBpGrading] = useState<any | null>(null);
+  const [bpGradingOpen, setBpGradingOpen] = useState(false);
+  const [bpGradingWhyId, setBpGradingWhyId] = useState<string | null>(null);
   const bpMoreRef = useRef<HTMLDivElement>(null);
   const bpOutlineHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bpReadRootRef = useRef<HTMLDivElement>(null);
@@ -805,6 +836,7 @@ export default function StudentPage() {
           student_id: studentId,
           conversation_id: conversationId,
           allow_low_confidence: allowLowConfidence,
+          mode: mode === "competition" ? "competition" : (mode === "coursework" ? "coursework" : "learning"),
         }),
       });
       const data = (await resp.json()) as BusinessPlanResponse;
@@ -920,6 +952,234 @@ export default function StudentPage() {
       setBpError(err?.message || "升级失败");
     } finally {
       setBpUpgradeBusy(false);
+    }
+  }
+
+  // ── 竞赛分支 fork ──────────────────────────────────────────
+  const loadBpSiblings = useCallback(async (planId: string) => {
+    if (!planId) return;
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/siblings`);
+      const data = await resp.json();
+      if (Array.isArray(data?.plans)) setBpSiblings(data.plans);
+    } catch {
+      setBpSiblings([]);
+    }
+  }, []);
+
+  const loadBpGrading = useCallback(async (planId: string) => {
+    if (!planId) {
+      setBpGrading(null);
+      return;
+    }
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/grading`);
+      const data = await resp.json();
+      if (data?.status === "ok") setBpGrading(data.grading);
+      else setBpGrading(null);
+    } catch {
+      setBpGrading(null);
+    }
+  }, []);
+
+  const loadAgenda = useCallback(async (planId: string) => {
+    if (!planId) return;
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/agenda`
+      );
+      const data = await resp.json();
+      if (Array.isArray(data?.items)) setBpAgendaItems(data.items);
+      else setBpAgendaItems([]);
+    } catch {
+      setBpAgendaItems([]);
+    }
+  }, []);
+
+  async function patchAgendaItem(
+    planId: string,
+    agendaId: string,
+    patch: { status?: string; section_id_hint?: string }
+  ) {
+    try {
+      await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/agenda/${encodeURIComponent(agendaId)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        }
+      );
+      await loadAgenda(planId);
+    } catch {
+      /* silent */
+    }
+  }
+
+  async function applySelectedAgenda() {
+    const plan = businessPlan;
+    if (!plan?.plan_id) return;
+    const ids = Array.from(bpAgendaSelected);
+    if (!ids.length) return;
+    setBpAgendaBusy(true);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(plan.plan_id)}/agenda/apply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agenda_ids: ids, target_section_map: {} }),
+        }
+      );
+      if (resp.ok) {
+        const data = (await resp.json()) as BusinessPlanResponse;
+        if (data.plan) {
+          setBusinessPlan(data.plan);
+          setBpReadiness(data.readiness ?? null);
+          setBpAgendaSelected(new Set());
+          setBpUpgradeToast(`已把 ${ids.length} 条竞赛教练议题合入候选章节，可在右侧逐条审阅。`);
+          loadAgenda(plan.plan_id);
+        }
+      }
+    } finally {
+      setBpAgendaBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (businessPlan?.plan_id) {
+      loadBpSiblings(businessPlan.plan_id);
+      loadBpGrading(businessPlan.plan_id);
+      if (String((businessPlan as any).coaching_mode || "project") === "competition") {
+        loadAgenda(businessPlan.plan_id);
+      } else {
+        setBpAgendaItems([]);
+      }
+    }
+  }, [businessPlan?.plan_id, businessPlan?.updated_at, (businessPlan as any)?.coaching_mode, loadBpSiblings, loadBpGrading, loadAgenda]);
+
+  // 顶栏模式 → 计划书 coaching_mode 自动同步：避免手动切换教练模式
+  // competition 模式对应竞赛教练；其它（coursework/learning）统一回到项目教练
+  useEffect(() => {
+    if (!businessPlan?.plan_id) return;
+    const expected: "project" | "competition" = mode === "competition" ? "competition" : "project";
+    const current = String((businessPlan as any).coaching_mode || "project");
+    if (current === expected) return;
+    // 未解锁时不阻断切换，但后端会返回 locked，下面 setCoachingMode 已处理
+    setCoachingMode(expected).catch(() => {});
+    // 只依赖 mode / plan_id，避免切模式后 businessPlan 更新再次触发
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, businessPlan?.plan_id]);
+
+  async function openSiblingPlan(siblingId: string) {
+    if (!siblingId) return;
+    setBpLoading(true);
+    setBpError("");
+    try {
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(siblingId)}`);
+      const data = (await resp.json()) as BusinessPlanResponse;
+      setBpReadiness(data.readiness ?? null);
+      setBusinessPlan(data.plan ?? null);
+      const firstSection = (data.plan?.sections ?? [])[0];
+      if (firstSection) {
+        setBpSelectedSectionId(firstSection.section_id);
+        setBpEditorContent(firstSection.user_edit || firstSection.content || "");
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "切换分支失败");
+    } finally {
+      setBpLoading(false);
+    }
+  }
+
+  async function setCoachingMode(nextMode: "project" | "competition") {
+    if (!businessPlan?.plan_id) return;
+    setBpForkBusy(true);
+    setBpError("");
+    setBpUpgradeToast("");
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/coaching-mode`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: nextMode }),
+        }
+      );
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        setBpError(`切换教练模式失败（HTTP ${resp.status}）：${txt.slice(0, 200)}`);
+        return;
+      }
+      const data = (await resp.json()) as BusinessPlanResponse;
+      if (data.status === "locked") {
+        setBpError("当前成熟度未达基础就绪，尚不能切换到竞赛教练。先补齐骨架与基础字段。");
+        return;
+      }
+      if (data.plan) {
+        setBusinessPlan(data.plan);
+        setBpReadiness(data.readiness ?? null);
+        setBpUpgradeToast(
+          nextMode === "competition"
+            ? "已切换到竞赛教练模式：对话侧会以评委视角追问，产出议题板供你批量应用。"
+            : "已切换回项目教练模式：按章节完整度继续推进。"
+        );
+        if (nextMode === "competition") {
+          // 首次进入竞赛模式，预取一次议题板
+          loadAgenda(String(data.plan.plan_id)).catch(() => {});
+        }
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "切换教练模式失败");
+    } finally {
+      setBpForkBusy(false);
+    }
+  }
+
+  // 兼容入口：旧版 fork（UI 入口已移除，仅供外部脚本/兼容代码调用）
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function forkForCompetition() {
+    if (!businessPlan?.plan_id) return;
+    setBpForkBusy(true);
+    setBpError("");
+    setBpUpgradeToast("");
+    setBpMoreOpen(false);
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(businessPlan.plan_id)}/fork-competition`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            competition_type: "",
+            refresh_kb_reference: true,
+          }),
+        }
+      );
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => "");
+        setBpError(`竞赛优化失败（HTTP ${resp.status}）：${txt.slice(0, 200)}`);
+        return;
+      }
+      const data = (await resp.json()) as BusinessPlanResponse;
+      if (data.status === "invalid") {
+        setBpError("当前计划书已是竞赛分支，无法再次 fork。可直接在当前分支继续优化。");
+        return;
+      }
+      if (data.plan) {
+        setBusinessPlan(data.plan);
+        setBpReadiness(data.readiness ?? null);
+        const firstSection = (data.plan.sections ?? [])[0];
+        if (firstSection) {
+          setBpSelectedSectionId(firstSection.section_id);
+          setBpEditorContent(firstSection.user_edit || firstSection.content || "");
+        }
+        setBpUpgradeToast("已生成竞赛优化分支：基于 KB 预学习做了逐章改写，你可审阅每章修订后接受/忽略。");
+      }
+    } catch (err: any) {
+      setBpError(err?.message || "竞赛优化失败");
+    } finally {
+      setBpForkBusy(false);
     }
   }
 
@@ -1512,6 +1772,7 @@ export default function StudentPage() {
         text: m.content ?? "",
         ts: m.timestamp ? formatBjTime(m.timestamp) : undefined,
         id: ++_msgId,
+        advisory: m?.agent_trace?.finance_advisory?.triggered ? m.agent_trace.finance_advisory : undefined,
       }));
       setMessages(msgs);
 
@@ -1676,7 +1937,8 @@ export default function StudentPage() {
         setMessages((p) => p.map((m) => m.id === typeMsgId ? { ...m, text: slice } : m));
         await new Promise((r) => setTimeout(r, 12));
       }
-      setMessages((p) => p.map((m) => m.id === typeMsgId ? { ...m, text: reply } : m));
+      const advisory = data?.agent_trace?.finance_advisory?.triggered ? data.agent_trace.finance_advisory : undefined;
+      setMessages((p) => p.map((m) => m.id === typeMsgId ? { ...m, text: reply, advisory } : m));
 
       loadConversations();
     } catch (err: any) {
@@ -1876,7 +2138,9 @@ export default function StudentPage() {
 
   const rubric = useMemo(() => {
     if (resultHistory.length === 0) return latestResult?.diagnosis?.rubric ?? [];
-    const merged: Record<string, { item: string; scores: number[]; weight: number; reason?: string; source?: string }> = {};
+    // 合并时保留最近一次的完整字段（base_score / signal_bonus / length_bonus / rule_penalty /
+    // dim_rules / matched_evidence / missing_evidence / rationale 等），用于"分数怎么算出来的"展示。
+    const merged: Record<string, { item: string; scores: number[]; weight: number; reason?: string; source?: string; latestRow?: any }> = {};
     for (const r of resultHistory) {
       for (const row of r?.diagnosis?.rubric ?? []) {
         if (!merged[row.item]) merged[row.item] = { item: row.item, scores: [], weight: row.weight ?? 0 };
@@ -1884,12 +2148,14 @@ export default function StudentPage() {
         merged[row.item].reason = row.reason ?? merged[row.item].reason;
         merged[row.item].source = row.source ?? merged[row.item].source;
         merged[row.item].weight = row.weight ?? merged[row.item].weight;
+        merged[row.item].latestRow = row; // 每次循环覆盖，最终持有"最后一次提交"的整行
       }
     }
     return Object.values(merged).map((m) => {
       const latest = m.scores[m.scores.length - 1];
       const best = Math.max(...m.scores);
       const prev = m.scores.length > 1 ? m.scores[m.scores.length - 2] : null;
+      const latestRow: any = m.latestRow || {};
       return {
         item: m.item,
         score: Math.round(latest * 100) / 100,
@@ -1899,6 +2165,16 @@ export default function StudentPage() {
         weight: m.weight,
         reason: m.reason,
         source: m.source,
+        // ── 保留推导字段，供评分 tab 的"分数构成 / 命中规则 / 证据关键词 / 详细推导"使用 ──
+        base_score: latestRow.base_score,
+        signal_bonus: latestRow.signal_bonus,
+        length_bonus: latestRow.length_bonus,
+        rule_penalty: latestRow.rule_penalty,
+        dim_rules: latestRow.dim_rules,
+        matched_evidence: latestRow.matched_evidence,
+        missing_evidence: latestRow.missing_evidence,
+        rationale: latestRow.rationale,
+        status: latestRow.status,
       };
     });
   }, [resultHistory, latestResult]);
@@ -2855,7 +3131,7 @@ export default function StudentPage() {
             )}
 
             {messages.map((m, i) => (
-              <div key={m.id} className={`msg-row ${m.role}`} style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}>
+              <div key={m.id} data-msg-index={i} className={`msg-row ${m.role}`} style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}>
                 {m.role === "assistant" && <div className="msg-avatar">AI</div>}
                 <div className="msg-content">
                   <div className="msg-bubble">
@@ -2883,6 +3159,18 @@ export default function StudentPage() {
                         )}
                         <MarkdownContent content={m.text} theme={theme} />
                         {loading && i === messages.length - 1 && <span className="streaming-cursor" />}
+                        {m.advisory && typeof m.advisory === "object" ? (
+                          <FinanceAdvisoryCard
+                            advisory={m.advisory as any}
+                            onOpenReport={() => setRightTab("finance")}
+                            onJumpBudget={() => {
+                              try {
+                                const btn = document.querySelector('[data-budget-open-btn]');
+                                if (btn && btn instanceof HTMLElement) btn.click();
+                              } catch { /* ignore */ }
+                            }}
+                          />
+                        ) : null}
                         {m.text && !loading && <div className="ai-disclaimer">⚠ AI生成，仅供参考</div>}
                       </>
                     ) : (
@@ -3035,6 +3323,7 @@ export default function StudentPage() {
                 { id: "bp",     label: "计划书" },
                 { id: "risk",   label: "风险" },
                 { id: "score",  label: "评分" },
+                { id: "finance", label: "财务" },
                 { id: "kg",     label: "图谱" },
                 { id: "hyper",  label: "超图" },
                 { id: "cases",  label: "案例" },
@@ -3168,16 +3457,6 @@ export default function StudentPage() {
               {rightTab === "task" && (
                 <div className="right-section">
                   <div className="panel-desc">基于你的全部对话累积生成的行动建议，不会因追问而丢失。</div>
-                  <div style={{ margin: "6px 0 10px", display: "flex", justifyContent: "flex-end" }}>
-                    <button
-                      type="button"
-                      className="tch-sm-btn"
-                      onClick={generatePosterFromCurrentProject}
-                      disabled={posterLoading}
-                    >
-                      {posterLoading ? "正在生成海报…" : "根据当前项目生成路演海报"}
-                    </button>
-                  </div>
                   {(() => {
                     const s = (v: any): string => (v == null ? "" : typeof v === "string" ? v : JSON.stringify(v));
                     const priLabel: Record<string, string> = { urgent: "紧急", important: "重要", nice_to_have: "建议" };
@@ -3283,7 +3562,8 @@ export default function StudentPage() {
                     const sectionsCount = plan?.sections?.length ?? 0;
                     const wordCount = plan ? (plan.sections || []).reduce((sum, s) => sum + ((s.user_edit || s.content || "").length), 0) : 0;
                     const titleText = plan?.title || (plan?.cover_info?.project_name as string) || "商业计划书";
-                    const oneLiner = (plan?.knowledge_base as any)?.one_liner || (plan?.cover_info?.one_liner as string) || "请在对话中描述你的项目定位，系统会根据此自动更新此处";
+                    const rawOneLiner = (plan?.knowledge_base as any)?.one_liner || (plan?.cover_info?.one_liner as string) || "";
+                    const oneLiner = String(rawOneLiner || "").trim();
                     const teamInfo = [(plan?.cover_info?.student_or_team as string), (plan?.cover_info?.course_or_class as string), (plan?.cover_info?.teacher_name as string)].filter(Boolean).join(" · ");
                     const updatedAt = (plan?.updated_at as string) || (plan?.created_at as string) || "";
                     const ring = (() => {
@@ -3298,38 +3578,115 @@ export default function StudentPage() {
                     return (
                       <>
                         {plan && (
-                          <div className="bp-cover-strip">
-                            <div className="bp-cs-title" title={titleText}>{titleText}</div>
-                            {oneLiner && <div className="bp-cs-oneliner" title={oneLiner}>{oneLiner}</div>}
-                            <span className={`bp-version-chip tier-${versionTier} bp-cs-chip`}>{versionTier === "full" ? "正式版" : versionTier === "basic" ? "基础版" : "草稿"}</span>
-                            {maturityScore != null && (
-                              <button
-                                type="button"
-                                className={`bp-cs-maturity tier-${maturityTier}`}
-                                onClick={() => setBpMaturityOpen((v) => !v)}
-                                title="点击查看成熟度详情"
-                              >
-                                <svg viewBox="0 0 32 32" width="26" height="26">
-                                  <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.14)" strokeWidth="3" fill="none" />
-                                  <circle
-                                    cx="16" cy="16" r="13"
-                                    stroke="currentColor" strokeWidth="3" fill="none"
-                                    strokeDasharray={`${(Math.max(0, Math.min(100, Number(maturityScore ?? 0))) / 100) * (2 * Math.PI * 13)} ${2 * Math.PI * 13}`}
-                                    strokeLinecap="round"
-                                    transform="rotate(-90 16 16)"
-                                  />
-                                </svg>
-                                <span className="bp-cs-m-val">{Number(maturityScore)}</span>
-                                <span className="bp-cs-m-lbl">{maturityTierLabel}</span>
-                              </button>
-                            )}
-                            <div className="bp-cs-stats" aria-hidden>
-                              <span><b>{sectionsCount}</b>章</span>
-                              <span className="bp-cs-sep">·</span>
-                              <span><b>{wordCount.toLocaleString()}</b>字</span>
-                              {pendingCount > 0 && <><span className="bp-cs-sep">·</span><span className="bp-cs-pending"><b>{pendingCount}</b>待审</span></>}
-                              {updatedAt && <><span className="bp-cs-sep">·</span><span className="bp-cs-date">{updatedAt.slice(5, 10)}</span></>}
+                          <div className="bp-cover-strip bp-cs-v2">
+                            {/* 左列：叙事（标题 / 一句话 / 教练模式） */}
+                            <div className="bp-cs-left">
+                              <div className="bp-cs-title-row">
+                                <span className={`bp-version-chip tier-${versionTier} bp-cs-chip`}>
+                                  {versionTier === "full" ? "正式版" : versionTier === "basic" ? "基础版" : "草稿"}
+                                </span>
+                                <div className="bp-cs-title" title={titleText}>{titleText}</div>
+                              </div>
+                              {oneLiner ? (
+                                <div className="bp-cs-oneliner" title={oneLiner}>{oneLiner}</div>
+                              ) : (
+                                <div className="bp-oneliner-ghost" aria-hidden title="等待项目描述">
+                                  <span className="bp-dot" /><span className="bp-dot" /><span className="bp-dot" />
+                                  <span className="bp-oneliner-ghost-tag">待项目描述</span>
+                                </div>
+                              )}
+                              {/* 教练模式徽标：只读，模式随顶栏自动同步 */}
+                              {plan && (() => {
+                                const coachMode = String(((plan as any).coaching_mode) || "project");
+                                const isCompetition = coachMode === "competition";
+                                const unlocked = (plan as any).competition_unlocked !== false;
+                                return (
+                                  <span
+                                    className={`bp-coach-badge ${isCompetition ? "is-competition" : "is-project"} ${isCompetition && !unlocked ? "is-warn" : ""}`}
+                                    title={
+                                      isCompetition
+                                        ? unlocked
+                                          ? "竞赛教练模式：评委视角追问，产出议题板（顶栏切换回其它模式即自动回项目教练）"
+                                          : "当前成熟度未达基础就绪，竞赛教练建议仅覆盖关键章节"
+                                        : "项目教练模式：按章节完整度节奏引导。顶栏选『竞赛冲刺』即自动进入竞赛教练"
+                                    }
+                                  >
+                                    <span className="bp-coach-badge-dot" aria-hidden />
+                                    <span className="bp-coach-badge-txt">
+                                      {isCompetition ? "竞赛教练" : "项目教练"}
+                                    </span>
+                                    {isCompetition && !unlocked && (
+                                      <span className="bp-coach-badge-warn">成熟度不足</span>
+                                    )}
+                                  </span>
+                                );
+                              })()}
                             </div>
+
+                            {/* 右列：指标群（成熟度环 + 统计三胞胎） */}
+                            <div className="bp-cs-right">
+                              {maturityScore != null && (
+                                <button
+                                  type="button"
+                                  className={`bp-cs-maturity tier-${maturityTier}`}
+                                  onClick={() => setBpMaturityOpen((v) => !v)}
+                                  title="点击查看成熟度详情"
+                                >
+                                  <svg viewBox="0 0 32 32" width="30" height="30">
+                                    <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.14)" strokeWidth="3" fill="none" />
+                                    <circle
+                                      cx="16" cy="16" r="13"
+                                      stroke="currentColor" strokeWidth="3" fill="none"
+                                      strokeDasharray={`${(Math.max(0, Math.min(100, Number(maturityScore ?? 0))) / 100) * (2 * Math.PI * 13)} ${2 * Math.PI * 13}`}
+                                      strokeLinecap="round"
+                                      transform="rotate(-90 16 16)"
+                                    />
+                                  </svg>
+                                  <div className="bp-cs-m-meta">
+                                    <span className="bp-cs-m-val">{Number(maturityScore)}</span>
+                                    <span className="bp-cs-m-lbl">{maturityTierLabel}</span>
+                                  </div>
+                                </button>
+                              )}
+                              <div className="bp-cs-stats-grid" aria-hidden>
+                                <div className="bp-cs-stat">
+                                  <span className="bp-cs-stat-v">{sectionsCount}</span>
+                                  <span className="bp-cs-stat-l">章节</span>
+                                </div>
+                                <div className="bp-cs-stat">
+                                  <span className="bp-cs-stat-v">{wordCount >= 10000 ? `${(wordCount / 1000).toFixed(1)}k` : wordCount.toLocaleString()}</span>
+                                  <span className="bp-cs-stat-l">字数</span>
+                                </div>
+                                {pendingCount > 0 ? (
+                                  <div className="bp-cs-stat is-pending">
+                                    <span className="bp-cs-stat-v">{pendingCount}</span>
+                                    <span className="bp-cs-stat-l">待审</span>
+                                  </div>
+                                ) : updatedAt ? (
+                                  <div className="bp-cs-stat is-date">
+                                    <span className="bp-cs-stat-v">{updatedAt.slice(5, 10)}</span>
+                                    <span className="bp-cs-stat-l">更新</span>
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                            {/* 旧 fork 分支兼容显示（老数据，只读切换） */}
+                            {bpSiblings.filter((s) => s.plan_type === "competition_fork").length > 0 && (
+                              <div className="bp-legacy-fork-hint">
+                                <span>旧版竞赛分支：</span>
+                                {bpSiblings.filter((s) => s.plan_type === "competition_fork").map((sib) => (
+                                  <button
+                                    key={sib.plan_id}
+                                    type="button"
+                                    className={`bp-legacy-fork-chip ${sib.plan_id === plan?.plan_id ? "is-active" : ""}`}
+                                    onClick={() => sib.plan_id !== plan?.plan_id && openSiblingPlan(sib.plan_id)}
+                                    title={`旧版竞赛分支 · ${sib.updated_at?.slice(5, 16) || ""}`}
+                                  >
+                                    旧版 {(sib.updated_at || "").slice(5, 10)}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                             {bpMaturityOpen && maturityScore != null && (
                               <div className="bp-maturity-pop bp-maturity-pop-strip">
                                 <div className="bp-maturity-pop-row">
@@ -3385,10 +3742,136 @@ export default function StudentPage() {
                                     })}
                                   </div>
                                 )}
+                                {((bpReadiness as any)?.maturity_breakdown_rationale) && (
+                                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px dashed rgba(255,255,255,0.12)" }}>
+                                    <RationaleCard
+                                      rationale={(bpReadiness as any).maturity_breakdown_rationale as Rationale}
+                                      compact
+                                      title="成熟度打分公式"
+                                    />
+                                  </div>
+                                )}
                                 <div className="bp-maturity-foot">
                                   <span className="bp-maturity-foot-tip">评分由骨架(60) + 智能体信息(30) + 逻辑(10)加权，实时更新</span>
                                   <button className="bp-maturity-close" onClick={() => setBpMaturityOpen(false)}>关闭</button>
                                 </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 教师评分回显卡片 */}
+                        {plan && bpGrading && (
+                          <div className="bp-grading-card">
+                            <div className="bp-grading-head">
+                              <span className="bp-grading-ic">🎓</span>
+                              <span className="bp-grading-title">教师批改反馈</span>
+                              <button className="bp-grading-toggle" onClick={() => setBpGradingOpen((v) => !v)}>
+                                {bpGradingOpen ? "收起" : "展开"}
+                              </button>
+                            </div>
+                            <div className="bp-grading-summary">
+                              <div className="bp-grading-score-wrap">
+                                <div className={`bp-grading-grade grade-${bpGrading.grade || "B"}`}>{bpGrading.grade || "B"}</div>
+                                <div className="bp-grading-score">
+                                  <b>{Number(bpGrading.overall_score || 0).toFixed(1)}</b>
+                                  <span>/100</span>
+                                </div>
+                                <div className={`bp-grading-pass ${bpGrading.passed ? "is-pass" : "is-fail"}`}>
+                                  {bpGrading.passed ? "已通过" : "待改进"}
+                                </div>
+                              </div>
+                              <div className="bp-grading-teacher">
+                                {bpGrading.teacher_name || bpGrading.teacher_id || "教师"} · {(bpGrading.updated_at || bpGrading.created_at || "").slice(5, 16).replace("T", " ")}
+                              </div>
+                            </div>
+                            {bpGradingOpen && (
+                              <div className="bp-grading-detail">
+                                {bpGrading.summary && (
+                                  <div className="bp-grading-block">
+                                    <div className="bp-grading-block-title">总评</div>
+                                    <div className="bp-grading-block-text">{bpGrading.summary}</div>
+                                  </div>
+                                )}
+                                {(bpGrading.strengths || []).length > 0 && (
+                                  <div className="bp-grading-block">
+                                    <div className="bp-grading-block-title is-ok">亮点</div>
+                                    <ul className="bp-grading-list">
+                                      {(bpGrading.strengths || []).map((s: string, i: number) => (<li key={i}>{s}</li>))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {(bpGrading.improvements || []).length > 0 && (
+                                  <div className="bp-grading-block">
+                                    <div className="bp-grading-block-title is-warn">建议改进</div>
+                                    <ul className="bp-grading-list">
+                                      {(bpGrading.improvements || []).map((s: string, i: number) => (<li key={i}>{s}</li>))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {(bpGrading.rubric || []).length > 0 && (
+                                  <div className="bp-grading-block">
+                                    <div className="bp-grading-block-title">
+                                      章节评分
+                                      <span className="bp-grading-block-hint">（点「?」看打分依据）</span>
+                                    </div>
+                                    <div className="bp-grading-rubric">
+                                      {(bpGrading.rubric || []).map((r: any, i: number) => {
+                                        const title = (plan.sections || []).find((s) => s.section_id === r.section_id)?.display_title || r.section_id;
+                                        const score = Math.max(0, Math.min(10, Number(r.score || 0)));
+                                        const pct = score * 10;
+                                        const keyId = r.section_id || `row-${i}`;
+                                        const isOpen = bpGradingWhyId === keyId;
+                                        return (
+                                          <div key={i} className={`bp-grading-rubric-row ${isOpen ? "is-open" : ""}`} style={{ position: "relative" }}>
+                                            <span className="bp-grading-rubric-title">{title}</span>
+                                            <div className="bp-grading-rubric-bar"><div style={{ width: `${pct}%` }} /></div>
+                                            <span className="bp-grading-rubric-score">{score.toFixed(1)}/10</span>
+                                            <button
+                                              type="button"
+                                              className="bp-grading-rubric-why"
+                                              onClick={() => setBpGradingWhyId(isOpen ? null : keyId)}
+                                              aria-label="查看打分依据"
+                                              title="查看本章节打分依据"
+                                            >?</button>
+                                            {isOpen && (
+                                              <div className="bp-grading-rubric-pop">
+                                                <div className="bp-grading-rubric-pop-head">
+                                                  <span>{title} · 评分依据</span>
+                                                  <button onClick={() => setBpGradingWhyId(null)}>×</button>
+                                                </div>
+                                                <div className="bp-grading-rubric-pop-row">
+                                                  <span className="bp-grr-k">得分</span>
+                                                  <span className="bp-grr-v"><b>{score.toFixed(1)}</b> / 10</span>
+                                                </div>
+                                                <div className="bp-grading-rubric-pop-row">
+                                                  <span className="bp-grr-k">档位</span>
+                                                  <span className="bp-grr-v">
+                                                    {score >= 8.5 ? "优" : score >= 7 ? "良" : score >= 6 ? "中" : score >= 4 ? "待改进" : "不合格"}
+                                                  </span>
+                                                </div>
+                                                <div className="bp-grading-rubric-pop-row">
+                                                  <span className="bp-grr-k">在总评占比</span>
+                                                  <span className="bp-grr-v">
+                                                    章节分 × 1/{(bpGrading.rubric || []).length} = {score.toFixed(1)} ÷ {(bpGrading.rubric || []).length} = {(score / (bpGrading.rubric || []).length).toFixed(2)} 分
+                                                  </span>
+                                                </div>
+                                                {r.comment ? (
+                                                  <div className="bp-grading-rubric-pop-comment">
+                                                    <div className="bp-grr-k">教师批注</div>
+                                                    <div className="bp-grr-comment-text">{r.comment}</div>
+                                                  </div>
+                                                ) : (
+                                                  <div className="bp-grading-rubric-pop-empty">教师未填写额外批注。</div>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -3443,6 +3926,7 @@ export default function StudentPage() {
                                   <span className="bp-fab-badge">{pendingCount}</span>
                                 </button>
                               )}
+                              {/* 旧版 fork 入口已移除：改为顶栏的"教练模式切换"与议题板 */}
                               {plan && (
                                 <>
                                   <div className="bp-fab-sep" />
@@ -3555,25 +4039,276 @@ export default function StudentPage() {
                       </>
                     );
                   })()}
-                  {bpError && <div className="right-card" style={{ color: "#ff8787" }}>{bpError}</div>}
-                  {!businessPlan && bpReadiness && (
-                    <div className="right-card">
-                      <strong>首次生成门槛</strong>
-                      <p style={{ marginTop: 8 }}>当前已覆盖 {bpReadiness?.filled_core_count ?? 0} 个核心维度。</p>
-                      {(bpReadiness?.missing_core_slots ?? []).length > 0 && (
-                        <div className="tch-tag-row">
-                          {(bpReadiness.missing_core_slots ?? []).map((item: string) => (
-                            <span key={item} className="tch-tag">{item}</span>
-                          ))}
+                  {/* 竞赛教练议题板：仅在 coaching_mode === competition 时显示 */}
+                  {businessPlan && String((businessPlan as any).coaching_mode || "project") === "competition" && (
+                    <div className="bp-agenda-card right-card">
+                      {(businessPlan as any).competition_unlocked === false && (
+                        <div className="bp-agenda-lock-note">
+                          成熟度未达基础就绪，竞赛教练建议仅覆盖关键章节。先补齐项目骨架与基础字段，可获得完整评委视角。
                         </div>
                       )}
-                      {(bpReadiness?.suggested_questions ?? []).length > 0 && (
-                        <ul style={{ marginTop: 10, paddingLeft: 18 }}>
-                          {(bpReadiness.suggested_questions ?? []).map((q: string, idx: number) => <li key={idx}>{q}</li>)}
-                        </ul>
+                      <div className="bp-agenda-head">
+                        <div className="bp-agenda-title">
+                          竞赛教练议题板
+                          <span className="bp-agenda-count">
+                            {bpAgendaItems.filter((x) => (x.status || "pending") === "pending").length} 条待处理
+                          </span>
+                        </div>
+                        <div className="bp-agenda-hint">
+                          与竞赛教练每聊一轮，系统会把可落章节的评委视角点子堆到这里。勾选后一次性"应用到候选章节"。
+                        </div>
+                      </div>
+                      {bpAgendaItems.length === 0 ? (
+                        <div className="bp-agenda-empty-v2">
+                          <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="bp-ae-icon">
+                            <rect x="7" y="10" width="28" height="22" rx="3" />
+                            <path d="M13 16h16M13 21h11M13 26h8" />
+                            <path d="M35 32l4 4M33 30l3-3 5 5-3 3-5-5z" />
+                          </svg>
+                          <div className="bp-ae-title">议题板空着</div>
+                          <details className="bp-ae-details">
+                            <summary>如何触发议题？</summary>
+                            <p>切到竞赛教练后与之对话，关于评委视角、量化、反证、防守点等建议会自动沉淀到这里，勾选后可批量应用到候选章节。</p>
+                          </details>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="bp-agenda-list">
+                            {bpAgendaItems
+                              .filter((it) => (it.status || "pending") !== "applied")
+                              .map((it) => {
+                                const selected = bpAgendaSelected.has(it.agenda_id);
+                                const expanded = bpAgendaExpanded.has(it.agenda_id);
+                                const isDismissed = (it.status || "") === "dismissed";
+                                return (
+                                  <div
+                                    key={it.agenda_id}
+                                    className={`bp-agenda-item ${selected ? "is-selected" : ""} ${isDismissed ? "is-dismissed" : ""}`}
+                                  >
+                                    <div className="bp-agenda-row-main">
+                                      <label className="bp-agenda-check">
+                                        <input
+                                          type="checkbox"
+                                          disabled={isDismissed}
+                                          checked={selected}
+                                          onChange={(e) => {
+                                            const next = new Set(bpAgendaSelected);
+                                            if (e.target.checked) next.add(it.agenda_id);
+                                            else next.delete(it.agenda_id);
+                                            setBpAgendaSelected(next);
+                                          }}
+                                        />
+                                      </label>
+                                      <span className={`bp-agenda-tag tag-${(it.jury_tag || "默认").replace(/[^a-zA-Z0-9]/g, "_")}`}>
+                                        {it.jury_tag || "议题"}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        className="bp-agenda-title-btn"
+                                        onClick={() => {
+                                          const next = new Set(bpAgendaExpanded);
+                                          if (next.has(it.agenda_id)) next.delete(it.agenda_id);
+                                          else next.add(it.agenda_id);
+                                          setBpAgendaExpanded(next);
+                                        }}
+                                      >
+                                        {it.title || "未命名议题"}
+                                      </button>
+                                      {it.section_id_hint && (
+                                        <span className="bp-agenda-section-hint" title={`建议落点：${it.section_id_hint}`}>
+                                          → {it.section_id_hint}
+                                        </span>
+                                      )}
+                                      <div className="bp-agenda-actions">
+                                        {!isDismissed && (
+                                          <button
+                                            type="button"
+                                            className="bp-agenda-mini-btn"
+                                            title="忽略这条议题"
+                                            onClick={() => businessPlan?.plan_id && patchAgendaItem(businessPlan.plan_id, it.agenda_id, { status: "dismissed" })}
+                                          >
+                                            忽略
+                                          </button>
+                                        )}
+                                        {isDismissed && (
+                                          <button
+                                            type="button"
+                                            className="bp-agenda-mini-btn"
+                                            onClick={() => businessPlan?.plan_id && patchAgendaItem(businessPlan.plan_id, it.agenda_id, { status: "pending" })}
+                                          >
+                                            恢复
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {expanded && (
+                                      <div className="bp-agenda-detail">
+                                        <div className="bp-agenda-gist">{it.gist}</div>
+                                        {it.evidence_hint && (
+                                          <div className="bp-agenda-evidence">
+                                            <span className="bp-agenda-evidence-lbl">参考证据</span>
+                                            <span>{it.evidence_hint}</span>
+                                          </div>
+                                        )}
+                                        <div className="bp-agenda-meta-row">
+                                          {it.source_message_id && (
+                                            <button
+                                              type="button"
+                                              className="bp-agenda-jump"
+                                              onClick={() => {
+                                                const idx = Number(String(it.source_message_id || "").split("#")[1] || 0);
+                                                const elList = document.querySelectorAll('[data-msg-index]');
+                                                const target = Array.from(elList).find((el) => el.getAttribute('data-msg-index') === String(idx));
+                                                if (target) (target as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+                                              }}
+                                              title="跳到沉淀这条议题的原始对话消息"
+                                            >
+                                              跳原消息
+                                            </button>
+                                          )}
+                                          {it.created_at && <span className="bp-agenda-meta">{String(it.created_at).slice(5, 16)}</span>}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                          </div>
+                          <div className="bp-agenda-foot">
+                            <button
+                              type="button"
+                              className="bp-agenda-apply"
+                              disabled={bpAgendaSelected.size === 0 || bpAgendaBusy}
+                              onClick={applySelectedAgenda}
+                            >
+                              {bpAgendaBusy ? "应用中…" : `应用选中 · ${bpAgendaSelected.size}`}
+                            </button>
+                            <button
+                              type="button"
+                              className="bp-agenda-clear"
+                              disabled={bpAgendaSelected.size === 0}
+                              onClick={() => setBpAgendaSelected(new Set())}
+                            >
+                              清空选中
+                            </button>
+                            <span className="bp-agenda-foot-hint">
+                              应用后自动生成待审修订，学生可逐条接受 / 拒绝。
+                            </span>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
+                  {bpError && <div className="right-card" style={{ color: "#ff8787" }}>{bpError}</div>}
+                  {!businessPlan && (() => {
+                    const filled = bpReadiness?.filled_core_count ?? 0;
+                    const missing = bpReadiness?.missing_core_slots ?? [];
+                    const suggested = bpReadiness?.suggested_questions ?? [];
+                    const ready = bpReadiness ? missing.length === 0 : false;
+                    const total = filled + missing.length;
+                    const progress = total > 0 ? Math.round((filled / total) * 100) : 0;
+                    return (
+                      <div className="bp-intro-card">
+                        <div className="bp-intro-head">
+                          <div className="bp-intro-title-wrap">
+                            <div className="bp-intro-title">还没有计划书</div>
+                            <div className="bp-intro-sub">先通过下方对话补齐核心信息，系统会自动生成一份结构化草稿。</div>
+                          </div>
+                          <div className={`bp-intro-status ${ready ? "is-ready" : "is-wait"}`}>
+                            {ready ? "已可生成" : `还差 ${missing.length} 项`}
+                          </div>
+                        </div>
+
+                        {bpReadiness && total > 0 && (
+                          <div className="bp-intro-progress" aria-label="核心信息完成度">
+                            <div className="bp-intro-progress-bar">
+                              <div className="bp-intro-progress-fill" style={{ width: `${progress}%` }} />
+                            </div>
+                            <div className="bp-intro-progress-label">
+                              已覆盖 {filled}/{total} 个核心维度 · {progress}%
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="bp-intro-steps">
+                          <div className="bp-intro-step">
+                            <span className="bp-intro-step-num">1</span>
+                            <div className="bp-intro-step-body">
+                              <div className="bp-intro-step-title">与项目教练对话</div>
+                              <div className="bp-intro-step-desc">描述痛点、目标用户、方案与市场，系统会自动识别核心信息。</div>
+                            </div>
+                          </div>
+                          <div className="bp-intro-step">
+                            <span className="bp-intro-step-num">2</span>
+                            <div className="bp-intro-step-body">
+                              <div className="bp-intro-step-title">生成草稿（1 次 KB 蒸馏 + 1 次短版写作）</div>
+                              <div className="bp-intro-step-desc">自动提取对话里的要点，交由多智能体链路生成 9+ 章节初稿。</div>
+                            </div>
+                          </div>
+                          <div className="bp-intro-step">
+                            <span className="bp-intro-step-num">3</span>
+                            <div className="bp-intro-step-body">
+                              <div className="bp-intro-step-title">按章继续深化或一键升级</div>
+                              <div className="bp-intro-step-desc">每章可"继续深化"，成熟度达标后可升级为基础版 / 正式版。</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bp-intro-modes">
+                          <div className="bp-intro-mode">
+                            <span className="bp-intro-mode-dot is-project" />
+                            <div>
+                              <div className="bp-intro-mode-title">项目教练</div>
+                              <div className="bp-intro-mode-desc">按章节完整度节奏引导、补齐骨架与证据。</div>
+                            </div>
+                          </div>
+                          <div className="bp-intro-mode">
+                            <span className="bp-intro-mode-dot is-competition" />
+                            <div>
+                              <div className="bp-intro-mode-title">竞赛教练</div>
+                              <div className="bp-intro-mode-desc">顶栏切到"竞赛冲刺"即自动进入，以评委视角追问、产出议题板。</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {missing.length > 0 && (
+                          <div className="bp-intro-missing">
+                            <div className="bp-intro-section-title">还需补齐</div>
+                            <div className="bp-intro-chip-row">
+                              {missing.map((item: string) => (
+                                <span key={item} className="bp-intro-chip">{item}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {suggested.length > 0 && (
+                          <div className="bp-intro-suggest">
+                            <div className="bp-intro-section-title">下一句可以说</div>
+                            <div className="bp-intro-suggest-list">
+                              {suggested.slice(0, 4).map((q: string, idx: number) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  className="bp-intro-suggest-item"
+                                  onClick={() => {
+                                    setInput(q);
+                                    setTimeout(() => {
+                                      textareaRef.current?.focus();
+                                      textareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                                    }, 80);
+                                  }}
+                                  title="点击填入下方对话输入框"
+                                >
+                                  {q}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {businessPlan && (() => {
                     const sections = businessPlan.sections ?? [];
                     const pendingRevs = businessPlan.pending_revisions ?? [];
@@ -3676,24 +4411,40 @@ export default function StudentPage() {
                                 lineHeight: 1.9,
                               }}
                             >
-                              <div
-                                style={{
-                                  textAlign: "center",
-                                  padding: "28px 0 30px",
-                                  borderBottom: "1px dashed rgba(255,255,255,0.15)",
-                                  marginBottom: 28,
-                                }}
-                              >
-                                <div style={{ fontSize: 12, color: "var(--text-muted, #9aa3b2)", letterSpacing: 3, marginBottom: 10 }}>BUSINESS PLAN</div>
-                                <div className="bp-cover-title">
-                                  {businessPlan.cover_info?.project_name || businessPlan.title || "商业计划书"}
-                                </div>
-                                <div style={{ fontSize: 13, color: "var(--text-muted, #9aa3b2)", display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: 12 }}>
-                                  <span>负责人：{businessPlan.cover_info?.student_or_team || currentUser?.display_name || currentUser?.user_id || "—"}</span>
-                                  {classId && <span>班级：{classId}</span>}
-                                  <span>日期：{businessPlan.cover_info?.date || new Date().toISOString().slice(0, 10)}</span>
-                                </div>
-                              </div>
+                              {(() => {
+                                const realTitle = businessPlan.cover_info?.project_name || businessPlan.title;
+                                if (realTitle) {
+                                  return (
+                                    <div
+                                      style={{
+                                        textAlign: "center",
+                                        padding: "28px 0 30px",
+                                        borderBottom: "1px dashed rgba(255,255,255,0.15)",
+                                        marginBottom: 28,
+                                      }}
+                                    >
+                                      <div style={{ fontSize: 12, color: "var(--text-muted, #9aa3b2)", letterSpacing: 3, marginBottom: 10 }}>BUSINESS PLAN</div>
+                                      <div className="bp-cover-title">{realTitle}</div>
+                                      <div style={{ fontSize: 13, color: "var(--text-muted, #9aa3b2)", display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: 12 }}>
+                                        <span>负责人：{businessPlan.cover_info?.student_or_team || currentUser?.display_name || currentUser?.user_id || "—"}</span>
+                                        {classId && <span>班级：{classId}</span>}
+                                        <span>日期：{businessPlan.cover_info?.date || new Date().toISOString().slice(0, 10)}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <div className="bp-cover-ghost">
+                                    <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="bp-cg-icon">
+                                      <path d="M12 8h18a4 4 0 014 4v26a2 2 0 01-2 2H14a4 4 0 01-4-4V10a2 2 0 012-2z" />
+                                      <path d="M18 16h14M18 22h14M18 28h10" />
+                                      <path d="M10 12v24" opacity="0.5" />
+                                    </svg>
+                                    <div className="bp-cg-eyebrow">BUSINESS PLAN</div>
+                                    <div className="bp-cg-text">尚未生成封面 · 先和教练对话几轮即可</div>
+                                  </div>
+                                );
+                              })()}
 
                               <div style={{ marginBottom: 32 }}>
                                 <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>目录</div>
@@ -3746,7 +4497,20 @@ export default function StudentPage() {
                                       <div className="bp-aistub-hint">本章尚未收集到用户素材，以下为基于行业通用框架生成的参考稿，建议团队校准事实后再定稿。</div>
                                     )}
                                     <div style={{ fontSize: 14 }}>
-                                      <MarkdownContent content={section.user_edit || section.content || "_本章内容仍在补全中。_"} theme={theme} />
+                                      {(() => {
+                                        const body = section.user_edit || section.content || "";
+                                        if (body.trim()) {
+                                          return <MarkdownContent content={body} theme={theme} />;
+                                        }
+                                        return (
+                                          <div className="bp-section-skeleton" aria-label="本章待补全">
+                                            <span className="bp-sk-line" style={{ width: "92%" }} />
+                                            <span className="bp-sk-line" style={{ width: "78%" }} />
+                                            <span className="bp-sk-line" style={{ width: "64%" }} />
+                                            <div className="bp-sk-hint">向教练追问即可自动补全本章</div>
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
                                     {!!section.missing_points?.length && (
                                       <div style={{ marginTop: 12, padding: "8px 12px", background: "rgba(255,169,77,0.08)", borderRadius: 8, fontSize: 12.5, color: "#ffa94d" }}>
@@ -4216,6 +4980,21 @@ export default function StudentPage() {
                                   <p>{r.competition_context}</p>
                                 </div>
                               )}
+                              {(r.inference_chain?.length || r.agent_name || r.score_impact != null) && (
+                                <details className="tch-conclusion" style={{ marginTop: 10 }}>
+                                  <summary>查看推理链 · {r.agent_name || "综合诊断 Agent"}{r.score_impact != null ? ` · 扣分 ${r.score_impact.toFixed(2)}` : ""}</summary>
+                                  <div className="tch-conclusion-body">
+                                    {(r.inference_chain || []).map((step: any, si: number) => (
+                                      <div key={si} style={{ padding: "6px 10px", marginBottom: 6, background: "rgba(255,255,255,0.03)", borderLeft: "2px solid rgba(139,127,216,0.4)", borderRadius: "0 6px 6px 0", fontSize: 12, lineHeight: 1.55 }}>
+                                        <span style={{ display: "inline-block", minWidth: 80, color: "#a78bfa", fontWeight: 600, fontFamily: "ui-monospace, monospace", fontSize: 10.5, letterSpacing: "0.04em", textTransform: "uppercase" }}>{step.step}</span>
+                                        <span style={{ color: "#cbd5e1" }}>
+                                          {step.detail || step.rule_name || step.text || (step.keywords || []).join("、") || (step.missing || []).join("、") || ""}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </details>
+                              )}
                           </div>
                         </details>
                         );
@@ -4227,16 +5006,6 @@ export default function StudentPage() {
 
               {rightTab === "score" && (
                 <div className="right-section sc-panel">
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                    <button
-                      type="button"
-                      className="tch-sm-btn"
-                      onClick={generatePosterFromCurrentProject}
-                      disabled={posterLoading}
-                    >
-                      {posterLoading ? "正在生成海报…" : "根据当前项目生成路演海报"}
-                    </button>
-                  </div>
                   {rubric.length > 0 ? (() => {
                     const total = overallScore ?? 0;
                     const totalColor = total >= 7 ? "var(--accent-green,#22c55e)" : total >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)";
@@ -4327,6 +5096,117 @@ export default function StudentPage() {
                                   {r.trend && <span className={`sc-dim-trend sc-trend-${r.trend}`}>{r.trend === "up" ? "↑" : r.trend === "down" ? "↓" : "—"}{r.prevScore != null ? ` (${r.prevScore}→${r.score})` : ""}</span>}
                             </summary>
                                 {r.reason && <div className="sc-dim-reason">{r.reason}</div>}
+                                {(() => {
+                                  const base = Number(r.base_score ?? 0);
+                                  const sigBonus = Number(r.signal_bonus ?? 0);
+                                  const lenBonus = Number(r.length_bonus ?? 0);
+                                  const rulePen = Number(r.rule_penalty ?? 0);
+                                  const dimRules: any[] = Array.isArray(r.dim_rules) ? r.dim_rules : [];
+                                  const matched: string[] = Array.isArray(r.matched_evidence) ? r.matched_evidence : [];
+                                  const missing: string[] = Array.isArray(r.missing_evidence) ? r.missing_evidence : [];
+                                  const rationale = r.rationale;
+                                  const hasRich = base > 0 || sigBonus > 0 || lenBonus > 0 || rulePen > 0 || dimRules.length > 0 || matched.length > 0 || missing.length > 0 || rationale;
+                                  // 无论 hasRich 与否都渲染——保底显示一个"得分 = X"迷你推导，
+                                  // 让学生始终能看到这个分数至少怎么写出来的。
+                                  const weight = Number(r.weight ?? 0);
+                                  return (
+                                    <div className="sc-dim-breakdown">
+                                      {/* 分数构成条 */}
+                                      <div className="sc-dim-breakdown-title">分数怎么算出来的</div>
+                                      <div className="sc-dim-breakdown-row">
+                                        {hasRich ? (
+                                          <>
+                                            {base > 0 && (
+                                              <span className="sc-dim-breakdown-chip pos" title="按阶段或证据覆盖得到的基础分">
+                                                基础 <b>{base.toFixed(1)}</b>
+                                              </span>
+                                            )}
+                                            {lenBonus > 0.05 && (
+                                              <span className="sc-dim-breakdown-chip pos" title="文本长度加成">
+                                                文本加成 <b>+{lenBonus.toFixed(1)}</b>
+                                              </span>
+                                            )}
+                                            {sigBonus > 0.05 && (
+                                              <span className="sc-dim-breakdown-chip pos" title="财务/量化模块证据加成">
+                                                量化证据 <b>+{sigBonus.toFixed(1)}</b>
+                                              </span>
+                                            )}
+                                            {rulePen > 0.05 && (
+                                              <span className="sc-dim-breakdown-chip neg" title="触发风险规则造成的扣分合计">
+                                                规则扣分 <b>-{rulePen.toFixed(1)}</b>
+                                              </span>
+                                            )}
+                                            <span className="sc-dim-breakdown-eq">=</span>
+                                            <span className="sc-dim-breakdown-chip final">
+                                              得分 <b>{Number(r.score).toFixed(1)}</b>
+                                            </span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <span className="sc-dim-breakdown-chip pos" title="本次诊断给出的原始打分（未返回细化因子）">
+                                              本次得分 <b>{Number(r.score).toFixed(1)}</b>
+                                            </span>
+                                            {weight > 0 && (
+                                              <>
+                                                <span className="sc-dim-breakdown-eq">×</span>
+                                                <span className="sc-dim-breakdown-chip" title="该维度在综合分中的权重">
+                                                  权重 <b>{weight.toFixed(2)}</b>
+                                                </span>
+                                                <span className="sc-dim-breakdown-eq">=</span>
+                                                <span className="sc-dim-breakdown-chip final" title="本维度对综合分的贡献">
+                                                  贡献 <b>{(Number(r.score) * weight).toFixed(2)}</b>
+                                                </span>
+                                              </>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                      {!hasRich && (
+                                        <div className="sc-dim-breakdown-note">
+                                          该次诊断未返回细化因子（基础分 / 证据加成 / 规则扣分）。重新提交后会显示完整推导链路。
+                                        </div>
+                                      )}
+
+                                      {/* 命中规则 */}
+                                      {dimRules.length > 0 && (
+                                        <>
+                                          <div className="sc-dim-breakdown-title">命中的风险规则</div>
+                                          <div className="sc-dim-rule-list">
+                                            {dimRules.slice(0, 4).map((dr: any, i: number) => (
+                                              <div key={`${dr.id}-${i}`} className={`sc-dim-rule-row sev-${dr.severity || "mid"}`}>
+                                                <span className="sc-dim-rule-id">{dr.id}</span>
+                                                <span className="sc-dim-rule-name">{dr.name}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </>
+                                      )}
+
+                                      {/* 证据命中 / 缺失 */}
+                                      {(matched.length > 0 || missing.length > 0) && (
+                                        <>
+                                          <div className="sc-dim-breakdown-title">证据关键词</div>
+                                          <div className="sc-dim-evidence-chips">
+                                            {matched.slice(0, 6).map((kw) => (
+                                              <span key={`m-${kw}`} className="sc-dim-evidence-chip matched">命中 · {kw}</span>
+                                            ))}
+                                            {missing.slice(0, 4).map((kw) => (
+                                              <span key={`x-${kw}`} className="sc-dim-evidence-chip missing">缺 · {kw}</span>
+                                            ))}
+                                          </div>
+                                        </>
+                                      )}
+
+                                      {/* 人话公式（详细版，可折叠） */}
+                                      {rationale?.formula_display && (
+                                        <details className="sc-dim-rationale">
+                                          <summary>查看详细推导</summary>
+                                          <pre className="sc-dim-rationale-text">{rationale.formula_display}</pre>
+                                        </details>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                                 {typeof r.bestScore === "number" && r.bestScore > r.score && (
                                   <div className="sc-dim-best-hint">历史最高：{r.bestScore}（点击外侧竖线查看）</div>
                                 )}
@@ -4334,6 +5214,89 @@ export default function StudentPage() {
                         );
                       })}
                     </div>
+
+                        {/* 综合分 · 怎么算出来的 */}
+                        {(() => {
+                          const ovr: any = (latestResult?.diagnosis as any)?.overall_rationale;
+                          if (!ovr) return null;
+                          const floor = Number(ovr.stage_floor ?? 0);
+                          const ceil = Number(ovr.stage_ceiling ?? 10);
+                          const raw = Number(ovr.raw_score ?? ovr.value ?? 0);
+                          const finalScore = Number(ovr.value ?? 0);
+                          const stageCn = String(ovr.project_stage_cn || ovr.project_stage || "");
+                          const clamped = raw < floor || raw > ceil;
+                          // marker positions on a 0-10 scale
+                          const pct = (v: number) => Math.min(100, Math.max(0, (v / 10) * 100));
+                          return (
+                            <div className="sc-overall-rationale">
+                              <div className="sc-overall-rat-head">
+                                <span className="sc-overall-rat-title">综合分 {finalScore} / 10 · 怎么算出来的</span>
+                                {stageCn && <span className="sc-overall-rat-stage">{stageCn}</span>}
+                              </div>
+                              <div className="sc-overall-rat-desc">
+                                综合分 = 按 9 个维度加权平均后，再夹到「{stageCn || "当前阶段"}」允许区间
+                                <b> [{floor}, {ceil}]</b>。
+                                加权平均算出 <b>{raw.toFixed(2)}</b>，
+                                {clamped
+                                  ? (raw < floor
+                                      ? <>被抬到下限 <b>{floor}</b></>
+                                      : <>被压到上限 <b>{ceil}</b></>)
+                                  : <>落在区间内不再修正</>
+                                }，
+                                最终 <b style={{ color: finalScore >= 7 ? "var(--accent-green,#22c55e)" : finalScore >= 4 ? "var(--accent-yellow,#f59e0b)" : "var(--accent-red,#ef4444)" }}>{finalScore}</b>。
+                              </div>
+                              {/* 标尺可视化 */}
+                              <div className="sc-overall-scale-wrap">
+                                <div className="sc-overall-scale">
+                                  <div
+                                    className="sc-overall-scale-range"
+                                    style={{ left: `${pct(floor)}%`, width: `${pct(ceil) - pct(floor)}%` }}
+                                    title={`阶段区间 [${floor}, ${ceil}]`}
+                                  />
+                                  <div className="sc-overall-scale-marker raw" style={{ left: `${pct(raw)}%` }} title={`加权平均 ${raw.toFixed(2)}`}>
+                                    <span className="sc-overall-marker-dot" />
+                                    <span className="sc-overall-marker-lbl">加权 {raw.toFixed(1)}</span>
+                                  </div>
+                                  <div className="sc-overall-scale-marker final" style={{ left: `${pct(finalScore)}%` }} title={`最终 ${finalScore}`}>
+                                    <span className="sc-overall-marker-dot" />
+                                    <span className="sc-overall-marker-lbl">最终 {finalScore}</span>
+                                  </div>
+                                </div>
+                                <div className="sc-overall-scale-axis">
+                                  <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>
+                                </div>
+                              </div>
+                              {/* 维度贡献表 */}
+                              {rubric.length > 0 && (
+                                <div className="sc-overall-contrib-wrap">
+                                  <div className="sc-overall-contrib-title">各维度贡献（得分 × 权重）</div>
+                                  <div className="sc-overall-contrib">
+                                    {rubric.map((rr: any) => {
+                                      const w = Number(rr.weight ?? 1);
+                                      const sc = Number(rr.score ?? 0);
+                                      const contrib = sc * w;
+                                      const pctContrib = Math.min(100, (contrib / 10) * 100);
+                                      const col = sc >= 7 ? "#22c55e" : sc >= 4 ? "#f59e0b" : "#ef4444";
+                                      return (
+                                        <div key={rr.item} className="sc-overall-contrib-row">
+                                          <span className="sc-overall-contrib-name">{rr.item}</span>
+                                          <div className="sc-overall-contrib-bar">
+                                            <div className="sc-overall-contrib-fill" style={{ width: `${pctContrib}%`, background: col }} />
+                                          </div>
+                                          <span className="sc-overall-contrib-val">{sc.toFixed(1)}×{w.toFixed(1)} = <b>{contrib.toFixed(2)}</b></span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                              <details className="sc-overall-rat-formula">
+                                <summary>查看公式原文</summary>
+                                <pre className="sc-overall-rat-text">{ovr.formula_display}</pre>
+                              </details>
+                            </div>
+                          );
+                        })()}
 
                         {/* Grading Principles */}
                         {gradingPrinciples.length > 0 && (
@@ -4349,6 +5312,28 @@ export default function StudentPage() {
                       </>
                     );
                   })() : <p className="right-hint">提交项目描述后显示评分，描述越完整评分越有参考价值</p>}
+                </div>
+              )}
+
+              {rightTab === "finance" && (
+                <div className="right-section">
+                  <h4>财务分析</h4>
+                  <div className="panel-desc">
+                    从商业模式假设出发，做单位经济、现金流、合理性、TAM/SAM/SOM、定价框架、融资节奏六项建模。
+                  </div>
+                  <FinanceReportView
+                    apiBase={API_BASE}
+                    userId={(currentUser?.user_id || studentId || "").toString()}
+                    projectId={projectId}
+                    conversationId={conversationId || undefined}
+                    industryHint={(latestResult?.category || "") as string}
+                    onJumpBudget={() => {
+                      try {
+                        const btn = document.querySelector('[data-budget-open-btn]');
+                        if (btn && btn instanceof HTMLElement) btn.click();
+                      } catch (e) { /* ignore */ }
+                    }}
+                  />
                 </div>
               )}
 

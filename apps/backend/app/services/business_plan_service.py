@@ -591,11 +591,16 @@ class BusinessPlanService:
         json_store: JsonStorage,
         conv_store: ConversationStorage,
         llm: LlmClient | None = None,
+        rag_engine: Any | None = None,
+        graph_service: Any | None = None,
     ) -> None:
         self.storage = storage
         self.json_store = json_store
         self.conv_store = conv_store
         self.llm = llm
+        # 可选：竞赛分支优化用的 KB 检索通道
+        self.rag_engine = rag_engine
+        self.graph_service = graph_service
 
     def get_latest(self, project_id: str, conversation_id: str) -> dict[str, Any] | None:
         return self.storage.load_latest(project_id, conversation_id)
@@ -654,6 +659,52 @@ class BusinessPlanService:
             f"请补充一下项目的{label}。" for label in missing_core[:3]
         ]
 
+        # ── 构造 rationale：每个 field_level、每个 breakdown、总成熟度 score 都能追溯计算 ──
+        breakdown = maturity["breakdown"]
+        total_score = maturity["score"]
+        breakdown_rationale = {
+            "field": "maturity:overall",
+            "value": total_score,
+            "formula": "skeleton + agent_density + coherence",
+            "formula_display": (
+                f"成熟度 = 骨架完整度 + 智能体信息密度 + 逻辑自洽度\n"
+                f"= {breakdown.get('skeleton', 0)}（满分 {breakdown.get('skeleton_max', 60)}）"
+                f" + {breakdown.get('agent_density', 0)}（满分 {breakdown.get('agent_density_max', 30)}）"
+                f" + {breakdown.get('coherence', 0)}（满分 {breakdown.get('coherence_max', 10)}）"
+                f"\n= {total_score}"
+            ),
+            "inputs": [
+                {"label": "骨架完整度", "value": breakdown.get("skeleton", 0),
+                 "weight": breakdown.get("skeleton_max", 60),
+                 "impact": f"+{breakdown.get('skeleton', 0)}"},
+                {"label": "智能体信息密度", "value": breakdown.get("agent_density", 0),
+                 "weight": breakdown.get("agent_density_max", 30),
+                 "impact": f"+{breakdown.get('agent_density', 0)}"},
+                {"label": "逻辑自洽度", "value": breakdown.get("coherence", 0),
+                 "weight": breakdown.get("coherence_max", 10),
+                 "impact": f"+{breakdown.get('coherence', 0)}"},
+            ],
+            "note": f"等级：{_MATURITY_TIER_LABEL.get(maturity['tier'], '未就绪')}",
+        }
+
+        field_level_rationales: dict[str, dict[str, Any]] = {}
+        for gkey, level in (maturity.get("field_levels") or {}).items():
+            field_text = fields.get(gkey, "") if isinstance(fields, dict) else ""
+            field_level_rationales[gkey] = {
+                "field": f"maturity:{gkey}",
+                "value": level,
+                "formula": "content_specificity_level",
+                "formula_display": (
+                    f"字段「{gkey}」的具体度等级：{level}\n"
+                    f"依据：{'已填内容：' + (field_text or '（空）')[:120]}"
+                ),
+                "inputs": [
+                    {"label": "原始内容", "value": (field_text or "")[:80] or "—"}
+                ],
+                "contributing_evidence": [],
+                "note": f"等级映射：empty < stub < general < concrete",
+            }
+
         return {
             "ready": ready,
             "filled_core_slots": filled_core,
@@ -666,8 +717,10 @@ class BusinessPlanService:
             "maturity_tier": maturity["tier"],
             "maturity_tier_label": _MATURITY_TIER_LABEL.get(maturity["tier"], "未就绪"),
             "maturity_breakdown": maturity["breakdown"],
+            "maturity_breakdown_rationale": breakdown_rationale,
             "maturity_next_gap": maturity["next_gap"],
             "maturity_field_levels": maturity["field_levels"],
+            "maturity_field_rationales": field_level_rationales,
         }
 
     def generate_plan(
@@ -677,6 +730,7 @@ class BusinessPlanService:
         conversation_id: str,
         student_id: str = "",
         allow_low_confidence: bool = False,
+        mode: str = "learning",
     ) -> dict[str, Any]:
         readiness = self.get_readiness(project_id, conversation_id)
         tier = str(readiness.get("maturity_tier") or "")
@@ -690,8 +744,12 @@ class BusinessPlanService:
         if not conv:
             return {"status": "not_found", "detail": "conversation not found", "plan": None}
 
-        current = self.storage.load_latest(project_id, conversation_id)
-        draft = self._build_draft(conv=conv, project_id=project_id, student_id=student_id, current=current)
+        # 只取"主干"计划书做对比（避免 fork 被当作 latest）
+        current = self._load_latest_main(project_id, conversation_id)
+        draft = self._build_draft(
+            conv=conv, project_id=project_id, student_id=student_id, current=current,
+            mode=mode,
+        )
         if current:
             revisions = self._build_revisions(current.get("sections") or [], draft.get("sections") or [], conv)
             draft["pending_revisions"] = revisions
@@ -712,7 +770,22 @@ class BusinessPlanService:
             conversation_id=str(current.get("conversation_id") or ""),
             student_id=str(current.get("student_id") or ""),
             allow_low_confidence=True,
+            mode=str(current.get("mode") or "learning"),
         )
+
+    def _load_latest_main(self, project_id: str, conversation_id: str) -> dict[str, Any] | None:
+        """只取主干计划书（plan_type=main 或缺省），用于生成对比基线。"""
+        plan_dir = self.storage._plan_dir(project_id, conversation_id)
+        files = sorted(plan_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        for file in files:
+            try:
+                data = json.loads(file.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            pt = str(data.get("plan_type") or "main")
+            if pt == "main":
+                return data
+        return None
 
     def update_section(
         self,
@@ -792,6 +865,316 @@ class BusinessPlanService:
         plan["revision_badge_count"] = len(plan["pending_revisions"])
         plan["updated_at"] = _now_iso()
         return self._save_plan(plan, previous=previous)
+
+    # ── 教练模式切换（项目教练 ↔ 竞赛教练） ─────────────────────────
+    def set_coaching_mode(self, plan_id: str, mode: str) -> dict[str, Any]:
+        """切换计划书的教练模式；不会复制计划书、不会改写已有章节。
+        切到 competition 前要求 maturity 达到 basic_ready，否则拒绝。"""
+        mode = "competition" if str(mode or "").lower() == "competition" else "project"
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "plan": None}
+        previous = copy.deepcopy(plan)
+
+        # 实时校正 competition_unlocked
+        readiness = self.get_readiness(
+            str(plan.get("project_id") or ""),
+            str(plan.get("conversation_id") or ""),
+        )
+        tier = str(readiness.get("maturity_tier") or "")
+        unlocked = tier in {"basic_ready", "full_ready"}
+        plan["competition_unlocked"] = unlocked
+
+        if mode == "competition" and not unlocked:
+            plan["updated_at"] = _now_iso()
+            saved = self._save_plan(plan, previous=previous)
+            return {
+                "status": "locked",
+                "reason": "maturity_below_basic_ready",
+                "maturity_tier": tier,
+                "plan": saved,
+            }
+
+        plan["coaching_mode"] = mode
+        plan.setdefault("competition_agenda", list(plan.get("competition_agenda") or []))
+        plan["updated_at"] = _now_iso()
+        saved = self._save_plan(plan, previous=previous)
+        return {"status": "ok", "plan": saved}
+
+    # ── 竞赛教练议题板：核心产出池 ──────────────────────────────────
+    JURY_TAGS: tuple[str, ...] = (
+        "证据", "量化", "防守点", "差异化", "赛道匹配",
+    )
+
+    _JURY_KEYWORDS: dict[str, tuple[str, ...]] = {
+        "证据": ("证据", "来源", "数据来源", "引用", "权威", "佐证", "白皮书", "调研"),
+        "量化": ("量化", "具体数字", "百分比", "指标", "kpi", "数据化", "单量", "财务模型", "tam", "sam", "som"),
+        "防守点": ("壁垒", "防守", "复制", "护城河", "专利", "先发", "独占", "抄袭"),
+        "差异化": ("差异化", "独特", "区别", "替代方案", "对比竞品", "竞品", "对手"),
+        "赛道匹配": ("赛道", "评委", "获奖", "互联网+", "挑战杯", "大创", "赛事", "加分项", "评分标准"),
+    }
+
+    _SECTION_HINT_KEYWORDS: dict[str, tuple[str, ...]] = {
+        "users": ("用户", "人群", "痛点", "客户"),
+        "solution": ("产品", "方案", "功能", "服务"),
+        "market": ("市场", "tam", "sam", "竞品", "竞争"),
+        "business_model": ("商业模式", "定价", "收入", "盈利"),
+        "advantage": ("壁垒", "优势", "护城河", "差异化", "专利"),
+        "operation": ("运营", "推广", "增长", "渠道"),
+        "team": ("团队", "成员", "背景"),
+        "finance": ("财务", "预算", "资金", "现金流"),
+        "milestone": ("里程碑", "时间", "节点", "计划"),
+        "risk": ("风险", "合规", "法律"),
+    }
+
+    def _infer_section_hint(self, text: str) -> str:
+        t = str(text or "").lower()
+        best_sid = ""
+        best_hits = 0
+        for sid, keys in self._SECTION_HINT_KEYWORDS.items():
+            hits = sum(1 for k in keys if k in t)
+            if hits > best_hits:
+                best_hits = hits
+                best_sid = sid
+        return best_sid
+
+    def _infer_jury_tag(self, text: str) -> str:
+        t = str(text or "").lower()
+        best_tag = ""
+        best_hits = 0
+        for tag, keys in self._JURY_KEYWORDS.items():
+            hits = sum(1 for k in keys if k.lower() in t)
+            if hits > best_hits:
+                best_hits = hits
+                best_tag = tag
+        return best_tag or "差异化"
+
+    def extract_agenda_from_message(
+        self,
+        plan_id: str,
+        *,
+        assistant_text: str,
+        source_message_id: str | None = None,
+    ) -> dict[str, Any]:
+        """竞赛教练每次 assistant 回合完成后调用一次，解析出 0~3 条议题入库。
+        规则兜底版（不依赖 LLM）：按段落切片 + 关键词打标 + 章节提示。"""
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "new_items": []}
+        if str(plan.get("coaching_mode") or "project") != "competition":
+            return {"status": "skipped", "reason": "not_competition_mode", "new_items": []}
+
+        text = str(assistant_text or "").strip()
+        if not text:
+            return {"status": "empty", "new_items": []}
+
+        # 按段落切片，只保留含"评委视角关键词"或长度 >= 40 的段
+        paragraphs: list[str] = []
+        for raw in re.split(r"\n\s*\n", text):
+            p = raw.strip()
+            if not p:
+                continue
+            has_kw = any(
+                any(k.lower() in p.lower() for k in keys)
+                for keys in self._JURY_KEYWORDS.values()
+            )
+            if has_kw or self._chinese_length(p) >= 40:
+                paragraphs.append(p)
+        if not paragraphs:
+            return {"status": "no_signal", "new_items": []}
+
+        # 每段产出至多 1 条议题；总上限 3
+        existing = list(plan.get("competition_agenda") or [])
+        seen_titles = {str(row.get("title") or "").strip() for row in existing if row.get("status") != "dismissed"}
+        conversation_id = str(plan.get("conversation_id") or "")
+
+        new_items: list[dict[str, Any]] = []
+        for para in paragraphs[:6]:
+            jury_tag = self._infer_jury_tag(para)
+            section_hint = self._infer_section_hint(para)
+            # 取第一句 / 最长的 40 字做标题
+            first_sentence = re.split(r"[。！？\n]", para, 1)[0].strip()
+            title = first_sentence[:36] if first_sentence else para[:36]
+            if not title:
+                continue
+            if title in seen_titles:
+                continue
+
+            # evidence_hint：尝试从 KB 里凑一句
+            evidence_hint = ""
+            kb_ref = (plan.get("kb_reference") or {})
+            case_refs = (kb_ref.get("case_refs") or [])[:2]
+            if case_refs:
+                parts = [str(c.get("case_name") or "").strip() for c in case_refs if c.get("case_name")]
+                if parts:
+                    evidence_hint = "可对标案例：" + "、".join(parts)
+
+            new_items.append({
+                "agenda_id": str(uuid4())[:10],
+                "plan_id": plan_id,
+                "conversation_id": conversation_id,
+                "source_message_id": source_message_id or "",
+                "jury_tag": jury_tag,
+                "section_id_hint": section_hint,
+                "title": title,
+                "gist": para[:480],
+                "evidence_hint": evidence_hint,
+                "status": "pending",
+                "created_at": _now_iso(),
+                "applied_at": None,
+            })
+            seen_titles.add(title)
+            if len(new_items) >= 3:
+                break
+
+        if not new_items:
+            return {"status": "no_new", "new_items": []}
+
+        previous = copy.deepcopy(plan)
+        plan["competition_agenda"] = existing + new_items
+        plan["updated_at"] = _now_iso()
+        saved = self._save_plan(plan, previous=previous)
+        return {"status": "ok", "new_items": new_items, "plan": saved}
+
+    def list_agenda(self, plan_id: str, status_filter: str = "") -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "items": []}
+        items = list(plan.get("competition_agenda") or [])
+        if status_filter:
+            items = [row for row in items if str(row.get("status") or "pending") == status_filter]
+        # 按创建时间倒序
+        items.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+        return {
+            "status": "ok",
+            "items": items,
+            "coaching_mode": plan.get("coaching_mode") or "project",
+            "competition_unlocked": bool(plan.get("competition_unlocked")),
+        }
+
+    def patch_agenda(
+        self,
+        plan_id: str,
+        agenda_id: str,
+        *,
+        status: str | None = None,
+        section_id_hint: str | None = None,
+    ) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "item": None}
+        previous = copy.deepcopy(plan)
+        items = list(plan.get("competition_agenda") or [])
+        target = None
+        for row in items:
+            if str(row.get("agenda_id") or "") == agenda_id:
+                if status is not None:
+                    if status not in {"pending", "applied", "dismissed"}:
+                        return {"status": "invalid_status", "item": None}
+                    row["status"] = status
+                    if status == "applied":
+                        row["applied_at"] = _now_iso()
+                if section_id_hint is not None:
+                    row["section_id_hint"] = str(section_id_hint or "")
+                target = row
+                break
+        if not target:
+            return {"status": "not_found", "item": None}
+        plan["competition_agenda"] = items
+        plan["updated_at"] = _now_iso()
+        saved = self._save_plan(plan, previous=previous)
+        return {"status": "ok", "item": target, "plan": saved}
+
+    def apply_agenda(
+        self,
+        plan_id: str,
+        agenda_ids: list[str],
+        target_section_map: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        """把选中的议题合并进对应章节，产出 pending_revisions（逐条可接受/拒绝）。"""
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "plan": None}
+        previous = copy.deepcopy(plan)
+        wanted = [str(x) for x in (agenda_ids or []) if x]
+        if not wanted:
+            return {"status": "no_ids", "plan": plan}
+
+        items = list(plan.get("competition_agenda") or [])
+        id2item = {str(r.get("agenda_id") or ""): r for r in items}
+        sections = list(plan.get("sections") or [])
+        # section_id → section row（浅拷贝，稍后写回）
+        sec_by_id: dict[str, dict[str, Any]] = {str(s.get("section_id") or ""): s for s in sections}
+
+        # 按目标章节分组议题
+        group: dict[str, list[dict[str, Any]]] = {}
+        applied_ids: list[str] = []
+        for aid in wanted:
+            item = id2item.get(aid)
+            if not item or str(item.get("status") or "pending") != "pending":
+                continue
+            sid_override = (target_section_map or {}).get(aid) or ""
+            target_sid = sid_override or str(item.get("section_id_hint") or "")
+            if not target_sid or target_sid not in sec_by_id:
+                # 没明确章节时，默认落到市场或优势章节
+                for fallback in ("advantage", "market", "overview"):
+                    if fallback in sec_by_id:
+                        target_sid = fallback
+                        break
+            if not target_sid or target_sid not in sec_by_id:
+                continue
+            group.setdefault(target_sid, []).append(item)
+            applied_ids.append(aid)
+
+        if not group:
+            return {"status": "no_match", "plan": plan}
+
+        revisions = list(plan.get("pending_revisions") or [])
+        # 逐章节合并：旧 content + 竞赛教练增量
+        for sid, grp in group.items():
+            sec = sec_by_id.get(sid) or {}
+            original = str(sec.get("user_edit") or sec.get("content") or "")
+            addition_blocks: list[str] = []
+            for it in grp:
+                tag = str(it.get("jury_tag") or "")
+                title = str(it.get("title") or "")
+                gist = str(it.get("gist") or "")
+                evi = str(it.get("evidence_hint") or "")
+                block = f"【竞赛教练 · {tag}】{title}\n{gist}"
+                if evi:
+                    block += f"\n补充证据：{evi}"
+                addition_blocks.append(block)
+            new_content = (original + "\n\n" + "\n\n".join(addition_blocks)).strip()
+
+            revisions.append({
+                "revision_id": str(uuid4())[:8],
+                "section_id": sid,
+                "section_title": sec.get("display_title") or sec.get("title"),
+                "summary": f"{sec.get('display_title') or sec.get('title')} · 竞赛教练议题合入（{len(grp)} 条）",
+                "reason": "来自竞赛教练议题板的批量应用，强化评委视角证据与量化。",
+                "source_hint": "competition_agenda",
+                "old_content": original,
+                "new_content": new_content,
+                "candidate_field_map": sec.get("field_map") or {},
+                "candidate_missing_points": sec.get("missing_points") or [],
+                "candidate_missing_level": "complete",
+                "changes": self._build_inline_changes(original, new_content),
+                "created_at": _now_iso(),
+                "agenda_ids": [str(it.get("agenda_id") or "") for it in grp],
+            })
+
+        # 标记已 applied
+        for item in items:
+            if str(item.get("agenda_id") or "") in applied_ids:
+                item["status"] = "applied"
+                item["applied_at"] = _now_iso()
+
+        plan["competition_agenda"] = items
+        plan["pending_revisions"] = revisions
+        plan["revision_badge_count"] = len(revisions)
+        plan["updated_at"] = _now_iso()
+        saved = self._save_plan(plan, previous=previous)
+        return {"status": "ok", "applied_ids": applied_ids, "plan": saved}
 
     def export_stub(self, plan_id: str, export_mode: str, cover_info: dict[str, Any] | None = None) -> dict[str, Any]:
         return self.export_plan(
@@ -1294,6 +1677,7 @@ class BusinessPlanService:
         project_id: str,
         student_id: str,
         current: dict[str, Any] | None,
+        mode: str = "learning",
     ) -> dict[str, Any]:
         conversation_id = str(conv.get("conversation_id") or "")
         messages = list(conv.get("messages") or [])
@@ -1332,6 +1716,13 @@ class BusinessPlanService:
             created_at = _now_iso()
 
         title = str(conv.get("title") or "").strip() or "商业计划书"
+        # coaching_mode 继承自老记录，默认项目教练；unlock 由 readiness 实时判定
+        inherited_coaching_mode = str((current or {}).get("coaching_mode") or "project")
+        if inherited_coaching_mode not in {"project", "competition"}:
+            inherited_coaching_mode = "project"
+        inherited_agenda = list((current or {}).get("competition_agenda") or [])
+        maturity_tier_val = str((maturity or {}).get("tier") or "")
+        competition_unlocked_val = maturity_tier_val in {"basic_ready", "full_ready"}
         return {
             "plan_id": plan_id,
             "project_id": project_id,
@@ -1340,6 +1731,13 @@ class BusinessPlanService:
             "title": f"{title} · 商业计划书",
             "status": "draft" if not current else "synced",
             "version_tier": "draft",
+            "plan_type": (current or {}).get("plan_type") or "main",
+            "fork_of": (current or {}).get("fork_of") or None,
+            "mode": mode or (current or {}).get("mode") or "learning",
+            "coaching_mode": inherited_coaching_mode,
+            "competition_unlocked": competition_unlocked_val,
+            "competition_agenda": inherited_agenda,
+            "submission_status": (current or {}).get("submission_status") or "draft",
             "created_at": created_at,
             "updated_at": _now_iso(),
             "sections": sections,
@@ -3724,29 +4122,57 @@ class BusinessPlanService:
         template = next((t for t in SECTION_TEMPLATES if t["section_id"] == section_id), None)
         writing_points = (template or {}).get("writing_points") or []
 
+        coaching_mode = str(plan.get("coaching_mode") or "project")
+        is_competition = coaching_mode == "competition"
+
+        # 竞赛教练模式下，问题目标从 3-5 提升至 5-8，且每题必须带评委视角
+        fallback_template = (
+            "关于「{title}」：请从评委视角给出第 {idx} 个可量化的证据/防守点或差异化亮点？"
+            if is_competition
+            else "关于「{title}」，请补充第 {idx} 个关键事实或具体数字？"
+        )
+        fallback_count = 5 if is_competition else 3
         fallback_questions = [
             {"id": f"q{i+1}",
-             "question": f"关于「{title}」，请补充第 {i+1} 个关键事实或具体数字？",
-             "why": "该章节尚缺关键细节", "hint": ""}
-            for i in range(3)
+             "question": fallback_template.format(title=title, idx=i + 1),
+             "why": ("评委要看到量化证据与防守点" if is_competition else "该章节尚缺关键细节"),
+             "hint": ""}
+            for i in range(fallback_count)
         ]
 
         if not self.llm or not self.llm.enabled:
             return {"status": "ok", "questions": fallback_questions}
 
-        system_prompt = (
-            "你是商业计划书顾问，需要针对指定章节设计 3-5 个靶向问题，"
-            "帮助学生团队把该章写得更深入、更具体。\n\n"
-            "【要求】\n"
-            "1. 每个问题必须针对该章的关键信息空缺，避免空泛的『你如何看待...』。\n"
-            "2. 问题必须具体、可回答，形式如『请给出...的具体数字或案例』、『...的核心假设是什么』。\n"
-            "3. 问题之间覆盖不同维度（数据 / 流程 / 案例 / 风险 / 差异化），避免重复。\n"
-            "4. 禁止使用『你 / 您 / 团队你们』等第二人称，一律第三人称书面语。\n"
-            "5. 每个问题附 why（为什么需要这个信息）与 hint（可能的回答线索）。\n\n"
-            "返回严格 JSON：\n"
-            "{\"questions\": [{\"id\":\"q1\",\"question\":\"...\",\"why\":\"...\",\"hint\":\"...\"}]}，"
-            "数组长度 3-5。"
-        )
+        if is_competition:
+            system_prompt = (
+                "你是一位资深创业竞赛教练兼评委顾问（互联网+ / 挑战杯 / 大创赛道）。\n"
+                "你要针对指定章节设计 5-8 个【评委视角】的深化问题，逼学生把章节写成一份"
+                "在评审桌上经得起反驳的叙述。\n\n"
+                "【要求】\n"
+                "1. 每个问题必须瞄准评委关心的五类 tag 之一：证据 / 量化 / 防守点 / 差异化 / 赛道匹配；"
+                "在 why 字段开头用【<tag>】标注。\n"
+                "2. 问题必须具体到可量化或可举证，例如『市场规模的自顶向下推导链条是什么？引用哪份报告？』。\n"
+                "3. 不同问题覆盖不同 tag，尽量均匀（至少覆盖其中 3 类）。\n"
+                "4. 禁止第二人称；问题一律第三人称书面语。\n"
+                "5. 每个问题附 why（为什么评委会追问） 与 hint（回答线索或推荐证据来源）。\n\n"
+                "返回严格 JSON：\n"
+                "{\"questions\": [{\"id\":\"q1\",\"question\":\"...\",\"why\":\"【证据】...\",\"hint\":\"...\"}]}，"
+                "数组长度 5-8。"
+            )
+        else:
+            system_prompt = (
+                "你是商业计划书顾问，需要针对指定章节设计 3-5 个靶向问题，"
+                "帮助学生团队把该章写得更深入、更具体。\n\n"
+                "【要求】\n"
+                "1. 每个问题必须针对该章的关键信息空缺，避免空泛的『你如何看待...』。\n"
+                "2. 问题必须具体、可回答，形式如『请给出...的具体数字或案例』、『...的核心假设是什么』。\n"
+                "3. 问题之间覆盖不同维度（数据 / 流程 / 案例 / 风险 / 差异化），避免重复。\n"
+                "4. 禁止使用『你 / 您 / 团队你们』等第二人称，一律第三人称书面语。\n"
+                "5. 每个问题附 why（为什么需要这个信息）与 hint（可能的回答线索）。\n\n"
+                "返回严格 JSON：\n"
+                "{\"questions\": [{\"id\":\"q1\",\"question\":\"...\",\"why\":\"...\",\"hint\":\"...\"}]}，"
+                "数组长度 3-5。"
+            )
         user_prompt = (
             f"章节编号：{section_id}\n"
             f"章节标题：{title}\n"
@@ -3771,8 +4197,10 @@ class BusinessPlanService:
         if not isinstance(items, list) or not items:
             return {"status": "ok", "questions": fallback_questions}
 
+        max_out = 8 if is_competition else 5
+        min_out = 5 if is_competition else 3
         out: list[dict[str, Any]] = []
-        for i, item in enumerate(items[:5]):
+        for i, item in enumerate(items[:max_out]):
             if not isinstance(item, dict):
                 continue
             q = str(item.get("question") or "").strip()
@@ -3784,8 +4212,8 @@ class BusinessPlanService:
                 "why": str(item.get("why") or "").strip(),
                 "hint": str(item.get("hint") or "").strip(),
             })
-        if len(out) < 3:
-            out = out + fallback_questions[: 3 - len(out)]
+        if len(out) < min_out:
+            out = out + fallback_questions[: min_out - len(out)]
         return {"status": "ok", "section_id": section_id, "section_title": title, "questions": out}
 
     def apply_chapter_deepen(
@@ -4301,6 +4729,8 @@ class BusinessPlanService:
             return {"status": "not_found", "suggestions": []}
         sections = list(plan.get("sections") or [])
         kb = plan.get("knowledge_base") or {}
+        coaching_mode = str(plan.get("coaching_mode") or "project")
+        is_competition = coaching_mode == "competition"
 
         scored: list[tuple[float, dict[str, Any]]] = []
         for section in sections:
@@ -4328,12 +4758,21 @@ class BusinessPlanService:
             question = f"{title} 还需要补充哪些关键事实或案例？"
             if self.llm and self.llm.enabled:
                 try:
-                    raw = self.llm.chat_json(
-                        system_prompt=(
+                    if is_competition:
+                        sys_prompt = (
+                            "你是资深创业竞赛教练与评委顾问。请针对该章提出 1 个最关键的【评委视角】深化问题。"
+                            "问题必须瞄准量化/证据/防守点/差异化/赛道匹配之一，具体、可举证。"
+                            "why 字段开头用【<tag>】标注 tag。"
+                            "返回 JSON：{\"question\":\"...\",\"why\":\"【证据】...\"}"
+                        )
+                    else:
+                        sys_prompt = (
                             "你是商业计划书顾问，需要针对某一章提出 1 个最关键的深化问题。"
                             "问题要具体、可回答，避免使用 '你/您'。"
                             "返回 JSON：{\"question\":\"...\",\"why\":\"简短原因\"}"
-                        ),
+                        )
+                    raw = self.llm.chat_json(
+                        system_prompt=sys_prompt,
                         user_prompt=(
                             f"章节：{title}\n"
                             f"现有内容（截断）：{str(section.get('content') or '')[:900]}\n"
@@ -4379,3 +4818,623 @@ class BusinessPlanService:
             except Exception:
                 continue
         return {}
+
+    # ══════════════════════════════════════════════════════════════
+    #  竞赛分支 / 教师评分 / 计划书对比
+    # ══════════════════════════════════════════════════════════════
+
+    def _grading_file(self, plan: dict[str, Any]) -> Path:
+        pdir = self.storage._plan_dir(
+            str(plan.get("project_id") or ""),
+            str(plan.get("conversation_id") or ""),
+        )
+        return pdir / f"{plan.get('plan_id')}.grading.json"
+
+    def _retrieve_kb_reference(
+        self,
+        kb: dict[str, Any],
+        competition_type: str = "",
+        top_k: int = 4,
+    ) -> dict[str, Any]:
+        """双路 KB 预学习：
+        - semantic RAG：取同品类优秀案例的结构/证据/风险片段
+        - graph RAG：取关联的风险规则、竞赛评分维度（通过 graph_service）
+        失败时会降级返回空结构，不阻塞 fork 流程。
+        """
+        ref: dict[str, Any] = {
+            "competition_type": competition_type or "",
+            "retrieved_at": _now_iso(),
+            "case_refs": [],
+            "outline_patterns": [],
+            "evidence_patterns": [],
+            "risk_patterns": [],
+            "graph_signals": [],
+        }
+
+        query_parts = [
+            str(v) for v in [
+                kb.get("project_name"), kb.get("one_liner"),
+                kb.get("solution"), kb.get("market_segment"),
+                kb.get("target_user"), kb.get("pain_point"),
+            ] if v
+        ]
+        query_text = " ".join(query_parts)[:600] or "创新创业 商业计划书"
+        if competition_type:
+            query_text = f"{competition_type} 竞赛 计划书 " + query_text
+
+        # ── A. Semantic RAG（走 rag_engine.retrieve） ──────────
+        if self.rag_engine is not None:
+            try:
+                hits = self.rag_engine.retrieve(query_text, top_k=top_k, mode="auto")
+            except Exception as exc:
+                logger.warning("fork KB semantic RAG failed: %s", exc)
+                hits = []
+            for h in hits or []:
+                try:
+                    ref["case_refs"].append({
+                        "case_id": str(h.get("case_id") or h.get("id") or ""),
+                        "case_name": str(h.get("project_name") or h.get("title") or "范本"),
+                        "category": str(h.get("category") or ""),
+                        "score": float(h.get("score") or 0),
+                        "snippet": str(h.get("text") or h.get("snippet") or "")[:400],
+                    })
+                except Exception:
+                    continue
+
+        # ── B. 从 case_knowledge 补强 outline / evidence / risk 模式 ──
+        try:
+            from app.services.case_knowledge import infer_category, retrieve_cases_by_category
+            hint_text = query_text
+            category = infer_category(hint_text)
+            case_refs = retrieve_cases_by_category(category, limit=3) or []
+            structured_dir = self.storage.root.parent / "graph_seed" / "case_structured"
+            for cr in case_refs:
+                cid = str(cr.get("case_id") or "")
+                if not cid:
+                    continue
+                p = structured_dir / f"{cid}.json"
+                if not p.exists():
+                    continue
+                try:
+                    data = json.loads(p.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                profile = data.get("project_profile") or {}
+                # outline
+                ref["outline_patterns"].append({
+                    "case_name": profile.get("project_name", ""),
+                    "innovation_points": (profile.get("innovation_points") or [])[:3],
+                    "business_model": str(profile.get("business_model") or "")[:260],
+                    "competitive_moat": str(profile.get("competitive_moat") or "")[:260],
+                })
+                # evidence（引用模式）
+                evid = profile.get("evidence") or profile.get("evidence_chain") or []
+                if isinstance(evid, list):
+                    for item in evid[:4]:
+                        ref["evidence_patterns"].append(str(item)[:200])
+                # risks
+                risks = profile.get("key_risks") or profile.get("risks") or []
+                if isinstance(risks, list):
+                    for r in risks[:4]:
+                        ref["risk_patterns"].append(str(r)[:180])
+        except Exception as exc:
+            logger.info("fork KB case_knowledge skipped: %s", exc)
+
+        # ── C. Graph RAG：取竞赛相关节点/风险规则 ───────────────
+        gs = self.graph_service
+        if gs is not None:
+            # 风险规则：取 Top-5，供 LLM 在论证部分规避
+            try:
+                rule_cypher = (
+                    "MATCH (r:RiskRule) RETURN r.rule_id AS rule_id, "
+                    "coalesce(r.title, r.description) AS title, r.severity AS severity "
+                    "ORDER BY coalesce(r.severity,0) DESC LIMIT 5"
+                )
+                with gs._driver.session() as session:  # type: ignore[attr-defined]
+                    records = list(session.run(rule_cypher))
+                for rec in records:
+                    ref["graph_signals"].append({
+                        "kind": "risk_rule",
+                        "id": rec.get("rule_id"),
+                        "title": rec.get("title"),
+                        "severity": rec.get("severity"),
+                    })
+            except Exception as exc:
+                logger.info("fork KB graph risk_rule skipped: %s", exc)
+
+            # 类目对应的竞赛评分维度（若图中有 CompetitionDomain 节点）
+            try:
+                dom_cypher = (
+                    "MATCH (d:CompetitionDomain) "
+                    "RETURN d.name AS name, d.weight AS weight LIMIT 10"
+                )
+                with gs._driver.session() as session:  # type: ignore[attr-defined]
+                    records = list(session.run(dom_cypher))
+                for rec in records:
+                    ref["graph_signals"].append({
+                        "kind": "competition_domain",
+                        "name": rec.get("name"),
+                        "weight": rec.get("weight"),
+                    })
+            except Exception as exc:
+                logger.info("fork KB graph competition_domain skipped: %s", exc)
+
+        return ref
+
+    def fork_for_competition(
+        self,
+        plan_id: str,
+        *,
+        competition_type: str = "",
+        refresh_kb_reference: bool = True,
+    ) -> dict[str, Any]:
+        """把主干计划书 fork 为「竞赛优化分支」：
+        1. 新建一个独立 plan_id（与主干共享 project_id + conversation_id）
+        2. 注入 kb_reference（双路 RAG）
+        3. 对每章跑一次 LLM 重写，口径切换到竞赛视角（含评审关注点、证据要求）
+        4. 只影响自己的存储文件，主干不变
+        """
+        main_plan = self.storage.load(plan_id)
+        if not main_plan:
+            return {"status": "not_found", "plan": None}
+
+        if str(main_plan.get("plan_type") or "main") != "main":
+            return {"status": "invalid", "reason": "only_main_plan_can_be_forked", "plan": None}
+
+        # 1. 准备新 fork
+        fork_plan = copy.deepcopy(main_plan)
+        new_plan_id = f"f{str(uuid4())[:7]}"
+        fork_plan["plan_id"] = new_plan_id
+        fork_plan["plan_type"] = "competition_fork"
+        fork_plan["fork_of"] = plan_id
+        fork_plan["mode"] = "competition"
+        fork_plan["version_tier"] = "full"
+        fork_plan["status"] = "competition_optimizing"
+        fork_plan["title"] = f"{main_plan.get('title') or '商业计划书'} · 竞赛优化版"
+        fork_plan["created_at"] = _now_iso()
+        fork_plan["updated_at"] = _now_iso()
+        fork_plan["pending_revisions"] = []
+        fork_plan["revision_badge_count"] = 0
+        fork_plan["submission_status"] = "draft"
+        fork_plan["previous_version"] = None
+        # 主干 id / 升级报告不跨分支
+        fork_plan["upgrade_report"] = None
+
+        # 2. 预学习
+        kb = main_plan.get("knowledge_base") or {}
+        kb_reference = self._retrieve_kb_reference(
+            kb,
+            competition_type=competition_type,
+            top_k=4,
+        ) if refresh_kb_reference else (main_plan.get("kb_reference") or {})
+        fork_plan["kb_reference"] = kb_reference
+
+        # 3. 逐章竞赛化重写（若 LLM 不可用则走结构化追加兜底）
+        sections = list(fork_plan.get("sections") or [])
+        competition_context = self._format_competition_context(kb_reference, competition_type)
+
+        revisions: list[dict[str, Any]] = []
+        next_sections: list[dict[str, Any]] = []
+        for section in sections:
+            sid = str(section.get("section_id") or "")
+            row = copy.deepcopy(section)
+            original = str(row.get("content") or "")
+            try:
+                new_content = self._competition_rewrite_section(
+                    sid=sid,
+                    title=str(row.get("display_title") or row.get("title") or sid),
+                    original=original,
+                    kb=kb,
+                    kb_reference=kb_reference,
+                    competition_type=competition_type,
+                )
+            except Exception as exc:
+                logger.warning("competition rewrite failed for %s: %s", sid, exc)
+                new_content = ""
+            # 兜底：若 LLM 没返回或太短，则在原稿末尾追加竞赛补充段
+            if self._chinese_length(new_content) < max(self._chinese_length(original) // 2, 120):
+                new_content = original + "\n\n" + competition_context.get(sid, "")
+                new_content = new_content.strip()
+            if new_content and new_content != original:
+                revisions.append({
+                    "revision_id": str(uuid4())[:8],
+                    "section_id": sid,
+                    "section_title": row.get("display_title") or row.get("title"),
+                    "summary": f"{row.get('display_title') or row.get('title')} · 竞赛视角重写",
+                    "reason": "以评委打分视角强化证据、量化与防守点。",
+                    "source_hint": "competition_fork",
+                    "old_content": original,
+                    "new_content": new_content,
+                    "candidate_field_map": row.get("field_map") or {},
+                    "candidate_missing_points": row.get("missing_points") or [],
+                    "candidate_missing_level": "complete",
+                    "changes": self._build_inline_changes(original, new_content),
+                    "created_at": _now_iso(),
+                })
+                row["ai_draft"] = new_content
+                row["revision_status"] = "pending"
+            next_sections.append(row)
+
+        fork_plan["sections"] = next_sections
+        fork_plan["pending_revisions"] = revisions
+        fork_plan["revision_badge_count"] = len(revisions)
+        fork_plan["upgrade_report"] = {
+            "mode": "competition_fork",
+            "requested": [s.get("section_id") for s in sections],
+            "success_ids": [r["section_id"] for r in revisions],
+            "failed_ids": [
+                s.get("section_id") for s in sections
+                if not any(r["section_id"] == s.get("section_id") for r in revisions)
+            ],
+            "timestamp": _now_iso(),
+            "competition_type": competition_type,
+        }
+
+        saved = self.storage.save(fork_plan)
+        self._sync_project_meta(saved)
+        return {
+            "status": "ok",
+            "plan": saved,
+            "main_plan_id": plan_id,
+            "fork_plan_id": new_plan_id,
+        }
+
+    def _format_competition_context(
+        self,
+        kb_reference: dict[str, Any],
+        competition_type: str,
+    ) -> dict[str, str]:
+        """把 kb_reference 折成每章的"竞赛补充段"兜底文本。"""
+        tip = competition_type or "互联网+ / 挑战杯 / 大创"
+        case_names = [
+            str(c.get("case_name") or "")
+            for c in (kb_reference.get("case_refs") or [])
+            if c.get("case_name")
+        ][:3]
+        case_hint = "、".join(case_names) if case_names else "同赛道优秀案例"
+        risks = (kb_reference.get("risk_patterns") or [])[:3]
+        evid = (kb_reference.get("evidence_patterns") or [])[:3]
+        risk_line = ("；".join(risks)[:260]) if risks else "注意竞争壁垒与现金流可持续性"
+        evid_line = ("；".join(evid)[:260]) if evid else "补充用户访谈、MVP 数据、合同或意向书"
+
+        common = (
+            f"【竞赛优化补充 · {tip}】\n"
+            f"- 评审关注点：可行性 / 商业价值 / 创新性 / 团队与执行。\n"
+            f"- 参考范本：{case_hint}。\n"
+            f"- 证据落点（学习自知识库）：{evid_line}。\n"
+            f"- 防守点（规避常见风险）：{risk_line}。"
+        )
+        # 不同章节给予差异化侧重
+        per_sid = {
+            "overview": common + "\n- 建议以一句话价值主张 + 3 个量化亮点开场。",
+            "users": common + "\n- 建议贴一张用户画像表 + 访谈样本 n ≥ 20 的结论。",
+            "market": common + "\n- 建议补 TAM/SAM/SOM 数据来源，并给出测算公式。",
+            "solution": common + "\n- 建议展示 MVP 截图或数据 + 关键技术护城河。",
+            "business_model": common + "\n- 建议以 Business Model Canvas 9 格呈现。",
+            "competition": common + "\n- 建议补充竞品雷达图与核心差异位。",
+            "finance": common + "\n- 建议 3 年预测（分月首年）+ 敏感度分析。",
+            "risk": common + "\n- 建议用风险矩阵（概率×影响）+ 缓解方案。",
+            "roadmap": common + "\n- 建议配 12 月甘特图 + 每季度里程碑 KPI。",
+        }
+        return per_sid
+
+    def _competition_rewrite_section(
+        self,
+        *,
+        sid: str,
+        title: str,
+        original: str,
+        kb: dict[str, Any],
+        kb_reference: dict[str, Any],
+        competition_type: str,
+    ) -> str:
+        """用 LLM 把单章改写为竞赛计划书口径。"""
+        if not (self.llm and self.llm.enabled) or not original.strip():
+            return ""
+        case_hint = "\n".join(
+            f"- {c.get('case_name')}（{c.get('category') or ''}）：{(c.get('snippet') or '')[:220]}"
+            for c in (kb_reference.get("case_refs") or [])[:3]
+        )
+        outline_hint = "\n".join(
+            f"- {o.get('case_name')}：亮点={ '、'.join((o.get('innovation_points') or [])[:2]) }"
+            for o in (kb_reference.get("outline_patterns") or [])[:3]
+        )
+        evid_hint = "；".join((kb_reference.get("evidence_patterns") or [])[:5])[:400]
+        risk_hint = "；".join((kb_reference.get("risk_patterns") or [])[:5])[:400]
+        graph_hint_parts = []
+        for g in (kb_reference.get("graph_signals") or [])[:6]:
+            if g.get("kind") == "risk_rule":
+                graph_hint_parts.append(f"风险规则 {g.get('id')}：{g.get('title')}")
+            elif g.get("kind") == "competition_domain":
+                graph_hint_parts.append(f"评分维度 {g.get('name')}(w={g.get('weight')})")
+        graph_hint = "；".join(graph_hint_parts)[:400]
+        competition = competition_type or "互联网+/挑战杯/大创"
+
+        system_prompt = (
+            "你是国内高校创新创业竞赛的金奖教练，现在需要把一章商业计划书改写为可以直接提交竞赛评审的版本。\n"
+            "要求：\n"
+            "1) 保留原稿中真实的项目事实（团队、产品、用户等），不要虚构；\n"
+            "2) 以评委视角补齐证据锚点（数据/访谈样本/合同意向/MVP 指标）；\n"
+            "3) 段落结构推荐：亮点卡片 + 量化事实 + 与同行差异 + 防守点；\n"
+            "4) 长度控制在 600~900 字中文，不要出现章节标题；\n"
+            "5) 在必要处可插入要点列表或极简表格，但不要过度炫技。"
+        )
+        user_prompt = (
+            f"【目标竞赛】{competition}\n"
+            f"【当前章节】{title}\n\n"
+            f"【原稿】\n{original[:3500]}\n\n"
+            f"【项目 KB 摘要】{json.dumps({k: v for k, v in kb.items() if isinstance(v, (str, list)) and v}, ensure_ascii=False)[:1600]}\n\n"
+            f"【KB 预学习 · 同赛道案例】\n{case_hint or '（无）'}\n\n"
+            f"【KB 预学习 · 结构范式】\n{outline_hint or '（无）'}\n\n"
+            f"【KB 预学习 · 证据线索】{evid_hint or '（无）'}\n"
+            f"【KB 预学习 · 风险清单】{risk_hint or '（无）'}\n"
+            f"【图谱信号】{graph_hint or '（无）'}\n\n"
+            "请输出 JSON：{\"content\":\"改写后的章节正文（纯文本/Markdown）\"}"
+        )
+        try:
+            raw = self.llm.chat_json(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.55,
+            )
+        except Exception as exc:
+            logger.warning("competition rewrite llm failed: %s", exc)
+            return ""
+        if isinstance(raw, dict) and raw.get("content"):
+            text = str(raw["content"]).strip()
+            return text
+        return ""
+
+    # ── 教师批改 ────────────────────────────────────────────────
+    def grade_plan(self, plan_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "grading": None}
+        grading = {
+            "plan_id": plan_id,
+            "teacher_id": str(payload.get("teacher_id") or ""),
+            "teacher_name": str(payload.get("teacher_name") or ""),
+            "overall_score": float(payload.get("overall_score") or 0),
+            "grade": str(payload.get("grade") or "B").upper(),
+            "passed": bool(payload.get("passed", True)),
+            "summary": str(payload.get("summary") or ""),
+            "strengths": list(payload.get("strengths") or []),
+            "improvements": list(payload.get("improvements") or []),
+            "rubric": list(payload.get("rubric") or []),
+            "created_at": _now_iso(),
+            "updated_at": _now_iso(),
+        }
+        target = self._grading_file(plan)
+        # 若已有历史评分，保留一份 history
+        history: list[dict[str, Any]] = []
+        if target.exists():
+            try:
+                prev = json.loads(target.read_text(encoding="utf-8"))
+                history = list(prev.get("history") or [])
+                prev_snap = {k: v for k, v in prev.items() if k != "history"}
+                history.append(prev_snap)
+            except Exception:
+                history = []
+        grading["history"] = history[-5:]
+        target.write_text(json.dumps(grading, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        # 在 plan 中打上 submission_status=graded 标记
+        plan["submission_status"] = "graded"
+        plan["last_grading_at"] = _now_iso()
+        plan["updated_at"] = _now_iso()
+        self.storage.save(plan)
+        self._sync_project_meta(plan)
+
+        return {"status": "ok", "grading": grading}
+
+    def get_grading(self, plan_id: str) -> dict[str, Any]:
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "grading": None}
+        target = self._grading_file(plan)
+        if not target.exists():
+            return {"status": "no_grading", "grading": None}
+        try:
+            grading = json.loads(target.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.warning("read grading failed: %s", exc)
+            return {"status": "error", "grading": None}
+        return {"status": "ok", "grading": grading}
+
+    # ── 计划书对比 ─────────────────────────────────────────────
+    def compare_plans(
+        self,
+        plan_ids: list[str],
+        *,
+        focus_sections: list[str] | None = None,
+        use_llm: bool = True,
+    ) -> dict[str, Any]:
+        if len(plan_ids) < 2:
+            return {"status": "too_few", "comparison": None}
+        plans: list[dict[str, Any]] = []
+        for pid in plan_ids[:5]:
+            p = self.storage.load(pid)
+            if p:
+                plans.append(p)
+        if len(plans) < 2:
+            return {"status": "plans_not_found", "comparison": None}
+
+        # 章节轴：取所有计划书中出现过的章节 id（按 SECTION_TEMPLATES 定义顺序）
+        tmpl_order = [str(t["section_id"]) for t in SECTION_TEMPLATES]
+        seen = set()
+        for p in plans:
+            for s in (p.get("sections") or []):
+                sid = str(s.get("section_id") or "")
+                if sid:
+                    seen.add(sid)
+        axis = [sid for sid in tmpl_order if sid in seen] + [sid for sid in seen if sid not in tmpl_order]
+        if focus_sections:
+            axis = [sid for sid in axis if sid in focus_sections] or axis
+
+        # 拼装每个章节每份计划书的摘要 + 字数 + 提到的关键词
+        sections_compare: list[dict[str, Any]] = []
+        for sid in axis:
+            row: dict[str, Any] = {"section_id": sid, "title": "", "plans": []}
+            for p in plans:
+                match = next(
+                    (s for s in (p.get("sections") or []) if str(s.get("section_id")) == sid),
+                    None,
+                )
+                if not match:
+                    row["plans"].append({
+                        "plan_id": p.get("plan_id"),
+                        "word_count": 0,
+                        "excerpt": "",
+                        "has_content": False,
+                    })
+                    continue
+                if not row["title"]:
+                    row["title"] = str(match.get("display_title") or match.get("title") or sid)
+                content = str(match.get("user_edit") or match.get("content") or "").strip()
+                wc = self._chinese_length(content)
+                row["plans"].append({
+                    "plan_id": p.get("plan_id"),
+                    "word_count": wc,
+                    "excerpt": content[:420],
+                    "has_content": wc > 30,
+                })
+            sections_compare.append(row)
+
+        # 结构化 diff：字数分布 / 完成度
+        overview = []
+        for p in plans:
+            wc_total = sum(
+                self._chinese_length(str(s.get("user_edit") or s.get("content") or ""))
+                for s in (p.get("sections") or [])
+            )
+            kb = p.get("knowledge_base") or {}
+            grading_resp = self.get_grading(str(p.get("plan_id") or ""))
+            grading = grading_resp.get("grading") if grading_resp.get("status") == "ok" else None
+            overview.append({
+                "plan_id": p.get("plan_id"),
+                "project_id": p.get("project_id"),
+                "title": p.get("title"),
+                "plan_type": p.get("plan_type") or "main",
+                "fork_of": p.get("fork_of"),
+                "version_tier": p.get("version_tier"),
+                "mode": p.get("mode") or "learning",
+                "updated_at": p.get("updated_at"),
+                "student_id": p.get("student_id"),
+                "word_count": wc_total,
+                "maturity_tier": ((p.get("maturity") or {}).get("tier")),
+                "project_name": kb.get("project_name") or "",
+                "category": kb.get("category") or kb.get("market_segment") or "",
+                "overall_score": (grading or {}).get("overall_score"),
+                "grade": (grading or {}).get("grade"),
+                "passed": (grading or {}).get("passed"),
+            })
+
+        ai_notes: list[dict[str, Any]] = []
+        if use_llm and self.llm and self.llm.enabled:
+            try:
+                ai_notes = self._compare_llm_notes(overview, sections_compare)
+            except Exception as exc:
+                logger.warning("compare llm notes failed: %s", exc)
+                ai_notes = []
+
+        return {
+            "status": "ok",
+            "comparison": {
+                "generated_at": _now_iso(),
+                "plan_count": len(plans),
+                "overview": overview,
+                "sections": sections_compare,
+                "ai_notes": ai_notes,
+            },
+        }
+
+    def _compare_llm_notes(
+        self,
+        overview: list[dict[str, Any]],
+        sections_compare: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        if not (self.llm and self.llm.enabled):
+            return []
+        brief_overview = json.dumps(overview, ensure_ascii=False)[:2200]
+        # 逐章抽出不超过 600 字的片段数组喂给 LLM
+        trimmed = []
+        for sec in sections_compare:
+            trimmed.append({
+                "section_id": sec["section_id"],
+                "title": sec["title"],
+                "plans": [
+                    {
+                        "plan_id": p["plan_id"],
+                        "word_count": p["word_count"],
+                        "excerpt": (p.get("excerpt") or "")[:360],
+                    }
+                    for p in sec["plans"]
+                ],
+            })
+        brief_sections = json.dumps(trimmed, ensure_ascii=False)[:4500]
+        system_prompt = (
+            "你是资深创新创业课程的老师，现在要为几份学生计划书做对比分析。\n"
+            "请基于提供的「总览」和「逐章节片段」，针对每一章给出一条 1~2 句话的差异要点 + 一条改进建议。\n"
+            "尽量客观，不要编造不存在的数字；若章节缺失，直接指出。"
+            "返回 JSON：{\"notes\":[{\"section_id\":\"...\",\"title\":\"...\",\"diff_note\":\"...\",\"advice\":\"...\"}, ...]}"
+        )
+        user_prompt = (
+            f"【总览】\n{brief_overview}\n\n"
+            f"【逐章节片段】\n{brief_sections}"
+        )
+        try:
+            raw = self.llm.chat_json(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.4,
+            )
+        except Exception as exc:
+            logger.warning("compare llm failed: %s", exc)
+            return []
+        notes = (raw or {}).get("notes") if isinstance(raw, dict) else None
+        if not isinstance(notes, list):
+            return []
+        out: list[dict[str, Any]] = []
+        for n in notes:
+            if not isinstance(n, dict):
+                continue
+            out.append({
+                "section_id": str(n.get("section_id") or ""),
+                "title": str(n.get("title") or ""),
+                "diff_note": str(n.get("diff_note") or ""),
+                "advice": str(n.get("advice") or ""),
+            })
+        return out
+
+    # ── 按分类分组（教师端） ───────────────────────────────────
+    def list_plans_grouped_by_category(
+        self,
+        rows: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """把 teacher_list_business_plans 的结果按 category/market_segment 二次分组。"""
+        groups: dict[str, list[dict[str, Any]]] = {}
+        for row in rows:
+            plan = self.storage.load(str(row.get("plan_id") or ""))
+            category = ""
+            if plan:
+                kb = plan.get("knowledge_base") or {}
+                category = str(kb.get("category") or kb.get("market_segment") or "").strip()
+            key = category or "未分类"
+            enriched = dict(row)
+            enriched["category"] = key
+            enriched["plan_type"] = (plan or {}).get("plan_type") or "main"
+            enriched["fork_of"] = (plan or {}).get("fork_of")
+            enriched["mode"] = (plan or {}).get("mode") or "learning"
+            enriched["submission_status"] = (plan or {}).get("submission_status") or "draft"
+            groups.setdefault(key, []).append(enriched)
+
+        out = []
+        for k, items in groups.items():
+            out.append({
+                "category": k,
+                "plan_count": len(items),
+                "plans": sorted(items, key=lambda r: str(r.get("updated_at") or ""), reverse=True),
+            })
+        # 未分类放最后
+        out.sort(key=lambda g: (g["category"] == "未分类", -g["plan_count"]))
+        return out

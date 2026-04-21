@@ -76,6 +76,7 @@ class WorkflowState(TypedDict, total=False):
     history_context: str
     conversation_messages: list
     teacher_feedback_context: str
+    structured_signals: dict
 
     intent: str
     intent_confidence: float
@@ -2835,7 +2836,13 @@ def gather_context_node(state: WorkflowState) -> dict:
     from app.services.diagnosis_engine import run_diagnosis
 
     comp_type = state.get("competition_type", "")
-    diag_obj = run_diagnosis(input_text=msg, mode=mode, competition_type=comp_type)
+    struct_signals = state.get("structured_signals") or {}
+    diag_obj = run_diagnosis(
+        input_text=msg,
+        mode=mode,
+        competition_type=comp_type,
+        structured_signals=struct_signals,
+    )
     diag_data: dict = diag_obj.diagnosis
     next_task: dict = diag_obj.next_task
     cat = infer_category(msg)
@@ -2843,7 +2850,16 @@ def gather_context_node(state: WorkflowState) -> dict:
     rule_ids = [r.get("id", "") for r in rules if isinstance(r, dict)]
     top_rule = _top_triggered_rule(diag_data, msg)
     top_fallacy = str(top_rule.get("fallacy_label") or "")
-    preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])
+    # v2: merge rule-derived families + intent-derived + keyword-derived so all 77
+    # hyperedge families have retrieval paths instead of only top_rule's subset.
+    from app.services.diagnosis_engine import get_preferred_edge_families
+    preferred_edge_types = get_preferred_edge_families(
+        rule_ids=rule_ids,
+        intent=intent,
+        message=msg,
+    )
+    if not preferred_edge_types:
+        preferred_edge_types = list(top_rule.get("preferred_edge_types") or [])
 
     # Cross-turn context reuse: collect case knowledge from earlier turns
     _history_case_ids: set[str] = set()
@@ -3182,10 +3198,14 @@ def gather_context_node(state: WorkflowState) -> dict:
                 category=cat, rule_ids=rule_ids,
                 preferred_edge_types=preferred_edge_types,
                 limit=12 if intent == "pressure_test" else 10,
+                diversity_cap=2,
             )
             _n_edges = len(h.get("edges", [])) if isinstance(h, dict) else 0
-            logger.info("hyper_teaching: ok=%s edges=%d cat=%s rules=%s",
-                        h.get("ok"), _n_edges, cat, rule_ids[:5])
+            _fam_dist = (h.get("matched_by") or {}).get("family_distribution", {}) if isinstance(h, dict) else {}
+            logger.info(
+                "hyper_teaching: ok=%s edges=%d families=%d cat=%s rules=%s",
+                h.get("ok"), _n_edges, len(_fam_dist), cat, rule_ids[:5],
+            )
             return {"hypergraph_insight": h}
         except Exception as exc:
             logger.warning("Hypergraph insight failed: %s", exc)
@@ -4507,17 +4527,49 @@ def _fmt_hyper_for_dim(dim: str, hyper_insight: dict | None) -> str:
     edges = hyper_insight.get("edges") or []
     if not edges:
         return ""
+    # v2: 关键词对齐 77 家族的中文 family_label，让 10 个维度都能匹配到多样家族，
+    # 而不是只能命中 Risk_Pattern / Value_Loop 两种。每个维度覆盖 3-5 个主题家族。
     _dim_keywords: dict[str, list[str]] = {
-        "status_judgment": ["阶段", "成熟度", "完整度", "覆盖"],
-        "core_bottleneck": ["瓶颈", "风险", "缺陷", "不足", "薄弱"],
-        "structural_cause": ["结构", "根因", "深层", "系统性"],
-        "counter_intuitive": ["盲区", "假设", "反例", "反直觉", "乐观"],
-        "method_bridge": ["方法", "框架", "模型", "概念", "理论"],
-        "teacher_criteria": ["评分", "评委", "评审", "标准", "得分"],
-        "external_reference": ["案例", "竞品", "行业", "数据", "对比"],
-        "strategy_directions": ["策略", "方向", "路径", "选择", "打法"],
-        "action_plan": ["行动", "执行", "计划", "步骤", "验证"],
-        "probing_questions": ["追问", "思考", "深入", "验证"],
+        "status_judgment": [
+            "阶段", "成熟度", "完整度", "覆盖", "里程碑", "技术成熟",
+            "原型", "MVP", "可行性", "融资阶段",
+        ],
+        "core_bottleneck": [
+            "瓶颈", "风险", "缺陷", "不足", "薄弱", "规模化", "技术债",
+            "执行断裂", "单点", "团队能力", "创始人", "规模瓶颈",
+        ],
+        "structural_cause": [
+            "结构", "根因", "深层", "系统性", "成本结构", "生态", "依赖",
+            "闭环", "供应链", "合作网络", "利益方冲突", "本体",
+        ],
+        "counter_intuitive": [
+            "盲区", "假设", "反例", "反直觉", "乐观", "替代", "迁移",
+            "转型信号", "切换", "假设堆叠", "场景分析",
+        ],
+        "method_bridge": [
+            "方法", "框架", "模型", "概念", "理论", "本体", "设计思维",
+            "产学研", "学术", "知识产权", "研究应用", "创意",
+        ],
+        "teacher_criteria": [
+            "评分", "评委", "评审", "标准", "得分", "规则张力", "一致性",
+            "指标", "评分项", "跨维度", "叙事",
+        ],
+        "external_reference": [
+            "案例", "竞品", "行业", "数据", "对比", "市场", "替代",
+            "竞争", "合作", "生态", "社会价值", "ESG", "可持续",
+        ],
+        "strategy_directions": [
+            "策略", "方向", "路径", "选择", "打法", "定价", "护城河",
+            "窗口", "先发", "创新", "细分", "转型", "数据飞轮", "网络效应",
+        ],
+        "action_plan": [
+            "行动", "执行", "计划", "步骤", "验证", "里程碑", "架构",
+            "接口", "反馈", "原型", "渠道转化", "留存", "用户教育",
+        ],
+        "probing_questions": [
+            "追问", "思考", "深入", "验证", "假设", "证据", "信任",
+            "采纳", "共情", "洞察", "问题发现", "需求优先级",
+        ],
     }
     keywords = _dim_keywords.get(dim, [])
     matched = []
@@ -6596,6 +6648,7 @@ def run_workflow(
     conversation_messages: list | None = None,
     teacher_feedback_context: str = "",
     competition_type: str = "",
+    structured_signals: dict | None = None,
 ) -> dict[str, Any]:
     initial: WorkflowState = {
         "message": message,
@@ -6605,6 +6658,7 @@ def run_workflow(
         "history_context": history_context,
         "conversation_messages": conversation_messages or [],
         "teacher_feedback_context": teacher_feedback_context,
+        "structured_signals": structured_signals or {},
     }
     return workflow.invoke(initial)
 
@@ -6617,6 +6671,7 @@ def run_workflow_pre_orchestrate(
     conversation_messages: list | None = None,
     teacher_feedback_context: str = "",
     competition_type: str = "",
+    structured_signals: dict | None = None,
 ) -> dict[str, Any]:
     """Run router + gather + agents but NOT orchestrator. Returns state for streaming."""
     initial: WorkflowState = {
@@ -6627,6 +6682,7 @@ def run_workflow_pre_orchestrate(
         "history_context": history_context,
         "conversation_messages": conversation_messages or [],
         "teacher_feedback_context": teacher_feedback_context,
+        "structured_signals": structured_signals or {},
     }
     state = dict(initial)
     state.update(router_agent(state))

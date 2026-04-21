@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { RationaleCard, type Rationale } from "../../components/RationaleCard";
+import { RadarChart, type RadarItem } from "../../components/RadarChart";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 
@@ -34,6 +36,475 @@ function formatBjDate(value?: string) {
   }).format(d);
 }
 
+type PanoramaData = {
+  health_score?: number;
+  health_level?: "healthy" | "warning" | "critical";
+  health_label?: string;
+  rubric_heatmap_team?: Array<{ item: string; item_cn?: string; avg_score: number; sample_count?: number }>;
+  rubric_heatmap?: Array<{ item: string; avg_score: number; count?: number; rationale?: any }>;
+  top_strengths?: string[];
+  top_weaknesses?: string[];
+  strength_dimensions?: string[];
+  weakness_dimensions?: string[];
+  risk_rule_top3?: Array<{ rule_id: string; count: number; label?: string }>;
+  engagement_stats?: { total_submissions?: number; scored_count?: number; risk_count?: number };
+  trend_summary?: string;
+  overall_assessment?: string;
+  detail_bullets?: string[];
+  score_distribution?: { good?: number; average?: number; weak?: number; no_data?: number };
+  avg_score?: number;
+  trend?: number;
+  total_submissions?: number;
+  overview_rationale?: any;
+  strength_rationale?: any;
+  weakness_rationale?: any;
+  growth_rationale?: any;
+  intent_distribution?: Record<string, number>;
+  student_case_summary?: string;
+  behavioral_pattern?: {
+    total_submissions?: number;
+    avg_submit_interval_days?: number;
+    improvement_rate?: number;
+    active_days_span?: number;
+  };
+  growth_trajectory?: Array<{ date: string; score: number }>;
+};
+
+type ProjectCardData = {
+  latest_task?: { title?: string; description?: string; acceptance_criteria?: string[] };
+  evidence_quotes?: Array<{ text?: string; source?: string; created_at?: string }>;
+  phase_history?: Array<{ created_at?: string; phase?: string; intent?: string; score?: number }>;
+  current_summary?: string;
+  top_risks?: string[];
+  intent_distribution?: Record<string, number>;
+};
+
+const INTENT_LABEL_CN: Record<string, string> = {
+  ideation: "构想",
+  feedback: "反馈",
+  question: "提问",
+  validation: "验证",
+  reflection: "复盘",
+  planning: "规划",
+  execution: "执行",
+  summary: "总结",
+  other: "其他",
+};
+
+function IntentDistributionBar({ dist }: { dist?: Record<string, number> }) {
+  if (!dist) return null;
+  const entries = Object.entries(dist).filter(([, v]) => Number(v) > 0);
+  if (!entries.length) return null;
+  const total = entries.reduce((a, [, v]) => a + Number(v), 0) || 1;
+  entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+  const palette = ["#6b8aff", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4", "#8b5cf6", "#94a3b8"];
+  return (
+    <div className="sp-intent-bar">
+      <div className="sp-intent-track">
+        {entries.map(([k, v], i) => {
+          const pct = (Number(v) / total) * 100;
+          return (
+            <span
+              key={k}
+              className="sp-intent-seg"
+              style={{ width: `${pct}%`, background: palette[i % palette.length] }}
+              title={`${INTENT_LABEL_CN[k] || k} · ${v} 次 · ${pct.toFixed(0)}%`}
+            />
+          );
+        })}
+      </div>
+      <div className="sp-intent-legend">
+        {entries.slice(0, 6).map(([k, v], i) => (
+          <span key={k} className="sp-intent-chip">
+            <span className="sp-intent-chip-dot" style={{ background: palette[i % palette.length] }} />
+            {INTENT_LABEL_CN[k] || k}
+            <small>· {v}</small>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GrowthSparkline({ points }: { points?: Array<{ date: string; score: number }> }) {
+  if (!points || points.length < 2) return null;
+  const W = 320;
+  const H = 64;
+  const maxY = 10;
+  const px = (i: number) => (i / Math.max(points.length - 1, 1)) * (W - 16) + 8;
+  const py = (v: number) => H - 10 - (v / maxY) * (H - 20);
+  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${px(i)},${py(p.score)}`).join(" ");
+  const area = `${line} L${px(points.length - 1)},${H - 6} L${px(0)},${H - 6} Z`;
+  const first = points[0].score;
+  const last = points[points.length - 1].score;
+  const delta = last - first;
+  return (
+    <div className="sp-growth-spark">
+      <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="spGrowthG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6b8aff" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#6b8aff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={area} fill="url(#spGrowthG)" />
+        <path d={line} fill="none" stroke="#6b8aff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {points.map((p, i) => (
+          <circle
+            key={i}
+            cx={px(i)}
+            cy={py(p.score)}
+            r={i === 0 || i === points.length - 1 ? 3 : 2}
+            fill="#6b8aff"
+            stroke="var(--bg-primary)"
+            strokeWidth="1.5"
+          />
+        ))}
+      </svg>
+      <div className="sp-growth-spark-meta">
+        <span>首次 {first.toFixed(1)}</span>
+        <span style={{ color: delta >= 0 ? "#22c55e" : "#ef4444" }}>{delta >= 0 ? "↑" : "↓"} {delta.toFixed(1)}</span>
+        <span>最新 {last.toFixed(1)}</span>
+      </div>
+    </div>
+  );
+}
+
+function PhaseTimeline({ history }: { history?: ProjectCardData["phase_history"] }) {
+  if (!history || history.length === 0) return null;
+  const trimmed = history.slice(-6);
+  return (
+    <div className="sp-phase-timeline">
+      {trimmed.map((h, i) => (
+        <div className="sp-phase-node" key={i}>
+          <div className="sp-phase-dot" />
+          {i < trimmed.length - 1 && <div className="sp-phase-line" />}
+          <div className="sp-phase-chip">
+            <span className="sp-phase-chip-title">{h.phase || "—"}</span>
+            <span className="sp-phase-chip-meta">
+              {(h.created_at || "").slice(5, 10)}
+              {typeof h.score === "number" && h.score > 0 ? ` · ${h.score.toFixed(1)}` : ""}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StudentPortraitPanorama({
+  data,
+  title,
+  projectCard,
+}: {
+  data: PanoramaData;
+  title: string;
+  projectCard?: ProjectCardData | null;
+}) {
+  const [showHow, setShowHow] = useState(false);
+  const [activeDim, setActiveDim] = useState<string | null>(null);
+  const healthScore = Number(data.health_score ?? 0);
+  const healthLevel = data.health_level ?? "warning";
+  const healthColor =
+    healthLevel === "healthy" ? "#5cbd8a" : healthLevel === "critical" ? "#ef4444" : "#eab308";
+  const heatmap = (data.rubric_heatmap_team && data.rubric_heatmap_team.length > 0
+    ? data.rubric_heatmap_team
+    : (data.rubric_heatmap ?? []).map((h) => ({ item: h.item, item_cn: h.item, avg_score: h.avg_score, sample_count: h.count }))) as Array<{ item: string; item_cn?: string; avg_score: number; sample_count?: number }>;
+  const sd = data.score_distribution || {};
+  const engage = data.engagement_stats || {};
+  const detailBullets = data.detail_bullets || [];
+  const strengths = data.top_strengths || [];
+  const weaknesses = data.top_weaknesses || [];
+  const risks = data.risk_rule_top3 || [];
+  const ringCirc = 2 * Math.PI * 48;
+  const ringDash = (healthScore / 100) * ringCirc;
+  const beh = data.behavioral_pattern || {};
+
+  // rubric_heatmap（带 rationale）用于雷达顶点 popover
+  const rubricWithRationale = Array.isArray(data.rubric_heatmap) ? data.rubric_heatmap : [];
+  const rubricMap: Record<string, any> = Object.fromEntries(rubricWithRationale.map((h) => [h.item, h]));
+
+  // 基线：九维均值 - 1.2，用于视觉上让"当前"轮廓比"历史均值"有落差
+  const radarMean = heatmap.length
+    ? heatmap.reduce((a, h) => a + (h.avg_score || 0), 0) / heatmap.length
+    : 0;
+  const radarItems: RadarItem[] = heatmap.map((h) => ({
+    label: h.item_cn || h.item,
+    value: h.avg_score,
+    max: 10,
+    baseline: Math.max(0, radarMean - 0.5),
+    meta: h,
+  }));
+  const activeRationale = activeDim ? (rubricMap[activeDim]?.rationale as Rationale | undefined) : undefined;
+  const activeRubric = activeDim ? rubricMap[activeDim] : null;
+
+  const caseSummary = data.student_case_summary || "";
+  const latestTask = projectCard?.latest_task;
+  const evidenceQuotes = projectCard?.evidence_quotes || [];
+  const phaseHistory = projectCard?.phase_history || [];
+  const intentDist = data.intent_distribution || projectCard?.intent_distribution || {};
+
+  return (
+    <div className="tm-team-panorama sp-panorama">
+      <div className="tm-panorama-header">
+        <h3>{title}</h3>
+        <span className={`tm-portrait-health-badge tm-health-${healthLevel}`}>
+          {data.health_label || "—"}
+        </span>
+        {typeof data.avg_score === "number" && data.avg_score > 0 && (
+          <span className="tm-portrait-health-badge tm-health-warning">均分 {data.avg_score}/10</span>
+        )}
+        <button
+          type="button"
+          className="sp-panorama-how-btn"
+          onClick={() => setShowHow((v) => !v)}
+          title="展开/收起计算依据"
+        >
+          {showHow ? "收起计算依据" : "如何得出"}
+        </button>
+      </div>
+
+      {caseSummary && (
+        <div className="sp-case-summary">{caseSummary}</div>
+      )}
+
+      <div className="tm-portrait-top-row">
+        <div className="tm-portrait-ring-box">
+          <svg viewBox="0 0 120 120" className="tm-portrait-ring-svg">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="10" />
+            <circle
+              cx="60" cy="60" r="48" fill="none"
+              stroke={healthColor} strokeWidth="10" strokeLinecap="round"
+              strokeDasharray={`${ringDash} ${ringCirc}`}
+              transform="rotate(-90 60 60)"
+              style={{ transition: "stroke-dasharray .8s ease" }}
+            />
+            <text x="60" y="55" textAnchor="middle" fill="var(--text-primary)" fontSize="22" fontWeight="700">
+              {healthScore}
+            </text>
+            <text x="60" y="72" textAnchor="middle" fill="var(--text-muted)" fontSize="10">健康指数</text>
+          </svg>
+          <div className="tm-portrait-ring-meta">
+            <div className="tm-ring-stat"><span className="tm-ring-stat-v" style={{ color: "#5cbd8a" }}>{sd.good || 0}</span><span className="tm-ring-stat-l">良好</span></div>
+            <div className="tm-ring-stat"><span className="tm-ring-stat-v" style={{ color: "#eab308" }}>{sd.average || 0}</span><span className="tm-ring-stat-l">一般</span></div>
+            <div className="tm-ring-stat"><span className="tm-ring-stat-v" style={{ color: "#ef4444" }}>{sd.weak || 0}</span><span className="tm-ring-stat-l">薄弱</span></div>
+          </div>
+        </div>
+
+        {radarItems.length >= 3 && (
+          <div className="sp-radar-wrap">
+            <div className="sp-radar-title">
+              九维评审雷达
+              <span className="sp-radar-hint">点击顶点查看该维度计算依据</span>
+            </div>
+            <RadarChart
+              data={radarItems}
+              size={270}
+              showBaseline
+              onVertexClick={(it) => setActiveDim(String(it.meta?.item || it.label))}
+            />
+            {activeDim && (
+              <div className="sp-radar-popover">
+                <div className="sp-radar-popover-head">
+                  <strong>{activeRubric?.item_cn || activeDim}</strong>
+                  <span
+                    className="sp-radar-popover-score"
+                    style={{
+                      color:
+                        (activeRubric?.avg_score || 0) >= 7
+                          ? "#22c55e"
+                          : (activeRubric?.avg_score || 0) >= 5
+                          ? "#eab308"
+                          : "#ef4444",
+                    }}
+                  >
+                    {activeRubric?.avg_score ?? "—"}
+                    <small>/10</small>
+                  </span>
+                  <button className="sp-radar-popover-close" onClick={() => setActiveDim(null)}>×</button>
+                </div>
+                {activeRationale ? (
+                  <RationaleCard rationale={activeRationale} compact />
+                ) : (
+                  <p className="sp-radar-popover-empty">本维度暂无详细计算依据</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {detailBullets.length > 0 && (
+        <div className="tm-portrait-section">
+          <div className="tm-portrait-section-title">核心发现</div>
+          <ul className="tm-panorama-bullets">
+            {detailBullets.map((b, i) => <li key={i}>{b}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <div className="tm-portrait-tags-row">
+        <div className="tm-portrait-tags-col">
+          {strengths.length > 0 && (
+            <div className="tm-panorama-dim-group">
+              <span className="tm-panorama-dim-label">优势</span>
+              {strengths.slice(0, 3).map((s) => <span key={s} className="tm-portrait-dim-tag strength">{s}</span>)}
+            </div>
+          )}
+          {weaknesses.length > 0 && (
+            <div className="tm-panorama-dim-group">
+              <span className="tm-panorama-dim-label">短板</span>
+              {weaknesses.slice(0, 3).map((w) => <span key={w} className="tm-portrait-dim-tag weakness">{w}</span>)}
+            </div>
+          )}
+        </div>
+        {risks.length > 0 && (
+          <div className="tm-portrait-tags-col">
+            <div className="tm-panorama-dim-group">
+              <span className="tm-panorama-dim-label">高频风险</span>
+              {risks.map((r) => <span key={r.rule_id} className="tm-portrait-dim-tag risk">{r.rule_id} <small>({r.count})</small></span>)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {Object.keys(intentDist).length > 0 && (
+        <div className="tm-portrait-section">
+          <div className="tm-portrait-section-title">行为意图分布</div>
+          <IntentDistributionBar dist={intentDist} />
+        </div>
+      )}
+
+      <div className="tm-portrait-engage-row">
+        <div className="tm-engage-item">
+          <span className="tm-engage-v">{engage.total_submissions ?? data.total_submissions ?? 0}</span>
+          <span className="tm-engage-l">总提交</span>
+        </div>
+        <div className="tm-engage-item">
+          <span className="tm-engage-v">{engage.scored_count ?? 0}</span>
+          <span className="tm-engage-l">有效打分</span>
+        </div>
+        <div className="tm-engage-item">
+          <span className="tm-engage-v" style={{ color: "#ef4444" }}>{engage.risk_count ?? 0}</span>
+          <span className="tm-engage-l">触发风险次数</span>
+        </div>
+        {typeof beh.avg_submit_interval_days === "number" && (
+          <div className="tm-engage-item">
+            <span className="tm-engage-v">{beh.avg_submit_interval_days.toFixed(1)}</span>
+            <span className="tm-engage-l">平均提交间隔(天)</span>
+          </div>
+        )}
+        {typeof beh.improvement_rate === "number" && (
+          <div className="tm-engage-item">
+            <span className="tm-engage-v" style={{ color: beh.improvement_rate >= 0 ? "#22c55e" : "#ef4444" }}>
+              {beh.improvement_rate >= 0 ? "+" : ""}{beh.improvement_rate.toFixed(1)}
+            </span>
+            <span className="tm-engage-l">首末进步</span>
+          </div>
+        )}
+        {typeof data.trend === "number" && (
+          <div className="tm-engage-item">
+            <span className="tm-engage-v" style={{ color: data.trend >= 0 ? "#22c55e" : "#ef4444" }}>
+              {data.trend >= 0 ? "+" : ""}{data.trend.toFixed(1)}
+            </span>
+            <span className="tm-engage-l">近中期变化</span>
+          </div>
+        )}
+      </div>
+
+      {Array.isArray(data.growth_trajectory) && data.growth_trajectory.length >= 2 && (
+        <div className="tm-portrait-section">
+          <div className="tm-portrait-section-title">成长轨迹</div>
+          <GrowthSparkline points={data.growth_trajectory} />
+        </div>
+      )}
+
+      {phaseHistory.length > 0 && (
+        <div className="tm-portrait-section">
+          <div className="tm-portrait-section-title">阶段历程</div>
+          <PhaseTimeline history={phaseHistory} />
+        </div>
+      )}
+
+      {(latestTask?.title || latestTask?.description || (latestTask?.acceptance_criteria || []).length > 0) && (
+        <div className="tm-portrait-section">
+          <div className="tm-portrait-section-title">最近任务</div>
+          <div className="sp-latest-task">
+            {latestTask?.title && <div className="sp-latest-task-title">{latestTask.title}</div>}
+            {latestTask?.description && <div className="sp-latest-task-desc">{latestTask.description}</div>}
+            {(latestTask?.acceptance_criteria || []).length > 0 && (
+              <ul className="sp-latest-task-ac">
+                {(latestTask!.acceptance_criteria || []).map((c, i) => (
+                  <li key={i}>{c}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {evidenceQuotes.length > 0 && (
+        <div className="tm-portrait-section">
+          <div className="tm-portrait-section-title">近期证据摘录</div>
+          <div className="sp-evidence-quotes">
+            {evidenceQuotes.slice(0, 3).map((q, i) => (
+              <div className="sp-evidence-quote" key={i}>
+                <span className="sp-evidence-quote-mark">“</span>
+                <span className="sp-evidence-quote-text">{q.text || "—"}</span>
+                {q.source && <span className="sp-evidence-quote-src">— {q.source}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.trend_summary && (
+        <div className="tm-portrait-trend">{data.trend_summary}</div>
+      )}
+      {data.overall_assessment && (
+        <div className="tm-panorama-overall">{data.overall_assessment}</div>
+      )}
+
+      {showHow && (
+        <div className="sp-panorama-how">
+          {data.overview_rationale && (
+            <RationaleCard rationale={data.overview_rationale as Rationale} title="总览 · 如何得出" />
+          )}
+          {data.strength_rationale && (
+            <RationaleCard rationale={data.strength_rationale as Rationale} title="优势维度如何得出" compact />
+          )}
+          {data.weakness_rationale && (
+            <RationaleCard rationale={data.weakness_rationale as Rationale} title="待加强维度如何得出" compact />
+          )}
+          {data.growth_rationale && (
+            <RationaleCard rationale={data.growth_rationale as Rationale} title="成长轨迹如何得出" compact />
+          )}
+          {Array.isArray(data.rubric_heatmap) && data.rubric_heatmap.length > 0 && (
+            <div className="sp-panorama-how-rubric">
+              <div className="rc-section-title" style={{ marginBottom: 8 }}>九维每维度计算依据</div>
+              <div className="sp-portrait-grid">
+                {data.rubric_heatmap.map((h: any) => (
+                  <div key={h.item} className="sp-portrait-card">
+                    <div className="sp-portrait-card-title">
+                      <span>{h.item}</span>
+                      <span className="sp-portrait-card-score" style={{ color: h.avg_score >= 7 ? "#22c55e" : h.avg_score >= 4 ? "#f59e0b" : "#ef4444" }}>{h.avg_score}</span>
+                    </div>
+                    {h.rationale && (
+                      <div style={{ marginTop: 8 }}>
+                        <RationaleCard rationale={h.rationale as Rationale} compact />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScoreRing({ score, max = 10, size = 72, label }: { score: number; max?: number; size?: number; label: string }) {
   const r = (size - 10) / 2;
   const c = 2 * Math.PI * r;
@@ -63,6 +534,14 @@ export default function StudentProfilePage() {
   const [interventions, setInterventions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 画像状态
+  const [portraitTab, setPortraitTab] = useState<"overall" | "conversations">("overall");
+  const [overallPortrait, setOverallPortrait] = useState<any>(null);
+  const [conversationPortraits, setConversationPortraits] = useState<any[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string>("");
+  const [convPortraitDetail, setConvPortraitDetail] = useState<any>(null);
+  const [convCardWhy, setConvCardWhy] = useState<string | null>(null);
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem("va_user");
@@ -83,7 +562,22 @@ export default function StudentProfilePage() {
       setInterventions(interventionData.interventions ?? []);
       setLoading(false);
     });
+    // 画像数据并行拉取
+    fetch(`${API}/api/student/${encodeURIComponent(user.user_id)}/portrait/overall`)
+      .then((r) => r.json()).then((data) => setOverallPortrait(data.portrait || null))
+      .catch(() => {});
+    fetch(`${API}/api/student/${encodeURIComponent(user.user_id)}/portrait/conversations`)
+      .then((r) => r.json()).then((data) => setConversationPortraits(data.cards || []))
+      .catch(() => {});
   }, [user]);
+
+  // 切换到会话画像时加载详情
+  useEffect(() => {
+    if (!user || !activeConvId) return;
+    fetch(`${API}/api/student/${encodeURIComponent(user.user_id)}/portrait/conversation/${encodeURIComponent(activeConvId)}`)
+      .then((r) => r.json()).then((data) => setConvPortraitDetail(data))
+      .catch(() => setConvPortraitDetail(null));
+  }, [user, activeConvId]);
 
   const stats = useMemo(() => {
     if (!submissions.length) return { total: 0, avg: 0, recent: [], bestScore: 0, riskCount: 0, scoreHistory: [] };
@@ -177,6 +671,122 @@ export default function StudentProfilePage() {
                 <span>{label}</span>
               </div>
             ))}
+          </section>
+
+          {/* Personal Portrait —— 总画像 / 按会话 双 Tab */}
+          <section className="profile-section fade-up">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <h3 style={{ margin: 0 }}>个人画像</h3>
+              <div className="sp-portrait-tabs">
+                <button
+                  className={`sp-portrait-tab ${portraitTab === "overall" ? "active" : ""}`}
+                  onClick={() => setPortraitTab("overall")}
+                >总画像</button>
+                <button
+                  className={`sp-portrait-tab ${portraitTab === "conversations" ? "active" : ""}`}
+                  onClick={() => setPortraitTab("conversations")}
+                >按会话查看</button>
+              </div>
+            </div>
+
+            {portraitTab === "overall" ? (
+              overallPortrait ? (
+                <StudentPortraitPanorama data={overallPortrait as PanoramaData} title="总画像" />
+              ) : (
+                <p className="profile-empty-hint">画像生成中…请先提交几次诊断。</p>
+              )
+            ) : (
+              <div>
+                {conversationPortraits.length > 0 ? (
+                  <>
+                    <div className="sp-portrait-grid" style={{ marginBottom: 16 }}>
+                      {conversationPortraits.map((c) => {
+                        const rat: Rationale | null = c.last_score
+                          ? {
+                              field: `conv:last_score:${c.conversation_id}`,
+                              value: c.last_score,
+                              formula: "latest(overall_score in this conversation)",
+                              formula_display: `该会话最近一次评分 = ${c.last_score}\n阶段：${c.project_phase || "—"}\n消息数：${c.message_count ?? 0}`,
+                              inputs: [
+                                { label: "最新评分", value: c.last_score },
+                                { label: "阶段", value: c.project_phase || "—" },
+                                { label: "消息数", value: c.message_count ?? 0 },
+                              ],
+                              note: "点击卡片查看完整画像",
+                            }
+                          : null;
+                        return (
+                        <div
+                          key={c.conversation_id}
+                          className="sp-portrait-card"
+                          onClick={() => setActiveConvId(c.conversation_id)}
+                          style={activeConvId === c.conversation_id ? { borderColor: "rgba(139,127,216,0.7)", boxShadow: "0 10px 24px rgba(139,127,216,0.25)" } : {}}
+                        >
+                          <div className="sp-portrait-card-title">
+                            <span>{c.title || "会话"}</span>
+                            <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                              <span className="sp-portrait-card-score" style={{ color: c.last_score >= 7 ? "#22c55e" : c.last_score >= 4 ? "#f59e0b" : "#ef4444" }}>{c.last_score || 0}</span>
+                              {rat && (
+                                <button
+                                  type="button"
+                                  className="sp-card-why-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setConvCardWhy((prev) => (prev === c.conversation_id ? null : c.conversation_id));
+                                  }}
+                                  title="查看分数如何得出"
+                                >?</button>
+                              )}
+                            </div>
+                          </div>
+                          {rat && convCardWhy === c.conversation_id && (
+                            <div className="sp-card-why-pop" onClick={(e) => e.stopPropagation()}>
+                              <RationaleCard rationale={rat} compact />
+                            </div>
+                          )}
+                          <div className="sp-portrait-card-meta">
+                            <span>{c.project_phase || "持续迭代"}</span>
+                            <span>{c.message_count ?? 0} 条消息</span>
+                          </div>
+                          <div className="sp-portrait-card-summary">{c.summary || "—"}</div>
+                          {(c.top_risks || []).length > 0 && (
+                            <div className="sp-portrait-risks">
+                              {(c.top_risks || []).slice(0, 4).map((r: string) => (
+                                <span key={r} className="sp-portrait-risk-chip">{r}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        );
+                      })}
+                    </div>
+                    {activeConvId && convPortraitDetail && !convPortraitDetail.status && (
+                      <>
+                        {convPortraitDetail.portrait ? (
+                          <StudentPortraitPanorama
+                            data={convPortraitDetail.portrait as PanoramaData}
+                            projectCard={convPortraitDetail.project_card as ProjectCardData}
+                            title={`会话画像 · ${conversationPortraits.find((c) => c.conversation_id === activeConvId)?.title || ""}`}
+                          />
+                        ) : (
+                          <p className="profile-empty-hint">该会话画像生成中…</p>
+                        )}
+                        {convPortraitDetail.maturity_snapshot?.maturity_breakdown_rationale && (
+                          <div style={{ marginTop: 12 }}>
+                            <div className="rc-section-title" style={{ marginBottom: 6 }}>计划书成熟度</div>
+                            <RationaleCard
+                              rationale={convPortraitDetail.maturity_snapshot.maturity_breakdown_rationale as Rationale}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <p className="profile-empty-hint">暂无会话画像，先去工作台完成至少一次对话。</p>
+                )}
+              </div>
+            )}
           </section>
 
           {/* Score Trend (mini sparkline) */}

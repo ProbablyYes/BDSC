@@ -1,0 +1,1571 @@
+{
+  "conversation_id": "0e116d9f-461e-4df0-89ad-bf01583f7d69",
+  "project_id": "test_finance_probe",
+  "student_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "title": "初创公司融资策略分析",
+  "summary": "项目团队规模和收入数据明确，但缺乏其他关键信息，如用户群体、痛点、解决方案等。",
+  "created_at": "2026-04-18T18:48:41.661119+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "我们已经有 30 个付费用户，月收入 3000，团队 4 人，但我想融 1500 万 A 轮。",
+      "timestamp": "2026-04-18T18:50:43.581267+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "同学你好。\n\n首先，我必须坦诚地告诉你，基于你提供的数据（30个付费用户，月收入3000元，团队4人），直接寻求1500万的A轮融资，在当前的创投市场环境下，是**完全不现实**的。这并非否定你的努力，而是从评委和投资人的专业视角，帮你校准预期，避免在错误的路径上浪费宝贵时间。\n\n让我为你系统性地拆解一下，并给出切实可行的建议。\n\n### 1. 项目阶段判断与融资策略\n\n你的项目目前处于 **“MVP（最小可行产品）验证初期”** 阶段。核心标志是：产品已上线，获得了初步的付费用户，验证了“有人愿意为此付钱”这个最基础的假设。但样本量小（30人），收入规模（月入3000）尚未形成有说服力的增长趋势或规模效应。\n\n**对应融资策略**：你的目标不应该是A轮，而是 **“种子轮”或“天使轮”** 。这个阶段的融资核心目的不是扩张，而是**完成“产品-市场匹配”的验证**，跑通从获客到变现的核心闭环，并积累足以支撑下一轮融资的关键数据。\n\n### 2. 融资轮次与里程碑对照\n\n你需要了解不同轮次的逻辑，这直接关系到投资人对你的期望。请看下表：\n\n| 轮次 | 典型金额范围（人民币） | 投资人类型 | 核心验证目标（里程碑） | 对应你的项目差距 |\n| :--- | :--- | :--- | :--- | :--- |\n| **种子轮** | 50万 - 300万 | 个人天使、早期机构、政府基金 | 完成MVP开发，获取首批种子用户（约100-1000人），验证核心功能与用户需求。 | **你的现阶段**。你需要证明这30个用户不是偶然，而是可复制的。 |\n| **天使轮** | 300万 - 1000万 | 专业天使投资人、早期VC | 初步验证商业模式（有持续收入），用户数/收入呈月度增长，团队关键岗位补齐。 | **你的下一目标**。你需要将月收入提升一个数量级（例如月入数万至十万），并展示清晰的增长曲线。 |\n| **Pre-A轮** | 500万 - 1500万 | VC机构 | 产品-市场匹配基本达成，有明确的增长模型（如LTV>CAC），需要资金进行规模化获客。 | **中期目标**。需要数据证明你的用户获取成本可控，且用户留存和复购良好。 |\n| **A轮** | 1000万 - 5000万+ | 知名VC机构 | 商业模式已被充分验证，需要大量资金加速市场扩张，建立竞争壁垒。通常要求月度收入达到数百万量级。 | **差距巨大**。1500万A轮对应的月收入基准线通常在百万以上，且增长迅猛。 |\n\n**给你的直接建议**：将融资目标调整为 **80万 - 200万的天使轮（甚至更偏向种子轮）** 。这笔钱的用途应该是：用6-12个月的时间，将付费用户从30人扩展到500-1000人，将月收入从3000元提升到5万-10万元以上，并在此过程中打磨团队和产品。\n\n### 3. 关于估值：务实是唯一选择\n\n在早期阶段，尤其是收入规模很小时，估值更多是艺术而非纯科学。切忌自嗨式高估值。\n\n1.  **可比交易法**：这是早期最常用的方法。你需要寻找近期、同赛道、同阶段项目的融资案例。例如，一个SaaS工具，在拥有100个付费用户、月收入5万时，天使轮估值可能在1000万-1500万左右。你的数据约为其1/10，那么一个务实的估值范围可能在**300万-800万**之间。估值谈判的核心是“用现在的数据，支撑一个能让你完成下一阶段目标的估值”。\n2.  **收入倍数法**：对于已有收入的项目常用。早期SaaS或互联网项目，年收入（ARR）的倍数可能在5-20倍之间，取决于增长速度和市场潜力。你当前年化收入约3.6万元，即便给10倍估值，也仅36万，这显然不适用，说明**单纯用当前收入估值已失真**，必须加入“未来增长潜力”的考量，这又回到了“里程碑”逻辑。\n3.  **风险调整折现法（DCF）**：对于早期项目过于复杂且假设太多，不实用。\n\n**结论**：结合阶段和可比案例，你当前项目一个**合理且可谈判的投前估值在500万-1200万**之间。融资金额占股15%-25%，即对应75万-300万的融资额。这才是你可以去和早期投资人沟通的范围。\n\n### 4. BP（商业计划书）核心要素：讲好你的“证据链”\n\n评委和投资人看的不是梦想清单，而是**证据链**。你的BP必须围绕以下8个要素，用数据说话：\n\n1.  **痛点与市场**：清晰定义你在为谁解决什么问题？这个问题有多痛？市场容量有多大？（需要具体数据和用户访谈支撑）\n2.  **解决方案与产品**：你的产品如何具体解决问题？展示核心功能截图、操作流程。**你的30个用户就是最好的产品验证**。\n3.  **商业模式**：怎么赚钱？客单价多少？你的3000元月收入就是商业模式的起点。要讲清楚用户付费逻辑。\n4.  **市场与竞争分析**：赛道里有哪些玩家？你的差异化优势是什么？不要只说“我们更好”，要说“我们在XX具体维度上，因为XX原因，比对手快/省/好XX%”。\n5.  **运营与增长数据**：这是你**目前最薄弱但必须全力加强**的部分。不仅要提30个用户和3000元收入，更要展示：\n    *   用户获取渠道是什么？成本大概多少？\n    *   用户留存率如何？有多少复购？\n    *   用户画像是什么？（这能反推市场定位）\n    *   **未来的增长计划是什么？** 拿到钱后具体怎么做？\n6.  **团队介绍**：4人团队的分工是否合理？是否有技术、运营、市场的核心能力？背景是否与项目匹配？\n7.  **融资规划**：明确你需要**80-200万**（举例），出让**15%-20%** 股份。**详细列出资金用途**（例如：40%用于产品迭代，40%用于市场获客，20%用于团队工资），这体现你的规划能力。\n8.  **未来展望与愿景**：基于本轮融资后的里程碑，下一阶段的目标是什么？（例如：12个月内达到5000付费用户，月收入50万），这为下一轮融资埋下伏笔。\n\n### 5. 案例参考与警示\n\n*   **参考案例**：你提到的**PushPlus**项目，其“周销售单量超10万”就是一个强大的运营数据证据。你虽然暂时没有这个量级，但可以学习其**如何清晰展示解决方案与市场需求的结合点**。早期项目**字节跳动**在A轮前，其“今日头条”已经积累了数百万用户，并通过数据证明了独特的推荐算法带来的高增长和高留存，这才支撑了高估值。\n*   **最新市场动态**：根据搜索结果，一些地方政府对早期项目的奖励或资助通常在**100万元**量级。这从侧面印证了，对于有初步成果的早期项目，百万级别的资金支持是主流且合理的起点。\n\n### 6. 必须警惕的常见坑\n\n1.  **估值过高**：这是“融资自杀”最常见原因。过高的估值会吓跑所有专业投资人，导致融资周期无限拉长，错过发展黄金期。**务必务实**。\n2.  **股权稀释过快**：在早期就出让过多股权（比如超过30%），会让团队在未来融资和激励方面陷入被动。建议种子/天使轮稀释控制在10%-25%。\n3.  **对赌条款风险**：如果遇到投资人要求对赌（例如规定X年内必须达到Y收入或上市），务必极其谨慎。早期项目变数大，对赌可能让团队为短期目标扭曲长期战略，甚至导致公司失控。\n\n**给你的行动建议**：\n1.  **立即调整目标**：忘掉1500万A轮，聚焦准备一份寻求100-200万天使轮的BP。\n2.  **深度复盘数据**：深入分析你那30个付费用户。他们是谁？为什么付费？从哪里来？愿意为你传播吗？把这些故事和数据变成BP里最有力的证据。\n3.  **规划清晰路径**：在BP中明确写出，拿到这笔钱后，6个月内的关键指标（KPI）是什么？如何达成？\n4.  **开始接触投资人**：从个人天使、早期投资经理开始聊，他们的反馈是打磨项目和认知的最佳途径。\n\n创业是场马拉松，融资是过程中的补给站。找准自己的公里数，拿合适的水和能量棒，才能跑得更远。你现在需要的是“第一桶金”来验证更大的可能性，而不是巨额资金来盲目扩张。沉下心来，把基础打牢。加油！",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "competition",
+          "llm_enabled": true,
+          "intent": "funding_investment",
+          "intent_shape": "single",
+          "intent_reason": "学生在讨论融资金额和轮次；判定为单一主问题；主意图归类为 funding_investment",
+          "confidence": 0.9,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: funding_investment]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前问题足够聚焦，由编排器直接生成回答，不额外拆分角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 2,
+          "rag_case_ids": [
+            "case_8b9ecae17168",
+            "case_1135e29de95e"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "30个付费用户",
+              "type": "resource"
+            },
+            {
+              "id": "e2",
+              "label": "月收入3000",
+              "type": "resource"
+            },
+            {
+              "id": "e3",
+              "label": "团队4人",
+              "type": "team"
+            },
+            {
+              "id": "e4",
+              "label": "1500万A轮融资",
+              "type": "resource"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e3",
+              "target": "e1",
+              "relation": "拥有"
+            },
+            {
+              "source": "e3",
+              "target": "e2",
+              "relation": "产生"
+            },
+            {
+              "source": "e3",
+              "target": "e4",
+              "relation": "寻求"
+            }
+          ],
+          "structural_gaps": [
+            "缺少用户群体",
+            "缺少痛点",
+            "缺少解决方案",
+            "缺少创新点",
+            "缺少技术",
+            "缺少市场",
+            "缺少竞争对手",
+            "缺少商业模式",
+            "缺少执行步骤",
+            "缺少风控措施",
+            "缺少证据"
+          ],
+          "content_strengths": [
+            "团队规模明确",
+            "收入数据明确",
+            "融资需求明确"
+          ],
+          "completeness_score": 2,
+          "section_scores": {
+            "resource": 8,
+            "team": 6,
+            "business_model": 2
+          },
+          "insight": "项目团队规模和收入数据明确，但缺乏其他关键信息，如用户群体、痛点、解决方案等。",
+          "kg_quality": {
+            "entity_specificity": 6.75,
+            "relationship_density": 0.5,
+            "dimension_balance": 0.8113,
+            "cross_validation_index": 0.0,
+            "extraction_confidence": 5.48,
+            "entity_count": 4,
+            "relationship_count": 3,
+            "type_distribution": {
+              "resource": 3,
+              "team": 1
+            },
+            "formulas": {
+              "entity_specificity": "avg(label_length_score + numeric_bonus + proper_noun_bonus)",
+              "relationship_density": "R / (E*(E-1)/2)",
+              "dimension_balance": "H(type_distribution) / log2(num_types)",
+              "cross_validation_index": "Pearson(kg_section_scores, rubric_scores)",
+              "extraction_confidence": "0.3*entity + 0.25*rel + 0.25*balance + 0.2*specificity"
+            }
+          }
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "summary": "本轮超图主要命中了风险模式超边、证据锚定超边、阶段目标匹配超边，说明当前问题更集中在Category、RiskRule、RubricItem、EvidenceType。",
+          "top_signals": [
+            "优先命中的超边类型：风险模式超边、证据锚定超边、阶段目标匹配超边",
+            "当前高连接节点：交通运输、其他、H10"
+          ],
+          "key_dimensions": [
+            "Category",
+            "RiskRule",
+            "RubricItem",
+            "EvidenceType",
+            "Stage"
+          ],
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_001",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 5,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_106839a62240",
+                "case_1135e29de95e",
+                "case_1512b0f26aa4",
+                "case_43210f67ee34",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.81,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 3.0
+            },
+            {
+              "hyperedge_id": "he_evidence_001",
+              "type": "Evidence_Grounding_Edge",
+              "family_label": "证据锚定超边",
+              "support": 3,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "no_execution_plan"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测系统，可实现150飞秒的超高的时间分辨率、20纳米的超高空间分辨率，并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RiskRule::H10",
+                "RiskRule::no_execution_plan",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::pain_points_evidence",
+                  "type": "EvidenceType",
+                  "name": "pain_points_evidence",
+                  "display": "pain_points_evidence"
+                },
+                {
+                  "key": "EvidenceType::solution_evidence",
+                  "type": "EvidenceType",
+                  "name": "solution_evidence",
+                  "display": "solution_evidence"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::no_execution_plan",
+                  "type": "RiskRule",
+                  "name": "no_execution_plan",
+                  "display": "no_execution_plan"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_1512b0f26aa4",
+                "case_317f0438a5dd",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.85,
+              "severity": "中",
+              "score_impact": 6.08,
+              "stage_scope": "验证期",
+              "match_score": 2.6
+            },
+            {
+              "hyperedge_id": "he_stage_007",
+              "type": "Stage_Goal_Fit_Edge",
+              "family_label": "阶段目标匹配超边",
+              "support": 3,
+              "teaching_note": "科技创新类项目在验证期最重要的不是面面俱到，而是完成该阶段最关键的验证目标。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10"
+              ],
+              "rubrics": [
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题"
+              ],
+              "retrieval_reason": "阶段、证据与评分焦点可对齐，适合解释当前阶段应该优先证明什么。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "RiskRule::H10",
+                "RubricItem::User Evidence Strength",
+                "Stage::验证期"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::pain_points_evidence",
+                  "type": "EvidenceType",
+                  "name": "pain_points_evidence",
+                  "display": "pain_points_evidence"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                },
+                {
+                  "key": "Stage::验证期",
+                  "type": "Stage",
+                  "name": "验证期",
+                  "display": "验证期"
+                }
+              ],
+              "source_project_ids": [
+                "case_1512b0f26aa4",
+                "case_317f0438a5dd",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.85,
+              "severity": "低",
+              "score_impact": 3.2,
+              "stage_scope": "验证期",
+              "match_score": 2.6
+            },
+            {
+              "hyperedge_id": "he_stage_008",
+              "type": "Stage_Goal_Fit_Edge",
+              "family_label": "阶段目标匹配超边",
+              "support": 3,
+              "teaching_note": "科技创新类项目在原型期最重要的不是面面俱到，而是完成该阶段最关键的验证目标。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10"
+              ],
+              "rubrics": [
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "初期目标市场为沿海地区旅客吞吐量较大的的机场等，以保护其免受无人机‘黑飞’的威胁。中长期目标将扩展到全国一二线城市地区的机场、政府机关大楼、大型企业等重要场所甚至私人豪宅",
+                "无人机‘黑飞’、‘滥飞’事件频发，严重危害个人隐私安全、公共场所安全、航空安全以及国家安全",
+                "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。"
+              ],
+              "retrieval_reason": "阶段、证据与评分焦点可对齐，适合解释当前阶段应该优先证明什么。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::user_evidence",
+                "RiskRule::H10",
+                "RubricItem::User Evidence Strength",
+                "Stage::原型期"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::user_evidence",
+                  "type": "EvidenceType",
+                  "name": "user_evidence",
+                  "display": "user_evidence"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                },
+                {
+                  "key": "Stage::原型期",
+                  "type": "Stage",
+                  "name": "原型期",
+                  "display": "原型期"
+                }
+              ],
+              "source_project_ids": [
+                "case_1135e29de95e",
+                "case_43210f67ee34",
+                "case_83d252dd4946"
+              ],
+              "confidence": 0.75,
+              "severity": "低",
+              "score_impact": 3.2,
+              "stage_scope": "原型期",
+              "match_score": 2.6
+            },
+            {
+              "hyperedge_id": "he_tension_002",
+              "type": "Rule_Rubric_Tension_Edge",
+              "family_label": "规则评分张力超边",
+              "support": 3,
+              "teaching_note": "科技创新类项目中，某些规则风险会同时拉低多个评分维度，形成“规则-评分张力”。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "execution_vague",
+                "no_execution_plan"
+              ],
+              "rubrics": [
+                "Problem Definition",
+                "Risk Control",
+                "Solution Feasibility"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题"
+              ],
+              "retrieval_reason": "规则命中和评分维度同时存在，适合解释为什么一个问题会被连续追问。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "RiskRule::H10",
+                "RiskRule::execution_vague",
+                "RiskRule::no_execution_plan",
+                "RubricItem::Problem Definition",
+                "RubricItem::Risk Control",
+                "RubricItem::Solution Feasibility"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::pain_points_evidence",
+                  "type": "EvidenceType",
+                  "name": "pain_points_evidence",
+                  "display": "pain_points_evidence"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::execution_vague",
+                  "type": "RiskRule",
+                  "name": "execution_vague",
+                  "display": "execution_vague"
+                },
+                {
+                  "key": "RiskRule::no_execution_plan",
+                  "type": "RiskRule",
+                  "name": "no_execution_plan",
+                  "display": "no_execution_plan"
+                },
+                {
+                  "key": "RubricItem::Problem Definition",
+                  "type": "RubricItem",
+                  "name": "Problem Definition",
+                  "display": "Problem Definition"
+                },
+                {
+                  "key": "RubricItem::Risk Control",
+                  "type": "RubricItem",
+                  "name": "Risk Control",
+                  "display": "Risk Control"
+                },
+                {
+                  "key": "RubricItem::Solution Feasibility",
+                  "type": "RubricItem",
+                  "name": "Solution Feasibility",
+                  "display": "Solution Feasibility"
+                }
+              ],
+              "source_project_ids": [
+                "case_1512b0f26aa4",
+                "case_317f0438a5dd",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.85,
+              "severity": "高",
+              "score_impact": 9.9,
+              "stage_scope": "验证期",
+              "match_score": 2.6
+            },
+            {
+              "hyperedge_id": "he_evidence_009",
+              "type": "Evidence_Grounding_Edge",
+              "family_label": "证据锚定超边",
+              "support": 2,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、user_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H15",
+                "H3"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "通过鼻腔、咽喉、胃肠道等腔道实施剥离探查、病灶切除等手术操作，有效地避免了传统开放式手术的体表切口创伤，解决了多孔 /单孔腔镜手术存在的术后疼痛及切口感染等问题， 实现了最小化创伤的无瘢痕治疗。",
+                "然而，由于人体自然腔道弯曲狭长、动态柔软、操作复杂，对器械的尺寸、刚度和灵巧性提出了巨大挑战。",
+                "本作品针对以上技术瓶颈， 结合人体自然腔道手术环境和操作任务特点， 研制小尺寸多自由度手术执行器， 开发基于虚拟现实技术的主从控制系统， 集成可快速部署的小型化手术机器人系统， 开展性能和功能实验验证。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::user_evidence",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::pain_points_evidence",
+                  "type": "EvidenceType",
+                  "name": "pain_points_evidence",
+                  "display": "pain_points_evidence"
+                },
+                {
+                  "key": "EvidenceType::user_evidence",
+                  "type": "EvidenceType",
+                  "name": "user_evidence",
+                  "display": "user_evidence"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_81bd41c4f863",
+                "case_a498ec8c0770"
+              ],
+              "confidence": 0.9,
+              "severity": "中",
+              "score_impact": 5.88,
+              "stage_scope": "想法期",
+              "match_score": 2.4
+            },
+            {
+              "hyperedge_id": "he_evidence_010",
+              "type": "Evidence_Grounding_Edge",
+              "family_label": "证据锚定超边",
+              "support": 2,
+              "teaching_note": "科技创新类项目常用“business_model_evidence、user_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "no_execution_plan"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。",
+                "国外各大公司为重现元宇宙的活力都付出了巨大努力：Meta公司布局八大场景，在元宇宙的软硬件部署上都有了很大进展，现已有了Horizon产品并投入使用；Google在元宇宙地图赛道完成了诸多城市的等比复现。",
+                "目前市场上不存在一种通用且高效的大型虚拟空间构建仿真方案，所以元界创生迎接新时代元宇宙技术为建模仿真技术带来的新挑战，针对万人并发、百万人访问、三端一体的技术难题，打造了一个即时高交互数字云空间一体化全流程平台。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::business_model_evidence",
+                "EvidenceType::user_evidence",
+                "RiskRule::H10",
+                "RiskRule::no_execution_plan",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::business_model_evidence",
+                  "type": "EvidenceType",
+                  "name": "business_model_evidence",
+                  "display": "business_model_evidence"
+                },
+                {
+                  "key": "EvidenceType::user_evidence",
+                  "type": "EvidenceType",
+                  "name": "user_evidence",
+                  "display": "user_evidence"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::no_execution_plan",
+                  "type": "RiskRule",
+                  "name": "no_execution_plan",
+                  "display": "no_execution_plan"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_1135e29de95e",
+                "case_43210f67ee34"
+              ],
+              "confidence": 0.75,
+              "severity": "中",
+              "score_impact": 5.88,
+              "stage_scope": "原型期",
+              "match_score": 2.4
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [],
+            "expanded_rule_ids": [],
+            "preferred_edge_types": []
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "Category::交通运输",
+                "degree": 263,
+                "interpretation": "「交通运输」类别出现在263种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "Category::其他",
+                "degree": 50,
+                "interpretation": "「其他」类别出现在50种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "RiskRule::H10",
+                "degree": 43,
+                "interpretation": "风险规则「H10」关联43种模式，是最普遍的问题"
+              },
+              {
+                "node": "RubricItem::User Evidence Strength",
+                "degree": 38,
+                "interpretation": "评分维度「User Evidence Strength」被38种模式反复命中，是重要教学检查点"
+              },
+              {
+                "node": "RiskRule::H15",
+                "degree": 28,
+                "interpretation": "风险规则「H15」关联28种模式，是最普遍的问题"
+              }
+            ],
+            "avg_edge_size": 6.8,
+            "max_edge_size": 7,
+            "family_leaderboard": [
+              {
+                "type": "Risk_Pattern_Edge",
+                "label": "风险模式超边",
+                "count": 18
+              },
+              {
+                "type": "Value_Loop_Edge",
+                "label": "价值闭环超边",
+                "count": 16
+              },
+              {
+                "type": "Evidence_Grounding_Edge",
+                "label": "证据锚定超边",
+                "count": 12
+              },
+              {
+                "type": "User_Pain_Fit_Edge",
+                "label": "用户痛点匹配超边",
+                "count": 12
+              },
+              {
+                "type": "Execution_Gap_Edge",
+                "label": "执行断裂超边",
+                "count": 10
+              },
+              {
+                "type": "Market_Competition_Edge",
+                "label": "市场竞争超边",
+                "count": 10
+              }
+            ]
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 362,
+            "node_count": 167,
+            "family_counts": {
+              "Risk_Pattern_Edge": 18,
+              "Value_Loop_Edge": 16,
+              "User_Pain_Fit_Edge": 12,
+              "Evidence_Grounding_Edge": 12,
+              "Execution_Gap_Edge": 10,
+              "Market_Competition_Edge": 10,
+              "Compliance_Safety_Edge": 8,
+              "Innovation_Validation_Edge": 8,
+              "Pricing_Unit_Economics_Edge": 10,
+              "Substitute_Migration_Edge": 10,
+              "Trust_Adoption_Edge": 8,
+              "Retention_Workflow_Embed_Edge": 8,
+              "Stage_Goal_Fit_Edge": 8,
+              "Rule_Rubric_Tension_Edge": 10,
+              "Ontology_Grounded_Edge": 6,
+              "Team_Capability_Gap_Edge": 8,
+              "User_Journey_Edge": 10,
+              "Social_Impact_Edge": 6,
+              "Data_Flywheel_Edge": 8,
+              "Scalability_Bottleneck_Edge": 8,
+              "IP_Moat_Edge": 6,
+              "Pivot_Signal_Edge": 6,
+              "Cost_Structure_Edge": 8,
+              "Ecosystem_Dependency_Edge": 6,
+              "MVP_Scope_Edge": 8,
+              "Stakeholder_Conflict_Edge": 6,
+              "Channel_Conversion_Edge": 8,
+              "Regulatory_Landscape_Edge": 6,
+              "Presentation_Narrative_Edge": 8,
+              "Resource_Leverage_Edge": 6,
+              "Timing_Window_Edge": 6,
+              "Revenue_Sustainability_Edge": 8,
+              "Demand_Supply_Match_Edge": 8,
+              "Founder_Risk_Edge": 6,
+              "Ethical_Bias_Edge": 6,
+              "Assumption_Stack_Edge": 8,
+              "Metric_Definition_Edge": 6,
+              "Market_Segmentation_Edge": 8,
+              "Competitive_Response_Edge": 6,
+              "Milestone_Dependency_Edge": 6,
+              "Funding_Stage_Fit_Edge": 6,
+              "Switching_Cost_Edge": 6,
+              "Network_Effect_Edge": 8,
+              "Cross_Dimension_Coherence_Edge": 6,
+              "ESG_Measurability_Edge": 6
+            }
+          }
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_8b9ecae17168",
+            "category": "科技创新",
+            "project_name": "PushPlus",
+            "similarity": 0.5186,
+            "score_keyword": 0.0511,
+            "score_vector": 0.5186,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Business Model Consistency",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Team & Execution",
+              "rubric:Presentation Quality",
+              "risk_rule:H3",
+              "risk_rule:H5"
+            ],
+            "pain_points": [
+              "新媒体内容排版设计需求量大",
+              "传统排版设计耗时耗力"
+            ],
+            "solution": [
+              "AI智慧自动排版技术",
+              "专业代排版设计服务"
+            ],
+            "innovation_points": [
+              "AI智慧排版",
+              "专业设计服务结合"
+            ],
+            "business_model": [
+              "提供AI智慧排版和专业设计服务",
+              "周销售单量超10万"
+            ],
+            "evidence_quotes": [
+              "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。",
+              "根据安永（Ernst & Young）在2016年发表的市场研究表明，中国新媒体消费者中，平均每天用于阅读新媒体内容的时间达到了76.8分钟。"
+            ],
+            "risk_flags": [
+              "H3",
+              "H5"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": true
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": true
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "商业计划书 PushPlus Business Plan 推送家是 融合 AI 智慧排版 与专业设计服务的新媒体交易云 。 推送家创业团队 出版 保留所有权利 © 2018 - 2020 推送家 北京市房山区文昌西路 11 号 智汇城科技创业园 5 层 80510 室 11, West Wenchang Drive, Fangshan, Beijing All rights reserved © 2018 - 2020 北京市大学生优秀创业团队 GOLD 第十六届世纪杯学生创意竞赛 特等奖 特 北京市文创百强企业（项目） 100 北京市房山区文化创意大赛 第一名、一等奖 FIRST 国家级大学",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "新媒体内容排版设计需求量大",
+              "传统排版设计耗时耗力"
+            ],
+            "graph_solutions": [
+              "AI智慧自动排版技术",
+              "专业代排版设计服务"
+            ],
+            "graph_innovations": [
+              "AI智慧排版",
+              "专业设计服务结合"
+            ],
+            "graph_biz_models": [
+              "提供AI智慧排版和专业设计服务",
+              "周销售单量超10万"
+            ],
+            "graph_markets": [
+              "新媒体市场价值超百亿",
+              "中国新媒体消费者日均阅读时间76.8分钟"
+            ],
+            "graph_exec_steps": [
+              "一年半潜心研发和业务拓展",
+              "拥有7名核心成员和数十人设计师团队"
+            ],
+            "graph_rules": [
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Business Model Consistency",
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Team & Execution",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Financial Logic"
+            ],
+            "graph_evidence_count": 4,
+            "graph_evidence_samples": [
+              {
+                "type": "market_analysis_evidence",
+                "quote": "每天750000篇推送文章、30000多篇原创文章带来的是价值超过百亿的新媒体市场。"
+              },
+              {
+                "type": "market_analysis_evidence",
+                "quote": "根据安永（Ernst & Young）在2016年发表的市场研究表明，中国新媒体消费者中，平均每天用于阅读新媒体内容的时间达到了76.8分钟。"
+              },
+              {
+                "type": "business_model_evidence",
+                "quote": "在国内主流电商“淘宝”一搜便知，推送代排版设计需求量巨大，周平均销售单量超过100000。"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [],
+              "only_in_case": [
+                "H3",
+                "H5"
+              ],
+              "only_in_student": []
+            }
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书",
+            "similarity": 0.4942,
+            "score_keyword": 0.0,
+            "score_vector": 0.4942,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "risk_control:missing",
+              "risk_gap:compliance_not_covered",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H13",
+              "risk_rule:H15",
+              "risk_rule:H3",
+              "risk_rule:H4",
+              "risk_rule:H5",
+              "risk_rule:H7",
+              "risk_rule:H9",
+              "competition:internet_plus"
+            ],
+            "pain_points": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "solution": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "innovation_points": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "business_model": [],
+            "evidence_quotes": [],
+            "risk_flags": [
+              "H10",
+              "H13",
+              "H15",
+              "H3",
+              "H4",
+              "H5",
+              "H7",
+              "H9"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 .....................................................",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "graph_solutions": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "graph_innovations": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "graph_biz_models": [],
+            "graph_markets": [
+              "随着 Web 3.0 与 5G 普及，沉浸式交互空间市场预计呈指数增长",
+              "不仅是工具提供商，更旨在构建“元宇宙内容生成协议”标准"
+            ],
+            "graph_exec_steps": [
+              "技术研发规划：积累更丰富的模型数据与算法指纹库，提升 GPU 利用率",
+              "市场推广规划：先行在红色文旅与教育培训领域落地"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H9",
+                "name": "增长逻辑跳跃",
+                "severity": "medium"
+              },
+              {
+                "id": "H4",
+                "name": "TAM/SAM/SOM口径混乱",
+                "severity": "high"
+              },
+              {
+                "id": "H8",
+                "name": "单位经济不成立",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 3,
+            "graph_evidence_samples": [
+              {
+                "type": "user_evidence",
+                "quote": "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。"
+              },
+              {
+                "type": "business_model_evidence",
+                "quote": "目前市场上不存在一种通用且高效的大型虚拟空间构建仿真方案，所以元界创生迎接新时代元宇宙技术为建模仿真技术带来的新挑战，针对万人并发、百万人访问、三端一体的技术难题，打造了一个即时高交互数字云空间一体化全流程平台。"
+              },
+              {
+                "type": "risk_evidence",
+                "quote": "我国在这方面的技术储备目前还有所欠缺。虽然我国在虚拟空间描述方法、高精度三维仿真与渲染引擎设计、基于高沉浸的协同编辑与辅助技术方面有一定的科研与产品生产，但缺乏应对虚拟场景构建、高交互角色映射、多样虚拟空间服务需求的平台和成型系统。"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [],
+              "only_in_case": [
+                "H10",
+                "H13",
+                "H15",
+                "H3",
+                "H4",
+                "H5",
+                "H7",
+                "H8",
+                "H9"
+              ],
+              "only_in_student": []
+            }
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创新创业 个付费用户 月收入",
+          "results": [
+            {
+              "title": "标题",
+              "snippet": "条 件 的 早 期创新创业项目给予不超过100万元奖励。材、医疗服务项目费用; 3.因诊疗需要在外院就诊发生的费用; 4.肝、肾等器官移植术后抗排异治疗定额费用。",
+              "url": "https://swj.beijing.gov.cn/zwgk/szfgb/202602/P020260203674550016301.pdf"
+            },
+            {
+              "title": "2019.01：全職在家賺錢的每月生活報告. 本月單日收入：298... | Medium",
+              "snippet": "我提過只要我連續兩個月／2019 年 6月前有兩次未能達成收支平衡的目標，這系列連載將會停止。 然而，先前的每月收入計算方式只限當月收入，等於上個月的盈餘無法累積到下個月——這有點奇怪，難道我上個月不管賺十萬還是賺一萬，這個月的目標都. 還是一樣嗎？",
+              "url": "https://medium.com/wumanru/201901-life-report-ca0614a33970"
+            }
+          ],
+          "summary": "- 条 件 的 早 期创新创业项目给予不超过100万元奖励。材、医疗服务项目费用; 3.因诊疗需要在外院就诊发生的费用; 4.肝、肾等器官移植术后抗排异治疗定额费用。\n- 我提過只要我連續兩個月／2019 年 6月前有兩次未能達成收支平衡的目標，這系列連載將會停止。 然而，先前的每月收入計算方式只限當月收入，等於上個月的盈餘無法累積到下個月——這有點奇怪，難道我上個月不管賺十萬還是賺一萬，這個月的目標都. 還是一樣嗎？"
+        },
+        "hypergraph_student": {},
+        "hyper_consistency_issues": [],
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 3.8,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "定价无支撑"
+            ],
+            "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 3.6,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS07",
+            "name": "合规伦理盲区",
+            "match_score": 3.6,
+            "probing_layers": [
+              "数据合规检验: 你收集哪些用户数据？存储在哪里？用户是否明确同意？依据什么法规？",
+              "伦理风险检验: 你的产品如果被滥用，最坏情况是什么？你有什么防范措施？",
+              "监管预判: 如果相关监管政策收紧（参考教育双减、医疗AI审查），你的产品还能运营吗？"
+            ],
+            "expected_evidence": [
+              "数据流向图",
+              "隐私协议草案",
+              "监管风险评估"
+            ],
+            "counterfactual": "如果个人信息保护法要求你删除所有用户数据，你的商业模式是否还成立？",
+            "preferred_edge_types": [
+              "Compliance_Safety_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "合规伦理缺口",
+              "风险控制空泛"
+            ],
+            "strategy_logic": "合规边界逻辑 + 最坏情境预判",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "",
+          "fallacy_rule_id": "",
+          "retrieved_heterogeneous_subgraph": [
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_001",
+              "support": 5,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ]
+            },
+            {
+              "edge_type": "Evidence_Grounding_Edge",
+              "hyperedge_id": "he_evidence_001",
+              "support": 3,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RiskRule::H10",
+                "RiskRule::no_execution_plan",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测系统，可实现150飞秒的超高的时间分辨率、20纳米的超高空间分辨率，并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取。"
+              ]
+            },
+            {
+              "edge_type": "Stage_Goal_Fit_Edge",
+              "hyperedge_id": "he_stage_007",
+              "support": 3,
+              "teaching_note": "科技创新类项目在验证期最重要的不是面面俱到，而是完成该阶段最关键的验证目标。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "RiskRule::H10",
+                "RubricItem::User Evidence Strength",
+                "Stage::验证期"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题"
+              ]
+            }
+          ],
+          "selected_strategy": "定价无支撑",
+          "selected_strategy_id": "CS08",
+          "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+          "generated_question": "你提到“准备收费”。用户现在已经有哪些免费或更便宜的替代方案？你凭什么判断他会为你多付这笔钱？如果价格上调 50%，你预计谁会先流失？",
+          "consistency_pressure_questions": [],
+          "evidence_quotes": [
+            "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+            "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+            "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "kb_utilization": {
+          "retrieval_mode": "vector",
+          "total_kb_cases": 95,
+          "excluded_history_count": 0,
+          "hits_count": 2,
+          "neo4j_enriched": true,
+          "neo4j_enriched_count": 2,
+          "complementary_count": 0,
+          "category_filter": "科技创新",
+          "top_k_requested": 4,
+          "search_trace": [
+            {
+              "case_id": "case_8b9ecae17168",
+              "score": 0.519,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "PushPlus"
+            },
+            {
+              "case_id": "case_1135e29de95e",
+              "score": 0.494,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书"
+            }
+          ],
+          "query_preview": "我们已经有 30 个付费用户，月收入 3000，团队 4 人，但我想融 1500 万 A 轮。",
+          "weak_dims_for_complementary": [],
+          "dual_channel": {
+            "vector_hits": 2,
+            "graph_hits": 0,
+            "graph_details": []
+          },
+          "incremental_stats": {
+            "total_accumulated": 4,
+            "new_this_turn": 4,
+            "total_rels": 3,
+            "project_maturity": "exploring",
+            "readiness_score": 5,
+            "message_chars": 47,
+            "filled_slots": 2,
+            "vague_hits": 0,
+            "concrete_hits": 1
+          }
+        },
+        "rag_enrichment_insight": "参考案例普遍覆盖的维度: Risk Control, Problem Definition, Solution Feasibility, Market & Competition, Innovation & Differentiation。",
+        "neo4j_graph_hits": [],
+        "incremental_stats": {},
+        "dim_results": {},
+        "agent_hyper_details": [],
+        "diagnosis": {
+          "mode": "competition",
+          "overall_score": null,
+          "bottleneck": "",
+          "triggered_rules": [],
+          "rubric": [],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "summary": "消息较短，暂不进行完整诊断。请描述你的项目或上传文件以获得详细分析。",
+          "info_sufficient": false,
+          "project_stage": "idea",
+          "score_band": "",
+          "grading_principles": [
+            "信息太少时不做完整评分",
+            "先补全目标用户、痛点、方案三项核心信息"
+          ]
+        },
+        "next_task": {
+          "title": "描述你的项目",
+          "description": "告诉我你的创业想法、目标用户和想解决的问题，越详细越好。",
+          "acceptance_criteria": [
+            "项目一句话描述",
+            "目标用户是谁",
+            "解决什么问题"
+          ]
+        },
+        "execution_trace": {},
+        "exploration_state": {
+          "phase": "convergence",
+          "filled_slots": {
+            "target_user": true,
+            "business_model": true
+          },
+          "missing_slots": [
+            "pain_point",
+            "solution",
+            "competition"
+          ],
+          "next_question_slot": "pain_point",
+          "n_filled": 2
+        }
+      },
+      "timestamp": "2026-04-18T18:50:44.571243+08:00"
+    }
+  ],
+  "exploration_state": {
+    "phase": "convergence",
+    "filled_slots": {
+      "target_user": true,
+      "business_model": true
+    },
+    "missing_slots": [
+      "pain_point",
+      "solution",
+      "competition"
+    ],
+    "next_question_slot": "pain_point",
+    "n_filled": 2
+  }
+}

@@ -76,6 +76,45 @@ export default function BusinessPlanAnnotatePage() {
   const [filterStatus, setFilterStatus] = useState<"all" | "open" | "resolved">("open");
   const rootRef = useRef<HTMLDivElement>(null);
 
+  // ── 评分抽屉状态 ─────────────────────────────────────────────
+  const [rubricOpen, setRubricOpen] = useState(false);
+  const [rubricScores, setRubricScores] = useState<Record<string, { score: number; comment: string }>>({});
+  const [gradeOverall, setGradeOverall] = useState<number>(80);
+  const [gradeLetter, setGradeLetter] = useState<"A" | "B" | "C" | "D" | "E">("B");
+  const [gradePassed, setGradePassed] = useState(true);
+  const [gradeSummary, setGradeSummary] = useState("");
+  const [gradeStrengths, setGradeStrengths] = useState("");
+  const [gradeImprovements, setGradeImprovements] = useState("");
+  const [gradeSubmitting, setGradeSubmitting] = useState(false);
+  const [existingGrading, setExistingGrading] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!planId) return;
+    (async () => {
+      try {
+        const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/grading`);
+        const data = await resp.json();
+        if (data?.status === "ok" && data.grading) {
+          const g = data.grading;
+          setExistingGrading(g);
+          setGradeOverall(Number(g.overall_score || 80));
+          setGradeLetter((g.grade || "B") as any);
+          setGradePassed(Boolean(g.passed));
+          setGradeSummary(String(g.summary || ""));
+          setGradeStrengths((g.strengths || []).join("\n"));
+          setGradeImprovements((g.improvements || []).join("\n"));
+          const map: Record<string, { score: number; comment: string }> = {};
+          (g.rubric || []).forEach((r: any) => {
+            map[r.section_id] = { score: Number(r.score || 0), comment: String(r.comment || "") };
+          });
+          setRubricScores(map);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, [planId]);
+
   // ── 数据加载 ─────────────────────────────────────────────────
   useEffect(() => {
     if (!planId) return;
@@ -288,6 +327,50 @@ export default function BusinessPlanAnnotatePage() {
 
   const totalOpen = useMemo(() => comments.filter((c) => (c.status || "open") === "open").length, [comments]);
 
+  async function submitGrading() {
+    if (!planId) return;
+    setGradeSubmitting(true);
+    try {
+      const rubric = Object.entries(rubricScores)
+        .filter(([, v]) => v && typeof v.score === "number")
+        .map(([section_id, v]) => ({
+          section_id,
+          score: Math.max(0, Math.min(10, Number(v.score) || 0)),
+          weight: 1.0,
+          comment: v.comment || "",
+        }));
+      const payload = {
+        teacher_id: teacherId,
+        teacher_name: teacherName,
+        overall_score: Math.max(0, Math.min(100, Number(gradeOverall) || 0)),
+        grade: gradeLetter,
+        passed: gradePassed,
+        summary: gradeSummary.trim(),
+        strengths: gradeStrengths.split(/\n+/).map((s) => s.trim()).filter(Boolean),
+        improvements: gradeImprovements.split(/\n+/).map((s) => s.trim()).filter(Boolean),
+        rubric,
+      };
+      const resp = await fetch(`${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/grade`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await resp.json();
+      if (data?.status === "ok" && data.grading) {
+        setExistingGrading(data.grading);
+        setToast("评分已提交，学生端会立刻看到反馈。");
+        setTimeout(() => setToast(""), 2600);
+        setRubricOpen(false);
+      } else {
+        setToast("提交失败：" + (data?.status || "未知错误"));
+      }
+    } catch (err: any) {
+      setToast("提交失败：" + (err?.message || ""));
+    } finally {
+      setGradeSubmitting(false);
+    }
+  }
+
   if (loading) return <div className="bp-print-msg">正在加载计划书…</div>;
   if (error || !plan) return <div className="bp-print-msg bp-print-err">加载失败：{error || "计划书不存在"}</div>;
 
@@ -307,6 +390,30 @@ export default function BusinessPlanAnnotatePage() {
         <div className="bp-annot-me">
           {teacherName || teacherId || "未识别教师"} · 未解决 {totalOpen}
         </div>
+        <button
+          type="button"
+          className={`bp-annot-grade-inline ${existingGrading ? "has-grade" : ""}`}
+          onClick={() => setRubricOpen(true)}
+          title={
+            existingGrading
+              ? `已评分 ${existingGrading.overall_score?.toFixed?.(1) || existingGrading.overall_score}/100 · ${existingGrading.grade}`
+              : "为这份计划书打分"
+          }
+        >
+          <span className="bp-annot-grade-inline-main">
+            {existingGrading ? "已评分" : "打分"}
+          </span>
+          {existingGrading && (
+            <>
+              <span className="bp-annot-grade-inline-score">
+                {existingGrading.overall_score?.toFixed?.(1) || existingGrading.overall_score}
+                /100
+              </span>
+              <span className="bp-annot-grade-inline-sep">·</span>
+              <span className="bp-annot-grade-inline-grade">{existingGrading.grade}</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* 主体：左正文 + 右批注面板 */}
@@ -431,6 +538,123 @@ export default function BusinessPlanAnnotatePage() {
       )}
 
       {toast && <div className="bp-annot-toast">{toast}</div>}
+
+      {/* 评分抽屉 */}
+      {rubricOpen && (
+        <div className="bp-annot-rubric-drawer" role="dialog" aria-label="计划书评分">
+          <div className="bp-annot-rubric-head">
+            <b>计划书评分</b>
+            <button
+              type="button"
+              className="bp-annot-rubric-close-btn"
+              onClick={() => setRubricOpen(false)}
+              aria-label="关闭"
+            >×</button>
+          </div>
+
+          <div className="bp-annot-rubric-overall">
+            <label>
+              <span>总分</span>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={0.5}
+                value={gradeOverall}
+                onChange={(e) => setGradeOverall(Number(e.target.value))}
+              />
+              <span style={{ fontSize: 11, color: "#94a3b8", flex: "unset" }}>/100</span>
+            </label>
+            <label>
+              <span>等级</span>
+              <select value={gradeLetter} onChange={(e) => setGradeLetter(e.target.value as any)}>
+                {(["A", "B", "C", "D", "E"] as const).map((g) => <option key={g} value={g}>{g}</option>)}
+              </select>
+              <label style={{ marginLeft: 4, display: "inline-flex", alignItems: "center", gap: 4, flex: "unset" }}>
+                <input type="checkbox" checked={gradePassed} onChange={(e) => setGradePassed(e.target.checked)} />
+                <span style={{ minWidth: "unset", fontSize: 11.5 }}>通过</span>
+              </label>
+            </label>
+            <label style={{ flexDirection: "column", alignItems: "stretch" }}>
+              <span>总评</span>
+              <textarea
+                placeholder="写下总体评价（会直接呈现给学生）…"
+                value={gradeSummary}
+                onChange={(e) => setGradeSummary(e.target.value)}
+              />
+            </label>
+            <label style={{ flexDirection: "column", alignItems: "stretch" }}>
+              <span>亮点（每行一条）</span>
+              <textarea
+                placeholder="如：用户画像清晰；MVP 数据具体…"
+                value={gradeStrengths}
+                onChange={(e) => setGradeStrengths(e.target.value)}
+              />
+            </label>
+            <label style={{ flexDirection: "column", alignItems: "stretch" }}>
+              <span>建议改进（每行一条）</span>
+              <textarea
+                placeholder="如：补充 TAM 来源；风险矩阵需具象化…"
+                value={gradeImprovements}
+                onChange={(e) => setGradeImprovements(e.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="bp-annot-rubric-section-title">章节评分（0~10）</div>
+          {sections.map((s) => (
+            <div key={s.section_id} className="bp-annot-rubric-row">
+              <div className="bp-annot-rubric-row-head">
+                <span className="bp-annot-rubric-row-title">{s.display_title || s.title}</span>
+                <span className="bp-annot-rubric-row-sid">{s.section_id}</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  step={0.5}
+                  value={rubricScores[s.section_id]?.score ?? ""}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setRubricScores((prev) => ({
+                      ...prev,
+                      [s.section_id]: {
+                        score: Number.isFinite(v) ? v : 0,
+                        comment: prev[s.section_id]?.comment || "",
+                      },
+                    }));
+                  }}
+                  placeholder="分"
+                />
+              </div>
+              <textarea
+                placeholder="本章节评语（可选）"
+                value={rubricScores[s.section_id]?.comment || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setRubricScores((prev) => ({
+                    ...prev,
+                    [s.section_id]: {
+                      score: prev[s.section_id]?.score ?? 0,
+                      comment: val,
+                    },
+                  }));
+                }}
+              />
+            </div>
+          ))}
+
+          <div className="bp-annot-rubric-foot">
+            <button className="is-ghost" onClick={() => setRubricOpen(false)}>取消</button>
+            <button
+              className="is-primary"
+              disabled={gradeSubmitting}
+              onClick={() => void submitGrading()}
+            >
+              {gradeSubmitting ? "提交中…" : (existingGrading ? "更新评分" : "提交评分")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

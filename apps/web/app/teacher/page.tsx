@@ -3,6 +3,8 @@
 import { CSSProperties, FormEvent, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
+import { RationaleCard, EvidencePopover, type Rationale } from "../components/RationaleCard";
+import { AiOverrideDrawer } from "../components/AiOverrideDrawer";
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
 type Tab = "overview" | "assistant" | "conversation-analytics" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition" | "student-plans";
@@ -559,6 +561,37 @@ export default function TeacherPage() {
   const [studentPlansError, setStudentPlansError] = useState("");
   const [studentPlansQuery, setStudentPlansQuery] = useState("");
   const [selectedBpStudent, setSelectedBpStudent] = useState<string>("");
+  const [studentPlansView, setStudentPlansView] = useState<"by_student" | "by_category">("by_student");
+  const [studentPlansGroups, setStudentPlansGroups] = useState<any[]>([]);
+  const [selectedPlanIdsForCompare, setSelectedPlanIdsForCompare] = useState<string[]>([]);
+
+  const loadStudentPlansGrouped = useCallback(async (teacherIdIn: string) => {
+    const tid = (teacherIdIn || "").trim();
+    if (!tid) return;
+    try {
+      const data = await api(`/api/teacher/student-plans-grouped?teacher_id=${encodeURIComponent(tid)}`);
+      const groups = Array.isArray(data?.groups) ? data.groups : [];
+      setStudentPlansGroups(groups);
+    } catch {
+      setStudentPlansGroups([]);
+    }
+  }, []);
+
+  const togglePlanCompareSelect = useCallback((planId: string) => {
+    setSelectedPlanIdsForCompare((prev) => {
+      if (prev.includes(planId)) return prev.filter((p) => p !== planId);
+      if (prev.length >= 5) return prev;
+      return [...prev, planId];
+    });
+  }, []);
+
+  const openComparePage = useCallback(() => {
+    if (selectedPlanIdsForCompare.length < 2) return;
+    const params = new URLSearchParams({
+      plan_ids: selectedPlanIdsForCompare.join(","),
+    });
+    window.open(`/business-plan/compare?${params.toString()}`, "_blank", "noreferrer");
+  }, [selectedPlanIdsForCompare]);
 
   const loadStudentPlans = useCallback(async (teacherIdIn: string) => {
     const tid = (teacherIdIn || "").trim();
@@ -624,9 +657,30 @@ export default function TeacherPage() {
   const [ruleCoverage, setRuleCoverage] = useState<any>(null);
   const [projectDiagnosis, setProjectDiagnosis] = useState<any>(null);
   const [rubricAssessment, setRubricAssessment] = useState<any>(null);
+  const [rubricWhyOpen, setRubricWhyOpen] = useState<string | null>(null);
+  const [teamHeatWhyOpen, setTeamHeatWhyOpen] = useState<string | null>(null);
+  const [stuHeatWhyOpen, setStuHeatWhyOpen] = useState<string | null>(null);
   const [competitionScore, setCompetitionScore] = useState<any>(null);
   const [projectRuleDashboard, setProjectRuleDashboard] = useState<any>(null);
   const [projectEvidenceTrace, setProjectEvidenceTrace] = useState<any>(null);
+  const [projectEvidenceTraceV2, setProjectEvidenceTraceV2] = useState<any>(null);
+  const [overrideDrawer, setOverrideDrawer] = useState<{
+    open: boolean;
+    title: string;
+    projectId: string;
+    conversationId?: string;
+    targetType: string;
+    targetKey: string;
+    aiValue: number | string | null | undefined;
+  }>({
+    open: false,
+    title: "",
+    projectId: "",
+    conversationId: undefined,
+    targetType: "rubric",
+    targetKey: "",
+    aiValue: null,
+  });
   const [projectWorkbenchSummary, setProjectWorkbenchSummary] = useState<any>(null);
   const [projectCaseBenchmark, setProjectCaseBenchmark] = useState<any>(null);
   const [projectStructuredReport, setProjectStructuredReport] = useState<any>(null);
@@ -1795,12 +1849,13 @@ export default function TeacherPage() {
       ).trim();
       setSelectedLogicalProjectId(resolvedLogicalProjectId);
       const q = resolvedLogicalProjectId ? `?logical_project_id=${encodeURIComponent(resolvedLogicalProjectId)}` : "";
-      const [assessmentData, diagnosisData, competitionData, evidenceData, evidenceTraceData, ruleDashboardData, feedbackData] = await Promise.all([
+      const [assessmentData, diagnosisData, competitionData, evidenceData, evidenceTraceData, evidenceTraceV2Data, ruleDashboardData, feedbackData] = await Promise.all([
         api(`/api/teacher/assistant/project/${encodeURIComponent(pid)}/assessment${q}`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/deep-diagnosis`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/competition-score`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/evidence`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/evidence-trace${q}`).catch(() => null),
+        api(`/api/teacher/project/${encodeURIComponent(pid)}/evidence-trace-v2${q}`).catch(() => null),
         api(`/api/teacher/project/${encodeURIComponent(pid)}/rule-dashboard${q}`).catch(() => null),
         api(`/api/project/${encodeURIComponent(pid)}/feedback`).catch(() => ({ feedback: [] })),
       ]);
@@ -1819,6 +1874,7 @@ export default function TeacherPage() {
       setProjectDiagnosis(diagnosisData);
       setCompetitionScore(competitionData);
       setProjectEvidenceTrace(evidenceTraceData);
+      setProjectEvidenceTraceV2(evidenceTraceV2Data);
       setProjectRuleDashboard(ruleDashboardData);
       setEvidence(evidenceData?.data || evidenceData || null);
       setProjectFeedbackHistory(
@@ -5629,8 +5685,92 @@ export default function TeacherPage() {
               {!studentPlansLoading && !studentPlansError && studentPlansTeams.length === 0 && (
                 <div className="bp-sp-empty">当前没有找到任何学生计划书。</div>
               )}
+
+              {/* 视图切换 + 对比工具栏 */}
+              <div className="tch-plans-toolbar">
+                <span style={{ fontSize: 12, color: "var(--text-secondary, #94a3b8)" }}>视图：</span>
+                <button
+                  className={`tch-sm-btn ${studentPlansView === "by_student" ? "is-primary" : ""}`}
+                  onClick={() => setStudentPlansView("by_student")}
+                >按学生</button>
+                <button
+                  className={`tch-sm-btn ${studentPlansView === "by_category" ? "is-primary" : ""}`}
+                  onClick={() => {
+                    setStudentPlansView("by_category");
+                    if (studentPlansGroups.length === 0) {
+                      void loadStudentPlansGrouped(currentUser?.user_id || teacherId || "");
+                    }
+                  }}
+                >按项目分类</button>
+                <span style={{ fontSize: 11.5, color: "var(--text-secondary, #94a3b8)", marginLeft: 8 }}>
+                  已勾选 <b style={{ color: "#60a5fa" }}>{selectedPlanIdsForCompare.length}</b> / 5 份用于对比
+                </span>
+                <button
+                  className="tch-plans-compare-btn"
+                  disabled={selectedPlanIdsForCompare.length < 2}
+                  onClick={openComparePage}
+                  title="选中 2~5 份计划书，打开跨学生对比页"
+                >📑 对比选中（{selectedPlanIdsForCompare.length}）</button>
+                {selectedPlanIdsForCompare.length > 0 && (
+                  <button
+                    className="tch-sm-btn"
+                    onClick={() => setSelectedPlanIdsForCompare([])}
+                  >清空勾选</button>
+                )}
+              </div>
+
               <div className="bp-sp-body">
-                {studentPlansTeams.map((team: any) => {
+                {studentPlansView === "by_category" && (
+                  <div className="tch-plans-grouped">
+                    {studentPlansGroups.length === 0 && (
+                      <div className="bp-sp-empty">暂无分类数据。点击"按项目分类"会自动刷新。</div>
+                    )}
+                    {studentPlansGroups.map((g: any) => (
+                      <div key={g.category} className="tch-group-card">
+                        <div className="tch-group-head">
+                          <span>{g.category}</span>
+                          <span className="tch-group-chip">{g.plan_count} 份</span>
+                        </div>
+                        <div className="tch-group-list">
+                          {(g.plans || []).map((p: any) => {
+                            const checked = selectedPlanIdsForCompare.includes(p.plan_id);
+                            const typeTag = p.plan_type === "competition_fork" ? "竞赛版" : "主干";
+                            return (
+                              <label key={p.plan_id} className="tch-group-row">
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  disabled={!checked && selectedPlanIdsForCompare.length >= 5}
+                                  onChange={() => togglePlanCompareSelect(p.plan_id)}
+                                />
+                                <span className={`tch-group-row-type ${p.plan_type === "competition_fork" ? "fork" : "main"}`}>
+                                  {typeTag}
+                                </span>
+                                <span className="tch-group-row-name">
+                                  {p.project_name || p.display_name || "未命名"} · {p.display_name || ""}
+                                </span>
+                                <span className="tch-group-row-meta">
+                                  <span>{p.version_tier === "full" ? "正式版" : p.version_tier === "basic" ? "基础版" : "草稿"}</span>
+                                  {p.submission_status === "graded" && <span className="tch-group-row-type graded">已批改</span>}
+                                  <span>{(p.word_count || 0).toLocaleString()} 字</span>
+                                  <span>{(p.updated_at || "").slice(5, 10)}</span>
+                                </span>
+                                <a
+                                  className="tch-sm-btn"
+                                  href={`/business-plan/${encodeURIComponent(p.plan_id)}/annotate?teacher_id=${encodeURIComponent(currentUser?.user_id || teacherId || "")}&teacher_name=${encodeURIComponent(currentUser?.display_name || "")}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                >批注</a>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {studentPlansView === "by_student" && studentPlansTeams.map((team: any) => {
                   const q = studentPlansQuery.trim().toLowerCase();
                   const filtered = (team.students || []).filter((s: any) => {
                     if (!q) return true;
@@ -5683,6 +5823,14 @@ export default function TeacherPage() {
                                     <div key={p.plan_id} className="bp-sp-plan-card">
                                       <div className="bp-sp-plan-main">
                                         <div className="bp-sp-plan-title">
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedPlanIdsForCompare.includes(p.plan_id)}
+                                            disabled={!selectedPlanIdsForCompare.includes(p.plan_id) && selectedPlanIdsForCompare.length >= 5}
+                                            onChange={() => togglePlanCompareSelect(p.plan_id)}
+                                            title="勾选用于对比"
+                                            style={{ marginRight: 6, accentColor: "#3b82f6" }}
+                                          />
                                           {p.project_name || "未命名项目"}
                                           <span className={`bp-sp-plan-tier tier-${p.version_tier || "draft"}`}>
                                             {p.version_tier === "full" ? "正式版" : p.version_tier === "basic" ? "基础版" : "草稿"}
@@ -5927,7 +6075,7 @@ export default function TeacherPage() {
                       rubricAssessment.rubric_items.map((item: any, idx: number) => (
                         <div 
                           key={item.item_id} 
-                          className="tch-table-row"
+                          className="tch-table-row tch-rubric-row-rich"
                           style={{
                             animation: `fade-in 0.3s ease-out ${idx * 0.05}s both`,
                             backgroundColor: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success-soft)" : 
@@ -5936,8 +6084,39 @@ export default function TeacherPage() {
                           }}
                         >
                           <span><strong>{item.item_id}</strong> {item.item_name}</span>
-                          <span style={{ fontWeight: "600", color: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success)" : "var(--tch-warning)" }}>
-                            {item.score}/{item.max_score}
+                          <span style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
+                            <strong style={{ color: Number(item.score) >= item.max_score * 0.7 ? "var(--tch-success)" : "var(--tch-warning)" }}>
+                              {item.score}/{item.max_score}
+                            </strong>
+                            {item.rationale && (
+                              <button
+                                type="button"
+                                className="tch-why-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRubricWhyOpen((cur) => cur === item.item_id ? null : item.item_id);
+                                }}
+                                title="查看这个分数是如何算出来的"
+                                aria-label="查看分数推导"
+                              >?</button>
+                            )}
+                            {rubricWhyOpen === item.item_id && item.rationale && (
+                              <div className="tch-why-pop" onClick={(e) => e.stopPropagation()}>
+                                <div className="tch-why-pop-head">
+                                  <span className="tch-why-pop-title">{item.item_name} · 评分推导</span>
+                                  <button className="tch-why-pop-close" onClick={() => setRubricWhyOpen(null)}>×</button>
+                                </div>
+                                <RationaleCard rationale={item.rationale as Rationale} compact />
+                                {(item.evidence_quotes || []).length > 0 && (
+                                  <div className="tch-why-pop-quotes">
+                                    <div className="tch-why-pop-quotes-title">证据引用</div>
+                                    {(item.evidence_quotes || []).slice(0, 2).map((q: string, i: number) => (
+                                      <div key={i} className="tch-why-pop-quote">“{q}”</div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </span>
                           <span>{(item.weight * 100).toFixed(0)}%</span>
                           <span style={{ fontSize: "0.9em", color: "var(--text-secondary)" }}>{item.revision_suggestion}</span>
@@ -7214,19 +7393,173 @@ export default function TeacherPage() {
                                 </div>
                               )}
 
-                              {projectEvidenceTrace && !projectEvidenceTrace.error && (
+                              {projectEvidenceTraceV2 && !projectEvidenceTraceV2.error && (
                                 <div className="assistant-section">
-                                  <div className="assistant-section-title">Rubric × 证据链追溯</div>
-                                  <div className="assistant-note-list">
-                                    {(projectEvidenceTrace.rubric_summary || []).slice(0, 4).map((row: any) => (
-                                      <div key={row.rubric_item} className="tm-note-row warn">
-                                        {row.rubric_item} · {row.evidence_count} 条证据 · 关联规则
-                                        {" "}
-                                        {(row.rule_ids || []).slice(0, 3).map((rid: string) => getRuleDisplayName(rid)).join(" / ") || "未标注"}
+                                  <div className="assistant-section-title">
+                                    结论 × 证据树
+                                    <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 400, marginLeft: 10 }}>
+                                      共 {projectEvidenceTraceV2.total_evidence || 0} 条证据 · 按结论分组
+                                    </span>
+                                  </div>
+                                  <div className="tet-tree">
+                                    {projectEvidenceTraceV2.overall?.rationale && (
+                                      <details className="tet-group tet-group-overall" open>
+                                        <summary>
+                                          <span className="tet-group-tag tet-group-tag-overall">综合</span>
+                                          <span className="tet-group-label">综合分</span>
+                                          <span className="tet-group-meta">
+                                            = {Number(projectEvidenceTraceV2.overall.rationale.value ?? 0).toFixed(2)}
+                                            {projectEvidenceTraceV2.overall.rationale.teacher_override && (
+                                              <span className="tet-override-badge" title={projectEvidenceTraceV2.overall.rationale.teacher_override.reason}>
+                                                已订正
+                                              </span>
+                                            )}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            className="tet-override-btn"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setOverrideDrawer({
+                                                open: true,
+                                                title: "订正综合分",
+                                                projectId: selectedProject,
+                                                conversationId: undefined,
+                                                targetType: "overall",
+                                                targetKey: "overall",
+                                                aiValue: projectEvidenceTraceV2.overall.rationale.value,
+                                              });
+                                            }}
+                                            title="老师订正此分数"
+                                          >
+                                            订正
+                                          </button>
+                                        </summary>
+                                        <div className="tet-group-body">
+                                          <RationaleCard rationale={projectEvidenceTraceV2.overall.rationale as Rationale} compact />
+                                        </div>
+                                      </details>
+                                    )}
+                                    {(projectEvidenceTraceV2.rubric_groups || []).length > 0 && (
+                                      <div className="tet-section">
+                                        <div className="tet-section-title">Rubric 维度（{(projectEvidenceTraceV2.rubric_groups || []).length} 个）</div>
+                                        {(projectEvidenceTraceV2.rubric_groups || []).slice(0, 6).map((g: any) => (
+                                          <details key={g.conclusion_key} className="tet-group tet-group-rubric">
+                                            <summary>
+                                              <span className="tet-group-tag tet-group-tag-rubric">维度</span>
+                                              <span className="tet-group-label">{g.label}</span>
+                                              <span className="tet-group-meta">{(g.evidence || []).length} 条证据</span>
+                                              <button
+                                                type="button"
+                                                className="tet-override-btn"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  setOverrideDrawer({
+                                                    open: true,
+                                                    title: `订正 Rubric：${g.conclusion_key}`,
+                                                    projectId: selectedProject,
+                                                    conversationId: undefined,
+                                                    targetType: "rubric",
+                                                    targetKey: g.conclusion_key,
+                                                    aiValue: null,
+                                                  });
+                                                }}
+                                                title="老师订正此维度"
+                                              >
+                                                订正
+                                              </button>
+                                            </summary>
+                                            <div className="tet-group-body">
+                                              {(g.evidence || []).slice(0, 5).map((ev: any, ei: number) => (
+                                                <div key={ei} className="tet-evidence-item">
+                                                  <div className="tet-ev-quote">“{(ev.quote || "").slice(0, 160)}”</div>
+                                                  <div className="tet-ev-meta">
+                                                    {ev.source_message_id && (
+                                                      <span className="tet-ev-mid" title="源消息">msg {String(ev.source_message_id).split("#").pop()}</span>
+                                                    )}
+                                                    {ev.source_message_role && <span className="tet-ev-role">{ev.source_message_role}</span>}
+                                                    {typeof ev.source_message_confidence === "number" && (
+                                                      <span className="tet-ev-conf">置信度 {Math.round(ev.source_message_confidence * 100)}%</span>
+                                                    )}
+                                                    {(ev.rule_ids || []).slice(0, 2).map((rid: string) => (
+                                                      <span key={rid} className="tet-ev-rule">{getRuleDisplayName(rid)}</span>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              ))}
+                                              {(g.evidence || []).length > 5 && (
+                                                <div className="tet-ev-more">还有 {(g.evidence || []).length - 5} 条证据…</div>
+                                              )}
+                                            </div>
+                                          </details>
+                                        ))}
                                       </div>
-                                    ))}
-                                    {(projectEvidenceTrace.rubric_summary || []).length === 0 && (
-                                      <p className="right-hint">暂未在当前项目下找到可追溯的 Rubric 证据链。</p>
+                                    )}
+                                    {(projectEvidenceTraceV2.rule_groups || []).length > 0 && (
+                                      <div className="tet-section">
+                                        <div className="tet-section-title">触发规则（{(projectEvidenceTraceV2.rule_groups || []).length} 条）</div>
+                                        {(projectEvidenceTraceV2.rule_groups || []).slice(0, 6).map((g: any) => (
+                                          <details key={g.conclusion_key} className="tet-group tet-group-rule">
+                                            <summary>
+                                              <span className="tet-group-tag tet-group-tag-rule">规则</span>
+                                              <span className="tet-group-label">{g.label}</span>
+                                              <span className="tet-group-meta">{(g.evidence || []).length} 条证据</span>
+                                              {g.fallacy && <span className="tet-group-fallacy">{g.fallacy}</span>}
+                                              <button
+                                                type="button"
+                                                className="tet-override-btn"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  setOverrideDrawer({
+                                                    open: true,
+                                                    title: `订正风险：${g.conclusion_key}`,
+                                                    projectId: selectedProject,
+                                                    conversationId: undefined,
+                                                    targetType: "risk",
+                                                    targetKey: g.conclusion_key,
+                                                    aiValue: null,
+                                                  });
+                                                }}
+                                                title="老师订正此规则判定"
+                                              >
+                                                订正
+                                              </button>
+                                            </summary>
+                                            <div className="tet-group-body">
+                                              {(g.edge_families || []).length > 0 && (
+                                                <div className="tet-group-families">
+                                                  关联超边：{(g.edge_families || []).slice(0, 4).join(" / ")}
+                                                </div>
+                                              )}
+                                              {(g.evidence || []).slice(0, 5).map((ev: any, ei: number) => (
+                                                <div key={ei} className="tet-evidence-item">
+                                                  <div className="tet-ev-quote">“{(ev.quote || "").slice(0, 160)}”</div>
+                                                  <div className="tet-ev-meta">
+                                                    {ev.source_message_id && (
+                                                      <span className="tet-ev-mid" title="源消息">msg {String(ev.source_message_id).split("#").pop()}</span>
+                                                    )}
+                                                    {ev.source_message_role && <span className="tet-ev-role">{ev.source_message_role}</span>}
+                                                    {typeof ev.source_message_confidence === "number" && (
+                                                      <span className="tet-ev-conf">置信度 {Math.round(ev.source_message_confidence * 100)}%</span>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              ))}
+                                              {(g.evidence || []).length > 5 && (
+                                                <div className="tet-ev-more">还有 {(g.evidence || []).length - 5} 条证据…</div>
+                                              )}
+                                            </div>
+                                          </details>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {((projectEvidenceTraceV2.rubric_groups || []).length === 0)
+                                      && ((projectEvidenceTraceV2.rule_groups || []).length === 0)
+                                      && !projectEvidenceTraceV2.overall?.rationale && (
+                                      <p className="right-hint">暂未在当前项目下找到可追溯的结论。</p>
                                     )}
                                   </div>
                                 </div>
@@ -8520,6 +8853,34 @@ export default function TeacherPage() {
                                 ))}
                               </div>
 
+                              {/* Rationale 展开：对于每条结论可以查看其来源 */}
+                              {(tp.strength_rationale || tp.weakness_rationale || tp.growth_rationale) && (
+                                <details
+                                  className="tch-conclusion"
+                                  style={{ marginTop: 10 }}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <summary>展开结论来源（强弱维度 / 成长 / 风险）</summary>
+                                  <div className="tch-conclusion-body">
+                                    {tp.strength_rationale && (
+                                      <div style={{ marginBottom: 8 }}>
+                                        <RationaleCard rationale={tp.strength_rationale as Rationale} compact title="强项维度" />
+                                      </div>
+                                    )}
+                                    {tp.weakness_rationale && (
+                                      <div style={{ marginBottom: 8 }}>
+                                        <RationaleCard rationale={tp.weakness_rationale as Rationale} compact title="弱项维度" />
+                                      </div>
+                                    )}
+                                    {tp.growth_rationale && (
+                                      <div>
+                                        <RationaleCard rationale={tp.growth_rationale as Rationale} compact title="成长轨迹" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </details>
+                              )}
+
                               <div className="tm-diag-meta">
                                 <span>{card.member_count} 人</span>
                                 <span>{card.active_count} 活跃</span>
@@ -8682,17 +9043,39 @@ export default function TeacherPage() {
 
                               {heatmap.length > 0 && (
                                 <div className="tm-portrait-bars-box">
-                                  <div className="tm-portrait-bars-title">九维评审均分</div>
+                                  <div className="tm-portrait-bars-title">
+                                    九维评审均分
+                                    <span className="tm-portrait-bars-hint">（点击查看算法）</span>
+                                  </div>
                                   {heatmap.map((h: any) => {
                                     const pct = Math.min(100, (h.avg_score / maxHeatScore) * 100);
                                     const col = h.avg_score >= 7 ? "#5cbd8a" : h.avg_score >= 5 ? "#eab308" : "#ef4444";
+                                    const isOpen = teamHeatWhyOpen === h.item;
                                     return (
-                                      <div key={h.item} className="tm-bar-row">
+                                      <div
+                                        key={h.item}
+                                        className={`tm-bar-row ${h.rationale ? "is-clickable" : ""} ${isOpen ? "is-open" : ""}`}
+                                        onClick={() => {
+                                          if (!h.rationale) return;
+                                          setTeamHeatWhyOpen((cur) => cur === h.item ? null : h.item);
+                                        }}
+                                        title={h.rationale ? "查看推导过程" : ""}
+                                        style={{ cursor: h.rationale ? "pointer" : "default", position: "relative" }}
+                                      >
                                         <span className="tm-bar-label">{h.item_cn}</span>
                                         <div className="tm-bar-track">
                                           <div className="tm-bar-fill" style={{ width: `${pct}%`, background: col }} />
                                         </div>
                                         <span className="tm-bar-value" style={{ color: col }}>{h.avg_score}</span>
+                                        {isOpen && h.rationale && (
+                                          <div className="tm-bar-why-pop" onClick={(e) => e.stopPropagation()}>
+                                            <div className="tm-bar-why-head">
+                                              <span>{h.item_cn} · 推导</span>
+                                              <button onClick={() => setTeamHeatWhyOpen(null)}>×</button>
+                                            </div>
+                                            <RationaleCard rationale={h.rationale as Rationale} compact />
+                                          </div>
+                                        )}
                                       </div>
                                     );
                                   })}
@@ -9148,23 +9531,47 @@ export default function TeacherPage() {
                               )}
                             </div>
                             <div className="tm-portrait-col">
-                              <div className="tm-portrait-label">评审维度热力图</div>
+                              <div className="tm-portrait-label">
+                                评审维度热力图
+                                <span className="tm-portrait-bars-hint">（点击查看推导）</span>
+                              </div>
                               <div className="tm-rubric-heat">
-                                {rubricHeat.map((r: any) => (
-                                  <div key={r.item} className="tm-rubric-heat-row">
-                                    <span className="tm-rubric-heat-name">{r.item}</span>
-                                    <div className="tm-rubric-heat-bar-track">
-                                      <div
-                                        className="tm-rubric-heat-bar"
-                                        style={{
-                                          width: `${(r.avg_score / maxRubric) * 100}%`,
-                                          background: r.avg_score >= 7 ? "#22c55e" : r.avg_score >= 5 ? "#eab308" : "#ef4444",
-                                        }}
-                                      />
+                                {rubricHeat.map((r: any) => {
+                                  const isOpen = stuHeatWhyOpen === r.item;
+                                  return (
+                                    <div
+                                      key={r.item}
+                                      className={`tm-rubric-heat-row ${r.rationale ? "is-clickable" : ""} ${isOpen ? "is-open" : ""}`}
+                                      onClick={() => {
+                                        if (!r.rationale) return;
+                                        setStuHeatWhyOpen((cur) => cur === r.item ? null : r.item);
+                                      }}
+                                      style={{ cursor: r.rationale ? "pointer" : "default", position: "relative" }}
+                                      title={r.rationale ? "查看推导过程" : ""}
+                                    >
+                                      <span className="tm-rubric-heat-name">{r.item}</span>
+                                      <div className="tm-rubric-heat-bar-track">
+                                        <div
+                                          className="tm-rubric-heat-bar"
+                                          style={{
+                                            width: `${(r.avg_score / maxRubric) * 100}%`,
+                                            background: r.avg_score >= 7 ? "#22c55e" : r.avg_score >= 5 ? "#eab308" : "#ef4444",
+                                          }}
+                                        />
+                                      </div>
+                                      <span className="tm-rubric-heat-val">{r.avg_score}</span>
+                                      {isOpen && r.rationale && (
+                                        <div className="tm-bar-why-pop" onClick={(e) => e.stopPropagation()}>
+                                          <div className="tm-bar-why-head">
+                                            <span>{r.item} · 推导</span>
+                                            <button onClick={() => setStuHeatWhyOpen(null)}>×</button>
+                                          </div>
+                                          <RationaleCard rationale={r.rationale as Rationale} compact />
+                                        </div>
+                                      )}
                                     </div>
-                                    <span className="tm-rubric-heat-val">{r.avg_score}</span>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                             {growth.length >= 2 && (
@@ -10368,6 +10775,25 @@ export default function TeacherPage() {
         }
       `}
       </style>
+      <AiOverrideDrawer
+        open={overrideDrawer.open}
+        title={overrideDrawer.title}
+        projectId={overrideDrawer.projectId}
+        conversationId={overrideDrawer.conversationId}
+        targetType={overrideDrawer.targetType}
+        targetKey={overrideDrawer.targetKey}
+        aiValue={overrideDrawer.aiValue ?? ""}
+        teacherName={currentUser?.display_name || currentUser?.user_id || "老师"}
+        teacherId={currentUser?.user_id || ""}
+        apiBase={API}
+        onClose={() => setOverrideDrawer((s) => ({ ...s, open: false }))}
+        onSuccess={() => {
+          setOverrideDrawer((s) => ({ ...s, open: false }));
+          if (selectedProject) {
+            void loadProjectWorkbench(selectedProject, selectedLogicalProjectId);
+          }
+        }}
+      />
     </div>
   );
 }

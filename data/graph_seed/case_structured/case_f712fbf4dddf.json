@@ -1,0 +1,375 @@
+{
+  "case_id": "case_f712fbf4dddf",
+  "document_id": "doc_cdd03b5ebf09",
+  "source": {
+    "file_path": "社会公益/文化公益平台公益事业创业计划-挑战杯.doc",
+    "file_name": "文化公益平台公益事业创业计划-挑战杯.doc",
+    "category": "社会公益",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 595,
+    "full_text_chars": 19653,
+    "core_text_chars": 18721,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 596,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 596,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "文化公益平台",
+    "target_users": [
+      "具有文化方面爱好或才能的人，作为文化作品的捐赠者",
+      "对公益有热情的个人或集体以及对文化作品收藏感兴趣的人，作为文化作品的购买者",
+      "文化教育资源匮乏地区的居民，作为善款使用的受益者"
+    ],
+    "pain_points": [
+      "我国公益机构数量有限且行政化色彩较浓，远未形成市场化竞争，渠道不畅制约了慈善行为",
+      "公益机构自身管理存在缺陷，如捐赠项目选择少、工作人员不专业、运作透明度与公信度不高，打击了捐赠人积极性",
+      "贫困地区文化教育条件落后，家庭无力承担教育及文化用品支出，导致文化教育水平低下"
+    ],
+    "solution": [
+      "建立一个文化公益平台（工作室加网络平台），征集文学、音乐、影视、手工艺品等文化作品",
+      "通过投票筛选和征求专业大师意见选出优秀作品进行宣传推广，并通过网络义卖或拍卖筹集善款",
+      "将筹集的善款用于为教育资源匮乏地区采购图书、现代化教育设备等，以提高其文化教育水平"
+    ],
+    "innovation_points": [
+      "将文化与公益结合，通过文化作品捐赠与义卖的新型公益模式，提高公众参与公益的积极性",
+      "捐赠者可自行选择作品售卖价格中用作善款的比例，并有机会通过平台展示和推广自己的作品",
+      "利用互联网平台（网站、微博、微信）进行作品征集、评选、宣传和义卖，拓宽公益渠道"
+    ],
+    "business_model": [
+      "收入来源于文化作品的义卖所得，捐赠者自愿选择部分售卖收入作为善款，剩余部分可能归捐赠者或平台",
+      "关键成本包括平台运营、宣传推广、人员聘用及善款落实的跟踪记录，通过招募志愿者和节省成本来控制支出"
+    ],
+    "market_analysis": [
+      "我国慈善捐赠水平较低，占GDP比重不到1%，远低于美国等国家，公众主动捐赠意识薄弱，公益市场潜力未被充分激发",
+      "我国存在大量贫困地区，特别是13个集中连片的贫困片区，涉及约1.19亿人，对文化教育援助有巨大需求",
+      "据调查，我国尚未存在类似以文化作品为纽带、采用全新公益模式的组织，预计能产生较强的公益效应"
+    ],
+    "execution_plan": [
+      "第一阶段：加强宣传，联系文化公司建立合作，建立网上运营平台，组织机构并招聘专业人士和残疾人",
+      "第二阶段：联系成名大师捐赠作品造势，明确善款捐赠地区后，面向社会公开征集义卖作品",
+      "第三阶段：对征集作品进行网络投票和大师咨询筛选，开展网络义卖筹集善款，并公布采购详单以提升公信力"
+    ],
+    "risk_control": [
+      "【通用风险控制】针对运营成本可能侵蚀善款的风险，项目计划在整个活动运行过程中注意成本节省，并招募志愿者参与以降低成本"
+    ]
+  },
+  "tags": [
+    "category:社会公益",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H13",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H7"
+  ],
+  "evidence": [
+    {
+      "id": "case_f712fbf4dddf_e1",
+      "type": "user_evidence",
+      "quote": "捐赠人群：具有文化方面爱好或才能的人（作品来源）购买人群：对公益有热情的个人或集体以及对文化作品收藏感兴趣的人。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_f712fbf4dddf_e2",
+      "type": "pain_points_evidence",
+      "quote": "我国公益机构自身的管理与运作方面存在缺陷和不足，如未能开发足够的捐赠对象和项目，捐赠人可选择的范围过小，工作人员队伍不专业，工作效率不高，专业化能力不强；运作的透明度和公信度不高，捐赠款项的使用情况往往不甚明了，捐赠者不知道是否有效的满足了自己的捐赠愿望，从而打击了捐赠人的积极性。",
+      "chunk_id": "C2",
+      "source_unit": "段落27"
+    },
+    {
+      "id": "case_f712fbf4dddf_e3",
+      "type": "solution_evidence",
+      "quote": "通过建立一个文化公益平台包括工作室加网络平台，与出版社，音乐演艺经纪公司等文化传媒公司建立联系，同时面向广大社会群众，征集文化作品，文学作品，音乐作品，影视作品，手工艺品等，我们平台通过开展一系列投票筛选活动，以及征求专业大师的意见，从中选出优秀的作品，进行宣传和推广",
+      "chunk_id": "C4",
+      "source_unit": "段落75"
+    },
+    {
+      "id": "case_f712fbf4dddf_e4",
+      "type": "business_model_evidence",
+      "quote": "捐赠者在作品捐献的同时自行选择要将售卖价格的多少用作善款，选择比例多少由捐赠者自己决定。",
+      "chunk_id": "C6",
+      "source_unit": "段落114"
+    },
+    {
+      "id": "case_f712fbf4dddf_e5",
+      "type": "market_analysis_evidence",
+      "quote": "我国慈善事业机构数量较低,不足以满足贫困人群的需求.目前我国需要社会救助的人口超过总人口数量的10%以上,而全国年募集到的慈善款物约50亿元人民币,远远满足不了学要救助口的需要.",
+      "chunk_id": "C9",
+      "source_unit": "段落177"
+    },
+    {
+      "id": "case_f712fbf4dddf_e6",
+      "type": "execution_plan_evidence",
+      "quote": "<5>.在第一阶段面向社会征集作品之前，先去联系在文学艺术方面颇有造诣的成名大师，说服他们捐赠作品，为活动开展造势，加强活动的社会关注度。",
+      "chunk_id": "C5",
+      "source_unit": "段落95"
+    },
+    {
+      "id": "case_f712fbf4dddf_e7",
+      "type": "risk_evidence",
+      "quote": "建立健全的慈善运作透明机制,注重社会公信力的提高,获得社会的信任.保证善款真正落实到位.",
+      "chunk_id": "C3",
+      "source_unit": "段落52"
+    },
+    {
+      "id": "case_f712fbf4dddf_e8",
+      "type": "risk_evidence",
+      "quote": "整个活动运行过程一定要注意成本的节省，保证善款扣除完运营成本后，有足够的善款做公益，并保证能做出有较大影响力的真正的公益。",
+      "chunk_id": "C5",
+      "source_unit": "段落95"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "创业计划书 建立本公益组织旨在通过文化的连接进行相关的公益活动，通过建立一种新型的公益模 式，在一定程度上，提高人们参与公益事业的热情和积极性。本公益组织将通过建立一 个文化公益平台，鼓励人们捐赠自己的文化作品（包括文学，音乐，影视，手工艺品等 ）来参与本公益组织主办的义卖活动，并自愿选择义卖捐赠的比例，同时在这个过程中 我们会对优秀的作品进行宣传和营销，给参与捐赠义卖的人一个展示自己的机会。总之 我们会建立一个文化自愿捐赠平台，通过给与捐赠者充分的尊重和选择权，以及展示自 己的机会，来提高参与者的积极性，从而在社会上形成一种新型的捐献风尚。 同时本公益组织将主题定为文化公益，旨在通过文化这一元素，搭建起新型公益之路。 公益资源来源于文化，同时应用于文化教育资源落后地区的建设，整个公益活动主题简 单清晰，以文化为主线进行一系列公益活动，旨在把文化公益做成经典。 在当前社会上公益泛滥，且无质量保证，人们对公益的积极性不是很高。所以对于我们 社会来说，一个具有简单明晰主题的公益组织是很需要的。把以文化为主题的公益，做 成一种有效的社会公益，并提高人们对公益的热情和信心，所以这种公益模式的存",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:17:46Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H13",
+    "H14",
+    "H15",
+    "H3",
+    "H5",
+    "H6",
+    "H7"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目文本详细描述了公益机构数量有限、管理缺陷、渠道不畅等问题，以及贫困地区文化教育资源匮乏的情况。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中提到公众主动捐赠意识薄弱，但未提供具体的访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目文本描述了通过网络平台征集、评选、宣传和义卖文化作品的技术路线，但未详细说明具体的技术实现细节。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 6.0,
+      "reason": "项目文本描述了收入来源和成本控制措施，但未详细说明具体的财务模型和盈利模式。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目文本描述了公益市场的潜力和当前存在的问题，但未提供详细的竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目文本提到收入来源和成本控制，但未提供具体的财务数据和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目文本强调了文化与公益结合的创新模式，但未提供具体的差异化指标。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本未详细描述团队成员及其能力，也未提供具体的执行计划和里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目文本结构较为完整，描述了项目背景、目标、模式等，但部分细节描述不够具体。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "捐赠者可自行选择作品售卖价格中用作善款的比例，并有机会通过平台展示和推广自己的作品。",
+      "reason": "项目文本描述了捐赠者和购买者的匹配，未见明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "利用互联网平台（网站、微博、微信）进行作品征集、评选、宣传和义卖，拓宽公益渠道。",
+      "reason": "项目文本描述了利用互联网平台进行作品征集和义卖，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "捐赠者在作品捐献的同时自行选择要将售卖价格的多少用作善款，选择比例多少由捐赠者自己决定。",
+      "reason": "项目文本提到捐赠者自行选择售卖价格中用作善款的比例，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "我国慈善捐赠水平较低，占GDP比重不到1%，远低于美国等国家，公众主动捐赠意识薄弱，公益市场潜力未被充分激发。",
+      "reason": "项目文本描述了公益市场的潜力，市场规模口径较为合理。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "我国公益机构自身的管理与运作方面存在缺陷和不足，如未能开发足够的捐赠对象和项目，捐赠人可选择的范围过小，工作人员队伍不专业，工作效率不高，专业化能力不强；运作的透明度和公信度不高，捐赠款项的使用情况往往不甚明了，捐赠者不知道是否有效的满足了自己的捐赠愿望，从而打击了捐赠人的积极性。",
+      "reason": "项目文本描述了公益机构存在的问题，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "据调查，我国尚未存在类似以文化作品为纽带、采用全新公益模式的组织，预计能产生较强的公益效应。",
+      "reason": "项目文本声称无类似竞品，但未提供详细的竞品分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "通过建立一个文化公益平台包括工作室加网络平台，与出版社，音乐演艺经纪公司等文化传媒公司建立联系，同时面向广大社会群众，征集文化作品，文学作品，音乐作品，影视作品，手工艺品等，我们平台通过开展一系列投票筛选活动，以及征求专业大师的意见，从中选出优秀的作品，进行宣传和推广。",
+      "reason": "项目文本强调了文化与公益结合的创新模式，但未提供可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "收入来源于文化作品的义卖所得，捐赠者自愿选择部分售卖收入作为善款，剩余部分可能归捐赠者或平台。",
+      "reason": "项目文本描述了收入来源和成本控制措施，未见明显的单位经济问题。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "在第一阶段面向社会征集作品之前，先去联系在文学艺术方面颇有造诣的成名大师，说服他们捐赠作品，为活动开展造势，加强活动的社会关注度。",
+      "reason": "项目文本描述了具体的增长策略，未见明显的增长逻辑跳跃。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "在第一阶段面向社会征集作品之前，先去联系在文学艺术方面颇有造诣的成名大师，说服他们捐赠作品，为活动开展造势，加强活动的社会关注度。",
+      "reason": "项目文本提到联系成名大师，但未提供具体的执行计划和时间表，里程碑不可交付。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目文本未涉及隐私、医疗、金融等高风险领域。",
+      "reason": "项目文本未涉及高风险领域，合规/伦理缺口风险较低。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目文本描述了通过网络平台征集、评选、宣传和义卖文化作品的技术路线，未见明显的技术资源不匹配。",
+      "reason": "项目文本描述了技术路线，未见明显的技术资源不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "通过建立一个文化公益平台包括工作室加网络平台，与出版社，音乐演艺经纪公司等文化传媒公司建立联系，同时面向广大社会群众，征集文化作品，文学作品，音乐作品，影视作品，手工艺品等，我们平台通过开展一系列投票筛选活动，以及征求专业大师的意见，从中选出优秀的作品，进行宣传和推广。",
+      "reason": "项目文本提到投票筛选和征求专业大师意见，但未提供具体的实验设计和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "创业计划书 建立本公益组织旨在通过文化的连接进行相关的公益活动，通过建立一种新型的公益模 式，在一定程度上，提高人们参与公益事业的热情和积极性。",
+      "reason": "项目文本叙事结构较为完整，但部分关键环节描述不具体，存在叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目文本在多个关键 Rubric 维度（如用户证据强度、财务逻辑、团队与执行）缺乏支撑证据。",
+      "reason": "项目文本在多个关键 Rubric 维度缺乏支撑证据。"
+    }
+  ]
+}

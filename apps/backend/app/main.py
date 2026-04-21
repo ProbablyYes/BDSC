@@ -363,15 +363,23 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
 
     created_users: list[dict[str, Any]] = []
     password_list: list[dict[str, str]] = []
+    duplicate_accounts: list[str] = []
+    duplicate_names: list[str] = []
 
     for i in range(count):
         seq = start_index + i
         account = f"{prefix}{seq:03d}"
         email = account  # 现有系统以 email 字段作为登录账号
 
-        # Avoid partial success: if any account already exists, abort.
         if user_store.get_by_email(email):
-            raise HTTPException(status_code=400, detail=f"账号 {account} 已存在，批量创建已取消")
+            duplicate_accounts.append(account)
+            continue
+        # 检查昵称唯一
+        display_name = account
+        users = user_store._load()
+        if display_name and any(str(u.get("display_name", "")).strip() == display_name for u in users):
+            duplicate_names.append(display_name)
+            continue
 
         raw_password = f"{account}{password_suffix or '123'}"
         payload_single = {
@@ -385,7 +393,12 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
         try:
             user, _temp_password = user_store.admin_create_user(payload_single)
         except ValueError as e:  # pragma: no cover - defensive
-            raise HTTPException(status_code=400, detail=str(e))
+            msg = str(e)
+            if "用户名已存在" in msg:
+                duplicate_names.append(display_name)
+            else:
+                duplicate_accounts.append(account)
+            continue
 
         uid = str(user.get("user_id", ""))
         if role == "student" and uid:
@@ -430,13 +443,20 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
                     invite_code=team_invite_code if i == 0 else None,
                 )
             except ValueError as e:  # pragma: no cover - validation
-                raise HTTPException(status_code=400, detail=str(e))
+                pass  # skip team creation error for batch
 
     return {
         "status": "ok",
         "count": len(created_users),
         "users": created_users,
         "passwords": password_list,
+        "duplicates": duplicate_accounts,
+        "duplicate_names": duplicate_names,
+        "duplicate_message": (
+            ("该账号名已存在" if duplicate_accounts else "") +
+            ("，" if duplicate_accounts and duplicate_names else "") +
+            ("用户名已存在" if duplicate_names else "")
+        ),
     }
 
 
@@ -469,6 +489,15 @@ def admin_update_user(user_id: str, payload: AdminUserUpdatePayload) -> dict:
 
 @app.delete("/api/admin/users/{user_id}")
 def admin_delete_user(user_id: str) -> dict:
+    # 先查找该用户是否为教师，若是则删除其所有团队
+    user = user_store.get_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if user.get("role") == "teacher":
+        # 删除该教师所有团队
+        teams = team_store.list_by_teacher(user_id)
+        for t in teams:
+            team_store.delete_team(t.get("team_id"), user_id)
     ok = user_store.delete_user(user_id)
     if not ok:
         raise HTTPException(status_code=404, detail="用户不存在")
@@ -8749,3 +8778,263 @@ def _compute_team_health(avg_score: float, risk_count: int, active: int, total: 
         level = "critical"
         summary = "团队需要紧急干预，多名学生存在风险。"
     return {"score": score, "level": level, "summary": summary}
+
+
+import pandas as pd
+from fastapi import UploadFile
+# ── 批量导入用户与团队（CSV/Excel/JSON） ──────────────────────────────
+@app.post("/api/admin/users/import_csv")
+async def admin_import_users_csv(
+    file: UploadFile = File(...),
+    meta: str = Form(None),
+    data: str = Form(None),
+    request: Request = None
+):
+    """
+    支持 CSV/Excel/JSON 批量导入用户与团队，字段：account, name, role, email, team_name, invite_code, password
+    1. 解析文件或 data 字段
+    2. 校验字段完整性、格式、重复
+    3. 自动创建/合并团队，成员自动加入
+    4. 只追加新用户/团队，不做删除/覆盖
+    5. 生成导入日志，错误项单独返回
+    """
+    import os
+    import json as _json
+    from datetime import datetime
+    from pathlib import Path
+    from uuid import uuid4
+    # 1. 解析数据
+    rows = []
+    filename = file.filename
+    ext = filename.split(".")[-1].lower()
+    try:
+        if data:
+            rows = _json.loads(data)
+        elif ext == "csv":
+            df = pd.read_csv(file.file)
+            rows = df.to_dict(orient="records")
+        elif ext in ("xlsx", "xls"):  # Excel
+            df = pd.read_excel(file.file)
+            rows = df.to_dict(orient="records")
+        else:
+            raise Exception("仅支持 .csv/.xlsx/.xls 文件")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"文件解析失败: {e}")
+    if not rows or not isinstance(rows, list):
+        raise HTTPException(status_code=400, detail="未检测到有效数据")
+    # 2. 校验与处理
+    required_fields = ["account", "name", "role", "email", "team_name", "invite_code", "password"]
+    success, failed, errors = 0, 0, []
+    new_users, new_teams = [], []
+    user_ids, team_ids = set(), set()
+    users_json = (settings.data_root / "users" / "users.json")
+    teams_json = (settings.data_root / "teams" / "teams.json")
+    # 加载现有数据
+    try:
+        users_data = _json.loads(users_json.read_text("utf-8")) if users_json.exists() else []
+    except Exception:
+        users_data = []
+    try:
+        teams_data = _json.loads(teams_json.read_text("utf-8")) if teams_json.exists() else []
+    except Exception:
+        teams_data = []
+    existing_emails = set()
+    existing_names = set()
+    for u in users_data:
+        user_ids.add(str(u.get("user_id") or u.get("email") or u.get("account") or "").strip())
+        email = str(u.get("email") or "").strip().lower()
+        name = str(u.get("display_name") or u.get("name") or "").strip()
+        if email:
+            existing_emails.add(email)
+        if name:
+            existing_names.add(name)
+    for t in teams_data:
+        team_ids.add(str(t.get("team_id") or t.get("invite_code") or t.get("team_name") or "").strip())
+    # 3. 处理每一行
+    for idx, row in enumerate(rows):
+        # 字段标准化
+        item = {k: str(row.get(k, "")).strip() for k in required_fields}
+        # team_name 和 invite_code 可以为空
+        # email 和 password 可自动填充
+        if not item["account"] or not item["name"] or not item["role"]:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "account/name/role 不能为空", "item": item})
+            continue
+        if not item["email"]:
+            item["email"] = f"{item['account']}@local"
+        if not item["password"]:
+            item["password"] = f"{item['account']}+123"
+        if item["role"] not in ("student", "teacher", "admin"):
+            failed += 1
+            errors.append({"row": idx+1, "reason": "角色无效", "item": item})
+            continue
+        # 邮箱唯一
+        email_lower = item["email"].lower()
+        if email_lower in existing_emails:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "邮箱已存在", "item": item})
+            continue
+        # 姓名唯一
+        if item["name"] in existing_names:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "姓名已存在", "item": item})
+            continue
+        if item["account"] in user_ids:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "账号已存在", "item": item})
+            continue
+        # 导入后也要加入集合，防止本批次重复
+        existing_emails.add(email_lower)
+        existing_names.add(item["name"])
+        # 检查团队是否存在，不存在则创建（team_name/invite_code都为空则不创建团队）
+        team = None
+        if item["team_name"] or item["invite_code"]:
+            team = next((t for t in teams_data if (item["team_name"] and t.get("team_name") == item["team_name"]) or (item["invite_code"] and t.get("invite_code") == item["invite_code"])), None)
+            if not team:
+                team_id = f"team-{uuid4().hex[:8]}"
+                team = {
+                    "team_id": team_id,
+                    "team_name": item["team_name"],
+                    "invite_code": item["invite_code"],
+                    "teacher_id": "",
+                    "teacher_name": "",
+                    "members": [],
+                    "created_at": datetime.utcnow().isoformat(),
+                }
+                # 如果是教师，自动归属
+                if item["role"] == "teacher":
+                    team["teacher_id"] = "user-" + item["account"] if not item["account"].startswith("user-") else item["account"]
+                    team["teacher_name"] = item["name"]
+                teams_data.append(team)
+                team_ids.add(team_id)
+                new_teams.append(team)
+        # 创建用户
+        user_id = f"user-{uuid4().hex[:8]}"
+        user = {
+            "user_id": user_id,
+            "display_name": item["name"],
+            "role": item["role"],
+            "email": item["email"],
+            "password": item["password"],
+            "status": "active",
+            "team_names": [item["team_name"]] if item["team_name"] else [],
+            "last_login": "",
+        }
+        users_data.append(user)
+        user_ids.add(item["account"])
+        new_users.append(user)
+        # 加入团队：仅非教师用户加入 members
+        if team and "members" in team and item["role"] != "teacher":
+            team["members"].append({"user_id": user_id, "joined_at": datetime.utcnow().isoformat()})
+        # 如果是教师，补充团队teacher_id/teacher_name（但不加入 members）
+        if team and item["role"] == "teacher":
+            team["teacher_id"] = user_id
+            team["teacher_name"] = item["name"]
+        success += 1
+    # 4. 数据落盘
+    try:
+        users_json.write_text(_json.dumps(users_data, ensure_ascii=False, indent=2), encoding="utf-8")
+        teams_json.write_text(_json.dumps(teams_data, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"数据写入失败: {e}")
+    # 5. 写入日志
+    logs_dir = settings.data_root / "import_logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    log_obj = {
+        "filename": filename,
+        "meta": meta,
+        "time": datetime.utcnow().isoformat(),
+        "operator": str(request.headers.get("X-User", "admin")),
+        "total": len(rows),
+        "success": success,
+        "failed": failed,
+        "errors": errors,
+        "new_users": [u["user_id"] for u in new_users],
+        "new_teams": [t["team_id"] for t in new_teams],
+    }
+    log_path = logs_dir / f"import_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid4().hex[:6]}.json"
+    log_path.write_text(_json.dumps(log_obj, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 6. 返回结果
+    return {
+        "status": "ok",
+        "filename": filename,
+        "total": len(rows),
+        "success": success,
+        "failed": failed,
+        "errors": errors,
+        "new_users": [u["user_id"] for u in new_users],
+        "new_teams": [t["team_id"] for t in new_teams],
+        "log": str(log_path.name),
+    }
+from fastapi import Body
+# 批量创建教师账号及团队（前端新UI专用）
+@app.post("/api/admin/teachers/batch_with_teams")
+def admin_batch_create_teachers_with_teams(
+    payload: dict = Body(...)
+):
+    """
+    批量创建教师账号和团队，每个教师可自定义账号、姓名、团队名、邀请码、密码。
+    前端需传入 teachers: [{account, name, team_name, invite_code, password}]
+    """
+    teachers = payload.get("teachers")
+    if not isinstance(teachers, list) or not teachers:
+        raise HTTPException(status_code=400, detail="参数格式错误：teachers 必须为非空数组")
+    results = []
+    for t in teachers:
+        account = str(t.get("account", "")).strip()
+        name = str(t.get("name", "")).strip()
+        password = str(t.get("password", "")).strip()
+        teams = t.get("teams", [])
+        if not (account and name and password and isinstance(teams, list) and teams):
+            results.append({"account": account, "success": False, "reason": "信息不完整"})
+            continue
+        # 检查账号是否已存在
+        if user_store.get_by_email(account):
+            results.append({"account": account, "success": False, "reason": "账号已存在"})
+            continue
+        # 创建教师账号
+        try:
+            user, _ = user_store.admin_create_user({
+                "role": "teacher",
+                "display_name": name,
+                "email": account,
+                "password": password,
+            })
+        except Exception as e:
+            results.append({"account": account, "success": False, "reason": f"创建账号失败: {e}"})
+            continue
+        teacher_id = user.get("user_id")
+        # 为该教师批量创建团队
+        team_results = []
+        for tm in teams:
+            team_name = str(tm.get("team_name", "")).strip()
+            invite_code = str(tm.get("invite_code", "")).strip().upper()
+            if not (team_name and invite_code):
+                team_results.append({"team_name": team_name, "success": False, "reason": "团队信息不完整"})
+                continue
+            # 检查团队邀请码是否冲突
+            if team_store.find_by_invite_code(invite_code):
+                team_results.append({"team_name": team_name, "invite_code": invite_code, "success": False, "reason": "邀请码已被占用"})
+            else:
+                try:
+                    team = team_store.create_team_with_custom_code(
+                        teacher_id=teacher_id,
+                        teacher_name=name,
+                        team_name=team_name,
+                        invite_code=invite_code,
+                    )
+                    team_results.append({
+                        "team_name": team_name,
+                        "invite_code": invite_code,
+                        "team_id": team.get("team_id"),
+                        "success": True
+                    })
+                except Exception as e:
+                    team_results.append({"team_name": team_name, "invite_code": invite_code, "success": False, "reason": f"创建团队失败: {e}"})
+        results.append({
+            "account": account,
+            "teacher_id": teacher_id,
+            "success": True,
+            "teams": team_results
+        })
+    return {"status": "ok", "results": results}

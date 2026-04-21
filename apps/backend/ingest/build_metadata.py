@@ -14,7 +14,7 @@ from ingest.common import (
     now_iso,
     parse_quality,
 )
-
+import textract
 METADATA_FIELDS = [
     "file_path",
     "file_name",

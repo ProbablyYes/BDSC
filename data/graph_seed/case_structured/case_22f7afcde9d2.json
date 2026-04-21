@@ -1,0 +1,363 @@
+{
+  "case_id": "case_22f7afcde9d2",
+  "document_id": "doc_380866c66c18",
+  "source": {
+    "file_path": "社会公益/“挑战杯”_温馨家园养老服务公司项目计划书.doc",
+    "file_name": "“挑战杯”_温馨家园养老服务公司项目计划书.doc",
+    "category": "社会公益",
+    "doc_type": "doc",
+    "parse_quality": "B",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1338,
+    "full_text_chars": 36609,
+    "core_text_chars": 32067,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 1339,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1339,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "温馨家园养老服务公司",
+    "target_users": [
+      "追求生活质量和精神愉悦的中高收入阶层的老人"
+    ],
+    "pain_points": [
+      "老年人物质生活得到保障但精神生活空虚，面临孤独与交流匮乏的问题",
+      "老年服务行业整体运营状况不佳，存在管理落后、服务质量低、精神愉悦缺失等问题"
+    ],
+    "solution": [
+      "建立社区连锁的专业养老服务机构，为老人提供模块化运营、菜单式服务的个性化养老服务",
+      "通过组建会员健身俱乐部、开办老年人学堂、组织集体比赛出游等活动，搭建老年人学习生活交流娱乐的平台"
+    ],
+    "innovation_points": [
+      "采用模块化运营和菜单式服务模式，针对不同老人群体提供差异化、可选择的养老服务组合",
+      "将品牌运营与现代管理理念引入老年服务行业，注重老年人精神生活品质与时尚文化传播",
+      "在传统养老服务基础上拓展社区互动和会员服务等延伸业务"
+    ],
+    "business_model": [
+      "核心收入来源于长住老人的房间住宿费（如豪华间3000元/月、单间1800元/月、双人间1000元/月）及特殊护理费用（2000元/月）",
+      "对非常住老人实行会员制，收取会员费（50元/月），并通过老年人俱乐部、活动组织（如旅游）、超市承包、特色讲堂等多元化经营获取利润"
+    ],
+    "market_analysis": [
+      "我国60岁及以上老年人近1.43亿，占人口10.97%，预计2010年老年人消费将超过1.4万亿元，银发经济市场庞大",
+      "目前平均每千名老人占有养老床位不到9张，与发达国家相比存在较大市场缺口",
+      "主要竞争对手为国营及民营养老院、老年社区和老年大学，但本项目以现代化管理模式和品牌运营作为差异化优势"
+    ],
+    "execution_plan": [
+      "三年内从济南市经十路起步，面向整个济南市开拓市场，争取成为济南市老年服务市场强势品牌",
+      "五年内面向整个山东省发展业务，以济南为总部在青岛、临沂、威海等地建立分部，争取成为山东省强势品牌",
+      "十年内在全国其他大城市建立营业网点，按不同地区消费水平建立不同层次连锁机构，争取成为全国知名品牌"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:社会公益",
+    "education_level:unknown",
+    "doc_type:doc",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:User Evidence Strength",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H8"
+  ],
+  "evidence": [
+    {
+      "id": "case_22f7afcde9d2_e1",
+      "type": "user_evidence",
+      "quote": "我们的目标市场是山东省内及其周边城市，主要客户群是追求生活质量和精神愉悦的中高收入阶层的老人。",
+      "chunk_id": "C2",
+      "source_unit": "段落23"
+    },
+    {
+      "id": "case_22f7afcde9d2_e2",
+      "type": "business_model_evidence",
+      "quote": "豪华间   3000/月   共40间\n单间     1800/月   共40间\n双人间   1000/月   共40间\n特殊护理间  2000/月  共20间（2人/间）\n老年健身房、棋类活动室等活动场所面向常住老人免费开放，对非常住老人实行会员制，50元/月",
+      "chunk_id": "C9",
+      "source_unit": "段落191"
+    },
+    {
+      "id": "case_22f7afcde9d2_e3",
+      "type": "business_model_evidence",
+      "quote": "我们争取保证基本的老人院内部服务的基础上发展多元化经营，其中，老年人俱乐部（征收会员费等），老年人大讲堂，心理咨询，超市（承包或自主经营，看情况定），不同模块增收费用（长住老人按房间标准收费，暂住或不住老人视其所需服务另外收费），特殊护理费用，活动组织费用（如旅游），其他基础性收费是是本企业的特色盈利点",
+      "chunk_id": "C9",
+      "source_unit": "段落191"
+    },
+    {
+      "id": "case_22f7afcde9d2_e4",
+      "type": "market_analysis_evidence",
+      "quote": "据全国老龄工作委员会统计，我国目前60岁及以上老年人将近1.43亿，占全国人口总数的10.97%，至2010年我国老年人消费将超过1.4万亿元",
+      "chunk_id": "C2",
+      "source_unit": "段落23"
+    },
+    {
+      "id": "case_22f7afcde9d2_e5",
+      "type": "market_analysis_evidence",
+      "quote": "目前，我国共有各类老年社会福利机构3.8万个，养老床位120多万张，平均每千名老人占有床位不到9张，与发达国家每千名老人占有养老床位数",
+      "chunk_id": "C10",
+      "source_unit": "段落218"
+    },
+    {
+      "id": "case_22f7afcde9d2_e6",
+      "type": "market_analysis_evidence",
+      "quote": "我们的主要竞争对手是国营及民营的养老院，专门的老年社区和专业的老年大学等，但是我们具有现代化的管理模式和品牌运营的优势。",
+      "chunk_id": "C2",
+      "source_unit": "段落23"
+    },
+    {
+      "id": "case_22f7afcde9d2_e7",
+      "type": "execution_plan_evidence",
+      "quote": "三年内公司从济南市经十路温馨家园起步，面向整个济南市开拓市场，争取成为济南市老年服务市场强势品牌，五年内面向整个山东省发展业务拓展，并以济南为总部在青岛、临沂、威海等地区建立分部，同时建立各事业部（发展中心）以拓宽营业面。争取成为山东省老年服务市场强势品牌，十年内在全国其他大城市建立了营业网点，按不同地区不同消费水平，建立不同层次的连锁机构，争取成为全国老年服务市场知名品牌",
+      "chunk_id": "C4",
+      "source_unit": "段落65"
+    },
+    {
+      "id": "case_22f7afcde9d2_e9",
+      "type": "risk_evidence",
+      "quote": "在营销上我们将采用公益传播和公关执行的方式，在各个大型城市社区和活动场所组织各种文艺演出，体育比赛等活动进行公关造势和宣传，吸引潜在消费者及时方便的获取我们的服务信息。同时，我们将在第一年投入一定资金做前期推广，通过各种媒体广告和各种促销活动推进品牌的知名度。在市场上采取先立足济南，后逐渐有计划分步骤的推向全省乃至全国。",
+      "chunk_id": "C3",
+      "source_unit": "段落42"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": true
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "温馨家园创业计划书 目 录 第一部分 执行总结 ……………………………………………………… 2 第二部分 战略规划和项目概述 ………………………………………… 4 第三部分 战略制定背景分析 …………………………………………… 10 第四部分 市场和竞争分析 ……………………………………………… 12 第五部分 市场营销策划 ………………………………………………… 14 第六部分 组织结构和人力资源 ……………………………………………20 第七部分 企业管理和企业文化……………………………………………27 第八部分 投资和财务………………………………………………………29 第九部分投资者退出…………………………………………………………34 1 济南市养老服务市场社会调查问卷…………………………………34 2 温馨家园公司章程 ………………………………………………36 3 温馨家园会员俱乐部章程 ………………………………………37 4 养老服务协议 ……………………………………………………38 1．1．产品和服务 本项目拟建的温馨家园养老服务公司是一家有限责任公司，它将通过品牌运营的模式",
+  "confidence": 0.7,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T15:27:22Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H8"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出了老年人物质生活得到保障但精神生活空虚的问题，有具体的用户场景支撑。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提到了养老服务市场社会调查问卷，但未提供具体结果或数据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 8.0,
+      "reason": "提出了模块化运营和菜单式服务模式，以及具体的活动和服务内容，技术路线与资源匹配。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 8.0,
+      "reason": "客户、价值主张、渠道、营收、成本形成了较为完整的闭环，有明确的收入来源。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提供了市场规模和竞品分析，但未详细说明SOM口径。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 5.0,
+      "reason": "提到了具体的房间价格和会员费，但未提供详细的财务逻辑分析，如LTV和CAC等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "强调了现代化管理模式和品牌运营作为差异化优势，具有可验证性。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "未提供团队背景和执行能力的具体信息，里程碑较为宏观。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "BP结构完整，但部分数据说服力不足。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "追求生活质量和精神愉悦的中高收入阶层的老人",
+      "reason": "目标用户与价值主张匹配，未发现错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "三年内从济南市经十路起步，面向整个济南市开拓市场，争取成为济南市老年服务市场强势品牌",
+      "reason": "提出了具体的市场开拓计划，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "豪华间   3000/月   共40间\n单间     1800/月   共40间\n双人间   1000/月   共40间\n特殊护理间  2000/月  共20间（2人/间）\n老年健身房、棋类活动室等活动场所面向常住老人免费开放，对非常住老人实行会员制，50元/月",
+      "reason": "提到了定价，但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "据全国老龄工作委员会统计，我国目前60岁及以上老年人将近1.43亿，占全国人口总数的10.97%，至2010年我国老年人消费将超过1.4万亿元",
+      "reason": "市场规模口径合理，未发现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "据全国老龄工作委员会统计，我国目前60岁及以上老年人将近1.43亿，占全国人口总数的10.97%，至2010年我国老年人消费将超过1.4万亿元",
+      "reason": "提供了市场规模和用户需求的统计数据，需求证据较为充分。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "我们的主要竞争对手是国营及民营的养老院，专门的老年社区和专业的老年大学等，但是我们具有现代化的管理模式和品牌运营的优势。",
+      "reason": "进行了竞品分析，并提出了自身的差异化优势。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "我们的主要竞争对手是国营及民营的养老院，专门的老年社区和专业的老年大学等，但是我们具有现代化的管理模式和品牌运营的优势。",
+      "reason": "提出了可验证的差异化优势，如现代化管理模式和品牌运营。"
+    },
+    {
+      "id": "H8",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "豪华间   3000/月   共40间\n单间     1800/月   共40间\n双人间   1000/月   共40间\n特殊护理间  2000/月  共20间（2人/间）\n老年健身房、棋类活动室等活动场所面向常住老人免费开放，对非常住老人实行会员制，50元/月",
+      "reason": "未提供详细的财务逻辑分析，难以判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "三年内从济南市经十路起步，面向整个济南市开拓市场，争取成为济南市老年服务市场强势品牌\n五年内面向整个山东省发展业务，以济南为总部在青岛、临沂、威海等地建立分部，争取成为山东省强势品牌\n十年内在其他大城市建立营业网点，按不同地区消费水平建立不同层次连锁机构，争取成为全国知名品牌",
+      "reason": "提出了逐步发展的增长逻辑，较为合理。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "三年内从济南市经十路起步，面向整个济南市开拓市场，争取成为济南市老年服务市场强势品牌\n五年内面向整个山东省发展业务，以济南为总部在青岛、临沂、威海等地建立分部，争取成为山东省强势品牌\n十年内在其他大城市建立营业网点，按不同地区消费水平建立不同层次连锁机构，争取成为全国知名品牌",
+      "reason": "里程碑较为宏观，缺乏具体可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未涉及高风险领域",
+      "reason": "项目未涉及隐私、医疗、金融等高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "采用模块化运营和菜单式服务模式，针对不同老人群体提供差异化、可选择的养老服务组合",
+      "reason": "技术路线与资源匹配，未发现不匹配问题。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "未提到实验/测试",
+      "reason": "项目未提到实验或测试，因此未触发此风险。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "温馨家园创业计划书 目 录 第一部分 执行总结 ……………………………………………………… 2 第二部分 战略规划和项目概述 ………………………………………… 4 第三部分 战略制定背景分析 …………………………………………… 10 第四部分 市场和竞争分析 ……………………………………………… 12 第五部分 市场营销策划 ………………………………………………… 14 第六部分 组织结构和人力资源 ……………………………………………20 第七部分 企业管理和企业文化……………………………………………27 第八部分 投资和财务……………………………………………………… 29 第九部分投资者退出…………………………………………………………34",
+      "reason": "BP结构完整，未发现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未提供详细的财务逻辑分析，未提供团队背景和执行能力的具体信息",
+      "reason": "多个关键Rubric维度缺乏支撑证据，如财务逻辑和团队执行能力。"
+    }
+  ]
+}

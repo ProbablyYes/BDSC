@@ -1,0 +1,369 @@
+{
+  "case_id": "case_860eb845f8a6",
+  "document_id": "doc_9d8205a1ef4d",
+  "source": {
+    "file_path": "医疗健康/医疗垃圾无害化处理_全国挑战杯创业大赛一等奖-创业计划书.doc",
+    "file_name": "医疗垃圾无害化处理_全国挑战杯创业大赛一等奖-创业计划书.doc",
+    "category": "医疗健康",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1237,
+    "full_text_chars": 42842,
+    "core_text_chars": 40449,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 1238,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1238,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "亿可利绿色科技有限责任公司",
+    "target_users": [
+      "无力投资建造焚烧炉的中小医院及其他医疗机构",
+      "需要医疗垃圾集中处理站的大中型城市"
+    ],
+    "pain_points": [
+      "部分大医院自建焚烧炉档次低，燃烧不彻底，对环境造成二次污染",
+      "绝大多数中小医院及其他医疗机构无力投资建造焚烧炉，导致医疗垃圾直接混入生活垃圾",
+      "直接引进的国外技术因我国医疗垃圾成分复杂、水分含量高、不分类等特点存在应用障碍且一次性投入极大"
+    ],
+    "solution": [
+      "提供“亿可利（Easy Clean）”两段气控回转式医疗垃圾焚烧处理技术，针对我国医疗垃圾成分复杂、不分类等特点进行无害化处理",
+      "采用自主开发的烟气净化系统，有效解决二恶英等问题，使尾气排放达到国家标准",
+      "处理过程全自动，工人劳动强度低，劳动环境好",
+      "处理能力可以随不同城市规模而变化，示范性工程年处理能力为3,000吨"
+    ],
+    "innovation_points": [
+      "技术针对我国医疗垃圾成分复杂、不分类等特点，克服了直接引进国外技术的应用障碍",
+      "设置了垃圾预处理系统，利用余热去除垃圾中的水分，既保证处理效果又节约能源",
+      "处理过程全自动，工人劳动强度低，且处理能力可以随不同城市规模而变化"
+    ],
+    "business_model": [
+      "采用BOT（建设-运营-移交）运作模式，针对年处理规模为3,000吨的医疗垃圾处理企业，需吸纳外部投资400万、投入自有资金50万、技术作价150万",
+      "参照“谁制造谁负责”和“谁处理谁受益”原则，与物价部门协商制订合理的收费标准，形成项目收入来源",
+      "经初步估算，企业内部报酬率约为24%，投资回收期为三年一个月"
+    ],
+    "market_analysis": [
+      "2000年全国产生医疗垃圾约100万吨，且产量以每年3%~6%的速度递增",
+      "大部分地区缺乏医疗垃圾集中处理站，大量医疗垃圾非法流失，对公众健康形成严重隐患",
+      "随着环保法规相继出台和监控力度加大，整个医疗垃圾处理市场将逐步扩大"
+    ],
+    "execution_plan": [
+      "前期用3～5年左右时间，在全国较发达地区的大中型城市建立20～30个医疗垃圾处理工厂",
+      "后期在5—8年内将公司建立成业务范围遍及全国，集环保技术研究、设备制造、工程设计建设投资于一体的大型环保集团公司"
+    ],
+    "risk_control": [
+      "【通用风险控制】技术应用风险：针对我国医疗垃圾成分复杂、水分高、不分类的特点，自主研发了适应性技术，以克服直接引进国外技术的障碍，确保处理效果",
+      "【合规与伦理意识】市场与合规风险：依据“谁制造谁负责”和“谁处理谁受益”原则，计划与物价部门协商制订收费标准，以形成合理收入并维持项目健康运行",
+      "【通用风险控制】运营风险：通过设置垃圾预处理系统利用余热去除水分，并采用自主烟气净化系统，以解决二恶英问题并确保尾气排放达标"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Financial Logic",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H7",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_860eb845f8a6_e1",
+      "type": "user_evidence",
+      "quote": "绝大多数中小医院及其他医疗机构，没有也无力投资建造焚烧炉，大量医疗垃圾直接混入生活垃圾。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_860eb845f8a6_e2",
+      "type": "business_model_evidence",
+      "quote": "本企业拟采用“BOT”（即Build-Operate-Transfer）的运作模式，针对一个年处理规模为3,000吨的医疗垃圾处理企业，为了经营活动的稳定进行，企业需要吸纳外部投资400万，投入自有资金50万，技术作价150万。",
+      "chunk_id": "C4",
+      "source_unit": "段落135"
+    },
+    {
+      "id": "case_860eb845f8a6_e3",
+      "type": "business_model_evidence",
+      "quote": "根据废弃物“谁制造谁负责”和“谁处理谁受益”的原则，参照当地公众收入水平和消费指数，与物价部门协商制订合理的收费标准，形成项目的收入来源，并且在保持适度利润水平的前提之下，维持项目正常健康的运行。",
+      "chunk_id": "C5",
+      "source_unit": "段落161"
+    },
+    {
+      "id": "case_860eb845f8a6_e4",
+      "type": "business_model_evidence",
+      "quote": "经初步估算，企业的内部报酬率约为24%，投资回收期为三年一个月。",
+      "chunk_id": "C4",
+      "source_unit": "段落135"
+    },
+    {
+      "id": "case_860eb845f8a6_e5",
+      "type": "risk_evidence",
+      "quote": "针对我国医疗垃圾成分复杂、不分类等特点，克服了直接引进国外技术的应用障碍。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_860eb845f8a6_e6",
+      "type": "risk_evidence",
+      "quote": "在亿可利医疗垃圾处理技术中，我们充分考虑了医疗垃圾的这一特点，设置了垃圾预处理系统，利用余热去除垃圾中的水分。",
+      "chunk_id": "C9",
+      "source_unit": "段落246"
+    },
+    {
+      "id": "case_860eb845f8a6_e7",
+      "type": "risk_evidence",
+      "quote": "采用自主开发的烟气净化系统，可以有效的解决二恶英等问题，尾气排放达到国家标准。",
+      "chunk_id": "C4",
+      "source_unit": "段落135"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": true
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "创业计划书 目 录 目 录 i • 为有意投资于本项目者提供充分的信息 • 为本计划未来的经营活动提供基本数据和指导准则 随着我国一次性医疗器械的广泛使用，医疗垃圾的产量以每年3％~6％的速度递增。 2000年，全国共有医疗卫生机构324,771个，病床317.7万张，年诊疗人数21.23亿人次， 产生医疗垃圾100万吨左右。联合国环境署的《巴塞尔公约》已将医疗垃圾列为需要严格控 制国际间转移的危险废弃物，我国《国家危险废物名录》也将其列为头号危险废物。因为 医疗垃圾本身带有病菌和病毒，如不能妥善处理，将对环境和社会产生巨大的危害。浙 江大学热能工程研究所潜心研制的“亿可利（Easy Clean）”两段气控回转式医疗垃圾焚烧处理技术，针对我国医疗垃圾成分复杂、不分类 等特点，克服了直接引进国外技术的应用障碍，对医疗垃圾进行无害化处理，不仅可以 将二次污染减小到最低水平，而且可回收热能，具有低投入和高社会效益的双重优点。 目前我国医疗垃圾处理行业具有以下特点： • 部分大医院采用自建焚烧炉方式处理医疗垃圾，但焚烧炉档次低，燃烧不彻底，对环境 造成了二次污染。 • 由于客观条件的限制，绝大",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T15:23:55Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H13",
+    "H15",
+    "H3",
+    "H5",
+    "H7",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本详细描述了医疗垃圾处理的痛点，包括中小医院无力投资焚烧炉、大医院焚烧炉档次低、直接引进国外技术的应用障碍等。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本中提到医疗垃圾的产量和医疗机构的数量，但缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了技术方案的适应性和优势，包括预处理系统、烟气净化系统等，但未详细说明技术实现的具体资源需求。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了BOT模式和收费标准的制定原则，形成了较为合理的商业模式，但未详细说明具体渠道和成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了市场规模和增长趋势，以及部分大医院自建焚烧炉的情况，但未详细分析其他竞争对手。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本提供了初步的财务估算，包括内部报酬率和投资回收期，但未提供详细的财务模型和假设。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本强调了技术的创新点，如适应我国医疗垃圾特点的预处理系统和烟气净化系统，但未提供具体的实验或指标验证。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "文本未提及团队背景、能力和执行计划的具体里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本结构较为完整，提供了项目背景、技术方案、商业模式等信息，但部分信息缺乏详细数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未提及获客渠道的具体问题。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "经初步估算，企业的内部报酬率约为24%，投资回收期为三年一个月。",
+      "reason": "文本提到定价和收费标准，但未提供用户支付意愿的具体验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中描述的市场规模口径较为合理，未出现混乱的情况。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "绝大多数中小医院及其他医疗机构，没有也无力投资建造焚烧炉，大量医疗垃圾直接混入生活垃圾。",
+      "reason": "文本中缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中未声称无竞品或无竞争对手，且提到了部分大医院自建焚烧炉的情况。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "针对我国医疗垃圾成分复杂、不分类等特点，克服了直接引进国外技术的应用障碍。",
+      "reason": "文本强调了技术的创新点，但未提供具体的实验或指标验证。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本提供的初步财务估算是合理的，未出现明显的单位经济不成立的情况。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "前期用3～5年左右时间，在全国较发达地区的大中型城市建立20～30个医疗垃圾处理工厂。",
+      "reason": "文本中出现了“只要拿下 1% 市场”类似的自上而下估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "前期用3～5年左右时间，在全国较发达地区的大中型城市建立20～30个医疗垃圾处理工厂。",
+      "reason": "文本中的时间表和里程碑显得不现实，且缺少具体的可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到了合规与伦理意识，未出现明显的合规/伦理缺口。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中描述的技术方案与资源需求匹配，未出现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "针对我国医疗垃圾成分复杂、不分类等特点，克服了直接引进国外技术的应用障碍。",
+      "reason": "文本中提到技术适应性，但未提供实验设计的具体样本量和评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本的叙事结构较为完整，未出现明显的断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "绝大多数中小医院及其他医疗机构，没有也无力投资建造焚烧炉，大量医疗垃圾直接混入生活垃圾。",
+      "reason": "文本中多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、团队与执行等。"
+    }
+  ]
+}

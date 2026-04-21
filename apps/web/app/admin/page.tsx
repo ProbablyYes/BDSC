@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import * as Papa from "papaparse";
+import type { ParseResult, ParseError } from "papaparse";
+import * as XLSX from "xlsx";
+
 import Link from "next/link";
 import { useAuth, logout } from "../hooks/useAuth";
 
@@ -227,6 +231,12 @@ export default function AdminPage() {
   const [batchTeamInviteCode, setBatchTeamInviteCode] = useState<string>("");
   const [batchSubmitting, setBatchSubmitting] = useState(false);
   const [batchResult, setBatchResult] = useState<any>(null);
+  // 新增：批量教师表单数据结构
+  const [batchTeachers, setBatchTeachers] = useState<{
+    account: string;
+    name: string;
+    teams: { teamName: string; inviteCode: string }[];
+  }[]>([]);
 
   // Teacher performance
   const [teachers, setTeachers] = useState<TeacherStat[]>([]);
@@ -241,6 +251,105 @@ export default function AdminPage() {
   const [accessLogs, setAccessLogs] = useState<AdminLogEntry[]>([]);
   const [logStats, setLogStats] = useState<AdminLogStats | null>(null);
   const [showHealthDetail, setShowHealthDetail] = useState(false);
+
+  // 批量导入相关字段
+  const IMPORT_FIELDS = ["account", "name", "role", "email", "team_name", "invite_code", "password"];
+  // 批量导入
+  const [showImport, setShowImport] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importData, setImportData] = useState<any[]>([]);
+  const [importPreview, setImportPreview] = useState<any[]>([]);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<any>(null);
+  const [importError, setImportError] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // 解析上传文件
+  function handleImportFile(file: File) {
+    setImportFile(file);
+    setImportError("");
+    setImportResult(null);
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext === "csv") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target?.result as string;
+          Papa.parse<any>(text, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (res: ParseResult<any>) => {
+              const rows = Array.isArray(res.data) ? res.data : [];
+              setImportData(rows);
+              setImportPreview(rows.slice(0, 20));
+            },
+            error: (err: Error) => setImportError("CSV 解析失败: " + err.message),
+          });
+        } catch (err: any) {
+          setImportError("CSV 解析失败: " + (err?.message || err));
+        }
+      };
+      reader.readAsText(file);
+    } else if (ext === "xlsx") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const wb = XLSX.read(e.target?.result, { type: "array" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+          setImportData(rows);
+          setImportPreview(rows.slice(0, 20));
+        } catch (err: any) {
+          setImportError("Excel 解析失败: " + (err?.message || err));
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      setImportError("仅支持 .csv 或 .xlsx 文件");
+    }
+  }
+
+  // 上传导入数据
+  async function handleImportSubmit() {
+    if (!importFile || importData.length === 0) return;
+    setImportLoading(true);
+    setImportResult(null);
+    setImportError("");
+    try {
+      const form = new FormData();
+      form.append("file", importFile);
+      form.append("meta", JSON.stringify({ filename: importFile.name, time: Date.now() }));
+      // 也可直接传数据数组
+      form.append("data", JSON.stringify(importData));
+      const r = await fetch(`${API}/api/admin/users/import_csv`, {
+        method: "POST",
+        body: form,
+      });
+      const d = await r.json();
+      if (!r.ok) {
+        setImportError(d?.detail || "导入失败");
+        return;
+      }
+      setImportResult(d);
+      // @ts-ignore
+      await Promise.all([(typeof loadUsers === "function" ? loadUsers() : Promise.resolve()), (typeof loadTeams === "function" ? loadTeams() : Promise.resolve())]);
+    } catch (err: any) {
+      setImportError("导入失败: " + (err?.message || err));
+    } finally {
+      setImportLoading(false);
+    }
+  }
+  // 拖拽上传
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleImportFile(e.dataTransfer.files[0]);
+    }
+  }
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files[0]) {
+      handleImportFile(e.target.files[0]);
+    }
+  }
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -938,6 +1047,14 @@ export default function AdminPage() {
         body: JSON.stringify(payload),
       });
       const d = await r.json();
+      if (!r.ok) {
+        if (typeof d?.detail === "string" && d.detail.includes("该账号名已存在")) {
+          window.alert("该账号名已存在");
+        } else {
+          window.alert(d?.detail || "添加用户失败");
+        }
+        return;
+      }
       const u = d.user ?? d;
       const record: UserRecord = {
         id: u.user_id,
@@ -952,8 +1069,8 @@ export default function AdminPage() {
       setUsers((prev) => [...prev, record]);
       setNewUser({ id: "", name: "", role: "student", email: "", password: "" });
       setShowAddUser(false);
-    } catch {
-      /* noop */
+    } catch (err: any) {
+      window.alert("添加用户失败: " + (err?.message || err));
     }
   }
 
@@ -1018,6 +1135,62 @@ export default function AdminPage() {
       return;
     }
 
+    // 教师批量新表单逻辑
+    if (batchRole === "teacher" && batchTeachers.length > 0) {
+      // 校验
+      for (const t of batchTeachers) {
+        if (!t.account.trim() || !t.name.trim() || !Array.isArray(t.teams) || t.teams.length === 0) {
+          window.alert("请填写所有教师账号、姓名和至少一个团队");
+          return;
+        }
+        for (const tm of t.teams) {
+          if (!tm.teamName.trim() || !tm.inviteCode.trim()) {
+            window.alert("请填写所有团队名和邀请码");
+            return;
+          }
+        }
+      }
+      setBatchSubmitting(true);
+      setBatchResult(null);
+      try {
+        // 新结构：每个教师只创建一次账号，teams为数组
+        const teachersPayload = batchTeachers.map(t => ({
+          account: t.account,
+          name: t.name,
+          password: `${t.account}${batchPasswordSuffix || "123"}`,
+          teams: t.teams.map(tm => ({
+            team_name: tm.teamName,
+            invite_code: tm.inviteCode
+          }))
+        }));
+        const r = await fetch(`${API}/api/admin/teachers/batch_with_teams`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ teachers: teachersPayload }),
+        });
+        const d = await r.json();
+        if (!r.ok) {
+          let msg = d && d.detail ? String(d.detail) : "批量创建失败";
+          window.alert(msg);
+          return;
+        }
+        // 结果反馈
+        setBatchResult({
+          count: Array.isArray(d.results) ? d.results.length : 0,
+          results: d.results || [],
+        });
+        // 自动刷新用户和团队
+        await Promise.all([loadUsers(), loadTeams()]);
+        window.alert(`已创建 ${d.results?.length || 0} 个教师账号`);
+      } catch {
+        window.alert("批量创建失败，请稍后再试");
+      } finally {
+        setBatchSubmitting(false);
+      }
+      return;
+    }
+
+    // 学生批量逻辑（保留原有）
     const payload: any = {
       role: batchRole === "admin" ? "student" : batchRole,
       prefix: batchPrefix.trim(),
@@ -1029,15 +1202,6 @@ export default function AdminPage() {
     if (payload.role === "student" && batchInviteCode.trim()) {
       payload.invite_code = batchInviteCode.trim().toUpperCase();
     }
-    if (payload.role === "teacher") {
-      if (batchTeamName.trim()) {
-        payload.team_name = batchTeamName.trim();
-      }
-      if (batchTeamInviteCode.trim()) {
-        payload.team_invite_code = batchTeamInviteCode.trim().toUpperCase();
-      }
-    }
-
     setBatchSubmitting(true);
     setBatchResult(null);
     try {
@@ -1046,17 +1210,6 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!r.ok) {
-        let msg = "批量创建失败";
-        try {
-          const err = await r.json();
-          if (err && err.detail) msg = String(err.detail);
-        } catch {
-          /* noop */
-        }
-        window.alert(msg);
-        return;
-      }
       const d = await r.json();
       const created = (d.users ?? []) as any[];
       const mapped: UserRecord[] = created.map((u: any): UserRecord => ({
@@ -1072,12 +1225,43 @@ export default function AdminPage() {
       if (mapped.length) {
         setUsers((prev) => [...prev, ...mapped]);
       }
-      setBatchResult({
-        count: Number(d.count ?? mapped.length),
-        passwords: Array.isArray(d.passwords) ? d.passwords : [],
-      });
-      window.alert(`已创建 ${mapped.length} 个账号`);
-    } catch {
+      // 新增：处理重复账号和昵称反馈
+      const duplicateMsg = [];
+      if (Array.isArray(d.duplicates) && d.duplicates.length > 0) {
+        duplicateMsg.push(`账号名已存在：${d.duplicates.join(", ")}`);
+      }
+      if (Array.isArray(d.duplicate_names) && d.duplicate_names.length > 0) {
+        duplicateMsg.push(`用户名已存在：${d.duplicate_names.join(", ")}`);
+      }
+      if (duplicateMsg.length > 0) {
+        setBatchResult({
+          status: "partial",
+          count: Number(d.count ?? mapped.length),
+          passwords: Array.isArray(d.passwords) ? d.passwords : [],
+          duplicates: d.duplicates,
+          duplicate_names: d.duplicate_names,
+          message: `部分账号/昵称未创建，${duplicateMsg.join("；")}`,
+        });
+        window.alert(`部分账号/昵称未创建，${duplicateMsg.join("；")}`);
+      } else if (!r.ok) {
+        let msg = d && d.detail ? String(d.detail) : "批量创建失败";
+        if (typeof d?.detail === "string" && d.detail.includes("该账号名已存在")) {
+          msg = "该账号名已存在";
+        } else if (typeof d?.detail === "string" && d.detail.includes("用户名已存在")) {
+          msg = "用户名已存在";
+        }
+        setBatchResult({ status: "error", message: msg });
+        window.alert(msg);
+      } else {
+        setBatchResult({
+          status: "ok",
+          count: Number(d.count ?? mapped.length),
+          passwords: Array.isArray(d.passwords) ? d.passwords : [],
+        });
+        window.alert(`已创建 ${mapped.length} 个账号`);
+      }
+    } catch (err: any) {
+      setBatchResult({ status: "error", message: "批量创建失败: " + (err?.message || err) });
       window.alert("批量创建失败，请稍后再试");
     } finally {
       setBatchSubmitting(false);
@@ -1303,6 +1487,173 @@ export default function AdminPage() {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
                       批量创建
                     </button>
+                    <button className="admin-add-btn" onClick={() => setShowImport(true)}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/><path d="M7 9l5 5 5-5"/></svg>
+                      批量导入
+                    </button>
+                    {/* 批量导入弹窗 */}
+                    {showImport && (
+                      <div
+                        style={{
+                          position: "fixed",
+                          inset: 0,
+                          backgroundColor: "rgba(0,0,0,0.45)",
+                          zIndex: 2000,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center"
+                        }}
+                      >
+                        <div
+                          className="admin-add-form fade-up"
+                          style={{
+                            minWidth: 380,
+                            maxWidth: 520,
+                            width: "96%",
+                            maxHeight: "90vh",
+                            overflow: "auto",
+                            background: "var(--bg-card, #fff)",
+                            color: "var(--text-primary, #222)",
+                            borderRadius: 10,
+                            boxShadow: "0 14px 36px rgba(0,0,0,0.18)",
+                            padding: 24,
+                            position: "relative"
+                          }}
+                        >
+                          <h4>批量导入用户/团队（CSV/Excel）</h4>
+                          <div
+                            style={{
+                              border: "2px dashed var(--border)",
+                              borderRadius: 8,
+                              padding: 24,
+                              textAlign: "center",
+                              marginBottom: 12,
+                              background: "var(--bg-card)",
+                              color: "var(--text-primary)",
+                              transition: "background 0.2s, color 0.2s"
+                            }}
+                            onDrop={handleDrop}
+                            onDragOver={e => e.preventDefault()}
+                          >
+                            <input
+                              type="file"
+                              accept=".csv,.xlsx"
+                              style={{ display: "none" }}
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                            />
+                            <div style={{ marginBottom: 8, fontSize: 15, fontWeight: 500 }}>
+                              拖拽 <span style={{ color: "var(--accent)" }}>.csv/.xlsx</span> 文件到此，<br style={{ display: "none" }} />或者
+                              <button type="button" className="admin-btn-secondary" style={{ marginLeft: 8, verticalAlign: "middle" }} onClick={() => fileInputRef.current?.click()}>
+                                选择文件
+                              </button>
+                            </div>
+                            {importFile && <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>已选择文件：{importFile.name}</div>}
+                          </div>
+                          {importError && <div style={{ color: "#e07070", marginBottom: 8 }}>{importError}</div>}
+                          {importPreview.length > 0 && (
+                            <div
+                              className="admin-import-preview"
+                              style={{
+                                maxHeight: 220,
+                                overflow: "auto",
+                                border: "1px solid var(--border, #e0e0e0)",
+                                borderRadius: 8,
+                                marginBottom: 8,
+                                background: "var(--bg-card, #fff)",
+                                color: "var(--text-primary, #222)",
+                                transition: "background 0.2s, color 0.2s"
+                              }}
+                            >
+                              <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
+                                <thead>
+                                  <tr style={{ background: "var(--bg-secondary, #f7f7f7)", color: "var(--text-primary, #222)" }}>
+                                    {IMPORT_FIELDS.map(f => <th key={f} style={{ padding: "6px 8px", fontWeight: 600, borderBottom: "1px solid var(--border, #e0e0e0)", textAlign: "left" }}>{f}</th>)}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {importPreview.map((row, idx) => (
+                                    <tr
+                                      key={idx}
+                                      style={{
+                                        background: idx % 2
+                                          ? "var(--bg-secondary, #fafbfc)"
+                                          : "var(--bg-primary, #fff)",
+                                        color: "var(--text-primary, #222)"
+                                      }}
+                                    >
+                                      {IMPORT_FIELDS.map(f => (
+                                        <td key={f} style={{ padding: "6px 8px", borderBottom: "1px solid var(--border, #e0e0e0)", wordBreak: "break-all" }}>{row[f] ?? ""}</td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              <div style={{ fontSize: 12, color: "var(--text-secondary, #888)", margin: "4px 0 0 0" }}>
+                                仅预览前 20 条，实际将导入 {importData.length} 条
+                              </div>
+                            </div>
+                          )}
+                          {importResult && (
+                            <div
+                              className="admin-import-log"
+                              style={{
+                                background: 'var(--bg-card, #fff)',
+                                color: 'var(--text-primary, #222)',
+                                border: '1px solid var(--border, #e0e0e0)',
+                                borderRadius: 8,
+                                padding: 16,
+                                marginBottom: 12,
+                                fontSize: 15,
+                                lineHeight: 1.7,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                                wordBreak: 'break-all',
+                                fontFamily: 'var(--font-mono, Consolas, monospace)',
+                              }}
+                            >
+                              <strong>导入完成：</strong>
+                              <div>总数：{importResult.total ?? 0}，成功：{importResult.success ?? 0}，失败：{importResult.failed ?? 0}</div>
+                              {Array.isArray(importResult.errors) && importResult.errors.length > 0 && (
+                                <div style={{ color: 'var(--accent, #e07070)', marginTop: 4, fontFamily: 'var(--font-sans, inherit)' }}>
+                                  <div>错误项：</div>
+                                  <ul style={{ maxHeight: 80, overflow: "auto", fontFamily: 'var(--font-sans, inherit)', fontSize: 15, lineHeight: 1.7, margin: 0, padding: 0, listStyle: 'disc inside' }}>
+                                    {importResult.errors.slice(0, 10).map((err: any, i: number) => (
+                                      <li key={i} style={{ whiteSpace: 'pre-line', wordBreak: 'break-all', fontFamily: 'var(--font-sans, inherit)' }}>{typeof err.reason === 'string' ? err.reason : (typeof err === 'string' ? err : '')}</li>
+                                    ))}
+                                    {importResult.errors.length > 10 && <li>… 共 {importResult.errors.length} 条，仅展示前 10 条</li>}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div className="admin-form-actions" style={{ marginTop: 8, textAlign: "right" }}>
+                            <button className="admin-btn-primary" onClick={handleImportSubmit} disabled={importLoading || !importFile || importData.length === 0}>
+                              {importLoading ? "导入中…" : "确认导入"}
+                            </button>
+                            <button className="admin-btn-secondary" onClick={() => {
+                              setShowImport(false); setImportFile(null); setImportData([]); setImportPreview([]); setImportResult(null); setImportError("");
+                            }}>关闭</button>
+                          </div>
+                          <button
+                            type="button"
+                            aria-label="关闭"
+                            style={{
+                              position: "absolute",
+                              top: 10,
+                              right: 10,
+                              background: "none",
+                              border: "none",
+                              fontSize: 22,
+                              color: "var(--text-secondary, #888)",
+                              cursor: "pointer"
+                            }}
+                            onClick={() => {
+                              setShowImport(false); setImportFile(null); setImportData([]); setImportPreview([]); setImportResult(null); setImportError("");
+                            }}
+                          >×</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1342,6 +1693,10 @@ export default function AdminPage() {
                           const role = e.target.value as UserRole;
                           setBatchRole(role);
                           setBatchPrefix(role === "teacher" ? "tea" : "stu");
+                          // 切换身份时重置教师表单
+                          if (role === "teacher") {
+                            setBatchTeachers([]);
+                          }
                         }}
                       >
                         <option value="student">学生</option>
@@ -1369,7 +1724,26 @@ export default function AdminPage() {
                         min={1}
                         max={500}
                         value={batchCount}
-                        onChange={(e) => setBatchCount(Number(e.target.value) || 1)}
+                        onChange={(e) => {
+                          const n = Number(e.target.value) || 1;
+                          setBatchCount(n);
+                          // 教师批量时动态生成N行
+                          if (batchRole === "teacher") {
+                            setBatchTeachers((prev) => {
+                              const arr = [...prev];
+                              while (arr.length < n) {
+                                arr.push({
+                                  account: `${batchPrefix}${String(batchStartIndex + arr.length).padStart(3, "0")}`,
+                                  name: `教师${arr.length + 1}`,
+                                  teams: [
+                                    { teamName: `教师团队${arr.length + 1}-1`, inviteCode: `TEAM${Math.floor(1000 + Math.random() * 9000)}` }
+                                  ]
+                                });
+                              }
+                              return arr.slice(0, n);
+                            });
+                          }
+                        }}
                       />
                     </label>
                     <label>默认密码后缀
@@ -1388,25 +1762,156 @@ export default function AdminPage() {
                         />
                       </label>
                     )}
-                    {batchRole === "teacher" && (
-                      <>
-                        <label>新建团队名称（可选）
-                          <input
-                            value={batchTeamName}
-                            onChange={(e) => setBatchTeamName(e.target.value)}
-                            placeholder="如 挑战杯指导一组"
-                          />
-                        </label>
-                        <label>团队邀请码（可选）
-                          <input
-                            value={batchTeamInviteCode}
-                            onChange={(e) => setBatchTeamInviteCode(e.target.value.toUpperCase())}
-                            placeholder="如 ABC123；留空则自动生成"
-                          />
-                        </label>
-                      </>
-                    )}
                   </div>
+                  {/* 教师批量创建专用表单 */}
+                  {batchRole === "teacher" && (
+                    <>
+                      <div style={{ margin: "12px 0 8px 0" }}>
+                        <button
+                          className="admin-btn-secondary"
+                          type="button"
+                          onClick={() => {
+                            // 一键填充所有教师条目
+                            setBatchTeachers(Array.from({ length: batchCount }, (_, i) => ({
+                              account: `${batchPrefix}${String(batchStartIndex + i).padStart(3, "0")}`,
+                              name: `教师${i + 1}`,
+                              teams: [
+                                { teamName: `教师团队${i + 1}-1`, inviteCode: `TEAM${1000 + i}` }
+                              ]
+                            })));
+                          }}
+                        >一键填充默认值</button>
+                      </div>
+                      <div style={{ maxHeight: 320, overflow: "auto", border: "1px solid #eee", borderRadius: 6, marginBottom: 8 }}>
+                        <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
+                          <thead>
+                            <tr style={{ background: "var(--bg-card)", color: "var(--text-primary)", borderBottom: "1px solid var(--border-strong)" }}>
+                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>账号</th>
+                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>姓名</th>
+                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>团队名</th>
+                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>团队邀请码</th>
+                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>操作</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {batchTeachers.map((row, idx) => (
+                              row.teams && row.teams.length > 0 ? (
+                                row.teams.map((team, tIdx) => (
+                                  <tr key={idx + '-' + tIdx} style={{ background: "var(--bg-primary)", color: "var(--text-primary)", borderBottom: "1px solid var(--border)" }}>
+                                    {tIdx === 0 && (
+                                      <td style={{ padding: "6px 8px" }} rowSpan={row.teams.length}>
+                                        <input
+                                          value={row.account}
+                                          onChange={e => {
+                                            const v = e.target.value;
+                                            setBatchTeachers(arr => arr.map((r, i) => i === idx ? { ...r, account: v } : r));
+                                          }}
+                                          style={{ width: 90, background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: 4, padding: "2px 6px" }}
+                                        />
+                                      </td>
+                                    )}
+                                    {tIdx === 0 && (
+                                      <td style={{ padding: "6px 8px" }} rowSpan={row.teams.length}>
+                                        <input
+                                          value={row.name}
+                                          onChange={e => {
+                                            const v = e.target.value;
+                                            setBatchTeachers(arr => arr.map((r, i) => i === idx ? { ...r, name: v } : r));
+                                          }}
+                                          style={{ width: 90, background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: 4, padding: "2px 6px" }}
+                                        />
+                                      </td>
+                                    )}
+                                    <td style={{ padding: "6px 8px" }}>
+                                      <input
+                                        value={team.teamName}
+                                        onChange={e => {
+                                          const v = e.target.value;
+                                          setBatchTeachers(arr => arr.map((r, i) => i === idx ? {
+                                            ...r,
+                                            teams: r.teams.map((tm, j) => j === tIdx ? { ...tm, teamName: v } : tm)
+                                          } : r));
+                                        }}
+                                        style={{ width: 110, background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: 4, padding: "2px 6px" }}
+                                      />
+                                    </td>
+                                    <td style={{ padding: "6px 8px" }}>
+                                      <input
+                                        value={team.inviteCode}
+                                        onChange={e => {
+                                          const v = e.target.value;
+                                          setBatchTeachers(arr => arr.map((r, i) => i === idx ? {
+                                            ...r,
+                                            teams: r.teams.map((tm, j) => j === tIdx ? { ...tm, inviteCode: v } : tm)
+                                          } : r));
+                                        }}
+                                        style={{ width: 100, background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid var(--border)", borderRadius: 4, padding: "2px 6px" }}
+                                      />
+                                    </td>
+                                    <td style={{ padding: "6px 8px" }}>
+                                      <span className="admin-action-group" style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                                        {/* 移除团队按钮 */}
+                                        <button
+                                          type="button"
+                                          className="admin-sm-btn danger"
+                                          style={{ padding: "2px 6px" }}
+                                          title="移除该团队"
+                                          onClick={() => {
+                                            setBatchTeachers(arr => arr.map((r, i) => i === idx ? {
+                                              ...r,
+                                              teams: r.teams.filter((_, j) => j !== tIdx)
+                                            } : r));
+                                          }}
+                                          disabled={row.teams.length === 1}
+                                        >
+                                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                        </button>
+                                        {/* 新增团队按钮 */}
+                                        {tIdx === row.teams.length - 1 && (
+                                          <button
+                                            type="button"
+                                            className="admin-sm-btn"
+                                            style={{ padding: "2px 6px" }}
+                                            title="添加团队"
+                                            onClick={() => {
+                                              setBatchTeachers(arr => arr.map((r, i) => i === idx ? {
+                                                ...r,
+                                                teams: [
+                                                  ...r.teams,
+                                                  { teamName: `教师团队${idx + 1}-${r.teams.length + 1}`, inviteCode: `TEAM${1000 + idx * 10 + r.teams.length}` }
+                                                ]
+                                              } : r));
+                                            }}
+                                          >
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                                          </button>
+                                        )}
+                                        {/* 删除教师按钮 */}
+                                        {tIdx === 0 && (
+                                          <button
+                                            type="button"
+                                            className="admin-sm-btn danger"
+                                            style={{ padding: "2px 6px" }}
+                                            title="删除该教师"
+                                            onClick={() => {
+                                              setBatchTeachers(arr => arr.filter((_, i) => i !== idx));
+                                            }}
+                                          >
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 6V4a4 4 0 1 1 8 0v2"/></svg>
+                                          </button>
+                                        )}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : null
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+                  {/* 账号预览和结果展示，保留原有逻辑 */}
                   <div className="admin-form-preview" style={{ marginTop: 8, fontSize: 12 }}>
                     <span>账号预览：</span>
                     <span style={{ fontFamily: "monospace" }}>{`${batchPrefix}${String(batchStartIndex).padStart(3, "0")}`}</span>
@@ -1423,6 +1928,9 @@ export default function AdminPage() {
                   </div>
                   {batchResult && (
                     <div className="admin-form-result" style={{ marginTop: 8, fontSize: 12 }}>
+                      {batchResult.status === "partial" && (
+                        <div style={{ color: "#e07070", marginBottom: 4 }}>{batchResult.message}</div>
+                      )}
                       <strong>已创建 {batchResult.count} 个账号</strong>
                       {Array.isArray(batchResult.passwords) && batchResult.passwords.length > 0 && (
                         <ul style={{ marginTop: 4 }}>

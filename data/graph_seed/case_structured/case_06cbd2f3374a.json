@@ -1,0 +1,359 @@
+{
+  "case_id": "case_06cbd2f3374a",
+  "document_id": "doc_bd4b356ed308",
+  "source": {
+    "file_path": "智能制造/面向人工光合作用的新型纳米超晶格材料.doc",
+    "file_name": "面向人工光合作用的新型纳米超晶格材料.doc",
+    "category": "智能制造",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 207,
+    "full_text_chars": 8328,
+    "core_text_chars": 8225,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 208,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 208,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "面向人工光合作用的新型纳米超晶格材料",
+    "target_users": [],
+    "pain_points": [
+      "、清洁、循环使用的挑战与环境的现实问题。",
+      "详细介绍： 面向人工光合作用的新型纳米超晶格材料李君1，全映州2 摘要：作品通过合成可模拟自然界绿叶光合作用的新型纳米超晶格材料，合理、高效、 廉价的利用可再生",
+      "关键词：分解水制氢，能源存储，环境监测一、研究背景在经济、社会、文化、科技等多种因素共同影响下，人类社会正飞速发展，与此同时也带来一系列能源短缺，环境污染和人类"
+    ],
+    "solution": [
+      "本项目通过一步法合成纳米碳层包覆金属的超晶格结构，并将其直接生长在导电基底上，用于构建双功能电化学催化器件。",
+      "该器件结合太阳能电池，利用太阳能分解水制氢，实现了较高的光电转化效率。",
+      "该材料结构也被用于构建超级电容器，以实现能源存储功能。"
+    ],
+    "innovation_points": [
+      "采用一步法将碳包金属纳米超晶格结构直接生长在基底上，方法简便。",
+      "采用液态前驱体，可以将任意导电基底浸入其中，可实现柔性功能化器件的应用。",
+      "创造性地将超晶格材料与太阳能电池配合，使利用太阳能分解水的效率提高到10%以上，且器件启动电位更低、电流密度更高。"
+    ],
+    "business_model": [
+      "合成步骤简单，生产成本降低，有利于进行工业化生产。",
+      "一步浸蘸-煅烧的方法非常方便，有利于规模化生产。"
+    ],
+    "market_analysis": [
+      "超级电容器是介于充电电池和电容器之间的新型能源器件，在储备太阳能、风能等可再生能源，以及电动交通工具制动、便携式设备、应急后备电源等方面有广阔应用前景。"
+    ],
+    "execution_plan": [
+      "首先制备油酸-金属胶束液态前驱体，利用热分解的方法在碳纤维基底上直接生长出超晶格结构。",
+      "运用一步浸蘸的方法，将碳纤维基底浸入前驱体溶液，干燥后实现前驱体与基底的复合。",
+      "在Ar保护下运用化学气相沉积仪进行350°C碳化反应，形成外层碳膜，制成纳米碳层包覆金属纳米超晶格颗粒。"
+    ],
+    "risk_control": []
+  },
+  "tags": [
+    "category:智能制造",
+    "education_level:unknown",
+    "doc_type:doc",
+    "risk_control:missing",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_06cbd2f3374a_e1",
+      "type": "user_evidence",
+      "quote": "作品通过合成可模拟自然界绿叶光合作用的新型纳米超晶格材料，合理、高效、廉价的利用可再生清洁能源太阳能的巨大优势，以实现高效太阳能分解水制氢、超长寿命能源存储和高灵敏度环境监测",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_06cbd2f3374a_e2",
+      "type": "business_model_evidence",
+      "quote": "我们使用非常简单的合成步骤，得到同种超晶格结构，设计制作了集成化的双功能电化学催化器件，使生产成本降低，有利于进行工业化生产",
+      "chunk_id": "C8",
+      "source_unit": "段落122"
+    },
+    {
+      "id": "case_06cbd2f3374a_e3",
+      "type": "business_model_evidence",
+      "quote": "创造性的将其与太阳能电池配合，使利用太阳能这种可再生能源分解水的效率提高到10%以上，相比其他同类工作，这种方法制成的超晶格结构器件分解水启动电位更低，负载活性物质的量成倍增加，在相同电压下的电流密度也成倍增长。",
+      "chunk_id": "C8",
+      "source_unit": "段落122"
+    },
+    {
+      "id": "case_06cbd2f3374a_e4",
+      "type": "business_model_evidence",
+      "quote": "水分解在电压1.7 V情况下能达到30 mA cm-2，达到较高的光电转化效率，为可再生能源的利用提供了有效思路，有利于实现工业化生产。",
+      "chunk_id": "C8",
+      "source_unit": "段落122"
+    },
+    {
+      "id": "case_06cbd2f3374a_e5",
+      "type": "business_model_evidence",
+      "quote": "我们的合成过程只需用一步浸蘸-煅烧的方法，是非常方便的，有利于规模化生产。",
+      "chunk_id": "C10",
+      "source_unit": "段落153"
+    },
+    {
+      "id": "case_06cbd2f3374a_e6",
+      "type": "market_analysis_evidence",
+      "quote": "超级电容器是近年来出现的一种新型能源器件，它是连接传统介质电容器和电池之间的重要桥梁。超级电容器在许多领域都有广阔的应用前景，如：储备太阳能、风能及其它再生能源用于电动交通工具的制动、便携式仪器设备、数据记忆存储系统、应急后备电源等方面。",
+      "chunk_id": "C3",
+      "source_unit": "段落38"
+    },
+    {
+      "id": "case_06cbd2f3374a_e7",
+      "type": "execution_plan_evidence",
+      "quote": "首先制备油酸-金属胶束液态前驱体，利用热分解的方法在碳纤维基底上直接生长出均匀、高分散度、介孔结构、高比表面的被包覆在纳米碳层中的金属超晶格结构。",
+      "chunk_id": "C5",
+      "source_unit": "段落71"
+    },
+    {
+      "id": "case_06cbd2f3374a_e8",
+      "type": "execution_plan_evidence",
+      "quote": "我们运用一步浸蘸的方法，将合适大小的碳纤维基底浸入前驱体溶液，然后50°C烘箱加热条件下充分干燥，即可实现前驱体与基底的充分复合，获得基底上的均匀分布超晶格材料。",
+      "chunk_id": "C6",
+      "source_unit": "段落87"
+    },
+    {
+      "id": "case_06cbd2f3374a_e9",
+      "type": "execution_plan_evidence",
+      "quote": "在Ar保护下运用化学气相沉积仪进行350°C碳化反应，使材料脱去氢、氧，通过充分的高温热分解使油酸-金属的长碳链断裂，形成外层碳膜。最后成功制成了得到纳米碳层包覆金属纳米超晶格颗粒。",
+      "chunk_id": "C6",
+      "source_unit": "段落87"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": false
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "作品名称： 面向人工光合作用的新型纳米超晶格材料 大类： 自然科学类学术论文 小类： 能源化工 简介： 作品通过合成可模拟自然界绿叶光合作用的新型纳米超晶格材料，合理、高效、廉价的 利用可再生清洁能源太阳能的巨大优势，以实现高效太阳能分解水制氢、超长寿命能源 存储和高灵敏度环境监测，提供了提高器件应用竞争力的新思路，协同解决了能源高效 、清洁、循环使用的挑战与环境的现实问题。 详细介绍： 面向人工光合作用的新型纳米超晶格材料 李 君1，全映州2 摘要：作品通过合成可模拟自然界绿叶光合作用的新型纳米超晶格材料，合理、高效、 廉价的利用可再生清洁能源太阳能的巨大优势，以实现高效太阳能分解水制氢、超长寿 命能源存储和高灵敏度环境监测，提供了提高器件应用竞争力的新思路，协同解决了能 源高效、清洁、循环使用的挑战与环境的现实问题。 关键词：分解水制氢，能源存储，环境监测 一、研究背景 在经济、社会、文化、科技等多种因素共同影响下，人类社会正飞速发展，与此同时也 带来一系列能源短缺，环境污染和人类健康的问题，这对人类的生存和发展构成了威胁 [1]。所以，开发可再生能源以及有效的能量储存和转换技术是",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:14:43Z",
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H5",
+    "H6",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了能源短缺、环境污染等现实问题，并提出了具体的应用场景。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目详细描述了合成方法和技术路线，且强调了方法的简便性和低成本。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未明确描述客户、价值主张、渠道、营收、成本等商业模型要素。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目未提供市场规模（TAM/SAM/SOM）的具体数据，也未进行竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目未提供财务分析，如单位经济、LTV、CAC 等。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 9.0,
+      "reason": "项目强调了创新点，如新型纳米超晶格材料的合成方法和应用效果，且有具体实验数据支持。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目未提供团队背景和执行计划，如里程碑和时间表。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目材料结构完整，描述清晰，但缺乏商业模型和市场分析的具体数据。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了目标用户（需要清洁能源解决方案的行业）和价值主张（高效、清洁、低成本的能源转换和存储技术）的一致性。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及具体获客渠道，但未表明渠道不可达。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "作品通过合成可模拟自然界绿叶光合作用的新型纳米超晶格材料，合理、高效、廉价的利用可再生清洁能源太阳能的巨大优势，以实现高效太阳能分解水制氢、超长寿命能源存储和高灵敏度环境监测",
+      "reason": "项目提到价值主张（高效、清洁、低成本的能源转换和存储技术），但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提及市场规模的具体数据，但未出现口径混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "在经济、社会、文化、科技等多种因素共同影响下，人类社会正飞速发展，与此同时也带来一系列能源短缺，环境污染和人类健康的问题，这对人类的生存和发展构成了威胁 [1]。",
+      "reason": "项目描述了能源短缺和环境污染的问题，但未提供用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "创造性的将其与太阳能电池配合，使利用太阳能这种可再生能源分解水的效率提高到10%以上，相比其他同类工作，这种方法制成的超晶格结构器件分解水启动电位更低，负载活性物质的量成倍增加，在相同电压下的电流密度也成倍增长。",
+      "reason": "项目声称其技术相比其他同类工作有显著优势，但未提供具体竞品分析或对比数据。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了具体的实验数据，如光电转化效率和电流密度，支持其创新点。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未提供财务数据，但未表明单位经济不成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "超级电容器是近年来出现的一种新型能源器件，它是连接传统介质电容器和电池之间的重要桥梁。超级电容器在许多领域都有广阔的应用前景，如：储备太阳能、风能及其它再生能源用于电动交通工具的制动、便携式仪器设备、数据记忆存储系统、应急后备电源等方面。",
+      "reason": "项目提到超级电容器的应用前景，但未提供具体市场占有率或增长策略的证据。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "我们的合成过程只需用一步浸蘸-煅烧的方法，是非常方便的，有利于规模化生产。",
+      "reason": "项目未提供具体的时间表或里程碑，仅描述了合成方法的简便性。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域，如隐私、医疗、金融等。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了合成方法和技术路线，且强调了方法的简便性和低成本，未表明技术路线与资源不匹配。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目提供了具体的实验步骤和结果，如光电转化效率和电流密度。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，描述清晰，未出现叙事断裂。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "作品通过合成可模拟自然界绿叶光合作用的新型纳米超晶格材料，合理、高效、廉价的利用可再生清洁能源太阳能的巨大优势，以实现高效太阳能分解水制氢、超长寿命能源存储和高灵敏度环境监测，提供了提高器件应用竞争力的新思路，协同解决了能源高效、清洁、循环使用的挑战与环境的现实问题。",
+      "reason": "项目在多个关键 Rubric 维度（用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行）缺乏支撑证据。"
+    }
+  ]
+}

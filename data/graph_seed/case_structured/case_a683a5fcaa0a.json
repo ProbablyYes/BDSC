@@ -70,18 +70,38 @@
     "rubric:Problem Definition",
     "rubric:Solution Feasibility",
     "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
     "rubric:Innovation & Differentiation",
     "rubric:Presentation Quality",
     "risk_rule:H10",
     "risk_rule:H13",
     "risk_rule:H15",
     "risk_rule:H3",
-    "risk_rule:H4",
-    "risk_rule:H5",
-    "risk_rule:H6",
-    "risk_rule:H9"
+    "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_a683a5fcaa0a_e1",
+      "type": "user_evidence",
+      "quote": "聚焦当代大学生学习过程中的核心痛点——学习动力不足、个性化学习缺失及知识点融会贯通困难",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_a683a5fcaa0a_e2",
+      "type": "business_model_evidence",
+      "quote": "经市场调研与主流教育软件对比分析，本平台形成五大核心竞争优势",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    },
+    {
+      "id": "case_a683a5fcaa0a_e3",
+      "type": "risk_evidence",
+      "quote": "上述特性有效弥补了当前面向大学生的工程类学习软件在实践性、个性化和系统性方面的短板，展现出显著的市场适配性与技术创新潜力",
+      "chunk_id": "C1",
+      "source_unit": "page_2"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -101,7 +121,7 @@
     },
     {
       "rubric_item": "Market & Competition",
-      "covered": false
+      "covered": true
     },
     {
       "rubric_item": "Financial Logic",
@@ -135,65 +155,62 @@
     "H13",
     "H15",
     "H3",
-    "H4",
-    "H5",
-    "H6",
-    "H9"
+    "H5"
   ],
   "rubric_items_detail": [
     {
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "项目明确指出了学习动力缺失、教学缺乏针对性和学习效率低下的问题，并提供了具体用户场景。"
+      "reason": "项目明确指出了学习动力缺失、教学缺乏针对性和学习效率低下的痛点，并提供了具体的用户场景。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
       "score": 3.0,
-      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。"
+      "reason": "项目提到经过市场调研，但未提供具体的访谈、问卷或行为数据等原始证据。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提出了AI驱动的成瘾性教学、个性化学习模式和智能诊断与路径规划，技术路线与资源匹配。"
+      "reason": "项目提出了AI驱动的成瘾性教学、个性化学习模式和智能诊断与路径规划，技术路线与资源匹配度较高。"
     },
     {
       "item": "Business Model Consistency",
       "covered": true,
       "score": 7.0,
-      "reason": "项目商业模式包括实验平台租赁与销售、定制化AI教育课程插件和增值数据分析服务，形成了较为完整的闭环。"
+      "reason": "项目提出了面向高校提供实验平台租赁与销售、定制化AI教育课程插件和基于平台的增值数据分析服务，形成了较为完整的商业模式。"
     },
     {
       "item": "Market & Competition",
-      "covered": false,
-      "score": 4.0,
-      "reason": "项目提到了市场背景和需求，但未详细分析市场规模（TAM/SAM/SOM）和竞品情况。"
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提到了市场调研与主流教育软件的对比分析，展示了五大核心竞争优势。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
-      "score": 3.0,
-      "reason": "项目未提供具体的财务数据，无法判断单位经济是否成立。"
+      "score": 4.0,
+      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV和CAC等。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "项目强调了AI驱动的成瘾性教学、个性化学习模式和智能诊断与路径规划，具有明显的创新点。"
+      "reason": "项目强调了AI驱动的成瘾性教学、个性化学习模式和智能诊断与路径规划，具有明显的创新点和差异化。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
-      "score": 4.0,
-      "reason": "项目未详细描述团队背景和执行计划，里程碑不够清晰。"
+      "score": 5.0,
+      "reason": "项目未详细描述团队背景和具体里程碑，难以评估团队能力和执行计划的现实性。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "项目PPT展示了关键内容，结构较为完整，但缺乏详细数据支撑。"
+      "reason": "项目PPT展示了关键内容，结构较为完整，但未提供详细数据支持。"
     }
   ],
   "risk_rule_details": [
@@ -201,106 +218,106 @@
       "id": "H1",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目目标用户与价值主张匹配，未出现明显错位。"
+      "evidence": "项目明确指出了目标用户和价值主张的匹配性。",
+      "reason": "项目描述中目标用户与价值主张匹配度较高。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目未提及具体获客渠道，但未表明难以触达目标用户。"
+      "evidence": "项目提到面向高校提供实验平台租赁与销售，渠道较为明确。",
+      "reason": "项目渠道较为明确，但未详细说明如何有效触达。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
-      "evidence": "面向高校提供实验平台租赁与销售。",
-      "reason": "项目提到定价/收费但未提供用户支付意愿验证。"
+      "evidence": "项目提到定价/收费但未提供用户支付意愿验证。",
+      "reason": "项目提到面向高校提供实验平台租赁与销售，但未提供用户支付意愿验证。"
     },
     {
       "id": "H4",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "背景：人工智能+教育教学赛道，响应国家教育数字化转型。 需求：理工科实验教学对沉浸式、高交互平台的需求日益增长。",
-      "reason": "项目未详细说明TAM/SAM/SOM口径，市场分析较为模糊。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了TAM/SAM/SOM口径合理。",
+      "reason": "项目未提到具体的TAM/SAM/SOM口径，但未发现口径混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
-      "severity": "high",
-      "evidence": "学习动力缺失：学生感到枯燥乏味，难以看到学习的即时价值。 教学缺乏针对性：传统方式无法满足个性化需求。 学习效率低下：面对复杂学科，知识点难以融会贯通。",
-      "reason": "项目提到了需求但未提供具体的用户访谈、问卷或其他需求验证证据。"
+      "severity": "medium",
+      "evidence": "项目提到经过市场调研，但未提供具体的访谈、问卷或行为数据等原始证据。",
+      "reason": "项目缺乏具体的用户访谈、问卷或行为数据等需求验证证据。"
     },
     {
       "id": "H6",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "技术风险：视觉伺服的精度与延迟控制。 市场风险：传统教学观念的转变及高校采购周期长。",
-      "reason": "项目提到了市场风险但未进行详细的竞品分析，存在竞品对比不可比的风险。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目提到了与主流教育软件的对比分析。",
+      "reason": "项目进行了竞品分析，但未声称无竞品或分析失真。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目强调了创新点，并提供了具体的技术方案。"
+      "evidence": "项目提到了AI驱动的成瘾性教学、个性化学习模式和智能诊断与路径规划，并提供了实验设计。",
+      "reason": "项目强调了创新点，并提到了实验设计，但未提供具体实验结果。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目未提供具体财务数据，但未表明单位经济不成立。"
+      "evidence": "项目未提供具体的财务数据，但未发现单位经济不成立的描述。",
+      "reason": "项目未提供具体的财务数据，但未发现单位经济不成立的描述。"
     },
     {
       "id": "H9",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "背景：人工智能+教育教学赛道，响应国家教育数字化转型。 需求：理工科实验教学对沉浸式、高交互平台的需求日益增长。",
-      "reason": "项目提到市场增长趋势但未提供具体增长逻辑，存在自上而下估算的风险。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未出现‘只要拿下1%市场’等自上而下估算。",
+      "reason": "项目未出现‘只要拿下1%市场’等自上而下估算。"
     },
     {
       "id": "H10",
       "triggered": true,
       "severity": "medium",
-      "evidence": "系统集成阶段：视觉伺服系统与学习平台的联调。 测试迭代阶段：收集学生学习数据，优化AI推荐算法。",
-      "reason": "项目里程碑描述较为模糊，缺乏具体可交付物和时间表。"
+      "evidence": "项目未详细描述团队背景和具体里程碑，难以评估团队能力和执行计划的现实性。",
+      "reason": "项目未详细描述团队背景和具体里程碑，难以评估团队能力和执行计划的现实性。"
     },
     {
       "id": "H11",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目未涉及高风险领域，未出现合规/伦理缺口。"
+      "evidence": "项目未涉及隐私、医疗、金融等高风险领域。",
+      "reason": "项目未涉及隐私、医疗、金融等高风险领域。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目技术路线与资源匹配，未出现技术路线与资源不匹配的风险。"
+      "evidence": "项目提到了视觉伺服的精度与延迟控制，但未发现技术路线与资源不匹配的描述。",
+      "reason": "项目提到了视觉伺服的精度与延迟控制，但未发现技术路线与资源不匹配的描述。"
     },
     {
       "id": "H13",
       "triggered": true,
       "severity": "medium",
-      "evidence": "测试迭代阶段：收集学生学习数据，优化AI推荐算法。",
-      "reason": "项目提到实验/测试但未提供样本量与评价指标。"
+      "evidence": "项目提到实验/测试但缺少样本量与评价指标。",
+      "reason": "项目提到实验/测试但未提供具体的样本量与评价指标。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
-      "evidence": "",
-      "reason": "项目PPT展示了关键内容，叙事结构较为完整。"
+      "evidence": "项目PPT展示了关键内容，结构较为完整。",
+      "reason": "项目PPT展示了关键内容，结构较为完整。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
-      "evidence": "项目未提供具体的用户访谈、问卷或其他需求验证证据。 项目提到了市场风险但未进行详细的竞品分析。 项目未提供具体的财务数据。 项目里程碑描述较为模糊，缺乏具体可交付物和时间表。 项目提到实验/测试但未提供样本量与评价指标。",
-      "reason": "多个关键Rubric维度缺乏支撑证据，包括用户证据强度、市场与竞争、财务逻辑和里程碑。"
+      "evidence": "项目多个关键Rubric维度缺乏支撑证据，如用户证据强度、财务逻辑和团队与执行。",
+      "reason": "项目多个关键Rubric维度缺乏支撑证据，如用户证据强度、财务逻辑和团队与执行。"
     }
   ]
 }

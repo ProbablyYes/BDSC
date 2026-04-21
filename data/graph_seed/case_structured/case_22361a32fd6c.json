@@ -1,0 +1,364 @@
+{
+  "case_id": "case_22361a32fd6c",
+  "document_id": "doc_cc6dc184e469",
+  "source": {
+    "file_path": "医疗健康/甲壳质材料研究&开发_“挑战杯”全国大学生创业计划大赛金奖作品.doc",
+    "file_name": "甲壳质材料研究&开发_“挑战杯”全国大学生创业计划大赛金奖作品.doc",
+    "category": "医疗健康",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1140,
+    "full_text_chars": 37113,
+    "core_text_chars": 5720,
+    "appendix_start_index": 270,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 1141,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1141,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "甲壳质材料研究&开发有限责任公司",
+    "target_users": [
+      "需要进行伤口缝合、组织结扎和固定手术的病人",
+      "外科主刀医师和护士长（使用者与购买决策者）",
+      "医院的采购部门（实际购买者）"
+    ],
+    "pain_points": [
+      "PGA类可吸收缝合线大量依赖进口，价格昂贵，增加了国家和手术病人的经济负担",
+      "羊肠线生产工艺落后，污染环境，可吸收性差，易过敏和产生抗体反应",
+      "国内部分可吸收缝合线（如“华利康”）存在售后服务不完善和质量问题"
+    ],
+    "solution": [
+      "生产以纯天然甲壳质为主要原料的医用甲壳质可吸收缝合线，该产品能被人体完全吸收且无毒副作用",
+      "利用国际领先的甲壳质纤维制备专利技术，实现产品生产成本仅为PGA类缝合线的十分之一",
+      "采用竞争定价策略，产品平均定价30元/根，约为PGA类缝合线平均市场价格的一半"
+    ],
+    "innovation_points": [
+      "采用纯天然甲壳质作为原料，是一种可吸收、可降解的纯天然生物高分子材料",
+      "产品具有优异的生物相容性、无免疫抗原性，能促进组织生长并加速伤口愈合",
+      "拥有甲壳质纤维制备的核心专利技术，形成了技术壁垒"
+    ],
+    "business_model": [
+      "主要收入来源于医用甲壳质可吸收缝合线的销售，产品平均定价30元/根，生产成本约2.1元/根",
+      "通过在全国设立区域分销中心并与代理商合作，建立健全的营销网络",
+      "产品进入市场时将大量赠送产品让医生试用，作为促销和提高市场占有率的手段",
+      "关键成本包括固定资产投资602万与流动资金498万，公司成立初期共需资金1100万"
+    ],
+    "market_analysis": [
+      "1999年国内医用缝合线市场容量约为15亿人民币，其中可吸收缝合线金额约占总量的50%",
+      "市场按开发程度分为三类：大量使用PGA类线的高端市场、大量使用羊肠线的中端市场、仍使用丝线的低端市场",
+      "主要竞争对手为进口PGA类缝合线品牌（如强生、氰胺）以及国内的丝线、羊肠线生产厂家"
+    ],
+    "execution_plan": [
+      "公司成立初期生产医用甲壳质可吸收缝合线，投资建厂，并建立ISO9000质量管理体系",
+      "计划在第一年赠送90万根产品供医生试用，第二年赠送160万根，第三年以后每年赠送80万根",
+      "中长期目标将逐步拓宽产品领域，涉足甲壳质医用抗菌材料、药物缓释材料等，形成多元化经营集团"
+    ],
+    "risk_control": [
+      "【通用风险控制】针对产品生命周期短、更新换代快的替代风险，计划着力研究新技术、开发新产品、加强市场营销以化解威胁",
+      "【合规与伦理意识】医疗器械销售需取得《医疗器械生产许可证》、《医疗器械销售许可证》、《产品合格证》三证，已将合规作为市场准入前提"
+    ]
+  },
+  "tags": [
+    "category:医疗健康",
+    "education_level:unknown",
+    "doc_type:doc",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Financial Logic",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H5",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_22361a32fd6c_e1",
+      "type": "user_evidence",
+      "quote": "医用缝合线的实际消费者是病人，使用者和购买决策者是外科主刀医师和护士长，实际购买者是采购部门。",
+      "chunk_id": "C6",
+      "source_unit": "段落161"
+    },
+    {
+      "id": "case_22361a32fd6c_e2",
+      "type": "business_model_evidence",
+      "quote": "产品生产成本约2.1元/根，是PGA类缝合线的十分之一；平均定价30元/根（据调查，市场可接受价格为30—40元/根），大约是PGA类缝合线平均市场价格的1/2。",
+      "chunk_id": "C2",
+      "source_unit": "段落73"
+    },
+    {
+      "id": "case_22361a32fd6c_e3",
+      "type": "business_model_evidence",
+      "quote": "公司将在全国设立七个区域分销中心，与代理商、经销商一起建立健全的营销网络。产品进入市场的过程中将大量赠送产品让医生试用作为促销手段和提高市场占有率的手段，第一年赠送90万根，第二年赠送160万根，第三年以后每年赠送80万根。",
+      "chunk_id": "C2",
+      "source_unit": "段落73"
+    },
+    {
+      "id": "case_22361a32fd6c_e4",
+      "type": "business_model_evidence",
+      "quote": "公司成立初期共需资金1100万。其中风险投资700万，东华大学投入资金100万，短期借款300万。其中用于固定资产投资602万，流动资金498万。",
+      "chunk_id": "C2",
+      "source_unit": "段落73"
+    },
+    {
+      "id": "case_22361a32fd6c_e5",
+      "type": "risk_evidence",
+      "quote": "替代风险：高新技术产品的生命周期较短，更新换代快。甲壳质缝合线有可能被其他产品如吻合器、激光设备、伤口粘合剂替代，应着力研究新技术，开发新产品，加强市场营销，化解被替代威胁。",
+      "chunk_id": "C9",
+      "source_unit": "段落249"
+    },
+    {
+      "id": "case_22361a32fd6c_e6",
+      "type": "risk_evidence",
+      "quote": "医疗器械的销售要三证齐全，三证是《医疗器械生产许可证》、《医疗器械销售许可证》、《产品合格证》，有些地方还要求由当地卫生主管部门核发的《准销证》。",
+      "chunk_id": "C6",
+      "source_unit": "段落161"
+    },
+    {
+      "id": "case_22361a32fd6c_e7",
+      "type": "risk_evidence",
+      "quote": "公司拥有甲壳质纤维制备技术专利，同类产品的潜在竞争者需经授权许可才能进入，也给替代品的出现构成障碍。",
+      "chunk_id": "C9",
+      "source_unit": "段落249"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": true
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "创业计划书范文 甲壳质材料研究&开发有限责任公司 本案例为首届“挑战杯”全国大学生创业计划大赛金奖作品。 目 录 9 管理体系 21 10 机遇与风险 22 11 风险资本的退出 23 附 录 23 附1 市场容量估算 23 我国医用缝合线每年约有15亿人民币的市场需求，其中可吸收缝合线约有7.5亿。公 司成立初期生产医用甲壳质可吸收缝合线，以满足迅速发展的可吸收缝合线市场的需求 ，使用投资建厂解决方案，针对解决PGA（Polyglycolic Acid聚乙二醇酸）类可吸收缝合线大部分依赖进口、价格昂贵、影响提高人们医疗水平 的问题。 甲壳质材料研究&开发有限责任公司是一个提议中的公司，以生产甲壳质系列产品为 主，拥有甲壳质纤维制备的专利技术，提倡科技为本的绿色生活新理念，为人类提供尽 善尽美的天然生物产品。 公司注重短期目标与长远战略的结合，中长期目标将逐步拓宽产品领域，涉足甲壳质 医用抗菌材料、药物缓释材料、人造器官、化妆品、保健食品、保健服装面料、新型环 保包装材料、快餐用具等，形成以甲壳质材料为核心的多元化经营集团公司。 公司拥有世界领先的甲壳质纤维制备技术和高素质的管理队伍，",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:11:57Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H13",
+    "H15",
+    "H5",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出了PGA类可吸收缝合线依赖进口、价格昂贵，以及羊肠线的环境和健康问题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "利用甲壳质纤维制备专利技术，实现低成本生产，但未详细说明技术实现的具体步骤。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "商业模式包括销售、成本和渠道，但赠送产品的策略可能影响初期的财务表现。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "市场容量和竞争分析较为详细，但未提供具体数据来源。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": true,
+      "score": 8.0,
+      "reason": "单位经济模型合理，成本和定价清晰，但需关注赠送产品对现金流的影响。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "拥有核心专利技术，形成技术壁垒，产品具有明显优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "提到拥有高素质的管理队伍，但未具体说明团队成员背景和执行能力。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "材料结构完整，但部分内容缺乏具体数据支持。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张匹配，产品解决医生和病人的实际需求。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "通过设立区域分销中心和代理商合作，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到市场可接受价格为30—40元/根，定价策略合理。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "市场容量估算合理，分为高端、中端和低端市场。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未提供具体的用户访谈、问卷或行为数据等原始证据。",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "竞品分析较为客观，包括进口品牌和国内品牌。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "创新点有专利技术支撑，可验证性较高。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "单位经济模型合理，生产成本和定价清晰。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "第一年赠送90万根，第二年赠送160万根，第三年以后每年赠送80万根。",
+      "reason": "赠送产品数量巨大，存在自上而下估算的可能。"
+    },
+    {
+      "id": "H10",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "时间表和里程碑较为清晰，但需关注实际执行情况。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到医疗器械销售需取得三证，合规意识较强。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "技术路线与资源匹配，专利技术支撑。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "未详细说明技术实现的具体步骤和实验设计。",
+      "reason": "技术实现的具体步骤和实验设计缺乏详细说明。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "材料结构完整，逻辑清晰。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "团队与执行能力描述不足，用户证据强度不足。",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如团队与执行能力、用户证据强度。"
+    }
+  ]
+}

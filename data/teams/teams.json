@@ -210,5 +210,23 @@
     "teacher_name": "贪吃蛇",
     "members": [],
     "created_at": "2026-04-12T15:52:08.922842+08:00"
+  },
+  {
+    "team_id": "6ccd1dcc-ca63-41b8-9ff8-69d87c8cbe56",
+    "team_name": "教师团队1-1",
+    "invite_code": "TEAM1493",
+    "teacher_id": "02b518f5-6db2-4068-9d0a-def491f3e6d1",
+    "teacher_name": "教师1",
+    "members": [],
+    "created_at": "2026-04-20T03:15:41.749786+08:00"
+  },
+  {
+    "team_id": "b3b5f2f3-e43f-45b3-837c-80524feea15d",
+    "team_name": "教师团队1-2",
+    "invite_code": "TEAM1001",
+    "teacher_id": "02b518f5-6db2-4068-9d0a-def491f3e6d1",
+    "teacher_name": "教师1",
+    "members": [],
+    "created_at": "2026-04-20T03:15:41.768925+08:00"
   }
 ]

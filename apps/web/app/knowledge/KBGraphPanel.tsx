@@ -115,6 +115,7 @@ export default function KBGraphPanel({ onClose }: Props) {
     business_model: "商业模式", market: "市场分析", execution: "执行计划",
     risk_control: "风控", evidence: "证据", stakeholder: "利益方",
     category: "类别", risk_rule: "风险规则", rubric: "评审标准", project: "项目",
+    entrepreneur_domain: "创业领域", competition: "赛事类型", entrepreneurship: "创业案例", innovation_case: "创新案例"
   };
 
   const galaxyGraphData = useMemo(() => {
@@ -131,8 +132,27 @@ export default function KBGraphPanel({ onClose }: Props) {
       return () => { s = (s * 16807 + 0) % 2147483647; return s / 2147483647; };
     };
 
+    // 创业领域/创业/创新/赛事类型节点特殊布局
     const nodes = rawNodes.map((n: any, idx: number) => {
       const rand = rng(idx * 7919 + 31);
+      // 创业领域节点聚集在右上角，颜色根据level_rank高亮
+      if (n.type === "entrepreneur_domain") {
+        let color = n.color || "#fb923c";
+        if (n.level_rank === 2 || n.level_rank === "2") color = "#ef4444";
+        return { ...n, fx: 350 + (rand() - 0.5) * 60, fy: -250 + (rand() - 0.5) * 60, color };
+      }
+      // 赛事类型节点聚集在右下角
+      if (n.type === "competition") {
+        return { ...n, fx: 350 + (rand() - 0.5) * 60, fy: 250 + (rand() - 0.5) * 60 };
+      }
+      // 创业案例节点聚集在左下角
+      if (n.type === "entrepreneurship") {
+        return { ...n, fx: -350 + (rand() - 0.5) * 60, fy: 250 + (rand() - 0.5) * 60 };
+      }
+      // 创新案例节点聚集在左上角
+      if (n.type === "innovation") {
+        return { ...n, fx: -350 + (rand() - 0.5) * 60, fy: -250 + (rand() - 0.5) * 60 };
+      }
       if (n.type === "Project" || n.subgraph === "project") {
         return { ...n, fx: (rand() - 0.5) * 180, fy: (rand() - 0.5) * 180 };
       }
@@ -480,9 +500,20 @@ export default function KBGraphPanel({ onClose }: Props) {
                    : kgFullError ? <ErrorBox msg={kgFullError} onRetry={() => { setKgFullError(""); loadKGFull(); }} />
                    : galaxyGraphData.nodes.length > 0 ? (
                     <ForceGraph2D ref={kgGalaxyRef} graphData={galaxyGraphData}
-                      nodeColor={(n: any) => n.color || "#94a3b8"}
+                      nodeColor={(n: any) => {
+                        return n.color || "#94a3b8";
+                      }}
                       nodeVal={() => 0.6}
-                      nodeLabel={(n: any) => `${n.name || ""} [${n.type || ""}]${n.category ? " · " + n.category : ""}`}
+                      nodeLabel={(n: any) => {
+                        let label = n.name || "";
+                        if (n.type === "entrepreneur_domain") label += " [创业领域]";
+                        else if (n.type === "competition") label += " [赛事]";
+                        else if (n.type === "entrepreneurship") label += " [创业]";
+                        else if (n.type === "innovation") label += " [创新]";
+                        else label += n.type ? ` [${n.type}]` : "";
+                        if (n.category) label += ` · ${n.category}`;
+                        return label;
+                      }}
                       linkColor={() => "rgba(148,163,184,0.04)"}
                       linkWidth={0.3}
                       onRenderFramePost={renderGalaxySectors}
@@ -552,6 +583,17 @@ export default function KBGraphPanel({ onClose }: Props) {
                       )}
                     </>
                   )}
+                {/* 图例/说明区分创业领域/创业/创新/赛事节点 */}
+                <div className="kb-legend-section">
+                  <h4>节点类型图例</h4>
+                  <div className="kb-legend-grid">
+                    <div className="kb-legend-item"><span className="kb-legend-dot" style={{ background: "#fb923c" }} />创业领域</div>
+                    <div className="kb-legend-item"><span className="kb-legend-dot" style={{ background: "#fb923c" }} />创业案例</div>
+                    <div className="kb-legend-item"><span className="kb-legend-dot" style={{ background: "#a78bfa" }} />创新案例</div>
+                    <div className="kb-legend-item"><span className="kb-legend-dot" style={{ background: "#f472b6" }} />赛事类型</div>
+                  </div>
+                  <div className="kb-legend-tip">创业领域/创业/创新/赛事节点已单独分类和配色，悬停/点击节点可查看详细类型说明。</div>
+                </div>
                 </aside>
                 {/* ── Detail graph ── */}
                 <div className="kb-graph-area">
@@ -566,6 +608,7 @@ export default function KBGraphPanel({ onClose }: Props) {
                       nodeColor={(n: any) => {
                         if (kgDetailSelectedNode && n.id === kgDetailSelectedNode.id) return "#fbbf24";
                         if ((kgDetailFiltered as any).highlightIds?.size && !(kgDetailFiltered as any).highlightIds.has(n.id)) return "rgba(255,255,255,0.08)";
+                        
                         return n.color || "#94a3b8";
                       }}
                       nodeVal={(n: any) => n.size || 4}

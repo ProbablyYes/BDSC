@@ -67,12 +67,33 @@
     "rubric:Innovation & Differentiation",
     "rubric:Team & Execution",
     "rubric:Presentation Quality",
-    "risk_rule:H13",
+    "risk_rule:H11",
     "risk_rule:H15",
-    "risk_rule:H3",
     "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_9eda9c027008_e1",
+      "type": "user_evidence",
+      "quote": "为司法人员、律师和普通民众提供精准的法律建议。在司法实务层面，“物权智判”为法律职业群体提供全方位的智能辅助，如审理农村宅基地权属纠纷案件时，系统能够快速检索并推送类案裁判文书及裁判要点摘要，助力司法机关统一裁判尺度，提升审判质量。对于律师群体，在处理涉外厂房交易等复杂法律事务中，“法律冲突地图”模块可对中德两国物权登记效力的差异进行深度剖析，自动生成包含风险点提示及应对策略的专业报告",
+      "chunk_id": "C2",
+      "source_unit": "page_8"
+    },
+    {
+      "id": "case_9eda9c027008_e2",
+      "type": "user_evidence",
+      "quote": "系统基于浏览器-服务器(B/S)架构，前端采用 React 框架，后端基于 FastAPI框架，数据支撑由多种数据库构成，并通过阿里云百炼大模型实现智能功能",
+      "chunk_id": "C1",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_9eda9c027008_e3",
+      "type": "user_evidence",
+      "quote": "系统的数据来源广泛，包括多国法律法规、司法解释、裁判文书、司法考试题库、法学核心期刊和多部物权法著作，经过严格的清洗和标注，保障了数据的高质量",
+      "chunk_id": "C1",
+      "source_unit": "page_7"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -122,9 +143,8 @@
   "engine": "hypernetx",
   "generated_at": "2026-03-29T10:00:16Z",
   "risk_flags": [
-    "H13",
+    "H11",
     "H15",
-    "H3",
     "H5"
   ],
   "rubric_items_detail": [
@@ -132,55 +152,55 @@
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "项目明确指出了基层法院法官、法官助理及社会公众在物权纠纷案件中面临的痛点，包括案件数量庞大、复杂多样以及法律知识匮乏。"
+      "reason": "项目明确指出了基层法院法官、法官助理、社会公众和社区调解委员会在物权纠纷案件中面临的痛点，包括案件数量庞大、复杂多样和法律知识匮乏。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
-      "score": 2.0,
-      "reason": "项目文本中没有提供具体的用户访谈、问卷或行为数据等原始证据来支持需求的真实性。"
+      "score": 3.0,
+      "reason": "项目未提供具体的用户访谈、问卷或行为数据等原始证据，仅描述了痛点。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提出了基于大模型的端到端法律推理架构，包括意图识别、智能类案检索、层次化法律数据结构、跨模态法律检索和动态演化立场建模，技术路线较为清晰。"
+      "reason": "项目提出了基于大模型的端到端法律推理架构，包括意图识别、智能类案检索、层次化法律数据结构、跨模态法律检索和动态演化立场建模，技术路线与资源匹配。"
     },
     {
       "item": "Business Model Consistency",
       "covered": false,
-      "score": 3.0,
-      "reason": "项目文本中没有详细描述客户、价值主张、渠道、营收和成本等商业模式闭环的内容。"
+      "score": 4.0,
+      "reason": "项目未详细描述客户、价值主张、渠道、营收和成本的闭环，仅提到为司法人员、律师和普通民众提供法律建议。"
     },
     {
       "item": "Market & Competition",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提到了法律AI市场的年增长率超过20%，并指出了国家‘智慧法院’建设的行业趋势，但未详细分析具体竞品。"
+      "reason": "项目提到了国家“智慧法院”建设的行业趋势和法律AI市场的年增长率，但未详细分析竞品。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
-      "score": 2.0,
-      "reason": "项目文本中没有提供单位经济模型或财务预测，无法判断财务逻辑是否成立。"
+      "score": 3.0,
+      "reason": "项目未提供单位经济模型或财务预测，无法判断LTV和CAC。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "项目强调了基于大模型的法律推理系统在意图识别、智能类案检索、跨模态法律检索等方面的创新点。"
+      "reason": "项目强调了基于大模型的法律推理系统和跨模态法律检索等创新点，具有明显的差异化。"
     },
     {
       "item": "Team & Execution",
       "covered": true,
-      "score": 6.0,
-      "reason": "项目团队成员较多，且有指导老师支持，但未详细描述团队成员的具体能力和里程碑计划。"
+      "score": 7.0,
+      "reason": "项目团队成员背景多样，包括技术、法律等专业，指导老师也具备相关经验，但未详细描述里程碑。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
-      "score": 7.0,
-      "reason": "项目材料结构较为完整，提到了多个技术方案和行业趋势，但缺乏具体数据支持。"
+      "score": 8.0,
+      "reason": "项目材料结构完整，描述清晰，提供了高质量的数据来源和技术架构。"
     }
   ],
   "risk_rule_details": [
@@ -188,106 +208,106 @@
       "id": "H1",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目明确指出了目标用户（基层法院法官及法官助理、社会公众、社区调解委员会及政务咨询中心）和价值主张（解决物权纠纷案件数量庞大、复杂多样及法律知识匮乏的问题）",
-      "reason": "目标用户与价值主张匹配度较高。"
+      "evidence": "项目为司法人员、律师和普通民众提供精准的法律建议，符合目标用户的需求。",
+      "reason": "项目的价值主张与目标用户匹配，未发现错位。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目提到了目标用户包括基层法院法官及法官助理、社会公众、社区调解委员会及政务咨询中心，但未具体描述获客渠道。",
-      "reason": "虽然未具体描述获客渠道，但目标用户群体明确。"
+      "evidence": "项目提到为司法人员、律师和普通民众提供法律建议，渠道包括基层法院、社区调解委员会等。",
+      "reason": "项目描述了合理的获客渠道，未发现难以触达目标用户的问题。"
     },
     {
       "id": "H3",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "项目提到了定价/收费，但没有提供用户支付意愿的验证证据。",
-      "reason": "提到定价/收费但缺少用户支付意愿验证。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未提到具体定价，但强调了法律建议的价值。",
+      "reason": "项目未提到具体定价，但未发现支付意愿验证不足的问题。"
     },
     {
       "id": "H4",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目提到了法律AI市场的年增长率超过20%，并指出了国家‘智慧法院’建设的行业趋势。",
-      "reason": "市场规模口径较为合理。"
+      "evidence": "项目提到了TAM/SAM/SOM的行业趋势，法律AI市场年增长率超过20%。",
+      "reason": "项目描述了合理的市场规模口径，未发现混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
-      "severity": "high",
-      "evidence": "项目文本中没有提供具体的用户访谈、问卷或行为数据等原始证据来支持需求的真实性。",
-      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+      "severity": "medium",
+      "evidence": "项目未提供具体的用户访谈、问卷或行为数据等原始证据。",
+      "reason": "项目缺乏用户需求验证的原始证据。"
     },
     {
       "id": "H6",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目未声称‘无竞品/无竞争对手’，但未详细分析具体竞品。",
-      "reason": "虽然未详细分析具体竞品，但未声称‘无竞品/无竞争对手’。"
+      "evidence": "项目未声称无竞品，但未详细分析竞品。",
+      "reason": "项目未声称无竞品，但竞品分析不够详细。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目强调了基于大模型的法律推理系统在意图识别、智能类案检索、跨模态法律检索等方面的创新点，并提到了法律专家终审机制与引用来源回溯。",
-      "reason": "创新点较为明确且有验证机制。"
+      "evidence": "项目强调了基于大模型的法律推理系统和跨模态法律检索等创新点，并提供了技术架构。",
+      "reason": "项目提供了可验证的创新点和技术架构。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目文本中没有提供单位经济模型或财务预测，无法判断财务逻辑是否成立。",
-      "reason": "缺乏财务数据，无法判断单位经济是否成立。"
+      "evidence": "项目未提供单位经济模型或财务预测，但强调了法律建议的价值。",
+      "reason": "项目未提供单位经济模型，但未发现明显的单位经济不成立问题。"
     },
     {
       "id": "H9",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目提到了法律AI市场的年增长率超过20%，并指出了国家‘智慧法院’建设的行业趋势。",
-      "reason": "增长逻辑较为合理。"
+      "evidence": "项目未出现‘只要拿下1%市场’等自上而下估算。",
+      "reason": "项目未出现明显的增长逻辑跳跃。"
     },
     {
       "id": "H10",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目团队成员较多，且有指导老师支持，但未详细描述团队成员的具体能力和里程碑计划。",
-      "reason": "虽然未详细描述里程碑计划，但团队成员和指导老师支持较强。"
+      "evidence": "项目未详细描述时间表/里程碑，但团队成员背景多样，指导老师具备相关经验。",
+      "reason": "项目未详细描述时间表/里程碑，但团队背景和指导老师经验较强。"
     },
     {
       "id": "H11",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "项目提到了数据安全风险，严格保护当事人隐私数据，实施本地化部署或加密处理。",
-      "reason": "有数据安全和隐私保护措施。"
+      "triggered": true,
+      "severity": "high",
+      "evidence": "项目提到数据安全风险，但未详细描述合规机制。",
+      "reason": "项目涉及隐私数据，但未详细描述合规机制。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目提出了基于大模型的端到端法律推理架构，技术路线较为清晰。",
-      "reason": "技术路线与资源匹配度较高。"
+      "evidence": "项目基于浏览器-服务器(B/S)架构，前端采用React框架，后端基于FastAPI框架，数据支撑由多种数据库构成，并通过阿里云百炼大模型实现智能功能。",
+      "reason": "项目的技术路线与资源匹配，未发现明显不匹配问题。"
     },
     {
       "id": "H13",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "项目提到AI推理可能存在‘幻觉’，需建立法律专家终审机制与引用来源回溯，但未具体描述实验设计与评价指标。",
-      "reason": "提到实验但缺少样本量与评价指标。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "项目未提到具体实验/测试，但提供了技术架构和数据来源。",
+      "reason": "项目未提到具体实验/测试，但提供了技术架构和数据来源。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
-      "evidence": "项目材料结构较为完整，提到了多个技术方案和行业趋势。",
-      "reason": "路演叙事结构较为完整。"
+      "evidence": "项目材料结构完整，描述清晰，提供了高质量的数据来源和技术架构。",
+      "reason": "项目材料结构完整，未发现叙事断裂。"
     },
     {
       "id": "H15",
       "triggered": true,
-      "severity": "high",
-      "evidence": "项目文本中缺乏用户证据强度、商业模式一致性和财务逻辑等方面的支撑证据。",
-      "reason": "多个关键Rubric维度缺乏支撑证据。"
+      "severity": "medium",
+      "evidence": "项目在用户证据强度、商业模式一致性和财务逻辑等方面缺乏支撑证据。",
+      "reason": "项目在多个关键Rubric维度缺乏支撑证据。"
     }
   ]
 }

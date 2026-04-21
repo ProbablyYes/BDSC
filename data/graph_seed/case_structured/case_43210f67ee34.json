@@ -61,14 +61,32 @@
     "risk_gap:compliance_not_covered",
     "rubric:Problem Definition",
     "rubric:Solution Feasibility",
+    "rubric:Market & Competition",
     "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
     "risk_rule:H10",
-    "risk_rule:H14",
+    "risk_rule:H13",
     "risk_rule:H15",
-    "risk_rule:H4",
-    "risk_rule:H5"
+    "risk_rule:H3",
+    "risk_rule:H5",
+    "risk_rule:H7"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_43210f67ee34_e1",
+      "type": "user_evidence",
+      "quote": "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。",
+      "chunk_id": "C3",
+      "source_unit": "page_7"
+    },
+    {
+      "id": "case_43210f67ee34_e2",
+      "type": "business_model_evidence",
+      "quote": "国外各大公司为重现元宇宙的活力都付出了巨大努力：Meta公司布局八大场景，在元宇宙的软硬件部署上都有了很大进展，现已有了Horizon产品并投入使用；Google在元宇宙地图赛道完成了诸多城市的等比复现。",
+      "chunk_id": "C1",
+      "source_unit": "page_5"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -88,7 +106,7 @@
     },
     {
       "rubric_item": "Market & Competition",
-      "covered": false
+      "covered": true
     },
     {
       "rubric_item": "Financial Logic",
@@ -104,7 +122,7 @@
     },
     {
       "rubric_item": "Presentation Quality",
-      "covered": false
+      "covered": true
     }
   ],
   "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 ..................................................... 5 第一章 项目背景 .......................................... 6 一、项目背景 .......................................... 6 二、行业现状 .......................................... 7 三、痛点分析 ................................",
@@ -119,23 +137,24 @@
   "generated_at": "2026-03-29T10:41:30Z",
   "risk_flags": [
     "H10",
-    "H14",
+    "H13",
     "H15",
-    "H4",
-    "H5"
+    "H3",
+    "H5",
+    "H7"
   ],
   "rubric_items_detail": [
     {
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "明确指出了文旅产业、教育培训、工业制造等领域的具体痛点，如渲染成本高昂、通信延迟与带宽压力、开发门槛高等。"
+      "reason": "明确指出了文旅、教育、工业等多个领域的痛点，如渲染成本高昂、通信延迟与带宽压力、开发门槛高等。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
       "score": 2.0,
-      "reason": "未提供用户访谈、问卷或其他需求验证的具体证据。"
+      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
     },
     {
       "item": "Solution Feasibility",
@@ -147,37 +166,37 @@
       "item": "Business Model Consistency",
       "covered": false,
       "score": 3.0,
-      "reason": "未详细描述客户、价值主张、渠道、营收、成本等商业模式闭环。"
+      "reason": "未明确描述客户、价值主张、渠道、营收、成本等商业模型要素。"
     },
     {
       "item": "Market & Competition",
-      "covered": false,
-      "score": 4.0,
-      "reason": "未提供TAM/SAM/SOM的具体数据，也未进行竞品分析。"
+      "covered": true,
+      "score": 7.0,
+      "reason": "提到了国外大公司在元宇宙领域的布局和进展，但未详细分析国内市场的竞争情况。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
       "score": 2.0,
-      "reason": "未提供单位经济模型或财务预测的具体数据。"
+      "reason": "未提供单位经济模型或财务预测，无法判断财务逻辑是否成立。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
-      "score": 7.0,
-      "reason": "强调了基于DPU/GPU的硬件性能深度优化、面向低带宽环境的图像引擎压缩技术等创新点。"
+      "score": 8.0,
+      "reason": "强调了智能生成算法和三端协作等创新点，但未提供具体验证实验或指标。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
       "score": 3.0,
-      "reason": "未详细描述团队背景、能力及里程碑计划。"
+      "reason": "未详细描述团队背景、能力及具体里程碑。"
     },
     {
       "item": "Presentation Quality",
-      "covered": false,
-      "score": 4.0,
-      "reason": "提供的文本内容较为简略，缺乏完整的BP/路演结构和具体数据支撑。"
+      "covered": true,
+      "score": 7.0,
+      "reason": "材料结构完整，但部分内容缺乏具体数据支撑。"
     }
   ],
   "risk_rule_details": [
@@ -186,105 +205,105 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未出现目标用户与价值主张明显不匹配的情况。"
+      "reason": "未发现目标用户与价值主张明显不匹配的情况。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未提及主要获客渠道难以有效触达目标用户的问题。"
+      "reason": "未提及主要获客渠道难以有效触达目标用户的问题。"
     },
     {
       "id": "H3",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "",
-      "reason": "文本中未提到定价/收费及用户支付意愿验证。"
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到定价/收费但缺少用户支付意愿验证。",
+      "reason": "提到了渲染成本高昂的问题，但未提供用户支付意愿的验证证据。"
     },
     {
       "id": "H4",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "未提供TAM/SAM/SOM的具体数据",
-      "reason": "文本中未提供TAM/SAM/SOM的具体数据，口径或计算逻辑不明确。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现 TAM/SAM/SOM 口径或计算逻辑混乱的情况。"
     },
     {
       "id": "H5",
       "triggered": true,
       "severity": "high",
-      "evidence": "未提供用户访谈、问卷或其他需求验证的具体证据",
-      "reason": "文本中缺乏用户访谈、问卷或其他需求验证的具体证据。"
+      "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
+      "reason": "未提供具体的用户访谈、问卷或行为数据等原始证据。"
     },
     {
       "id": "H6",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未声称‘无竞品/无竞争对手’或进行明显失真的竞品分析。"
+      "reason": "未发现声称‘无竞品/无竞争对手’或竞品分析明显失真的情况。"
     },
     {
       "id": "H7",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "",
-      "reason": "文本中提到了具体的创新技术，但未提供可验证的实验或指标。"
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "强调创新/颠覆但缺少可验证的实验或指标。",
+      "reason": "强调了智能生成算法和三端协作等创新点，但未提供具体验证实验或指标。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未提供单位经济模型或财务预测的具体数据，无法判断单位经济是否成立。"
+      "reason": "未发现根据描述可以判断 LTV <= CAC 或长期亏损的情况。"
     },
     {
       "id": "H9",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未出现‘只要拿下1%市场’等自上而下的估算。"
+      "reason": "未发现出现‘只要拿下 1% 市场’等自上而下估算的情况。"
     },
     {
       "id": "H10",
       "triggered": true,
       "severity": "medium",
-      "evidence": "未详细描述团队背景、能力及里程碑计划",
-      "reason": "文本中未详细描述团队背景、能力及里程碑计划，时间表/里程碑明显不现实或缺少可交付物。"
+      "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
+      "reason": "未详细描述团队背景、能力及具体里程碑。"
     },
     {
       "id": "H11",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未涉及隐私/医疗/金融等高风险领域。"
+      "reason": "未涉及隐私/医疗/金融等高风险领域。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "文本中未提及技术方案对算力/硬件/人才要求远超项目现状的情况。"
+      "reason": "未发现技术路线对算力/硬件/人才要求远超项目现状的情况。"
     },
     {
       "id": "H13",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "",
-      "reason": "文本中未提及实验/测试的具体设计。"
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "提到实验/测试但缺少样本量与评价指标。",
+      "reason": "提到了技术方案，但未提供具体实验设计的样本量与评价指标。"
     },
     {
       "id": "H14",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "提供的文本内容较为简略，缺乏完整的BP/路演结构和具体数据支撑",
-      "reason": "文本内容较为简略，缺乏完整的BP/路演结构和具体数据支撑，叙事结构残缺或跳跃。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未发现叙事结构残缺或跳跃，无法形成完整故事线的情况。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
-      "evidence": "多个关键Rubric维度缺乏支撑证据，如用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行等",
-      "reason": "多个关键Rubric维度缺乏支撑证据，如用户证据强度、商业模式一致性、市场与竞争、财务逻辑、团队与执行等。"
+      "evidence": "多个关键 Rubric 维度缺乏支撑证据。",
+      "reason": "多个关键 Rubric 维度如用户证据强度、商业模式一致性、财务逻辑、团队与执行等缺乏充分支撑证据。"
     }
   ],
   "分类": [

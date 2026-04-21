@@ -81,11 +81,41 @@
     "risk_rule:H10",
     "risk_rule:H15",
     "risk_rule:H3",
+    "risk_rule:H4",
     "risk_rule:H5",
     "risk_rule:H6",
-    "risk_rule:H9"
+    "risk_rule:H8"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_2d9dfeac57ca_e1",
+      "type": "user_evidence",
+      "quote": "为广大农民群体提供精准、及时且易于理解的农业灾害预警信息和科学的应对策略",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_2d9dfeac57ca_e2",
+      "type": "user_evidence",
+      "quote": "2024年我国自然灾害直接经济损失达4011.1亿元",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_2d9dfeac57ca_e3",
+      "type": "user_evidence",
+      "quote": "该智能决策系统能够填补传统农技服务在时效性和覆盖面方面的不足",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_2d9dfeac57ca_e4",
+      "type": "business_model_evidence",
+      "quote": "系统生成的“现成药方-当紧提醒-长远诀窍”三级防控方案可有效降低5-10%的作物损失",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -138,16 +168,17 @@
     "H10",
     "H15",
     "H3",
+    "H4",
     "H5",
     "H6",
-    "H9"
+    "H8"
   ],
   "rubric_items_detail": [
     {
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "项目明确指出了传统灾害响应模式的不足，包括依赖经验、知识门槛高、缺乏个性化方案等，且有具体用户场景支撑。"
+      "reason": "项目明确指出了传统灾害响应模式依赖经验、响应时效性差、农业防灾知识门槛高、方言识别与图像识别适配性不足等具体痛点，并提供了用户场景支撑。"
     },
     {
       "item": "User Evidence Strength",
@@ -159,43 +190,43 @@
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "项目基于百度千帆平台，构建了数据+知识双驱动的灾害预警决策助手，技术路线清晰，但未详细说明资源匹配情况。"
+      "reason": "项目基于百度千帆平台构建数据+知识双驱动的农业灾害助手，技术路线合理，但未详细说明资源匹配情况。"
     },
     {
       "item": "Business Model Consistency",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提出了B2C和B2B两种商业模式，以及数据增值服务，但未详细说明成本和收益的具体构成。"
+      "reason": "项目提出了B2C和B2B两种商业模式，并有数据增值服务，但未详细说明成本和营收的具体情况。"
     },
     {
       "item": "Market & Competition",
       "covered": true,
       "score": 6.0,
-      "reason": "项目提到覆盖全农业领域，市场潜力巨大，但未提供具体的TAM/SAM/SOM数据，也未详细分析竞品。"
+      "reason": "项目覆盖全农业领域，市场潜力巨大，但未详细说明TAM/SAM/SOM口径，也未进行详细的竞品分析。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
       "score": 3.0,
-      "reason": "项目未提供具体的财务数据，如单位经济模型、LTV和CAC等。"
+      "reason": "项目提到单位经济，但未提供具体的LTV和CAC数据，难以判断财务逻辑是否成立。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "项目强调了AI工作流动态记忆管理、农业生理周期耦合模型、方言与视觉融合技术等创新点。"
+      "reason": "项目强调了AI工作流动态记忆管理、农业生理周期耦合模型、方言与视觉融合技术等创新点，并提供了具体的差异化方案。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
       "score": 4.0,
-      "reason": "项目未详细说明团队背景和执行能力，里程碑较为笼统。"
+      "reason": "项目未详细说明团队背景和能力，也未提供清晰的里程碑和可交付物。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "项目材料结构较为完整，但部分数据和逻辑需要进一步验证。"
+      "reason": "项目材料结构较为完整，提供了具体的技术方案和市场潜力，但部分数据缺乏详细支撑。"
     }
   ],
   "risk_rule_details": [
@@ -204,105 +235,105 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目目标用户与价值主张较为匹配，未发现明显错位。"
+      "reason": "项目目标用户与价值主张匹配，未发现明显错位。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未提及主要获客渠道，但未明确表示难以触达目标用户。"
+      "reason": "项目未提到获客渠道的具体问题，但基于百度千帆平台的推广渠道较为可靠。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
-      "evidence": "B2C模式：为农户提供会员制预警与专家建议服务",
-      "reason": "项目提到定价/收费但未提供用户支付意愿的验证证据。"
+      "evidence": "系统生成的“现成药方-当紧提醒-长远诀窍”三级防控方案可有效降低5-10%的作物损失",
+      "reason": "项目提到定价/收费但未提供用户支付意愿验证的证据。"
     },
     {
       "id": "H4",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "",
-      "reason": "项目未提供具体的TAM/SAM/SOM数据，但未发现口径或计算逻辑混乱。"
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "覆盖种植业、渔业、畜牧业、林业等全农业领域，市场潜力巨大",
+      "reason": "项目提到市场潜力巨大，但未详细说明TAM/SAM/SOM口径。"
     },
     {
       "id": "H5",
       "triggered": true,
       "severity": "high",
-      "evidence": "普通农户（特别是对灾害敏感度高的小规模种植者） 农业合作社及农业生产基地管理者 基层农技推广人员",
-      "reason": "项目缺乏具体的用户访谈、问卷或其他需求验证证据。"
+      "evidence": "传统灾害响应模式依赖经验，响应时效性差 农业防灾知识门槛高，普通农户难以理解专业防灾指令 灾害发生后缺乏个性化的补救和防治方案生成 方言识别与图像识别在传统农业工具中适配性不足",
+      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
     },
     {
       "id": "H6",
       "triggered": true,
       "severity": "medium",
       "evidence": "本项目更侧重灾害预警的决策闭环与复杂场景的应急预案匹配",
-      "reason": "项目声称无竞品或竞品分析明显失真，未提供客观的竞品对比。"
+      "reason": "项目未进行详细的竞品分析，仅强调自身特点。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目强调了多个创新点，并提供了具体的技术方案。"
+      "reason": "项目提供了具体的创新点和技术方案，如AI工作流动态记忆管理、农业生理周期耦合模型等。"
     },
     {
       "id": "H8",
-      "triggered": false,
-      "severity": "low",
-      "evidence": "",
-      "reason": "项目未提供具体的财务数据，但未发现明显的单位经济不成立问题。"
+      "triggered": true,
+      "severity": "high",
+      "evidence": "2024年我国自然灾害直接经济损失达4011.1亿元",
+      "reason": "项目未提供具体的LTV和CAC数据，难以判断单位经济是否成立。"
     },
     {
       "id": "H9",
-      "triggered": true,
-      "severity": "medium",
-      "evidence": "覆盖种植业、渔业、畜牧业、林业等全农业领域，市场潜力巨大",
-      "reason": "项目出现了‘只要拿下1%市场’等自上而下估算的表述。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未出现明显的自上而下估算。"
     },
     {
       "id": "H10",
       "triggered": true,
       "severity": "medium",
       "evidence": "落地推广阶段：选择特定地区进行MVP测试，验证响应时效与成本效益比",
-      "reason": "项目里程碑较为笼统，缺乏具体可交付物的时间表。"
+      "reason": "项目未提供具体的时间表和里程碑，且MVP测试的可交付物不明确。"
     },
     {
       "id": "H11",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目提到合规风险并表示会遵守相关规定，但未提供具体措施。"
+      "reason": "项目提到严格遵守农业数据安全与隐私保护相关规定，未发现合规/伦理缺口。"
     },
     {
       "id": "H12",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目基于百度千帆平台，技术路线与资源匹配度较高。"
+      "reason": "项目基于百度千帆平台，技术路线与资源匹配情况未见明显问题。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未提及具体实验，但未发现实验设计不合格的问题。"
+      "reason": "项目未提到具体的实验设计问题。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目材料结构较为完整，未发现叙事断裂。"
+      "reason": "项目材料结构较为完整，未发现明显的叙事断裂。"
     },
     {
       "id": "H15",
       "triggered": true,
       "severity": "high",
-      "evidence": "",
-      "reason": "项目多个关键Rubric维度缺乏支撑证据，如用户证据强度、财务逻辑、团队与执行等。"
+      "evidence": "技术研发阶段：完成72类作物敏感度矩阵构建与模型微调 产品化阶段：通过百度千帆APPBuilder快速部署智能交互体系 落地推广阶段：选择特定地区进行MVP测试，验证响应时效与成本效益比",
+      "reason": "多个关键Rubric维度缺乏支撑证据，如用户证据强度、团队与执行等。"
     }
   ]
 }

@@ -80,7 +80,50 @@
     "risk_rule:H3",
     "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_cf1a91618898_e1",
+      "type": "user_evidence",
+      "quote": "高校正能量联盟是一个整合多方资源、帮助高校志愿团队抱团取暖、解决志愿团队困难的公益孵化服务平台。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_cf1a91618898_e2",
+      "type": "user_evidence",
+      "quote": "联盟的服务受众不仅仅是志愿团队，社区、基金会、企业在承担自己社会责任的同时，如果有任何项目需求，都可以在高校正能量联盟平台上寻找合适的团队，平台帮助双方进行对接与合作。",
+      "chunk_id": "C2",
+      "source_unit": "page_9"
+    },
+    {
+      "id": "case_cf1a91618898_e3",
+      "type": "user_evidence",
+      "quote": "高校志愿团队大多势单力薄，缺少稳定的项目资金来源，缺少合作伙伴。",
+      "chunk_id": "C2",
+      "source_unit": "page_9"
+    },
+    {
+      "id": "case_cf1a91618898_e4",
+      "type": "user_evidence",
+      "quote": "沿用行政命令的方式来推动、管理志愿服务和非政府、非营利组织的方式不仅会从根本上损害志愿者的初衷和目标，其后果是扼杀志愿服务的精髓，贬低志愿服务的价值。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_cf1a91618898_e5",
+      "type": "user_evidence",
+      "quote": "高校正能量联盟项目立足于针对大学生公益团队的服务，通过网络平台及移动客户端的搭建，以及线下工作团队的建立，为高校公益团队提供团队培训、项目协助设计、项目整合、项目宣传、项目筹款、执行监督、项目评估、财务审计等服务。",
+      "chunk_id": "C2",
+      "source_unit": "page_9"
+    },
+    {
+      "id": "case_cf1a91618898_e6",
+      "type": "user_evidence",
+      "quote": "而高校正能量联盟打破传统模式，以志愿团队为主导，辅助扶持各团队进行项目监管，管理监督各个项目的进展情况。",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -140,55 +183,55 @@
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "项目明确指出了高校公益项目存在的问题，包括公益碎片化、资源错配和传播局限。"
+      "reason": "项目明确指出了高校公益项目存在的问题，如重复建设、资源错配和传播局限。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
-      "score": 2.0,
-      "reason": "项目未提供具体的用户访谈、问卷或其他需求验证证据。"
+      "score": 3.0,
+      "reason": "项目描述中没有提供具体的用户访谈、问卷或行为数据等原始证据。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "项目提出了一站式跨校公益平台、公益沙龙模式和品牌化运作，技术路线与资源匹配。"
+      "reason": "项目提出了建立跨校公益平台、公益沙龙模式和品牌化运作等解决方案，但未详细说明技术路线和资源需求。"
     },
     {
       "item": "Business Model Consistency",
       "covered": true,
       "score": 6.0,
-      "reason": "项目提出了社会捐赠、基金会合作和企业赞助等多元化的资金来源，但未详细说明成本结构。"
+      "reason": "项目提到了社会捐赠、基金会合作和企业赞助等收入来源，但未详细说明成本结构和盈利模式。"
     },
     {
       "item": "Market & Competition",
       "covered": true,
       "score": 7.0,
-      "reason": "项目分析了国家政策支持和社会关注度提升的市场机遇，以及高校公益项目现状。"
+      "reason": "项目分析了市场机遇和行业现状，但未提供具体的竞品分析。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
-      "score": 3.0,
-      "reason": "项目提到了多元化的资金来源，但未提供具体的财务逻辑和单位经济分析。"
+      "score": 4.0,
+      "reason": "项目提到了资金来源，但未详细说明单位经济模型和长期财务可持续性。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "项目强调了组织创新、模式创新和传播创新，具有可验证的竞争优势。"
+      "reason": "项目强调了组织创新、模式创新和传播创新，具有明显的差异化优势。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
-      "score": 4.0,
-      "reason": "项目提到建立专业团队进行项目管理与风险监控，但未提供具体团队成员信息和里程碑。"
+      "score": 5.0,
+      "reason": "项目描述中未提供团队具体能力和里程碑计划。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
       "score": 7.0,
-      "reason": "项目计划书结构完整，内容清晰，但缺乏具体数据支持。"
+      "reason": "项目计划书结构较为完整，但部分信息不够具体。"
     }
   ],
   "risk_rule_details": [
@@ -197,56 +240,56 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目的价值主张与目标用户（高校大学生、社团、社会公益组织）匹配。"
+      "reason": "项目的服务对象和价值主张较为一致，主要针对高校公益团队提供支持。"
     },
     {
       "id": "H2",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未提及具体获客渠道，但考虑到高校公益项目的特性，渠道可达性较高。"
+      "reason": "项目提到了多种获客渠道，如高校、社区、基金会和企业。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
-      "evidence": "社会捐赠与基金会合作 企业赞助与冠名",
-      "reason": "项目提到了定价/收费（企业赞助与冠名），但未提供用户支付意愿验证。"
+      "evidence": "高校志愿团队大多势单力薄，缺少稳定的项目资金来源，缺少合作伙伴。",
+      "reason": "项目提到资金来源问题，但未提供用户支付意愿的验证。"
     },
     {
       "id": "H4",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目对市场规模的描述较为合理，未出现口径混乱。"
+      "reason": "项目对市场规模的描述较为合理，未出现口径混乱的情况。"
     },
     {
       "id": "H5",
       "triggered": true,
-      "severity": "high",
-      "evidence": "公益碎片化：高校公益项目重复建设，缺乏跨校联动 资源错配：社团缺乏资金与专业指导，企业缺乏优质公益出口 传播局限：正能量内容在校园端的传播力及持久性不足",
-      "reason": "项目描述了需求，但未提供具体的用户访谈、问卷或其他需求验证证据。"
+      "severity": "medium",
+      "evidence": "高校正能量联盟项目立足于针对大学生公益团队的服务，通过网络平台及移动客户端的搭建，以及线下工作团队的建立，为高校公益团队提供团队培训、项目协助设计、项目整合、项目宣传、项目筹款、执行监督、项目评估、财务审计等服务。",
+      "reason": "项目描述中缺乏具体的用户访谈、问卷或其他需求验证证据。"
     },
     {
       "id": "H6",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未声称无竞品，且对高校公益项目现状进行了分析。"
+      "reason": "项目未声称无竞品，但未提供具体的竞品分析。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目提出的创新点较为具体，包括组织创新、模式创新和传播创新。"
+      "reason": "项目提到了创新点，但未提供具体的实验或指标验证。"
     },
     {
       "id": "H8",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未提供具体的财务逻辑，但未出现明显的单位经济不成立问题。"
+      "reason": "项目未提供详细的财务数据，但未出现明显的单位经济不成立的情况。"
     },
     {
       "id": "H9",
@@ -260,7 +303,7 @@
       "triggered": true,
       "severity": "medium",
       "evidence": "扩大联盟成员规模，覆盖更多首都高校 深化与地方政府及大型公益基金会的官方合作 推动公益项目从“活动化”向“产品化”转型",
-      "reason": "项目提出的里程碑较为宏观，缺乏具体可交付物和时间表。"
+      "reason": "项目里程碑计划较为笼统，缺乏具体的时间表和可交付物。"
     },
     {
       "id": "H11",
@@ -274,28 +317,28 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目的技术路线与资源匹配，未出现技术路线与资源不匹配的情况。"
+      "reason": "项目未详细说明技术路线和资源需求，但未出现明显的技术路线与资源不匹配的情况。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目未提及具体实验，因此不存在实验设计不合格的问题。"
+      "reason": "项目未提到具体的实验或测试设计。"
     },
     {
       "id": "H14",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "项目计划书结构完整，内容清晰，未出现叙事断裂。"
+      "reason": "项目计划书结构较为完整，未出现明显的叙事断裂。"
     },
     {
       "id": "H15",
       "triggered": true,
-      "severity": "high",
-      "evidence": "User Evidence Strength, Financial Logic, Team & Execution",
-      "reason": "项目在用户证据强度、财务逻辑和团队与执行方面缺乏足够的支撑证据。"
+      "severity": "medium",
+      "evidence": "高校正能量联盟项目立足于针对大学生公益团队的服务，通过网络平台及移动客户端的搭建，以及线下工作团队的建立，为高校公益团队提供团队培训、项目协助设计、项目整合、项目宣传、项目筹款、执行监督、项目评估、财务审计等服务。",
+      "reason": "项目在多个关键 Rubric 维度（如用户证据强度、财务逻辑、团队与执行）缺乏充分的支撑证据。"
     }
   ],
   "分类": [

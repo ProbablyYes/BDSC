@@ -1,0 +1,402 @@
+{
+  "case_id": "case_ca98912ec69a",
+  "document_id": "doc_5897c784316c",
+  "source": {
+    "file_path": "工业制造/一次性打印电池技术_挑战杯创业计划大赛金奖作品.doc",
+    "file_name": "一次性打印电池技术_挑战杯创业计划大赛金奖作品.doc",
+    "category": "工业制造",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 955,
+    "full_text_chars": 30178,
+    "core_text_chars": 29174,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 956,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 956,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "闪电贴",
+    "target_users": [
+      "出差的商务人士",
+      "旅游群体以及往来商旅人士"
+    ],
+    "pain_points": [
+      "手机在关键时刻电量不足或突然断电，给商务洽谈或出游带来尴尬和损失",
+      "商场提供的临时充电器需等候多时且服务网点稀少，手机电量补充问题未根本解决"
+    ],
+    "solution": [
+      "推出“闪电贴”一次性超薄手机电池，厚度1毫米，面积与传统电池相仿，提供约12小时电量",
+      "产品可直接粘贴于现有电池表面，实现即买即贴、即贴即用，满足应急或备用需求"
+    ],
+    "innovation_points": [
+      "采用一次性打印电池技术，将喷墨打印技术和纳米材料技术结合，简化生产工艺并降低成本",
+      "产品填补了一次性手机电池的市场空白，具有超薄（1mm）、轻便（5g）和高性价比（0.42元/小时）的特点"
+    ],
+    "business_model": [
+      "通过便利店、超市、书报亭等渠道大规模铺货销售产品",
+      "初期售价5元/贴，成本1.2元/贴，随着生产规模扩大成本可降至0.9元/贴",
+      "公司设立在高科技园区，享受“两年免征所得税”的税收优惠"
+    ],
+    "market_analysis": [
+      "中国手机用户超过2.5亿且不断增长，手机配套市场年增长率20%以上，每年手机电池销售规模达百亿元",
+      "目前手机电池市场只有可充电锂电池，存在一次性应急电池的空白市场，且需求潜力巨大",
+      "手机电池未来趋势是电量高、材质轻、厚度薄、价格低，传统电池充电麻烦且应急能力不足"
+    ],
+    "execution_plan": [
+      "第一年进行大量派送试用和媒体广告促销，计划销售37万片，第二年销售45万片，第三年开始销售额和利润大幅上升"
+    ],
+    "risk_control": [
+      "【通用风险控制】通过申请‘喷墨打印电池’技术国家专利，并对产品名称、外形、可移动金属触头等技术申请系列专利，构建知识产权壁垒以应对技术被模仿的风险。",
+      "【通用风险控制】规划了清晰的产品线延伸路径（闪电系列、超能系列、可充系列），以‘闪电贴’为市场突破口，降低单一产品市场表现不佳的风险，并为公司带来更稳定的利润。"
+    ]
+  },
+  "tags": [
+    "category:工业制造",
+    "education_level:unknown",
+    "doc_type:doc",
+    "risk_gap:compliance_not_covered",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Financial Logic",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H13",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H5"
+  ],
+  "evidence": [
+    {
+      "id": "case_ca98912ec69a_e1",
+      "type": "user_evidence",
+      "quote": "“闪电贴（FlashTip）®”的目标群体主要定位于出差的商务人士、旅游群体以及往来商旅等",
+      "chunk_id": "C2",
+      "source_unit": "段落24"
+    },
+    {
+      "id": "case_ca98912ec69a_e2",
+      "type": "user_evidence",
+      "quote": "手机的不便之处也逐渐暴露，比如关键时刻的电量不足，突然断电的现象常常给人们带来很多尴尬，特别是外出洽谈商务或结伴出游时手机电池的突然断电有时会给人们带来很大的损失。",
+      "chunk_id": "C2",
+      "source_unit": "段落24"
+    },
+    {
+      "id": "case_ca98912ec69a_e3",
+      "type": "user_evidence",
+      "quote": "虽然一些大商场提供了临时充电器，但由于充电需等候多时，且只有少数大商场提供此类服务等原因，手机电量的及时补充问题还未得到根本解决。",
+      "chunk_id": "C2",
+      "source_unit": "段落24"
+    },
+    {
+      "id": "case_ca98912ec69a_e4",
+      "type": "business_model_evidence",
+      "quote": "初期成本为1.2元/贴（大小类似普通手机电池，厚度为1mm，待机时间12小时），售价5元/贴",
+      "chunk_id": "C2",
+      "source_unit": "段落24"
+    },
+    {
+      "id": "case_ca98912ec69a_e5",
+      "type": "business_model_evidence",
+      "quote": "在营销上采用大规模铺货的方式，占领便利店，超市，书报亭等主要的销售渠道",
+      "chunk_id": "C3",
+      "source_unit": "段落43"
+    },
+    {
+      "id": "case_ca98912ec69a_e6",
+      "type": "business_model_evidence",
+      "quote": "公司设立在张江高科技园区，属于国家支持的中小型高科技企业，税收上享受“两年免征所得税”的政策。",
+      "chunk_id": "C3",
+      "source_unit": "段落43"
+    },
+    {
+      "id": "case_ca98912ec69a_e7",
+      "type": "business_model_evidence",
+      "quote": "据测算,当年产量达到400万片时，成本明显降到了0.9元人民币每贴.",
+      "chunk_id": "C9",
+      "source_unit": "段落139"
+    },
+    {
+      "id": "case_ca98912ec69a_e8",
+      "type": "market_analysis_evidence",
+      "quote": "目前在中国已拥有超过2.5亿的手机用户，且数量仍在不断增长。手机配套市场的年增长率高达20%以上，属于高成长型行业。中国每年生产、销售的手机电池（包括随手机销售的）高达8000万块，是一个拥有百亿元市场规模的产品。",
+      "chunk_id": "C4",
+      "source_unit": "段落63"
+    },
+    {
+      "id": "case_ca98912ec69a_e9",
+      "type": "market_analysis_evidence",
+      "quote": "目前手机电池市场产品类别只有各种型号的可充电式锂电池，我们发现，在手机电池市场中，明显存在一个一次性手机电池的空白市场，而且该市场同样具有巨大需求潜力",
+      "chunk_id": "C4",
+      "source_unit": "段落63"
+    },
+    {
+      "id": "case_ca98912ec69a_e10",
+      "type": "market_analysis_evidence",
+      "quote": "其未来的主要趋势必将是向着生产电量高、材质轻、厚度薄、价格低的产品发展。而传统的手机电池都面临充电时间长而且较麻烦的制约",
+      "chunk_id": "C4",
+      "source_unit": "段落63"
+    },
+    {
+      "id": "case_ca98912ec69a_e11",
+      "type": "execution_plan_evidence",
+      "quote": "第一年进行大量的派送试用，且投入一定资金做前期推广，通过各种媒体广告和各种促销活动推进产品知名度。第一年37万片，第二年45万片，第三年开始销售额和利润都大幅上升",
+      "chunk_id": "C3",
+      "source_unit": "段落43"
+    },
+    {
+      "id": "case_ca98912ec69a_e13",
+      "type": "risk_evidence",
+      "quote": "目前公司以对产品的核心技术“喷墨打印电池”技术申请了国家专利，公司正式成立后，将对我们的产品申请一系列的专利，具体包括：“闪电贴”名称、闪电贴外形、可移动金属触头技术等。",
+      "chunk_id": "C6",
+      "source_unit": "段落104"
+    },
+    {
+      "id": "case_ca98912ec69a_e14",
+      "type": "risk_evidence",
+      "quote": "“闪电贴”扮演了一个突破口的角色，一旦为市场所认可，为消费者所信任，本公司将进一步推出其他的产品线和产品项目，丰富本公司的产品组合，为公司股东带来更稳定、更丰厚的利润。",
+      "chunk_id": "C10",
+      "source_unit": "段落160"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": true
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "本案例为第四届“挑战杯”创业计划大赛金奖作品， 为避免篇幅过长，编者对部分内容作了删减，仅作参考。 目 录 1．执行总结…………………………………………………………………01 2．项目背景…………………………………………………………………05 3．市场机会…………………………………………………………………11 4．公司战略…………………………………………………………………16 5．市场营销…………………………………………………………………21 6．生产管理…………………………………………………………………29 7．投资分析…………………………………………………………………33 8．财务分析…………………………………………………………………37 9．管理体系…………………………………………………………………40 10．机遇与风险……………………………………………………………42 11．风险资本的推出………………………………………………………43 1．“闪电贴”前期调研报告……………………………………………45 2．超薄打印电池核心技术………………………………………………51 上海盛旦科技",
+  "confidence": 0.9,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T15:25:34Z",
+  "分类": [
+    {
+      "类型": "赛事",
+      "名称": "挑战杯"
+    },
+    {
+      "类型": "创业",
+      "名称": "relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H13",
+    "H15",
+    "H3",
+    "H5"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本详细描述了手机电量不足或突然断电给商务洽谈或出游带来的尴尬和损失，以及现有临时充电器服务的不足。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 3.0,
+      "reason": "文本中没有提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了采用一次性打印电池技术，结合喷墨打印技术和纳米材料技术，简化生产工艺并降低成本，但未详细说明技术实现的具体步骤。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了通过便利店、超市、书报亭等渠道销售产品，初期售价5元/贴，成本1.2元/贴，随着生产规模扩大成本可降至0.9元/贴，形成了基本的商业闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本提供了中国手机用户超过2.5亿且不断增长，手机配套市场年增长率20%以上，每年手机电池销售规模达百亿元的市场数据，以及目前手机电池市场只有可充电锂电池，存在一次性应急电池的空白市场的分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本描述了初期售价5元/贴，成本1.2元/贴，随着生产规模扩大成本可降至0.9元/贴，单位经济模型基本成立。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 8.0,
+      "reason": "文本强调了产品填补了一次性手机电池的市场空白，具有超薄、轻便和高性价比的特点，且申请了多项专利。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 4.0,
+      "reason": "文本中没有具体描述团队成员的背景和能力，以及具体的执行里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 7.0,
+      "reason": "文本结构完整，提供了详细的项目背景、市场机会、公司战略、市场营销、生产管理、投资分析、财务分析、管理体系、机遇与风险等内容。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中目标用户与价值主张匹配，没有明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到通过便利店、超市、书报亭等渠道大规模铺货销售产品，渠道可达性较高。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "初期售价5元/贴，成本1.2元/贴，随着生产规模扩大成本可降至0.9元/贴",
+      "reason": "文本中提到定价但没有提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提供的市场规模口径合理，没有出现混乱。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "手机的不便之处也逐渐暴露，比如关键时刻的电量不足，突然断电的现象常常给人们带来很多尴尬，特别是外出洽谈商务或结伴出游时手机电池的突然断电有时会给人们带来很大的损失。",
+      "reason": "文本中缺乏具体的用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中对竞品分析较为客观，指出了市场空白。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中提到的创新点有具体的技术支持，如喷墨打印电池技术。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中描述的单位经济模型基本成立，LTV > CAC。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中没有出现‘只要拿下1%市场’等自上而下的估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "公司设立在张江高科技园区，属于国家支持的中小型高科技企业，税收上享受‘两年免征所得税’的政策。",
+      "reason": "文本中没有具体描述时间表或里程碑，仅提到税收优惠政策。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中没有涉及高风险领域的合规或伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本中描述的技术路线与资源匹配，没有出现技术方案要求远超项目现状的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "本案例为第四届‘挑战杯’创业计划大赛金奖作品， 为避免篇幅过长，编者对部分内容作了删减，仅作参考。",
+      "reason": "文本中提到实验/测试但没有提供具体的样本量与评价指标。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "文本结构完整，没有出现叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "团队与执行、用户证据强度等维度缺乏支撑证据。",
+      "reason": "文本中多个关键 Rubric 维度缺乏充分的支撑证据，如团队与执行、用户证据强度。"
+    }
+  ]
+}

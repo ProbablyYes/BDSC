@@ -147,6 +147,13 @@
     "output_file": "case_7129550f1fc9.json"
   },
   {
+    "case_id": "case_16722d22eea6",
+    "file_path": "农业发展/自动化孵化鸡蛋—捷惠创业计划书.doc",
+    "category": "农业发展",
+    "confidence": 0.9,
+    "output_file": "case_16722d22eea6.json"
+  },
+  {
     "case_id": "case_9484dd40cb89",
     "file_path": "医疗健康/13.省级创业项目-5G时代下健康体育生活方式自媒体平台的构建.docx",
     "category": "医疗健康",
@@ -224,11 +231,25 @@
     "output_file": "case_c1e2597b715d.json"
   },
   {
+    "case_id": "case_860eb845f8a6",
+    "file_path": "医疗健康/医疗垃圾无害化处理_全国挑战杯创业大赛一等奖-创业计划书.doc",
+    "category": "医疗健康",
+    "confidence": 0.9,
+    "output_file": "case_860eb845f8a6.json"
+  },
+  {
     "case_id": "case_c7a02700fbc0",
     "file_path": "医疗健康/清华大学 海斯凯尔医学技术有限公司项目运营报告.pdf",
     "category": "医疗健康",
     "confidence": 0.9,
     "output_file": "case_c7a02700fbc0.json"
+  },
+  {
+    "case_id": "case_22361a32fd6c",
+    "file_path": "医疗健康/甲壳质材料研究&开发_“挑战杯”全国大学生创业计划大赛金奖作品.doc",
+    "category": "医疗健康",
+    "confidence": 0.9,
+    "output_file": "case_22361a32fd6c.json"
   },
   {
     "case_id": "case_4f02070b3113",
@@ -301,11 +322,25 @@
     "output_file": "case_b30dfb691947.json"
   },
   {
+    "case_id": "case_ca98912ec69a",
+    "file_path": "工业制造/一次性打印电池技术_挑战杯创业计划大赛金奖作品.doc",
+    "category": "工业制造",
+    "confidence": 0.9,
+    "output_file": "case_ca98912ec69a.json"
+  },
+  {
     "case_id": "case_c6900035299b",
     "file_path": "工业制造/华东理工大学  M.E.T光纤光栅传感器有限责任公司。.pdf",
     "category": "工业制造",
     "confidence": 0.9,
     "output_file": "case_c6900035299b.json"
+  },
+  {
+    "case_id": "case_3b3b393a7f75",
+    "file_path": "工业制造/造纸化学品生产_第四届“挑战杯”创业计划竞赛.doc",
+    "category": "工业制造",
+    "confidence": 0.75,
+    "output_file": "case_3b3b393a7f75.json"
   },
   {
     "case_id": "case_0df4eb42f70c",
@@ -427,6 +462,13 @@
     "output_file": "case_c5513197852e.json"
   },
   {
+    "case_id": "case_4f25bc0c5759",
+    "file_path": "文旅文创/湖北工业大学  书画艺术品电子商务系统项目计划书.docx",
+    "category": "文旅文创",
+    "confidence": 0.7,
+    "output_file": "case_4f25bc0c5759.json"
+  },
+  {
     "case_id": "case_20c6a399181d",
     "file_path": "文旅文创/麦扑文化创意-智慧旅游.pdf",
     "category": "文旅文创",
@@ -455,13 +497,6 @@
     "output_file": "case_8391b61334d9.json"
   },
   {
-    "case_id": "case_006ebe070c07",
-    "file_path": "智能制造/浙江大学  杭州云造科技有限公司——商业创新设计机构.pdf",
-    "category": "智能制造",
-    "confidence": 0.9,
-    "output_file": "case_006ebe070c07.json"
-  },
-  {
     "case_id": "case_cda90a998113",
     "file_path": "智能制造/浙江大学  杭州利珀科技有限公司——机器视觉表面缺陷检测.pdf",
     "category": "智能制造",
@@ -481,6 +516,13 @@
     "category": "智能制造",
     "confidence": 0.9,
     "output_file": "case_1d81de8aafb9.json"
+  },
+  {
+    "case_id": "case_06cbd2f3374a",
+    "file_path": "智能制造/面向人工光合作用的新型纳米超晶格材料.doc",
+    "category": "智能制造",
+    "confidence": 0.9,
+    "output_file": "case_06cbd2f3374a.json"
   },
   {
     "case_id": "case_bf184c6cce86",
@@ -525,6 +567,13 @@
     "output_file": "case_97e2aaf70734.json"
   },
   {
+    "case_id": "case_edf2f9099f09",
+    "file_path": "环境保护/智能节能基站专用空调创业项目_挑战杯获奖作品.doc",
+    "category": "环境保护",
+    "confidence": 0.75,
+    "output_file": "case_edf2f9099f09.json"
+  },
+  {
     "case_id": "case_2439d2e06588",
     "file_path": "环境保护/清源计划项目计划书.pdf",
     "category": "环境保护",
@@ -532,11 +581,39 @@
     "output_file": "case_2439d2e06588.json"
   },
   {
+    "case_id": "case_22f7afcde9d2",
+    "file_path": "社会公益/“挑战杯”_温馨家园养老服务公司项目计划书.doc",
+    "category": "社会公益",
+    "confidence": 0.7,
+    "output_file": "case_22f7afcde9d2.json"
+  },
+  {
+    "case_id": "case_5337b81313fc",
+    "file_path": "社会公益/大学生创业公益投资_挑战杯.doc",
+    "category": "社会公益",
+    "confidence": 0.9,
+    "output_file": "case_5337b81313fc.json"
+  },
+  {
+    "case_id": "case_f712fbf4dddf",
+    "file_path": "社会公益/文化公益平台公益事业创业计划-挑战杯.doc",
+    "category": "社会公益",
+    "confidence": 0.9,
+    "output_file": "case_f712fbf4dddf.json"
+  },
+  {
     "case_id": "case_1d74266e7f96",
     "file_path": "社会公益/海角公益在线支教平台.pdf",
     "category": "社会公益",
     "confidence": 0.9,
     "output_file": "case_1d74266e7f96.json"
+  },
+  {
+    "case_id": "case_7765ad085d20",
+    "file_path": "社会公益/老年心理健康保健计划—新夕阳股份有限责任公司创业计划书.doc",
+    "category": "社会公益",
+    "confidence": 0.9,
+    "output_file": "case_7765ad085d20.json"
   },
   {
     "case_id": "case_cf1a91618898",
@@ -670,6 +747,27 @@
     "category": "金融经济",
     "confidence": 0.7,
     "output_file": "case_e3020c0304f9.json"
+  },
+  {
+    "case_id": "case_2f23516ecee5",
+    "file_path": "金融经济/新疆农业大学 乌鲁木齐菜芽网络科技有限公司项目运营报告.doc",
+    "category": "金融经济",
+    "confidence": 0.75,
+    "output_file": "case_2f23516ecee5.json"
+  },
+  {
+    "case_id": "case_31df161bd769",
+    "file_path": "金融经济/贸易公司商业企划书.doc",
+    "category": "金融经济",
+    "confidence": 0.9,
+    "output_file": "case_31df161bd769.json"
+  },
+  {
+    "case_id": "case_71f7a22982e7",
+    "file_path": "金融经济/进口海产品专卖店运做策划书.docx",
+    "category": "金融经济",
+    "confidence": 0.7,
+    "output_file": "case_71f7a22982e7.json"
   },
   {
     "case_id": "case_f1f5448a9cd2",

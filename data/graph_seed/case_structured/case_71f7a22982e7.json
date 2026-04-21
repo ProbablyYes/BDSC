@@ -1,0 +1,351 @@
+{
+  "case_id": "case_71f7a22982e7",
+  "document_id": "doc_dc70fad7817b",
+  "source": {
+    "file_path": "金融经济/进口海产品专卖店运做策划书.docx",
+    "file_name": "进口海产品专卖店运做策划书.docx",
+    "category": "金融经济",
+    "doc_type": "docx",
+    "parse_quality": "B",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 66,
+    "full_text_chars": 3305,
+    "core_text_chars": 2986,
+    "appendix_start_index": null,
+    "has_appendix_evidence": false,
+    "hypergraph_nodes": 67,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 67,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "进口海产品专卖店运做策划书",
+    "target_users": [
+      "中低档消费人群"
+    ],
+    "pain_points": [
+      "海水产品市场缺乏知名品牌，消费者无法判断产品质量好坏，购买完全凭感觉或依赖摊主不可靠的许诺"
+    ],
+    "solution": [
+      "通过开设海水产品专卖店，打造值得消费者信赖的品牌，提供一站式购物体验"
+    ],
+    "innovation_points": [
+      "借鉴生猪肉行业通过专卖店成功打造品牌的经验，以专卖店形式经营海水产品，改变消费者购买行为"
+    ],
+    "business_model": [
+      "目标客户为中低档消费人群；通过主题形象店（旗舰店、模范店、标准店）和店中店（农贸大厅便利店、KA卖场水族广场）渠道触达；收入来源于产品销售；需考虑盈亏平衡以进行"
+    ],
+    "market_analysis": [
+      "海水产品市场缺乏知名品牌，消费者鉴别产品好坏困难，存在打造值得信赖品牌的市场机会；可参考生猪肉行业通过专卖店成功打造品牌的案例"
+    ],
+    "execution_plan": [
+      "前期开设多为公司直营的主题形象店（分旗舰店、模范店、标准店三级），后期发展加盟店；"
+    ],
+    "risk_control": [
+      "【通用风险控制】识别到选址错误是经营失败的主要风险（如沈阳绿色阳光连锁公司案例），计划通过制定详细的《选址手册》作为标准，进行详尽选址调查来规避拍脑袋决定，预期提高开店成功率"
+    ]
+  },
+  "tags": [
+    "category:金融经济",
+    "education_level:unknown",
+    "doc_type:docx",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Market & Competition",
+    "rubric:Innovation & Differentiation",
+    "risk_rule:H10",
+    "risk_rule:H14",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H7"
+  ],
+  "evidence": [
+    {
+      "id": "case_71f7a22982e7_e1",
+      "type": "user_evidence",
+      "quote": "产品价格定位主要定位要在中低档消费人群，这是专卖店能得以生存的最其码的环境保障。",
+      "chunk_id": "C3",
+      "source_unit": "paragraph_13"
+    },
+    {
+      "id": "case_71f7a22982e7_e2",
+      "type": "pain_points_evidence",
+      "quote": "可是我们的海产品、水产品连最其码的蓝色印章都没有，消费者无法判断哪种海产品是好的，哪种是不好的，购买产品完全凭感觉，只是依靠对摊主那不值钱许诺作为判别依据",
+      "chunk_id": "C2",
+      "source_unit": "paragraph_9"
+    },
+    {
+      "id": "case_71f7a22982e7_e3",
+      "type": "solution_evidence",
+      "quote": "目前能打造生活海、水产品最好的途径只能是专卖店方式",
+      "chunk_id": "C2",
+      "source_unit": "paragraph_9"
+    },
+    {
+      "id": "case_71f7a22982e7_e4",
+      "type": "innovation_evidence",
+      "quote": "而很多肉食行业的企业也正是发现了这一点开始以专卖店的形式经营生猪肉，如金锣公司、双汇公司，目前金锣公司在沈阳市已经开了80多家生猪肉专卖店，打造生猪行业的品牌。",
+      "chunk_id": "C2",
+      "source_unit": "paragraph_9"
+    },
+    {
+      "id": "case_71f7a22982e7_e5",
+      "type": "business_model_evidence",
+      "quote": "对于每个店的规模规划要充分考虑利盈亏平衡，以便进行计划性的费用投入及规模设计",
+      "chunk_id": "C3",
+      "source_unit": "paragraph_13"
+    },
+    {
+      "id": "case_71f7a22982e7_e6",
+      "type": "execution_plan_evidence",
+      "quote": "前期主题形象店多为公司的直营店，后期可有加盟店的方式",
+      "chunk_id": "C3",
+      "source_unit": "paragraph_13"
+    },
+    {
+      "id": "case_71f7a22982e7_e7",
+      "type": "execution_plan_evidence",
+      "quote": "店中店是在主题形象店的延产伸品，在主题形象店的基本布局完成后再开始店中店的形式，店中店是属于海水产品专卖店的精耕细作模式。",
+      "chunk_id": "C4",
+      "source_unit": "paragraph_29"
+    },
+    {
+      "id": "case_71f7a22982e7_e8",
+      "type": "risk_evidence",
+      "quote": "沈阳绿色阳光连锁公司的失败，拍脑袋、凭感觉选址，造成错误选址是其失败最主要的原因。开店前必须做好享尽的选址调杳，做出我们公司海水产品专卖店的〈〈选址手册〉〉作为选址的标准，防止拍脑袋的决定误事误人。",
+      "chunk_id": "C4",
+      "source_unit": "paragraph_29"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": true
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": false
+    }
+  ],
+  "summary": "关于海水产品专卖店方式的简要规划 □ 导言：从某种程度上说，市场的运作成功与否关键是方向的成功，如果方向错了，你努力越大那失败就越大，方向对了，你所有的努力就都是正确的。所以说企业的营销战略的选择是企业成功的第一步，所谓营销战略就是结合市场需求、企业的可支配资源能力及竞争状况，为企业选择出一条可持续发展之路，下面就海产品专卖店的市场营销战略及战术执行做一简要分析。 □ 分析环境的目的： 我们来看一下海水产品经营的各个企业目前是否有一个名牌产品，能在行业里获得很高的知名度，就象消费者知道娃哈哈、可口可乐及康师付一样，我的回答是没有，难道如此众多的渔业集团们不想打造他们的品牌吗？回答是否定的，他们想，但是海产品本身的特点〈售卖方式、食用方式、保存方式、购买方式〉体现了打造品牌的难度，即建立品牌识别、品牌区隔很难，就好比现在的生猪肉行业一样，人们每天都需要他，可是识别他们的好坏、质量优劣不是靠品牌知名度而只是依靠卫生检验部门的一个蓝色的印章而已，试问这个蓝章的可信度能有多大，报纸连篇累牍的负面报道还少吗？消费者其实也早已不信这个印章了，可不信又能怎么样呢？也就是说消费者除了这枚蓝色印章作为评",
+  "confidence": 0.7,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:19:53Z",
+  "risk_flags": [
+    "H10",
+    "H14",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "H7"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "明确指出了海水产品市场缺乏知名品牌，消费者难以判断产品质量的问题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "没有提供具体的用户访谈、问卷或行为数据等原始证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "提出通过专卖店形式打造品牌，但未详细说明技术路线与资源匹配情况。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 7.0,
+      "reason": "商业模式包括客户、价值主张、渠道、营收等，但未详细说明成本结构。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": true,
+      "score": 6.0,
+      "reason": "提到市场缺乏知名品牌，但未提供详细的 TAM/SAM/SOM 数据和客观的竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "提到考虑盈亏平衡，但未提供具体的财务数据和单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 6.0,
+      "reason": "提出通过专卖店形式打造品牌，但未详细说明创新点和差异化优势。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "未提供团队背景和执行能力的具体信息，里程碑也不清晰。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": false,
+      "score": 4.0,
+      "reason": "材料结构较为简单，缺乏详细的数据支持和说服力。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "目标用户与价值主张较为匹配，未发现明显错位。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "提到了详细的选址手册和调查，渠道可达性有一定保障。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "产品价格定位主要定位要在中低档消费人群，这是专卖店能得以生存的最其码的环境保障。",
+      "reason": "提到定价但未提供用户支付意愿的验证证据。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "海水产品市场缺乏知名品牌，消费者鉴别产品好坏困难，存在打造值得信赖品牌的市场机会；可参考生猪肉行业通过专卖店成功打造品牌的案例",
+      "reason": "市场规模口径未明确，且未提供详细的 TAM/SAM/SOM 数据。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "可是我们的海产品、水产品连最其码的蓝色印章都没有，消费者无法判断哪种海产品是好的，哪种是不好的，购买产品完全凭感觉，只是依靠对摊主那不值钱许诺作为判别依据",
+      "reason": "缺乏用户访谈、问卷或其他需求验证证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "目前能打造生活海、水产品最好的途径只能是专卖店方式；而很多肉食行业的企业也正是发现了这一点开始以专卖店的形式经营生猪肉，如金锣公司、双汇公司",
+      "reason": "竞品分析较为简单，未提供详细的对比数据。"
+    },
+    {
+      "id": "H7",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "目前能打造生活海、水产品最好的途径只能是专卖店方式",
+      "reason": "强调专卖店形式的创新但未提供可验证的实验或指标。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供足够的财务数据来判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未出现自上而下的增长逻辑估算。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "前期开设多为公司直营的主题形象店（分旗舰店、模范店、标准店三级），后期发展加盟店的方式",
+      "reason": "时间表和里程碑较为模糊，缺乏具体可交付物。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目未涉及高风险领域。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供具体技术路线，但未见技术资源不匹配的证据。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提到具体的实验或测试计划。"
+    },
+    {
+      "id": "H14",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "关于海水产品专卖店方式的简要规划 □ 导言：从某种程度上说，市场的运作成功与否关键是方向的成功，如果方向错了，你努力越大那失败就越大，方向对了，你所有的努力就都是正确的，所以说企业的营销战略的选择是企业成功的第一步，所谓营销战略就是结合市场需求、企业的可支配资源能力及竞争状况，为企业选择出一条可持续发展之路，下面就海产品专卖店的市场营销战略及战术执行做一简要分析。",
+      "reason": "叙事结构较为简单，缺乏连贯性和完整性。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "对于每个店的规模规划要充分考虑利盈亏平衡，以便进行计划性的费用投入及规模设计",
+      "reason": "多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、财务逻辑、团队与执行等。"
+    }
+  ]
+}

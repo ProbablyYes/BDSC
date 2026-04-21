@@ -1324,12 +1324,17 @@ class GraphService:
         ("risk_control", "RiskControlPoint", "HAS_RISK_CONTROL", "#fb923c"),
         ("evidence", "Evidence", "HAS_EVIDENCE", "#94a3b8"),
         ("stakeholder", "Stakeholder", "HAS_TARGET_USER", "#f0abfc"),
+        # 新增赛事类型
+        ("entrepreneur_domain", "Entrepreneurship", "ENTREPRENEURSHIP", "#fb923c"),
+        ("competition", "Competition", "PARTICIPATED_IN", "#f472b6"),
+        # 创业案例特殊处理见下
     ]
 
     EXTRA_SUBGRAPHS: list[tuple[str, str, str, str]] = [
         ("category", "Category", "BELONGS_TO", "#c4b5fd"),
         ("risk_rule", "RiskRule", "HITS_RULE", "#fca5a5"),
         ("rubric", "RubricItem", "EVALUATED_BY", "#6ee7b7"),
+        # 创业案例特殊处理见下
     ]
 
     SG_LABELS: dict[str, str] = {
@@ -1337,11 +1342,13 @@ class GraphService:
         "business_model": "商业模式", "market": "市场分析", "execution": "执行计划",
         "risk_control": "风控", "evidence": "证据", "stakeholder": "利益方",
         "category": "类别", "risk_rule": "风险规则", "rubric": "评审标准",
+        "entrepreneur_domain": "创业领域", "competition": "赛事类型",
+        "entrepreneurship": "创业案例", "innovation_case": "创新案例",
         "project": "项目",
     }
 
     def get_subgraph_overview(self) -> dict[str, Any]:
-        """Return meta-level overview: one node per subgraph + cross-subgraph links."""
+        """Return meta-level overview: one node per subgraph + cross-subgraph links, with competition/entrepreneurship support."""
         try:
             def _query(session):
                 all_sgs = self.DIMENSION_SUBGRAPHS + self.EXTRA_SUBGRAPHS
@@ -1354,6 +1361,7 @@ class GraphService:
                 project_count = project_rows[0]["cnt"] if project_rows else 0
                 sg_node_counts["project"] = project_count
 
+                # 标准子图
                 for sg_id, node_label, rel_type, color in all_sgs:
                     count_rows = list(session.run(
                         f"MATCH (n:{node_label}) RETURN count(n) AS cnt"
@@ -1396,6 +1404,103 @@ class GraphService:
                         "linked_projects": linked_projects,
                         "top_nodes": [{"name": r["name"], "freq": r["freq"]} for r in top_rows],
                         "category_dist": [{"cat": r["cat"], "count": r["cnt"]} for r in cat_rows],
+                        "type": "competition" if sg_id in ["competition", "competition_domain"] else "dimension",
+                    })
+
+                # 创业领域（创业项目）
+                ent_domains = list(session.run(
+                    "MATCH (p:Project)-[e:ENTREPRENEURSHIP]->(n:Entrepreneurship) "
+                    "OPTIONAL MATCH (p)-[:BELONGS_TO]->(c:Category) "
+                    "RETURN p.id AS pid, p.name AS pname, c.name AS cat, n.name AS nname, e.level_rank AS level_rank, e.level AS level, elementId(n) AS nid"
+                ))
+                for ent in ent_domains:
+                    # 颜色逻辑：level_rank=2 红色，其余橙色
+                    color = "#fb923c"
+                    try:
+                        level_rank = int(ent["level_rank"] or 0)
+                    except Exception:
+                        level_rank = 0
+                    if level_rank == 2:
+                        color = "#ef4444"  # 红色高亮
+                    sg_meta.append({
+                        "id": f"entrepreneur_domain_{ent['nid']}",
+                        "label": ent["nname"],
+                        "node_label": "Entrepreneurship",
+                        "color": color,
+                        "node_count": 1,
+                        "edge_count": 1,
+                        "linked_projects": 1,
+                        "top_nodes": [{"name": ent["nname"], "freq": 1, "level": ent["level"], "level_rank": ent["level_rank"]}],
+                        "category_dist": [{"cat": ent["cat"] or "", "count": 1}],
+                        "type": "entrepreneur_domain",
+                        "level": ent["level"],
+                        "level_rank": ent["level_rank"],
+                        "project_id": ent["pid"],
+                    })
+                # 赛事类型节点全部只用 PARTICIPATED_IN
+                comp_types = list(session.run(
+                    "MATCH (p:Project)-[:PARTICIPATED_IN]->(n:Competition) "
+                    "OPTIONAL MATCH (p)-[:BELONGS_TO]->(c:Category) "
+                    "RETURN p.id AS pid, p.name AS pname, c.name AS cat, n.name AS nname, elementId(n) AS nid"
+                ))
+                for c in comp_types:
+                    sg_meta.append({
+                        "id": f"competition_{c['nid']}",
+                        "label": c["nname"],
+                        "node_label": "Competition",
+                        "color": "#f472b6",
+                        "node_count": 1,
+                        "edge_count": 1,
+                        "linked_projects": 1,
+                        "top_nodes": [{"name": c["nname"], "freq": 1}],
+                        "category_dist": [{"cat": c["cat"] or "", "count": 1}],
+                        "type": "competition",
+                    })
+
+                # 创业/创新案例区分
+                # 创业案例
+                ent_cases = list(session.run(
+                    "MATCH (e:Entrepreneurship)<-[r:ENTREPRENEURSHIP]-(p:Project)" 
+                    "RETURN p.id AS pid, p.name AS pname, r.level AS relevance, e.name AS ename, r.level_rank AS level_rank"
+                ))
+                for e in ent_cases:
+                    color = "#fb923c"
+                    try:
+                        level_rank = int(e["level_rank"] or 0)
+                    except Exception:
+                        level_rank = 0
+                    if level_rank == 2:
+                        color = "#ef4444"
+                    sg_meta.append({
+                        "id": f"entrepreneurship_{e['pid']}",
+                        "label": e["pname"],
+                        "node_label": "Project",
+                        "color": color,
+                        "node_count": 1,
+                        "edge_count": 1,
+                        "linked_projects": 1,
+                        "top_nodes": [{"name": e["ename"], "freq": 1, "level_rank": e["level_rank"]}],
+                        "category_dist": [],
+                        "type": "entrepreneurship",
+                        "level_rank": e["level_rank"],
+                    })
+                # 创新案例（未标注创业的项目）
+                inno_cases = list(session.run(
+                    "MATCH (p:Project) WHERE NOT (p)-[:ENTREPRENEURSHIP]->(:Entrepreneurship)" 
+                    "RETURN p.id AS pid, p.name AS pname"
+                ))
+                for i in inno_cases:
+                    sg_meta.append({
+                        "id": f"entrepreneurship_{i['pid']}",
+                        "label": "innovation",
+                        "node_label": "Project",
+                        "color": color,
+                        "node_count": 1,
+                        "edge_count": 1,
+                        "linked_projects": 1,
+                        "top_nodes": [{"name": i["pname"], "freq": 1}],
+                        "category_dist": [],
+                        "type": "innovation",
                     })
 
                 cross_links: list[dict] = []
@@ -1419,12 +1524,12 @@ class GraphService:
 
                 overview_nodes = [
                     {"id": "project", "label": "项目", "color": "#ffffff",
-                     "node_count": project_count, "node_label": "Project"},
+                     "node_count": project_count, "node_label": "Project", "type": "project"},
                 ]
                 for m in sg_meta:
                     overview_nodes.append({
                         "id": m["id"], "label": m["label"], "color": m["color"],
-                        "node_count": m["node_count"], "node_label": m["node_label"],
+                        "node_count": m["node_count"], "node_label": m["node_label"], "type": m["type"]
                     })
                 overview_links = []
                 for m in sg_meta:

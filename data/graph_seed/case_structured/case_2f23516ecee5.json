@@ -1,0 +1,335 @@
+{
+  "case_id": "case_2f23516ecee5",
+  "document_id": "doc_0658177a11d4",
+  "source": {
+    "file_path": "金融经济/新疆农业大学 乌鲁木齐菜芽网络科技有限公司项目运营报告.doc",
+    "file_name": "新疆农业大学 乌鲁木齐菜芽网络科技有限公司项目运营报告.doc",
+    "category": "金融经济",
+    "doc_type": "doc",
+    "parse_quality": "A",
+    "include_in_kg": true,
+    "education_level": "unknown",
+    "year": "",
+    "award_level": "",
+    "school": ""
+  },
+  "document_stats": {
+    "segment_count": 1197,
+    "full_text_chars": 38027,
+    "core_text_chars": 582,
+    "appendix_start_index": 85,
+    "has_appendix_evidence": true,
+    "hypergraph_nodes": 1198,
+    "hypergraph_edges": 1,
+    "hypergraph_hypernode_count": 1198,
+    "hypergraph_hyperedge_count": 1
+  },
+  "project_profile": {
+    "project_name": "菜芽网络科技有限公司",
+    "target_users": [
+      "新疆地区的本地用户群",
+      "新疆地区的企业商家"
+    ],
+    "pain_points": [
+      "传统媒体信息覆盖性不够广、传播性不够强、服务不够全面"
+    ],
+    "solution": [
+      "创建本地新媒体平台“新疆我的家”积攒用户群",
+      "为企业商家提供移动互联网的数字化整合营销服务",
+      "提供商业化的数据分析服务",
+      "提供O2O移动电商业务"
+    ],
+    "innovation_points": [
+      "基于移动互联网的新媒体技术，推动传统媒体转型"
+    ],
+    "business_model": [
+      "通过平台为企业商家提供数字化整合营销服务获得收入",
+      "通过提供商业化的数据分析服务获得收入",
+      "通过O2O移动电商业务获得收入"
+    ],
+    "market_analysis": [
+      "项目所属领域为信息技术和电子商务"
+    ],
+    "execution_plan": [
+      "通过创建“新疆我的家”平台积攒用户群，使之成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台",
+      "朝着O2O型移动电商发展，打造新疆地区“生活消费第一”新媒体平台"
+    ],
+    "risk_control": [
+      "【通用风险控制】第八部分风险分析 54 第九部分投资退出策略 57"
+    ]
+  },
+  "tags": [
+    "category:金融经济",
+    "education_level:unknown",
+    "doc_type:doc",
+    "risk_gap:weak_user_evidence",
+    "rubric:Problem Definition",
+    "rubric:Solution Feasibility",
+    "rubric:Business Model Consistency",
+    "rubric:Innovation & Differentiation",
+    "rubric:Presentation Quality",
+    "risk_rule:H10",
+    "risk_rule:H15",
+    "risk_rule:H3",
+    "risk_rule:H4",
+    "risk_rule:H5",
+    "risk_rule:H6",
+    "risk_rule:H9"
+  ],
+  "evidence": [
+    {
+      "id": "case_2f23516ecee5_e1",
+      "type": "user_evidence",
+      "quote": "通过创建本地新媒体平台“新疆我的家”来积攒用户群，为企业商家提供移动互联网的数字化整合营销服务",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_2f23516ecee5_e2",
+      "type": "user_evidence",
+      "quote": "使之成为本地入户率最高，影响力最广泛，掌上信息化服务最全面，并朝着O2O型移动电商发展的新疆地区“生活消费第一”新媒体平台。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_2f23516ecee5_e3",
+      "type": "business_model_evidence",
+      "quote": "为企业商家提供移动互联网的数字化整合营销服务，商业化的数据分析服务、O2O移动电商业务等。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    },
+    {
+      "id": "case_2f23516ecee5_e4",
+      "type": "business_model_evidence",
+      "quote": "使之成为本地入户率最高，影响力最广泛，掌上信息化服务最全面，并朝着O2O型移动电商发展的新疆地区“生活消费第一”新媒体平台。",
+      "chunk_id": "C1",
+      "source_unit": "段落1"
+    }
+  ],
+  "rubric_coverage": [
+    {
+      "rubric_item": "Problem Definition",
+      "covered": true
+    },
+    {
+      "rubric_item": "User Evidence Strength",
+      "covered": false
+    },
+    {
+      "rubric_item": "Solution Feasibility",
+      "covered": true
+    },
+    {
+      "rubric_item": "Business Model Consistency",
+      "covered": true
+    },
+    {
+      "rubric_item": "Market & Competition",
+      "covered": false
+    },
+    {
+      "rubric_item": "Financial Logic",
+      "covered": false
+    },
+    {
+      "rubric_item": "Innovation & Differentiation",
+      "covered": true
+    },
+    {
+      "rubric_item": "Team & Execution",
+      "covered": false
+    },
+    {
+      "rubric_item": "Presentation Quality",
+      "covered": true
+    }
+  ],
+  "summary": "|编号 | |项目分类 | | |项目名称 |菜芽网络科技有限公司 | |项目所属领域分组 |信息技术和电子商务 | |作品简介：基于移动互联网的新媒体科技公司，通过高速发展的新媒体技术| |渐渐使传统媒体转型，使信息的覆盖性更广，传播性更强，服务更全面。通| |过创建本地新媒体平台 | |“新疆我的家”来积攒用户群，为企业商家提供移动互联网的数字化整合营销| |服务，商业化的数据分析服务、O2O移动电商业务等。使之成为本地入户率 | |最高，影响力最广泛，掌上信息化服务最全面，并朝着O2O型移动电商发展 | |的新疆地区“生活消费第一”新媒体平台。 | 第一部分 执行概要 1 第三部分 市场分析 9 第四部分 服务介绍 27 第五部分 市场营销 31 第六部分 公司战略 38 第七部分 公司财务 42 第八部分 风险分析 54 第九部分 投资退出策略 57",
+  "confidence": 0.75,
+  "llm": {
+    "enabled": true,
+    "provider": "siliconflow",
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "used": true
+  },
+  "engine": "hypernetx",
+  "generated_at": "2026-04-19T14:18:15Z",
+  "分类": [
+    {
+      "类型": "创业",
+      "名称": "high relevance"
+    }
+  ],
+  "risk_flags": [
+    "H10",
+    "H15",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "H9"
+  ],
+  "rubric_items_detail": [
+    {
+      "item": "Problem Definition",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目明确指出了传统媒体在新疆地区存在的信息覆盖性、传播性和服务全面性不足的问题。"
+    },
+    {
+      "item": "User Evidence Strength",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有提供用户访谈、问卷或其他需求验证的具体证据。"
+    },
+    {
+      "item": "Solution Feasibility",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目提出了通过创建本地新媒体平台来解决传统媒体的问题，技术路线与资源匹配度较高。"
+    },
+    {
+      "item": "Business Model Consistency",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目描述了通过提供数字化整合营销服务、商业化的数据分析服务和O2O移动电商业务获得收入的商业模式，形成了闭环。"
+    },
+    {
+      "item": "Market & Competition",
+      "covered": false,
+      "score": 4.0,
+      "reason": "项目提到了市场目标，但没有详细说明TAM/SAM/SOM的口径，也没有进行客观的竞品分析。"
+    },
+    {
+      "item": "Financial Logic",
+      "covered": false,
+      "score": 3.0,
+      "reason": "项目提到了收入来源，但没有提供具体的财务数据或单位经济分析。"
+    },
+    {
+      "item": "Innovation & Differentiation",
+      "covered": true,
+      "score": 7.0,
+      "reason": "项目强调了通过新媒体技术推动传统媒体转型，提供了全面的信息化服务，具有一定的创新性和差异化。"
+    },
+    {
+      "item": "Team & Execution",
+      "covered": false,
+      "score": 2.0,
+      "reason": "项目文本中没有详细描述团队背景和执行能力，也没有明确的里程碑。"
+    },
+    {
+      "item": "Presentation Quality",
+      "covered": true,
+      "score": 8.0,
+      "reason": "项目材料结构完整，描述清晰，但缺乏具体数据支撑。"
+    }
+  ],
+  "risk_rule_details": [
+    {
+      "id": "H1",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述中没有出现目标用户与价值主张明显不匹配的情况。"
+    },
+    {
+      "id": "H2",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目没有提到具体的获客渠道，但也没有证据表明这些渠道难以触达目标用户。"
+    },
+    {
+      "id": "H3",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "通过平台为企业商家提供数字化整合营销服务获得收入 通过提供商业化的数据分析服务获得收入 通过O2O移动电商业务获得收入",
+      "reason": "项目提到了收入来源，但没有提供用户支付意愿的具体验证。"
+    },
+    {
+      "id": "H4",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "使之成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台 朝着O2O型移动电商发展，打造新疆地区“生活消费第一”新媒体平台",
+      "reason": "项目描述了市场目标，但没有详细说明TAM/SAM/SOM的口径，存在口径混乱的风险。"
+    },
+    {
+      "id": "H5",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "传统媒体信息覆盖性不够广、传播性不够强、服务不够全面",
+      "reason": "项目提到了需求，但没有提供用户访谈、问卷或其他需求验证的具体证据。"
+    },
+    {
+      "id": "H6",
+      "triggered": true,
+      "severity": "medium",
+      "evidence": "使之成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台 朝着O2O型移动电商发展，打造新疆地区“生活消费第一”新媒体平台",
+      "reason": "项目声称要成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台，但没有提供客观的竞品分析。"
+    },
+    {
+      "id": "H7",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述了通过新媒体技术推动传统媒体转型，提供了全面的信息化服务，具有一定的创新性和差异化。"
+    },
+    {
+      "id": "H8",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有提供足够的财务数据来判断单位经济是否成立。"
+    },
+    {
+      "id": "H9",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "使之成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台 朝着O2O型移动电商发展，打造新疆地区“生活消费第一”新媒体平台",
+      "reason": "项目描述了宏大的市场目标，但没有提供具体的增长逻辑和实现路径。"
+    },
+    {
+      "id": "H10",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "使之成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台 朝着O2O型移动电商发展，打造新疆地区“生活消费第一”新媒体平台",
+      "reason": "项目描述了宏大的目标，但没有提供具体的时间表或里程碑。"
+    },
+    {
+      "id": "H11",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有涉及高风险领域的合规或伦理问题。"
+    },
+    {
+      "id": "H12",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目描述的技术路线与资源匹配度较高，没有出现技术路线与资源不匹配的情况。"
+    },
+    {
+      "id": "H13",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目文本中没有提到具体的实验或测试。"
+    },
+    {
+      "id": "H14",
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "项目材料结构完整，描述清晰，没有出现叙事断裂的情况。"
+    },
+    {
+      "id": "H15",
+      "triggered": true,
+      "severity": "high",
+      "evidence": "使之成为新疆地区入户率最高、影响力最广泛、掌上信息化服务最全面的平台 朝着O2O型移动电商发展，打造新疆地区“生活消费第一”新媒体平台",
+      "reason": "项目文本中多个关键 Rubric 维度缺乏支撑证据，如用户证据强度、市场与竞争、财务逻辑和团队与执行。"
+    }
+  ]
+}

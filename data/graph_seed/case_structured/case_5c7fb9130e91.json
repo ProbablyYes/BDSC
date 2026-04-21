@@ -72,10 +72,31 @@
     "risk_rule:H10",
     "risk_rule:H15",
     "risk_rule:H3",
-    "risk_rule:H5",
-    "risk_rule:H8"
+    "risk_rule:H5"
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "case_5c7fb9130e91_e1",
+      "type": "user_evidence",
+      "quote": "系统开发背景源于涉氢场所安全事故频发 （如南京某大学氢实验室爆炸、 挪威及德国加氢站爆炸等） 及传统人工巡检效率低、 风险高、技术滞后等局限性",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_5c7fb9130e91_e2",
+      "type": "user_evidence",
+      "quote": "本项目开发了一种涉氢场所泄漏检测与爆燃风险防控的智能巡检机器人",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    },
+    {
+      "id": "case_5c7fb9130e91_e3",
+      "type": "user_evidence",
+      "quote": "结合欠膨胀射流和气体扩散模型理论提出了氢泄漏检测方法， 基于火焰参数 （温度、UV 光波长、UV 光波长） 对区域损伤影响规律构建火焰关键参量检测方案和自动巡检路线",
+      "chunk_id": "C1",
+      "source_unit": "page_1"
+    }
+  ],
   "rubric_coverage": [
     {
       "rubric_item": "Problem Definition",
@@ -128,27 +149,26 @@
     "H10",
     "H15",
     "H3",
-    "H5",
-    "H8"
+    "H5"
   ],
   "rubric_items_detail": [
     {
       "item": "Problem Definition",
       "covered": true,
       "score": 8.0,
-      "reason": "明确指出人工巡检在涉氢高危环境下的安全风险及氢火焰在日光下不可见的问题，有具体用户场景支撑。"
+      "reason": "明确指出人工巡检在涉氢高危环境下的安全风险和效率问题，有具体用户场景支撑。"
     },
     {
       "item": "User Evidence Strength",
       "covered": false,
-      "score": 2.0,
-      "reason": "未提供具体的用户访谈、问卷或其他需求验证证据。"
+      "score": 3.0,
+      "reason": "提到安全事故频发，但未提供具体的访谈、问卷或行为数据等原始证据。"
     },
     {
       "item": "Solution Feasibility",
       "covered": true,
       "score": 7.0,
-      "reason": "技术路线包括防爆型AGV、多传感器融合感知系统等，与项目需求匹配，但未详细说明资源情况。"
+      "reason": "技术方案包括防爆型AGV、多传感器融合感知系统等，与项目需求匹配，但未详细说明资源情况。"
     },
     {
       "item": "Business Model Consistency",
@@ -160,30 +180,30 @@
       "item": "Market & Competition",
       "covered": true,
       "score": 7.0,
-      "reason": "市场背景清晰，指出双碳战略下氢能产业的爆发式增长，但竞品分析较为简略。"
+      "reason": "市场背景清晰，提到氢能产业爆发式增长，竞品分析较为客观，但未详细说明市场规模。"
     },
     {
       "item": "Financial Logic",
       "covered": false,
-      "score": 3.0,
+      "score": 4.0,
       "reason": "未提供具体的财务数据，无法判断单位经济是否成立。"
     },
     {
       "item": "Innovation & Differentiation",
       "covered": true,
       "score": 8.0,
-      "reason": "强调了多模态火灾检测、防爆底盘与机械臂协同等创新点，具有差异化优势。"
+      "reason": "提出多模态火灾检测和防爆底盘与机械臂协同等创新点，具有差异化优势。"
     },
     {
       "item": "Team & Execution",
       "covered": false,
-      "score": 4.0,
-      "reason": "未详细说明团队背景及执行能力，里程碑也未明确列出。"
+      "score": 5.0,
+      "reason": "未详细说明团队背景和执行能力，里程碑也未明确列出。"
     },
     {
       "item": "Presentation Quality",
       "covered": true,
-      "score": 6.0,
+      "score": 7.0,
       "reason": "PPT 内容展示较为完整，但部分信息重复，缺乏详细数据支撑。"
     }
   ],
@@ -200,63 +220,63 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及具体获客渠道，但未见难以触达目标用户的证据。"
+      "reason": "未提到具体获客渠道，但未见难以触达目标用户的证据。"
     },
     {
       "id": "H3",
       "triggered": true,
       "severity": "medium",
       "evidence": "提到定价/收费但缺少用户支付意愿验证。",
-      "reason": "提到提供长期技术支持服务和数据监测服务，但未提供用户支付意愿的验证。"
+      "reason": "提到提供长期技术支持服务，但未提供用户支付意愿的验证。"
     },
     {
       "id": "H4",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "市场背景清晰，未见市场规模口径混乱的证据。"
+      "reason": "市场背景描述清晰，未见市场规模口径混乱。"
     },
     {
       "id": "H5",
       "triggered": true,
-      "severity": "high",
+      "severity": "medium",
       "evidence": "缺乏用户访谈、问卷或其他需求验证证据。",
-      "reason": "未提供具体的用户访谈、问卷或其他需求验证证据。"
+      "reason": "提到安全事故频发，但未提供具体的访谈、问卷或行为数据等原始证据。"
     },
     {
       "id": "H6",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未声称无竞品，但竞品分析较为简略。"
+      "reason": "竞品分析较为客观，未见明显失真。"
     },
     {
       "id": "H7",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "强调了多模态火灾检测、防爆底盘与机械臂协同等创新点，未见不可验证的证据。"
+      "reason": "创新点有具体技术方案支撑，未见不可验证的情况。"
     },
     {
       "id": "H8",
-      "triggered": true,
-      "severity": "high",
-      "evidence": "未提供具体的财务数据，无法判断单位经济是否成立。",
-      "reason": "未提供具体的财务数据，无法判断单位经济是否成立。"
+      "triggered": false,
+      "severity": "low",
+      "evidence": "",
+      "reason": "未提供具体财务数据，但未见明显单位经济不成立的描述。"
     },
     {
       "id": "H9",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未见自上而下估算的表述。"
+      "reason": "未见自上而下估算的增长逻辑。"
     },
     {
       "id": "H10",
       "triggered": true,
       "severity": "medium",
       "evidence": "时间表/里程碑明显不现实或缺少可交付物。",
-      "reason": "未详细说明团队背景及执行能力，里程碑也未明确列出。"
+      "reason": "未详细说明团队背景和执行能力，里程碑也未明确列出。"
     },
     {
       "id": "H11",
@@ -270,14 +290,14 @@
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "技术路线与项目现状匹配，未见资源不匹配的证据。"
+      "reason": "技术方案与项目现状匹配，未见资源不匹配的情况。"
     },
     {
       "id": "H13",
       "triggered": false,
       "severity": "low",
       "evidence": "",
-      "reason": "未提及具体实验/测试，但未见实验设计不合格的证据。"
+      "reason": "提到实验/测试，但未见具体样本量与评价指标的描述。"
     },
     {
       "id": "H14",

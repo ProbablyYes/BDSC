@@ -18,9 +18,23 @@
       0.45
     ],
     "avg_user_lifetime_months": 18,
-    "note": "硬件重资产，注意库存 / 售后 / 供应链成本"
+    "note": "硬件重资产，注意库存 / 售后 / 供应链成本",
+    "thresholds": {
+      "ltv_cac_healthy": 2.5,
+      "ltv_cac_warning": 1.2,
+      "payback_healthy_months": 9.0,
+      "payback_warning_months": 18.0,
+      "runway_red_months": 12.0,
+      "runway_warning_months": 18.0,
+      "breakeven_green_months": 18.0,
+      "breakeven_warning_months": 30.0,
+      "_source": "seed_v2"
+    }
   },
   "source": "seed",
   "updated_at": "2026-04-18T12:48:34+00:00",
-  "evidence": []
+  "evidence": [],
+  "notes": [
+    "thresholds back-filled from seed v2 at 2026-04-22T00:28:59+00:00"
+  ]
 }

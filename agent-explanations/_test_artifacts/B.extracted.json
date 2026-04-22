@@ -1,0 +1,1037 @@
+{
+    "session_label":  "B",
+    "project_id":  "test-654321-proj-eldercare-ai",
+    "conversation_id":  "bfeb4791-0ca4-419a-82c8-1ba7f95fe4c6",
+    "title":  "独居老人跌倒检测技术探讨",
+    "summary":  "项目团队介绍详细，硬件量产计划和软件 MVP 清晰，但缺少技术细节、市场分析、竞争对手分析、商业模式、执行步骤和风控措施",
+    "turns":  [
+                  {
+                      "turn_index":  1,
+                      "user_message":  "我在做一个\"独居老人跌倒检测边缘 AI 设备\"。核心思路是用 60GHz 毫米波雷达加一个轻量级动作识别小模型，在端侧做推理，检测到跌倒或长时间无活动时自动通过 4G 报警给家属和社区网格员。不用摄像头，避免隐私问题。",
+                      "assistant_head":  "好的，同学，我们坐下来好好聊聊你的这个“独居老人跌倒检测”项目。你提出的“毫米波雷达+边缘AI”这个技术组合，思路非常清晰，而且你敏锐地抓住了摄像头方案带来的隐私顾虑，这是一个非常好的起点，说明你对用户心理有基本的洞察。\n\n但是，就像我们在课堂上反复强调的，一个好的创业项目，不能只停留在“技术实现”层面。它必须是一个完整的商业闭环，要能经得起市场、法律、伦理和技术的多重考验。从我们刚才的讨论来看，你的项目目前更像一个“技术原型构想”，距离一个“可落地的商业产品”还有几道非常关键、甚至可以说是生死攸关的鸿沟需要跨越。\n\n我们一个一个来看。\n\n### 一、最核心的瓶颈：被严重低估的“合规与伦理”生死线（H11）\n\n你可能会觉得，我已经用了毫米波雷达，没有摄像头，隐私问题不就解决了吗？**这是一个非常危险且常见的误区。** 事实上，你选择的这条路，可能把你引向了一个比普通摄像头更复杂的合规雷区。\n\n**1. 毫米波雷达的数据，真的不涉及隐私吗？**\n我们来拆解一下。60GHz毫米波雷达发射的电磁波可以穿透衣物、薄被等遮挡物，它返回的“点云”或“微多普勒”信号，经过算法处理，可以还原出人体的**姿态、动作轨迹、呼吸频率、甚至心跳信息**。\n\u003e “毫米波雷达虽然不生成直观图像，但能穿透衣物、被褥，生成包含人体姿态、呼吸、心跳等生物特征的‘点云’或‘微多普勒’数据。”\n\n这就不再是简单的“空间内有没有人”的信息了，而是**高度敏感的生物识别信息和健康生理数据**。在中国的《个人信息保护法》和欧盟的GDPR框架下，这类数据属于“敏感个人信息”，其采集、处理、存储和传输受到极其严格的限制。你需要：\n*   **明确的、单独的授权同意**：如何向可能认知能力下降的独居老人解释清楚你在收集什么数据、用于什么目的？获取的同意是否在法律上有效？\n*   **数据最小化原则**：你的设备是否只采集跌倒判断所必需的最少数据？原始点云数据如何处理？是即时分析后丢弃，还是会上传到云端？存储多久？\n*   **严格的安全保障**：数据在设备端、通过4G传输、在服务器端，如何加密？如何防止泄露？\n\n你的方案里完全没有涉及这些。如果这些问题不解决，你的产品一旦上市，可能会面临比“侵犯肖像权”更严重的法律指控——侵犯个人隐私和敏感信息。\n\n**2. “跌倒检测”本身，可能把你划入“医疗器械”的监管范畴。**\n这是另一个你尚未触及的“深水区”。如果你的设备声称具备“健康监测”或“紧急生命报警”功能，尤其是在宣传中强调其医疗保健用途，那么在中国，它有很大概率需要向国家药品监督管理局（NMPA）申请**医疗器械注册认证**。在美国，则需要面对FDA的审查。\n这个过程意味着什么？\n*   **漫长的周期**：通常以“年”为单位。\n*   **高昂的成本**：需要大量的临床验证，证明你的算法在真实场景下的**准确率、误报率、漏报率**达到医疗级标准。\n*   **极高的可靠性要求**：不再是“差不多就行”，而是必须有严谨的统计数据支撑。\n\n参考案例“灵眼守护”（基于rPPG的无接触健康监测）同样属于健康监测领域，但它可能通过定位为“日常健康趋势观察”而非“医疗诊断报警”，巧妙地规避了最严格的医疗器械认证。而你的项目核心就是“自动报警”，这直接触动了“生命安全”这根最敏感的神经，监管机构会格外关注。\n\n**3. 报警之后的伦理与责任困境。**\n假设设备报警了，但发生了以下情况，责任如何界定？\n*   **误报**：老人只是慢慢躺下休息，设备却通知了家属和网格员，导致不必要的惊慌和社区资源浪费。几次之后，所有接收方都会选择忽略你的报警。\n*   **漏报**：老人真的跌倒了，但设备没检测到（比如被家具完全遮挡），错过了黄金救援时间。\n*   **响应失败**：报警发出去了，但家属手机没信号，网格员在忙其他事，没有及时响应。\n\n这些不是技术问题，而是产品设计时必须考虑的**伦理和法律责任**。你需要设计清晰的用户协议，界定设备是“辅助报警工具”而非“绝对保障”，并可能需要考虑与保险结合来分摊风险。目前，你的方案里这块是完全空白的。\n\n---\n\n### 二、被忽略的技术挑战：单一传感器的“阿喀琉斯之踵”（H14）\n\n你对毫米波雷达的技术选型是对的，但对其能力可能过于乐观了。独居老人的家庭环境",
+                      "assistant_full_len":  5237,
+                      "pipeline":  "coach",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "project_diagnosis",
+                      "intent_reason":  "描述了一个具体项目的功能和商业模式；判定为单一主问题；主意图归类为 project_diagnosis",
+                      "intent_engine":  "llm",
+                      "category":  "科技创新",
+                      "mode":  "coursework",
+                      "project_stage":  "idea",
+                      "overall_score":  4.21,
+                      "bottleneck":  "当前最高风险为 H11（合规/伦理缺口），会直接影响项目落地可行性。",
+                      "score_band":  "早期可塑",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H5",
+                                                 "H11",
+                                                 "H14"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.16
+                                    },
+                                    {
+                                        "id":  "H11",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.34
+                                    },
+                                    {
+                                        "id":  "H14",
+                                        "severity":  "low",
+                                        "title":  null,
+                                        "score_impact":  -0.07
+                                    }
+                                ],
+                      "next_task_title":  "完成合规与伦理检查清单",
+                      "next_task_desc":  "列出数据采集、存储、使用、授权链路并补齐缺口。",
+                      "kg_entities_count":  8,
+                      "kg_relationship_count":  7,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.81,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "价值闭环超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H19",
+                                                                "H3",
+                                                                "H4",
+                                                                "H5",
+                                                                "H9",
+                                                                "execution_vague",
+                                                                "market_size_fallacy",
+                                                                "no_execution_plan",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Innovation \u0026 Differentiation",
+                                                                  "Market \u0026 Competition",
+                                                                  "Presentation Quality",
+                                                                  "Problem Definition",
+                                                                  "Risk Control",
+                                                                  "Solution Feasibility"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "价值闭环超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H19",
+                                                                "H3",
+                                                                "H4",
+                                                                "H5",
+                                                                "H9",
+                                                                "execution_vague",
+                                                                "market_size_fallacy",
+                                                                "no_execution_plan",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Innovation \u0026 Differentiation",
+                                                                  "Market \u0026 Competition",
+                                                                  "Presentation Quality",
+                                                                  "Problem Definition",
+                                                                  "Risk Control",
+                                                                  "Solution Feasibility"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "跨维度一致性超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  6.52,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H14",
+                                                                "innovation_unclear",
+                                                                "no_innovation"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Problem Definition",
+                                                                  "Risk Control"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  6.08,
+                                                  "confidence":  0.85,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "no_execution_plan"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  4,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  null,
+                      "competition_role":  null
+                  },
+                  {
+                      "turn_index":  2,
+                      "user_message":  "硬件形态是一个小盒子，功耗 3W，吸顶或挂墙。BOM 成本：雷达模组 85 元，MCU+NPU 模组 60 元，电源与外壳 25 元，4G 模组 40 元，合计约 210 元。出厂定价 599 元，目标毛利 55%。预计第一年出货 1 万台，渠道主要是社区居家养老服务中心采购 + 养老院批量部署。",
+                      "assistant_head":  "好的，同学，我们接着往下聊。你这次补充的硬件形态、成本和定价信息非常具体，能看出你已经开始认真思考商业化的细节了，这是从“技术构想”迈向“商业项目”的关键一步。非常好。\n\n不过，也正是这些具体的数字，让我看到了这个项目目前最需要你冷静下来、深入思考的几个核心问题。我们一个一个来拆解，就像下棋一样，先看清全局，再决定下一步怎么走。\n\n### 第一颗棋子：你的定价和渠道策略，真的成立吗？\n\n你给出了一个非常清晰的模型：BOM成本210元，出厂价599元，目标毛利55%，第一年出货1万台，卖给社区和养老院。\n\n这个模型在纸面上是成立的，但一旦放到真实的市场和商业环境中，它可能非常脆弱。我们来算一笔更真实的账：\n\n1.  **你的“出厂价”不等于“到手价”**：对于社区和养老院这类B端/G端客户，采购时几乎必然要求折扣。行业惯例，硬件产品给渠道或大客户的折扣通常在20%-40%之间。我们取一个中间值30%，那么你的实际成交价可能只有 `599 * 0.7 ≈ 419元`。\n\n2.  **你的“毛利”不等于“利润”**：用419元的实际收入，减去210元的BOM成本，你的毛利润是209元。但这远不是你能装进口袋的钱。你还必须覆盖：\n    *   **研发摊销**：开发算法、设计硬件、写固件的成本，平摊到每一台设备上。\n    *   **模具与测试认证费**：开模生产那个小盒子，以及产品上市必需的3C认证、入网许可等费用。\n    *   **销售与市场费用**：说服第一个社区、第一个养老院试用你的产品，需要投入的商务、演示、样品成本。对于一个涉及安全的新品类，市场教育成本极高。\n    *   **售后与支持成本**：设备安装、调试、处理误报警、软件升级、保修期内维修。\n    *   **最关键却被你忽略的：合规成本**：这个我们下面重点讲，但医疗器械类认证（如果涉及）、数据安全合规审查、法律咨询等，都是一笔不菲的固定投入。\n\n所以，看似55%的丰厚毛利，在扣掉这些“硬成本”后，净利润可能所剩无几，甚至可能是负的。**这就引出了一个更根本的问题：你的价值主张，支撑得起近600元的定价吗？**\n\n我们来看一个外部案例的启示。在分析中提到的“求是鹰眼反无人机系统”，它的一个核心竞争优势是 **“成本较国外同类系统降低40%”** 。这说明什么？说明即便是技术有壁垒的硬件项目，在面向B端/G端市场时，**“性价比”或者说“成本优势”始终是关键的竞争武器和采购决策点**。\n\n你的竞争对手是谁？不仅仅是其他雷达方案。更直接、更便宜的替代品是**一键呼叫器**（成本可能只有几十元）、**带跌倒检测功能的智能手表/手环**（价格从几百到上千不等，但功能更综合）、甚至是一些养老院已经部署的**定期人工巡检**。\n\n那么，社区或养老院的采购负责人，为什么要花近600元买你的单一功能设备？你的价值必须足够锋利。这里有两种可能的价值主张，对应的采购逻辑完全不同：\n\n| 价值主张方向 | 核心驱动力 | 采购决策者关心什么 | 对价格的敏感度 |\n| :--- | :--- | :--- | :--- |\n| **降低管理与责任风险** | “有了它，万一老人出事，我们能第一时间知道，避免了因响应不及时而承担的责任。” | 事故责任界定、管理流程优化、降低潜在赔偿风险。 | **相对较低**，因为这是在为“保险”和“免责”付费。但需要极强的证据证明你的设备可靠。 |\n| **提升关爱体验与效率** | “为辖区老人提供高科技关爱服务，提升满意度，同时减少网格员无效上门巡检的次数。” | 服务创新亮点、实际节省的人力成本、老人/家属的反馈。 | **较高**，需要精确计算投资回报率（ROI）。如果节省的人力成本低于设备投入，就很难推动。 |\n\n你的599元定价，更像是基于第一种逻辑（为风险买单）。但这就对你的产品**可靠性**和**责任界定**提出了极高的要求，而这恰恰是你目前方案中最薄弱的地方，直接把我们带到了下一个，也是最关键的问题。\n\n### 第二颗棋子（也是棋盘上的“王”）：合规与伦理风险，是你的生死线\n\n同学，我必须非常严肃地跟你强调这一点。上一轮我们提到H11（合规/伦理缺口）是最高风险，现在结合你的具体方案，这个风险已经不是一个“需要注意的问题”，而",
+                      "assistant_full_len":  4373,
+                      "pipeline":  "coach",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "business_model",
+                      "intent_reason":  "学生详细描述了项目的成本、定价、毛利和销售渠道，涉及商业模式问题；判定为单一主问题；主意图归类为 business_model",
+                      "intent_engine":  "llm",
+                      "category":  "科技创新",
+                      "mode":  "coursework",
+                      "project_stage":  "structured",
+                      "overall_score":  6.9,
+                      "bottleneck":  "当前最高风险为 H11（合规/伦理缺口），会直接影响项目落地可行性。",
+                      "score_band":  "基本成形",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H3",
+                                                 "H5",
+                                                 "H11",
+                                                 "H14"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H3",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H11",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    },
+                                    {
+                                        "id":  "H14",
+                                        "severity":  "low",
+                                        "title":  null,
+                                        "score_impact":  -0.08
+                                    }
+                                ],
+                      "next_task_title":  "完成合规与伦理检查清单",
+                      "next_task_desc":  "列出数据采集、存储、使用、授权链路并补齐缺口。",
+                      "kg_entities_count":  12,
+                      "kg_relationship_count":  12,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.81,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "价值闭环超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H19",
+                                                                "H3",
+                                                                "H4",
+                                                                "H5",
+                                                                "H9",
+                                                                "execution_vague",
+                                                                "market_size_fallacy",
+                                                                "no_execution_plan",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Innovation \u0026 Differentiation",
+                                                                  "Market \u0026 Competition",
+                                                                  "Presentation Quality",
+                                                                  "Problem Definition",
+                                                                  "Risk Control",
+                                                                  "Solution Feasibility"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "价值闭环超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H19",
+                                                                "H3",
+                                                                "H4",
+                                                                "H5",
+                                                                "H9",
+                                                                "execution_vague",
+                                                                "market_size_fallacy",
+                                                                "no_execution_plan",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Innovation \u0026 Differentiation",
+                                                                  "Market \u0026 Competition",
+                                                                  "Presentation Quality",
+                                                                  "Problem Definition",
+                                                                  "Risk Control",
+                                                                  "Solution Feasibility"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  2,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  {
+                                               "verdict":  null,
+                                               "evidence":  {
+                                                                "H3":  0.5
+                                                            },
+                                               "cards_count":  1,
+                                               "hits":  [
+                                                            "pricing",
+                                                            "unit_econ"
+                                                        ],
+                                               "triggered":  true,
+                                               "industry":  "教育"
+                                           },
+                      "competition_role":  null
+                  },
+                  {
+                      "turn_index":  3,
+                      "user_message":  "系统会持续采集老人的活动时间段、作息节律、跌倒事件等行为数据，云端会做长期健康趋势分析，用于提醒子女。我们会把这些数据跟社区卫生服务中心共享，做老人健康档案。用户同意书我们打算让安装师傅现场让老人或家属签字。",
+                      "assistant_head":  "同学，我们继续聊。你刚才补充的这个数据共享和用户同意的想法，让我更清楚地看到了你项目里那个最危险、也最容易被忽视的“地雷”。我们之前聊了成本和定价，那是在算“能不能赚钱”的账；但现在这个问题，是决定你“能不能做”的生死线。\n\n你刚才说：\n\n\u003e 系统会持续采集老人的活动时间段、作息节律、跌倒事件等行为数据，云端会做长期健康趋势分析，用于提醒子女。我们会把这些数据跟社区卫生服务中心共享，做老人健康档案。用户同意书我们打算让安装师傅现场让老人或家属签字。\n\n这个想法听起来很有社会价值，连接了家庭和社区医疗，但恰恰是这里，埋下了会让整个项目瞬间崩塌的合规与伦理风险（也就是我们常说的H11风险）。这不是危言耸听，我们把它掰开揉碎了看。\n\n### 一、你的“用户同意书”，可能是一张“无效通行证”\n\n你认为让安装师傅带着一份同意书去现场签字，就解决了“告知”和“授权”问题。这可能是你目前最大的认知盲区。\n\n**1. “知情同意”不是签个字那么简单，尤其是对老人。**\n《个人信息保护法》对处理敏感个人信息（健康信息是典型的敏感信息）的要求是“单独同意”和“充分告知”。这意味着：\n*   **告知必须清晰、具体、易于理解。** 一份密密麻麻的法律条文，安装师傅用几分钟时间，能向一位可能耳背、眼花、理解能力下降的老人解释清楚“长期健康趋势分析”是什么意思吗？能说清数据会“共享给社区卫生服务中心”后，具体怎么用、谁能看、存多久吗？\n*   **同意必须是自愿、明确的。** 如果老人是在子女不在场、出于对“社区服务”的信任或安装师傅的催促下签的字，这种同意的有效性在法律上非常脆弱。\n*   **现场签署难以留痕和审计。** 你怎么证明你履行了充分的告知义务？有录音录像吗？有第三方见证吗？如果没有，一旦发生纠纷，这份同意书很可能被认定为无效。\n\n**2. 你的数据流向了“医疗体系”，触发了更严格的监管。**\n这才是最关键的。你把数据共享给**社区卫生服务中心**，并用于建立**健康档案**。这个动作，性质就变了。\n*   社区卫生服务中心是受《基本医疗卫生与健康促进法》等法规监管的基层医疗机构。\n*   “健康档案”是标准的医疗数据概念。\n*   这意味着，你的设备采集的“行为数据”（活动、作息、跌倒），一旦流入这个系统并被用于健康评估，就极有可能被认定为“医疗健康数据”或“用于医疗目的的健康相关信息”。\n\n一旦被划入这个范畴，你要遵守的就不再仅仅是《个人信息保护法》，还有《医疗器械监督管理条例》（如果你的设备被认定为用于医疗目的的软件或设备）、医疗数据安全管理办法等一系列更严苛的规定。**让安装师傅签一张纸，就试图打通从消费电子数据到医疗健康数据的流转通道，这在法律上是完全站不住脚的。**\n\n### 二、对比一下，别人是怎么处理这个“雷”的？\n\n我们参考两个案例，看看面临类似H11风险的团队是怎么思考的：\n\n*   **“明眸智芯”项目（半植入式眼压监测芯片）：**\n    这个项目的数据（24小时眼压）天生就是医疗数据，他们面临的H11风险是明牌。因此，他们的商业模式和路径规划是**围绕合规展开**的：明确走医疗器械注册流程，进行临床试验（这本身就有严格的伦理审查），与医疗机构深度绑定合作。他们的合规成本是计算在模型里的。你的项目危险在于，**数据看似“非医疗”，但用途滑向了“医疗”，这种模糊性让你的合规路径极其不清晰**，更容易踩雷。\n\n*   **“灵眼守护”项目（社区养老监护）：**\n    注意，它在方案描述中提到了“**安全脱敏的数据分析**”。这个词很关键，它表明团队在技术设计阶段，就已经在思考如何从源头控制数据风险（比如，不传输原始视频，只传输脱敏后的特征数据）。而你的方案里，缺少这种“**通过技术设计来实现合规**”的前置思维。\n\n### 三、数据共享：一个美好的假设，还是一套复杂的工程？\n\n你说“共享给社区卫生服务中心”，听起来是一个动作，但实际上是一个需要精密设计的**系统对接工程**和**权责划分协议**。\n\n```mermaid\ngraph TD\n    A[你的设备采集原始行为数据] --\u003e B[你的云端进行长期趋势分析];\n    B -- “共享” --\u003e C{社区卫生服务中心IT系统};\n    \n    C --\u003e D[数",
+                      "assistant_full_len":  4110,
+                      "pipeline":  "coach",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "project_diagnosis",
+                      "intent_reason":  "学生详细描述了项目的功能、用户、商业模式等，希望获得综合诊断；判定为单一主问题；主意图归类为 project_diagnosis",
+                      "intent_engine":  "llm",
+                      "category":  "医疗健康",
+                      "mode":  "coursework",
+                      "project_stage":  "structured",
+                      "overall_score":  6.4,
+                      "bottleneck":  "当前最高风险为 H11（合规/伦理缺口），会直接影响项目落地可行性。",
+                      "score_band":  "基本成形",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H3",
+                                                 "H5",
+                                                 "H11"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H3",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H11",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    }
+                                ],
+                      "next_task_title":  "完成合规与伦理检查清单",
+                      "next_task_desc":  "列出数据采集、存储、使用、授权链路并补齐缺口。",
+                      "kg_entities_count":  12,
+                      "kg_relationship_count":  12,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "risk_control"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.862,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.783,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Financial Logic",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.825,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "ESG可量化超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Problem Definition"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "ESG可量化超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  6.28,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H13",
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Problem Definition"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  2,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  null,
+                      "competition_role":  null
+                  },
+                  {
+                      "turn_index":  4,
+                      "user_message":  "团队情况：我（机械工程+嵌入式背景）、一位算法同学、一位设计同学，没人做过量产；硬件量产计划找深圳的代工厂代工；软件 MVP 做完了可以测跌倒，雷达穿透家具的鲁棒性还没验证过。请帮我评估这个方案还差什么，并指出我可能忽视的关键风险（伦理、隐私、量产、竞争）。",
+                      "assistant_head":  "同学，我们继续聊。你刚才补充的这个数据共享和用户同意的想法，让我更清楚地看到了你项目里那个最危险、也最容易被忽视的“地雷”。我们之前聊了成本和定价，那是在算“能不能赚钱”的账；但现在这个问题，是决定你“能不能做”的生死线。\n\n你刚才说：\n\n\u003e 系统会持续采集老人的活动时间段、作息节律、跌倒事件等行为数据，云端会做长期健康趋势分析，用于提醒子女。我们会把这些数据跟社区卫生服务中心共享，做老人健康档案。用户同意书我们打算让安装师傅现场让老人或家属签字。\n\n这是一个非常典型的、从技术思维直接“跳跃”到商业模式的想法，但却忽略了中间最关键的几层地基。我们把它拆开来看，你会发现，你无意中给自己挖了一个巨大的坑，而且这个坑比你想象的还要深。\n\n---\n\n### **第一部分：你正在触碰的，可能是一条“高压线”**\n\n首先，我们得明确一点：**你采集和分析的数据，性质已经变了。** 它不再是简单的“活动信号”，而是包含了“作息节律”、“健康趋势”的**个人健康信息**，甚至是**敏感个人信息**。\n\n这直接把你从一个“消费电子安防设备”的赛道，拽进了一个监管严格得多的领域。我举个类似的案例给你听，你就明白区别在哪里了。\n\n有一个医疗硬件项目叫 **“Greta Oto”** ，它做的是胃镜胶囊机器人。它的商业模式非常清晰：卖给医院消化科做诊断，卖给门诊做初步筛查。为了支撑这个商业模式，它的技术指标必须极其过硬——比如170度的超广视角、300线对/毫米的高分辨率，并且要有降低23%发病/死亡率的临床价值证据。更重要的是，它所有的数据流转，从采集、分析到医生诊断，都在一个明确的、受监管的**医疗合规框架**内进行。医院本身就是合规主体，医生有执业资格，整个流程责任清晰。\n\n**而你的项目呢？** 你计划把数据共享给“社区卫生服务中心”。这听起来很好，但这里有几个致命的问题你完全没有回答：\n\n1.  **法律身份问题**：社区卫生服务中心是具备基本医疗资质的机构。你向他们提供“健康趋势分析”数据，相当于你在扮演一个“体外诊断”或“健康监测”设备提供商的角色。那么，你的设备是否需要按照**医疗器械**进行注册和认证？如果没有，你提供的数据在法律上就没有“医疗效力”，社区医生敢不敢、能不能把它作为健康档案的一部分？一旦他们参考了你的数据，但做出了误判（比如你的算法漏报了一次轻微中风前的步态异常），这个**医疗责任**由谁来承担？是你，是算法同学，还是社区医院？你那张“安装师傅现场签的同意书”，绝对覆盖不了这种级别的责任。\n\n2.  **数据合规的复杂性**：你把数据从老人家里，传到你的云端，再共享给第三方机构（社区卫生中心）。这构成了一个完整的数据流转链条。根据《个人信息保护法》，处理敏感个人信息需要取得个人的**单独同意**，并且要告知接收方的身份、处理目的、方式和个人信息的种类。你让安装师傅拿一张纸去签，能完成这么复杂的告知并确保老人（特别是认知能力可能下降的老人）完全理解吗？这几乎是不可能的，在法律上会被认定为**无效同意**。更不用说，数据在传输和存储过程中的加密标准、访问权限控制、泄露应急预案……这些你考虑过吗？这些都是成本，而且是高昂的合规成本，在你的210元BOM成本里，一分钱都没体现。\n\n**这不仅仅是“隐私问题”，这是“合规生存”问题。** 参考另一个案例“5G健康体育平台”，它早期也面临类似的合规风险（H11）。它的解法是：先与高校体育科研项目合作，将科研内容转化为权威科普，用“高校背书”来建立初始信任，规避直接涉足医疗建议的风险。你呢？你的背书在哪里？是“毫米波雷达”这个技术名词吗？这在采购方眼里，远不如一张医疗器械注册证或一份权威临床报告有分量。\n\n**所以，第一个你必须想通的核心问题是：你的产品，到底是一个“高可靠性的安防传感器”，还是一个“准医疗级的健康管理终端”？**\n*   **如果选前者**：你的价值主张就应聚焦于“无隐私泄露风险的、7x24小时跌倒监测报警器”。数据可以只做本地化报警和简单的活动日志，**绝不**做深度健康分析，也**绝不**主动共享给第三方医疗机构。商业模式就是卖硬件和可能的报警服务订阅。\n*   **如果选后者**：你就必须直面医疗器械认证的可能性，组建法律和医学顾问团队，设计符合医疗数据规范的全套流",
+                      "assistant_full_len":  5884,
+                      "pipeline":  "coach",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "project_diagnosis",
+                      "intent_reason":  "学生描述了项目细节并请求评估和指出关键风险；判定为单一主问题；主意图归类为 project_diagnosis",
+                      "intent_engine":  "llm",
+                      "category":  "医疗健康",
+                      "mode":  "coursework",
+                      "project_stage":  "validated",
+                      "overall_score":  7.0,
+                      "bottleneck":  "当前最高风险为 H11（合规/伦理缺口），会直接影响项目落地可行性。",
+                      "score_band":  "较成熟",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H3",
+                                                 "H5",
+                                                 "H11",
+                                                 "H16",
+                                                 "H21",
+                                                 "H25"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H3",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.22
+                                    },
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.22
+                                    },
+                                    {
+                                        "id":  "H11",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.48
+                                    },
+                                    {
+                                        "id":  "H16",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.22
+                                    },
+                                    {
+                                        "id":  "H21",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.22
+                                    },
+                                    {
+                                        "id":  "H25",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.22
+                                    }
+                                ],
+                      "next_task_title":  "完成合规与伦理检查清单",
+                      "next_task_desc":  "列出数据采集、存储、使用、授权链路并补齐缺口。",
+                      "kg_entities_count":  17,
+                      "kg_relationship_count":  12,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "team"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "team"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "team"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "team"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "execution_step"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "risk_control"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.862,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.783,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Financial Logic",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "证据锚定超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.88,
+                                                  "confidence":  0.825,
+                                                  "rules":  [
+                                                                "H15",
+                                                                "H3"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "ESG可量化超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Problem Definition"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "ESG可量化超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  6.28,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H13",
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Problem Definition"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  2,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  null,
+                      "competition_role":  null
+                  }
+              ]
+}

@@ -567,6 +567,14 @@ class BusinessPlanAgendaPatchPayload(BaseModel):
     section_id_hint: str | None = None
 
 
+# 触发"评委视角全书巡检"。当前所有字段都可空，只是占位扩展点。
+class BusinessPlanAgendaReviewPayload(BaseModel):
+    # 限定只巡检某些章节；空数组表示巡检全部章节
+    section_ids: list[str] = Field(default_factory=list)
+    # 是否强制重跑（即便最近 1 分钟刚跑过）。默认 False，命中节流则直接返回上次结果
+    force: bool = False
+
+
 # ── Finance Report ────────────────────────────────────────────────────
 
 class FinanceReportGeneratePayload(BaseModel):

@@ -216,7 +216,7 @@ class FinanceReportService:
             self._set_status(user_id, "running", "跑单位经济模型")
             ue = analyze_unit_economics(assumptions, industry=industry, allow_online=True)
             self._set_status(user_id, "running", "跑现金流推演")
-            cf = project_cash_flow(assumptions, months=36)
+            cf = project_cash_flow(assumptions, months=36, industry=industry, allow_online=True)
             self._set_status(user_id, "running", "跑合理性评估")
             rat = evaluate_rationality(assumptions, industry=industry, allow_online=True)
             self._set_status(user_id, "running", "建模 TAM/SAM/SOM")

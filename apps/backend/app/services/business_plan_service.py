@@ -602,6 +602,19 @@ class BusinessPlanService:
         self.rag_engine = rag_engine
         self.graph_service = graph_service
 
+        # ── 竞赛教练议题板：聊天沉淀缓冲池 + 巡检进度 ───────────────────
+        # _agenda_chat_buffer[plan_id] = [
+        #   {"assistant_text": str, "source_message_id": str, "ts": str}, ...
+        # ]
+        # 缓冲池满 _AGENDA_CHAT_BATCH 条或距上次抽取 > _AGENDA_CHAT_MAX_GAP_SEC 时，
+        # 触发一次 _llm_extract_agenda_from_chunk，避免每轮都调 LLM。
+        self._agenda_chat_buffer: dict[str, list[dict[str, Any]]] = {}
+        self._agenda_chat_last_extract: dict[str, datetime] = {}
+        # _review_status[plan_id] = {state, current_index, total, current_section_id, current_section_title, ts, error}
+        self._review_status: dict[str, dict[str, Any]] = {}
+        # 巡检节流：1 分钟内同一 plan 不重复触发（除非 force=True）
+        self._review_last_run: dict[str, datetime] = {}
+
     def get_latest(self, project_id: str, conversation_id: str) -> dict[str, Any] | None:
         return self.storage.load_latest(project_id, conversation_id)
 
@@ -901,11 +914,20 @@ class BusinessPlanService:
         saved = self._save_plan(plan, previous=previous)
         return {"status": "ok", "plan": saved}
 
-    # ── 竞赛教练议题板：核心产出池 ──────────────────────────────────
+    # ══════════════════════════════════════════════════════════════════
+    #  竞赛教练议题板（v2：LLM 结构化抽取 + 全书巡检 + 段落级 patch）
+    # ══════════════════════════════════════════════════════════════════
     JURY_TAGS: tuple[str, ...] = (
         "证据", "量化", "防守点", "差异化", "赛道匹配",
     )
 
+    # 聊天沉淀缓冲：满 N 条 assistant 回复或距上次抽取 > T 秒，触发一次 LLM 结构化抽取
+    _AGENDA_CHAT_BATCH: int = 4
+    _AGENDA_CHAT_MAX_GAP_SEC: int = 600  # 10 分钟没新对话也强制抽一次
+    # 全书巡检节流（除非 force=True）
+    _REVIEW_MIN_INTERVAL_SEC: int = 60
+
+    # ── 关键词版（保留作为 LLM 失败时的兜底）─────────────────────────
     _JURY_KEYWORDS: dict[str, tuple[str, ...]] = {
         "证据": ("证据", "来源", "数据来源", "引用", "权威", "佐证", "白皮书", "调研"),
         "量化": ("量化", "具体数字", "百分比", "指标", "kpi", "数据化", "单量", "财务模型", "tam", "sam", "som"),
@@ -949,15 +971,218 @@ class BusinessPlanService:
                 best_tag = tag
         return best_tag or "差异化"
 
-    def extract_agenda_from_message(
+    # ── 议题 schema 工具（构造 / 兼容老议题）──────────────────────────
+    def _agenda_section_id_set(self, plan: dict[str, Any]) -> set[str]:
+        return {str(s.get("section_id") or "") for s in (plan.get("sections") or []) if s.get("section_id")}
+
+    def _normalize_agenda_item(
+        self,
+        raw: dict[str, Any],
+        *,
+        plan_id: str,
+        conversation_id: str,
+        source_kind: str,
+        source_message_ids: list[str] | None,
+        valid_section_ids: set[str],
+    ) -> dict[str, Any] | None:
+        """把 LLM 输出（或 fallback 输出）的一条原始议题统一成入库 schema。"""
+        weakness = str(raw.get("weakness") or raw.get("gist") or "").strip()
+        suggestion = str(raw.get("suggestion") or "").strip()
+        section_id = str(raw.get("section_id") or raw.get("section_id_hint") or "").strip()
+        if not weakness and not suggestion:
+            return None
+        if section_id and section_id not in valid_section_ids:
+            # 章节 id 不存在 → 尝试用关键词推一次
+            section_id = ""
+        if not section_id:
+            section_id = self._infer_section_hint(f"{weakness}\n{suggestion}") or ""
+        # 仍找不到合法章节就不要这条议题（避免不知道往哪改）
+        if not section_id or section_id not in valid_section_ids:
+            return None
+        jury_tag = str(raw.get("jury_tag") or "").strip()
+        if jury_tag not in self.JURY_TAGS:
+            jury_tag = self._infer_jury_tag(f"{weakness}\n{suggestion}")
+        anchor = str(raw.get("anchor_text") or "").strip()
+        if anchor:
+            anchor = anchor[:240]
+        priority = str(raw.get("priority") or "").lower()
+        if priority not in {"high", "med", "low"}:
+            priority = "med"
+        title = str(raw.get("title") or "").strip()
+        if not title:
+            title = (weakness or suggestion).split("\n", 1)[0][:36]
+        expected = str(raw.get("expected_diff_summary") or "").strip()[:160]
+        return {
+            "agenda_id": str(uuid4())[:10],
+            "plan_id": plan_id,
+            "conversation_id": conversation_id,
+            "source_kind": source_kind if source_kind in {"chat", "review"} else "chat",
+            "source_message_ids": list(source_message_ids or []),
+            # 兼容老前端：保留 source_message_id（取第一条）
+            "source_message_id": (source_message_ids or [""])[0],
+            "jury_tag": jury_tag,
+            "section_id": section_id,
+            # 兼容老前端字段
+            "section_id_hint": section_id,
+            "anchor_text": anchor,
+            "title": title[:36],
+            "weakness": weakness[:480],
+            "suggestion": suggestion[:480],
+            "expected_diff_summary": expected,
+            "priority": priority,
+            # 旧字段兜底（老前端字段）
+            "gist": weakness[:480] or suggestion[:480],
+            "evidence_hint": "",
+            "status": "pending",
+            "created_at": _now_iso(),
+            "applied_at": None,
+            "patch_preview": None,
+        }
+
+    def _existing_anchor_set(self, plan: dict[str, Any]) -> set[tuple[str, str]]:
+        """已 pending 议题的 (section_id, anchor_text|title) 集合，用于去重。"""
+        out: set[tuple[str, str]] = set()
+        for row in (plan.get("competition_agenda") or []):
+            if str(row.get("status") or "pending") != "pending":
+                continue
+            sid = str(row.get("section_id") or row.get("section_id_hint") or "")
+            anchor = str(row.get("anchor_text") or row.get("title") or "").strip()
+            if sid and anchor:
+                out.add((sid, anchor))
+        return out
+
+    # ── 4.1 LLM 结构化抽取（聊天沉淀） ───────────────────────────────
+    def _llm_extract_agenda_from_chunk(
+        self,
+        plan: dict[str, Any],
+        chunk: list[dict[str, Any]],
+        *,
+        max_items: int = 4,
+    ) -> list[dict[str, Any]]:
+        """从 N 轮 assistant 文本块里抽取 0~max_items 条结构化议题。
+        失败 / LLM 不可用时返回空列表，调用方负责回退。"""
+        if not self.llm or not getattr(self.llm, "enabled", False):
+            return []
+        if not chunk:
+            return []
+
+        sections = list(plan.get("sections") or [])
+        section_brief = []
+        for s in sections:
+            sid = str(s.get("section_id") or "")
+            if not sid:
+                continue
+            title = str(s.get("display_title") or s.get("title") or sid)
+            content_len = self._chinese_length(str(s.get("user_edit") or s.get("content") or ""))
+            missing = list(s.get("missing_points") or [])
+            section_brief.append(
+                {"section_id": sid, "title": title, "char_len": content_len,
+                 "missing_points": missing[:4]}
+            )
+
+        chunk_lines = []
+        for idx, c in enumerate(chunk[-self._AGENDA_CHAT_BATCH:]):
+            mid = c.get("source_message_id") or ""
+            txt = str(c.get("assistant_text") or "")[:1200]
+            chunk_lines.append(f"--- assistant 回合 {idx + 1}（msg={mid}）---\n{txt}")
+        chunk_text = "\n\n".join(chunk_lines)
+
+        valid_sids = sorted(self._agenda_section_id_set(plan))
+
+        system_prompt = (
+            "你是一位资深创业竞赛教练 + 评委顾问（互联网+ / 挑战杯 / 大创赛道）。\n"
+            "学生此前若干轮里，竞赛教练给出了一些建议性回复。请你仅基于这些回复，"
+            "提炼出 0~{max_items} 条 **可直接转换为对计划书章节修改的议题**。\n\n"
+            "硬性要求：\n"
+            "1. 输出严格 JSON：{{\"items\":[ ... ]}}，没有任何解释文字。\n"
+            "2. 每条议题字段：{{section_id, jury_tag, weakness, suggestion, "
+            "expected_diff_summary, anchor_text, priority, title}}\n"
+            "   - section_id 必须从 [{valid_sids}] 中选一个，否则不要产出该条。\n"
+            "   - jury_tag ∈ [证据, 量化, 防守点, 差异化, 赛道匹配]。\n"
+            "   - weakness：评委视角下，这一章 **当前** 的具体短板（≤ 90 字）。\n"
+            "   - suggestion：要在该章哪一句 / 哪一段做什么修改（≤ 120 字，必须是动词起头的指令）。\n"
+            "   - expected_diff_summary：一句话总结改完后变成什么样（≤ 50 字）。\n"
+            "   - anchor_text：从该章已有内容里挑一段 / 一句话作为 patch 的锚点（≤ 60 字）。"
+            "如果暂无对应原文可锚定，留空字符串，会作为段尾追加处理。\n"
+            "   - priority：high / med / low，按对评委视角的影响排。\n"
+            "   - title：6~16 字短摘要。\n"
+            "3. **不要复述教练原话，要提炼成 \"问题 + 怎么改\" 的指令式表达。**\n"
+            "4. 没有有效议题就返回 {{\"items\":[]}}。"
+        ).format(max_items=max_items, valid_sids=", ".join(valid_sids) or "<空>")
+
+        user_prompt = (
+            "## 计划书章节摘要\n"
+            f"{json.dumps(section_brief, ensure_ascii=False, indent=2)}\n\n"
+            "## 竞赛教练近期回复（按时间顺序）\n"
+            f"{chunk_text}\n\n"
+            "请只针对上述回复中真正涉及 \"如何改进计划书章节\" 的部分提炼议题，"
+            "聊天寒暄 / 提问引导 / 节奏控制类的内容请忽略。"
+        )
+
+        try:
+            raw = self.llm.chat_json(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.3,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.info("agenda chat extract llm failed: %s", exc)
+            return []
+        items = (raw or {}).get("items") if isinstance(raw, dict) else None
+        if not isinstance(items, list):
+            return []
+        return [it for it in items if isinstance(it, dict)][: max_items]
+
+    # ── 关键词兜底版（LLM 不可用 / 失败时使用） ──────────────────────
+    def _keyword_extract_agenda_from_text(
+        self,
+        text: str,
+        valid_section_ids: set[str],
+        *,
+        max_items: int = 3,
+    ) -> list[dict[str, Any]]:
+        """LLM 失败时使用：把文本切段、关键词打标，但不入库（由调用方 normalize）。"""
+        out: list[dict[str, Any]] = []
+        if not text:
+            return out
+        for raw in re.split(r"\n\s*\n", text):
+            p = raw.strip()
+            if not p:
+                continue
+            has_kw = any(any(k.lower() in p.lower() for k in keys) for keys in self._JURY_KEYWORDS.values())
+            if not has_kw and self._chinese_length(p) < 60:
+                continue
+            jury_tag = self._infer_jury_tag(p)
+            sid = self._infer_section_hint(p)
+            if sid not in valid_section_ids:
+                continue
+            first_sentence = re.split(r"[。！？\n]", p, 1)[0].strip()
+            title = first_sentence[:24] if first_sentence else p[:24]
+            out.append({
+                "section_id": sid,
+                "jury_tag": jury_tag,
+                "weakness": p[:240],
+                "suggestion": "建议把该段补充为评委视角下更可信的版本（自动兜底议题，建议手动二次审视）",
+                "expected_diff_summary": "强化 " + jury_tag,
+                "anchor_text": "",
+                "priority": "med",
+                "title": title,
+            })
+            if len(out) >= max_items:
+                break
+        return out
+
+    # ── 4.1 入口：聊天沉淀（节流缓冲池） ──────────────────────────────
+    def note_agenda_signal(
         self,
         plan_id: str,
         *,
         assistant_text: str,
         source_message_id: str | None = None,
     ) -> dict[str, Any]:
-        """竞赛教练每次 assistant 回合完成后调用一次，解析出 0~3 条议题入库。
-        规则兜底版（不依赖 LLM）：按段落切片 + 关键词打标 + 章节提示。"""
+        """竞赛教练每轮 assistant 回合调一次：把回复放入缓冲池，
+        到阈值（_AGENDA_CHAT_BATCH 条 或 _AGENDA_CHAT_MAX_GAP_SEC 秒）才真正抽取入库，
+        避免每轮都打 LLM。"""
         plan = self.storage.load(plan_id)
         if not plan:
             return {"status": "not_found", "new_items": []}
@@ -968,74 +1193,306 @@ class BusinessPlanService:
         if not text:
             return {"status": "empty", "new_items": []}
 
-        # 按段落切片，只保留含"评委视角关键词"或长度 >= 40 的段
-        paragraphs: list[str] = []
-        for raw in re.split(r"\n\s*\n", text):
-            p = raw.strip()
-            if not p:
-                continue
-            has_kw = any(
-                any(k.lower() in p.lower() for k in keys)
-                for keys in self._JURY_KEYWORDS.values()
-            )
-            if has_kw or self._chinese_length(p) >= 40:
-                paragraphs.append(p)
-        if not paragraphs:
-            return {"status": "no_signal", "new_items": []}
+        buf = self._agenda_chat_buffer.setdefault(plan_id, [])
+        buf.append({
+            "assistant_text": text,
+            "source_message_id": source_message_id or "",
+            "ts": _now_iso(),
+        })
 
-        # 每段产出至多 1 条议题；总上限 3
-        existing = list(plan.get("competition_agenda") or [])
-        seen_titles = {str(row.get("title") or "").strip() for row in existing if row.get("status") != "dismissed"}
+        last = self._agenda_chat_last_extract.get(plan_id)
+        gap_sec = (datetime.now(BJ_TZ) - last).total_seconds() if last else 1e9
+        should_flush = (
+            len(buf) >= self._AGENDA_CHAT_BATCH
+            or gap_sec >= self._AGENDA_CHAT_MAX_GAP_SEC
+        )
+        if not should_flush:
+            return {
+                "status": "buffered",
+                "buffered_count": len(buf),
+                "threshold": self._AGENDA_CHAT_BATCH,
+                "new_items": [],
+            }
+
+        return self._flush_agenda_chat_buffer(plan_id)
+
+    def _flush_agenda_chat_buffer(self, plan_id: str) -> dict[str, Any]:
+        """把缓冲池里的 N 轮回复一次性送进 LLM 抽议题，写入议题板。"""
+        chunk = list(self._agenda_chat_buffer.get(plan_id) or [])
+        if not chunk:
+            return {"status": "empty", "new_items": []}
+        plan = self.storage.load(plan_id)
+        if not plan:
+            self._agenda_chat_buffer.pop(plan_id, None)
+            return {"status": "not_found", "new_items": []}
+
+        valid_sids = self._agenda_section_id_set(plan)
         conversation_id = str(plan.get("conversation_id") or "")
+        source_ids = [str(c.get("source_message_id") or "") for c in chunk if c.get("source_message_id")]
 
-        new_items: list[dict[str, Any]] = []
-        for para in paragraphs[:6]:
-            jury_tag = self._infer_jury_tag(para)
-            section_hint = self._infer_section_hint(para)
-            # 取第一句 / 最长的 40 字做标题
-            first_sentence = re.split(r"[。！？\n]", para, 1)[0].strip()
-            title = first_sentence[:36] if first_sentence else para[:36]
-            if not title:
+        # 1) LLM 结构化抽取
+        raw_items = self._llm_extract_agenda_from_chunk(plan, chunk, max_items=4)
+        used_fallback = False
+        # 2) LLM 失败 → 关键词兜底
+        if not raw_items:
+            joined = "\n\n".join(str(c.get("assistant_text") or "") for c in chunk)
+            raw_items = self._keyword_extract_agenda_from_text(joined, valid_sids, max_items=3)
+            used_fallback = bool(raw_items)
+
+        normalized: list[dict[str, Any]] = []
+        seen = self._existing_anchor_set(plan)
+        for raw in raw_items:
+            item = self._normalize_agenda_item(
+                raw,
+                plan_id=plan_id,
+                conversation_id=conversation_id,
+                source_kind="chat",
+                source_message_ids=source_ids,
+                valid_section_ids=valid_sids,
+            )
+            if not item:
                 continue
-            if title in seen_titles:
+            key = (item["section_id"], item.get("anchor_text") or item.get("title", ""))
+            if key in seen:
                 continue
+            seen.add(key)
+            normalized.append(item)
 
-            # evidence_hint：尝试从 KB 里凑一句
-            evidence_hint = ""
-            kb_ref = (plan.get("kb_reference") or {})
-            case_refs = (kb_ref.get("case_refs") or [])[:2]
-            if case_refs:
-                parts = [str(c.get("case_name") or "").strip() for c in case_refs if c.get("case_name")]
-                if parts:
-                    evidence_hint = "可对标案例：" + "、".join(parts)
+        # 缓冲池消费 + 时间戳推进，无论是否真正写入议题
+        self._agenda_chat_buffer[plan_id] = []
+        self._agenda_chat_last_extract[plan_id] = datetime.now(BJ_TZ)
 
-            new_items.append({
-                "agenda_id": str(uuid4())[:10],
-                "plan_id": plan_id,
-                "conversation_id": conversation_id,
-                "source_message_id": source_message_id or "",
-                "jury_tag": jury_tag,
-                "section_id_hint": section_hint,
-                "title": title,
-                "gist": para[:480],
-                "evidence_hint": evidence_hint,
-                "status": "pending",
-                "created_at": _now_iso(),
-                "applied_at": None,
-            })
-            seen_titles.add(title)
-            if len(new_items) >= 3:
-                break
-
-        if not new_items:
-            return {"status": "no_new", "new_items": []}
+        if not normalized:
+            return {"status": "no_new", "new_items": [], "used_fallback": used_fallback}
 
         previous = copy.deepcopy(plan)
-        plan["competition_agenda"] = existing + new_items
+        plan["competition_agenda"] = list(plan.get("competition_agenda") or []) + normalized
         plan["updated_at"] = _now_iso()
         saved = self._save_plan(plan, previous=previous)
-        return {"status": "ok", "new_items": new_items, "plan": saved}
+        return {
+            "status": "ok",
+            "new_items": normalized,
+            "used_fallback": used_fallback,
+            "plan": saved,
+        }
 
+    # 兼容旧调用名：内部继续调用 note_agenda_signal
+    def extract_agenda_from_message(
+        self,
+        plan_id: str,
+        *,
+        assistant_text: str,
+        source_message_id: str | None = None,
+    ) -> dict[str, Any]:
+        """[deprecated alias] 保留旧名，转发到 note_agenda_signal。"""
+        return self.note_agenda_signal(
+            plan_id,
+            assistant_text=assistant_text,
+            source_message_id=source_message_id,
+        )
+
+    # ── 4.2 全书巡检（评委视角） ─────────────────────────────────────
+    def _llm_review_section(
+        self,
+        plan: dict[str, Any],
+        section: dict[str, Any],
+        *,
+        plan_summary: str,
+        max_items: int = 2,
+    ) -> list[dict[str, Any]]:
+        if not self.llm or not getattr(self.llm, "enabled", False):
+            return []
+        sid = str(section.get("section_id") or "")
+        title = str(section.get("display_title") or section.get("title") or sid)
+        content = str(section.get("user_edit") or section.get("content") or "")
+        if not sid:
+            return []
+        if self._chinese_length(content) < 30:
+            # 内容太短不评，让学生先写一些
+            return []
+
+        valid_sids = sorted(self._agenda_section_id_set(plan))
+        system_prompt = (
+            "你是一位资深创业竞赛评委（互联网+ / 挑战杯 / 大创赛道）。"
+            "我会给你这份计划书的整体摘要 + 单个章节的当前文本。请你以评委视角，"
+            f"针对该章节，给出 0~{max_items} 条 **具体到段落 / 数据 / 论证** 的修改议题。\n\n"
+            "硬性要求：\n"
+            "1. 输出严格 JSON：{\"items\":[ ... ]}，没有任何解释文字。\n"
+            "2. 每条议题字段：{section_id, jury_tag, weakness, suggestion, "
+            "expected_diff_summary, anchor_text, priority, title}\n"
+            f"   - section_id：必须填 \"{sid}\"。\n"
+            "   - jury_tag ∈ [证据, 量化, 防守点, 差异化, 赛道匹配]。\n"
+            "   - weakness：评委视角下这一章的具体短板（≤ 90 字）。\n"
+            "   - suggestion：动词起头的可执行修改建议（≤ 120 字）。\n"
+            "   - anchor_text：必须从下方提供的章节原文里 **逐字摘抄** 一段（≤ 60 字）"
+            "作为 patch 锚点；如果章节原文里实在挑不出可改的句子，留空字符串。\n"
+            "   - expected_diff_summary：一句话总结改完后变成什么样（≤ 50 字）。\n"
+            "   - priority：high / med / low，按对评委视角的影响排。\n"
+            "   - title：6~16 字短摘要。\n"
+            "3. 没有需要改进的就返回 {\"items\":[]}，不要凑数。\n"
+            "4. 不要重复说\"建议补充数据来源\"这种空话——必须指明哪段、加什么数据。"
+        )
+        user_prompt = (
+            "## 计划书整体摘要\n"
+            f"{plan_summary[:1200]}\n\n"
+            f"## 待审章节：{title}（section_id={sid}）\n"
+            f"```\n{content[:2400]}\n```\n\n"
+            f"合法 section_id 列表（仅供 jury_tag 跨章联想时参考，本次只评 {sid}）："
+            f"{valid_sids}"
+        )
+        try:
+            raw = self.llm.chat_json(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.35,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.info("jury review llm failed for section %s: %s", sid, exc)
+            return []
+        items = (raw or {}).get("items") if isinstance(raw, dict) else None
+        if not isinstance(items, list):
+            return []
+        return [it for it in items if isinstance(it, dict)][: max_items]
+
+    def run_jury_review(
+        self,
+        plan_id: str,
+        *,
+        section_ids: list[str] | None = None,
+        force: bool = False,
+    ) -> dict[str, Any]:
+        """全书巡检：让评委 agent 顺着每章读，给每章 0~2 条结构化议题入库。
+        返回 {status, new_items, scanned_sections, review_status}。"""
+        plan = self.storage.load(plan_id)
+        if not plan:
+            return {"status": "not_found", "new_items": []}
+        if str(plan.get("coaching_mode") or "project") != "competition":
+            return {"status": "skipped", "reason": "not_competition_mode", "new_items": []}
+
+        # 节流
+        last = self._review_last_run.get(plan_id)
+        if (not force) and last is not None:
+            gap = (datetime.now(BJ_TZ) - last).total_seconds()
+            if gap < self._REVIEW_MIN_INTERVAL_SEC:
+                return {
+                    "status": "throttled",
+                    "retry_after_sec": int(self._REVIEW_MIN_INTERVAL_SEC - gap) + 1,
+                    "new_items": [],
+                    "review_status": self._review_status.get(plan_id, {"state": "idle"}),
+                }
+        self._review_last_run[plan_id] = datetime.now(BJ_TZ)
+
+        sections = list(plan.get("sections") or [])
+        if section_ids:
+            wanted = set(str(x) for x in section_ids if x)
+            sections = [s for s in sections if str(s.get("section_id") or "") in wanted]
+        if not sections:
+            return {"status": "no_sections", "new_items": []}
+
+        # plan 概要：把每章标题 + 字数 + 缺失要点拍成一个简短摘要
+        plan_summary_lines: list[str] = []
+        for s in plan.get("sections") or []:
+            sid = str(s.get("section_id") or "")
+            title = str(s.get("display_title") or s.get("title") or sid)
+            content_len = self._chinese_length(str(s.get("user_edit") or s.get("content") or ""))
+            missing = list(s.get("missing_points") or [])
+            plan_summary_lines.append(
+                f"- [{sid}] {title}（{content_len}字）"
+                + (f"；缺：{ '/'.join(missing[:3]) }" if missing else "")
+            )
+        plan_summary = "项目：" + str(plan.get("title") or "未命名")
+        plan_summary += "\n" + "\n".join(plan_summary_lines)
+
+        valid_sids = self._agenda_section_id_set(plan)
+        conversation_id = str(plan.get("conversation_id") or "")
+        seen = self._existing_anchor_set(plan)
+
+        # 进度初始化
+        total = len(sections)
+        self._review_status[plan_id] = {
+            "state": "running",
+            "current_index": 0,
+            "total": total,
+            "current_section_id": "",
+            "current_section_title": "",
+            "ts": _now_iso(),
+            "error": "",
+            "new_count": 0,
+        }
+
+        normalized: list[dict[str, Any]] = []
+        scanned: list[dict[str, Any]] = []
+        try:
+            for idx, sec in enumerate(sections, 1):
+                sid = str(sec.get("section_id") or "")
+                title = str(sec.get("display_title") or sec.get("title") or sid)
+                self._review_status[plan_id].update({
+                    "current_index": idx,
+                    "current_section_id": sid,
+                    "current_section_title": title,
+                    "ts": _now_iso(),
+                })
+                raw_items = self._llm_review_section(
+                    plan, sec, plan_summary=plan_summary, max_items=2,
+                )
+                section_count = 0
+                for raw in raw_items:
+                    raw.setdefault("section_id", sid)
+                    item = self._normalize_agenda_item(
+                        raw,
+                        plan_id=plan_id,
+                        conversation_id=conversation_id,
+                        source_kind="review",
+                        source_message_ids=[],
+                        valid_section_ids=valid_sids,
+                    )
+                    if not item:
+                        continue
+                    key = (item["section_id"], item.get("anchor_text") or item.get("title", ""))
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    normalized.append(item)
+                    section_count += 1
+                scanned.append({"section_id": sid, "title": title, "new_count": section_count})
+
+            self._review_status[plan_id].update({
+                "state": "done",
+                "new_count": len(normalized),
+                "ts": _now_iso(),
+            })
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("jury review failed: %s", exc)
+            self._review_status[plan_id].update({
+                "state": "error",
+                "error": str(exc),
+                "ts": _now_iso(),
+            })
+            return {
+                "status": "error",
+                "error": str(exc),
+                "new_items": [],
+                "scanned_sections": scanned,
+                "review_status": self._review_status[plan_id],
+            }
+
+        if normalized:
+            previous = copy.deepcopy(plan)
+            plan["competition_agenda"] = list(plan.get("competition_agenda") or []) + normalized
+            plan["updated_at"] = _now_iso()
+            saved = self._save_plan(plan, previous=previous)
+        else:
+            saved = plan
+
+        return {
+            "status": "ok",
+            "new_items": normalized,
+            "scanned_sections": scanned,
+            "review_status": self._review_status[plan_id],
+            "plan": saved,
+        }
+
+    # ── 4.4 list_agenda 升级（带 review_status） ─────────────────────
     def list_agenda(self, plan_id: str, status_filter: str = "") -> dict[str, Any]:
         plan = self.storage.load(plan_id)
         if not plan:
@@ -1050,6 +1507,11 @@ class BusinessPlanService:
             "items": items,
             "coaching_mode": plan.get("coaching_mode") or "project",
             "competition_unlocked": bool(plan.get("competition_unlocked")),
+            "review_status": self._review_status.get(plan_id, {"state": "idle"}),
+            "chat_buffer": {
+                "buffered_count": len(self._agenda_chat_buffer.get(plan_id) or []),
+                "batch_size": self._AGENDA_CHAT_BATCH,
+            },
         }
 
     def patch_agenda(
@@ -1085,13 +1547,218 @@ class BusinessPlanService:
         saved = self._save_plan(plan, previous=previous)
         return {"status": "ok", "item": target, "plan": saved}
 
+    # ── 4.3 段落级 LLM patch（replace apply_agenda） ─────────────────
+    def _locate_paragraph(
+        self,
+        original: str,
+        anchor_text: str,
+        *,
+        threshold: float = 0.55,
+    ) -> tuple[int, int, str] | None:
+        """在 original 里用 difflib 模糊匹配，找到 anchor_text 最像的一段。
+        返回 (start_idx, end_idx, matched_paragraph_text)；找不到返回 None。
+        段落 = 双换行分隔的块。
+        """
+        if not anchor_text or not original:
+            return None
+        anchor_norm = anchor_text.strip()
+        if not anchor_norm:
+            return None
+
+        # 直接子串命中（最快路径）
+        idx = original.find(anchor_norm)
+        if idx >= 0:
+            # 扩到所在段落边界
+            start = original.rfind("\n\n", 0, idx)
+            start = 0 if start < 0 else start + 2
+            end_marker = original.find("\n\n", idx)
+            end = len(original) if end_marker < 0 else end_marker
+            return start, end, original[start:end]
+
+        # 段落级 difflib 模糊匹配
+        # 用 (start, end, paragraph_text) 列出所有段
+        paras: list[tuple[int, int, str]] = []
+        cursor = 0
+        for raw in re.split(r"\n\s*\n", original):
+            # 还原 cursor：找 raw 在 original 里的实际位置
+            pos = original.find(raw, cursor)
+            if pos < 0:
+                continue
+            paras.append((pos, pos + len(raw), raw))
+            cursor = pos + len(raw)
+
+        best_ratio = 0.0
+        best_para: tuple[int, int, str] | None = None
+        for s, e, txt in paras:
+            if not txt.strip():
+                continue
+            ratio = difflib.SequenceMatcher(None, anchor_norm, txt).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_para = (s, e, txt)
+        if best_para and best_ratio >= threshold:
+            return best_para
+        return None
+
+    def _llm_patch_paragraph(
+        self,
+        original_paragraph: str,
+        *,
+        weakness: str,
+        suggestion: str,
+        jury_tag: str,
+        section_title: str,
+    ) -> str | None:
+        """把 (原段落, 议题) → 优化后的段落文本。LLM 失败返回 None。"""
+        if not self.llm or not getattr(self.llm, "enabled", False):
+            return None
+        system_prompt = (
+            "你是一位资深创业竞赛教练，擅长用评委视角把计划书段落改得更扎实。\n"
+            "我会给你：\n"
+            "1) 计划书某章节里的【一段原文】\n"
+            "2) 评委视角下的【弱点】\n"
+            "3) 教练给出的【修改建议】\n"
+            "4) 议题主题（jury_tag）\n\n"
+            "你的任务：仅返回该段落 **改写后的纯文本**，不要任何解释、不要 Markdown 代码块、不要"
+            "包裹标签、不要返回 JSON。\n"
+            "硬性要求：\n"
+            "- 必须保留原段落的真实事实（例如学生提到的产品名、人物名、行业名等），"
+            "可以补充数据 / 重组论证 / 替换懒惰估算，但不要凭空捏造客户、专利、奖项等强声明。\n"
+            "- 字数控制在原段 0.8~1.6 倍之间，不要写成报告级长篇。\n"
+            "- 如果建议里要求加入数据，但原文没有可用的真实数据，"
+            "请改写为「需补充：xxx」式占位句而不是编造数字。\n"
+        )
+        user_prompt = (
+            f"## 章节：{section_title}\n\n"
+            f"## 原段落\n```\n{original_paragraph[:1600]}\n```\n\n"
+            f"## 评委视角弱点\n{weakness}\n\n"
+            f"## 修改建议（{jury_tag}）\n{suggestion}\n\n"
+            "请直接给出改写后的段落文本。"
+        )
+        try:
+            text = self.llm.chat_text(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.4,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.info("paragraph patch llm failed: %s", exc)
+            return None
+        text = (text or "").strip()
+        if not text:
+            return None
+        # 清理常见 Markdown 包裹
+        if text.startswith("```"):
+            text = re.sub(r"^```[a-zA-Z0-9]*\n?", "", text)
+            text = re.sub(r"\n?```$", "", text)
+        return text.strip() or None
+
+    def _apply_one_agenda_to_text(
+        self,
+        text: str,
+        agenda: dict[str, Any],
+        *,
+        section_title: str,
+    ) -> tuple[str, dict[str, Any]]:
+        """对一段 plan 章节文本应用一条议题。返回 (新文本, patch_preview)。"""
+        weakness = str(agenda.get("weakness") or agenda.get("gist") or "").strip()
+        suggestion = str(agenda.get("suggestion") or "").strip()
+        jury_tag = str(agenda.get("jury_tag") or "")
+        anchor = str(agenda.get("anchor_text") or "").strip()
+
+        located = self._locate_paragraph(text, anchor) if anchor else None
+
+        if located is not None:
+            start, end, original_para = located
+            new_para = self._llm_patch_paragraph(
+                original_para,
+                weakness=weakness,
+                suggestion=suggestion,
+                jury_tag=jury_tag,
+                section_title=section_title,
+            )
+            if new_para and new_para.strip() and new_para.strip() != original_para.strip():
+                new_text = text[:start] + new_para + text[end:]
+                preview = {
+                    "mode": "replace",
+                    "anchor_matched": True,
+                    "old_paragraph": original_para,
+                    "new_paragraph": new_para,
+                    "jury_tag": jury_tag,
+                }
+                return new_text, preview
+            # LLM patch 没产出 → 走兜底（在锚点段后追加教练建议块）
+            block = self._fallback_block(agenda)
+            new_text = text[:end] + "\n\n" + block + text[end:]
+            preview = {
+                "mode": "fallback_append_after_anchor",
+                "anchor_matched": True,
+                "old_paragraph": original_para,
+                "new_paragraph": original_para + "\n\n" + block,
+                "jury_tag": jury_tag,
+            }
+            return new_text, preview
+
+        # 没有 anchor 或匹配失败：尝试整章追加 LLM patch（无 anchor 模式 → 直接调 LLM 给一段新内容）
+        synthesized = None
+        if self.llm and getattr(self.llm, "enabled", False) and (weakness or suggestion):
+            synthesized = self._llm_patch_paragraph(
+                "（章节当前没有可锚定的段落，请围绕弱点 + 建议直接产出一段补强内容。"
+                "禁止编造客户 / 专利 / 奖项。）",
+                weakness=weakness,
+                suggestion=suggestion,
+                jury_tag=jury_tag,
+                section_title=section_title,
+            )
+        if synthesized and synthesized.strip():
+            block = synthesized.strip()
+            new_text = (text + "\n\n" + block).strip() if text else block
+            return new_text, {
+                "mode": "append",
+                "anchor_matched": False,
+                "old_paragraph": "",
+                "new_paragraph": block,
+                "jury_tag": jury_tag,
+            }
+
+        # 完全失败 → 兜底拼接（保留旧版本行为，让学生至少能拿到东西）
+        block = self._fallback_block(agenda)
+        new_text = (text + "\n\n" + block).strip() if text else block
+        return new_text, {
+            "mode": "fallback_append",
+            "anchor_matched": False,
+            "old_paragraph": "",
+            "new_paragraph": block,
+            "jury_tag": jury_tag,
+        }
+
+    def _fallback_block(self, agenda: dict[str, Any]) -> str:
+        """LLM patch 失败时使用的纯字符串拼接块（旧版 apply_agenda 的格式）。"""
+        tag = str(agenda.get("jury_tag") or "")
+        title = str(agenda.get("title") or "")
+        weakness = str(agenda.get("weakness") or agenda.get("gist") or "")
+        suggestion = str(agenda.get("suggestion") or "")
+        evi = str(agenda.get("evidence_hint") or "")
+        lines = [f"【竞赛教练 · {tag}】{title}".rstrip()]
+        if weakness:
+            lines.append(f"评委视角短板：{weakness}")
+        if suggestion:
+            lines.append(f"建议怎么改：{suggestion}")
+        if evi:
+            lines.append(f"补充证据：{evi}")
+        return "\n".join(lines)
+
     def apply_agenda(
         self,
         plan_id: str,
         agenda_ids: list[str],
         target_section_map: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        """把选中的议题合并进对应章节，产出 pending_revisions（逐条可接受/拒绝）。"""
+        """把选中的议题以段落级 LLM patch 形式落到对应章节，产出 pending_revisions。
+
+        关键改造：每条议题都用 anchor_text 在原章节里定位段落，然后让 LLM 改写该段
+        （而不是简单地把议题原文追加到章节末尾）。多条议题打到同一章会串行 patch。
+        """
         plan = self.storage.load(plan_id)
         if not plan:
             return {"status": "not_found", "plan": None}
@@ -1103,7 +1770,6 @@ class BusinessPlanService:
         items = list(plan.get("competition_agenda") or [])
         id2item = {str(r.get("agenda_id") or ""): r for r in items}
         sections = list(plan.get("sections") or [])
-        # section_id → section row（浅拷贝，稍后写回）
         sec_by_id: dict[str, dict[str, Any]] = {str(s.get("section_id") or ""): s for s in sections}
 
         # 按目标章节分组议题
@@ -1114,9 +1780,12 @@ class BusinessPlanService:
             if not item or str(item.get("status") or "pending") != "pending":
                 continue
             sid_override = (target_section_map or {}).get(aid) or ""
-            target_sid = sid_override or str(item.get("section_id_hint") or "")
+            target_sid = (
+                sid_override
+                or str(item.get("section_id") or "")
+                or str(item.get("section_id_hint") or "")
+            )
             if not target_sid or target_sid not in sec_by_id:
-                # 没明确章节时，默认落到市场或优势章节
                 for fallback in ("advantage", "market", "overview"):
                     if fallback in sec_by_id:
                         target_sid = fallback
@@ -1130,28 +1799,41 @@ class BusinessPlanService:
             return {"status": "no_match", "plan": plan}
 
         revisions = list(plan.get("pending_revisions") or [])
-        # 逐章节合并：旧 content + 竞赛教练增量
+        # 逐章节串行 patch：每条议题依次作用到上一条 patch 后的文本
         for sid, grp in group.items():
             sec = sec_by_id.get(sid) or {}
             original = str(sec.get("user_edit") or sec.get("content") or "")
-            addition_blocks: list[str] = []
+            section_title = str(sec.get("display_title") or sec.get("title") or sid)
+            current_text = original
+            previews: list[dict[str, Any]] = []
             for it in grp:
-                tag = str(it.get("jury_tag") or "")
-                title = str(it.get("title") or "")
-                gist = str(it.get("gist") or "")
-                evi = str(it.get("evidence_hint") or "")
-                block = f"【竞赛教练 · {tag}】{title}\n{gist}"
-                if evi:
-                    block += f"\n补充证据：{evi}"
-                addition_blocks.append(block)
-            new_content = (original + "\n\n" + "\n\n".join(addition_blocks)).strip()
+                current_text, prev = self._apply_one_agenda_to_text(
+                    current_text, it, section_title=section_title,
+                )
+                # 把 patch_preview 写回议题，前端展开议题就能看到改了什么
+                it["patch_preview"] = prev
+                previews.append({"agenda_id": it.get("agenda_id"), **prev})
+
+            new_content = current_text.strip()
+            tag_counts: dict[str, int] = {}
+            prio_counts: dict[str, int] = {}
+            for it in grp:
+                tag_counts[str(it.get("jury_tag") or "")] = tag_counts.get(str(it.get("jury_tag") or ""), 0) + 1
+                prio_counts[str(it.get("priority") or "med")] = prio_counts.get(str(it.get("priority") or "med"), 0) + 1
+            tag_brief = "、".join(f"{k}×{v}" for k, v in tag_counts.items() if k)
+            prio_brief = "、".join(f"{k}={v}" for k, v in prio_counts.items())
+            modes_used = sorted({p.get("mode") for p in previews if p.get("mode")})
+            patch_kind = "段落级重写" if "replace" in modes_used else "追加补强"
 
             revisions.append({
                 "revision_id": str(uuid4())[:8],
                 "section_id": sid,
-                "section_title": sec.get("display_title") or sec.get("title"),
-                "summary": f"{sec.get('display_title') or sec.get('title')} · 竞赛教练议题合入（{len(grp)} 条）",
-                "reason": "来自竞赛教练议题板的批量应用，强化评委视角证据与量化。",
+                "section_title": section_title,
+                "summary": f"{section_title} · 竞赛教练议题 patch（{len(grp)} 条 · {patch_kind}）",
+                "reason": (
+                    f"竞赛教练 {len(grp)} 条议题 patch · 涵盖 [{tag_brief or '—'}] · "
+                    f"优先级分布 {prio_brief or '—'}"
+                ),
                 "source_hint": "competition_agenda",
                 "old_content": original,
                 "new_content": new_content,
@@ -1161,6 +1843,8 @@ class BusinessPlanService:
                 "changes": self._build_inline_changes(original, new_content),
                 "created_at": _now_iso(),
                 "agenda_ids": [str(it.get("agenda_id") or "") for it in grp],
+                "patch_previews": previews,
+                "patch_modes": modes_used,
             })
 
         # 标记已 applied

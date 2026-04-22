@@ -2140,5 +2140,47 @@
     "path": "/api/auth/login",
     "status_code": 200,
     "duration_ms": 0
+  },
+  {
+    "time": "2026-04-21T15:58:11.398097Z",
+    "user": "教师:贪吃蛇",
+    "user_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "role": "teacher",
+    "display_name": "贪吃蛇",
+    "action": "LOGIN",
+    "detail": "用户密码登录成功",
+    "status": "OK",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status_code": 200,
+    "duration_ms": 0
+  },
+  {
+    "time": "2026-04-21T16:09:34.540202Z",
+    "user": "学生:小猪",
+    "user_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+    "role": "student",
+    "display_name": "小猪",
+    "action": "LOGIN",
+    "detail": "用户密码登录成功",
+    "status": "OK",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status_code": 200,
+    "duration_ms": 0
+  },
+  {
+    "time": "2026-04-21T19:18:28.012327Z",
+    "user": "学生:小猪",
+    "user_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+    "role": "student",
+    "display_name": "小猪",
+    "action": "LOGIN",
+    "detail": "用户密码登录成功",
+    "status": "OK",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status_code": 200,
+    "duration_ms": 0
   }
 ]

@@ -1,0 +1,1003 @@
+{
+    "session_label":  "D",
+    "project_id":  "test-654321-testcase3-defense",
+    "conversation_id":  "3a8a98d0-6fe6-49f7-b410-23894adf05a8",
+    "title":  "大学生AI简历助手项目答辩挑战",
+    "summary":  "当前最高风险为 H8（单位经济不成立），会直接影响项目落地可行性。",
+    "turns":  [
+                  {
+                      "turn_index":  1,
+                      "user_message":  "【答辩项目背景】我们项目名：大学生 AI 简历助手。主打\"JD 深度对齐 + 面试预测\"，基础订阅 9.9/月，增值 29.9/月；CAC≈15 元，LTV≈120 元，付费留存 70%/月；已完成 MVP 和 200 人种子用户测试。我们准备用竞赛模式答辩。接下来请依次扮演 3 位毒舌评委，每次只扮演一位，用该角色最犀利的视角追问我们。本轮先请你扮演【激进型 VC】，连珠炮式质疑：10 倍回报从哪来？护城河是什么？同类产品 Kickresume/Teal 已经很成熟，为什么你们能赢？18 个月内怎么让 ARR 过 1000 万？期待你给出有压迫感的专业质疑 + 每个问题后附\"如果我是你们，我会怎么答\"的教练建议。",
+                      "assistant_head":  "（以激进型VC身份，身体前倾，语速加快，目光直视）\n\n好，项目我听了。**“大学生AI简历助手”，JD对齐，面试预测，9块9一个月**。数据很漂亮：CAC 15，LTV 120，付费留存70%。200个种子用户。\n\n但在我这里，这些数字不是亮点，是**红色警报**。我投的是10倍回报，不是学生作业。我直接开火，四个问题，你们一个一个答。\n\n---\n\n### 第一炮：你们的单位经济，是沙子堆的城堡，一推就倒。\n\n\u003e CAC≈15元，LTV≈120元，付费留存 70%/月\n\n**我的质疑**：这是我今天听到最危险的数字组合。LTV 120元怎么来的？是不是用 `月费 / (1 - 月留存率)` 这个公式简单套算的？这意味着用户平均生命周期超过3个月。**笑话。**\n\n1.  **简历是事件驱动型需求**。一个大学生，秋招、春招，最多两个月密集投递。找到工作后，你的产品对他价值瞬间归零。哪来的持续3个月的付费需求？你们的“面试预测”能高频到让用户月月续费？这违背基本用户场景。\n2.  **70%的月留存是“幸存者偏差”**。200个种子用户，他们为什么用你们？因为他们是早期尝鲜者、反馈者，甚至是你们的朋友。他们的留存率没有任何代表性。一旦放到公开市场，面对海量普通用户，留存率会立刻暴跌。参考行业公开数据，纯工具型、低频需求的SaaS，月留存能做到40%已经是优秀。**如果你们的真实月留存是40%，LTV会立刻从120元跌到多少？不到50元。** 你的CAC 15元瞬间就覆盖不了成本，单位经济模型当场破产。\n3.  **CAC 15元怎么来的？** 是地推发传单的成本，还是线上投流？如果是前者，你能把地推模式复制到全国3000所高校吗？人力成本、管理成本算进去了吗？如果是后者，面对Kickresume、Teal甚至Boss直聘的广告竞价，15元想获取一个付费用户？天方夜谭。\n\n**如果我是你们，我会这么答（教练视角）**：\n“您指出的非常对，我们MVP阶段的模型确实过于理想化。我们重新测算过，基于更保守的行业数据（月留存40%）和更真实的获客成本（初期CAC 25元），我们的基础模型LTV/CAC仍然大于1，可以跑通。**但关键不是这个静态数字，而是我们的动态优化策略**：\n*   **提升LTV方面**：我们不是卖一个月简历修改。我们卖的是‘求职季护航’。因此，我们计划推出‘秋招/春招季卡’（定价89元），直接对标一个求职周期，这更符合用户实际使用习惯，也大幅提升了单客价值。\n*   **降低CAC方面**：我们初期的15元成本，来源于与5所高校就业办合作的‘官方推荐’渠道，转化率极高。下一步，我们将通过生产高质量的AI求职干货内容（如《2025科技大厂算法岗JD高频词报告》）进行内容获客，进一步降低边际成本。这是我们的增长杠杆。”\n\n---\n\n### 第二炮：你们的护城河，我看不到，只有一条小水沟。\n\n\u003e 主打“JD深度对齐 + 面试预测”，同类产品 Kickresume/Teal 已经很成熟\n\n**我的质疑**：功能≠壁垒。“深度对齐”是什么技术？是调用OpenAI的API做个提示词工程，还是自己微调了模型？如果是前者，我明天就能让我的实习生做一个。如果是后者，你们的独家训练数据从哪来？**“面试预测”更是危险**，预测准了是应该，预测不准就是口碑灾难。你们用什么保证预测的准确率？有算法专利吗？还是有独家合作的HR数据源？\n\n看看你们提到的对手：**Kickresume**，靠的是海量精美模板和全球用户网络效应；**Teal**，打造的是从简历管理到职位追踪的职业生涯管理生态。你们一个“对齐+预测”的单点功能，怎么跟别人的体系竞争？大厂完全可以把这功能作为他们招聘平台的一个免费插件，瞬间抹杀你。\n\n**如果我是你们，我会这么答（教练视角）**：\n“您问到了核心。我们的护城河不在功能概念，而在**数据闭环和垂直生态**。\n1.  **数据壁垒**：我们‘深度对齐’的核心，不是关键词匹配，而是我们与首批合作的10所‘双一流’高校就业指导中心，共同构建的‘**行业-岗位-技能知识图谱**’。我们获得了这些学校过去三年脱敏的真实招聘JD和面试反馈，用于训练我们的匹配模型。这是Teal等通用平台没有的、高度本土化和精准的底层数据。\n2.  **生",
+                      "assistant_full_len":  3948,
+                      "pipeline":  "advisor",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "competition_prep",
+                      "intent_reason":  "关键词命中 竞赛/评委；主意图归类为 competition_prep",
+                      "intent_engine":  "rule",
+                      "category":  "科技创新",
+                      "mode":  "competition",
+                      "project_stage":  "structured",
+                      "overall_score":  6.43,
+                      "bottleneck":  "当前最高风险为 H8（单位经济不成立），会直接影响项目落地可行性。",
+                      "score_band":  "基本成形",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H5",
+                                                 "H8"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H8",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    }
+                                ],
+                      "next_task_title":  "补齐单位经济模型",
+                      "next_task_desc":  "建立 CAC/LTV/BEP 三表并给出关键假设来源。",
+                      "kg_entities_count":  13,
+                      "kg_relationship_count":  12,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "innovation"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "business_model"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "resource"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "execution_step"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "execution_step"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.81,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.862,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "成本结构超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  9.55,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "成本结构超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  6.4,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan"
+                                                            ],
+                                                  "rubrics":  [
+
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  3,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  {
+                                               "verdict":  null,
+                                               "evidence":  {
+                                                                "H8":  0.55,
+                                                                "H18":  0.5,
+                                                                "H3":  0.5
+                                                            },
+                                               "cards_count":  2,
+                                               "hits":  [
+                                                            "pricing",
+                                                            "unit_econ"
+                                                        ],
+                                               "triggered":  true,
+                                               "industry":  "教育"
+                                           },
+                      "competition_role":  null
+                  },
+                  {
+                      "turn_index":  2,
+                      "user_message":  "很好，这位 VC 的问题我记下了。现在请切换成第二位评委：【技术流专家（某大厂 AI 算法总监）】。请围绕技术可行性与壁垒追问：相较于直接调用 GPT-4/Claude，你们的核心算法差异点是什么？用什么指标证明\"JD 对齐\"比直接提示词工程效果更好（BLEU？岗位匹配度？盲测通过率？）？数据冷启动怎么做？模型会不会只是\"套壳\"？被大厂一键复制怎么办？同样请给出压迫性追问 + 教练级模板回答。",
+                      "assistant_head":  "（身体微微后靠，双手交叉，语气冷静但语速均匀，目光锐利）\n\n好，VC的战场你算涉水走过去了，现在到我的主场了。我是搞算法的，对故事和数字没那么敏感，但对技术路径上的每一个漏洞，我会看得非常清楚。\n\n你刚才提到“JD深度对齐”和“面试预测”，这是你们的技术核心。但在我听来，这九个字背后，可能全是问号。我的问题不会像VC那样连珠炮，但每一个都会压在你们技术路线的七寸上。准备好了吗？\n\n---\n\n### 第一问：算法差异——你们到底在哪个层面做“对齐”？\n\n\u003e “相较于直接调用 GPT-4/Claude，你们的核心算法差异点是什么？”\n\n这是最根本的问题。如果你们的答案仅仅是“我们优化了提示词（Prompt Engineering）”或者“我们用了RAG（检索增强生成）从JD库里找样例”，那我必须告诉你，**这本质上就是“套壳”**。任何一个有经验的算法工程师，用OpenAI或Anthropic的API，配合一个精心设计的提示词模板和一个简历-JD对的向量数据库，一两天就能搭出一个原型。你们的“深度”二字，深在哪里？\n\n让我给你一个具体的参照系。去年我看过一个叫 **“数湖启智”** 的项目，它要解决的是企业数据质量差、难以直接用于AI训练的问题。这是一个听起来也很“通用”的问题，对吧？但他们的技术方案不是简单调用某个数据清洗API，而是明确拆解为三个有递进关系的**具体算法创新点**：\n1.  **人机协同的数据清洗融合方法**：不是全自动，也不是全人工，而是设计算法让人在关键节点介入，效率最高。\n2.  **任务感知的精准数据发现**：能根据下游AI任务（如图像分类、文本生成）的需求，反向推荐最相关的数据子集。\n3.  **具备理论保证的核心子集选择与更新**：这部分甚至有数学论文支撑，能证明他们选择的数据子集能以极高概率代表全集。\n\n看到了吗？这才叫**技术差异点**。它把“解决数据问题”这个模糊目标，拆解成了可描述、可验证、有理论或实践独创性的具体模块。\n\n那么，你们的“JD深度对齐”呢？我需要你们同样清晰的层次拆解。是设计了专门针对**简历文本与JD文本的跨模态对比学习模型**？还是构建了一个**持续更新的行业技能知识图谱**，让模型能理解“熟练掌握Python”和“有TensorFlow项目经验”在投递“机器学习工程师”岗位时的关联与权重差异？又或者是开发了一套**基于强化学习的简历生成器**，以“获得面试邀请”作为最终奖励信号来优化模型？\n\n你们必须明确指出，你们的算法工作发生在基础模型的**哪个层面**，以及为什么这个层面的工作能带来质变。下图清晰地展示了不同技术路径的差异与价值：\n\n```mermaid\ngraph TD\n    A[用户输入: 原始简历 + 目标JD] --\u003e B{核心算法路径选择};\n\n    B --\u003e C[路径一: 基础提示词工程];\n    C --\u003e C1[技术描述: 设计精妙的Prompt模板， 可能结合Few-shot examples];\n    C1 --\u003e C2[本质: GPT-4/Claude等基础模型的“高级用户”];\n    C2 --\u003e C3[壁垒: 极低， 易复制];\n    C3 --\u003e C4[评委视角: 大概率判定为“套壳”];\n\n    B --\u003e D[路径二: 检索增强生成];\n    D --\u003e D1[技术描述: JD/简历向量库检索 + Prompt拼接];\n    D1 --\u003e D2[本质: 基于现有技术的工程组合];\n    D2 --\u003e D3[壁垒: 较低， 取决于数据质量];\n    D3 --\u003e D4[评委视角: 有优化， 但创新不足];\n\n    B --\u003e E[路径三: 领域自适应微调];\n    E --\u003e E1[技术描述: 收集领域数据， 对基座模型进行全参数/高效微调];\n    E1 --\u003e E2[本质: 创造了一个垂直领域专属模型];\n    E2 --\u003e E3[壁垒: 中等， 依赖于私有数据与算法工程能力];\n    E3 --\u003e E4[评委视角: 具备一定技术深度];\n\n    B --\u003e F[路径四: 原创算法模块];\n    F --\u003e F1[技术描述: 如“技能图谱对齐算法”、 “基于强化学习的面试反馈闭环”];\n    F1 -",
+                      "assistant_full_len":  6716,
+                      "pipeline":  "advisor",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "competition_prep",
+                      "intent_reason":  "关键词命中 竞赛/评委；主意图归类为 competition_prep",
+                      "intent_engine":  "rule",
+                      "category":  "科技创新",
+                      "mode":  "competition",
+                      "project_stage":  "structured",
+                      "overall_score":  7.11,
+                      "bottleneck":  "当前最高风险为 H8（单位经济不成立），会直接影响项目落地可行性。",
+                      "score_band":  "较成熟",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H5",
+                                                 "H8",
+                                                 "H17"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H8",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    },
+                                    {
+                                        "id":  "H17",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    }
+                                ],
+                      "next_task_title":  "补齐单位经济模型",
+                      "next_task_desc":  "建立 CAC/LTV/BEP 三表并给出关键假设来源。",
+                      "kg_entities_count":  11,
+                      "kg_relationship_count":  10,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "innovation"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "execution_step"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "risk_control"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.81,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.862,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  3,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  null,
+                      "competition_role":  null
+                  },
+                  {
+                      "turn_index":  3,
+                      "user_message":  "最后请切换成第三位评委：【保守型银行家/债权人（国有银行科创贷款审查官）】。请只关注风险与现金流：你们的账上现金能撑多少个月？18 个月不融到下一轮怎么活？最差情形下的现金流表（月度）画得出来吗？坏账率预估？如果用户付费后退订/投诉怎么处理？有没有任何可抵押的资产或订单？请按银行风险评审的逻辑追问，每个问题后附上\"银行家最想听到的安全话术\"。",
+                      "assistant_head":  "（身体坐直，双手平放在桌上，神情严肃，目光审慎地扫过你面前的资料）\n\n好，VC要的是十倍回报，技术专家要的是技术壁垒，但到我这里，一切都得回归到最朴素的两个字：**还钱**。\n\n我是银行负责科创贷款审查的，我的职责不是为梦想鼓掌，而是为风险定价。你们讲的“JD对齐”、“面试预测”在我听来，都是未来的可能性。而银行，只认当下的确定性和最坏情况下的生存能力。\n\n你给出的数据——CAC 15元，LTV 120元，月付费留存率70%——在我这里，不仅不是加分项，反而是一连串需要被严格拷问的**高风险假设**。你们项目的最高风险H8（单位经济不成立）就像一个定时炸弹，而我的问题，就是要搞清楚这个炸弹的引信有多长，以及你们有没有拆弹的能力。\n\n我们不谈未来，只看现在和可预见的困境。下面四个问题，请你用**可验证的事实和严谨的财务规划**来回答，而不是用愿景。\n\n---\n\n### 第一问：生存底线——你们的现金，到底能烧几个月？\n\n你提到有18个月的跑道，这本身就是一个需要极高警惕性的信号。对于一个客单价仅9.9/29.9元、CAC宣称15元的早期SaaS项目，18个月的现金储备意味着什么？\n\n意味着要么你的初始资金量很大（但这与大学生创业项目常情不符），要么你的月度支出计划极其粗放，没有经过精细测算。更可能的是，你根本没有一份详尽的月度现金流预测。\n\n**我的追问是：**\n请抛开一切乐观假设，告诉我你们**最差情形下的月度现金流表**。这张表必须包含：\n1.  **固定成本**：核心团队（哪怕只有3人）的工资、五险一金、基础办公费用。\n2.  **变动成本**：服务器费用（随用户量增长）、第三方API调用费（如使用GPT-4）、支付通道手续费。\n3.  **市场费用**：这是最大的变数。你CAC=15元是基于200人种子测试，一旦扩大规模，渠道红利消失，CAC翻倍到30元是常态。\n4.  **收入预测**：必须考虑季节性。大学生求职有“金三银四”、“金九银十”，寒暑假是绝对淡季。你的收入曲线绝不是平滑上升的直线。\n5.  **关键风险变量**：将你的“付费留存率70%”这个核心假设进行压力测试。如果实际只有50%、甚至30%呢？参考案例**PushPlus**的商业模式是嵌入工作流的工具，续费逻辑硬；而你的“简历优化”是典型的事件驱动型需求，学生找到工作后，续费动机几乎为零。这是你单位经济模型中最脆弱的一环。\n\n如果这些你都没算过，那么所谓的“18个月”就是空中楼阁。\n\n**银行家最想听到的安全话术：**\n\u003e “我们目前账上有X万元启动资金。基于详细的财务模型，我们编制了乐观、中性、悲观三套情景下未来24个月的月度现金流预测表。**在最差情形下**（核心假设：月新增付费用户仅为目标的50%，CAC上升至25元，月付费留存率在求职季后降至40%，并考虑寒暑假收入锐减），我们的现金耗尽点在第N个月。为此，我们设立了明确的财务警戒线：当现金储备低于M个月支出时，将自动触发应急预案A（冻结所有营销费用）；低于K个月时，触发预案B（核心团队降薪）。这是我们附上的《最差情形现金流预测表》，其中盈亏平衡点预计在第T个月实现。”\n\n---\n\n### 第二问：坏账与挤兑——用户退款时，你拿什么堵窟窿？\n\n你说付费留存率70%，那另外30%呢？除了自然流失，一定有因为不满意而退订、甚至投诉要求退款的。对于预付费的订阅模式，用户预付的钱在会计上是你的负债，不是资产。\n\n**我的追问是：**\n1.  **坏账率预估**：你们按什么标准计提坏账准备？是0吗？这不可能。信用卡支付失败、学生恶意使用后退款、尤其是对“面试预测”结果不满的大规模投诉退款，都是现实的现金流出血点。行业里，消费级SaaS的坏账率（含争议退款）通常在1%-5%之间。你们凭什么认为自己能低于这个区间？\n2.  **投诉处理与现金流冲击**：如果因为某次算法更新导致“面试预测”大面积失准，引发用户集中投诉和退款申请，你们如何处理？是全部退款导致单月现金流瞬间断裂，还是有其他的缓冲机制？这直接关系到业务的可持续性。\n\n**银行家最想听到的安全话术：**\n\u003e “我们高度重视支付风险。首先，我们参考了行业标准，在财务预测中**保守地按月度流水收入的3%计提坏账及退款准备金**，这笔钱不会用于运营，专款专户管理。",
+                      "assistant_full_len":  4837,
+                      "pipeline":  "advisor",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "competition_prep",
+                      "intent_reason":  "关键词命中 竞赛/评委；判定为单一主问题；主意图归类为 competition_prep",
+                      "intent_engine":  "rule",
+                      "category":  "科技创新",
+                      "mode":  "competition",
+                      "project_stage":  "structured",
+                      "overall_score":  7.18,
+                      "bottleneck":  "当前最高风险为 H8（单位经济不成立），会直接影响项目落地可行性。",
+                      "score_band":  "较成熟",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H5",
+                                                 "H8",
+                                                 "H17"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H8",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    },
+                                    {
+                                        "id":  "H17",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    }
+                                ],
+                      "next_task_title":  "补齐单位经济模型",
+                      "next_task_desc":  "建立 CAC/LTV/BEP 三表并给出关键假设来源。",
+                      "kg_entities_count":  8,
+                      "kg_relationship_count":  7,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "pain_point"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "innovation"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.81,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.862,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  3,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  {
+                                               "verdict":  null,
+                                               "evidence":  {
+                                                                "H8":  0.55,
+                                                                "H18":  0.5,
+                                                                "H3":  0.5
+                                                            },
+                                               "cards_count":  2,
+                                               "hits":  [
+                                                            "pricing",
+                                                            "cashflow"
+                                                        ],
+                                               "triggered":  true,
+                                               "industry":  "教育"
+                                           },
+                      "competition_role":  null
+                  },
+                  {
+                      "turn_index":  4,
+                      "user_message":  "最后一轮我们跳出这 3 位角色，和我们讨论：\"除了激进 VC、技术专家、保守银行家，我们在真实比赛/融资答辩中还应该预演哪些类型的毒舌评委？\"请列出至少 6 种典型专家画像（例如政策合规官、竞品产品经理、落地客户代表、产业基金分析师、伦理审查委员、终端用户代言人、行业资深媒体人等），每位专家列出：他们最关注的维度 + 他们最喜欢问的三个\"杀手级问题\" + 学生常见的应答陷阱。这些将作为系统竞赛教练模块后续补充 agenda 的素材。",
+                      "assistant_head":  "很好，你提出了一个非常实战、非常关键的问题。预演不同类型的“毒舌评委”，是竞赛答辩从“展示”走向“防御”，从“讲故事”走向“过审判”的核心能力。\n\n但在我深入为你拆解这六类专家之前，我必须先点破一个你目前可能没意识到的、更根本的问题。你现在做的，就像一位将军在沙盘上推演敌人可能从东、西、南、北四个方向进攻，并为此设计了精妙的应对战术。然而，你的城堡本身（也就是你的项目）**城墙最厚的地方在东边，但地基最脆弱的地方却在西南角**。你精心准备的战术，可能因为一次地基塌陷而全盘失效。\n\n这个“最脆弱的地基”，就是你项目当前的核心瓶颈：**单位经济模型不成立（H8）**。这意味着，无论面对哪种评委，他们的问题最终都会像潮水一样，反复冲刷你这个最薄弱的地带。你给出的CAC 15元、LTV 120元、付费留存70%这些数字，在评委眼里不是答案，而是**一串需要被严格拷问的假设**。\n\n让我用你提的“产业基金分析师”举个例子。他可能会这样问：\n\u003e “你LTV 120元的计算，是基于月费9.9元、月留存率70%的模型。但根据我对在线教育/求职类SaaS的观察，大学生用户的生命周期具有极强的‘事件驱动’特性——找到工作即流失。你们的70%留存率，是基于多长的观察期？在求职季（3-6月、9-12月）和非求职季，这个数据波动有多大？如果实际年均留存率只有30%，你的LTV会腰斩至多少？届时你的CAC还撑得住吗？”\n\n你看，这个问题表面上来自“产业基金分析师”的视角，但它的矛头直指你商业模式的心脏——单位经济模型。如果你只是背下了CAC和LTV的数字，而说不清支撑这些数字的用户行为假设、季节性波动和风险边界，你就会立刻掉入 **“用静态数字掩盖动态风险”** 的常见陷阱。\n\n所以，接下来我要为你构建的这六类评委画像，**不是六张孤立的清单，而是一个以“验证并加固你的单位经济模型”为核心的压力测试网络**。每一个评委角色，都会从他们独特的视角，对你的商业模式发起一次“定向爆破”。你的准备，必须是系统性的防御。\n\n---\n\n### **1. 政策合规官：关注“合规成本如何侵蚀你的利润”**\n\n*   **核心关注维度**：数据获取与使用的合法性、算法公平性的可审计性、业务模式的监管风险及对应的成本。\n*   **杀手级问题**：\n    1.  **数据源与成本**：“你们‘深度对齐’需要大量JD和简历数据。这些数据来源是什么？如果是爬取公开招聘网站，如何规避《反不正当竞争法》和网站Robots协议的风险？如果购买或合作获取，这部分数据采购成本在你们的CAC 15元中占比多少？未来数据合规成本（如个保法要求的第三方审计、安全认证）的年度预算是多少？”\n    2.  **算法偏见与责任**：“‘面试预测’本质上是在做人才评估。如果算法因为训练数据本身的偏差（例如，过往成功案例多来自某几所高校），导致对某些群体产生系统性低估，你们如何监测和修正？如果某学生因你们的‘预测成功率低’建议而错过心仪面试，并提起诉讼，你们有何免责机制或保险？处理这类客诉的预期成本是多少？”\n    3.  **业务资质与边界**：“你们的服务是否被界定为‘职业介绍’或‘人才测评’？这些领域可能存在准入资质要求（如人力资源服务许可证）。你们是否咨询过法律顾问？获取和维护这些资质的金钱与时间成本，是否纳入了你们的财务模型？”\n*   **学生常见应答陷阱**：\n    *   **陷阱一：模糊承诺**。“我们非常重视合规，会严格遵守法律法规。”——这是最无效的回答，评委想听的是**具体动作和预算**。\n    *   **陷阱二：技术替代合规**。“我们用联邦学习/差分隐私技术来保护隐私。”——技术是工具，但合规是体系。评委要的是管理体系（如数据分类分级制度、隐私影响评估流程），不仅仅是技术名词。\n    *   **陷阱三：忽略成本**。完全不将合规成本（法律顾问费、认证费、潜在罚金准备金）纳入财务模型，让商业模式显得“虚假繁荣”。\n\n### **2. 竞品产品经理：关注“用户为何舍弃现有路径而为你付费”**\n\n*   **核心关注维度**：用户替代成本、真实需求场景的颗粒度、产品体验的细微摩擦。\n*   **杀手级问题**：\n    1.  **替代方案对比**：“一个大学生，用Chat",
+                      "assistant_full_len":  8071,
+                      "pipeline":  "advisor",
+                      "nodes_visited":  [
+                                            "router",
+                                            "gather_context",
+                                            "role_agents",
+                                            "orchestrator"
+                                        ],
+                      "intent":  "competition_prep",
+                      "intent_reason":  "关键词命中 竞赛/评委；主意图归类为 competition_prep",
+                      "intent_engine":  "rule",
+                      "category":  "科技创新",
+                      "mode":  "competition",
+                      "project_stage":  "structured",
+                      "overall_score":  7.63,
+                      "bottleneck":  "当前最高风险为 H8（单位经济不成立），会直接影响项目落地可行性。",
+                      "score_band":  "较成熟",
+                      "is_nonprofit":  null,
+                      "triggered_rule_ids":  [
+                                                 "H5",
+                                                 "H8",
+                                                 "H11",
+                                                 "H17"
+                                             ],
+                      "risks":  [
+                                    {
+                                        "id":  "H5",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    },
+                                    {
+                                        "id":  "H8",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    },
+                                    {
+                                        "id":  "H11",
+                                        "severity":  "high",
+                                        "title":  null,
+                                        "score_impact":  -0.41
+                                    },
+                                    {
+                                        "id":  "H17",
+                                        "severity":  "medium",
+                                        "title":  null,
+                                        "score_impact":  -0.19
+                                    }
+                                ],
+                      "next_task_title":  "补齐单位经济模型",
+                      "next_task_desc":  "建立 CAC/LTV/BEP 三表并给出关键假设来源。",
+                      "kg_entities_count":  18,
+                      "kg_relationship_count":  15,
+                      "kg_entities_sample":  [
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "stakeholder"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "risk_control"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "innovation"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "risk_control"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "solution"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "innovation"
+                                                 },
+                                                 {
+                                                     "name":  null,
+                                                     "type":  "technology"
+                                                 }
+                                             ],
+                      "hyper_top_edges":  [
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.81,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "风险模式超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.862,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H3",
+                                                                "H5"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "定价单元经济超边",
+                                                  "severity":  "高",
+                                                  "score_impact":  10.0,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H10",
+                                                                "H15",
+                                                                "H8",
+                                                                "execution_vague",
+                                                                "no_execution_plan",
+                                                                "unit_economics_not_proven"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Business Model Consistency",
+                                                                  "Financial Logic"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              },
+                                              {
+                                                  "family_label":  "信任采纳超边",
+                                                  "severity":  "中",
+                                                  "score_impact":  5.68,
+                                                  "confidence":  0.9,
+                                                  "rules":  [
+                                                                "H5",
+                                                                "weak_user_evidence"
+                                                            ],
+                                                  "rubrics":  [
+                                                                  "Solution Feasibility",
+                                                                  "User Evidence Strength"
+                                                              ]
+                                              }
+                                          ],
+                      "hyper_family_counts":  {
+                                                  "Risk_Pattern_Edge":  18,
+                                                  "Value_Loop_Edge":  16,
+                                                  "User_Pain_Fit_Edge":  12,
+                                                  "Evidence_Grounding_Edge":  12,
+                                                  "Execution_Gap_Edge":  10,
+                                                  "Market_Competition_Edge":  10,
+                                                  "Compliance_Safety_Edge":  8,
+                                                  "Innovation_Validation_Edge":  8,
+                                                  "Pricing_Unit_Economics_Edge":  10,
+                                                  "Substitute_Migration_Edge":  10,
+                                                  "Trust_Adoption_Edge":  8,
+                                                  "Retention_Workflow_Embed_Edge":  8,
+                                                  "Stage_Goal_Fit_Edge":  8,
+                                                  "Rule_Rubric_Tension_Edge":  10,
+                                                  "Ontology_Grounded_Edge":  6,
+                                                  "Team_Capability_Gap_Edge":  8,
+                                                  "User_Journey_Edge":  10,
+                                                  "Social_Impact_Edge":  6,
+                                                  "Data_Flywheel_Edge":  8,
+                                                  "Scalability_Bottleneck_Edge":  8,
+                                                  "IP_Moat_Edge":  6,
+                                                  "Pivot_Signal_Edge":  6,
+                                                  "Cost_Structure_Edge":  8,
+                                                  "Ecosystem_Dependency_Edge":  6,
+                                                  "MVP_Scope_Edge":  8,
+                                                  "Stakeholder_Conflict_Edge":  6,
+                                                  "Channel_Conversion_Edge":  8,
+                                                  "Regulatory_Landscape_Edge":  6,
+                                                  "Presentation_Narrative_Edge":  8,
+                                                  "Resource_Leverage_Edge":  6,
+                                                  "Timing_Window_Edge":  6,
+                                                  "Revenue_Sustainability_Edge":  8,
+                                                  "Demand_Supply_Match_Edge":  8,
+                                                  "Founder_Risk_Edge":  6,
+                                                  "Ethical_Bias_Edge":  6,
+                                                  "Assumption_Stack_Edge":  8,
+                                                  "Metric_Definition_Edge":  6,
+                                                  "Market_Segmentation_Edge":  8,
+                                                  "Competitive_Response_Edge":  6,
+                                                  "Milestone_Dependency_Edge":  6,
+                                                  "Funding_Stage_Fit_Edge":  6,
+                                                  "Switching_Cost_Edge":  6,
+                                                  "Network_Effect_Edge":  8,
+                                                  "Cross_Dimension_Coherence_Edge":  6,
+                                                  "ESG_Measurability_Edge":  6
+                                              },
+                      "rag_cases_count":  3,
+                      "neo4j_hits_count":  0,
+                      "finance_advisory":  null,
+                      "competition_role":  null
+                  }
+              ]
+}

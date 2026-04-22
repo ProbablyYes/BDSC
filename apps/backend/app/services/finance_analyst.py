@@ -32,6 +32,25 @@ logger = logging.getLogger(__name__)
 # 每个行业四个量：cac_range 获客成本区间（元），monthly_price 月价区间（元），
 # monthly_retention 月留存率区间，gross_margin 毛利率区间。
 # 数据来源：行业公开报告中位区间，仅供课程级建模教学使用。
+#
+# v2 起新增 thresholds 子字段：每个行业带自己的红/黄灯阈值。
+# 设计原则：阈值是"行业共识"（来自 16Z/Bessemer/天风 SaaS 白皮书等行研机构的中位值），
+# LLM 联网刷新时不抽 thresholds（怕被网页噪声污染），只刷价格/CAC/留存/毛利这四个区间。
+# thresholds 缺失时由 _get_thresholds() 回退到 _DEFAULT_THRESHOLDS。
+
+# 全局兜底阈值（找不到行业 thresholds 时用，对应"教科书 VC 通识"）
+_DEFAULT_THRESHOLDS: dict[str, float] = {
+    "ltv_cac_healthy": 3.0,           # LTV/CAC ≥ 3 绿
+    "ltv_cac_warning": 1.5,           # 1.5–3 黄；< 1.5 红
+    "payback_healthy_months": 6.0,    # Payback ≤ 6 月绿
+    "payback_warning_months": 12.0,   # 6–12 月黄；> 12 月红
+    "runway_red_months": 12.0,        # 现金 12 月内耗尽 → 红
+    "runway_warning_months": 18.0,    # 12–18 月 → 黄
+    "breakeven_green_months": 18.0,   # ≤ 18 月转正 → 绿
+    "breakeven_warning_months": 24.0, # 18–24 月 → 黄
+    "cpb_healthy_ratio": 1.0,         # CPB / 行业中位 ≤ 1.0 → 绿（仅公益）
+    "cpb_warning_ratio": 1.5,         # 1.0–1.5 → 黄；> 1.5 → 红
+}
 
 INDUSTRY_BASELINES: dict[str, dict[str, Any]] = {
     "教育": {
@@ -41,6 +60,18 @@ INDUSTRY_BASELINES: dict[str, dict[str, Any]] = {
         "gross_margin": [0.60, 0.85],
         "avg_user_lifetime_months": 9,
         "note": "教育类看重留存与续费，CAC 对价格敏感度高",
+        # 教育周期短、客单低，资金周转快，用通识但 Payback 略宽
+        "thresholds": {
+            "ltv_cac_healthy": 3.0,
+            "ltv_cac_warning": 1.5,
+            "payback_healthy_months": 9.0,
+            "payback_warning_months": 15.0,
+            "runway_red_months": 9.0,
+            "runway_warning_months": 15.0,
+            "breakeven_green_months": 18.0,
+            "breakeven_warning_months": 24.0,
+            "_source": "seed_v2",
+        },
     },
     "SaaS": {
         "cac_range": [200, 1500],
@@ -49,6 +80,18 @@ INDUSTRY_BASELINES: dict[str, dict[str, Any]] = {
         "gross_margin": [0.70, 0.85],
         "avg_user_lifetime_months": 24,
         "note": "SaaS 关键看净收入留存（NRR）和回本周期",
+        # SaaS 烧钱期长、回本慢但 LTV 高（订阅+高留存），按 16Z 经验值放宽 Payback / Breakeven
+        "thresholds": {
+            "ltv_cac_healthy": 3.0,
+            "ltv_cac_warning": 1.5,
+            "payback_healthy_months": 12.0,
+            "payback_warning_months": 18.0,
+            "runway_red_months": 12.0,
+            "runway_warning_months": 18.0,
+            "breakeven_green_months": 24.0,
+            "breakeven_warning_months": 36.0,
+            "_source": "seed_v2",
+        },
     },
     "电商": {
         "cac_range": [40, 200],
@@ -57,6 +100,18 @@ INDUSTRY_BASELINES: dict[str, dict[str, Any]] = {
         "gross_margin": [0.15, 0.40],
         "avg_user_lifetime_months": 6,
         "note": "电商以复购频次为核心，毛利率普遍较薄",
+        # 电商毛利薄、必须快回本：Payback 收紧到 3/6 月；LTV/CAC 口径放低（毛利薄难撑 3）
+        "thresholds": {
+            "ltv_cac_healthy": 2.0,
+            "ltv_cac_warning": 1.0,
+            "payback_healthy_months": 3.0,
+            "payback_warning_months": 6.0,
+            "runway_red_months": 6.0,
+            "runway_warning_months": 12.0,
+            "breakeven_green_months": 12.0,
+            "breakeven_warning_months": 18.0,
+            "_source": "seed_v2",
+        },
     },
     "硬件": {
         "cac_range": [80, 400],
@@ -65,6 +120,18 @@ INDUSTRY_BASELINES: dict[str, dict[str, Any]] = {
         "gross_margin": [0.20, 0.45],
         "avg_user_lifetime_months": 18,
         "note": "硬件重资产，注意库存 / 售后 / 供应链成本",
+        # 硬件首付即回收大部分成本，Payback 容忍中等；Runway 因供应链/库存吃现金，红线偏紧
+        "thresholds": {
+            "ltv_cac_healthy": 2.5,
+            "ltv_cac_warning": 1.2,
+            "payback_healthy_months": 9.0,
+            "payback_warning_months": 18.0,
+            "runway_red_months": 12.0,
+            "runway_warning_months": 18.0,
+            "breakeven_green_months": 18.0,
+            "breakeven_warning_months": 30.0,
+            "_source": "seed_v2",
+        },
     },
     "社会公益": {
         "cac_range": [10, 80],
@@ -75,6 +142,16 @@ INDUSTRY_BASELINES: dict[str, dict[str, Any]] = {
         "cost_per_beneficiary_range": [50, 500],
         "note": "公益项目不适用 LTV/CAC 口径，应看单位受益人成本与可持续性",
         "is_nonprofit": True,
+        # 公益不评 LTV/CAC/Payback；只看 CPB 偏离行业中位的比例
+        "thresholds": {
+            "cpb_healthy_ratio": 1.0,
+            "cpb_warning_ratio": 1.5,
+            "runway_red_months": 6.0,        # 公益项目对现金更敏感（依赖资助到位）
+            "runway_warning_months": 12.0,
+            "breakeven_green_months": 24.0,  # 公益不强求转正
+            "breakeven_warning_months": 36.0,
+            "_source": "seed_v2",
+        },
     },
 }
 
@@ -169,6 +246,36 @@ def _extract_meta(baseline: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
+def _get_thresholds(baseline: dict[str, Any]) -> dict[str, float]:
+    """
+    从 baseline 取该行业的红/黄灯阈值，缺哪条就用 _DEFAULT_THRESHOLDS 补哪条。
+    向后兼容：旧版 baseline 文件没有 thresholds 字段时整体回退到 default。
+    """
+    out: dict[str, float] = dict(_DEFAULT_THRESHOLDS)
+    if isinstance(baseline, dict):
+        ind_th = baseline.get("thresholds")
+        if isinstance(ind_th, dict):
+            for k, v in ind_th.items():
+                if k.startswith("_"):
+                    continue  # 跳过 _source 等元字段
+                try:
+                    out[k] = float(v)
+                except (TypeError, ValueError):
+                    continue
+    return out
+
+
+def _thresholds_meta(baseline: dict[str, Any]) -> dict[str, Any]:
+    """用于卡片输出 thresholds_used 字段：暴露阈值与出处。"""
+    th = _get_thresholds(baseline)
+    src = "default"
+    if isinstance(baseline, dict):
+        ind_th = baseline.get("thresholds")
+        if isinstance(ind_th, dict):
+            src = str(ind_th.get("_source") or "industry")
+    return {"values": th, "source": src}
+
+
 # ══════════════════════════════════════════════════════════════════
 #  模块 1：单位经济 Unit Economics
 # ══════════════════════════════════════════════════════════════════
@@ -190,8 +297,10 @@ def analyze_unit_economics(
     """
     ind = _match_industry(industry)
     baseline = _get_baseline(industry, allow_online=allow_online)
+    thresholds = _get_thresholds(baseline)
     card = _empty_card("unit_economics", "单位经济分析")
     card["baseline_meta"] = _extract_meta(baseline)
+    card["thresholds_used"] = _thresholds_meta(baseline)
 
     is_nonprofit = baseline.get("is_nonprofit")
 
@@ -240,28 +349,35 @@ def analyze_unit_economics(
             return card
         baseline_low, baseline_high = baseline["cost_per_beneficiary_range"]
         dev = cpb / ((baseline_low + baseline_high) / 2)
-        v = _verdict_from_ratio(dev, healthy=1.0, warning=1.5, higher_better=False)
+        cpb_healthy = thresholds.get("cpb_healthy_ratio", 1.0)
+        cpb_warning = thresholds.get("cpb_warning_ratio", 1.5)
+        v = _verdict_from_ratio(dev, healthy=cpb_healthy, warning=cpb_warning, higher_better=False)
         card["outputs"] = {
             "cost_per_beneficiary": cpb,
             "industry_range": [baseline_low, baseline_high],
             "deviation_ratio": round(dev, 2),
+            "cpb_healthy_ratio": cpb_healthy,
+            "cpb_warning_ratio": cpb_warning,
         }
         card["verdict"] = {
             "level": v["level"],
             "score": round(v["score"], 2),
             "reason": (
                 f"单位受益人成本 ¥{cpb:.0f}，公益项目参考区间 ¥{baseline_low}-{baseline_high}"
-                + ("（偏高）" if dev > 1.2 else "（合理）" if dev < 1.1 else "（接近上限）")
+                + (f"（偏离 {dev:.2f}x，超过黄线 {cpb_warning:.1f}x，偏高）" if dev > cpb_warning
+                   else f"（偏离 {dev:.2f}x，介于绿线 {cpb_healthy:.1f}x 与黄线 {cpb_warning:.1f}x 之间）" if dev > cpb_healthy
+                   else f"（偏离 {dev:.2f}x，落在绿线 {cpb_healthy:.1f}x 内，合理）")
             ),
         }
         card["framework_explain"] = (
             "CPB（Cost Per Beneficiary）衡量每单位捐赠换来多少实际社会影响，是公益项目效率核心指标。"
+            f"\n本次评分阈值：偏离行业中位 ≤ {cpb_healthy:.1f}x 绿；≤ {cpb_warning:.1f}x 黄；> {cpb_warning:.1f}x 红。"
         )
         card["suggestions"] = [
             "把 CPB 与同类公益项目对比写进报告",
             "结合「受益人生命周期影响」展示长期价值",
         ]
-        if dev > 1.5:
+        if dev > cpb_warning:
             card["evidence_for_diagnosis"]["H8"] = 0.3
         else:
             card["evidence_for_diagnosis"]["H8"] = 0.75
@@ -287,6 +403,12 @@ def analyze_unit_economics(
     monthly_gross = price * margin_eff
     payback = cac / monthly_gross if monthly_gross > 0 else float("inf")
 
+    # 行业化阈值（来自 baseline.thresholds，缺失则 _DEFAULT_THRESHOLDS）
+    th_lc_h = thresholds["ltv_cac_healthy"]
+    th_lc_w = thresholds["ltv_cac_warning"]
+    th_pb_h = thresholds["payback_healthy_months"]
+    th_pb_w = thresholds["payback_warning_months"]
+
     card["outputs"] = {
         "arpu": round(price, 2),
         "gross_margin": round(margin_eff, 2),
@@ -295,21 +417,42 @@ def analyze_unit_economics(
         "cac": round(cac, 2),
         "ltv_cac_ratio": round(ratio, 2),
         "payback_period_months": round(payback, 1) if math.isfinite(payback) else None,
+        # 把本次评分用的阈值显式回填到 outputs，前端/老师无需再翻 thresholds_used
+        "ltv_cac_healthy": th_lc_h,
+        "ltv_cac_warning": th_lc_w,
+        "payback_healthy_months": th_pb_h,
+        "payback_warning_months": th_pb_w,
     }
 
-    # verdict 综合 LTV/CAC 与 Payback
-    v_ratio = _verdict_from_ratio(ratio, healthy=3.0, warning=1.5, higher_better=True)
-    v_pay = _verdict_from_ratio(payback, healthy=6.0, warning=12.0, higher_better=False) if math.isfinite(payback) else {"level": "red", "score": 0.1}
+    # verdict 综合 LTV/CAC 与 Payback —— 阈值现在来自行业 thresholds
+    v_ratio = _verdict_from_ratio(ratio, healthy=th_lc_h, warning=th_lc_w, higher_better=True)
+    v_pay = (
+        _verdict_from_ratio(payback, healthy=th_pb_h, warning=th_pb_w, higher_better=False)
+        if math.isfinite(payback)
+        else {"level": "red", "score": 0.1}
+    )
     # 取较差的
     order = {"green": 0, "yellow": 1, "red": 2, "gray": 3}
     worse = v_ratio if order[v_ratio["level"]] >= order[v_pay["level"]] else v_pay
 
+    pb_str = f"{payback:.1f}" if math.isfinite(payback) else "∞"
     if ratio < 1:
-        reason = f"LTV/CAC = {ratio:.2f} < 1，每获一个用户都是亏的，商业模式不成立"
-    elif ratio < 3:
-        reason = f"LTV/CAC = {ratio:.2f} 在 1-3 之间，能撑但不健康；Payback ≈ {payback:.1f} 月"
+        reason = f"LTV/CAC = {ratio:.2f} < 1，每获一个用户都是亏的，商业模式不成立（{ind}行业绿线 ≥ {th_lc_h:.1f}）"
+    elif ratio < th_lc_w:
+        reason = (
+            f"LTV/CAC = {ratio:.2f} 低于{ind}行业黄线 {th_lc_w:.1f}，单位经济偏弱；"
+            f"Payback ≈ {pb_str} 月"
+        )
+    elif ratio < th_lc_h:
+        reason = (
+            f"LTV/CAC = {ratio:.2f} 在{ind}行业 [{th_lc_w:.1f}, {th_lc_h:.1f}] 区间，能撑但不健康；"
+            f"Payback ≈ {pb_str} 月（绿线 ≤ {th_pb_h:.0f} 月）"
+        )
     else:
-        reason = f"LTV/CAC = {ratio:.2f} ≥ 3，单位经济健康；Payback ≈ {payback:.1f} 月"
+        reason = (
+            f"LTV/CAC = {ratio:.2f} ≥ {th_lc_h:.1f}，{ind}行业单位经济健康；"
+            f"Payback ≈ {pb_str} 月"
+        )
 
     card["verdict"] = {"level": worse["level"], "score": round(worse["score"], 2), "reason": reason}
 
@@ -318,15 +461,19 @@ def analyze_unit_economics(
         "- LTV（用户终身价值）= 月 ARPU × 毛利率 × 平均生命周期月数\n"
         "- CAC（获客成本）= 获客投入 / 新增付费用户数\n"
         "- Payback（回本周期）= CAC / 月毛利\n\n"
-        "投资人最先看 LTV/CAC 比，< 1 表示亏损，1-3 勉强撑，≥ 3 健康，≥ 5 优秀。"
+        f"**本次评分阈值（{ind}行业）**：\n"
+        f"- LTV/CAC：≥ {th_lc_h:.1f} 绿，≥ {th_lc_w:.1f} 黄，否则红\n"
+        f"- Payback：≤ {th_pb_h:.0f} 月绿，≤ {th_pb_w:.0f} 月黄，否则红\n\n"
+        "通用 VC 默认值（教科书）：LTV/CAC ≥ 3、Payback ≤ 6 月。本系统按行业差异化调整，"
+        "如电商收紧到 Payback ≤ 3 月，SaaS 放宽到 Payback ≤ 12 月。"
     )
-    card["suggestions"] = _build_ue_suggestions(ratio, payback, price, baseline, ind)
+    card["suggestions"] = _build_ue_suggestions(ratio, payback, price, baseline, ind, thresholds)
 
-    # 证据回流
-    if ratio >= 3 and math.isfinite(payback) and payback <= 12:
+    # 证据回流（沿用阈值进行 H8/H18 打分）
+    if ratio >= th_lc_h and math.isfinite(payback) and payback <= th_pb_w:
         card["evidence_for_diagnosis"]["H8"] = 0.85
         card["evidence_for_diagnosis"]["H18"] = 0.6
-    elif ratio >= 1.5:
+    elif ratio >= th_lc_w:
         card["evidence_for_diagnosis"]["H8"] = 0.55
         card["evidence_for_diagnosis"]["H18"] = 0.5
     else:
@@ -334,18 +481,33 @@ def analyze_unit_economics(
     return card
 
 
-def _build_ue_suggestions(ratio: float, payback: float, price: float, baseline: dict, ind: str) -> list[str]:
+def _build_ue_suggestions(
+    ratio: float,
+    payback: float,
+    price: float,
+    baseline: dict,
+    ind: str,
+    thresholds: dict[str, float] | None = None,
+) -> list[str]:
+    th = thresholds or _DEFAULT_THRESHOLDS
+    th_lc_h = th.get("ltv_cac_healthy", 3.0)
+    th_lc_w = th.get("ltv_cac_warning", 1.5)
+    th_pb_w = th.get("payback_warning_months", 12.0)
     out: list[str] = []
     if ratio < 1:
         out.append(f"LTV/CAC < 1 → 优先提定价 / 降 CAC，可尝试{ind}行业头部的渠道组合")
         out.append("做一次 Van Westendorp 支付意愿问卷，验证当前定价是否有上调空间")
-    elif ratio < 3:
-        out.append("LTV/CAC 在 1-3 → 提留存是最低成本的优化：做一次流失用户回访")
+    elif ratio < th_lc_h:
+        out.append(
+            f"LTV/CAC 在 [{th_lc_w:.1f}, {th_lc_h:.1f}] → 提留存是最低成本的优化：做一次流失用户回访"
+        )
         out.append("CAC 分渠道拆解，砍掉 CAC > 平均值的渠道")
     else:
         out.append("LTV/CAC 已健康，可尝试加大获客投入扩规模")
-    if math.isfinite(payback) and payback > 12:
-        out.append(f"Payback {payback:.1f} 月偏长，评估是否改年付 / 预付提前回收")
+    if math.isfinite(payback) and payback > th_pb_w:
+        out.append(
+            f"Payback {payback:.1f} 月超过{ind}行业黄线 {th_pb_w:.0f} 月，评估是否改年付 / 预付提前回收"
+        )
     price_lo, price_hi = baseline["monthly_price_range"]
     if price_hi > 0 and price > price_hi * 1.3:
         out.append(f"当前月价 ¥{price:.0f} 高于{ind}行业上限 ¥{price_hi}，需用价值基（value-based）定价证据支撑")
@@ -358,7 +520,13 @@ def _build_ue_suggestions(ratio: float, payback: float, price: float, baseline: 
 #  模块 2：36 个月现金流推演
 # ══════════════════════════════════════════════════════════════════
 
-def project_cash_flow(assumptions: dict, months: int = 36) -> dict[str, Any]:
+def project_cash_flow(
+    assumptions: dict,
+    months: int = 36,
+    *,
+    industry: str = "教育",
+    allow_online: bool = False,
+) -> dict[str, Any]:
     """
     关键假设：
       - initial_capital:        起始资金
@@ -368,8 +536,14 @@ def project_cash_flow(assumptions: dict, months: int = 36) -> dict[str, Any]:
       - new_users_per_month:    月新增付费用户
       - monthly_retention:      月留存率
       - growth_rate_monthly:    月增长率（new_users 的自然增长）
+    industry 决定 runway / breakeven 红黄线（不同行业容忍度不同）。
     """
     card = _empty_card("cash_flow", "现金流推演与 Runway")
+    baseline = _get_baseline(industry, allow_online=allow_online)
+    thresholds = _get_thresholds(baseline)
+    ind = _match_industry(industry)
+    card["baseline_meta"] = _extract_meta(baseline)
+    card["thresholds_used"] = _thresholds_meta(baseline)
 
     cap0 = _safe_float(assumptions.get("initial_capital"))
     fixed = _safe_float(assumptions.get("fixed_costs_monthly"))
@@ -448,41 +622,96 @@ def project_cash_flow(assumptions: dict, months: int = 36) -> dict[str, Any]:
         "total_revenue_36m": round(sum(p["revenue"] for p in projection), 2),
     }
 
-    # verdict
-    if runway_exhausted_month is not None and runway_exhausted_month <= 12:
+    # verdict —— 阈值现在来自行业 thresholds
+    th_runway_red = thresholds["runway_red_months"]
+    th_runway_warn = thresholds["runway_warning_months"]
+    th_be_green = thresholds["breakeven_green_months"]
+    th_be_warn = thresholds["breakeven_warning_months"]
+
+    card["outputs"]["runway_red_months"] = th_runway_red
+    card["outputs"]["runway_warning_months"] = th_runway_warn
+    card["outputs"]["breakeven_green_months"] = th_be_green
+    card["outputs"]["breakeven_warning_months"] = th_be_warn
+
+    if runway_exhausted_month is not None and runway_exhausted_month <= th_runway_red:
         level = "red"
-        reason = f"模拟第 {runway_exhausted_month} 个月现金耗尽，12 个月内资金断流"
+        reason = (
+            f"模拟第 {runway_exhausted_month} 个月现金耗尽，超过{ind}行业红线 "
+            f"{th_runway_red:.0f} 个月，资金断流"
+        )
         card["evidence_for_diagnosis"]["H24"] = 0.2
-    elif breakeven_month is not None and breakeven_month <= 18:
+    elif breakeven_month is not None and breakeven_month <= th_be_green:
         level = "green"
-        reason = f"第 {breakeven_month} 个月起月度转正，Runway ≈ {runway_months:.1f} 月" if runway_months else f"第 {breakeven_month} 个月转正"
+        reason = (
+            f"第 {breakeven_month} 个月起月度转正（{ind}行业绿线 ≤ {th_be_green:.0f} 月），"
+            f"Runway ≈ {runway_months:.1f} 月"
+            if runway_months
+            else f"第 {breakeven_month} 个月转正（≤ {th_be_green:.0f} 月绿线）"
+        )
         card["evidence_for_diagnosis"]["H24"] = 0.8
-    elif breakeven_month is not None:
+    elif breakeven_month is not None and breakeven_month <= th_be_warn:
         level = "yellow"
-        reason = f"第 {breakeven_month} 个月转正，偏长，需考虑融资或加快增长"
+        reason = (
+            f"第 {breakeven_month} 个月转正，超过{ind}行业绿线 {th_be_green:.0f} 月但未到红线"
+            f" {th_be_warn:.0f} 月，需考虑融资或加快增长"
+        )
         card["evidence_for_diagnosis"]["H24"] = 0.55
+    elif breakeven_month is not None:
+        level = "red"
+        reason = (
+            f"第 {breakeven_month} 个月转正，超过{ind}行业红线 {th_be_warn:.0f} 月，"
+            "盈利节奏过慢"
+        )
+        card["evidence_for_diagnosis"]["H24"] = 0.3
     else:
         level = "yellow"
-        reason = f"36 个月内未实现单月净现金转正，末月现金 ¥{cash:.0f}"
+        reason = (
+            f"36 个月内未实现单月净现金转正，末月现金 ¥{cash:.0f}（{ind}行业绿线"
+            f" ≤ {th_be_green:.0f} 月）"
+        )
         card["evidence_for_diagnosis"]["H24"] = 0.3
-    card["verdict"] = {"level": level, "score": {"green": 0.85, "yellow": 0.55, "red": 0.2}.get(level, 0.3), "reason": reason}
+    card["verdict"] = {
+        "level": level,
+        "score": {"green": 0.85, "yellow": 0.55, "red": 0.2}.get(level, 0.3),
+        "reason": reason,
+    }
 
     card["framework_explain"] = (
         "**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；\n"
         "MRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n"
-        "**Runway** = 当前现金 / 平均月烧钱率。投资人默认 < 6 个月为高危、6-12 个月警戒、≥ 18 个月健康。"
+        f"**本次评分阈值（{ind}行业）**：\n"
+        f"- Runway：现金耗尽 ≤ {th_runway_red:.0f} 月 → 红；≤ {th_runway_warn:.0f} 月 → 黄\n"
+        f"- 盈亏平衡：转正 ≤ {th_be_green:.0f} 月 → 绿；≤ {th_be_warn:.0f} 月 → 黄；否则红\n\n"
+        "通用 VC 默认值：Runway < 12 月红、< 18 月黄；Breakeven ≤ 18 月绿、≤ 24 月黄。"
+        "本系统按行业差异化调整：电商红线收紧到 6 月，SaaS Breakeven 放宽到 24 月。"
     )
-    card["suggestions"] = _build_cf_suggestions(breakeven_month, runway_exhausted_month, avg_burn, cap0)
+    card["suggestions"] = _build_cf_suggestions(
+        breakeven_month, runway_exhausted_month, avg_burn, cap0, thresholds
+    )
 
     return card
 
 
-def _build_cf_suggestions(breakeven: int | None, exhausted: int | None, burn: float, cap: float) -> list[str]:
-    out = []
-    if exhausted is not None and exhausted <= 12:
-        out.append(f"优先在 {max(exhausted - 3, 3)} 个月内启动融资或削减 30% 月固定成本")
-    if breakeven is None or (breakeven and breakeven > 24):
-        out.append("盈亏平衡太晚，评估是否提价 / 增加付费转化率 / 降低变动成本")
+def _build_cf_suggestions(
+    breakeven: int | None,
+    exhausted: int | None,
+    burn: float,
+    cap: float,
+    thresholds: dict[str, float] | None = None,
+) -> list[str]:
+    th = thresholds or _DEFAULT_THRESHOLDS
+    th_runway_red = th.get("runway_red_months", 12.0)
+    th_be_warn = th.get("breakeven_warning_months", 24.0)
+    out: list[str] = []
+    if exhausted is not None and exhausted <= th_runway_red:
+        out.append(
+            f"现金{exhausted}月内耗尽（红线 {th_runway_red:.0f} 月），"
+            f"优先在 {max(exhausted - 3, 3)} 个月内启动融资或削减 30% 月固定成本"
+        )
+    if breakeven is None or (breakeven and breakeven > th_be_warn):
+        out.append(
+            f"盈亏平衡超过行业红线 {th_be_warn:.0f} 月，评估是否提价 / 增加付费转化率 / 降低变动成本"
+        )
     if burn > 0 and cap > 0 and burn > cap / 6:
         out.append(f"月烧钱率 ¥{burn:.0f} 过高，若不改善 Runway < 6 月")
     out.append("做敏感性分析：价格 +10% / 留存 +5pp / CAC -20% 三种场景下的 Runway 对比")
@@ -508,6 +737,7 @@ def evaluate_rationality(
     baseline = _get_baseline(industry, allow_online=allow_online)
     card = _empty_card("rationality", "财务假设合理性")
     card["baseline_meta"] = _extract_meta(baseline)
+    card["thresholds_used"] = _thresholds_meta(baseline)
     card["inputs"] = {"industry": ind, **{k: v for k, v in collected.items() if k in (
         "monthly_price", "cac", "monthly_retention", "gross_margin"
     )}}

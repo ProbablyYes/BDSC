@@ -18,9 +18,23 @@
       0.85
     ],
     "avg_user_lifetime_months": 9,
-    "note": "教育类看重留存与续费，CAC 对价格敏感度高"
+    "note": "教育类看重留存与续费，CAC 对价格敏感度高",
+    "thresholds": {
+      "ltv_cac_healthy": 3.0,
+      "ltv_cac_warning": 1.5,
+      "payback_healthy_months": 9.0,
+      "payback_warning_months": 15.0,
+      "runway_red_months": 9.0,
+      "runway_warning_months": 15.0,
+      "breakeven_green_months": 18.0,
+      "breakeven_warning_months": 24.0,
+      "_source": "seed_v2"
+    }
   },
   "source": "seed",
   "updated_at": "2026-04-21T01:13:05+00:00",
-  "evidence": []
+  "evidence": [],
+  "notes": [
+    "thresholds back-filled from seed v2 at 2026-04-22T01:41:59+00:00"
+  ]
 }

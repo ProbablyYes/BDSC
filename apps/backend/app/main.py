@@ -42,6 +42,7 @@ from app.schemas import (
     BusinessPlanCoachingModePayload,
     BusinessPlanAgendaApplyPayload,
     BusinessPlanAgendaPatchPayload,
+    BusinessPlanAgendaReviewPayload,
     BudgetAIChatPayload,
     BudgetAISuggestPayload,
     BudgetCreatePayload,
@@ -3412,7 +3413,7 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             conv_obj = conv_store.get(payload.project_id, conv_id) or {}
             turn_index_latest = max(len(list(conv_obj.get("messages") or [])) - 1, 0)
             source_message_id = f"{conv_id}#{turn_index_latest}"
-            business_plan_service.extract_agenda_from_message(
+            business_plan_service.note_agenda_signal(
                 str(latest_plan.get("plan_id") or ""),
                 assistant_text=assistant_message,
                 source_message_id=source_message_id,
@@ -9113,6 +9114,21 @@ def business_plan_patch_agenda(
         agenda_id,
         status=payload.status,
         section_id_hint=payload.section_id_hint,
+    )
+
+
+@app.post("/api/business-plan/{plan_id}/agenda/review")
+def business_plan_agenda_review(
+    plan_id: str,
+    payload: BusinessPlanAgendaReviewPayload | None = None,
+) -> dict:
+    """评委视角全书巡检：逐章调 LLM jury agent 出 0~2 条议题入库。
+    同步返回，受 _REVIEW_MIN_INTERVAL_SEC 节流（默认 60s）。"""
+    payload = payload or BusinessPlanAgendaReviewPayload()
+    return business_plan_service.run_jury_review(
+        plan_id,
+        section_ids=list(payload.section_ids or []),
+        force=bool(payload.force),
     )
 
 

@@ -2209,7 +2209,128 @@ Orchestrator 并不是只拿一段文本来润色，而是显式接收：
 
 - 都服务教师端；
 - 都强调结构化输出；
-- 都服务“老师下一步怎么教、怎么决策”。
+- 都服务"老师下一步怎么教、怎么决策"。
+
+### 8.6.13 学生端：竞赛教练议题板 v2（3 个新 Prompt）
+
+竞赛教练议题板从"关键词切段 + 末尾拼接"升级成了"LLM 结构化议题 + 全书巡检 + 段落级 patch"，由三段独立 Prompt 串成。三段 Prompt 都强调"结构化输出 + 不准凭空捏造"。
+
+#### A. 聊天沉淀议题抽取 `_llm_extract_agenda_from_chunk`
+
+**功能定位**：每聊 4 轮 assistant 回复（或 10 分钟）触发一次。把这 4 轮里"真正涉及如何改进计划书章节"的部分提炼成 0~4 条结构化议题。
+
+System Prompt：
+
+```python
+"你是一位资深创业竞赛教练 + 评委顾问（互联网+ / 挑战杯 / 大创赛道）。\n"
+"学生此前若干轮里，竞赛教练给出了一些建议性回复。请你仅基于这些回复，"
+"提炼出 0~{max_items} 条 **可直接转换为对计划书章节修改的议题**。\n\n"
+"硬性要求：\n"
+"1. 输出严格 JSON：{\"items\":[ ... ]}，没有任何解释文字。\n"
+"2. 每条议题字段：{section_id, jury_tag, weakness, suggestion, "
+"expected_diff_summary, anchor_text, priority, title}\n"
+"   - section_id 必须从 [{valid_sids}] 中选一个，否则不要产出该条。\n"
+"   - jury_tag ∈ [证据, 量化, 防守点, 差异化, 赛道匹配]。\n"
+"   - weakness：评委视角下，这一章 **当前** 的具体短板（≤ 90 字）。\n"
+"   - suggestion：要在该章哪一句 / 哪一段做什么修改（≤ 120 字，必须是动词起头的指令）。\n"
+"   - expected_diff_summary：一句话总结改完后变成什么样（≤ 50 字）。\n"
+"   - anchor_text：从该章已有内容里挑一段 / 一句话作为 patch 的锚点（≤ 60 字）。"
+"如果暂无对应原文可锚定，留空字符串，会作为段尾追加处理。\n"
+"   - priority：high / med / low，按对评委视角的影响排。\n"
+"   - title：6~16 字短摘要。\n"
+"3. **不要复述教练原话，要提炼成 \"问题 + 怎么改\" 的指令式表达。**\n"
+"4. 没有有效议题就返回 {\"items\":[]}。"
+```
+
+User Prompt：注入计划书章节摘要 + 最近 N 轮 assistant 回复原文。
+
+#### B. 评委视角全书巡检 `_llm_review_section`
+
+**功能定位**：学生点"评委视角全书巡检"按钮后，逐章调用，要求评委 agent 给该章 0~2 条结构化议题，且 anchor_text 必须从原文里**逐字摘抄**，便于后续 patch 定位。
+
+System Prompt：
+
+```python
+"你是一位资深创业竞赛评委（互联网+ / 挑战杯 / 大创赛道）。"
+"我会给你这份计划书的整体摘要 + 单个章节的当前文本。请你以评委视角，"
+f"针对该章节，给出 0~{max_items} 条 **具体到段落 / 数据 / 论证** 的修改议题。\n\n"
+"硬性要求：\n"
+"1. 输出严格 JSON：{\"items\":[ ... ]}，没有任何解释文字。\n"
+"2. 每条议题字段：{section_id, jury_tag, weakness, suggestion, "
+"expected_diff_summary, anchor_text, priority, title}\n"
+f"   - section_id：必须填 \"{sid}\"。\n"
+"   - jury_tag ∈ [证据, 量化, 防守点, 差异化, 赛道匹配]。\n"
+"   - weakness：评委视角下这一章的具体短板（≤ 90 字）。\n"
+"   - suggestion：动词起头的可执行修改建议（≤ 120 字）。\n"
+"   - anchor_text：必须从下方提供的章节原文里 **逐字摘抄** 一段（≤ 60 字）"
+"作为 patch 锚点；如果章节原文里实在挑不出可改的句子，留空字符串。\n"
+"   - expected_diff_summary：一句话总结改完后变成什么样（≤ 50 字）。\n"
+"   - priority：high / med / low，按对评委视角的影响排。\n"
+"   - title：6~16 字短摘要。\n"
+"3. 没有需要改进的就返回 {\"items\":[]}，不要凑数。\n"
+"4. 不要重复说\"建议补充数据来源\"这种空话——必须指明哪段、加什么数据。"
+```
+
+#### C. 段落级 patch `_llm_patch_paragraph`
+
+**功能定位**：学生在议题板勾选议题 → 点"应用选中"。后端用 `anchor_text` + difflib 模糊匹配定位段落（阈值 0.55），然后调这个 prompt 让 LLM 重写该段，输出**纯文本段落**（不是 JSON）。
+
+System Prompt：
+
+```python
+"你是一位资深创业竞赛教练，擅长用评委视角把计划书段落改得更扎实。\n"
+"我会给你：\n"
+"1) 计划书某章节里的【一段原文】\n"
+"2) 评委视角下的【弱点】\n"
+"3) 教练给出的【修改建议】\n"
+"4) 议题主题（jury_tag）\n\n"
+"你的任务：仅返回该段落 **改写后的纯文本**，不要任何解释、不要 Markdown 代码块、不要"
+"包裹标签、不要返回 JSON。\n"
+"硬性要求：\n"
+"- 必须保留原段落的真实事实（例如学生提到的产品名、人物名、行业名等），"
+"可以补充数据 / 重组论证 / 替换懒惰估算，但不要凭空捏造客户、专利、奖项等强声明。\n"
+"- 字数控制在原段 0.8~1.6 倍之间，不要写成报告级长篇。\n"
+"- 如果建议里要求加入数据，但原文没有可用的真实数据，"
+"请改写为「需补充：xxx」式占位句而不是编造数字。\n"
+```
+
+#### 三段 Prompt 串成的整体流程
+
+```mermaid
+sequenceDiagram
+    participant U as 学生
+    participant FE as 前端议题板
+    participant BE as business_plan_service
+    participant LLM as LLM
+    U->>FE: 与竞赛教练对话
+    FE->>BE: note_agenda_signal()（每轮）
+    BE->>BE: 累入 _agenda_chat_buffer（4 条节流）
+    BE->>LLM: A. _llm_extract_agenda_from_chunk()
+    LLM-->>BE: items[] (JSON)
+    BE-->>FE: 议题入库（source_kind=chat）
+    U->>FE: 点"评委视角全书巡检"
+    FE->>BE: POST /agenda/review
+    loop 逐章
+        BE->>LLM: B. _llm_review_section(section)
+        LLM-->>BE: 0~2 条议题
+    end
+    BE-->>FE: 议题入库（source_kind=review）
+    U->>FE: 勾选议题 → 应用
+    FE->>BE: POST /agenda/apply
+    loop 同章节多议题串行
+        BE->>BE: difflib 定位 anchor 段落
+        BE->>LLM: C. _llm_patch_paragraph(段落, 议题)
+        LLM-->>BE: 改写后的段落文本
+        BE->>BE: 替换原段（patch_preview 回填议题）
+    end
+    BE-->>FE: pending_revision (真 diff)
+```
+
+#### 关键设计决策
+
+- **三段都强制 JSON / 纯文本格式**，避免上一轮 v1 的混合自由文本难以下游处理。
+- **section_id / anchor_text 都必须 grounded 到 plan 真实数据**，LLM 拍脑袋编出来的 section_id 会被 `_normalize_agenda_item` 直接丢弃。
+- **三处 LLM 调用都带回退**：抽取失败 → 关键词兜底；巡检失败 → `_review_status` 标 error；patch 失败 → fallback 到旧版"末尾拼接评委块"。这样即便 LLM 不可用，议题板仍能给学生交付最低限度的产出。
 
 ---
 

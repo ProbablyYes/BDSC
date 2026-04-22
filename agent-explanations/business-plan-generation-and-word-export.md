@@ -557,25 +557,89 @@ flowchart LR
 
 这一步的意义非常大，因为它把竞赛教练从“会提建议”变成了“能给文档派工”。
 
+### 10.5b 议题板 v2 升级（结构化议题 + 全书巡检 + 段落级 patch）
+
+为了真正"看得到优化"，议题板从"关键词切段 + 末尾拼接"升级成了三段式 LLM 流水线：
+
+```mermaid
+flowchart TB
+    subgraph trig [触发]
+        Chat["每聊一轮 assistant 回复\n→ note_agenda_signal()"]
+        ReviewBtn["前端按钮\n→ POST /agenda/review"]
+    end
+
+    subgraph extract [议题生产 · LLM 结构化]
+        Buf["缓冲池（默认 4 轮 / 10 分钟）"]
+        ExtractChat["_llm_extract_agenda_from_chunk()\n输入: 最近 N 轮对话原文 + 章节摘要\n输出: 严格 JSON 议题数组"]
+        Review["run_jury_review(plan_id)\n逐章调 LLM jury agent\n每章 0~2 条议题"]
+    end
+
+    Chat --> Buf --> ExtractChat
+    ReviewBtn --> Review
+
+    ExtractChat --> Pool[("competition_agenda<br/>{section_id, anchor_text,<br/>weakness, suggestion,<br/>priority, source_kind}")]
+    Review --> Pool
+
+    Pool --> UI["前端议题板\nchat / review 来源徽标\nweakness + suggestion 双区块"]
+    UI -->|"勾选 + 应用"| Apply["apply_agenda 段落级 patch"]
+    Apply --> Patch["对每条议题:\n1) anchor_text 模糊定位段落 (difflib)\n2) _llm_patch_paragraph 改写该段\n3) 替换原段落（多议题串行）"]
+    Patch --> Rev["pending_revisions\n（走现有 diff 审稿 UI）"]
+```
+
+#### 升级后的议题数据结构 (`competition_agenda` 每条)
+
+| 字段 | 含义 |
+| ---- | ---- |
+| `agenda_id` `plan_id` `conversation_id` `created_at` `applied_at` `status` | 保留 |
+| `source_kind` | `"chat"`（聊天沉淀）或 `"review"`（全书巡检） |
+| `source_message_ids` | 列表（一次抽取可能聚合 N 轮回复） |
+| `jury_tag` | 证据 / 量化 / 防守点 / 差异化 / 赛道匹配 |
+| `section_id` | 已被规范到 plan 真实章节 id（不再是 hint） |
+| `anchor_text` | 议题指向的原章节段落片段，用于 patch 定位（可空） |
+| `weakness` | 评委视角下的具体问题描述（替代旧 `gist`） |
+| `suggestion` | 该段应该怎么改的具体动作（动词起头） |
+| `expected_diff_summary` | 一句话总结改完后变成什么样 |
+| `priority` | `high` / `med` / `low`（前端"全选高优先"用） |
+| `patch_preview` | apply 后回填的真实 patch 内容（old_paragraph / new_paragraph / mode） |
+
+旧字段 `gist / title / section_id_hint / source_message_id` 保留作为 UI 兼容字段，不会破坏老前端。
+
+#### 后端三个新 LLM agent
+
+| 入口 | 触发 | 任务 |
+| ---- | ---- | ---- |
+| `_llm_extract_agenda_from_chunk()` | 缓冲池满 4 条 assistant 回复，或 10 分钟未抽取 | 从最近 N 轮对话提炼 0~4 条结构化议题 |
+| `_llm_review_section()` | 前端点 `评委视角全书巡检` 按钮 | 单章调用，给 0~2 条议题，强制摘抄原文当 anchor |
+| `_llm_patch_paragraph()` | 学生勾选议题 → 应用 | 给定 (原段落 + weakness + suggestion + jury_tag) → 输出改写后段落 |
+
+3 处 LLM 全部带回退：
+
+- 抽取失败 → 走关键词兜底 → 仍失败 → 静默不入库（不影响对话）
+- 巡检失败 → `_review_status[plan_id] = "error"`，前端展示重试
+- patch 失败 → fallback 到旧版"末尾拼接竞赛教练块"，保证学生勾了应用一定能拿到东西
+
 ### 10.6 竞赛教练第三层作用：把口头建议真正回灌成文档修订
 
 议题被提取出来之后，并不会只停留在看板上。
 
-`apply_agenda()` 会把选中的竞赛议题按章节分组，再把它们合并回对应章节，形成新的 `pending_revisions`。
+`apply_agenda()`（v2）的工作方式：
 
-它追加进去的不是一个抽象标签，而是类似这样的结构化补充块：
-
-- 竞赛教练标签
-- 议题标题
-- 核心 gist
-- 需要补的证据提示
+1. 按目标章节把勾选的议题分组
+2. 取出该章节当前文本作为 `current_text`
+3. 对每条议题串行执行：
+   - 用 `anchor_text` 在 `current_text` 里跑 `difflib.SequenceMatcher` 模糊匹配（阈值 0.55）
+   - 找到段落 → 调 `_llm_patch_paragraph()` 让 LLM **重写该段**，再 `current_text[:start] + new_para + current_text[end:]`
+   - 找不到 anchor → LLM 直接合成一段补强内容追加（不允许凭空捏造客户/专利/奖项）
+   - LLM 完全失败 → fallback 到旧版"末尾拼接评委教练块"
+4. 串行结束后，把整章新文本写成一个 `pending_revision`（走现有逐条接受 / 拒绝的审稿 UI）
+5. 每条议题的 `patch_preview` 字段回填本次实际修改（old_paragraph / new_paragraph / mode），前端展开议题就能看到 diff
 
 因此，竞赛教练完成的是下面这个关键转化：
 
-> 从“评委可能会追问什么”  
-> 变成“计划书的哪一章应该加什么内容”
+> 从"评委可能会追问什么"  
+> 变成"计划书的这段原文应该被改写成什么"
 
-这就是为什么说它是在“继续优化生成的文档”，而不是停留在聊天建议层。
+这是 v2 跟 v1 最根本的差别：v1 是"原文 + 追加一坨教练评论"，v2 是真的对原段落做替换式优化，学生在 pending_revision 里看到的就是真优化稿，而不是"原文 + 标注"。
 
 ### 10.7 竞赛教练第四层作用：让计划书越来越像“可答辩文本”，而不是普通说明文
 

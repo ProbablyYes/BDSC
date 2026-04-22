@@ -546,23 +546,45 @@ export default function StudentPage() {
   const [bpTeacherComments, setBpTeacherComments] = useState<any[]>([]);
   const [bpCommentsOpen, setBpCommentsOpen] = useState(false);
   const [bpSiblings, setBpSiblings] = useState<Array<{plan_id:string; title?:string; plan_type?:string; fork_of?:string|null; mode?:string; version_tier?:string; submission_status?:string; updated_at?:string}>>([]);
-  // 竞赛教练议题板
+  // 竞赛教练议题板（v2：聊天沉淀 + 全书巡检 + 段落级 patch）
   const [bpAgendaItems, setBpAgendaItems] = useState<Array<{
     agenda_id: string;
     plan_id?: string;
     conversation_id?: string;
     source_message_id?: string;
+    source_message_ids?: string[];
+    source_kind?: string;
     jury_tag?: string;
+    section_id?: string;
     section_id_hint?: string;
+    anchor_text?: string;
     title?: string;
     gist?: string;
+    weakness?: string;
+    suggestion?: string;
+    expected_diff_summary?: string;
+    priority?: string;
     evidence_hint?: string;
     status?: string;
     created_at?: string;
+    patch_preview?: any;
   }>>([]);
   const [bpAgendaBusy, setBpAgendaBusy] = useState(false);
   const [bpAgendaSelected, setBpAgendaSelected] = useState<Set<string>>(new Set());
   const [bpAgendaExpanded, setBpAgendaExpanded] = useState<Set<string>>(new Set());
+  // 巡检状态：从后端 list_agenda 同步
+  const [bpReviewStatus, setBpReviewStatus] = useState<{
+    state?: string;
+    current_index?: number;
+    total?: number;
+    current_section_id?: string;
+    current_section_title?: string;
+    new_count?: number;
+    error?: string;
+    ts?: string;
+  } | null>(null);
+  const [bpReviewBusy, setBpReviewBusy] = useState(false);
+  const [bpReviewToast, setBpReviewToast] = useState<string>("");
   const [bpForkBusy, setBpForkBusy] = useState(false);
   const [bpGrading, setBpGrading] = useState<any | null>(null);
   const [bpGradingOpen, setBpGradingOpen] = useState(false);
@@ -1033,10 +1055,58 @@ export default function StudentPage() {
       const data = await resp.json();
       if (Array.isArray(data?.items)) setBpAgendaItems(data.items);
       else setBpAgendaItems([]);
+      if (data?.review_status) setBpReviewStatus(data.review_status);
     } catch {
       setBpAgendaItems([]);
     }
   }, []);
+
+  async function runJuryReview(planId: string, force: boolean = false) {
+    if (!planId) return;
+    if (bpReviewBusy) return;
+    setBpReviewBusy(true);
+    setBpReviewToast("");
+    try {
+      const resp = await fetch(
+        `${API_BASE}/api/business-plan/${encodeURIComponent(planId)}/agenda/review`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ section_ids: [], force }),
+        }
+      );
+      const data = await resp.json();
+      if (data?.status === "throttled") {
+        setBpReviewToast(`刚跑过巡检，请 ${data.retry_after_sec || 30}s 后再试`);
+      } else if (data?.status === "ok") {
+        const cnt = (data.new_items || []).length;
+        setBpReviewToast(
+          cnt > 0 ? `全书巡检完成，新增 ${cnt} 条评委议题` : "全书巡检完成，没有发现新短板"
+        );
+      } else if (data?.status === "error") {
+        setBpReviewToast(`巡检失败：${data.error || "未知错误"}`);
+      } else if (data?.status === "skipped") {
+        setBpReviewToast("仅竞赛教练模式可触发全书巡检");
+      } else {
+        setBpReviewToast("巡检结束");
+      }
+      if (data?.review_status) setBpReviewStatus(data.review_status);
+      await loadAgenda(planId);
+    } catch (e: any) {
+      setBpReviewToast(`巡检失败：${e?.message || "网络异常"}`);
+    } finally {
+      setBpReviewBusy(false);
+    }
+  }
+
+  // 巡检在 running 时轮询 list_agenda 拉进度（同步路由通常一次返回，但保留兜底）
+  useEffect(() => {
+    if (!businessPlan?.plan_id) return;
+    if (bpReviewStatus?.state !== "running") return;
+    const planId = businessPlan.plan_id;
+    const t = setInterval(() => loadAgenda(planId), 2500);
+    return () => clearInterval(t);
+  }, [businessPlan?.plan_id, bpReviewStatus?.state, loadAgenda]);
 
   async function patchAgendaItem(
     planId: string,
@@ -4194,8 +4264,39 @@ export default function StudentPage() {
                           </span>
                         </div>
                         <div className="bp-agenda-hint">
-                          与竞赛教练每聊一轮，系统会把可落章节的评委视角点子堆到这里。勾选后一次性"应用到候选章节"。
+                          与竞赛教练每聊一轮自动沉淀「评委视角议题」，也可点右上「全书巡检」让评委 agent 通读你当前的全文。勾选后将以段落级 LLM patch 落到候选章节。
                         </div>
+                        <div className="bp-agenda-toolbar">
+                          <button
+                            type="button"
+                            className="bp-agenda-review-btn"
+                            disabled={bpReviewBusy || !businessPlan?.plan_id}
+                            onClick={() => businessPlan?.plan_id && runJuryReview(businessPlan.plan_id, false)}
+                            title="让评委 agent 顺着每章读，给每章 0~2 条结构化议题"
+                          >
+                            {bpReviewBusy
+                              ? `巡检中…${bpReviewStatus?.current_index || 0}/${bpReviewStatus?.total || 0}`
+                              : "评委视角全书巡检"}
+                          </button>
+                          {bpReviewStatus?.state === "running" && (
+                            <span className="bp-review-progress">
+                              {bpReviewStatus.current_section_title || "准备中"}（{bpReviewStatus.current_index}/{bpReviewStatus.total}）
+                            </span>
+                          )}
+                          {bpReviewStatus?.state === "done" && (bpReviewStatus.new_count ?? 0) >= 0 && (
+                            <span className="bp-review-progress bp-review-done">
+                              上次巡检 · 新增 {bpReviewStatus.new_count || 0} 条
+                            </span>
+                          )}
+                          {bpReviewStatus?.state === "error" && (
+                            <span className="bp-review-progress bp-review-error">
+                              巡检失败：{bpReviewStatus.error || "未知"}
+                            </span>
+                          )}
+                        </div>
+                        {bpReviewToast && (
+                          <div className="bp-review-toast">{bpReviewToast}</div>
+                        )}
                       </div>
                       {bpAgendaItems.length === 0 ? (
                         <div className="bp-agenda-empty-v2">
@@ -4241,6 +4342,22 @@ export default function StudentPage() {
                                       <span className={`bp-agenda-tag tag-${(it.jury_tag || "默认").replace(/[^a-zA-Z0-9]/g, "_")}`}>
                                         {it.jury_tag || "议题"}
                                       </span>
+                                      <span
+                                        className={`bp-agenda-source bp-agenda-source-${(it.source_kind || "chat").toLowerCase()}`}
+                                        title={(it.source_kind || "chat") === "review" ? "评委视角全书巡检产出" : "聊天对话沉淀"}
+                                      >
+                                        {(it.source_kind || "chat") === "review" ? "全书巡检" : "聊天沉淀"}
+                                      </span>
+                                      <span
+                                        className={`bp-agenda-prio bp-agenda-prio-${(it.priority || "med").toLowerCase()}`}
+                                        title={`优先级：${(it.priority || "med")}`}
+                                      >
+                                        {(it.priority || "med") === "high"
+                                          ? "高优先"
+                                          : (it.priority || "med") === "low"
+                                          ? "低优先"
+                                          : "中优先"}
+                                      </span>
                                       <button
                                         type="button"
                                         className="bp-agenda-title-btn"
@@ -4253,9 +4370,12 @@ export default function StudentPage() {
                                       >
                                         {it.title || "未命名议题"}
                                       </button>
-                                      {it.section_id_hint && (
-                                        <span className="bp-agenda-section-hint" title={`建议落点：${it.section_id_hint}`}>
-                                          → {it.section_id_hint}
+                                      {(it.section_id || it.section_id_hint) && (
+                                        <span
+                                          className="bp-agenda-section-hint"
+                                          title={`落点章节：${it.section_id || it.section_id_hint}`}
+                                        >
+                                          → {it.section_id || it.section_id_hint}
                                         </span>
                                       )}
                                       <div className="bp-agenda-actions">
@@ -4282,13 +4402,55 @@ export default function StudentPage() {
                                     </div>
                                     {expanded && (
                                       <div className="bp-agenda-detail">
-                                        <div className="bp-agenda-gist">{it.gist}</div>
+                                        {(it.weakness || it.gist) && (
+                                          <div className="bp-agenda-block">
+                                            <div className="bp-agenda-block-lbl">评委视角的问题</div>
+                                            <div className="bp-agenda-block-text">{it.weakness || it.gist}</div>
+                                          </div>
+                                        )}
+                                        {it.suggestion && (
+                                          <div className="bp-agenda-block">
+                                            <div className="bp-agenda-block-lbl">建议怎么改</div>
+                                            <div className="bp-agenda-block-text">{it.suggestion}</div>
+                                          </div>
+                                        )}
+                                        {it.expected_diff_summary && (
+                                          <div className="bp-agenda-expected">
+                                            预期效果 · {it.expected_diff_summary}
+                                          </div>
+                                        )}
+                                        {it.anchor_text && (
+                                          <div className="bp-agenda-anchor">
+                                            <span className="bp-agenda-evidence-lbl">原文锚点</span>
+                                            <span className="bp-agenda-anchor-text">{it.anchor_text}</span>
+                                          </div>
+                                        )}
                                         {it.evidence_hint && (
                                           <div className="bp-agenda-evidence">
                                             <span className="bp-agenda-evidence-lbl">参考证据</span>
                                             <span>{it.evidence_hint}</span>
                                           </div>
                                         )}
+                                        {it.patch_preview && (() => {
+                                          const pp: any = it.patch_preview;
+                                          return (
+                                            <div className="bp-agenda-patch-preview">
+                                              <div className="bp-agenda-block-lbl">本议题的 patch 结果（{pp.mode || "?"}）</div>
+                                              {pp.old_paragraph && (
+                                                <div className="bp-agenda-patch-old">
+                                                  <span className="bp-agenda-patch-tag">原段</span>
+                                                  <span>{String(pp.old_paragraph).slice(0, 240)}</span>
+                                                </div>
+                                              )}
+                                              {pp.new_paragraph && (
+                                                <div className="bp-agenda-patch-new">
+                                                  <span className="bp-agenda-patch-tag">改后</span>
+                                                  <span>{String(pp.new_paragraph).slice(0, 320)}</span>
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
                                         <div className="bp-agenda-meta-row">
                                           {it.source_message_id && (
                                             <button
@@ -4330,8 +4492,54 @@ export default function StudentPage() {
                             >
                               清空选中
                             </button>
+                            <button
+                              type="button"
+                              className="bp-agenda-clear"
+                              onClick={() => {
+                                const next = new Set(bpAgendaSelected);
+                                bpAgendaItems
+                                  .filter((it) => (it.status || "pending") === "pending" && (it.priority || "med") === "high")
+                                  .forEach((it) => next.add(it.agenda_id));
+                                setBpAgendaSelected(next);
+                              }}
+                              title="把所有 pending + 高优先议题加入选中"
+                            >
+                              全选高优先
+                            </button>
+                            {(() => {
+                              // 出现频次最高的那个 section_id 作为「本章」
+                              const counts: Record<string, number> = {};
+                              bpAgendaItems.forEach((it) => {
+                                if ((it.status || "pending") !== "pending") return;
+                                const sid = String(it.section_id || it.section_id_hint || "");
+                                if (!sid) return;
+                                counts[sid] = (counts[sid] || 0) + 1;
+                              });
+                              let topSid = "";
+                              let topCnt = 0;
+                              Object.entries(counts).forEach(([sid, c]) => {
+                                if (c > topCnt) { topCnt = c; topSid = sid; }
+                              });
+                              if (!topSid) return null;
+                              return (
+                                <button
+                                  type="button"
+                                  className="bp-agenda-clear"
+                                  onClick={() => {
+                                    const next = new Set(bpAgendaSelected);
+                                    bpAgendaItems
+                                      .filter((it) => (it.status || "pending") === "pending" && (String(it.section_id || it.section_id_hint || "") === topSid))
+                                      .forEach((it) => next.add(it.agenda_id));
+                                    setBpAgendaSelected(next);
+                                  }}
+                                  title={`把所有指向 ${topSid} 章节的 pending 议题加入选中`}
+                                >
+                                  全选本章 · {topSid}
+                                </button>
+                              );
+                            })()}
                             <span className="bp-agenda-foot-hint">
-                              应用后自动生成待审修订，学生可逐条接受 / 拒绝。
+                              应用后将以段落级 LLM patch 生成待审修订；可在右侧逐条接受 / 拒绝。
                             </span>
                           </div>
                         </>

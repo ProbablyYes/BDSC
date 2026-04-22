@@ -418,8 +418,8 @@ flowchart TD
 并给出三种典型判断：
 
 - `LTV/CAC < 1`：越卖越亏，商业模式不成立
-- `1 ~ 3`：能撑但不健康
-- `>= 3`：单位经济健康
+- `1 ~ 行业黄线`：能撑但不健康
+- `>= 行业绿线`：单位经济健康
 
 这点非常关键，因为它把“商业模式”从一段漂亮叙事，拉回到了一个投资人也会看的底线问题：
 
@@ -434,6 +434,67 @@ flowchart TD
 - 你的收费能否覆盖成本
 - 你的留存能否支撑 LTV
 - 你的 CAC 是否过高
+
+### 10.1 行业化阈值（不是同一套数字打天下）
+
+通用 VC 教科书结论是 “LTV/CAC ≥ 3、Payback ≤ 6 月”，但电商和 SaaS 的健康线根本不是一回事。本系统从 v2 起，把这些红/黄灯阈值从 `analyze_unit_economics` / `project_cash_flow` 里抽到 `INDUSTRY_BASELINES[ind].thresholds`，每次评分都按行业读：
+
+| 行业 | LTV/CAC 绿线 | LTV/CAC 黄线 | Payback 绿线 | Payback 黄线 | Runway 红线 | Breakeven 绿线 | Breakeven 红线 |
+|------|--------------|--------------|--------------|--------------|-------------|----------------|----------------|
+| 教育 | 3.0 | 1.5 | 9 月 | 15 月 | 9 月 | 18 月 | 24 月 |
+| SaaS | 3.0 | 1.5 | 12 月 | 18 月 | 12 月 | 24 月 | 36 月 |
+| 电商 | 2.0 | 1.0 | 3 月 | 6 月 | 6 月 | 12 月 | 18 月 |
+| 硬件 | 2.5 | 1.2 | 9 月 | 18 月 | 12 月 | 18 月 | 30 月 |
+| 公益 | — | — | — | — | 6 月 | 24 月 | 36 月 |
+
+> 公益项目不评 LTV/CAC，改评 CPB（单位受益人成本）偏离行业中位的比例：≤ 1.0x 绿，≤ 1.5x 黄，> 1.5x 红。
+
+每个卡片输出里现在都带 `thresholds_used`：
+
+```json
+{
+  "module": "unit_economics",
+  "verdict": { "level": "yellow", "reason": "LTV/CAC = 1.8 在 SaaS 行业 [1.5, 3.0] 区间，能撑但不健康" },
+  "thresholds_used": {
+    "values": { "ltv_cac_healthy": 3.0, "payback_healthy_months": 12.0, ... },
+    "source": "seed_v2"
+  }
+}
+```
+
+`source` 三种取值：
+
+- `seed_v2`：用的是仓库自带的行业共识阈值；
+- `industry`：来自 `data/finance_baselines/<行业>.json` 里被教师/管理员手动调过的阈值；
+- `default`：找不到对应行业（如自定义新行业）时回退到 `_DEFAULT_THRESHOLDS`。
+
+> 所以学生看到 `LTV/CAC=2.5` 在 SaaS 是黄、在电商是绿，其实是不同行业绿线在背后起作用的；老师可以直接打开行业 JSON 改 thresholds，无需改代码。
+
+### 10.2 基线数字本身：本地缓存 → 后台异步刷新 → 网页 + LLM 抽取
+
+阈值是“行业共识”——不会让 LLM 抽，因为网页里几乎读不到“LTV/CAC 健康线 = 3”这种结论。但 **市场可观测数字**（CAC 区间、月价区间、留存、毛利）是可以联网更新的。本系统的设计：
+
+- **聊天侧（finance_guard）** ：永远 `allow_online=False`，只读本地缓存，对话零延迟；如果发现该行业当前还是 `seed` 或缓存超过 30 天，就**向后台单工作线程池扔一个 `refresh_from_web` 任务**，本次请求秒返回，下一次同行业对话即可拿到新值。
+- **深度报告（finance_report）**：`allow_online=True`，缓存超过 90 天会同步去网页 + DDGS + LLM 抽数，然后落盘 `data/finance_baselines/<行业>.json`。
+- **教师锁定**：调 `finance_baseline_service.mark_never_refresh("电商", locked=True)` 后，自动 / 后台刷新都会跳过该行业，避免老师手工校准的数字被网页噪声覆盖；卡片 `_meta.bg_refresh_state` 会显示 `skipped:locked`。
+
+每次卡片返回的 `baseline_meta` 现在多了三个字段，方便前端/老师看到本次评分用的基线到底从哪来：
+
+```json
+{
+  "baseline_meta": {
+    "industry": "SaaS",
+    "source": "web",                  // seed / web / hardcoded / teacher_edit
+    "updated_at": "2026-04-22T...",
+    "evidence_count": 3,
+    "never_refresh": false,
+    "bg_refresh_state": "skipped:fresh",  // scheduled:still_seed / scheduled:stale_>_30d / skipped:locked / skipped:in_progress / scheduled:no_cache
+    "bg_refresh_window_days": 30
+  }
+}
+```
+
+> 一句话：**“数字”能联网更新且不阻塞对话，**“评判数字的标尺”** 由教师 / 仓库共识控制——这是“合理且可解释”的最小代价。
 
 ---
 

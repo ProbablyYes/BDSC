@@ -23,9 +23,21 @@
       500
     ],
     "note": "公益项目不适用 LTV/CAC 口径，应看单位受益人成本与可持续性",
-    "is_nonprofit": true
+    "is_nonprofit": true,
+    "thresholds": {
+      "cpb_healthy_ratio": 1.0,
+      "cpb_warning_ratio": 1.5,
+      "runway_red_months": 6.0,
+      "runway_warning_months": 12.0,
+      "breakeven_green_months": 24.0,
+      "breakeven_warning_months": 36.0,
+      "_source": "seed_v2"
+    }
   },
   "source": "seed",
   "updated_at": "2026-04-21T01:13:05+00:00",
-  "evidence": []
+  "evidence": [],
+  "notes": [
+    "thresholds back-filled from seed v2 at 2026-04-22T01:41:59+00:00"
+  ]
 }

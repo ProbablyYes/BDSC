@@ -6,6 +6,30 @@
 - 教师端：查看项目快照、写回反馈、形成班级级洞察。
 - 系统端：预留 `Neo4j Community` 接口，后续承接知识图谱与超图规则引擎。
 
+## 最终说明书文档入口
+
+如果你要查看本项目已经整理完成的最终讲解文档，请直接进入：
+
+- [智能体讲解文档总目录](./agent-explanations/README.md)
+
+当前已经完成的主题包括：
+
+1. [商业项目与公益项目的编排区分及 Prompt 设计](./agent-explanations/project-type-orchestration-and-prompts.md)
+2. [全量 Prompt 体系与智能体编排说明](./agent-explanations/all-prompts-and-orchestration.md)
+3. [知识图谱及评估说明](./agent-explanations/knowledge-graph-and-evaluation.md)
+4. [超图及评估说明](./agent-explanations/hypergraph-and-evaluation.md)
+5. [知识图谱与超图的引用正确性、检索通道与下游输入说明](./agent-explanations/kg-hypergraph-reference-and-retrieval.md)
+6. [完整商业策划书生成与 Word 下载说明](./agent-explanations/business-plan-generation-and-word-export.md)
+7. [商业模式生成、差异化盈利方案与财务智能体会话干预说明](./agent-explanations/business-model-finance-intervention-and-market-sizing.md)
+8. [测试用例与结果分析（5 会话 × 20 轮真实对话证据）](./agent-explanations/test-cases-and-results.md)
+
+建议阅读顺序：
+
+- 如果想先看系统整体：先读第 `1`、`2` 篇。
+- 如果想看知识结构与评估：再读第 `3`、`4`、`5` 篇。
+- 如果想看业务落地：读第 `6`、`7` 篇。
+- 如果想看真实运行证据：读第 `8` 篇（`654321` 账号下已落盘的 5 个会话 × 20 轮对话，覆盖商业/科技/公益三类项目 + 竞赛答辩 + 合规伦理专题）。
+
 ## 当前目录结构
 
 ```txt

@@ -2168,5 +2168,19 @@
     "path": "/api/auth/login",
     "status_code": 200,
     "duration_ms": 0
+  },
+  {
+    "time": "2026-04-21T19:18:28.012327Z",
+    "user": "学生:小猪",
+    "user_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
+    "role": "student",
+    "display_name": "小猪",
+    "action": "LOGIN",
+    "detail": "用户密码登录成功",
+    "status": "OK",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status_code": 200,
+    "duration_ms": 0
   }
 ]

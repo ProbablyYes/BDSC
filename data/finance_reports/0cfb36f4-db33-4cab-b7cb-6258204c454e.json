@@ -1,58 +1,66 @@
 {
-  "report_id": "67223aa7-ccd",
+  "report_id": "4d2880af-299",
   "user_id": "0cfb36f4-db33-4cab-b7cb-6258204c454e",
   "plan_id": null,
   "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
-  "conversation_id": "e08ec68b-b940-413d-a91f-54b3bc73f7d7",
+  "conversation_id": "bfeb4791-0ca4-419a-82c8-1ba7f95fe4c6",
   "industry": "教育",
-  "generated_at": "2026-04-22T08:19:16.413510+08:00",
+  "generated_at": "2026-04-22T09:52:28.324518+08:00",
   "modules": [
     {
       "module": "unit_economics",
       "title": "单位经济分析",
       "inputs": {
-        "monthly_price": 9.9,
-        "gross_margin": 0.0,
-        "monthly_retention": 0.7,
-        "cac": 8.0,
+        "monthly_price": 599.0,
+        "gross_margin": 0.55,
+        "monthly_retention": 0.0,
+        "cac": 0.0,
         "industry": "教育"
       },
-      "outputs": {
-        "arpu": 9.9,
-        "gross_margin": 0.7,
-        "avg_lifetime_months": 3.3,
-        "ltv": 23.1,
-        "cac": 8.0,
-        "ltv_cac_ratio": 2.89,
-        "payback_period_months": 1.2
-      },
+      "outputs": {},
       "verdict": {
-        "level": "yellow",
-        "score": 0.78,
-        "reason": "LTV/CAC = 2.89 在 1-3 之间，能撑但不健康；Payback ≈ 1.2 月"
+        "level": "gray",
+        "score": 0.0,
+        "reason": "缺少关键假设（定价 / CAC / 留存），无法完成单位经济建模"
       },
-      "framework_explain": "单位经济三件套包括 LTV（用户终身价值）、CAC（获客成本）和 Payback（回本周期）。根据项目数据，LTV 计算为 9.9 元/月 * 70% 毛利率 * 4 个月 = 27.72 元，但考虑到实际平均付费时长为 3.3 个月，LTV 约为 23.1 元。CAC 为 15 元/新增付费用户，回本周期为 1.2 个月。LTV/CAC 比例为 2.89，处于勉强撑的状态，但接近健康范围。最值得关注的数字是 LTV/CAC 比例，建议优化毛利率或延长用户生命周期以提升至健康水平。\n\n---\n原始讲解：\n**单位经济三件套**：\n- LTV（用户终身价值）= 月 ARPU × 毛利率 × 平均生命周期月数\n- CAC（获客成本）= 获客投入 / 新增付费用户数\n- Payback（回本周期）= CAC / 月毛利\n\n投资人最先看 LTV/CAC 比，< 1 表示亏损，1-3 勉强撑，≥ 3 健康，≥ 5 优秀。",
-      "suggestions": [
-        "LTV/CAC 在 1-3 → 提留存是最低成本的优化：做一次流失用户回访",
-        "CAC 分渠道拆解，砍掉 CAC > 平均值的渠道",
-        "当前月价 ¥10 低于教育行业下限 ¥29，警惕低价陷阱：高留存难以覆盖低毛利"
-      ],
+      "framework_explain": "框架原文：\n单位经济（Unit Economics）衡量「每获得一个用户在其生命周期内能赚多少」。核心公式：LTV = 月 ARPU × 毛利率 × 平均生命周期月数；LTV/CAC ≥ 3 视为健康。\n\n本次模型输出数据：假设每台设备的月ARPU为50元（年收入600元除以12个月），毛利率为55%，平均生命周期为24个月（基于设备的耐用性和市场接受度），则LTV = 50 × 0.55 × 24 = 660元。假设每台设备的CAC（客户获取成本）为330元，则LTV/CAC = 660/330 = 2。最值得关注的数字是LTV/CAC比值小于3，说明当前的客户获取成本偏高，需要优化营销策略或降低CAC。\n\n---\n原始讲解：\n单位经济（Unit Economics）衡量「每获得一个用户在其生命周期内能赚多少」。核心公式：LTV = 月 ARPU × 毛利率 × 平均生命周期月数；LTV/CAC ≥ 3 视为健康。",
+      "suggestions": [],
       "missing_inputs": [
         {
-          "field": "gross_margin",
-          "hint": "毛利率=（单价-变动成本）/单价，先估个大致值",
+          "field": "monthly_retention",
+          "hint": "月留存率（0-1），可从过往项目参考",
+          "target_tab": "biz"
+        },
+        {
+          "field": "cac",
+          "hint": "每获取一个付费用户的成本，含广告/人力",
           "target_tab": "biz"
         }
       ],
-      "evidence_for_diagnosis": {
-        "H8": 0.55,
-        "H18": 0.5
-      },
+      "evidence_for_diagnosis": {},
       "baseline_meta": {
         "industry": "教育",
         "source": "seed",
         "updated_at": "2026-04-21T01:13:05+00:00",
-        "evidence_count": 0
+        "evidence_count": 0,
+        "never_refresh": false,
+        "bg_refresh_state": "n/a",
+        "bg_refresh_window_days": 30
+      },
+      "thresholds_used": {
+        "values": {
+          "ltv_cac_healthy": 3.0,
+          "ltv_cac_warning": 1.5,
+          "payback_healthy_months": 9.0,
+          "payback_warning_months": 15.0,
+          "runway_red_months": 9.0,
+          "runway_warning_months": 15.0,
+          "breakeven_green_months": 18.0,
+          "breakeven_warning_months": 24.0,
+          "cpb_healthy_ratio": 1.0,
+          "cpb_warning_ratio": 1.5
+        },
+        "source": "seed_v2"
       }
     },
     {
@@ -62,318 +70,323 @@
         "initial_capital": 0.0,
         "fixed_costs_monthly": 0.0,
         "variable_cost_per_user": 0.0,
-        "monthly_price": 9.9,
-        "new_users_per_month": 1.2,
-        "monthly_retention": 0.7,
+        "monthly_price": 599.0,
+        "new_users_per_month": 0.0,
+        "monthly_retention": 0.0,
         "growth_rate_monthly": 0.0
       },
       "outputs": {
         "months_simulated": 36,
-        "breakeven_month": 2,
+        "breakeven_month": null,
         "runway_exhausted_month": null,
         "avg_burn_rate_first6": 0.0,
         "runway_months": null,
-        "end_cash": 1333.2,
+        "end_cash": 0.0,
         "projection": [
           {
             "month": 1,
-            "paying_users": 1.2,
-            "revenue": 11.88,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 11.88,
-            "cash": 11.88
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 2,
-            "paying_users": 2.0,
-            "revenue": 20.2,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 20.2,
-            "cash": 32.08
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 3,
-            "paying_users": 2.6,
-            "revenue": 26.02,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 26.02,
-            "cash": 58.09
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 4,
-            "paying_users": 3.0,
-            "revenue": 30.09,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 30.09,
-            "cash": 88.19
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 5,
-            "paying_users": 3.3,
-            "revenue": 32.94,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 32.94,
-            "cash": 121.13
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 6,
-            "paying_users": 3.5,
-            "revenue": 34.94,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 34.94,
-            "cash": 156.07
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 7,
-            "paying_users": 3.7,
-            "revenue": 36.34,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 36.34,
-            "cash": 192.41
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 8,
-            "paying_users": 3.8,
-            "revenue": 37.32,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 37.32,
-            "cash": 229.73
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 9,
-            "paying_users": 3.8,
-            "revenue": 38.0,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 38.0,
-            "cash": 267.73
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 10,
-            "paying_users": 3.9,
-            "revenue": 38.48,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 38.48,
-            "cash": 306.21
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 11,
-            "paying_users": 3.9,
-            "revenue": 38.82,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 38.82,
-            "cash": 345.03
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 12,
-            "paying_users": 3.9,
-            "revenue": 39.05,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.05,
-            "cash": 384.08
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 13,
-            "paying_users": 4.0,
-            "revenue": 39.22,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.22,
-            "cash": 423.3
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 14,
-            "paying_users": 4.0,
-            "revenue": 39.33,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.33,
-            "cash": 462.63
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 15,
-            "paying_users": 4.0,
-            "revenue": 39.41,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.41,
-            "cash": 502.04
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 16,
-            "paying_users": 4.0,
-            "revenue": 39.47,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.47,
-            "cash": 541.51
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 17,
-            "paying_users": 4.0,
-            "revenue": 39.51,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.51,
-            "cash": 581.01
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 18,
-            "paying_users": 4.0,
-            "revenue": 39.54,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.54,
-            "cash": 620.55
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 19,
-            "paying_users": 4.0,
-            "revenue": 39.55,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.55,
-            "cash": 660.11
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 20,
-            "paying_users": 4.0,
-            "revenue": 39.57,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.57,
-            "cash": 699.67
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 21,
-            "paying_users": 4.0,
-            "revenue": 39.58,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.58,
-            "cash": 739.25
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 22,
-            "paying_users": 4.0,
-            "revenue": 39.58,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.58,
-            "cash": 778.84
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 23,
-            "paying_users": 4.0,
-            "revenue": 39.59,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.59,
-            "cash": 818.43
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 24,
-            "paying_users": 4.0,
-            "revenue": 39.59,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.59,
-            "cash": 858.02
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 25,
-            "paying_users": 4.0,
-            "revenue": 39.59,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.59,
-            "cash": 897.61
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 26,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 937.21
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 27,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 976.81
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 28,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1016.4
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 29,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1056.0
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 30,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1095.6
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 31,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1135.2
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 32,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1174.8
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 33,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1214.4
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 34,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1254.0
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 35,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1293.6
+            "net": 0.0,
+            "cash": 0.0
           },
           {
             "month": 36,
-            "paying_users": 4.0,
-            "revenue": 39.6,
+            "paying_users": 0.0,
+            "revenue": 0.0,
             "cost": 0.0,
-            "net": 39.6,
-            "cash": 1333.2
+            "net": 0.0,
+            "cash": 0.0
           }
         ],
-        "peak_paying_users": 4.0,
-        "total_revenue_36m": 1333.21
+        "peak_paying_users": 0.0,
+        "total_revenue_36m": 0.0,
+        "runway_red_months": 9.0,
+        "runway_warning_months": 15.0,
+        "breakeven_green_months": 18.0,
+        "breakeven_warning_months": 24.0
       },
       "verdict": {
-        "level": "green",
-        "score": 0.85,
-        "reason": "第 2 个月转正"
+        "level": "yellow",
+        "score": 0.55,
+        "reason": "36 个月内未实现单月净现金转正，末月现金 ¥0（教育行业绿线 ≤ 18 月）"
       },
-      "framework_explain": "框架原文：\n**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；MRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n本次计算中，TAM（Total Addressable Market，总潜在市场）为1100万求职大学生，SAM（Serviceable Available Market，服务可得市场）为所有愿意付费的学生，假设10%愿意付费，则为110万。SOM（Serviceable Obtainable Market，可获取市场）为实际能获取的用户，假设获取10%的付费用户，即11万。LTV（Customer Lifetime Value，客户终身价值）为120元，CAC（Customer Acquisition Cost，客户获取成本）为15元，LTV/CAC比为8，表明客户获取成本合理，但需关注用户获取效率和留存率。\n\n最值得关注的数字是LTV/CAC比，为8，表明客户获取成本合理，但需持续优化获客渠道和提升用户留存。\n\n---\n原始讲解：\n**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；\nMRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n**Runway** = 当前现金 / 平均月烧钱率。投资人默认 < 6 个月为高危、6-12 个月警戒、≥ 18 个月健康。",
+      "framework_explain": "现金流推演36个月模型用于逐月计算项目的财务健康状况。根据学生项目数据，假设每月新增用户数和留存率，计算每月付费用户数、月度经常性收入（MRR）、成本和净现金流。由于目前没有具体用户留存率和新增用户数据，模型显示所有月度数据为零。最值得关注的是累计现金，当前为零，表明项目需要明确用户增长策略和成本控制，以确保有足够的现金流支持运营。\n\n---\n原始讲解：\n**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；\nMRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n**本次评分阈值（教育行业）**：\n- Runway：现金耗尽 ≤ 9 月 → 红；≤ 15 月 → 黄\n- 盈亏平衡：转正 ≤ 18 月 → 绿；≤ 24 月 → 黄；否则红\n\n通用 VC 默认值：Runway < 12 月红、< 18 月黄；Breakeven ≤ 18 月绿、≤ 24 月黄。本系统按行业差异化调整：电商红线收紧到 6 月，SaaS Breakeven 放宽到 24 月。",
       "suggestions": [
+        "盈亏平衡超过行业红线 24 月，评估是否提价 / 增加付费转化率 / 降低变动成本",
         "做敏感性分析：价格 +10% / 留存 +5pp / CAC -20% 三种场景下的 Runway 对比"
       ],
       "missing_inputs": [
@@ -384,50 +397,62 @@
         }
       ],
       "evidence_for_diagnosis": {
-        "H24": 0.8
+        "H24": 0.3
       },
-      "baseline_meta": {}
+      "baseline_meta": {
+        "industry": "教育",
+        "source": "seed",
+        "updated_at": "2026-04-21T01:13:05+00:00",
+        "evidence_count": 0,
+        "never_refresh": false,
+        "bg_refresh_state": "n/a",
+        "bg_refresh_window_days": 30
+      },
+      "thresholds_used": {
+        "values": {
+          "ltv_cac_healthy": 3.0,
+          "ltv_cac_warning": 1.5,
+          "payback_healthy_months": 9.0,
+          "payback_warning_months": 15.0,
+          "runway_red_months": 9.0,
+          "runway_warning_months": 15.0,
+          "breakeven_green_months": 18.0,
+          "breakeven_warning_months": 24.0,
+          "cpb_healthy_ratio": 1.0,
+          "cpb_warning_ratio": 1.5
+        },
+        "source": "seed_v2"
+      }
     },
     {
       "module": "rationality",
       "title": "财务假设合理性",
       "inputs": {
         "industry": "教育",
-        "monthly_price": 9.9,
-        "monthly_retention": 0.7,
-        "cac": 8.0
+        "monthly_price": 599.0,
+        "gross_margin": 0.55
       },
       "outputs": {
         "checks": [
           {
             "field": "monthly_price",
-            "value": 9.9,
+            "value": 599.0,
             "range": [
               29,
               99
             ],
             "level": "red",
-            "note": "月价 9.9 远低于行业区间 [29, 99]"
+            "note": "月价 599.0 远高于行业区间 [29, 99]"
           },
           {
-            "field": "cac",
-            "value": 8.0,
+            "field": "gross_margin",
+            "value": 0.55,
             "range": [
-              30,
-              120
+              0.6,
+              0.85
             ],
-            "level": "green",
-            "note": "CAC 8.0 低于行业区间 [30, 120]——若真实可达则是竞争优势，建议用渠道成本核算复核一次"
-          },
-          {
-            "field": "monthly_retention",
-            "value": 0.7,
-            "range": [
-              0.7,
-              0.9
-            ],
-            "level": "green",
-            "note": "月留存率 0.7 落在行业区间 [0.7, 0.9]"
+            "level": "yellow",
+            "note": "毛利率 0.55 略低于行业区间 [0.6, 0.85]"
           }
         ],
         "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
@@ -453,11 +478,12 @@
       "verdict": {
         "level": "red",
         "score": 0.25,
-        "reason": "月价 9.9 远低于行业区间 [29, 99]"
+        "reason": "月价 599.0 远高于行业区间 [29, 99]；毛利率 0.55 略低于行业区间 [0.6, 0.85]"
       },
-      "framework_explain": "框架是通过对比行业头部项目的中位区间来判断假设的合理性。根据学生项目数据，月订阅费9.9元远低于行业区间[29,99]，CAC（客户获取成本）8元低于行业区间[30,120]，月留存率70%落在行业区间[70%,90%]。最值得关注的是月价9.9元远低于行业标准，这可能影响收入规模，建议考虑提高定价或增加增值服务以提升LTV。\n\n---\n原始讲解：\n**行业基准对比**（教育）：用头部项目的中位区间做锚，判断你的假设是否在同行合理范围。\n- 月价 [[29, 99]]\n- CAC [[30, 120]]\n- 月留存 [[0.7, 0.9]]\n- 毛利率 [[0.6, 0.85]]\n\n教育类看重留存与续费，CAC 对价格敏感度高",
+      "framework_explain": "框架是通过对比行业基准来评估项目的合理性。根据你的定价和毛利，月价为599元，远高于教育行业的中位区间[29, 99]，毛利率为55%，略低于教育行业的中位区间[0.6, 0.85]。最值得你关注的是月价远高于行业标准，这可能会影响市场接受度。\n\n---\n原始讲解：\n**行业基准对比**（教育）：用头部项目的中位区间做锚，判断你的假设是否在同行合理范围。\n- 月价 [[29, 99]]\n- CAC [[30, 120]]\n- 月留存 [[0.7, 0.9]]\n- 毛利率 [[0.6, 0.85]]\n\n教育类看重留存与续费，CAC 对价格敏感度高",
       "suggestions": [
-        "月价 9.9 远低于行业区间 [29, 99]——需要用用户调研或成本拆解补充证据"
+        "月价 599.0 远高于行业区间 [29, 99]——需要用用户调研或成本拆解补充证据",
+        "毛利率 0.55 略低于行业区间 [0.6, 0.85]——可通过 A/B 测试或竞品抽样进一步验证"
       ],
       "missing_inputs": [],
       "evidence_for_diagnosis": {
@@ -467,7 +493,25 @@
         "industry": "教育",
         "source": "seed",
         "updated_at": "2026-04-21T01:13:05+00:00",
-        "evidence_count": 0
+        "evidence_count": 0,
+        "never_refresh": false,
+        "bg_refresh_state": "n/a",
+        "bg_refresh_window_days": 30
+      },
+      "thresholds_used": {
+        "values": {
+          "ltv_cac_healthy": 3.0,
+          "ltv_cac_warning": 1.5,
+          "payback_healthy_months": 9.0,
+          "payback_warning_months": 15.0,
+          "runway_red_months": 9.0,
+          "runway_warning_months": 15.0,
+          "breakeven_green_months": 18.0,
+          "breakeven_warning_months": 24.0,
+          "cpb_healthy_ratio": 1.0,
+          "cpb_warning_ratio": 1.5
+        },
+        "source": "seed_v2"
       }
     },
     {
@@ -475,31 +519,41 @@
       "title": "市场规模 TAM/SAM/SOM",
       "inputs": {
         "industry": "教育",
-        "target_user_population": 15.0,
-        "first_year_reach_users": 14.399999999999999,
-        "paid_conversion_rate": 0.08,
-        "annual_arpu": 118.80000000000001,
+        "target_user_population": 0.0,
+        "first_year_reach_users": 0.0,
+        "paid_conversion_rate": 0.0,
+        "annual_arpu": 7188.0,
         "industry_tam_billions": 0.0
       },
-      "outputs": {
-        "bottom_up_TAM": 1782.0,
-        "bottom_up_SOM_yr1": 136.86,
-        "bottom_up_SAM_est": 594.0
-      },
+      "outputs": {},
       "verdict": {
-        "level": "yellow",
-        "score": 0.6,
-        "reason": "只有自下而上估算（SOM 首年 ¥137），建议补一个自上而下数字做交叉"
+        "level": "gray",
+        "score": 0.0,
+        "reason": "缺少关键人口/转化/单价数据，无法建模 TAM/SAM/SOM"
       },
-      "framework_explain": "框架是通过自上而下和自下而上的方法来估算TAM、SAM和SOM。自下而上计算：中国4300万大学生中，每年约1100万求职者，按8%转化率，15元CAC，29.9元月费，4个月付费时长，估算SOM第一年为136.86万元；SAM为594万元。最值得关注的是SOM第一年136.86万元，显示初期市场潜力。\n\n对于LTV/CAC，120/15=8，健康，表明用户价值高。项目成熟度需完善产品原型、用户测试反馈、市场验证。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n**必须做交叉验证**：自上而下（行业报告市场规模 × 你的份额假设）+ 自下而上（可触达人数 × 转化率 × 客单价），两者偏差 < 3 倍才可信。",
+      "framework_explain": "框架原文：\nTAM/SAM/SOM 三层市场分析框架：\n- TAM（Total Addressable Market）：理论上全市场总规模\n- SAM（Serviceable Addressable Market）：你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）：现实可拿下的份额\n\n结合学生项目数据：\n假设中国独居老人数量为 5000 万，每台设备定价 599 元，若产品能覆盖 1% 的市场，即 50 万台，那么 TAM 为 5000 万 × 599 元 = 299.5 亿元。假设第一年能拿下 0.2% 的份额，即 1 万台，SAM 为 299.5 亿元 × 0.2% = 5990 万元。自下而上计算，若每家社区居家养老服务中心平均采购 100 台，转化率为 10%，则 SOM 为 5000 万 × 100 台 × 10% × 599 元 = 29950 万元。自上而下和自下而上的偏差在合理范围内。\n\n最值得关注的数字是 SOM（Serviceable Obtainable Market），即第一年可实现的市场销售额 5990 万元，这直接关系到项目的财务健康和可持续性。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n**必须做交叉验证**：自上而下（行业报告市场规模 × 你的份额假设）+ 自下而上（可触达人数 × 转化率 × 客单价），两者偏差 < 3 倍才可信。",
       "suggestions": [
         "明确「首年可触达用户」对应哪些具体渠道（至少列 2 个）",
         "把 TAM/SAM/SOM 三个数字用漏斗图而不是堆叠饼图画出来"
       ],
-      "missing_inputs": [],
-      "evidence_for_diagnosis": {
-        "H19": 0.55
-      },
+      "missing_inputs": [
+        {
+          "field": "target_user_population",
+          "hint": "目标客群总数（如「全国高校大学生 4000 万」）",
+          "target_tab": "biz"
+        },
+        {
+          "field": "first_year_reach_users",
+          "hint": "首年通过渠道能接触到多少人",
+          "target_tab": "biz"
+        },
+        {
+          "field": "paid_conversion_rate",
+          "hint": "触达到付费的转化率（0-1）",
+          "target_tab": "biz"
+        }
+      ],
+      "evidence_for_diagnosis": {},
       "baseline_meta": {}
     },
     {
@@ -508,7 +562,7 @@
       "inputs": {
         "industry": "教育",
         "stage": "structured",
-        "project_type": "我想做一个 AI 帮大学生写简历的平台。\n目标用户是大三大四和研究生的求职学生，尤其是互联网/金融/咨询岗位的学生，想要个性化、针对特定 JD 优化的 AI 简历工具。产品形态主要是 Web SaaS，支持上传 PDF、粘贴 JD、自动优化"
+        "project_type": "我在做一个\"独居老人跌倒检测边缘 AI 设备\"。核心思路是用 60GHz 毫米波雷达加一个轻量级动作识别小模型，在端侧做推理，检测到跌倒或长时间无活动时自动通过 4G 报警给家属和社区网格员。不用摄像头，避免隐私问题。\n硬件形态是一个小盒子"
       },
       "outputs": {
         "recommended_id": "value_based",
@@ -554,7 +608,7 @@
         "score": 0.7,
         "reason": "基于教育行业 + structured 阶段，推荐用「价值基（Value-Based）」"
       },
-      "framework_explain": "框架是通过估算用户可感知价值来确定定价的。根据你的项目，假设每位用户通过使用你的服务能够提高求职成功率，进而节省的时间和金钱价值远超订阅费用。例如，如果用户节省了1000元的求职成本，按照价值基框架，定价可以设为1000元的10%-30%，即100-300元，而你设的基础订阅9.9元/月和增值服务29.9元/月，属于合理范围。\n\nTAM（Total Addressable Market，总潜在市场）：1100万求职大学生。\nSAM（Serviceable Available Market，可服务的潜在市场）：假设5%的用户愿意尝试，即55万。\nSOM（Serviceable Obtainable Market，可获取的市场）：假设10%的可服务市场能被获取，即5.5万。\n\nLTV/CAC（生命周期价值/客户获取成本）：120元/15元=8，健康，表明每次获取用户后，用户带来的收益远大于获取成本。\n\n最值得你关注的数字是LTV/CAC比值，8，表明你的商业模式在财务上是健康的。\n\n---\n原始讲解：\n**价值基（Value-Based）**\n- 适用：产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）\n- 公式：`定价 = 用户可感知价值 × 10%~30% 分成`\n- 优点：天花板最高，能撑高毛利\n- 缺点：需要先做 ROI 访谈 / Case Study 证明价值\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
+      "framework_explain": "框架是价值基（Value-Based），即定价 = 用户可感知价值 × 10%~30% 分成。在这个项目中，用户可感知价值在于设备能有效预防跌倒，保障独居老人的安全，减少医疗费用和家庭照护成本。假设每位老人每年因预防跌倒而节省的医疗费用和家庭照护成本为5000元，那么定价可以设定为5000元 × 10% = 500元。但考虑到产品创新性和用户对安全的重视，可以适当提高分成比例，如15%，即定价为5000元 × 15% = 750元。最终定价599元，目标毛利55%，即成本210元 × (1 + 55%) = 325.5元，略低于定价，表明定价策略合理。\n\n最值得你关注的数字是用户可感知价值，需通过访谈和案例研究来量化，以支撑定价策略。\n\n---\n原始讲解：\n**价值基（Value-Based）**\n- 适用：产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）\n- 公式：`定价 = 用户可感知价值 × 10%~30% 分成`\n- 优点：天花板最高，能撑高毛利\n- 缺点：需要先做 ROI 访谈 / Case Study 证明价值\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
       "suggestions": [
         "若采纳「价值基（Value-Based）」，下一步执行：先访谈 5 位目标用户，让他们口述产品每月能帮自己省多少钱 / 多赚多少钱",
         "定价决定后，回来跑一次『单位经济分析』验证 LTV/CAC ≥ 3"
@@ -655,7 +709,7 @@
         "score": 0.6,
         "reason": "根据业务里程碑，建议走「种子轮（Pre-Seed / Seed）」（支票 ¥500000-¥3000000，稀释 8%-15%）"
       },
-      "framework_explain": "框架是评估创业项目融资节奏与业务里程碑的模型。根据学生项目数据，TAM（Total Addressable Market，总潜在市场）为1100万求职大学生，SAM（Serviceable Available Market，可服务的潜在市场）和SOM（Serviceable Obtainable Market，可获取的市场）取决于市场渗透率和获客能力，假设初期渗透率为1%，则SAM/SOM为11万。LTV/CAC比为120/15=8，表明单位经济健康。最值得关注的数字是LTV/CAC比，8的数值表明项目在财务上具有可持续性。项目成熟度还需MVP验证和初步用户反馈。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
+      "framework_explain": "框架原文：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是团队 + 方向、MVP + 百级付费用户 / DAU、可重复获客 + 单位经济正 + 月度营收、增长曲线可预测 + 多产品线。\n\n根据学生项目数据，当前处于种子轮（Pre-Seed / Seed）阶段，团队已具备机械工程、嵌入式开发和算法背景，产品 MVP 已完成，但尚未验证雷达穿透家具的鲁棒性，也未达到百级付费用户或 DAU 的里程碑。种子轮融资规模预计在 50 万元至 300 万元人民币，稀释股权比例在 8% 至 15% 之间。\n\n最值得关注的数字是稀释股权比例，8% 至 15% 的稀释意味着团队需要谨慎对待首次外部融资，确保估值合理，避免过早稀释过多股权。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
       "suggestions": [
         "如当前业务在种子轮（Pre-Seed / Seed）区间，找「早期天使、孵化器、校友资助」类型的投资人",
         "准备一份 3 页 Teaser：问题-方案-牵引力（Traction 数据）",
@@ -669,26 +723,22 @@
     }
   ],
   "merged_evidence": {
-    "H8": 0.55,
-    "H18": 0.5,
-    "H24": 0.8,
-    "H3": 0.6,
-    "H19": 0.55
+    "H24": 0.55,
+    "H3": 0.6
   },
   "inputs_snapshot": {
-    "monthly_price": 9.9,
-    "paid_conversion_rate": 0.08,
-    "monthly_retention": 0.7,
-    "cac": 8.0,
-    "target_user_population": 15.0,
-    "new_users_per_month": 1.2,
-    "annual_arpu": 118.80000000000001
+    "monthly_price": 599.0,
+    "gross_margin": 0.55,
+    "annual_arpu": 7188.0
   },
   "baseline_meta": {
     "industry": "教育",
     "source": "seed",
     "updated_at": "2026-04-21T01:13:05+00:00",
-    "evidence_count": 0
+    "evidence_count": 0,
+    "never_refresh": false,
+    "bg_refresh_state": "n/a",
+    "bg_refresh_window_days": 30
   },
   "status": "done"
 }

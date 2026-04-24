@@ -10,7 +10,20 @@ const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim()
 /* ── Types ── */
 type CostItem = { name: string; unit_price: number; quantity: number; total: number; note: string; priority?: string; cost_type?: string };
 type CostCategory = { name: string; items: CostItem[] };
-type RevenueStream = { name: string; monthly_users: number; price: number; conversion_rate: number; monthly_revenue: number };
+type RevenueStream = {
+  name: string;
+  pattern_key?: string;
+  inputs?: Record<string, number>;
+  monthly_revenue: number;
+  active_units?: number;
+  // legacy fields (subscription)
+  monthly_users?: number;
+  price?: number;
+  conversion_rate?: number;
+};
+type PatternFieldSpec = { key: string; label: string; type: string; default: number | string; unit: string; help: string; min?: number | null; max?: number | null };
+type PatternMeta = { key: string; label: string; description: string; fields: PatternFieldSpec[]; key_levers: string[]; suit_for: string[]; track_hint: string; formula_explain: string };
+type KeyLever = { field: string; label: string; from_patterns: string[]; weighted_revenue: number };
 type CashFlowRow = { month: number; revenue: number; cost: number; net: number; cumulative: number };
 type CompItem = { name: string; amount: number; note: string };
 type FundingSource = { name: string; amount: number; note: string };
@@ -27,6 +40,7 @@ type Budget = {
     months_to_breakeven: number | null; cash_flow_projection: CashFlowRow[];
     scenario_models: Record<string, ScenarioModel>;
     scenario_results: Record<string, ScenarioResult>;
+    key_levers?: KeyLever[];
   };
   competition_budget: { items: CompItem[]; stages?: any[]; funding_sources?: FundingSource[] };
   funding_plan: { startup_capital_needed: number; sources: any[]; monthly_gap: any[]; fundraising_notes: string };
@@ -37,7 +51,7 @@ type Budget = {
 /* ── Helpers ── */
 const PIE_COLORS = ["#6b8aff", "#51cf66", "#ffa94d", "#ff6b6b", "#9c6aff", "#20c997", "#339af0", "#f06595"];
 function cny(n: number) { return n.toLocaleString("zh-CN", { style: "currency", currency: "CNY", minimumFractionDigits: 0 }); }
-function healthGrade(s: number) { if (s >= 80) return { grade: "A", color: "#51cf66" }; if (s >= 65) return { grade: "B+", color: "#6b8aff" }; if (s >= 50) return { grade: "B", color: "#ffa94d" }; if (s >= 35) return { grade: "C", color: "#ff922b" }; return { grade: "D", color: "#ff6b6b" }; }
+function healthGrade(s: number) { if (s >= 80) return { grade: "完整", color: "#51cf66" }; if (s >= 65) return { grade: "较完整", color: "#6b8aff" }; if (s >= 50) return { grade: "初步", color: "#ffa94d" }; if (s >= 35) return { grade: "待补", color: "#ff922b" }; return { grade: "空白", color: "#ff6b6b" }; }
 
 const TAB_LABELS: Record<string, string> = { cost: "成本中心", biz: "收入模型", comp: "比赛专项", compare: "情景分析", fund: "资金规划" };
 
@@ -107,16 +121,77 @@ export default function BudgetWorkbench({ userId, planId, onBack }: Props) {
   const removeCostItem = (ci: number, ii: number) => { if (!budget) return; const cats = [...budget.project_costs.categories]; cats[ci] = { ...cats[ci], items: cats[ci].items.filter((_, i) => i !== ii) }; autoSave({ ...budget, project_costs: { categories: cats } }); };
   const addCategory = () => { if (!budget) return; autoSave({ ...budget, project_costs: { categories: [...budget.project_costs.categories, { name: "新类别", items: [] }] } }); };
 
-  /* ── Revenue helpers ── */
-  const updateRevenue = (idx: number, field: keyof RevenueStream, value: any) => {
+  /* ── Revenue helpers (pattern-aware) ── */
+  // 每条收入流走 pattern_key + inputs，老结构（monthly_users/price/conversion_rate）兼容
+  const [patterns, setPatterns] = useState<PatternMeta[]>([]);
+  const [recommendedPatterns, setRecommendedPatterns] = useState<string[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API}/api/budget/revenue-patterns?user_id=${encodeURIComponent(userId)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.patterns)) setPatterns(d.patterns);
+        if (Array.isArray(d?.recommended)) setRecommendedPatterns(d.recommended);
+      })
+      .catch(() => {});
+  }, [userId]);
+
+  const getPattern = useCallback((key?: string): PatternMeta | undefined => {
+    return patterns.find((p) => p.key === (key || "subscription"));
+  }, [patterns]);
+
+  const updateRevenueName = (idx: number, value: string) => {
     if (!budget) return;
     const streams = [...budget.business_finance.revenue_streams];
-    streams[idx] = { ...streams[idx], [field]: value };
-    streams[idx].monthly_revenue = Math.round((streams[idx].monthly_users || 0) * (streams[idx].price || 0) * (streams[idx].conversion_rate || 1) * 100) / 100;
+    streams[idx] = { ...streams[idx], name: value };
     autoSave({ ...budget, business_finance: { ...budget.business_finance, revenue_streams: streams } });
   };
-  const addRevenue = () => { if (!budget) return; autoSave({ ...budget, business_finance: { ...budget.business_finance, revenue_streams: [...budget.business_finance.revenue_streams, { name: "", monthly_users: 0, price: 0, conversion_rate: 1, monthly_revenue: 0 }] } }); };
+
+  const updateRevenueInput = (idx: number, fieldKey: string, value: number) => {
+    if (!budget) return;
+    const streams = [...budget.business_finance.revenue_streams];
+    const cur = streams[idx] || { name: "", pattern_key: "subscription", inputs: {}, monthly_revenue: 0 };
+    const inputs = { ...(cur.inputs || {}), [fieldKey]: value };
+    streams[idx] = { ...cur, inputs };
+    autoSave({ ...budget, business_finance: { ...budget.business_finance, revenue_streams: streams } });
+  };
+
+  const switchRevenuePattern = (idx: number, newKey: string) => {
+    if (!budget) return;
+    const meta = getPattern(newKey);
+    const streams = [...budget.business_finance.revenue_streams];
+    const cur = streams[idx];
+    const newInputs: Record<string, number> = {};
+    if (meta) for (const fs of meta.fields) newInputs[fs.key] = Number(fs.default) || 0;
+    streams[idx] = { name: cur?.name || "", pattern_key: newKey, inputs: newInputs, monthly_revenue: 0 };
+    autoSave({ ...budget, business_finance: { ...budget.business_finance, revenue_streams: streams } });
+  };
+
+  const addRevenueWithPattern = (patternKey: string) => {
+    if (!budget) return;
+    const meta = getPattern(patternKey);
+    const inputs: Record<string, number> = {};
+    if (meta) for (const fs of meta.fields) inputs[fs.key] = Number(fs.default) || 0;
+    const newStream: RevenueStream = {
+      name: meta?.label || "新收入流",
+      pattern_key: patternKey,
+      inputs,
+      monthly_revenue: 0,
+    };
+    autoSave({ ...budget, business_finance: { ...budget.business_finance, revenue_streams: [...budget.business_finance.revenue_streams, newStream] } });
+    setPickerOpen(false);
+  };
+
   const removeRevenue = (idx: number) => { if (!budget) return; autoSave({ ...budget, business_finance: { ...budget.business_finance, revenue_streams: budget.business_finance.revenue_streams.filter((_, i) => i !== idx) } }); };
+
+  // 兼容老 stream：渲染时优先读 inputs[key]，否则读平铺字段
+  const readInput = (s: RevenueStream, key: string): number => {
+    const fromInputs = s.inputs && s.inputs[key];
+    if (fromInputs !== undefined && fromInputs !== null) return Number(fromInputs) || 0;
+    const flat = (s as any)[key];
+    return Number(flat) || 0;
+  };
 
   /* ── Scenario helpers ── */
   const updateScenario = (key: string, field: string, value: number) => {
@@ -278,7 +353,7 @@ export default function BudgetWorkbench({ userId, planId, onBack }: Props) {
         <div className="bw-sum-card"><div className="bw-sum-label">基准月收入</div><div className="bw-sum-value">{cny(sm.baseline_monthly_revenue || 0)}</div><div className="bw-sum-sub">年净收入 {cny(sm.baseline_annual_net || 0)}</div></div>
         <div className="bw-sum-card"><div className="bw-sum-label">盈亏平衡</div><div className="bw-sum-value">{sm.breakeven_baseline ? `第 ${sm.breakeven_baseline} 月` : "未达成"}</div><div className="bw-sum-sub">乐观 {sm.breakeven_fastest || "—"} / 悲观 {sm.breakeven_slowest || "—"}</div></div>
         <div className="bw-sum-card"><div className="bw-sum-label">资金缺口</div><div className="bw-sum-value" style={{ color: (sm.funding_gap || 0) > 0 ? "#ff6b6b" : "#51cf66" }}>{cny(sm.funding_gap || 0)}</div></div>
-        <div className="bw-sum-card bw-sum-grade"><div className="bw-sum-label">健康度</div><div className="bw-sum-value bw-grade-num" style={{ color: hg.color }}>{hg.grade}</div><div className="bw-sum-sub">{sm.health_score || 0}/100</div></div>
+        <div className="bw-sum-card bw-sum-grade"><div className="bw-sum-label">模型完成度</div><div className="bw-sum-value bw-grade-num" style={{ color: hg.color }}>{hg.grade}</div><div className="bw-sum-sub">{sm.health_score || 0}/100</div></div>
       </div>
 
       {/* Tab bar */}
@@ -332,20 +407,158 @@ export default function BudgetWorkbench({ userId, planId, onBack }: Props) {
         {tab === "biz" && (
           <div className="bw-fade-in">
             <div className="bw-section">
-              <h3 className="bw-section-title">收入来源</h3>
-              {budget.business_finance.revenue_streams.map((s, i) => (
-                <div key={i} className="bw-rev-card">
-                  <div className="bw-rev-fields">
-                    <div className="bw-field"><label>名称</label><input value={s.name} onChange={e => updateRevenue(i, "name", e.target.value)} placeholder="如：会员订阅" /></div>
-                    <div className="bw-field"><label>月活用户</label><input type="number" value={s.monthly_users || ""} onChange={e => updateRevenue(i, "monthly_users", parseFloat(e.target.value) || 0)} /></div>
-                    <div className="bw-field"><label>单价 (¥)</label><input type="number" value={s.price || ""} onChange={e => updateRevenue(i, "price", parseFloat(e.target.value) || 0)} /></div>
-                    <div className="bw-field"><label>转化率</label><input type="number" step="0.01" value={s.conversion_rate || ""} onChange={e => updateRevenue(i, "conversion_rate", parseFloat(e.target.value) || 0)} /></div>
-                    <div className="bw-rev-result">= {cny(s.monthly_revenue || 0)}/月</div>
-                    <button className="bw-del" onClick={() => removeRevenue(i)}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <h3 className="bw-section-title" style={{ marginBottom: 0 }}>收入来源 · 商务模型</h3>
+                <span style={{ fontSize: 12, color: "#666" }}>
+                  共 {budget.business_finance.revenue_streams.length} 条 · 月营收
+                  <strong style={{ color: "#6b8aff", marginLeft: 6 }}>
+                    {cny(budget.business_finance.revenue_streams.reduce((acc, s) => acc + (s.monthly_revenue || 0), 0))}
+                  </strong>
+                </span>
+              </div>
+
+              {/* 项目命门 */}
+              {Array.isArray(budget.business_finance.key_levers) && budget.business_finance.key_levers.length > 0 && (
+                <div style={{ background: "#fff8e7", border: "1px solid #f7c948", padding: "10px 14px", borderRadius: 8, marginBottom: 14, fontSize: 13, color: "#7a5b00" }}>
+                  <strong style={{ marginRight: 8 }}>命门变量：</strong>
+                  {budget.business_finance.key_levers.slice(0, 3).map((lv, i) => (
+                    <span key={lv.field} style={{ marginRight: 12 }}>
+                      {i > 0 && "· "}
+                      <span style={{ fontWeight: 600 }}>{lv.label}</span>
+                      <span style={{ opacity: 0.7, marginLeft: 4 }}>({lv.from_patterns.join("/")})</span>
+                    </span>
+                  ))}
+                  <div style={{ marginTop: 4, fontSize: 11, opacity: 0.7 }}>这些字段一动，整张报表就变 —— 优先打磨这些数字的依据</div>
+                </div>
+              )}
+
+              {/* 每条收入流 */}
+              {budget.business_finance.revenue_streams.map((s, i) => {
+                const meta = getPattern(s.pattern_key);
+                return (
+                  <div key={i} className="bw-rev-card" style={{ padding: 14 }}>
+                    {/* 顶栏：名称 + 模板切换 + 删除 */}
+                    <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
+                      <input
+                        value={s.name}
+                        onChange={(e) => updateRevenueName(i, e.target.value)}
+                        placeholder={meta?.label || "未命名收入流"}
+                        style={{ flex: "1 1 200px", minWidth: 180, padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontWeight: 600 }}
+                      />
+                      <select
+                        value={s.pattern_key || "subscription"}
+                        onChange={(e) => switchRevenuePattern(i, e.target.value)}
+                        style={{ padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 13, background: "#f9fafb" }}
+                      >
+                        {patterns.map((p) => (
+                          <option key={p.key} value={p.key}>{p.label}</option>
+                        ))}
+                      </select>
+                      <button className="bw-del" onClick={() => removeRevenue(i)} style={{ padding: 6 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+
+                    {/* 模板说明 + 公式 */}
+                    {meta && (
+                      <div style={{ background: "#f3f4f6", borderLeft: "3px solid #6b8aff", padding: "8px 12px", marginBottom: 10, fontSize: 12, color: "#374151", borderRadius: 4 }}>
+                        <div>{meta.description}</div>
+                        <div style={{ marginTop: 4, fontFamily: "monospace", color: "#6b8aff" }}>{meta.formula_explain}</div>
+                      </div>
+                    )}
+
+                    {/* 动态字段 */}
+                    {meta && (
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+                        {meta.fields.map((fs) => {
+                          const value = readInput(s, fs.key);
+                          const isLever = meta.key_levers.includes(fs.key);
+                          const display = fs.type === "percent" ? value * 100 : value;
+                          return (
+                            <div key={fs.key} className="bw-field" style={{ position: "relative" }}>
+                              <label style={{ fontSize: 12, color: isLever ? "#d97706" : "#374151", display: "flex", alignItems: "center", gap: 4 }}>
+                                {isLever && <span title="该字段是该模板的命门" style={{ fontSize: 10 }}>★</span>}
+                                {fs.label}
+                                {fs.unit && <span style={{ opacity: 0.5, fontWeight: 400 }}>({fs.unit})</span>}
+                              </label>
+                              <input
+                                type="number"
+                                step={fs.type === "percent" ? "1" : "any"}
+                                value={display === 0 ? "" : display}
+                                onChange={(e) => {
+                                  const raw = parseFloat(e.target.value) || 0;
+                                  const stored = fs.type === "percent" ? raw / 100 : raw;
+                                  updateRevenueInput(i, fs.key, stored);
+                                }}
+                                placeholder={String(fs.default ?? "")}
+                                title={fs.help}
+                                style={{ borderColor: isLever ? "#f7c948" : undefined }}
+                              />
+                              {fs.help && <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 2 }}>{fs.help}</div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* 计算结果 */}
+                    <div style={{ marginTop: 12, padding: "8px 12px", background: "#eef2ff", borderRadius: 6, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 13, color: "#3730a3" }}>{meta?.label || "subscription"} · 月营收</span>
+                      <strong style={{ fontSize: 18, color: "#3730a3" }}>{cny(s.monthly_revenue || 0)}</strong>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* 添加按钮 + 推荐 */}
+              {!pickerOpen && (
+                <button className="bw-add-row" onClick={() => setPickerOpen(true)}>+ 添加收入来源（选择商业模式模板）</button>
+              )}
+
+              {pickerOpen && (
+                <div style={{ background: "#fff", border: "2px solid #6b8aff", borderRadius: 10, padding: 16, marginTop: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                    <strong style={{ color: "#3730a3" }}>选择一种商业模式模板</strong>
+                    <button onClick={() => setPickerOpen(false)} style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: 20, color: "#6b7280" }}>×</button>
+                  </div>
+                  {recommendedPatterns.length > 0 && (
+                    <div style={{ marginBottom: 12, fontSize: 12, color: "#6b7280" }}>
+                      ✨ 根据你的项目偏向（双光谱）推荐：{recommendedPatterns.map((k) => getPattern(k)?.label || k).join(" · ")}
+                    </div>
+                  )}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
+                    {patterns.map((p) => {
+                      const isRec = recommendedPatterns.includes(p.key);
+                      return (
+                        <button
+                          key={p.key}
+                          onClick={() => addRevenueWithPattern(p.key)}
+                          style={{
+                            textAlign: "left",
+                            padding: 12,
+                            border: isRec ? "2px solid #6b8aff" : "1px solid #d1d5db",
+                            borderRadius: 8,
+                            background: isRec ? "#eef2ff" : "#fff",
+                            cursor: "pointer",
+                            position: "relative",
+                            transition: "all 0.15s",
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#6b8aff"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(107,138,255,0.15)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ""; if (!isRec) e.currentTarget.style.borderColor = "#d1d5db"; }}
+                        >
+                          {isRec && <span style={{ position: "absolute", top: 6, right: 8, fontSize: 10, background: "#6b8aff", color: "#fff", padding: "1px 6px", borderRadius: 10 }}>推荐</span>}
+                          <div style={{ fontWeight: 600, marginBottom: 4, color: "#111827" }}>{p.label}</div>
+                          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6, lineHeight: 1.4 }}>{p.description}</div>
+                          <div style={{ fontSize: 11, color: "#3b82f6", fontFamily: "monospace" }}>{p.formula_explain}</div>
+                          {p.suit_for.length > 0 && (
+                            <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 4 }}>适用：{p.suit_for.slice(0, 3).join("、")}</div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              ))}
-              <button className="bw-add-row" onClick={addRevenue}>+ 添加收入来源</button>
+              )}
             </div>
             <div className="bw-section">
               <h3 className="bw-section-title">三档情景参数</h3>

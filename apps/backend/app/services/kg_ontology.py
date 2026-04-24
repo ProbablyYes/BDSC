@@ -15,7 +15,7 @@ back to explicit concepts and artifacts, instead of opaque LLM
 heuristics.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from typing import Any, Iterable
 
 
@@ -26,6 +26,15 @@ class OntologyNode:
     kind: str
     label: str
     description: str
+    # —— 运行时语义骨架字段（向后兼容，默认值都为空集合）——
+    # 同义词/口语词/英文别名，用于 OntologyResolver.normalize 文本→canonical_id
+    aliases: tuple[str, ...] = field(default_factory=tuple)
+    # 上位概念 id，用于推理式覆盖（父命中时其子孙也算覆盖）
+    parent: str | None = None
+    # 在哪些 stage_v2 阶段属于"期望覆盖"（idea/structured/validated/scale）
+    stage_expected: tuple[str, ...] = field(default_factory=tuple)
+    # Critic 追问素材：当本节点缺失时可以拼接到追问 prompt 里
+    probing_questions: tuple[str, ...] = field(default_factory=tuple)
 
 
 # NOTE: keep ids stable; they are used as references from rubric and rules.
@@ -33,10 +42,37 @@ ONTOLOGY_NODES: dict[str, OntologyNode] = {}
 
 
 def _add_nodes(nodes: Iterable[tuple[str, str, str, str]]) -> None:
+    """旧版接口，仅含 (id, kind, label, description)，aliases/parent/stage/probing 走 _enrich_nodes 补。"""
     for nid, kind, label, desc in nodes:
         if nid in ONTOLOGY_NODES:
             continue
         ONTOLOGY_NODES[nid] = OntologyNode(id=nid, kind=kind, label=label, description=desc)
+
+
+def _enrich_nodes(meta: dict[str, dict[str, Any]]) -> None:
+    """给已注册节点叠加 aliases/parent/stage_expected/probing_questions。
+
+    meta = {
+        "C_xxx": {
+            "aliases": ("...", "..."),
+            "parent": "C_yyy",
+            "stage_expected": ("structured", "validated"),
+            "probing_questions": ("...", "..."),
+        },
+        ...
+    }
+    """
+    for nid, payload in meta.items():
+        node = ONTOLOGY_NODES.get(nid)
+        if not node:
+            continue
+        ONTOLOGY_NODES[nid] = replace(
+            node,
+            aliases=tuple(payload.get("aliases") or node.aliases),
+            parent=payload.get("parent", node.parent),
+            stage_expected=tuple(payload.get("stage_expected") or node.stage_expected),
+            probing_questions=tuple(payload.get("probing_questions") or node.probing_questions),
+        )
 
 
 # Core concepts (创业通用)
@@ -242,6 +278,347 @@ _add_nodes([
 
 
 # ────────────────────────────────────────────────────────────────
+# 运行时语义骨架元数据
+# ────────────────────────────────────────────────────────────────
+# 给已注册节点叠加 aliases / parent / stage_expected / probing_questions。
+# 命名约定:
+#   - aliases: 同义词/口语词/英文别名（OntologyResolver 文本归一时使用）
+#   - parent: 上位概念 id（推理式覆盖：父命中=子孙也覆盖）
+#   - stage_expected: idea / structured / validated / scale 中应当覆盖的阶段
+#   - probing_questions: 节点缺失时 Critic 可拼接的追问问题
+# 没有列出的节点会保持空集合，行为等同"不参与归一/推理/追问"。
+
+_enrich_nodes({
+    # ── 核心概念 ──
+    "C_problem": {
+        "aliases": ("问题定义", "痛点", "用户痛点", "problem", "pain point"),
+        "stage_expected": ("idea", "structured", "validated", "scale"),
+        "probing_questions": (
+            "目标用户在什么场景下遇到了这个问题？",
+            "他们目前用什么方式解决，付出的代价是什么？",
+        ),
+    },
+    "C_user_segment": {
+        "aliases": ("目标用户", "细分客群", "客群", "user segment", "target user"),
+        "stage_expected": ("idea", "structured", "validated", "scale"),
+        "probing_questions": (
+            "你描述的用户是不是足够具体？比如年龄、地域、岗位、消费能力？",
+            "这群人为什么是你最先服务的，而不是其他相邻人群？",
+        ),
+    },
+    "C_value_proposition": {
+        "aliases": ("价值主张", "价值定位", "value prop", "value proposition", "卖点逻辑"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "用一句话说出'为什么用户要选你而不是替代方案'？",
+            "这个价值能不能被一个具体的指标量化？",
+        ),
+    },
+    "C_solution": {
+        "aliases": ("解决方案", "产品方案", "solution", "产品形态"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "方案的核心步骤有几步？哪些是你最有把握做好的？",
+            "如果只能保留一个功能，你会留哪个，为什么？",
+        ),
+    },
+    "C_business_model": {
+        "aliases": ("商业模式", "盈利模式", "business model", "BM"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "你向谁收费？为什么是他们而不是用户本身？",
+            "成本结构里最大的一块是什么，能不能被规模摊薄？",
+        ),
+    },
+    "C_market_size": {
+        "aliases": ("市场规模", "市场容量", "TAM/SAM/SOM", "市场空间"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "你估算市场规模的口径是自下而上还是自上而下？",
+            "三年内你最有把握拿到的 SOM 是多少？",
+        ),
+    },
+    "C_competition": {
+        "aliases": ("竞品", "竞争格局", "替代方案", "竞争对手", "competition"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "用户当前最常用的替代方案是什么？为什么它还没解决问题？",
+            "和直接竞品相比，你最难被复制的优势是什么？",
+        ),
+    },
+    "C_team": {
+        "aliases": ("团队", "创始团队", "team", "founding team"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "团队里谁负责哪一块？关键岗位有没有缺口？",
+            "你们之前一起完成过什么项目，能证明协作能力？",
+        ),
+    },
+    "C_roadmap": {
+        "aliases": ("里程碑", "路线图", "roadmap", "产品节奏"),
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "未来 6/12 个月最关键的 3 个里程碑是什么？",
+            "每个里程碑的验收标准能不能写成一句话？",
+        ),
+    },
+    "C_risk_control": {
+        "aliases": ("风险控制", "合规", "伦理", "risk control", "compliance"),
+        "stage_expected": ("validated", "scale"),
+        "probing_questions": (
+            "项目涉及隐私/医疗/未成年人/资金等敏感场景吗？",
+            "你目前对这些风险有什么具体的控制措施？",
+        ),
+    },
+    "C_value_chain": {
+        "aliases": ("价值链", "value chain"),
+        "parent": "C_business_model",
+    },
+    "C_channel": {
+        "aliases": ("渠道", "获客渠道", "channel", "GTM"),
+        "parent": "C_business_model",
+        "stage_expected": ("structured", "validated", "scale"),
+        "probing_questions": (
+            "你打算用哪条渠道触达目标用户？这条渠道的成本和转化大概是多少？",
+        ),
+    },
+    "C_revenue_stream": {
+        "aliases": ("收入来源", "营收结构", "revenue stream"),
+        "parent": "C_business_model",
+        "stage_expected": ("structured", "validated", "scale"),
+    },
+    "C_cost_structure": {
+        "aliases": ("成本结构", "cost structure"),
+        "parent": "C_business_model",
+        "stage_expected": ("structured", "validated", "scale"),
+    },
+    "C_moat": {
+        "aliases": ("壁垒", "护城河", "moat", "差异化"),
+        "parent": "C_competition",
+        "stage_expected": ("validated", "scale"),
+    },
+    "C_positioning": {
+        "aliases": ("定位", "市场定位", "positioning"),
+        "parent": "C_competition",
+    },
+    "C_growth_model": {
+        "aliases": ("增长模式", "增长飞轮", "growth model", "growth loop"),
+        "parent": "C_business_model",
+        "stage_expected": ("validated", "scale"),
+    },
+    "C_kpi": {
+        "aliases": ("关键指标", "KPI", "key metric"),
+        "parent": "C_business_model",
+    },
+    "C_user_journey": {
+        "aliases": ("用户旅程", "user journey", "用户路径"),
+        "parent": "C_user_segment",
+    },
+    "C_risk_category_market": {
+        "aliases": ("市场风险", "需求风险", "market risk"),
+        "parent": "C_risk_control",
+    },
+    "C_risk_category_product": {
+        "aliases": ("产品风险", "技术风险", "product risk"),
+        "parent": "C_risk_control",
+    },
+    "C_risk_category_execution": {
+        "aliases": ("执行风险", "团队风险", "execution risk"),
+        "parent": "C_risk_control",
+    },
+    "C_risk_category_financial": {
+        "aliases": ("财务风险", "现金流风险", "financial risk"),
+        "parent": "C_risk_control",
+    },
+    # ── 方法 ──
+    "M_user_interview": {
+        "aliases": ("用户访谈", "深访", "user interview", "1v1 访谈"),
+        "stage_expected": ("idea", "structured", "validated"),
+        "probing_questions": ("你完成过几次访谈？被访谈者是不是真的目标用户？",),
+    },
+    "M_survey": {
+        "aliases": ("问卷", "survey", "调查"),
+        "stage_expected": ("structured", "validated"),
+        "probing_questions": ("问卷样本量多少？是怎么筛选的？",),
+    },
+    "M_competitor_matrix": {
+        "aliases": ("竞品矩阵", "竞品对比表", "competitor matrix"),
+        "parent": "C_competition",
+    },
+    "M_leancanvas": {
+        "aliases": ("精益画布", "Lean Canvas"),
+        "parent": "C_business_model",
+    },
+    "M_mvp": {
+        "aliases": ("MVP", "最小可行产品", "minimum viable product"),
+        "parent": "C_solution",
+        "stage_expected": ("structured", "validated"),
+        "probing_questions": ("有没有跑过 MVP？最小验证目标是什么？",),
+    },
+    "M_ab_test": {
+        "aliases": ("A/B 测试", "AB test"),
+        "parent": "M_mvp",
+    },
+    "M_unit_economics": {
+        "aliases": ("单位经济", "unit economics", "单笔经济模型"),
+        "parent": "C_business_model",
+        "stage_expected": ("validated", "scale"),
+        "probing_questions": (
+            "LTV/CAC 比值是多少？",
+            "Payback 周期超过 12 个月吗？",
+        ),
+    },
+    "M_tam_sam_som": {
+        "aliases": ("TAM/SAM/SOM", "市场拆分", "TAM"),
+        "parent": "C_market_size",
+        "stage_expected": ("structured", "validated", "scale"),
+    },
+    "M_risk_register": {
+        "aliases": ("风险登记表", "risk register"),
+        "parent": "C_risk_control",
+    },
+    "M_competition_mapping": {
+        "aliases": ("竞争地图", "competition mapping"),
+        "parent": "C_competition",
+    },
+    "M_usability_test": {
+        "aliases": ("可用性测试", "usability test"),
+        "parent": "M_mvp",
+    },
+    "M_cohort_analysis": {
+        "aliases": ("cohort 分析", "队列分析"),
+        "parent": "C_growth_model",
+    },
+    "M_growth_experiment": {
+        "aliases": ("增长实验", "growth experiment"),
+        "parent": "C_growth_model",
+    },
+    "M_sensitivity_analysis": {
+        "aliases": ("敏感性分析", "sensitivity analysis"),
+        "parent": "M_unit_economics",
+    },
+    "M_risk_workshop": {
+        "aliases": ("风险工作坊", "risk workshop"),
+        "parent": "C_risk_control",
+    },
+    "M_storytelling": {
+        "aliases": ("叙事", "故事化", "storytelling", "讲故事"),
+        "parent": "D_pitch_deck",
+    },
+    # ── 交付物 ──
+    "D_bp": {
+        "aliases": ("商业计划书", "BP", "business plan"),
+        "stage_expected": ("structured", "validated", "scale"),
+    },
+    "D_pitch_deck": {
+        "aliases": ("路演 PPT", "Pitch Deck", "路演文档"),
+        "stage_expected": ("validated", "scale"),
+    },
+    "D_interview_notes": {
+        "aliases": ("访谈记录", "interview notes", "访谈纪要"),
+        "parent": "M_user_interview",
+    },
+    "D_survey_report": {
+        "aliases": ("问卷报告", "survey report"),
+        "parent": "M_survey",
+    },
+    "D_competitor_table": {
+        "aliases": ("竞品对比表", "competitor table"),
+        "parent": "M_competitor_matrix",
+    },
+    "D_financial_model": {
+        "aliases": ("财务模型", "financial model", "财务测算"),
+        "parent": "C_business_model",
+        "stage_expected": ("validated", "scale"),
+    },
+    "D_roadmap": {
+        "aliases": ("路线图文档", "roadmap doc"),
+        "parent": "C_roadmap",
+    },
+    "D_risk_checklist": {
+        "aliases": ("风险检查清单", "compliance checklist", "合规清单"),
+        "parent": "C_risk_control",
+    },
+    "D_metric_dashboard": {
+        "aliases": ("指标看板", "metric dashboard"),
+        "parent": "C_kpi",
+    },
+    "D_kpi_report": {
+        "aliases": ("KPI 报告", "KPI report"),
+        "parent": "C_kpi",
+    },
+    "D_usability_report": {
+        "aliases": ("可用性测试报告",),
+        "parent": "M_usability_test",
+    },
+    "D_competition_map": {
+        "aliases": ("竞品地图",),
+        "parent": "C_competition",
+    },
+    "D_growth_experiment_log": {
+        "aliases": ("增长实验记录",),
+        "parent": "M_growth_experiment",
+    },
+    # ── 指标 ──
+    "X_tam": {"aliases": ("TAM", "总可服务市场"), "parent": "C_market_size"},
+    "X_sam": {"aliases": ("SAM", "可触达市场"), "parent": "C_market_size"},
+    "X_som": {"aliases": ("SOM", "可获得市场"), "parent": "C_market_size"},
+    "X_cac": {
+        "aliases": ("CAC", "获客成本", "客户获取成本", "拉新成本", "新客成本", "单客成本"),
+        "parent": "C_risk_category_financial",
+    },
+    "X_ltv": {
+        "aliases": ("LTV", "客户生命周期价值"),
+        "parent": "C_risk_category_financial",
+    },
+    "X_payback": {
+        "aliases": ("回本周期", "Payback", "Payback Period"),
+        "parent": "C_risk_category_financial",
+    },
+    "X_retention": {"aliases": ("留存", "留存率", "retention", "复购率", "用户留存"), "parent": "C_growth_model"},
+    "X_conversion": {"aliases": ("转化率", "conversion", "CVR"), "parent": "C_growth_model"},
+    "X_arpu": {"aliases": ("ARPU", "用户平均收入"), "parent": "C_revenue_stream"},
+    "X_nps": {"aliases": ("NPS", "净推荐值"), "parent": "C_kpi"},
+    "X_ctr": {"aliases": ("CTR", "点击率"), "parent": "C_growth_model"},
+    "X_churn": {"aliases": ("Churn", "流失率"), "parent": "C_growth_model"},
+    "X_gmv": {"aliases": ("GMV", "成交总额"), "parent": "C_revenue_stream"},
+    "X_margin": {"aliases": ("毛利率", "Gross Margin", "margin"), "parent": "C_cost_structure"},
+    "X_cashburn": {"aliases": ("现金消耗", "burn rate"), "parent": "C_risk_category_financial"},
+    "X_runway": {"aliases": ("Runway", "现金跑道"), "parent": "C_risk_category_financial"},
+    # ── 任务 ──
+    "T_task_user_evidence_loop": {
+        "stage_expected": ("idea", "structured"),
+    },
+    "T_task_value_proposition_consistency": {
+        "stage_expected": ("structured", "validated"),
+    },
+    "T_task_unit_economics": {
+        "stage_expected": ("validated", "scale"),
+    },
+    "T_task_risk_checklist": {
+        "stage_expected": ("validated", "scale"),
+    },
+    # ── 误区 ──
+    "P_no_competitor_claim": {
+        "aliases": ("没有竞争对手", "无竞品", "市场没有人在做"),
+        "parent": "C_competition",
+    },
+    "P_market_size_fallacy": {
+        "aliases": ("1% 市场幻觉", "拍脑袋市场规模"),
+        "parent": "C_market_size",
+    },
+    "P_weak_user_evidence": {
+        "aliases": ("证据不足", "我觉得", "拍脑袋"),
+        "parent": "C_user_segment",
+    },
+    "P_compliance_not_covered": {
+        "aliases": ("合规缺口", "未涉及合规"),
+        "parent": "C_risk_control",
+    },
+})
+
+
+# ────────────────────────────────────────────────────────────────
 # Rubric wiring
 # ────────────────────────────────────────────────────────────────
 
@@ -363,6 +740,20 @@ RULE_TASK_MAP: dict[str, list[str]] = {
 }
 
 
+def serialize_node(node: OntologyNode) -> dict[str, Any]:
+    """Serialize OntologyNode to a JSON-safe dict including new runtime fields."""
+    return {
+        "id": node.id,
+        "kind": node.kind,
+        "label": node.label,
+        "description": node.description,
+        "aliases": list(node.aliases),
+        "parent": node.parent,
+        "stage_expected": list(node.stage_expected),
+        "probing_questions": list(node.probing_questions),
+    }
+
+
 def get_rubric_evidence_chain(item: str) -> list[dict[str, Any]]:
     """Return ontology-backed evidence chain for a rubric dimension.
 
@@ -375,12 +766,7 @@ def get_rubric_evidence_chain(item: str) -> list[dict[str, Any]]:
         node = ONTOLOGY_NODES.get(nid)
         if not node:
             continue
-        out.append({
-            "id": node.id,
-            "kind": node.kind,
-            "label": node.label,
-            "description": node.description,
-        })
+        out.append(serialize_node(node))
     return out
 
 

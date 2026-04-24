@@ -29,6 +29,8 @@ export default function KBGraphPanel({ onClose }: Props) {
   const [kgFullData, setKgFullData] = useState<any>(null);
   const [kgFullLoading, setKgFullLoading] = useState(false);
   const [kgFullError, setKgFullError] = useState("");
+  // 能力子图（运行时本体话题切片）当前展开哪一个
+  const [abilitySgExpanded, setAbilitySgExpanded] = useState<string | null>(null);
   const [kgDetailData, setKgDetailData] = useState<any>(null);
   const [kgDetailLoading, setKgDetailLoading] = useState(false);
   const [kgDetailError, setKgDetailError] = useState("");
@@ -3362,14 +3364,88 @@ export default function KBGraphPanel({ onClose }: Props) {
                       <div>项目 <strong>{kgFullData.stats?.total_projects ?? 0}</strong></div>
                     </div>
                   )}
+                  {/* ── 运行时能力子图（基于本体 + 评分维度的语义切片）── */}
+                  {Array.isArray(kgFullData?.ability_subgraphs) && kgFullData.ability_subgraphs.length > 0 && (
+                    <div className="kb-ability-sg">
+                      <div className="kb-ability-sg-head">
+                        <h3>能力子图 <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 400 }}>Ability Subgraphs</span></h3>
+                        <span className="kb-ability-sg-pill">{kgFullData.ability_subgraphs.length} 个</span>
+                      </div>
+                      <p className="kb-ability-sg-desc">
+                        基于本体节点 + 评分维度构造的“话题切片”，对话过程中按项目阶段 / 双光谱命中后会注入 Prompt 与 Graph RAG 检索。
+                      </p>
+                      <div className="kb-ability-sg-list">
+                        {kgFullData.ability_subgraphs.map((sg: any) => {
+                          const expanded = abilitySgExpanded === sg.id;
+                          const dist = sg.kind_distribution || {};
+                          return (
+                            <div key={sg.id} className={`kb-ability-sg-item${expanded ? " expanded" : ""}`}
+                                 style={{ borderLeftColor: sg.color || "#a855f7" }}>
+                              <button className="kb-ability-sg-row"
+                                onClick={() => setAbilitySgExpanded(expanded ? null : sg.id)}>
+                                <span className="kb-ability-sg-dot" style={{ background: sg.color || "#a855f7" }} />
+                                <span className="kb-ability-sg-name">{sg.name || sg.id}</span>
+                                <span className="kb-ability-sg-count">{sg.node_count ?? 0} 节点</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                  strokeWidth="2" style={{ transform: expanded ? "rotate(90deg)" : "none", transition: "transform .15s" }}>
+                                  <path d="M9 6l6 6-6 6"/>
+                                </svg>
+                              </button>
+                              {expanded && (
+                                <div className="kb-ability-sg-body">
+                                  {sg.description && <div className="kb-ability-sg-text">{sg.description}</div>}
+                                  {sg.purpose && (
+                                    <div className="kb-ability-sg-line"><span className="kb-tag-mini">用途</span>{sg.purpose}</div>
+                                  )}
+                                  {Object.keys(dist).length > 0 && (
+                                    <div className="kb-ability-sg-dist">
+                                      {Object.entries(dist).map(([k, v]: any) => (
+                                        <span key={k} className="kb-ability-sg-kind">
+                                          <em>{k}</em>{v}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {Array.isArray(sg.rubric_dimensions) && sg.rubric_dimensions.length > 0 && (
+                                    <div className="kb-ability-sg-line">
+                                      <span className="kb-tag-mini">评分维度</span>{sg.rubric_dimensions.join(" · ")}
+                                    </div>
+                                  )}
+                                  {Array.isArray(sg.hyperedge_families) && sg.hyperedge_families.length > 0 && (
+                                    <div className="kb-ability-sg-line">
+                                      <span className="kb-tag-mini">超边族</span>{sg.hyperedge_families.join(" · ")}
+                                    </div>
+                                  )}
+                                  {Array.isArray(sg.applies_to_stages) && sg.applies_to_stages.length > 0 && (
+                                    <div className="kb-ability-sg-line">
+                                      <span className="kb-tag-mini">适用阶段</span>{sg.applies_to_stages.join(" · ")}
+                                    </div>
+                                  )}
+                                  {Array.isArray(sg.trigger_keywords) && sg.trigger_keywords.length > 0 && (
+                                    <div className="kb-ability-sg-line">
+                                      <span className="kb-tag-mini">触发词</span>
+                                      <span style={{ color: "#64748b" }}>
+                                        {sg.trigger_keywords.slice(0, 8).join(" / ")}{sg.trigger_keywords.length > 8 ? " …" : ""}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   <div className="kb-rag-card">
                     <h3>子图 RAG 检索架构</h3>
                     <p className="kb-rag-desc">
-                      知识图谱按维度划分为 <strong>{(kgFullData?.subgraphs || []).length}</strong> 个逻辑子图。
-                      每个扇区就是一个子图，密度代表节点数量。点击侧栏子图可钻入查看详情。
+                      知识图谱按维度划分为 <strong>{(kgFullData?.subgraphs || []).length}</strong> 个逻辑子图，并在运行时叠加
+                      <strong> {(kgFullData?.ability_subgraphs || []).length} </strong>
+                      个能力子图（本体 + 评分驱动）。意图识别后命中能力子图 → 限定 Graph RAG 检索 → 注入对应 Prompt。
                     </p>
                     <div className="kb-rag-flow">
-                      {["用户提问", "意图识别", "锁定子图", "子图检索", "生成回答"].map((step, i) => (
+                      {["用户提问", "意图识别", "命中能力子图", "子图检索", "生成回答"].map((step, i) => (
                         <React.Fragment key={i}>
                           {i > 0 && <div className="kb-rag-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>}
                           <div className={`kb-rag-step${i === 2 ? " kb-rag-step-highlight" : ""}`}>

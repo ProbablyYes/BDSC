@@ -1,0 +1,211 @@
+{
+  "internet_plus": {
+    "base_weights": {
+      "market": 22,
+      "innovation": 18,
+      "business_model": 24,
+      "execution": 14,
+      "team": 10,
+      "social_impact": 12
+    },
+    "item_map": {
+      "Problem Definition": "market",
+      "User Evidence Strength": "market",
+      "Solution Feasibility": "innovation",
+      "Business Model Consistency": "business_model",
+      "Market & Competition": "market",
+      "Financial Logic": "business_model",
+      "Innovation & Differentiation": "innovation",
+      "Team & Execution": "execution",
+      "Presentation Quality": "team"
+    },
+    "bucket_rules": {
+      "innov_venture": [
+        { "min": -1.0, "max": -0.5, "delta": { "innovation": 6, "business_model": -4, "market": -2 } },
+        { "min": -0.5, "max": 0.0, "delta": { "innovation": 3, "business_model": -2, "market": -1 } },
+        { "min": 0.0, "max": 0.5, "delta": { "business_model": 3, "execution": 2 } },
+        { "min": 0.5, "max": 1.0, "delta": { "business_model": 5, "market": 2, "innovation": -2 } }
+      ],
+      "biz_public": [
+        { "min": -1.0, "max": -0.5, "delta": { "business_model": 4, "market": 2, "social_impact": -3 } },
+        { "min": -0.5, "max": 0.0, "delta": { "business_model": 2, "social_impact": -1 } },
+        { "min": 0.0, "max": 0.5, "delta": { "social_impact": 3, "business_model": -1 } },
+        { "min": 0.5, "max": 1.0, "delta": { "social_impact": 7, "business_model": -3, "market": -1 } }
+      ]
+    },
+    "stage_adjustments": {
+      "idea": { "innovation": 2, "execution": -2, "team": -1, "market": 1 },
+      "structured": { "execution": 1, "business_model": 1 },
+      "validated": { "execution": 2, "market": 1, "innovation": 1 },
+      "scale": { "execution": 4, "team": 2, "innovation": -2 }
+    },
+    "track_adjustments": {
+      "innov": { "innovation": 3 },
+      "venture": { "business_model": 3, "execution": 1 },
+      "biz": { "business_model": 3, "market": 1 },
+      "public": { "social_impact": 4 }
+    },
+    "band_descriptors": {
+      "A": "证据链完整，商业与影响力逻辑能自洽，关键追问基本可答。",
+      "B+": "核心逻辑成立，但关键证据或量化深度仍不足，补齐后有明显上升空间。",
+      "B": "方向基本清楚，但市场、商业模式或执行证据仍存在明显短板。",
+      "C": "仍停留在概念层，评委很容易在用户、市场或持续性上连续追问。 "
+    },
+    "judge_focus_notes": {
+      "coach": "【赛事视角】互联网+更看重商业模式、市场机会与持续增长，辅导时要帮助学生把用户、价值、渠道和盈利讲成一个闭环。",
+      "analyst": "【赛事视角】互联网+更看重市场与商业证据，请优先检查市场口径、竞品差异、定价依据和获客路径。",
+      "advisor": "【赛事视角】互联网+答辩里最常见的追问落在：市场大不大、怎么获客、为什么用户愿意付费、你的差异化能不能守住。",
+      "tutor": "【赛事视角】讲概念时优先连接商业模式、价值主张、市场分析、增长与答辩说服力。",
+      "grader": "【赛事视角】互联网+评分时更看重市场、商业模式、执行与社会价值的组合质量，而不只是技术新不新。",
+      "planner": "【赛事视角】行动上优先补用户证据、竞品矩阵、商业闭环和演示材料的关键数据页。"
+    },
+    "prompt_fragments": {
+      "coach": "【竞赛补充】回答里顺带提醒学生：评委更关心为什么这个项目能成立、为什么现在成立、为什么你们能做成。",
+      "analyst": "【竞赛补充】请把风险翻译成评委会真正会追问的证据缺口，而不是泛泛的行业风险。",
+      "advisor": "【竞赛补充】请把判断贴近路演和答辩，不要写成纯理论分析。",
+      "tutor": "【竞赛补充】请把概念解释与评委标准连接起来，让学生知道为什么这会影响得分。",
+      "grader": "【竞赛补充】请把评分说成结构化评审摘要，并说明哪些维度值得优先补分。",
+      "planner": "【竞赛补充】请优先安排会直接提升答辩与材料说服力的动作。"
+    }
+  },
+  "challenge_cup": {
+    "base_weights": {
+      "market": 12,
+      "innovation": 32,
+      "business_model": 10,
+      "execution": 18,
+      "team": 10,
+      "social_impact": 6,
+      "evidence": 12
+    },
+    "item_map": {
+      "Problem Definition": "market",
+      "User Evidence Strength": "evidence",
+      "Solution Feasibility": "innovation",
+      "Business Model Consistency": "business_model",
+      "Market & Competition": "market",
+      "Financial Logic": "business_model",
+      "Innovation & Differentiation": "innovation",
+      "Team & Execution": "execution",
+      "Presentation Quality": "team"
+    },
+    "bucket_rules": {
+      "innov_venture": [
+        { "min": -1.0, "max": -0.5, "delta": { "innovation": 8, "evidence": 4, "business_model": -4 } },
+        { "min": -0.5, "max": 0.0, "delta": { "innovation": 4, "evidence": 2, "business_model": -2 } },
+        { "min": 0.0, "max": 0.5, "delta": { "execution": 2, "business_model": 1 } },
+        { "min": 0.5, "max": 1.0, "delta": { "business_model": 2, "innovation": -3 } }
+      ],
+      "biz_public": [
+        { "min": -1.0, "max": -0.5, "delta": { "business_model": 2 } },
+        { "min": -0.5, "max": 0.0, "delta": {} },
+        { "min": 0.0, "max": 0.5, "delta": { "social_impact": 2 } },
+        { "min": 0.5, "max": 1.0, "delta": { "social_impact": 4, "business_model": -1 } }
+      ]
+    },
+    "stage_adjustments": {
+      "idea": { "innovation": 2, "evidence": -2, "execution": -1 },
+      "structured": { "evidence": 1, "execution": 1 },
+      "validated": { "innovation": 2, "evidence": 3, "execution": 2 },
+      "scale": { "execution": 3, "team": 1, "innovation": -1 }
+    },
+    "track_adjustments": {
+      "innov": { "innovation": 4, "evidence": 2 },
+      "venture": { "execution": 2 },
+      "biz": { "business_model": 2 },
+      "public": { "social_impact": 3 }
+    },
+    "band_descriptors": {
+      "A": "创新点明确，实验或验证证据扎实，方法论与结论之间基本闭合。",
+      "B+": "研究或创新方向成立，但实验设计、样本质量或论证深度仍有提升空间。",
+      "B": "创新叙事存在，但可验证性和证据严谨性不足，评委会持续追问。",
+      "C": "主要停留在概念或愿景层，缺少足以支撑技术/学术判断的证据。 "
+    },
+    "judge_focus_notes": {
+      "coach": "【赛事视角】挑战杯更看重技术创新、方法论严谨性和验证质量，辅导时要帮助学生把“创新点”说成可检验的研究命题。",
+      "analyst": "【赛事视角】挑战杯风险分析要优先落在实验设计、样本代表性、对照基线和可复现性上。",
+      "advisor": "【赛事视角】挑战杯答辩最常见追问：相对谁而新、为什么这个验证足够、结果是否可复现、技术门槛是否真实。",
+      "tutor": "【赛事视角】讲概念时优先连接研究设计、创新边界、验证逻辑和科研表达。",
+      "grader": "【赛事视角】挑战杯评分时更看重创新性与证据严谨性，不会因为商业包装漂亮就给高分。",
+      "planner": "【赛事视角】行动上优先补实验、对照、样本、方法与技术说明，而不是先做路演包装。 "
+    },
+    "prompt_fragments": {
+      "coach": "【竞赛补充】请帮助学生把技术/研究问题说成评委能判断的证据命题。",
+      "analyst": "【竞赛补充】请优先审查实验设计和证据链，而不是先谈市场规模。",
+      "advisor": "【竞赛补充】请把建议尽量贴近答辩与评审追问。",
+      "tutor": "【竞赛补充】请把概念解释和科研判断标准连起来。",
+      "grader": "【竞赛补充】请把评分解释成创新性、证据链和执行成熟度的组合判断。",
+      "planner": "【竞赛补充】请优先安排能快速补强技术与证据链的动作。 "
+    }
+  },
+  "dachuang": {
+    "base_weights": {
+      "market": 14,
+      "innovation": 22,
+      "business_model": 12,
+      "execution": 24,
+      "team": 16,
+      "social_impact": 4,
+      "evidence": 8
+    },
+    "item_map": {
+      "Problem Definition": "market",
+      "User Evidence Strength": "evidence",
+      "Solution Feasibility": "execution",
+      "Business Model Consistency": "business_model",
+      "Market & Competition": "market",
+      "Financial Logic": "business_model",
+      "Innovation & Differentiation": "innovation",
+      "Team & Execution": "execution",
+      "Presentation Quality": "team"
+    },
+    "bucket_rules": {
+      "innov_venture": [
+        { "min": -1.0, "max": -0.5, "delta": { "innovation": 4, "execution": -2 } },
+        { "min": -0.5, "max": 0.0, "delta": { "innovation": 2 } },
+        { "min": 0.0, "max": 0.5, "delta": { "execution": 2, "business_model": 1 } },
+        { "min": 0.5, "max": 1.0, "delta": { "execution": 4, "business_model": 2, "innovation": -2 } }
+      ],
+      "biz_public": [
+        { "min": -1.0, "max": -0.5, "delta": { "business_model": 2 } },
+        { "min": -0.5, "max": 0.0, "delta": {} },
+        { "min": 0.0, "max": 0.5, "delta": { "social_impact": 1 } },
+        { "min": 0.5, "max": 1.0, "delta": { "social_impact": 3, "execution": 1 } }
+      ]
+    },
+    "stage_adjustments": {
+      "idea": { "innovation": 2, "execution": -2, "team": -1 },
+      "structured": { "execution": 2, "team": 1 },
+      "validated": { "execution": 3, "evidence": 2, "team": 1 },
+      "scale": { "execution": 3, "team": 2, "innovation": -1 }
+    },
+    "track_adjustments": {
+      "innov": { "innovation": 2 },
+      "venture": { "execution": 2, "business_model": 1 },
+      "biz": { "business_model": 2 },
+      "public": { "social_impact": 2 }
+    },
+    "band_descriptors": {
+      "A": "方案可行、执行路径清楚、阶段成果与团队能力匹配良好。",
+      "B+": "整体可做，但里程碑、证据或资源匹配还不够扎实。",
+      "B": "方向不差，但执行与验证仍较空，项目推进说服力不足。",
+      "C": "停留在概念层，缺少足够的动手成果与阶段性证明。 "
+    },
+    "judge_focus_notes": {
+      "coach": "【赛事视角】大创更看重可行性、执行力和阶段成果，辅导时要帮助学生把想法压成能做出来、能展示的计划。",
+      "analyst": "【赛事视角】大创风险分析要优先落在执行能力、资源匹配和阶段成果上。",
+      "advisor": "【赛事视角】大创答辩最常见追问：你们现在做到哪一步、谁来做、接下来怎么推进、已经拿到什么结果。",
+      "tutor": "【赛事视角】讲概念时优先连接 MVP、阶段性成果、里程碑与团队分工。",
+      "grader": "【赛事视角】大创评分时更看重可行性、执行成熟度和训练过程，不是只看宏大叙事。",
+      "planner": "【赛事视角】行动上优先补原型、测试、分工、时间线和阶段成果。 "
+    },
+    "prompt_fragments": {
+      "coach": "【竞赛补充】请把建议压到阶段成果与可执行动作上。",
+      "analyst": "【竞赛补充】请把风险翻译成执行断点与资源缺口。",
+      "advisor": "【竞赛补充】请把判断贴近项目训练和答辩场景。",
+      "tutor": "【竞赛补充】请把概念解释连到阶段成果与训练要求。",
+      "grader": "【竞赛补充】请把评分说明成可行性、执行和成果展示的组合判断。",
+      "planner": "【竞赛补充】请优先安排能在短周期内交付出来的动作。 "
+    }
+  }
+}

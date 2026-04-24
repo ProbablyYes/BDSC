@@ -1,5 +1,19 @@
 [
   {
+    "comment_id": "cmt_1777006702658_12bb",
+    "section_id": "users",
+    "teacher_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
+    "teacher_name": "贪吃蛇",
+    "quote": "影响了用户满意度和品牌形象，高峰期拥堵是用户投诉的主要原因之一。据艾瑞咨询《2024 中国智慧交通行业报告》数据显示，高峰期拥堵是用户投诉的主要原因之一。当用户在高峰期遭遇拥堵时，他们不仅会感到不便，还会对服务提供商产生负面评价，这直接损害了品牌形象。例如，校园保卫处和园区",
+    "position": 972,
+    "length": 137,
+    "annotation_type": "suggestion",
+    "content": "test",
+    "status": "open",
+    "created_at": "2026-04-24T12:58:22.658316+08:00",
+    "updated_at": "2026-04-24T12:58:22.658316+08:00"
+  },
+  {
     "comment_id": "cmt_1777023617733_205a",
     "section_id": "users",
     "teacher_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",

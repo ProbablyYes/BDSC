@@ -256,18 +256,62 @@ class BudgetStorage:
         growth = float(biz.get("growth_rate_monthly") or 0.1)
         scenario_models = biz.get("scenario_models") or {}
 
+        # 走 Pattern 化的收入模板（subscription / transaction / project_b2b /
+        # platform_commission / hardware_sales / grant_funded / donation），
+        # 老 stream 自动兼容为 subscription。
+        from app.services.revenue_models import (
+            compute_stream_monthly_revenue,
+            derive_key_levers_summary,
+            normalize_stream,
+            PATTERNS,
+        )
+        from app.services.finance_pattern_formulas import get_pattern_levers
+
         base_revenue = 0.0
-        base_users = 0
+        base_users = 0.0
         for s in streams:
-            mu = float(s.get("monthly_users") or 0)
-            price = float(s.get("price") or 0)
-            conv = float(s.get("conversion_rate") or 1)
-            mr = mu * price * conv
+            normalize_stream(s)
+            mr, users = compute_stream_monthly_revenue(s)
             s["monthly_revenue"] = round(mr, 2)
+            s["active_units"] = round(users, 2)
             base_revenue += mr
-            base_users += int(mu)
+            base_users += users
+        base_users = int(base_users)
+        biz["key_levers"] = derive_key_levers_summary(streams)
+
+        # 把所有 streams 涉及的 pattern → 杠杆定义一次拉出, 给前端展示
+        used_pattern_levers: dict[str, list[dict]] = {}
+        for s in streams:
+            pkey = (s or {}).get("pattern_key") or "subscription"
+            if pkey not in used_pattern_levers:
+                used_pattern_levers[pkey] = get_pattern_levers(pkey)
+        biz["pattern_levers"] = used_pattern_levers
+
+        def _scenario_revenue_for_streams(scenario_key: str) -> tuple[float, int]:
+            """按 pattern-aware 杠杆重算每条流的月营收: 不再一刀切全局乘 1.25/0.75。"""
+            total_rev = 0.0
+            total_users = 0.0
+            for s in streams:
+                pkey = (s or {}).get("pattern_key") or "subscription"
+                inputs = dict((s or {}).get("inputs") or {})
+                levers = get_pattern_levers(pkey)
+                for lev in levers:
+                    field = lev["field"]
+                    mult = (lev.get("scenarios") or {}).get(scenario_key, 1.0)
+                    if field in inputs:
+                        try:
+                            inputs[field] = float(inputs[field] or 0) * float(mult)
+                        except (TypeError, ValueError):
+                            continue
+                # 用调过 inputs 的临时 stream 算营收
+                temp_stream = {**s, "inputs": inputs}
+                rev, users = compute_stream_monthly_revenue(temp_stream)
+                total_rev += rev
+                total_users += users
+            return total_rev, int(total_users)
 
         def _simulate(
+            scenario_key: str,
             revenue_multiplier: float,
             conversion_multiplier: float,
             growth_rate_value: float,
@@ -277,8 +321,15 @@ class BudgetStorage:
             projection = []
             cumulative = 0.0
             breakeven_month = None
-            revenue_base = base_revenue * revenue_multiplier * conversion_multiplier
-            users_base = max(0, int(base_users * conversion_multiplier))
+            # pattern-aware: 用 per-stream 杠杆重算; 若没有 streams (legacy plan), 退回旧的全局乘子
+            if streams:
+                pa_rev, pa_users = _scenario_revenue_for_streams(scenario_key)
+                # 仍保留 revenue_multiplier 作为"用户手动总体调节", 默认 1.0
+                revenue_base = pa_rev * max(0.0, revenue_multiplier) if revenue_multiplier else pa_rev
+                users_base = max(0, int(pa_users * max(0.0, revenue_multiplier))) if revenue_multiplier else pa_users
+            else:
+                revenue_base = base_revenue * revenue_multiplier * conversion_multiplier
+                users_base = max(0, int(base_users * conversion_multiplier))
             for m in range(1, 13):
                 factor = (1 + growth_rate_value) ** (m - 1) if growth_rate_value else 1
                 rev = round(revenue_base * factor, 2)
@@ -322,8 +373,12 @@ class BudgetStorage:
                 "conversion_multiplier": float(incoming.get("conversion_multiplier", default["conversion_multiplier"]) or 0),
             }
 
+        # scenario_key 名称(conservative/baseline/optimistic) 与 PATTERN_LEVERS scenarios
+        # 中的 (pessimistic/baseline/optimistic) 做映射
+        _scenario_key_map = {"conservative": "pessimistic", "baseline": "baseline", "optimistic": "optimistic"}
         scenario_results = {
             key: _simulate(
+                scenario_key=_scenario_key_map.get(key, "baseline"),
                 revenue_multiplier=model["revenue_multiplier"],
                 conversion_multiplier=model["conversion_multiplier"],
                 growth_rate_value=model["growth_rate_monthly"],
@@ -358,15 +413,25 @@ class BudgetStorage:
         total_investment = round(cost_total + competition_total, 2)
         baseline_monthly_revenue = baseline_result["monthly_revenue_base"]
         funding_gap = round(max(0.0, total_investment - baseline_result["annual_net"]), 2)
-        health_score = 82
-        if baseline_monthly_revenue <= 0:
-            health_score -= 28
-        if baseline_result["months_to_breakeven"] is None:
-            health_score -= 18
-        elif baseline_result["months_to_breakeven"] > 9:
-            health_score -= 10
-        if funding_gap > total_investment * 0.6 and total_investment > 0:
-            health_score -= 12
+        completion_score = 25
+        if streams:
+            completion_score += 20
+        if baseline_monthly_revenue > 0:
+            completion_score += 15
+        if fixed > 0:
+            completion_score += 10
+        if var_cost >= 0:
+            completion_score += 5
+        if merged_models.get("baseline"):
+            completion_score += 10
+        if baseline_result["cash_flow_projection"]:
+            completion_score += 10
+        if competition_total > 0 or cost_total > 0:
+            completion_score += 5
+        if funding_gap >= 0:
+            completion_score += 5
+        if biz.get("key_levers"):
+            completion_score += 5
 
         budget["summary"] = {
             "project_cost_total": round(cost_total, 2),
@@ -375,7 +440,7 @@ class BudgetStorage:
             "baseline_monthly_revenue": round(baseline_monthly_revenue, 2),
             "baseline_annual_net": baseline_result["annual_net"],
             "funding_gap": funding_gap,
-            "health_score": max(0, min(100, int(health_score))),
+            "health_score": max(0, min(100, int(completion_score))),
             "breakeven_fastest": scenario_results["optimistic"]["months_to_breakeven"],
             "breakeven_baseline": baseline_result["months_to_breakeven"],
             "breakeven_slowest": scenario_results["conservative"]["months_to_breakeven"],

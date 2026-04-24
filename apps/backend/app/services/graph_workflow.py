@@ -48,6 +48,29 @@ from langgraph.graph import END, StateGraph
 
 from app.config import settings
 from app.services.llm_client import LlmClient
+from app.services.project_cognition import (
+    compose_oriented_prompt,
+    describe_track_vector,
+    ensure_project_cognition,
+    resolve_competition_rubric,
+    score_to_band,
+)
+from app.services.track_inference import infer_project_stage_v2, infer_track_vector
+from app.services.ability_subgraphs import (
+    collect_subgraph_focus_briefs,
+    select_ability_subgraphs,
+)
+from app.services.ontology_runtime import (
+    build_ontology_grounding,
+    render_ontology_prompt,
+)
+from app.services.competition_judges import (
+    JudgePersona,
+    format_judge_directory,
+    format_judge_for_advisor,
+    load_judges,
+    pick_judge,
+)
 
 logger = logging.getLogger(__name__)
 _llm = LlmClient()
@@ -95,6 +118,9 @@ class WorkflowState(TypedDict, total=False):
     planner_output: dict
 
     category: str
+    track_vector: dict
+    project_stage_v2: str
+    track_inference_meta: dict
     diagnosis: dict
     next_task: dict
     kg_analysis: dict
@@ -109,6 +135,10 @@ class WorkflowState(TypedDict, total=False):
     challenge_strategies: list
     pressure_test_trace: dict
     competition: dict
+    competition_judge_id: str
+    active_judge_persona_block: str
+    preferred_tone: str
+    tone_origin: str
     learning: dict
     kb_utilization: dict
     needs_clarification: bool
@@ -123,6 +153,9 @@ class WorkflowState(TypedDict, total=False):
     execution_trace: dict          # full V2 trace for debug panel
     reply_strategy: str            # selected reply strategy key
     web_facts: list                # extracted facts from web search
+    analysis_refresh: dict         # 多轮稳定性：标识本轮哪些重型组件是新跑/沿用上一轮
+    ability_subgraphs: list        # 本轮命中的能力子图（创新评估/商业模式/模拟路演 等）
+    ontology_grounding: dict       # 本轮本体覆盖摘要（covered/missing/evidence/tasks/pitfalls）
 
     assistant_message: str
     agents_called: Annotated[list[str], operator.add]
@@ -1742,7 +1775,44 @@ def _project_stage_label(stage: str) -> str:
         "structured": "原型期",
         "validated": "验证期",
         "document": "验证期",
+        "scale": "规模化",
     }.get(stage, "原型期")
+
+
+def _state_stage(state: dict) -> str:
+    stage = str(state.get("project_stage_v2") or "").strip()
+    if stage:
+        return stage
+    diag = state.get("diagnosis")
+    if isinstance(diag, dict):
+        raw = str(diag.get("project_stage") or "").strip()
+        if raw:
+            return "validated" if raw == "document" else raw
+    return "structured"
+
+
+def _oriented_hint(state: dict, role: str) -> str:
+    base = compose_oriented_prompt(
+        role=role,
+        track_vector=state.get("track_vector"),
+        stage=_state_stage(state),
+        comp_type=str(state.get("competition_type") or ""),
+    )
+    # 叠加能力子图焦点：让所有 agent 在本轮聚焦同一组本体节点（"同一件事"）。
+    subgraphs = state.get("ability_subgraphs") if isinstance(state, dict) else None
+    if isinstance(subgraphs, list) and subgraphs:
+        focus = collect_subgraph_focus_briefs(subgraphs[:2])
+        if focus:
+            sub_names = " / ".join(str(sg.get("name", "")) for sg in subgraphs[:2] if isinstance(sg, dict))
+            base = (base + "\n\n" if base else "") + (
+                f"### 本轮能力子图焦点（{sub_names}）\n{focus}"
+            )
+    # 叠加运行时本体接入：让 agent 在回答里显式回到本体概念，并指出缺失。
+    ontology = state.get("ontology_grounding") if isinstance(state, dict) else None
+    onto_block = render_ontology_prompt(ontology, role=role)
+    if onto_block:
+        base = (base + "\n\n" if base else "") + onto_block
+    return base
 
 
 _MODE_CHAT_FLAVOR: dict[str, str] = {
@@ -1898,51 +1968,184 @@ def _top_triggered_rule(diag: dict, message: str = "") -> dict[str, Any]:
     return high[0] if high else rules[0]
 
 
+_PRESSURE_QUESTION_TONE_VARIANTS: dict[str, dict[str, str]] = {
+    "CS01": {
+        "cool": (
+            "你提到“{quote}”。如果用户今天不用你们，他会先用什么办法把这件事凑合做完？"
+            "那个方案虽然笨，但为什么他们还愿意继续用？如果你们想让他切过来，最大的迁移成本是什么？"
+        ),
+        "strict": (
+            "你提到“{quote}”。我直接问三件事：用户今天到底用什么凑合解决？"
+            "他为什么还愿意继续用？让他切到你这，要付出哪些具体成本？三个回答都要给我数据或事实，不接受感觉。"
+        ),
+        "humorous": (
+            "你说没竞争对手——那用户在你出现之前，是不是把这事『默念三遍就解决』了？"
+            "他用的那个『凑合方案』哪怕是 Excel + 人脑，也是你的对手哦。要让他搬家到你这，搬家费谁付？"
+        ),
+        "warm": (
+            "我先帮你理一下：用户在没有你之前肯定有自己的临时办法。"
+            "你能描述一下他们目前是怎么做的、为什么还能凑合用吗？切到你这，他们最难放下的是什么？"
+        ),
+        "coaching": (
+            "你觉得用户在没有你之前是怎么把这件事凑合做完的？把那个办法写下来——它就是你最直接的对手。"
+            "你打算用什么来衡量『切换成本足够低』这件事？"
+        ),
+        "socratic": (
+            "如果真的没有竞争者，用户此刻是不是处于完全无解的状态？"
+            "为什么之前从没有团队尝试过这件事？切换到你这里需要付出代价，他们凭什么愿意付出？"
+        ),
+    },
+    "CS02": {
+        "cool": (
+            "你提到“{quote}”。这批人具体散落在哪些渠道里？"
+            "你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。"
+        ),
+        "strict": (
+            "1% 是个很危险的句式。我要三个数：渠道是哪个、CAC 多少、前 100 个付费用户的获取计划。"
+            "拿不出来，1% 这话就别再说。"
+        ),
+        "humorous": (
+            "你说『拿到 1% 就行』——那剩下 99% 是不是『因为没听说过你』就主动让出来了？"
+            "CAC 和 LTV 这两位老朋友你今天打算聊一下吗，还是继续假装他们不存在？"
+        ),
+        "warm": (
+            "1% 听起来不大，但落到具体渠道其实挺难。你打算先从哪一类用户切入？"
+            "我们一起做个粗算吧，拉一个用户大概要花多少？"
+        ),
+        "coaching": (
+            "你觉得这 1% 用户最有可能聚集在哪？我们可以先从最浓的那一池切入。"
+            "如果只有一周时间拉到第一批 10 个付费用户，你会怎么做？"
+        ),
+        "socratic": (
+            "凭什么这 1% 会先用你而不是别人？如果获取一个用户的成本高于他带来的收入，市场再大有意义吗？"
+        ),
+    },
+    "CS05": {
+        "cool": (
+            "如果未来 6 个月没有外部融资，你们账上的现金最先会被哪一项成本吃掉？"
+            "这条价值链里，谁先付钱、为什么现在就付、以及这笔钱能不能覆盖持续服务成本？"
+        ),
+        "strict": (
+            "现金流模型给我看：6 个月静态 runway 是多少？最先被哪项成本吃掉？"
+            "谁先付钱、为什么现在付、付的钱能不能覆盖持续服务成本——一个一个回答。"
+        ),
+        "humorous": (
+            "『先做大用户量再变现』——历史上这么说的项目大多去哪了？提示：不是上市了。"
+            "你账上的钱够撑到下一轮融资，还是够撑到下一杯咖啡？"
+        ),
+        "warm": (
+            "免费一段时间是合理的，关键是中间留一个明确的『切换信号』。"
+            "我们一起想想，这个信号是什么、什么时候应该响起来？"
+        ),
+        "coaching": (
+            "你心里有没有一个『再过多久还没变现就要警惕』的红线？"
+            "你觉得自己最有把握的渠道是哪个？为什么？"
+        ),
+        "socratic": (
+            "如果获客成本永远高于收入，规模再大有意义吗？免费的用户为什么要变成付费的？"
+        ),
+    },
+    "CS08": {
+        "cool": (
+            "你提到“{quote}”。用户现在已经有哪些免费或更便宜的替代方案？"
+            "你凭什么判断他会为你多付这笔钱？如果价格上调 50%，你预计谁会先流失？"
+        ),
+        "strict": (
+            "定价依据：拍脑袋还是测过？同档次产品都什么价？你贵在哪？"
+            "上调 50% 谁先走、下调 50% 能拉来谁——给我数。"
+        ),
+        "humorous": (
+            "竞品都免费，你卖 199——产品自带情绪价值还是健身教练？"
+            "价格上调 50% 用户不流失？要么你给他们下了降头，要么你高估自己。"
+        ),
+        "warm": (
+            "定价确实是最难的一关。你目前对这个价位最有把握的依据是什么？"
+            "我们一起把竞品摆出来对比一下，看看你的差异化能撑多少溢价。"
+        ),
+        "coaching": (
+            "如果只能做一次价格测试，你会设计成什么样？"
+            "你觉得用户付钱的真正理由是什么？这个理由能撑多少价钱？"
+        ),
+        "socratic": (
+            "如果免费替代品同样能用 80%，他为什么要付钱？价格上下浮动 50% 你真预测得了吗？"
+        ),
+    },
+    "CS07": {
+        "cool": (
+            "你说已经考虑了风险控制。那如果明天真的发生一次数据滥用或合规抽查，"
+            "你们具体靠哪一个流程、哪一个责任人、哪一份记录去应对，而不是只靠原则性表述？"
+        ),
+        "strict": (
+            "明天就来一次合规抽查：靠哪个流程、谁是责任人、哪份记录撑得住？"
+            "拿不出三个具体名字 / 文件，就是没有真正的风控。"
+        ),
+        "humorous": (
+            "你说『隐私当然要保护』——是『写在隐私协议第 17 页』那种保护，还是真的保护？"
+            "明天真要起诉你，你的法务……是 ChatGPT 吗？"
+        ),
+        "warm": (
+            "合规这件事不轻松，但越早想清楚越好。"
+            "如果哪天产品被滥用，对你来说最难承受的是什么？我们就从那一点开始防。"
+        ),
+        "coaching": (
+            "如果让你写一份『最让用户安心』的数据使用说明，你会怎么写第一条？"
+            "你觉得最容易出问题的环节是哪一个？"
+        ),
+        "socratic": (
+            "用户没有真正知情同意，你的合法性来自哪里？"
+            "如果这件事被滥用一次，你的项目还能继续吗？"
+        ),
+    },
+}
+
+_TONE_FALLBACK_PROMPT: dict[str, str] = {
+    "cool": "如果把你现在这句话拆开来看，哪一个前提其实还没有被真正证明？你准备用什么证据补上它？",
+    "strict": "把你刚才那句话最关键的前提拎出来——它有什么证据支撑？没有就承认。",
+    "humorous": "刚才那句话挺漂亮的，但漂亮不能上 PPT 当数据用。最薄的那块前提是哪一个？",
+    "warm": "我感觉你那句话里有一个前提其实还没怎么展开，能一起补一下吗？",
+    "coaching": "你觉得自己刚才说的话里，最该先验证的那个前提是什么？我们怎么验？",
+    "socratic": "你刚才那句话，到底建立在哪个未被验证的假设之上？",
+}
+
+
 def _compose_pressure_question(
     message: str,
     rule: dict[str, Any],
     strategy: dict[str, Any],
     retrieved_edges: list[dict[str, Any]],
+    tone: str = "cool",
 ) -> str:
     quote = str(rule.get("quote") or "").strip()
     strategy_id = str(strategy.get("strategy_id") or "")
     edge_types = [str(edge.get("edge_type") or edge.get("type") or "") for edge in retrieved_edges if isinstance(edge, dict)]
+    safe_tone = (tone or "cool").lower()
 
-    if strategy_id == "CS01":
-        return (
-            f"你提到“{quote or '没有竞争对手'}”。如果用户今天不用你们，他会先用什么办法把这件事凑合做完？"
-            "那个方案虽然笨，但为什么他们还愿意继续用？如果你们想让他切过来，最大的迁移成本是什么？"
-        )
-    if strategy_id == "CS02":
-        return (
-            f"你提到“{quote or '只要拿到1%市场'}”。这批人具体散落在哪些渠道里？"
-            "你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。"
-        )
-    if strategy_id == "CS05":
-        return (
-            "如果未来 6 个月没有外部融资，你们账上的现金最先会被哪一项成本吃掉？"
-            "这条价值链里，谁先付钱、为什么现在就付、以及这笔钱能不能覆盖持续服务成本？"
-        )
-    if strategy_id == "CS08":
-        return (
-            f"你提到“{quote or '准备收费'}”。用户现在已经有哪些免费或更便宜的替代方案？"
-            "你凭什么判断他会为你多付这笔钱？如果价格上调 50%，你预计谁会先流失？"
-        )
-    if strategy_id == "CS07":
-        return (
-            "你说已经考虑了风险控制。那如果明天真的发生一次数据滥用或合规抽查，"
-            "你们具体靠哪一个流程、哪一个责任人、哪一份记录去应对，而不是只靠原则性表述？"
-        )
+    cs_variants = _PRESSURE_QUESTION_TONE_VARIANTS.get(strategy_id)
+    if cs_variants:
+        # 兜底：若 tone 不在 5 个高频 CS 的写好版本里，回 cool
+        template = cs_variants.get(safe_tone) or cs_variants.get("cool")
+        if template:
+            default_quote = {
+                "CS01": "没有竞争对手",
+                "CS02": "只要拿到1%市场",
+                "CS08": "准备收费",
+            }.get(strategy_id, "")
+            return template.format(quote=quote or default_quote)
 
+    # 非高频 CS：先取 strategy.probing_layers[0]，再叠加 tone 风格提示
     layer = ""
     probing_layers = strategy.get("probing_layers") or []
     if probing_layers:
         layer = str(probing_layers[0]).split(":", 1)[-1].strip()
     if layer:
-        return layer
+        if safe_tone == "cool":
+            return layer
+        return f"{layer}（用 {safe_tone} 语气追问，但保留信息密度）"
+
     if edge_types:
-        return f"你现在的说法主要依赖 {edge_types[0]}。如果把这个逻辑拆开，最先需要你补证明的那个环节到底是什么？"
-    return "如果把你现在这句话拆开来看，哪一个前提其实还没有被真正证明？你准备用什么证据补上它？"
+        prefix = f"你现在的说法主要依赖 {edge_types[0]}。"
+        return prefix + _TONE_FALLBACK_PROMPT.get(safe_tone, _TONE_FALLBACK_PROMPT["cool"])
+    return _TONE_FALLBACK_PROMPT.get(safe_tone, _TONE_FALLBACK_PROMPT["cool"])
 
 
 def _build_pressure_test_trace(
@@ -1951,6 +2154,7 @@ def _build_pressure_test_trace(
     hypergraph_insight: dict,
     message: str = "",
     consistency_issues: list[dict[str, Any]] | None = None,
+    tone: str = "cool",
 ) -> dict:
     top_rule = _top_triggered_rule(diag, message)
     top_strategy = strategies[0] if strategies and isinstance(strategies[0], dict) else {}
@@ -1966,7 +2170,7 @@ def _build_pressure_test_trace(
             "nodes": edge.get("nodes") or [],
             "evidence_quotes": edge.get("evidence_quotes") or [],
         })
-    generated_question = _compose_pressure_question(message, top_rule, top_strategy, edge_items)
+    generated_question = _compose_pressure_question(message, top_rule, top_strategy, edge_items, tone=tone)
 
     # Merge consistency-rule pressure questions as fallback/supplement
     consistency_questions = []
@@ -1994,6 +2198,7 @@ def _build_pressure_test_trace(
         "generated_question": generated_question,
         "consistency_pressure_questions": consistency_questions[:3],
         "evidence_quotes": evidence_quotes[:3],
+        "tone": tone,
     }
 
 
@@ -2261,6 +2466,178 @@ def _adjust_pipeline_for_mode(agents: list[str], mode: str, intent: str) -> list
     return [a for a in agents if a in AGENT_FNS][:2] or ["coach"]
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  Judge / Tone selection helpers (Defense Mode + Probing Tone Library)
+# ═══════════════════════════════════════════════════════════════════
+
+# 6 种语气的一句话风格指南。复用给 _compose_pressure_question /
+# coach guiding_questions / orchestrator 三处，作为 LLM prompt 片段。
+TONE_DESCRIPTORS: dict[str, str] = {
+    "cool": "学术冷静、就事论事、不带情绪；像审稿人。",
+    "strict": "严肃克制、压力高、追问短促有力；像投资人尽调或合规审计。",
+    "humorous": "幽默风趣、可以用反讽和打比方；底线是不能伤学生自尊；像段子手老师。",
+    "warm": "共情温柔、先接住情绪、再轻轻指出问题；像可信赖的学姐。",
+    "coaching": "鼓励引导、把追问变成『你觉得呢』式的开放问题；像启发式教练。",
+    "socratic": "纯反问、不给答案、一层层暴露假设；像苏格拉底本人。",
+}
+
+VALID_TONES = tuple(TONE_DESCRIPTORS.keys())
+
+# 学生主动指定语气的关键词（中文友好），命中即覆盖默认 tone
+_TONE_TRIGGERS: list[tuple[str, list[str]]] = [
+    ("strict",   ["严肃", "严厉", "狠一点", "狠点", "凶一点", "凌厉", "压力大", "尖锐", "毒舌"]),
+    ("humorous", ["幽默", "风趣", "搞笑", "轻松一点", "段子", "调侃", "活泼"]),
+    ("warm",     ["温和", "温柔", "温暖", "柔和一点", "别太凶", "舒服一点"]),
+    ("coaching", ["鼓励", "正向", "教练式", "启发", "陪伴"]),
+    ("socratic", ["苏格拉底", "苏格拉底式", "反问", "只反问", "只问不答"]),
+    ("cool",     ["学术", "冷静", "中立", "默认"]),
+]
+
+
+_TONE_NEGATION_PREFIXES = ("别", "不要", "不那么", "不太", "少点", "少一点", "没那么")
+
+
+def _is_tone_negated(text: str, pos: int) -> bool:
+    """命中关键词位置的前 5 个字符里若出现否定词（如「别那么严肃」），视为负向。"""
+    if pos <= 0:
+        return False
+    window = text[max(0, pos - 5):pos]
+    return any(neg in window for neg in _TONE_NEGATION_PREFIXES)
+
+
+def parse_explicit_tone(message: str) -> str:
+    """从学生消息抽取显式的语气指令。返回 '' 表示没显式说。
+
+    规则：
+      1) 同时命中多个关键词时，取**位置最靠后**的（更接近本轮真实意图）；
+      2) 命中位置前 5 字符里若有否定词（别 / 不要 / 不那么），跳过该关键词
+         （例：「别那么严肃」不算 strict）。
+    """
+    if not message:
+        return ""
+    text = message.lower()
+    best_pos = -1
+    best_tone = ""
+    for tone, triggers in _TONE_TRIGGERS:
+        for kw in triggers:
+            kw_l = kw.lower()
+            pos = text.rfind(kw_l)
+            if pos < 0:
+                continue
+            if _is_tone_negated(text, pos):
+                continue
+            if pos > best_pos:
+                best_pos = pos
+                best_tone = tone
+    return best_tone
+
+
+def _default_tone_for(reply_strategy: str, intent: str) -> str:
+    """未指定时按 reply_strategy/intent 推一个默认 tone。"""
+    rs = (reply_strategy or "").lower()
+    if rs == "challenge":
+        return "strict"
+    if rs == "progressive":
+        return "warm"
+    if rs == "teach_concept":
+        return "coaching"
+    if intent in ("idea_brainstorm", "general_chat"):
+        return "warm"
+    if intent in ("pressure_test", "competition_prep"):
+        return "strict"
+    return "cool"
+
+
+def _last_user_messages(conv: list, limit: int = 5) -> list[str]:
+    if not conv:
+        return []
+    return [
+        str(m.get("content", "")) for m in conv[-(limit * 2):]
+        if isinstance(m, dict) and m.get("role") == "user"
+    ][-limit:]
+
+
+def resolve_tone_for_state(
+    state: dict,
+    reply_strategy: str = "",
+    intent: str = "",
+) -> tuple[str, str]:
+    """
+    返回 (tone, origin)。origin ∈ {explicit, sticky, project_state, default, forced_strict, forced_warm}.
+
+    优先级：
+      1) 学生本轮消息显式指令
+      2) 最近 5 条历史用户消息里最近一次显式指令（粘性）
+      3) project_state.preferred_tone
+      4) 默认（按 reply_strategy / intent 推）
+    高风险场景（finance_advisory.triggered / 高 H 风险）→ 强制 strict 覆盖；
+    探索期（exploration_phase=direction）→ 禁用 strict，自动降到 warm/coaching。
+    """
+    msg = str(state.get("message") or "")
+    project_state = state.get("project_state") or {}
+
+    tone = parse_explicit_tone(msg)
+    origin = "explicit" if tone else ""
+
+    if not tone:
+        for past in reversed(_last_user_messages(state.get("conversation_messages") or [], limit=5)):
+            t = parse_explicit_tone(past)
+            if t:
+                tone, origin = t, "sticky"
+                break
+
+    if not tone:
+        ps_tone = str(project_state.get("preferred_tone") or "").strip().lower()
+        if ps_tone in VALID_TONES:
+            tone, origin = ps_tone, "project_state"
+
+    if not tone:
+        tone = _default_tone_for(reply_strategy, intent)
+        origin = origin or "default"
+
+    # ── 安全闸门 ──
+    diag = state.get("diagnosis") or {}
+    triggered_ids = {
+        str(r.get("id") or "").upper()
+        for r in (diag.get("triggered_rules") or []) if isinstance(r, dict)
+    }
+    high_risk = bool(state.get("finance_advisory", {}).get("triggered")) or bool(
+        triggered_ids & {"H7", "H11"}
+    )
+    if high_risk and tone != "strict":
+        tone, origin = "strict", "forced_strict"
+
+    exploration_phase = (state.get("exploration_state") or {}).get("phase", "")
+    if exploration_phase == "direction" and tone == "strict":
+        tone, origin = "warm", "forced_warm"
+
+    return tone, origin
+
+
+def resolve_judge_for_state(state: dict) -> JudgePersona | None:
+    """挑选当前应注入的评委 persona。"""
+    msg = str(state.get("message") or "")
+    mode = str(state.get("mode") or "")
+    competition_type = str(state.get("competition_type") or "")
+    project_state = state.get("project_state") or {}
+
+    sticky_id = str(state.get("competition_judge_id") or project_state.get("competition_judge_id") or "")
+    if not sticky_id:
+        for past in reversed(_last_user_messages(state.get("conversation_messages") or [], limit=5)):
+            from app.services.competition_judges import parse_explicit_judge as _peek
+            past_judge = _peek(past)
+            if past_judge:
+                sticky_id = past_judge.id
+                break
+
+    return pick_judge(
+        msg,
+        mode=mode,
+        competition_type=competition_type,
+        sticky_judge_id=sticky_id,
+    )
+
+
 def router_agent(state: WorkflowState) -> dict:
     conv = state.get("conversation_messages", [])
     mode = state.get("mode", "coursework")
@@ -2278,6 +2655,19 @@ def router_agent(state: WorkflowState) -> dict:
         state.get("exploration_state"), message, kg_entities, conv,
     )
 
+    # Judge + tone resolution（不依赖 dim_results / 重型上下文，可在 router 阶段完成）
+    judge_persona = resolve_judge_for_state(state)
+    judge_block = format_judge_for_advisor(judge_persona) if judge_persona else ""
+    competition_meta: dict = {}
+    if judge_persona:
+        competition_meta = {
+            "active_judge": judge_persona.id,
+            "active_judge_name": judge_persona.name,
+            "active_judge_archetype": judge_persona.archetype,
+        }
+
+    tone, tone_origin = resolve_tone_for_state(state, intent=c["intent"])
+
     return {
         "intent": c["intent"],
         "intent_confidence": c["confidence"],
@@ -2290,6 +2680,11 @@ def router_agent(state: WorkflowState) -> dict:
         "conversation_continuation_mode": _conversation_continuation_mode(state),
         "dim_activations": dim_activations,
         "exploration_state": exploration_state,
+        "competition": competition_meta,
+        "competition_judge_id": judge_persona.id if judge_persona else "",
+        "active_judge_persona_block": judge_block,
+        "preferred_tone": tone,
+        "tone_origin": tone_origin,
         "agents_called": ["router"],
         "nodes_visited": ["router"],
     }
@@ -2847,6 +3242,130 @@ def _merge_historical_entities(
     return list(seen.values()), list(seen_rels.values()), new_count
 
 
+def _latest_assistant_trace(state: WorkflowState) -> dict:
+    """从 conversation_messages 倒序找到最近一条带 agent_trace 的 assistant 消息，
+    返回其 agent_trace（dict）。供 carry-forward 使用。"""
+    conv = state.get("conversation_messages") or []
+    if not isinstance(conv, list):
+        return {}
+    for hm in reversed(conv):
+        if not isinstance(hm, dict):
+            continue
+        if hm.get("role") != "assistant":
+            continue
+        trace = hm.get("agent_trace")
+        if isinstance(trace, dict) and trace:
+            return trace
+    return {}
+
+
+def _carried_heavy_components(state: WorkflowState) -> dict:
+    """供 shallow / learning_concept 等轻量分支使用：返回上一轮 assistant_trace 中
+    重计算字段（kg_analysis / 超图 / RAG / Neo4j 命中 等）的 carry-forward 拷贝。
+    本轮没跑这些重计算时，把它们带过去，避免前端面板被清空。"""
+    prev = _latest_assistant_trace(state)
+    return {
+        "carried_kg_analysis": prev.get("kg_analysis") if isinstance(prev.get("kg_analysis"), dict) else None,
+        "carried_hypergraph_insight": prev.get("hypergraph_insight") if isinstance(prev.get("hypergraph_insight"), dict) else None,
+        "carried_hypergraph_student": prev.get("hypergraph_student") if isinstance(prev.get("hypergraph_student"), dict) else None,
+        "carried_hyper_consistency_issues": prev.get("hyper_consistency_issues") if isinstance(prev.get("hyper_consistency_issues"), list) else None,
+        "carried_rag_cases": prev.get("rag_cases") if isinstance(prev.get("rag_cases"), list) else None,
+        "carried_rag_enrichment_insight": prev.get("rag_enrichment_insight") if isinstance(prev.get("rag_enrichment_insight"), str) else None,
+        "carried_neo4j_graph_hits": prev.get("neo4j_graph_hits") if isinstance(prev.get("neo4j_graph_hits"), list) else None,
+    }
+
+
+def _carry_forward_general_chat_state(state: WorkflowState) -> dict:
+    """general_chat 轻量分支：跳过 RAG/KG/超图等 LLM 重计算，但把上一轮的关键分析
+    结果原样带过来，前端就能继续展示评分/超图/认知，而不是空面板。"""
+    intent = state.get("intent", "general_chat")
+    msg = state.get("message", "")
+
+    prev = _latest_assistant_trace(state)
+    project_state = ensure_project_cognition(state.get("project_state"))
+    prev_track_vector = project_state.get("track_vector") or {}
+    prev_track_meta = project_state.get("track_inference_meta") or {}
+    prev_stage = project_state.get("project_stage_v2") or "structured"
+
+    diagnosis = prev.get("diagnosis") or {}
+    if not isinstance(diagnosis, dict):
+        diagnosis = {}
+    next_task = prev.get("next_task") or {}
+    if not isinstance(next_task, dict):
+        next_task = {}
+    kg_analysis = prev.get("kg_analysis") or {}
+    if not isinstance(kg_analysis, dict):
+        kg_analysis = _default_kg()
+    hyper_insight = prev.get("hypergraph_insight") or {}
+    hyper_student = prev.get("hypergraph_student") or {}
+    hyper_consistency = prev.get("hyper_consistency_issues") or []
+    rag_cases = list(prev.get("rag_cases") or [])
+    rag_enrichment_insight = str(prev.get("rag_enrichment_insight") or "")
+    challenge_strategies = list(prev.get("challenge_strategies") or [])
+    pressure_test_trace = prev.get("pressure_test_trace") or {}
+    if not isinstance(pressure_test_trace, dict):
+        pressure_test_trace = {}
+    ability_subgraphs_carry = list(prev.get("ability_subgraphs") or [])
+    ontology_grounding_carry = prev.get("ontology_grounding") if isinstance(prev.get("ontology_grounding"), dict) else {}
+    web_search_result = prev.get("web_search") or prev.get("web_search_result") or {}
+    if not isinstance(web_search_result, dict):
+        web_search_result = {}
+    neo4j_graph_hits = list(prev.get("neo4j_graph_hits") or [])
+    category = str(prev.get("category") or "")
+
+    refresh_meta = {
+        "intent": intent,
+        "carried": True,
+        "carried_reason": "general_chat_lightweight",
+        "carried_from_turn": int(prev.get("turn_index") or prev.get("submission_index") or 0) if isinstance(prev, dict) else 0,
+        "fresh_components": ["llm_reply"],
+        "carried_components": [
+            "diagnosis",
+            "kg_analysis",
+            "hypergraph_insight",
+            "hypergraph_student",
+            "rag_cases",
+            "neo4j_graph_hits",
+            "challenge_strategies",
+            "track_vector",
+            "ability_subgraphs",
+        ],
+        "message_preview": str(msg or "")[:80],
+    }
+
+    logger.info(
+        "gather_context: general_chat carry-forward (prev_diag=%s prev_hyper_ok=%s prev_rag=%d)",
+        bool(diagnosis), bool(isinstance(hyper_student, dict) and hyper_student.get("ok")),
+        len(rag_cases),
+    )
+
+    return {
+        "diagnosis": diagnosis,
+        "next_task": next_task,
+        "category": category,
+        "track_vector": prev_track_vector,
+        "project_stage_v2": prev_stage,
+        "track_inference_meta": prev_track_meta,
+        "kg_analysis": kg_analysis,
+        "rag_cases": rag_cases,
+        "rag_context": "",
+        "rag_enrichment_insight": rag_enrichment_insight,
+        "kb_utilization": prev.get("kb_utilization") or {},
+        "neo4j_graph_hits": neo4j_graph_hits,
+        "web_search_result": web_search_result,
+        "hypergraph_insight": hyper_insight,
+        "hypergraph_student": hyper_student,
+        "hyper_consistency_issues": hyper_consistency,
+        "challenge_strategies": challenge_strategies,
+        "pressure_test_trace": pressure_test_trace,
+        "ability_subgraphs": ability_subgraphs_carry,
+        "ontology_grounding": ontology_grounding_carry,
+        "needs_clarification": False,
+        "analysis_refresh": refresh_meta,
+        "nodes_visited": ["gather_context_carry_forward"],
+    }
+
+
 def gather_context_node(state: WorkflowState) -> dict:
     """Layer 1: Static Foundation + Conditional Enhancement.
 
@@ -2867,7 +3386,11 @@ def gather_context_node(state: WorkflowState) -> dict:
     is_file = "[上传文件:" in msg
 
     if intent == "general_chat" and not is_file and not _is_score_request_message(msg) and not _is_eval_followup_message(msg):
-        return {"nodes_visited": ["gather_context"]}
+        # 多轮稳定性：general_chat 轮次不再整段空返回，否则前端分析面板会“凭空清空”，
+        # 体感像系统不更新。这里只跳过 LLM 重计算（RAG/KG/超图分析），但把上一轮非空的
+        # 诊断/认知/超图/KG 等结果 carry-forward，并打上 analysis_refresh.carried 标记，
+        # 让前端能区分“本轮未刷新”与“数据丢失”。
+        return _carry_forward_general_chat_state(state)
 
     # ────────────────────────────────────────────────────────────────
     # STATIC: Diagnosis Engine (rule-based, deterministic, <50ms)
@@ -2901,6 +3424,34 @@ def gather_context_node(state: WorkflowState) -> dict:
     except Exception:
         pass
     cat = infer_category(cumulative_text or msg)
+    project_state = ensure_project_cognition(state.get("project_state"))
+    inferred_track = infer_track_vector(
+        msg,
+        diagnosis=diag_data,
+        category=cat,
+        competition_type=comp_type,
+        structured_signals=struct_signals,
+    )
+    # 单源平滑：本节点只产出“本轮推断的原始 track_vector + 置信度”，真正的惯性/分档/
+    # streak 处理统一交给 main.py 里的 merge_track_vector 完成，避免双重平滑导致光谱
+    # 长期粘在旧值附近。
+    inferred_tv = inferred_track.get("track_vector") if isinstance(inferred_track, dict) else {}
+    inferred_tv = inferred_tv if isinstance(inferred_tv, dict) else {}
+    confidence = float(inferred_track.get("confidence") or 0.0)
+    track_vector = {
+        "innov_venture": float(inferred_tv.get("innov_venture") or 0.0),
+        "biz_public": float(inferred_tv.get("biz_public") or 0.0),
+        "source": str(inferred_tv.get("source") or "inferred"),
+        "updated_at": str(inferred_tv.get("updated_at") or ""),
+    }
+    project_stage_v2 = infer_project_stage_v2(diag_data, project_state)
+    track_meta = {
+        **(project_state.get("track_inference_meta") if isinstance(project_state.get("track_inference_meta"), dict) else {}),
+        "confidence": round(confidence, 4),
+        "source_mix": inferred_track.get("source_mix") if isinstance(inferred_track.get("source_mix"), dict) else {},
+        "last_reason": str(inferred_track.get("reason") or ""),
+        "last_evidence": list(inferred_track.get("evidence") or [])[:6],
+    }
     rules = diag_data.get("triggered_rules", []) or []
     rule_ids = [r.get("id", "") for r in rules if isinstance(r, dict)]
     top_rule = _top_triggered_rule(diag_data, cumulative_text or msg)
@@ -2957,29 +3508,80 @@ def gather_context_node(state: WorkflowState) -> dict:
         max_results=3,
         fallacy_label=top_fallacy,
         edge_types=preferred_edge_types,
+        track_vector=track_vector,
+        project_stage=project_stage_v2,
+        competition_type=comp_type,
+    )
+
+    # 能力子图：根据本轮诊断 / 光谱 / 阶段 / 意图选 1~2 个，
+    # 让超图、Neo4j 检索、prompt 注入聚焦同一组本体节点。
+    ability_subgraphs_payload = select_ability_subgraphs(
+        message=msg,
+        diagnosis=diag_data,
+        track_vector=track_vector,
+        project_stage=project_stage_v2,
+        intent=intent,
+        max_results=2,
+    )
+    # 运行时本体接入：基于诊断 + 子图，算出本轮“覆盖 vs 缺失”。
+    # 注：完整路径下面会用最终 KG 重新算一遍，这里先用空 KG 兜底，避免轻量分支返回空 grounding。
+    ontology_grounding_seed = build_ontology_grounding(
+        diagnosis=diag_data,
+        kg_analysis=None,
+        ability_subgraphs=ability_subgraphs_payload,
+        user_message=msg,
+        stage_v2=project_stage_v2,
     )
 
     if _should_shallow_gather(state):
+        carried = _carried_heavy_components(state)
+        kg_for_clarify = carried.get("carried_kg_analysis") or _default_kg()
         clarify = _assess_clarification_need({
             **state,
             "diagnosis": diag_data,
-            "kg_analysis": _default_kg(),
+            "kg_analysis": kg_for_clarify,
         })
-        pressure_trace = _build_pressure_test_trace(diag_data, strategies, {}, msg)
+        pressure_trace = _build_pressure_test_trace(
+            diag_data, strategies, {}, msg,
+            tone=str(state.get("preferred_tone") or "cool"),
+        )
+        # 浅层 gather 也保留上一轮的重型组件，避免“跳过 LLM 抽取 ⇒ 面板清空”。
         return {
             "diagnosis": diag_data,
             "next_task": next_task,
             "category": cat,
-            "kg_analysis": _default_kg(),
-            "rag_cases": [],
+            "track_vector": track_vector,
+            "project_stage_v2": project_stage_v2,
+            "track_inference_meta": track_meta,
+            "kg_analysis": carried.get("carried_kg_analysis") or _default_kg(),
+            "rag_cases": carried.get("carried_rag_cases") or [],
             "rag_context": "",
-            "rag_enrichment_insight": "",
+            "rag_enrichment_insight": carried.get("carried_rag_enrichment_insight") or "",
             "web_search_result": {},
-            "hypergraph_insight": {},
-            "hypergraph_student": {},
-            "hyper_consistency_issues": [],
+            "hypergraph_insight": carried.get("carried_hypergraph_insight") or {},
+            "hypergraph_student": carried.get("carried_hypergraph_student") or {},
+            "hyper_consistency_issues": carried.get("carried_hyper_consistency_issues") or [],
+            "neo4j_graph_hits": carried.get("carried_neo4j_graph_hits") or [],
             "challenge_strategies": strategies,
             "pressure_test_trace": pressure_trace,
+            "ability_subgraphs": ability_subgraphs_payload,
+            "ontology_grounding": build_ontology_grounding(
+                diagnosis=diag_data,
+                kg_analysis=carried.get("carried_kg_analysis"),
+                ability_subgraphs=ability_subgraphs_payload,
+                user_message=msg,
+                stage_v2=project_stage_v2,
+            ),
+            "analysis_refresh": {
+                "intent": intent,
+                "carried": True,
+                "carried_reason": "shallow_gather",
+                "fresh_components": ["diagnosis", "track_vector", "challenge_strategies", "ability_subgraphs", "ontology_grounding"],
+                "carried_components": [
+                    k for k in ("kg_analysis", "hypergraph_insight", "hypergraph_student",
+                                "rag_cases", "neo4j_graph_hits") if carried.get(f"carried_{k}")
+                ],
+            },
             **clarify,
             "nodes_visited": ["gather_context"],
         }
@@ -3000,9 +3602,11 @@ def gather_context_node(state: WorkflowState) -> dict:
         _lw_kb_util: dict = {}
         if _rag is not None and _rag.case_count > 0:
             try:
+                _lw_sub_keys = [sg.get("id") for sg in (ability_subgraphs_payload or []) if isinstance(sg, dict) and sg.get("id")]
                 rag_cases = _rag.retrieve(
                     msg[:500], top_k=3, category_filter=cat or None,
                     exclude_ids=_history_case_ids or None,
+                    subgraph_filter=_lw_sub_keys or None,
                 )
                 # Neo4j enrichment for lightweight path too
                 if _graph_service and rag_cases:
@@ -3042,22 +3646,46 @@ def gather_context_node(state: WorkflowState) -> dict:
                         kg_result["kg_grounding"] = kg_nodes
             except Exception:
                 pass
+        # learning_concept 轻量分支：跳过超图 LLM 抽取，把上一轮项目的超图/认知 carry 过来，
+        # 否则学生在项目讨论途中问一句“什么是 CAC”就会让分析面板瞬间归零。
+        carried = _carried_heavy_components(state)
         return {
             "diagnosis": diag_data,
             "next_task": next_task,
             "category": cat,
-            "kg_analysis": kg_result,
-            "rag_cases": rag_cases,
+            "track_vector": track_vector,
+            "project_stage_v2": project_stage_v2,
+            "track_inference_meta": track_meta,
+            "kg_analysis": kg_result if (kg_result and kg_result.get("entities")) else (carried.get("carried_kg_analysis") or kg_result),
+            "rag_cases": rag_cases or (carried.get("carried_rag_cases") or []),
             "rag_context": rag_ctx,
-            "rag_enrichment_insight": rag_ei,
+            "rag_enrichment_insight": rag_ei or (carried.get("carried_rag_enrichment_insight") or ""),
             "kb_utilization": _lw_kb_util,
             "web_search_result": {},
-            "hypergraph_insight": {},
-            "hypergraph_student": {},
-            "hyper_consistency_issues": [],
+            "hypergraph_insight": carried.get("carried_hypergraph_insight") or {},
+            "hypergraph_student": carried.get("carried_hypergraph_student") or {},
+            "hyper_consistency_issues": carried.get("carried_hyper_consistency_issues") or [],
+            "neo4j_graph_hits": carried.get("carried_neo4j_graph_hits") or [],
             "challenge_strategies": strategies,
             "pressure_test_trace": {},
             "needs_clarification": False,
+            "ability_subgraphs": ability_subgraphs_payload,
+            "ontology_grounding": build_ontology_grounding(
+                diagnosis=diag_data,
+                kg_analysis=carried.get("carried_kg_analysis"),
+                ability_subgraphs=ability_subgraphs_payload,
+                user_message=msg,
+                stage_v2=project_stage_v2,
+            ),
+            "analysis_refresh": {
+                "intent": intent,
+                "carried": True,
+                "carried_reason": "learning_concept_lightweight",
+                "fresh_components": ["diagnosis", "track_vector", "rag_cases", "ability_subgraphs", "ontology_grounding"],
+                "carried_components": [
+                    k for k in ("hypergraph_insight", "hypergraph_student", "neo4j_graph_hits") if carried.get(f"carried_{k}")
+                ],
+            },
             "nodes_visited": ["gather_context"],
         }
 
@@ -3075,10 +3703,13 @@ def gather_context_node(state: WorkflowState) -> dict:
         if cat:
             tag_filter.append(f"category:{cat}")
         rag_top_k = 5 if intent in ("market_competitor", "competition_prep", "learning_concept", "idea_brainstorm") else 4
+        # 子图加权：把 select_ability_subgraphs 的 id（如 ["innovation_evaluation"]）传给检索层
+        _subgraph_keys = [sg.get("id") for sg in (ability_subgraphs_payload or []) if isinstance(sg, dict) and sg.get("id")]
         cases = _rag.retrieve(
             msg[:1000], top_k=rag_top_k, category_filter=cat or None,
             tags=tag_filter or None, exclude_ids=_history_case_ids or None,
             competition_type=comp_type or None,
+            subgraph_filter=_subgraph_keys or None,
         )
         retrieval_mode = cases[0].get("retrieval_mode", "auto") if cases else "auto"
         complementary_ids: list[str] = []
@@ -3706,6 +4337,9 @@ def gather_context_node(state: WorkflowState) -> dict:
         max_results=3,
         fallacy_label=top_fallacy,
         edge_types=selected_edge_types,
+        track_vector=track_vector,
+        project_stage=project_stage_v2,
+        competition_type=comp_type,
     )
 
     clarify = _assess_clarification_need({
@@ -3716,6 +4350,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     pressure_trace = _build_pressure_test_trace(
         diag_data, strategies, collected.get("hypergraph_insight", {}), msg,
         consistency_issues=hyper_student.get("consistency_issues", []) if isinstance(hyper_student, dict) else [],
+        tone=str(state.get("preferred_tone") or "cool"),
     )
 
     # V2: refine dimension activations with actual data
@@ -3775,21 +4410,56 @@ def gather_context_node(state: WorkflowState) -> dict:
     # Extract student identity from KG if present
     _student_identity = kg.get("student_identity") if isinstance(kg, dict) else None
 
+    # 当某些重型组件本轮没跑（典型：超图 LLM、Neo4j 图检索），从上一轮 carry 一份过来，
+    # 否则前端多轮面板会出现“跳一下空”的现象。
+    _carried = _carried_heavy_components(state)
+    final_hyper_student = hyper_student if (isinstance(hyper_student, dict) and hyper_student.get("ok")) else (_carried.get("carried_hypergraph_student") or hyper_student)
+    final_hyper_insight = collected.get("hypergraph_insight") or _carried.get("carried_hypergraph_insight") or {}
+    final_neo4j_hits = neo4j_graph_hits or _carried.get("carried_neo4j_graph_hits") or []
+
+    fresh_components = ["diagnosis", "track_vector", "challenge_strategies", "kg_analysis"]
+    carried_components: list[str] = []
+    if _need_hyper_student:
+        fresh_components.append("hypergraph_student")
+    elif _carried.get("carried_hypergraph_student"):
+        carried_components.append("hypergraph_student")
+    if _need_hyper_teaching:
+        fresh_components.append("hypergraph_insight")
+    elif _carried.get("carried_hypergraph_insight"):
+        carried_components.append("hypergraph_insight")
+    if _need_neo4j_graph and neo4j_graph_hits:
+        fresh_components.append("neo4j_graph_hits")
+    elif _carried.get("carried_neo4j_graph_hits"):
+        carried_components.append("neo4j_graph_hits")
+    if collected.get("rag_cases"):
+        fresh_components.append("rag_cases")
+
+    analysis_refresh = {
+        "intent": intent,
+        "carried": bool(carried_components),
+        "carried_reason": "heavy_path_partial_skip" if carried_components else "",
+        "fresh_components": fresh_components,
+        "carried_components": carried_components,
+    }
+
     return {
         "diagnosis": diag_data,
         "next_task": next_task,
         "category": cat,
+        "track_vector": track_vector,
+        "project_stage_v2": project_stage_v2,
+        "track_inference_meta": track_meta,
         "kg_analysis": kg,
         "rag_cases": collected.get("rag_cases", []),
         "rag_context": collected.get("rag_context", ""),
         "rag_enrichment_insight": collected.get("rag_enrichment_insight", ""),
         "kb_utilization": collected.get("kb_utilization", {}),
-        "neo4j_graph_hits": neo4j_graph_hits,
+        "neo4j_graph_hits": final_neo4j_hits,
         "incremental_stats": incremental_stats,
         "web_search_result": collected.get("web_search_result", {}),
-        "hypergraph_insight": collected.get("hypergraph_insight", {}),
-        "hypergraph_student": hyper_student,
-        "hyper_consistency_issues": hyper_student.get("consistency_issues", []) if isinstance(hyper_student, dict) else [],
+        "hypergraph_insight": final_hyper_insight,
+        "hypergraph_student": final_hyper_student,
+        "hyper_consistency_issues": final_hyper_student.get("consistency_issues", []) if isinstance(final_hyper_student, dict) else [],
         "challenge_strategies": strategies,
         "pressure_test_trace": pressure_trace,
         "dim_activations": dim_activations,
@@ -3803,6 +4473,15 @@ def gather_context_node(state: WorkflowState) -> dict:
         "_l1_hyper_teaching_ran": _need_hyper_teaching,
         "_l1_hyper_student_ran": _need_hyper_student,
         "_l1_neo4j_graph_ran": _need_neo4j_graph,
+        "ability_subgraphs": ability_subgraphs_payload,
+        "ontology_grounding": build_ontology_grounding(
+            diagnosis=diag_data,
+            kg_analysis=kg,
+            ability_subgraphs=ability_subgraphs_payload,
+            user_message=msg,
+            stage_v2=project_stage_v2,
+        ),
+        "analysis_refresh": {**analysis_refresh, "fresh_components": fresh_components + ["ability_subgraphs", "ontology_grounding"]},
         **clarify,
         "nodes_visited": ["gather_context"],
     }
@@ -4262,7 +4941,7 @@ def _build_learning_tutor_reply(state: dict, structured: bool = True) -> tuple[s
         "competition": "你现在还需要帮学生理解这个概念在竞赛评审中的权重和评委判断标准。",
         "learning": "你现在还需要帮学生理解这个概念在项目实操中如何验证，做完后该看什么信号判断自己学会了。",
     }.get(mode, "")
-    tutor_comp_hint = _get_competition_hint(state.get("competition_type", ""), "tutor", state.get("category", ""))
+    tutor_comp_hint = _oriented_hint(state, "tutor")
     if tutor_comp_hint:
         _tutor_mode_hint += f"\n{tutor_comp_hint}"
 
@@ -4769,6 +5448,8 @@ def _write_dimension(dim: str, state: dict) -> dict:
     ctx = _build_dim_context(dim, state)
     msg = state.get("message", "")
     mode = state.get("mode", "coursework")
+    writer_role = DIM_OWNERSHIP.get(dim, {}).get("writer", "coach")
+    oriented_hint = _oriented_hint(state, writer_role)
 
     mode_note = {
         "coursework": "教学引导视角",
@@ -4779,7 +5460,8 @@ def _write_dimension(dim: str, state: dict) -> dict:
     result = _llm.chat_text(
         system_prompt=(
             f"你是「{dim_info.get('label', dim)}」分析专家。{mode_note}\n"
-            f"任务：{hint}\n\n"
+            + (f"{oriented_hint}\n\n" if oriented_hint else "")
+            + f"任务：{hint}\n\n"
             "## 分析要求\n"
             "- 200-600字的深度分析，有理有据\n"
             "- **关键**：如果背景信息中有「知识图谱跨项目启发」，你必须至少引用其中一个案例的具体做法来对比或启发学生（例如'类似的「XX」项目把痛点锁定在YY，你也可以考虑…'），不要无视这些信息\n"
@@ -4802,7 +5484,7 @@ def _write_dimension(dim: str, state: dict) -> dict:
         "value": result or "",
         "confidence": 0.75 if result else 0.2,
         "evidence_source": "dim_analysis",
-        "writer": DIM_OWNERSHIP.get(dim, {}).get("writer", "coach"),
+        "writer": writer_role,
         "challenges": [],
         "hyper_context_sent": hyper_ctx_sent,
     }
@@ -4829,7 +5511,7 @@ def _coach_analyze(state: dict) -> dict:
         "learning": "当前是项目教练模式，侧重识别当前阶段最关键的瓶颈，用启发式追问推动思考。",
     }.get(mode, "")
     comp_type = state.get("competition_type", "")
-    coach_comp_hint = _get_competition_hint(comp_type, "coach", state.get("category", ""))
+    coach_comp_hint = _oriented_hint(state, "coach")
     if coach_comp_hint:
         mode_hint += f"\n{coach_comp_hint}"
 
@@ -4945,6 +5627,18 @@ def _coach_analyze(state: dict) -> dict:
     _is_exploring = _inc_stats.get("project_maturity") == "exploring"
     _entity_total = _inc_stats.get("total_accumulated", 0)
 
+    _preferred_tone = str(state.get("preferred_tone") or "cool").lower()
+    if _preferred_tone not in VALID_TONES:
+        _preferred_tone = "cool"
+    _tone_descriptor = TONE_DESCRIPTORS.get(_preferred_tone, TONE_DESCRIPTORS["cool"])
+    _tone_instruction = (
+        f"\n## 本轮追问语气\n"
+        f"- preferred_tone={_preferred_tone}\n"
+        f"- 风格指南：{_tone_descriptor}\n"
+        f"- 请按上述风格重写 guiding_questions 的语言表达（保持信息密度与追问深度，只换语气包装）\n"
+        f"- 如果学生情绪明显低落或处于探索期，遇到 strict 等高压语气请自动安全降档为 warm/coaching\n"
+    )
+
     if mode == "coursework":
         _exploring_hint = ""
         if _is_exploring:
@@ -4982,6 +5676,7 @@ def _coach_analyze(state: dict) -> dict:
                 "- 如果学生问的是概念、写法或框架，不要把回答写成大诊断报告，优先讲清楚这一题\n"
                 "- 如果有案例、联网或图谱依据，可在 source_note 里自然交代\n"
                 + _exploring_hint
+                + _tone_instruction
             ),
             user_prompt=(
                 f"模式提示: {mode_hint}\n"
@@ -5092,6 +5787,7 @@ def _coach_analyze(state: dict) -> dict:
                 "- 如果你建议做验证、访谈、搜索或比较，请明确：验证哪一个判断、找哪类人、看哪个行为信号；不要泛泛说“做问卷”\n"
                 "- 你不是行动规划师，不要输出详细执行方案\n"
                 "- 如果学生目前还只是提出一个大方向或大赛道，先帮他收敛场景、用户和切口，不要一上来就像成熟项目一样宣布“最大瓶颈”\n"
+                + _tone_instruction
             ),
             user_prompt=(
                 f"模式提示: {mode_hint}\n"
@@ -5206,7 +5902,7 @@ def _analyst_analyze(state: dict) -> dict:
         "coursework": "你同时兼顾教学视角：解释每个风险为什么算风险，帮学生建立风险判断的思维框架。",
         "learning": "你同时兼顾推进视角：按紧迫度排序风险，指出最小可行修复路径。",
     }.get(mode, "")
-    analyst_comp_hint = _get_competition_hint(state.get("competition_type", ""), "analyst", state.get("category", ""))
+    analyst_comp_hint = _oriented_hint(state, "analyst")
     if analyst_comp_hint:
         _analyst_mode_hint += f"\n{analyst_comp_hint}"
 
@@ -5324,6 +6020,17 @@ def _advisor_analyze(state: dict) -> dict:
     _comp_adv_ontology = _get_competition_ontology_context(comp_type)
     if _comp_adv_ontology:
         comp_hint += f"\n\n{_comp_adv_ontology}"
+    advisor_oriented_hint = _oriented_hint(state, "advisor")
+    if advisor_oriented_hint:
+        comp_hint = (advisor_oriented_hint + ("\n\n" + comp_hint if comp_hint else "")).strip()
+
+    # 答辩评委角色卡注入：竞赛模式下，把当前选中的评委 persona 拼进 system prompt
+    judge_block = str(state.get("active_judge_persona_block") or "").strip()
+    judge_directory = format_judge_directory() if mode == "competition" else ""
+    if judge_block:
+        comp_hint = (comp_hint + ("\n\n" + judge_block if comp_hint else judge_block)).strip()
+    if judge_directory:
+        comp_hint = (comp_hint + ("\n\n" + judge_directory if comp_hint else judge_directory)).strip()
 
     n_rules = len(diag.get("triggered_rules", []) or [])
     quality_hint = ""
@@ -5405,6 +6112,7 @@ def _advisor_analyze(state: dict) -> dict:
         "ppt_adjustments": ppt_adjustments,
         "prize_readiness": prize_readiness,
         "hyper_context_sent": hyper_advisor_ctx,
+        "active_judge": str(state.get("competition_judge_id") or ""),
     }
 
 
@@ -5441,7 +6149,7 @@ def _grader_analyze(state: dict) -> dict:
     advisor_out = state.get("advisor_output", {})
     hs = state.get("hypergraph_student", {})
     hyper_grader_ctx = _fmt_hyper_for_agent(hs, state.get("hypergraph_insight", {}), "grader", incremental_stats=state.get("incremental_stats"))
-    grader_comp_hint = _get_competition_hint(state.get("competition_type", ""), "grader", state.get("category", ""))
+    grader_comp_hint = _oriented_hint(state, "grader")
 
     # Fallback: if current turn has no rubric, pull from conversation history
     if (not rubric or overall is None):
@@ -5479,6 +6187,39 @@ def _grader_analyze(state: dict) -> dict:
             "reason": str(r.get("reason", "")),
         })
     rows.sort(key=lambda item: item["score"])
+    comp_profile = resolve_competition_rubric(
+        str(state.get("competition_type") or ""),
+        state.get("track_vector"),
+        _state_stage(state),
+    )
+    item_map = comp_profile.get("item_map") if isinstance(comp_profile.get("item_map"), dict) else {}
+    resolved_weights = comp_profile.get("weights") if isinstance(comp_profile.get("weights"), dict) else {}
+    structured_breakdown: list[dict[str, Any]] = []
+    for r in rows:
+        dim_key = str(item_map.get(r["item"]) or "")
+        weight_pct = float(resolved_weights.get(dim_key, 0.0) or 0.0)
+        structured_breakdown.append({
+            "item": r["item"],
+            "dimension": dim_key,
+            "weight_pct": round(weight_pct, 2),
+            "score": round(float(r["score"]), 2),
+            "band": score_to_band(float(r["score"])),
+            "reason": r["reason"],
+        })
+    improvement_priority = [
+        {
+            "item": row["item"],
+            "dimension": row["dimension"],
+            "band": row["band"],
+            "weight_pct": row["weight_pct"],
+            "action": f"优先补强 {row['item']} 的证据链与说服力",
+        }
+        for row in sorted(
+            structured_breakdown,
+            key=lambda item: (item["score"], -item["weight_pct"]),
+        )[:3]
+    ]
+    total_band = score_to_band(float(overall or 0))
 
     # Build score text with reason if available
     score_lines = []
@@ -5563,6 +6304,10 @@ def _grader_analyze(state: dict) -> dict:
         "analysis": analysis or "",
         "tools_used": ["rubric_engine", "kg_scores"],
         "hyper_context_sent": hyper_grader_ctx,
+        "band": total_band,
+        "breakdown": structured_breakdown,
+        "improvement_priority": improvement_priority,
+        "resolved_rubric": comp_profile,
     }
 
 
@@ -5577,7 +6322,7 @@ def _planner_analyze(state: dict) -> dict:
 
     hyper_insight = state.get("hypergraph_insight", {})
     hs_missing_ctx = _fmt_hyper_for_agent(hs, hyper_insight, "planner", incremental_stats=state.get("incremental_stats"))
-    planner_comp_hint = _get_competition_hint(state.get("competition_type", ""), "planner", state.get("category", ""))
+    planner_comp_hint = _oriented_hint(state, "planner")
 
     neo4j_planner_ctx = ""
     if _graph_service and kg.get("entities"):
@@ -6632,10 +7377,19 @@ def orchestrator(state: WorkflowState) -> dict:
                         ("- 赛道：" + {"internet_plus": "互联网+", "challenge_cup": "挑战杯", "dachuang": "大创"}.get(state.get("competition_type", ""), "通用") + "\n\n")
                         if state.get("competition_type") else "\n"
                     )
+                    + (
+                        ("\n" + str(state.get("active_judge_persona_block") or "").strip() + "\n\n")
+                        if state.get("active_judge_persona_block") else ""
+                    )
                     if mode == "competition"
                     else "## 项目教练模式额外要求\n"
                     "- 先判断项目阶段，聚焦最关键瓶颈\n"
                     "- 启发式追问优先于直接给答案\n\n"
+                )
+                + (
+                    f"\n## 本轮追问语气（preferred_tone={state.get('preferred_tone','cool')}）\n"
+                    f"- 风格指南：{TONE_DESCRIPTORS.get(str(state.get('preferred_tone') or 'cool'), TONE_DESCRIPTORS['cool'])}\n"
+                    "- 全文遵循以上语气；如学生情绪明显低落，可临时降档为 warm，但禁止凌厉打压\n\n"
                 )
                 + structure_guide
                 + "## 必须做到\n"
@@ -6739,6 +7493,15 @@ def orchestrator(state: WorkflowState) -> dict:
             else "你好！告诉我你的项目想法，我来帮你诊断和分析。"
         )
 
+    # Surface judge / tone trace to main.py 的 agent_trace
+    _competition_existing = state.get("competition") or {}
+    _competition_out = dict(_competition_existing) if isinstance(_competition_existing, dict) else {}
+    _judge_id = str(state.get("competition_judge_id") or "")
+    if _judge_id and "active_judge" not in _competition_out:
+        _competition_out["active_judge"] = _judge_id
+    _competition_out["preferred_tone"] = str(state.get("preferred_tone") or "")
+    _competition_out["tone_origin"] = str(state.get("tone_origin") or "")
+
     return {
         "assistant_message": reply.strip(),
         "conversation_continuation_mode": continuation_mode,
@@ -6746,6 +7509,9 @@ def orchestrator(state: WorkflowState) -> dict:
         "reply_strategy": v2_reply_strategy or state.get("reply_strategy", ""),
         "execution_trace": state.get("execution_trace", {}),
         "exploration_state": state.get("exploration_state", {}),
+        "competition": _competition_out,
+        "preferred_tone": str(state.get("preferred_tone") or ""),
+        "tone_origin": str(state.get("tone_origin") or ""),
         "nodes_visited": ["orchestrator"],
     }
 

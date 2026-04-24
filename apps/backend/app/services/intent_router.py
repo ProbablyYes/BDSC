@@ -13,8 +13,90 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from app.services.llm_client import LlmClient
+from app.services.competition_judges import (
+    parse_explicit_judge as _parse_explicit_judge,
+    load_judges as _load_judges,
+)
 
 llm = LlmClient()
+
+
+# ── Tone library detection（与 graph_workflow.TONE_DESCRIPTORS 对齐） ──
+# 注意：这里只做关键词识别，真正的语气指南文本在 graph_workflow.TONE_DESCRIPTORS
+# 与 challenge_strategies.TONE_DESCRIPTORS 中维护，避免散点。
+
+_TONE_TRIGGERS_LIGHT: list[tuple[str, list[str]]] = [
+    ("strict",   ["严肃", "严厉", "狠一点", "狠点", "凶一点", "凌厉", "压力大", "尖锐", "毒舌"]),
+    ("humorous", ["幽默", "风趣", "搞笑", "轻松一点", "段子", "调侃", "活泼"]),
+    ("warm",     ["温和", "温柔", "温暖", "柔和一点", "别太凶", "舒服一点"]),
+    ("coaching", ["鼓励", "正向", "教练式", "启发", "陪伴"]),
+    ("socratic", ["苏格拉底", "苏格拉底式", "反问", "只反问", "只问不答"]),
+    ("cool",     ["学术", "冷静", "中立", "默认"]),
+]
+
+
+_TONE_NEGATION_PREFIXES = ("别", "不要", "不那么", "不太", "少点", "少一点", "没那么")
+
+
+def _is_negated(text: str, pos: int) -> bool:
+    """命中关键词位置的前 4 个字符里若出现否定词（如「别那么严肃」），视为负向，应跳过。"""
+    if pos <= 0:
+        return False
+    window = text[max(0, pos - 5):pos]
+    return any(neg in window for neg in _TONE_NEGATION_PREFIXES)
+
+
+def detect_preferred_tone(message: str) -> str:
+    """学生消息里若显式指定语气，返回 tone id；否则返回 ''。
+
+    规则：
+      1) 同时命中多个关键词时，取**位置最靠后**的（更接近学生本轮真实意图）；
+      2) 命中位置前 5 字符里若有「别 / 不要 / 不那么」等否定，跳过该关键词
+         （例：「别那么严肃」不算 strict）。
+    """
+    if not message:
+        return ""
+    text = message.lower()
+    best_pos = -1
+    best_tone = ""
+    for tone, triggers in _TONE_TRIGGERS_LIGHT:
+        for kw in triggers:
+            kw_l = kw.lower()
+            pos = text.rfind(kw_l)
+            if pos < 0:
+                continue
+            if _is_negated(text, pos):
+                continue
+            if pos > best_pos:
+                best_pos = pos
+                best_tone = tone
+    return best_tone
+
+
+def detect_competition_judge_id(message: str) -> str:
+    """学生消息里若显式『请扮演 X / 切到 X 视角』，返回 judge.id；否则 ''。"""
+    if not message:
+        return ""
+    judge = _parse_explicit_judge(message, _load_judges())
+    return judge.id if judge else ""
+
+
+def update_session_state_from_message(state: dict, message: str) -> dict:
+    """
+    扫描学生消息，回写两类会话级粘性指令：
+      - state["competition_judge_id"]：竞赛模式答辩评委角色
+      - state["preferred_tone"]：追问语气
+    若本轮未显式指定，保持原值不变（粘性）。返回的是同一 dict（就地更新）。
+    """
+    if not isinstance(state, dict):
+        state = {}
+    judge_id = detect_competition_judge_id(message)
+    if judge_id:
+        state["competition_judge_id"] = judge_id
+    tone = detect_preferred_tone(message)
+    if tone:
+        state["preferred_tone"] = tone
+    return state
 
 # ── Intent definitions ─────────────────────────────────────────────
 

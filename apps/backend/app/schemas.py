@@ -114,6 +114,26 @@ class ProjectSnapshotResponse(BaseModel):
     teacher_feedback: list[dict] = Field(default_factory=list)
     video_analyses: list[dict] = Field(default_factory=list)
     graph_signals: dict = Field(default_factory=dict)
+    track_vector: dict = Field(default_factory=dict)
+    project_stage_v2: str = ""
+    track_history: list[dict] = Field(default_factory=list)
+    track_inference_meta: dict = Field(default_factory=dict)
+
+
+class ProjectCognitionUpdatePayload(BaseModel):
+    track_vector: dict | None = None
+    project_stage_v2: Literal["idea", "structured", "validated", "scale"] | None = None
+    source: Literal["student", "structured", "inferred", "agent", "system"] = "student"
+    reason: str = ""
+
+
+class ProjectCognitionResponse(BaseModel):
+    project_id: str
+    track_vector: dict = Field(default_factory=dict)
+    project_stage_v2: str = ""
+    track_history: list[dict] = Field(default_factory=list)
+    track_inference_meta: dict = Field(default_factory=dict)
+    labels: dict = Field(default_factory=dict)
 
 
 class AnalyzePayload(BaseModel):
@@ -170,6 +190,11 @@ class DialogueTurnResponse(BaseModel):
     pressure_test_trace: dict = Field(default_factory=dict)
     agent_trace: dict = Field(default_factory=dict)
     insight_sources: dict = Field(default_factory=dict)
+    logical_project_id: str = ""
+    track_vector: dict = Field(default_factory=dict)
+    project_stage_v2: str = ""
+    track_history: list = Field(default_factory=list)
+    track_inference_meta: dict = Field(default_factory=dict)
 
 
 class VideoRubricItem(BaseModel):

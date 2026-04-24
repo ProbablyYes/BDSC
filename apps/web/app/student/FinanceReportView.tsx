@@ -67,6 +67,7 @@ export interface FinanceReportViewProps {
 }
 
 const MODULE_ORDER = [
+  "finance_summary",
   "unit_economics",
   "cash_flow",
   "rationality",
@@ -169,6 +170,7 @@ const IconHourglass: React.FC<IconProps> = ({ size }) => (
 );
 
 const MODULE_ICON_COMP: Record<string, React.FC<IconProps>> = {
+  finance_summary: IconBriefcase,
   unit_economics: IconUnitEconomics,
   cash_flow: IconCashFlow,
   rationality: IconScale,
@@ -178,9 +180,9 @@ const MODULE_ICON_COMP: Record<string, React.FC<IconProps>> = {
 };
 
 const VERDICT_LABEL: Record<string, string> = {
-  red: "高风险",
-  yellow: "警戒",
-  green: "合理",
+  red: "重点复核",
+  yellow: "需补假设",
+  green: "已分析",
   gray: "信息不足",
 };
 
@@ -190,7 +192,20 @@ function MetricTable({ outputs }: { outputs: Record<string, unknown> | undefined
     const v = outputs[k];
     if (v === null || v === undefined) return false;
     if (Array.isArray(v) && v.length === 0) return false;
-    if (k === "projection" || k === "all_stages" || k === "all_frameworks" || k === "psm_survey_questions" || k === "checks") return false;
+    if (
+      k === "projection" ||
+      k === "all_stages" ||
+      k === "all_frameworks" ||
+      k === "psm_survey_questions" ||
+      k === "checks" ||
+      k === "analysis_conclusion" ||
+      k === "key_levers" ||
+      k === "cashflow_implications" ||
+      k === "market_implications" ||
+      k === "stream_conclusions" ||
+      k === "key_findings" ||
+      k === "missing_fields"
+    ) return false;
     return true;
   });
   if (keys.length === 0) return null;
@@ -224,6 +239,88 @@ function MetricTable({ outputs }: { outputs: Record<string, unknown> | undefined
         })}
       </tbody>
     </table>
+  );
+}
+
+function AnalysisBlocks({ outputs }: { outputs: Record<string, unknown> | undefined }) {
+  if (!outputs) return null;
+  const analysisConclusion = typeof outputs.analysis_conclusion === "string" ? outputs.analysis_conclusion : "";
+  const keyFindings = Array.isArray(outputs.key_findings) ? outputs.key_findings.filter((v): v is string => typeof v === "string") : [];
+  const streamConclusions = Array.isArray(outputs.stream_conclusions) ? outputs.stream_conclusions.filter((v): v is string => typeof v === "string") : [];
+  const cashflowImplications = Array.isArray(outputs.cashflow_implications) ? outputs.cashflow_implications.filter((v): v is string => typeof v === "string") : [];
+  const marketImplications = Array.isArray(outputs.market_implications) ? outputs.market_implications.filter((v): v is string => typeof v === "string") : [];
+  const keyLevers = Array.isArray(outputs.key_levers) ? outputs.key_levers.filter((v): v is string => typeof v === "string") : [];
+  const missingFields = Array.isArray(outputs.missing_fields) ? outputs.missing_fields.filter((v): v is string => typeof v === "string") : [];
+
+  if (
+    !analysisConclusion &&
+    keyFindings.length === 0 &&
+    streamConclusions.length === 0 &&
+    cashflowImplications.length === 0 &&
+    marketImplications.length === 0 &&
+    keyLevers.length === 0 &&
+    missingFields.length === 0
+  ) {
+    return null;
+  }
+
+  return (
+    <div className="fr-section-analysis">
+      {analysisConclusion && (
+        <div className="fr-section-analysis-main">
+          <div className="fr-section-label">结论</div>
+          <p>{analysisConclusion}</p>
+        </div>
+      )}
+      {keyFindings.length > 0 && (
+        <div className="fr-section-analysis-sub">
+          <div className="fr-section-label">关键判断</div>
+          <ul>
+            {keyFindings.map((item, idx) => <li key={idx}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {streamConclusions.length > 0 && (
+        <div className="fr-section-analysis-sub">
+          <div className="fr-section-label">收入流判断</div>
+          <ul>
+            {streamConclusions.map((item, idx) => <li key={idx}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {cashflowImplications.length > 0 && (
+        <div className="fr-section-analysis-sub">
+          <div className="fr-section-label">现金流影响</div>
+          <ul>
+            {cashflowImplications.map((item, idx) => <li key={idx}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {marketImplications.length > 0 && (
+        <div className="fr-section-analysis-sub">
+          <div className="fr-section-label">市场规模含义</div>
+          <ul>
+            {marketImplications.map((item, idx) => <li key={idx}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {keyLevers.length > 0 && (
+        <div className="fr-section-analysis-sub">
+          <div className="fr-section-label">敏感杠杆</div>
+          <ul>
+            {keyLevers.map((item, idx) => <li key={idx}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {missingFields.length > 0 && (
+        <div className="fr-section-analysis-sub">
+          <div className="fr-section-label">仍需补齐</div>
+          <div className="fr-section-missing">
+            {missingFields.map((field, idx) => <span key={idx} className="fr-advisory-missing-chip">{field}</span>)}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -268,6 +365,7 @@ function ModuleCard({ mod, onJumpBudget }: { mod: Module; onJumpBudget?: (t?: st
       {mod.module === "cash_flow" && (
         <CashFlowChart projection={(mod.outputs?.projection as { month: number; cash: number; revenue: number; net: number }[]) || []} />
       )}
+      <AnalysisBlocks outputs={mod.outputs} />
       <MetricTable outputs={mod.outputs} />
       {mod.suggestions && mod.suggestions.length > 0 && (
         <div className="fr-section-suggestions">
@@ -415,8 +513,8 @@ const FinanceReportView: React.FC<FinanceReportViewProps> = ({
         <div className="fr-report-empty-emoji fin-empty-icon"><IconBriefcase size={36} /></div>
         <div className="fr-report-empty-title">还没有财务分析报告</div>
         <div className="fr-report-empty-desc">
-          结合预算面板 + 对话内容跑 6 个财务建模模块（单位经济 / 现金流 / 合理性 / TAM·SAM·SOM / 定价 /
-          融资节奏），给商业模式做量化体检。
+          结合预算面板 + 对话内容跑 6 个财务建模模块（单位经济 / 现金流 / 假设自检 / TAM·SAM·SOM / 定价 /
+          融资节奏），把计算过程和待补假设拆出来。
         </div>
         <button type="button" className="fr-report-generate-btn" onClick={doGenerate} disabled={!canGenerate}>
           <span className="fin-mod-icon-btn" aria-hidden><IconRocket size={16} /></span>
@@ -450,9 +548,9 @@ const FinanceReportView: React.FC<FinanceReportViewProps> = ({
             {report.industry} · 生成于 {report.generated_at.slice(0, 16).replace("T", " ")}
           </div>
           {report.baseline_meta && report.baseline_meta.source && (
-            <div className="fr-report-baseline-bar" title="行业基准数据的来源与时效">
+            <div className="fr-report-baseline-bar" title="参考资料的来源与时效">
               <span className={`fr-advisory-source-chip fr-source-${report.baseline_meta.source}`}>
-                行业基准：{SOURCE_LABEL[report.baseline_meta.source] || report.baseline_meta.source}
+                参考资料：{SOURCE_LABEL[report.baseline_meta.source] || report.baseline_meta.source}
               </span>
               {report.baseline_meta.updated_at && (
                 <span className="fr-advisory-source-date">
@@ -461,12 +559,12 @@ const FinanceReportView: React.FC<FinanceReportViewProps> = ({
               )}
               {typeof report.baseline_meta.evidence_count === "number" && report.baseline_meta.evidence_count > 0 && (
                 <span className="fr-advisory-source-evidence">
-                  {report.baseline_meta.evidence_count} 条联网证据
+                  {report.baseline_meta.evidence_count} 条外部证据
                 </span>
               )}
               {report.baseline_meta.source !== "web" && (
                 <span className="fr-report-baseline-hint">
-                  重新生成时若数据过期将自动联网刷新
+                  重新生成时若资料过期将自动联网刷新
                 </span>
               )}
             </div>
@@ -474,9 +572,9 @@ const FinanceReportView: React.FC<FinanceReportViewProps> = ({
         </div>
         <div className="fr-report-header-actions">
           <div className="fr-report-verdict-summary">
-            {verdictCounts.green > 0 && <span className="fr-chip-green">{verdictCounts.green} 合理</span>}
-            {verdictCounts.yellow > 0 && <span className="fr-chip-yellow">{verdictCounts.yellow} 警戒</span>}
-            {verdictCounts.red > 0 && <span className="fr-chip-red">{verdictCounts.red} 高风险</span>}
+            {verdictCounts.green > 0 && <span className="fr-chip-green">{verdictCounts.green} 已分析</span>}
+            {verdictCounts.yellow > 0 && <span className="fr-chip-yellow">{verdictCounts.yellow} 需补假设</span>}
+            {verdictCounts.red > 0 && <span className="fr-chip-red">{verdictCounts.red} 重点复核</span>}
             {verdictCounts.gray > 0 && <span className="fr-chip-gray">{verdictCounts.gray} 待补</span>}
           </div>
           <button type="button" className="fr-report-regen-btn" onClick={doGenerate}>

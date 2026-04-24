@@ -29,6 +29,7 @@ class RationaleInput:
     agent: str | None = None
     rule_id: str | None = None
     impact: str = ""
+    source_quote: str = ""  # 原文引用语段（学生提交的真实文本）
 
     def to_dict(self) -> dict[str, Any]:
         return {k: v for k, v in asdict(self).items() if v is not None and v != ""}
@@ -143,6 +144,7 @@ def build_rubric_rationale(
             value=float(sc),
             source_submission_id=sid,
             excerpt=(excerpt or "")[:160],
+            source_quote=excerpt or "",
         )
         for sid, sc, excerpt in sub_scores
     ]
@@ -221,6 +223,7 @@ def build_maturity_field_rationale(
             value=(excerpt or "")[:80] or "—",
             excerpt=excerpt or "",
             source_message_id=mid,
+            source_quote=excerpt or "",
         )
         for slot, excerpt, mid in slot_excerpts
     ]

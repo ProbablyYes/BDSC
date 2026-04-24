@@ -1,36 +1,36 @@
 {
-  "report_id": "016f1a9f-468",
+  "report_id": "4c1864d8-e77",
   "user_id": "99fed9ab-486c-4b22-8329-b3c6466e17d2",
-  "plan_id": "c98d6d00",
+  "plan_id": "eddcf712",
   "project_id": "project-99fed9ab-486c-4b22-8329-b3c6466e17d2",
-  "conversation_id": "3f7426c7-3505-4e07-932f-1b17aa8a4c1c",
+  "conversation_id": "747a4ee1-91ee-4ff1-ab0a-d47bf3423611",
   "industry": "教育",
-  "generated_at": "2026-04-24T12:48:55.270346+08:00",
+  "generated_at": "2026-04-24T18:08:54.085535+08:00",
   "modules": [
     {
       "module": "finance_summary",
       "title": "财务结论摘要",
       "inputs": {},
       "outputs": {
-        "analysis_conclusion": "当前财务模型的主要链路已经闭环，可以开始进入版本结构、敏感性和资源配置优化。",
+        "analysis_conclusion": "当前财务模型已形成主链路，但仍有部分关键假设需要补齐，结论更适合用于校准而不是直接定案。",
         "key_findings": [
-          "单位经济分析（按收入模式分支）：多条收入流之间已经可以形成可读的收入结构，可继续验证各流之间的协同和资源分配",
+          "单位经济分析（按收入模式分支）：当前收入结构已经初步成形，但仍需补关键变量，才能判断每条流对整体模型的真实贡献",
           "现金流推演与 Runway：若维持当前增长轨迹，模型会在第 2 个月进入单月正现金流",
-          "假设自检与口径一致性：公益项目的服务边界、覆盖人数和资金折算口径已经基本闭环",
-          "市场规模 TAM/SAM/SOM：当前模型把可服务市场收敛到 TAM 的 13.3%，说明已经给出了明确服务边界"
+          "假设自检与口径一致性：当前模型已经形成基础公式链条，但仍有部分数字口径尚未闭合",
+          "市场规模 TAM/SAM/SOM：当前模型把可服务市场收敛到 TAM 的 10.0%，说明已经给出了明确服务边界"
         ],
         "missing_fields": []
       },
       "verdict": {
-        "level": "green",
-        "score": 0.82,
-        "reason": "当前财务模型的主要链路已经闭环，可以开始进入版本结构、敏感性和资源配置优化。"
+        "level": "yellow",
+        "score": 0.58,
+        "reason": "当前财务模型已形成主链路，但仍有部分关键假设需要补齐，结论更适合用于校准而不是直接定案。"
       },
-      "framework_explain": "框架是通过单位经济、现金流、假设自检和市场规模四个模块的综合分析，来评估当前商业模式的可行性和稳定性。\n\n本次计算中，我们首先基于给定的ARPU、毛利率、月留存率和CAC等关键假设，计算出LTV为3,170元，Payback为1.6个月，LTV/CAC比为4.88。接着，通过现金流模型，我们发现若保持现有增长速度，公司将在第二个月实现单月正现金流。然而，月留存率的假设基于极小样本，缺乏说服力，需要更多数据支持。\n\n最值得关注的是LTV/CAC比，4.88表明客户生命周期价值显著高于获取成本，这表明商业模式在理论上是可持续的，但需进一步验证留存率假设。\n\n---\n原始讲解：\n这是对单位经济、现金流、假设自检和市场规模四个模块的合成判断，用来回答“当前商业模式意味着什么”。",
+      "framework_explain": "财务分析框架是用于评估创业项目的经济可行性和稳定性。根据提供的数据，我们已经形成了单位经济、现金流、假设自检和市场规模四个模块的基础分析。单位经济分析显示当前收入结构初步成形，但需补关键变量以准确评估各收入流的贡献；现金流推演表明，若保持现有增长，第2个月将实现单月正现金流；假设自检发现部分数字口径尚未闭合；市场规模分析则将服务市场定位于整体市场的10%。最值得关注的是现金流推演，这直接关系到公司的短期财务健康和生存能力。\n\n---\n原始讲解：\n这是对单位经济、现金流、假设自检和市场规模四个模块的合成判断，用来回答“当前商业模式意味着什么”。",
       "suggestions": [
         "把第 2 个月转正的来源拆开，说明是价格提升、用户增长还是成本下降驱动",
         "至少保留三组情景：基线、保守、积极，并说明每组只改了哪些假设",
-        "下一步建议把资金来源拆成可持续收入、一次性资助和不确定资金三类",
+        "年 ARPU 与月价推导结果差异较大，请确认是否包含年付折扣或多档产品——补一条来源说明或计算过程即可",
         "把 TAM、SAM、SOM 分别对应到“总人群 / 可服务人群 / 首年可拿下人群”三层定义",
         "SAM 最好来自明确的地域、品类、渠道或服务能力边界，而不是固定比例"
       ],
@@ -43,42 +43,38 @@
       "title": "财务画像（按收入模式）",
       "inputs": {
         "stream_count": 1,
-        "is_public": true,
+        "is_public": false,
         "industry": "教育"
       },
       "outputs": {
-        "persona_label": "公益可持续型",
-        "dominant_pattern": "grant_funded",
-        "dominant_kind": "public",
+        "persona_label": "增长型 SaaS / C 端",
+        "dominant_pattern": "subscription",
+        "dominant_kind": "growth",
         "kind_mix": {
-          "public": 1.0
+          "growth": 1.0
         },
         "pattern_mix": {
-          "grant_funded": 1.0
+          "subscription": 1.0
         },
-        "total_monthly_revenue": 127500.0,
+        "total_monthly_revenue": 1.0,
         "stream_kpis": [
           {
-            "name": "公益 · 政府/基金资助（AI 自动建立）",
-            "pattern_key": "grant_funded",
-            "kind": "public",
-            "monthly_revenue": 127500.0,
-            "primary_kpi": [
-              "CPB",
-              25.0,
-              "元/人"
-            ],
-            "health": "green",
-            "reason": "在期资助 12 项 × 年额 ¥150,000, 月均 ¥150,000，当前续期假设 70%"
+            "name": "C 端订阅 / 会员（AI 自动建立）",
+            "pattern_key": "subscription",
+            "kind": "growth",
+            "monthly_revenue": 0.0,
+            "primary_kpi": null,
+            "health": "gray",
+            "reason": "缺少月费、月活或付费转化率"
           }
         ]
       },
       "verdict": {
         "level": "green",
         "score": 0.7,
-        "reason": "识别为「公益可持续型」, 共 1 条收入流, 月营收 ¥127,500"
+        "reason": "识别为「增长型 SaaS / C 端」, 共 1 条收入流, 月营收 ¥1"
       },
-      "framework_explain": "财务分析框架是根据项目收入流模式，确定财务画像标签，进而细化财务分析视角。本次计算中，我们根据纯订阅SaaS模式，计算出LTV为3,528元，Payback为11.5个月，LTV/CAC为5.4。其中，月留存率假设仅基于3家试用客户，样本量过小，需进一步验证。此外，现金流分析显示，起始资金80万需覆盖约10个月的净亏损，需关注月净增付费客户数及成本控制，确保现金流健康。\n\n---\n原始讲解：\n**财务画像**根据项目当前的收入流模式分布, 给出「增长型 / B 端 / 平台 / 硬件 / 公益」等画像标签, 后续模块的公式与分析视角会据此分支。",
+      "framework_explain": "财务分析框架是通过项目当前的收入流模式来构建项目的财务画像。根据提供的数据，该项目被定义为“增长型 SaaS / C 端”，主要收入模式为订阅制，但当前的月收入为0，且缺少关键指标如月费、月活跃用户数或付费转化率。最值得关注的数字是0，这表明项目目前没有实际的收入流，需要尽快建立有效的收费机制和用户基础。\n\n---\n原始讲解：\n**财务画像**根据项目当前的收入流模式分布, 给出「增长型 / B 端 / 平台 / 硬件 / 公益」等画像标签, 后续模块的公式与分析视角会据此分支。",
       "suggestions": [],
       "evidence_for_diagnosis": {},
       "missing_inputs": []
@@ -87,69 +83,53 @@
       "module": "unit_economics",
       "title": "单位经济分析（按收入模式分支）",
       "inputs": {
-        "industry": "社会公益",
+        "industry": "教育",
         "stream_count": 1,
-        "is_public_project": true,
-        "dominant_pattern": "grant_funded",
-        "dominant_kind": "public",
+        "is_public_project": false,
+        "dominant_pattern": "subscription",
+        "dominant_kind": "growth",
         "kind_mix": {
-          "public": 1.0
+          "growth": 1.0
         },
         "pattern_mix": {
-          "grant_funded": 1.0
+          "subscription": 1.0
         }
       },
       "outputs": {
         "per_stream": [
           {
-            "applicable": true,
-            "metrics": {
-              "monthly_grant_revenue": 150000.0,
-              "active_grants": 12.0,
-              "renewal_rate": 0.7,
-              "beneficiaries_per_month": 6000.0,
-              "cost_per_beneficiary": 25.0,
-              "cpb_deviation": 0.09,
-              "cpb_industry_range": [
-                50.0,
-                500.0
-              ]
-            },
-            "health": "green",
-            "reason": "在期资助 12 项 × 年额 ¥150,000, 月均 ¥150,000，当前续期假设 70%，若参考现有区间，CPB 与参考中位差异约 0.09x（仅供背景参考）",
+            "applicable": false,
+            "metrics": {},
+            "health": "gray",
+            "reason": "缺少月费、月活或付费转化率",
             "missing": [],
-            "primary_kpi": [
-              "CPB",
-              25.0,
-              "元/人"
-            ],
-            "pattern_key": "grant_funded",
-            "pattern_label": "公益 · 政府/基金资助",
-            "kind": "public",
-            "weight": 127500.0,
-            "stream_name": "公益 · 政府/基金资助（AI 自动建立）"
+            "pattern_key": "subscription",
+            "pattern_label": "C 端订阅 / 会员",
+            "kind": "growth",
+            "weight": 0.0,
+            "stream_name": "C 端订阅 / 会员（AI 自动建立）"
           }
         ],
-        "total_monthly_revenue": 127500.0,
-        "weighted_review_score": 0.82,
+        "total_monthly_revenue": 0.0,
+        "weighted_review_score": 0.18,
         "stream_conclusions": [
-          "[公益 · 政府/基金资助] 在期资助 12 项 × 年额 ¥150,000, 月均 ¥150,000，当前续期假设 70%，若参考现有区间，CPB 与参考中位差异约 0.09x（仅供背景参考）"
+          "[C 端订阅 / 会员] 缺少月费、月活或付费转化率"
         ],
-        "analysis_conclusion": "多条收入流之间已经可以形成可读的收入结构，可继续验证各流之间的协同和资源分配"
+        "analysis_conclusion": "当前收入结构已经初步成形，但仍需补关键变量，才能判断每条流对整体模型的真实贡献"
       },
       "verdict": {
-        "level": "green",
-        "score": 0.82,
-        "reason": "[公益 · 政府/基金资助] CPB=25.0元/人"
+        "level": "yellow",
+        "score": 0.58,
+        "reason": "[C 端订阅 / 会员] 缺少月费、月活或付费转化率；已完成初步拆解，但仍有部分关键假设缺失"
       },
-      "framework_explain": "框架是：单位经济分析，主要针对订阅型收入模式，通过拆解付费漏斗、月毛利、留存率与CAC，来评估单位经济健康度。\n\n本次计算：\n- LTV = (480元/月 * (1-87%)) / (1-87%) = 3221元\n- Payback = CAC / (月毛利 - 单付费客户月变动成本) = 650 / ((480 * 78%) - 35) ≈ 2.2个月\n- LTV/CAC = 3221 / 650 ≈ 4.95\n\n最值得关注的数字是月留存率，仅基于3家试用客户的数据，样本量过小，需更多客户数据验证。\n\n---\n原始讲解：\n**单位经济(按收入模式分支)**：本项目识别到 1 条收入流, 主导模式 grant_funded(public 大类)。\n\n- 订阅型: 先拆付费漏斗、月毛利、留存与 CAC 是否可串起来\n- 交易型: 先拆客单价、复购、月人均毛利与回收周期\n- 项目制 B2B: 先拆合同金额、周期、续约与 ARR\n- 平台抽佣: 先拆 GMV、抽成率、卖家规模与平台抽成\n- 硬件: 先拆单价、单位成本与单件毛利\n- 公益: 先拆资助/捐赠来源、受益人数与 CPB",
+      "framework_explain": "框架是用于分析创业项目财务健康状况的单位经济模型，通过识别收入流并评估其关键财务指标。对于LegalScan项目，主要收入模式为订阅制，因此需要关注付费漏斗、月毛利、用户留存率和客户获取成本（CAC）。然而，当前数据缺失了月费、月活跃用户数或付费转化率，导致无法准确计算这些指标。最值得关注的是加权审查分数为0.18，这表明收入结构虽已初步成形，但关键变量的缺失限制了对整体模型贡献的准确评估。\n\n---\n原始讲解：\n**单位经济(按收入模式分支)**：本项目识别到 1 条收入流, 主导模式 subscription(growth 大类)。\n\n- 订阅型: 先拆付费漏斗、月毛利、留存与 CAC 是否可串起来\n- 交易型: 先拆客单价、复购、月人均毛利与回收周期\n- 项目制 B2B: 先拆合同金额、周期、续约与 ARR\n- 平台抽佣: 先拆 GMV、抽成率、卖家规模与平台抽成\n- 硬件: 先拆单价、单位成本与单件毛利\n- 公益: 先拆资助/捐赠来源、受益人数与 CPB",
       "suggestions": [],
       "missing_inputs": [],
       "evidence_for_diagnosis": {
-        "H8": 0.8
+        "H8": 0.55
       },
       "baseline_meta": {
-        "industry": "社会公益",
+        "industry": "教育",
         "source": "seed",
         "updated_at": "2026-04-21T01:13:05+00:00",
         "evidence_count": 0,
@@ -161,12 +141,12 @@
         "values": {
           "ltv_cac_healthy": 3.0,
           "ltv_cac_warning": 1.5,
-          "payback_healthy_months": 6.0,
-          "payback_warning_months": 12.0,
-          "runway_red_months": 6.0,
-          "runway_warning_months": 12.0,
-          "breakeven_green_months": 24.0,
-          "breakeven_warning_months": 36.0,
+          "payback_healthy_months": 9.0,
+          "payback_warning_months": 15.0,
+          "runway_red_months": 9.0,
+          "runway_warning_months": 15.0,
+          "breakeven_green_months": 18.0,
+          "breakeven_warning_months": 24.0,
           "cpb_healthy_ratio": 1.0,
           "cpb_warning_ratio": 1.5
         },
@@ -180,11 +160,11 @@
         "initial_capital": 50000.0,
         "fixed_costs_monthly": 85000.0,
         "variable_cost_per_user": 0.0,
-        "monthly_price": 480.0,
-        "new_users_per_month": 6000.0,
+        "monthly_price": 299.0,
+        "new_users_per_month": 21600.0,
         "monthly_retention": 0.87,
         "growth_rate_monthly": 0.1,
-        "streams_baseline_revenue": 127500.0,
+        "streams_baseline_revenue": null,
         "stream_count": 1
       },
       "outputs": {
@@ -193,302 +173,303 @@
         "runway_exhausted_month": null,
         "avg_burn_rate_first6": 0.0,
         "runway_months": null,
-        "end_cash": 35128667.68,
+        "end_cash": 9049748061.15,
         "projection": [
           {
             "month": 1,
-            "paying_users": 6000.0,
-            "revenue": 127500.0,
+            "paying_users": 21600.0,
+            "revenue": 6458400.0,
             "cost": 85000.0,
-            "net": 42500.0,
-            "cash": 92500.0
+            "net": 6373400.0,
+            "cash": 6423400.0
           },
           {
             "month": 2,
-            "paying_users": 11820.0,
-            "revenue": 140250.0,
+            "paying_users": 42552.0,
+            "revenue": 12723048.0,
             "cost": 85000.0,
-            "net": 55250.0,
-            "cash": 147750.0
+            "net": 12638048.0,
+            "cash": 19061448.0
           },
           {
             "month": 3,
-            "paying_users": 17543.4,
-            "revenue": 154275.0,
+            "paying_users": 63156.2,
+            "revenue": 18883715.76,
             "cost": 85000.0,
-            "net": 69275.0,
-            "cash": 217025.0
+            "net": 18798715.76,
+            "cash": 37860163.76
           },
           {
             "month": 4,
-            "paying_users": 23248.8,
-            "revenue": 169702.5,
+            "paying_users": 83695.5,
+            "revenue": 25024963.11,
             "cost": 85000.0,
-            "net": 84702.5,
-            "cash": 301727.5
+            "net": 24939963.11,
+            "cash": 62800126.87
           },
           {
             "month": 5,
-            "paying_users": 29011.0,
-            "revenue": 186672.75,
+            "paying_users": 104439.7,
+            "revenue": 31227461.35,
             "cost": 85000.0,
-            "net": 101672.75,
-            "cash": 403400.25
+            "net": 31142461.35,
+            "cash": 93942588.22
           },
           {
             "month": 6,
-            "paying_users": 34902.6,
-            "revenue": 205340.03,
+            "paying_users": 125649.5,
+            "revenue": 37569209.16,
             "cost": 85000.0,
-            "net": 120340.03,
-            "cash": 523740.28
+            "net": 37484209.16,
+            "cash": 131426797.37
           },
           {
             "month": 7,
-            "paying_users": 40994.7,
-            "revenue": 225874.03,
+            "paying_users": 147580.8,
+            "revenue": 44126661.53,
             "cost": 85000.0,
-            "net": 140874.03,
-            "cash": 664614.3
+            "net": 44041661.53,
+            "cash": 175468458.9
           },
           {
             "month": 8,
-            "paying_users": 47357.7,
-            "revenue": 248461.43,
+            "paying_users": 170487.6,
+            "revenue": 50975790.05,
             "cost": 85000.0,
-            "net": 163461.43,
-            "cash": 828075.73
+            "net": 50890790.05,
+            "cash": 226359248.95
           },
           {
             "month": 9,
-            "paying_users": 54062.7,
-            "revenue": 273307.57,
+            "paying_users": 194625.7,
+            "revenue": 58193091.31,
             "cost": 85000.0,
-            "net": 188307.57,
-            "cash": 1016383.31
+            "net": 58108091.31,
+            "cash": 284467340.26
           },
           {
             "month": 10,
-            "paying_users": 61182.2,
-            "revenue": 300638.33,
+            "paying_users": 220256.0,
+            "revenue": 65856558.81,
             "cost": 85000.0,
-            "net": 215638.33,
-            "cash": 1232021.64
+            "net": 65771558.81,
+            "cash": 350238899.07
           },
           {
             "month": 11,
-            "paying_users": 68791.0,
-            "revenue": 330702.16,
+            "paying_users": 247647.6,
+            "revenue": 74046632.47,
             "cost": 85000.0,
-            "net": 245702.16,
-            "cash": 1477723.8
+            "net": 73961632.47,
+            "cash": 424200531.54
           },
           {
             "month": 12,
-            "paying_users": 76966.9,
-            "revenue": 363772.38,
+            "paying_users": 277080.7,
+            "revenue": 82847139.18,
             "cost": 85000.0,
-            "net": 278772.38,
-            "cash": 1756496.18
+            "net": 82762139.18,
+            "cash": 506962670.72
           },
           {
             "month": 13,
-            "paying_users": 85791.7,
-            "revenue": 400149.62,
+            "paying_users": 308850.3,
+            "revenue": 92346236.92,
             "cost": 85000.0,
-            "net": 315149.62,
-            "cash": 2071645.8
+            "net": 92261236.92,
+            "cash": 599223907.64
           },
           {
             "month": 14,
-            "paying_users": 95352.4,
-            "revenue": 440164.58,
+            "paying_users": 343268.8,
+            "revenue": 102637374.53,
             "cost": 85000.0,
-            "net": 355164.58,
-            "cash": 2426810.38
+            "net": 102552374.53,
+            "cash": 701776282.17
           },
           {
             "month": 15,
-            "paying_users": 105741.6,
-            "revenue": 484181.04,
+            "paying_users": 380669.8,
+            "revenue": 113820279.09,
             "cost": 85000.0,
-            "net": 399181.04,
-            "cash": 2825991.42
+            "net": 113735279.09,
+            "cash": 815511561.26
           },
           {
             "month": 16,
-            "paying_users": 117058.7,
-            "revenue": 532599.14,
+            "paying_users": 421411.3,
+            "revenue": 126001982.39,
             "cost": 85000.0,
-            "net": 447599.14,
-            "cash": 3273590.56
+            "net": 125916982.39,
+            "cash": 941428543.65
           },
           {
             "month": 17,
-            "paying_users": 129410.9,
-            "revenue": 585859.06,
+            "paying_users": 465879.3,
+            "revenue": 139297898.21,
             "cost": 85000.0,
-            "net": 500859.06,
-            "cash": 3774449.61
+            "net": 139212898.21,
+            "cash": 1080641441.86
           },
           {
             "month": 18,
-            "paying_users": 142914.3,
-            "revenue": 644444.96,
+            "paying_users": 514491.5,
+            "revenue": 153832962.33,
             "cost": 85000.0,
-            "net": 559444.96,
-            "cash": 4333894.57
+            "net": 153747962.33,
+            "cash": 1234389404.19
           },
           {
             "month": 19,
-            "paying_users": 157695.0,
-            "revenue": 708889.46,
+            "paying_users": 567701.8,
+            "revenue": 169742847.21,
             "cost": 85000.0,
-            "net": 623889.46,
-            "cash": 4957784.03
+            "net": 169657847.21,
+            "cash": 1404047251.4
           },
           {
             "month": 20,
-            "paying_users": 173890.1,
-            "revenue": 779778.4,
+            "paying_users": 626004.2,
+            "revenue": 187175264.05,
             "cost": 85000.0,
-            "net": 694778.4,
-            "cash": 5652562.44
+            "net": 187090264.05,
+            "cash": 1591137515.44
           },
           {
             "month": 21,
-            "paying_users": 191649.4,
-            "revenue": 857756.24,
+            "paying_users": 689937.7,
+            "revenue": 206291365.39,
             "cost": 85000.0,
-            "net": 772756.24,
-            "cash": 6425318.68
+            "net": 206206365.39,
+            "cash": 1797343880.84
           },
           {
             "month": 22,
-            "paying_users": 211136.4,
-            "revenue": 943531.87,
+            "paying_users": 760091.2,
+            "revenue": 227267262.13,
             "cost": 85000.0,
-            "net": 858531.87,
-            "cash": 7283850.55
+            "net": 227182262.13,
+            "cash": 2024526142.97
           },
           {
             "month": 23,
-            "paying_users": 232530.4,
-            "revenue": 1037885.05,
+            "paying_users": 837109.3,
+            "revenue": 250295669.72,
             "cost": 85000.0,
-            "net": 952885.05,
-            "cash": 8236735.6
+            "net": 250210669.72,
+            "cash": 2274736812.69
           },
           {
             "month": 24,
-            "paying_users": 256027.2,
-            "revenue": 1141673.56,
+            "paying_users": 921698.0,
+            "revenue": 275587699.49,
             "cost": 85000.0,
-            "net": 1056673.56,
-            "cash": 9293409.16
+            "net": 275502699.49,
+            "cash": 2550239512.17
           },
           {
             "month": 25,
-            "paying_users": 281842.1,
-            "revenue": 1255840.92,
+            "paying_users": 1014631.5,
+            "revenue": 303374812.07,
             "cost": 85000.0,
-            "net": 1170840.92,
-            "cash": 10464250.08
+            "net": 303289812.07,
+            "cash": 2853529324.24
           },
           {
             "month": 26,
-            "paying_users": 310210.8,
-            "revenue": 1381425.01,
+            "paying_users": 1116759.0,
+            "revenue": 333910951.36,
             "cost": 85000.0,
-            "net": 1296425.01,
-            "cash": 11760675.09
+            "net": 333825951.36,
+            "cash": 3187355275.6
           },
           {
             "month": 27,
-            "paying_users": 341392.5,
-            "revenue": 1519567.51,
+            "paying_users": 1229013.0,
+            "revenue": 367474879.04,
             "cost": 85000.0,
-            "net": 1434567.51,
-            "cash": 13195242.59
+            "net": 367389879.04,
+            "cash": 3554745154.63
           },
           {
             "month": 28,
-            "paying_users": 375671.4,
-            "revenue": 1671524.26,
+            "paying_users": 1352417.2,
+            "revenue": 404372731.25,
             "cost": 85000.0,
-            "net": 1586524.26,
-            "cash": 14781766.85
+            "net": 404287731.25,
+            "cash": 3959032885.88
           },
           {
             "month": 29,
-            "paying_users": 413360.1,
-            "revenue": 1838676.69,
+            "paying_users": 1488096.4,
+            "revenue": 444940821.32,
             "cost": 85000.0,
-            "net": 1753676.69,
-            "cash": 16535443.54
+            "net": 444855821.32,
+            "cash": 4403888707.2
           },
           {
             "month": 30,
-            "paying_users": 454801.9,
-            "revenue": 2022544.35,
+            "paying_users": 1637286.7,
+            "revenue": 489548714.2,
             "cost": 85000.0,
-            "net": 1937544.35,
-            "cash": 18472987.89
+            "net": 489463714.2,
+            "cash": 4893352421.4
           },
           {
             "month": 31,
-            "paying_users": 500374.0,
-            "revenue": 2224798.79,
+            "paying_users": 1801346.5,
+            "revenue": 538602600.97,
             "cost": 85000.0,
-            "net": 2139798.79,
-            "cash": 20612786.68
+            "net": 538517600.97,
+            "cash": 5431870022.37
           },
           {
             "month": 32,
-            "paying_users": 550491.5,
-            "revenue": 2447278.67,
+            "paying_users": 1981769.2,
+            "revenue": 592549004.41,
             "cost": 85000.0,
-            "net": 2362278.67,
-            "cash": 22975065.35
+            "net": 592464004.41,
+            "cash": 6024334026.78
           },
           {
             "month": 33,
-            "paying_users": 605610.2,
-            "revenue": 2692006.54,
+            "paying_users": 2180196.8,
+            "revenue": 651878849.57,
             "cost": 85000.0,
-            "net": 2607006.54,
-            "cash": 25582071.89
+            "net": 651793849.57,
+            "cash": 6676127876.35
           },
           {
             "month": 34,
-            "paying_users": 666231.8,
-            "revenue": 2961207.19,
+            "paying_users": 2398434.6,
+            "revenue": 717131936.43,
             "cost": 85000.0,
-            "net": 2876207.19,
-            "cash": 28458279.07
+            "net": 717046936.43,
+            "cash": 7393174812.79
           },
           {
             "month": 35,
-            "paying_users": 732907.7,
-            "revenue": 3257327.91,
+            "paying_users": 2638467.7,
+            "revenue": 788901855.73,
             "cost": 85000.0,
-            "net": 3172327.91,
-            "cash": 31630606.98
+            "net": 788816855.73,
+            "cash": 8181991668.52
           },
           {
             "month": 36,
-            "paying_users": 806244.3,
-            "revenue": 3583060.7,
+            "paying_users": 2902479.6,
+            "revenue": 867841392.63,
             "cost": 85000.0,
-            "net": 3498060.7,
-            "cash": 35128667.68
+            "net": 867756392.63,
+            "cash": 9049748061.15
           }
         ],
-        "peak_paying_users": 806244.3,
-        "total_revenue_36m": 38138667.7,
+        "peak_paying_users": 2902479.6,
+        "total_revenue_36m": 9052758061.17,
         "analysis_conclusion": "若维持当前增长轨迹，模型会在第 2 个月进入单月正现金流",
         "cashflow_implications": [
           "若维持当前增长轨迹，模型会在第 2 个月进入单月正现金流",
+          "该现金流轨迹对增长假设较敏感，后段收入占比明显高于前段",
           "按当前假设，累计现金最终高于起始资金，说明模型具备自我滚动空间"
         ]
       },
@@ -497,10 +478,11 @@
         "score": 0.82,
         "reason": "按当前假设，第 2 个月开始月度净现金转正"
       },
-      "framework_explain": "框架是通过逐月计算付费用户存量、月度经常性收入（MRR）、成本和净现金流，来推演36个月的财务状况。根据你提供的数据，LTV（客户终身价值）计算为ARPU/（1-月留存率）= 480/（1-0.87）= 3882.35元；Payback（回本期）计算为CAC/（MRR-变动成本）= 650/（480-35）= 1.53个月；LTV/CAC比值为3882.35/650=5.97。SaaS行业基准通常LTV/CAC比值大于3，月留存率高于85%，毛利率高于70%。最不靠谱的假设是月留存率，样本量过小，需更多客户数据验证。现金流和盈亏平衡方面，起始资金80万，月固定成本8.5万，单客户变动成本35元，月新增付费客户8家。重点关注的数字是回本期1.53个月，表明客户获取成本回收迅速，但需验证留存率。\n\n---\n原始讲解：\n**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；\nMRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n本模块不再把回本月份或 Runway 与行业阈值直接比较，而是直接展示“在你当前假设下会发生什么”。如果你需要对外论证，再补充融资计划、价格实验或渠道拆解来解释这些轨迹。",
+      "framework_explain": "现金流推演36个月模型用于预测公司的财务健康状况。根据学生项目数据，我们逐月计算付费用户存量，通过留存率和新增用户来推算；月度经常性收入（MRR）由付费用户数乘以每用户平均收入（ARPU）得出；成本包括固定成本和变动成本；净现金为MRR减去成本；累计现金则为上月累计现金加上当月净现金。模型显示，第二个月即实现盈亏平衡，累计现金在36个月后达到90亿多，但需注意，此模型假设条件下的现金流增长非常乐观。\n\n最值得关注的数字是累计现金在36个月后的数值，这表明在现有假设下，公司财务状况将非常健康，但需进一步验证假设的合理性。\n\n---\n原始讲解：\n**现金流推演 36 月模型**：逐月计算付费存量 = 上月存量 × 留存率 + 新增；\nMRR = 付费存量 × ARPU；成本 = 固定 + 变动×付费数；净现金 = MRR - 成本；累计现金 = 上月累计 + 净。\n\n本模块不再把回本月份或 Runway 与行业阈值直接比较，而是直接展示“在你当前假设下会发生什么”。如果你需要对外论证，再补充融资计划、价格实验或渠道拆解来解释这些轨迹。",
       "suggestions": [
         "把第 2 个月转正的来源拆开，说明是价格提升、用户增长还是成本下降驱动",
         "至少保留三组情景：基线、保守、积极，并说明每组只改了哪些假设",
+        "影响判断：该现金流轨迹对增长假设较敏感，后段收入占比明显高于前段",
         "影响判断：按当前假设，累计现金最终高于起始资金，说明模型具备自我滚动空间"
       ],
       "missing_inputs": [],
@@ -537,60 +519,70 @@
       "title": "假设自检与口径一致性",
       "inputs": {
         "industry": "教育",
-        "monthly_price": 480.0,
+        "monthly_price": 299.0,
         "cac": 650.0,
         "gross_margin": 0.78,
         "monthly_retention": 0.87,
-        "paid_conversion_rate": 0.65,
-        "target_user_population": 180000.0,
-        "serviceable_user_population": 24000.0,
-        "first_year_reach_users": 6000.0,
-        "annual_arpu": 480.0
+        "paid_conversion_rate": 0.08,
+        "target_user_population": 120000.0,
+        "serviceable_user_population": 12000.0,
+        "first_year_reach_users": 3000.0,
+        "annual_arpu": 7200.0
       },
       "outputs": {
         "checks": [
           {
-            "field": "cost_per_beneficiary",
+            "field": "monthly_price",
             "level": "green",
-            "note": "已给出单位受益人成本：¥25.00/人"
+            "note": "已给出定价口径：¥299.00"
           },
           {
-            "field": "target_user_population",
+            "field": "cac",
             "level": "green",
-            "note": "已给出目标受益人总量：180,000"
+            "note": "已给出 CAC 口径：¥650.00"
+          },
+          {
+            "field": "monthly_retention",
+            "level": "green",
+            "note": "已给出月留存率：87.0%"
+          },
+          {
+            "field": "gross_margin",
+            "level": "green",
+            "note": "已给出毛利率：78.0%"
           },
           {
             "field": "serviceable_user_population",
             "level": "green",
-            "note": "已给出可服务人群：24,000"
+            "note": "已给出可服务人群：12,000"
           },
           {
             "field": "first_year_reach_users",
             "level": "green",
-            "note": "已给出首年覆盖人数：6,000"
+            "note": "已给出首年触达人数：3,000"
           },
           {
             "field": "paid_conversion_rate",
             "level": "green",
-            "note": "已给出服务转化率：65.0%"
+            "note": "已给出付费转化率：8.0%"
           },
           {
             "field": "annual_arpu",
-            "level": "green",
-            "note": "已给出折算后的年 ARPU：¥480"
+            "level": "yellow",
+            "note": "年 ARPU 与月价推导结果差异较大，请确认是否包含年付折扣或多档产品"
           }
         ],
         "industry_note": "教育类看重留存与续费，CAC 对价格敏感度高",
-        "analysis_conclusion": "公益项目的服务边界、覆盖人数和资金折算口径已经基本闭环"
+        "analysis_conclusion": "当前模型已经形成基础公式链条，但仍有部分数字口径尚未闭合"
       },
       "verdict": {
-        "level": "green",
-        "score": 0.82,
-        "reason": "已完成 6 项公益口径自检，暂未发现明显内部矛盾"
+        "level": "yellow",
+        "score": 0.58,
+        "reason": "年 ARPU 与月价推导结果差异较大，请确认是否包含年付折扣或多档产品"
       },
-      "framework_explain": "框架是用于评估SaaS项目的财务健康状况，包括LTV、CAC、毛利率和留存率等关键指标。根据你的数据，LTV计算为480元/月 * (1-0.87)/0.87 * 78% ≈ 123元，Payback为650元/123元 ≈ 5.3个月，LTV/CAC为123/650 ≈ 0.19。SaaS行业基准通常要求LTV/CAC大于1，你的数据表明CAC偏高，且样本留存率过低，需更多客户数据验证。最需关注的数字是月留存率，样本量过小，需扩大样本验证。\n\n---\n原始讲解：\n**公益项目口径自检**（教育）：\n本模块优先检查受益对象、可服务边界、首年覆盖、单位受益人成本和折算后的资金口径，不再强制套用商业项目常见的 CAC / 毛利率 / 付费留存。",
+      "framework_explain": "框架原文：\n口径一致性自检（教育）：\n本模块不回答“这个数高不高”，只检查三类问题：\n1. 数值是否合法（例如比例是否在 0-1 内）；\n2. 公式是否能闭环（例如有定价但没有年 ARPU）；\n3. TAM/SAM/SOM 与收入假设之间是否互相打架。\n\n本次模型输出数据：{\"checks\": [{\"field\": \"monthly_price\", \"level\": \"green\", \"note\": \"已给出定价口径：¥299.00\"}, {\"field\": \"cac\", \"level\": \"green\", \"note\": \"已给出 CAC 口径：¥650.00\"}, {\"field\": \"monthly_retention\", \"level\": \"green\", \"note\": \"已给出月留存率：87.0%\"}, {\"field\": \"gross_margin\", \"level\": \"green\", \"note\": \"已给出毛利率：78.0%\"}, {\"field\": \"serviceable_user_population\", \"level\": \"green\", \"note\": \"已给出可服务人群：12,000\"}, {\"field\": \"first_year_reach_users\", \"level\": \"green\", \"note\": \"已给出首年触达人数：3,000\"}, {\"field\": \"paid_conversion_rate\", \"level\": \"green\", \"note\": \"已给出付费转化率：8.0%\"}, {\"field\": \"annual_arpu\", \"level\": \"yellow\", \"note\": \"年 ARPU 与月价推导结果差异较大，请确认是否包含年付折扣或多档产品\"}], \"industry_note\": \"教育类看重留存与续费，CAC 对价格敏感度高\", \"analysis_conclusion\": \"当前模型已经形成基础公式链条，但仍有部分数字口径尚未闭合\"}。\n\n本次计算中，我们检查了定价、CAC、月留存率、毛利率、可服务人群、首年触达人数、付费转化率等关键指标。年 ARPU 与月价推导结果差异较大，需要确认是否包含年付折扣或多档产品。最值得关注的数字是年 ARPU，因为它直接影响到收入预测的准确性。\n\n---\n原始讲解：\n**口径一致性自检**（教育）：\n本模块不回答“这个数高不高”，只检查三类问题：\n1. 数值是否合法（例如比例是否在 0-1 内）；\n2. 公式是否能闭环（例如有定价但没有年 ARPU）；\n3. TAM/SAM/SOM 与收入假设之间是否互相打架。",
       "suggestions": [
-        "下一步建议把资金来源拆成可持续收入、一次性资助和不确定资金三类"
+        "年 ARPU 与月价推导结果差异较大，请确认是否包含年付折扣或多档产品——补一条来源说明或计算过程即可"
       ],
       "missing_inputs": [],
       "evidence_for_diagnosis": {
@@ -627,40 +619,40 @@
       "title": "市场规模 TAM/SAM/SOM",
       "inputs": {
         "industry": "教育",
-        "target_user_population": 180000.0,
-        "serviceable_user_population": 24000.0,
+        "target_user_population": 120000.0,
+        "serviceable_user_population": 12000.0,
         "serviceable_ratio": 0.0,
-        "first_year_reach_users": 6000.0,
-        "paid_conversion_rate": 0.65,
-        "annual_arpu": 480.0,
+        "first_year_reach_users": 3000.0,
+        "paid_conversion_rate": 0.08,
+        "annual_arpu": 7200.0,
         "industry_tam_billions": 0.0,
         "industry_sam_billions": 0.0
       },
       "outputs": {
-        "bottom_up_tam": 86400000.0,
-        "bottom_up_sam": 11520000.0,
-        "serviceable_population_used": 24000.0,
-        "bottom_up_som_yr1": 1872000.0,
-        "first_year_paid_users": 3900.0,
-        "sam_share_of_tam": 0.1333,
-        "som_share_of_sam_year1": 0.1625,
-        "analysis_conclusion": "当前模型把可服务市场收敛到 TAM 的 13.3%，说明已经给出了明确服务边界",
+        "bottom_up_tam": 864000000.0,
+        "bottom_up_sam": 86400000.0,
+        "serviceable_population_used": 12000.0,
+        "bottom_up_som_yr1": 1728000.0,
+        "first_year_paid_users": 240.0,
+        "sam_share_of_tam": 0.1,
+        "som_share_of_sam_year1": 0.02,
+        "analysis_conclusion": "当前模型把可服务市场收敛到 TAM 的 10.0%，说明已经给出了明确服务边界",
         "market_implications": [
-          "当前模型把可服务市场收敛到 TAM 的 13.3%，说明已经给出了明确服务边界",
-          "首年 SOM 占 SAM 的 16.2%，说明已经把“能服务”与“首年能拿下”区分开了"
+          "当前模型把可服务市场收敛到 TAM 的 10.0%，说明已经给出了明确服务边界",
+          "首年 SOM 占 SAM 的 2.0%，说明已经把“能服务”与“首年能拿下”区分开了"
         ]
       },
       "verdict": {
         "level": "green",
         "score": 0.82,
-        "reason": "TAM≈¥86,400,000；SAM≈¥11,520,000；SOM(首年)≈¥1,872,000"
+        "reason": "TAM≈¥864,000,000；SAM≈¥86,400,000；SOM(首年)≈¥1,728,000"
       },
-      "framework_explain": "财务分析框架是基于TAM/SAM/SOM三层市场模型，通过计算全市场总规模、可覆盖子市场及可获取的市场份额，来明确市场边界。根据给定数据，TAM为8640万元，SAM为1152万元，首年SOM为187.2万元，首年付费用户数为3900。这表明模型已明确服务边界，首年可获取市场占可服务市场的16.2%。\n\n最值得关注的数字是首年SOM，即187.2万元，这直接反映了项目在第一年的市场潜力。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n本模块会尽量把三层都算出来，但不会用固定比例替你补 SAM，也不会把双口径差异直接判成“对/错”。它只负责把你的市场边界拆清楚，并提示还缺哪一个边界假设。",
+      "framework_explain": "框架是通过TAM/SAM/SOM三层市场分析来评估市场规模和潜在市场份额。根据提供的数据，TAM为864亿元，表示全市场潜在规模；SAM为86.4亿元，即产品可覆盖的市场；SOM首年为1728万元，表明首年可实际获得的份额。特别值得关注的是首年SOM仅占SAM的2%，这说明项目初期市场渗透率较低，需要更多营销和推广策略来提升市场份额。\n\n---\n原始讲解：\n**TAM/SAM/SOM 三层市场**：\n- TAM（Total Addressable Market）理论上全市场总规模\n- SAM（Serviceable Addressable Market）你产品能覆盖的子市场\n- SOM（Serviceable Obtainable Market）现实可拿下的份额\n\n本模块会尽量把三层都算出来，但不会用固定比例替你补 SAM，也不会把双口径差异直接判成“对/错”。它只负责把你的市场边界拆清楚，并提示还缺哪一个边界假设。",
       "suggestions": [
         "把 TAM、SAM、SOM 分别对应到“总人群 / 可服务人群 / 首年可拿下人群”三层定义",
         "SAM 最好来自明确的地域、品类、渠道或服务能力边界，而不是固定比例",
         "把 TAM/SAM/SOM 三个数字用漏斗图展示，并在旁边写清各层口径",
-        "影响判断：首年 SOM 占 SAM 的 16.2%，说明已经把“能服务”与“首年能拿下”区分开了"
+        "影响判断：首年 SOM 占 SAM 的 2.0%，说明已经把“能服务”与“首年能拿下”区分开了"
       ],
       "missing_inputs": [],
       "evidence_for_diagnosis": {},
@@ -672,7 +664,7 @@
       "inputs": {
         "industry": "教育",
         "stage": "structured",
-        "project_type": "我想专门跟你聊一下我们项目的财务测算，把整个口径从头梳一遍。\n\n项目还是面向中小企业法务的 AI 合同审查 SaaS（LegalScan）。目标客户 20–300 人企业，纯订阅，定价基础版 299/月、企业版 999/月、旗舰版 1999"
+        "project_type": "项目背景：我们做的是 LegalScan，一款面向中小企业法务岗的 AI 合同审查 SaaS。底层是百万级中文合同语料微调的 7B 大模型，处理保密协议 / 采购合同 / 用工合同等敏感文本。\n\n想请你帮我严肃评估一下 AI 伦理这一块：如"
       },
       "outputs": {
         "recommended_id": "value_based",
@@ -718,7 +710,7 @@
         "score": 0.7,
         "reason": "基于教育行业 + structured 阶段，推荐用「价值基（Value-Based）」"
       },
-      "framework_explain": "框架是基于产品为用户创造的价值来设定定价，适用于能明确量化用户获益的B2B SaaS产品。本次计算中，我们假设用户可感知价值为1600元/月（480元/月收入除以29.9%的分成率），并以此推算出定价合理性。最值得关注的数字是LTV/CAC比值，仅为1.35，表明客户生命周期价值与获取成本的比值较低，需进一步提升客户留存率或降低CAC。\n\n---\n原始讲解：\n**价值基（Value-Based）**\n- 适用：产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）\n- 公式：`定价 = 用户可感知价值 × 10%~30% 分成`\n- 优点：天花板最高，能撑高毛利\n- 缺点：需要先做 ROI 访谈 / Case Study 证明价值\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
+      "framework_explain": "框架是基于产品为用户创造的价值来确定定价，适用于能够量化用户收益的B2B SaaS产品。在本次计算中，我们首先通过访谈和案例研究确定了LegalScan为中小企业法务岗位带来的具体价值，比如节省的法务成本或避免的法律纠纷损失。然后，我们根据这些价值数据，乘以10%到30%的分成比例，得出推荐的定价范围。最值得关注的数字是用户可感知价值，它直接决定了产品的市场接受度和盈利能力。\n\n---\n原始讲解：\n**价值基（Value-Based）**\n- 适用：产品能量化帮用户省多少钱 / 多赚多少钱（B2B SaaS、行业软件）\n- 公式：`定价 = 用户可感知价值 × 10%~30% 分成`\n- 优点：天花板最高，能撑高毛利\n- 缺点：需要先做 ROI 访谈 / Case Study 证明价值\n\n其他 3 种框架见下，选择时考虑你的差异化强弱、成本可见度、是否有竞品锚。",
       "suggestions": [
         "若采纳「价值基（Value-Based）」，下一步执行：先访谈 5 位目标用户，让他们口述产品每月能帮自己省多少钱 / 多赚多少钱",
         "定价决定后，回来跑一次『单位经济分析』验证 LTV/CAC ≥ 3"
@@ -819,7 +811,7 @@
         "score": 0.6,
         "reason": "根据业务里程碑，建议走「种子轮（Pre-Seed / Seed）」（支票 ¥500000-¥3000000，稀释 8%-15%）"
       },
-      "framework_explain": "财务测算框架主要围绕单位经济、客户生命周期价值（LTV）、客户获取成本（CAC）、现金流和盈亏平衡点展开。结合你的项目数据，我们首先计算LTV、Payback、LTV/CAC：\n\n1. **LTV（客户生命周期价值）**：\\[LTV = \\frac{ARPU}{1 - 月留存率} = \\frac{480}{1 - 0.87} = 3765\\]元。\n2. **Payback（回收期）**：\\[Payback = \\frac{CAC}{ARPU - 单付费客户月变动成本} = \\frac{650}{480 - 35} = 1.51\\]月。\n3. **LTV/CAC**：\\[LTV/CAC = \\frac{3765}{650} = 5.8\\]。\n\nSaaS 行业基准：LTV/CAC 通常应在3以上，Payback 一般小于12个月，毛利率在70%-85%之间。\n\n最不靠谱的假设是月留存率，样本量过小，建议增加更多客户数据以验证留存率。\n\n现金流和盈亏平衡点分析：\n- **月净增付费客户**：8家，月营收增长\\[8 \\times 480 = 3840\\]元。\n- **月固定成本**：8.5万，月变动成本\\[8 \\times 35 = 280\\]元。\n- **月净现金流**：\\[3840 - 280 = 3560\\]元，固定成本8.5万，需多月积累才能覆盖。\n\n最值得关注的数字是LTV/CAC，5.8表明客户价值高于获取成本，但需提高留存率以增强稳定性。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
+      "framework_explain": "框架是根据创业项目的不同发展阶段来规划融资节奏与业务里程碑，确保每一轮融资都有明确的目标和验证标准。对于LegalScan项目，种子轮融资阶段需要展示的是团队和市场方向，即通过PPT展示来吸引早期天使、孵化器或校友资助，融资规模在50万至300万人民币之间，股权稀释比例在8%至15%。本次计算依据的是项目当前处于初步构想和团队建设阶段，尚未开发出产品或验证市场需求。\n\n最值得关注的数字是股权稀释比例，8%至15%意味着早期投资者将获得公司8%至15%的股份，这直接影响到创始团队的股权结构和未来控制权。\n\n---\n原始讲解：\n**融资节奏与业务里程碑**：机构融资看的不是商业计划书文采，而是三件事：\n- **种子轮**：团队 + 方向，PPT 融资\n- **天使轮**：MVP + 百级付费用户 / DAU，证「有人要」\n- **A 轮**：可重复获客 + 单位经济正 + 月度营收，证「能复制」\n- **B 轮起**：增长曲线可预测 + 多产品线，证「能规模化」\n\n错轮次融资的风险：要么被压价稀释过大，要么 DD 失败浪费 3 个月。",
       "suggestions": [
         "如当前业务在种子轮（Pre-Seed / Seed）区间，找「早期天使、孵化器、校友资助」类型的投资人",
         "准备一份 3 页 Teaser：问题-方案-牵引力（Traction 数据）",
@@ -833,7 +825,7 @@
     }
   ],
   "merged_evidence": {
-    "H8": 0.8,
+    "H8": 0.55,
     "H24": 0.8,
     "H3": 0.8,
     "H26": 0.72
@@ -842,95 +834,62 @@
     "fixed_costs_monthly": 85000.0,
     "variable_cost_per_user": 0.0,
     "growth_rate_monthly": 0.1,
-    "monthly_price": 480.0,
+    "monthly_price": 299.0,
     "cac": 650.0,
     "gross_margin": 0.78,
     "monthly_retention": 0.87,
-    "new_users_per_month": 6000.0,
+    "new_users_per_month": 21600.0,
     "initial_capital": 50000,
-    "cost_per_beneficiary": 25.0,
-    "paid_conversion_rate": 0.65,
-    "target_user_population": 180000.0,
-    "serviceable_user_population": 24000.0,
-    "first_year_reach_users": 6000.0,
-    "annual_arpu": 480.0,
+    "cost_per_beneficiary": 0.0,
+    "paid_conversion_rate": 0.08,
+    "target_user_population": 120000.0,
+    "serviceable_user_population": 12000.0,
+    "first_year_reach_users": 3000.0,
+    "annual_arpu": 7200.0,
     "industry_tam_billions": 0.0,
     "industry_sam_billions": 0.0,
     "by_stream": [
       {
-        "name": "公益 · 政府/基金资助（AI 自动建立）",
-        "pattern_key": "grant_funded",
-        "pattern_label": "公益 · 政府/基金资助",
-        "kind": "public",
+        "name": "C 端订阅 / 会员（AI 自动建立）",
+        "pattern_key": "subscription",
+        "pattern_label": "C 端订阅 / 会员",
+        "kind": "growth",
         "inputs": {
-          "active_grants": 12.0,
-          "grant_value_yearly": 150000.0,
-          "renewal_rate": 0.7,
-          "beneficiaries_served": 6000.0
+          "conversion_rate": 0.08
         },
-        "monthly_revenue": 127500.0,
+        "monthly_revenue": 0.0,
         "ai_meta": {
           "ai_created": true,
-          "source": "msg:turn-3",
-          "ts": 1776989728.94593,
+          "source": "msg:turn-1",
+          "ts": 1776975299.7953897,
           "fields": {
-            "active_grants": {
+            "conversion_rate": {
               "ai_filled": true,
-              "value": 12.0,
+              "value": 0.08,
               "prev_value": null,
-              "raw": "在期资助 12 个",
-              "reference_note": "公开样例常见记录约在 1-10个",
-              "source": "msg:turn-3",
-              "ts": 1776989728.94593,
-              "confidence": 0.85
-            },
-            "grant_value_yearly": {
-              "ai_filled": true,
-              "value": 150000.0,
-              "prev_value": null,
-              "raw": "单个资助年度金额 150000",
-              "reference_note": "公开样例常见记录约在 30000-2e+06元/年",
-              "source": "msg:turn-3",
-              "ts": 1776989728.94593,
-              "confidence": 0.85
-            },
-            "renewal_rate": {
-              "ai_filled": true,
-              "value": 0.7,
-              "prev_value": null,
-              "raw": "续期率 70%",
-              "reference_note": "公开样例常见记录约在 0.3-0.85比例",
-              "source": "msg:turn-3",
-              "ts": 1776989728.94593,
-              "confidence": 0.85
-            },
-            "beneficiaries_served": {
-              "ai_filled": true,
-              "value": 6000.0,
-              "prev_value": null,
-              "raw": "受益人 6000 人",
-              "reference_note": "公开样例常见记录约在 50-50000人/月",
-              "source": "msg:turn-3",
-              "ts": 1776989728.94593,
+              "raw": "付费转化率 8%",
+              "reference_note": "公开样例常见记录约在 0.01-0.15比例",
+              "source": "msg:turn-1",
+              "ts": 1776975299.7953897,
               "confidence": 0.85
             }
           }
         }
       }
     ],
-    "dominant_kind": "public",
-    "dominant_pattern": "grant_funded",
+    "dominant_kind": "growth",
+    "dominant_pattern": "subscription",
     "kind_mix": {
-      "public": 1.0
+      "growth": 1.0
     },
     "pattern_mix": {
-      "grant_funded": 1.0
+      "subscription": 1.0
     },
-    "is_public": true,
-    "total_monthly_revenue": 127500.0
+    "is_public": false,
+    "total_monthly_revenue": 1.0
   },
   "baseline_meta": {
-    "industry": "社会公益",
+    "industry": "教育",
     "source": "seed",
     "updated_at": "2026-04-21T01:13:05+00:00",
     "evidence_count": 0,

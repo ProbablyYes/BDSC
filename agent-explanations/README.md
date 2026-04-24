@@ -51,6 +51,16 @@
 
 - [界面美观与易用性说明](./ui.md)：深色主题 + 玻璃态 + 渐变光效的视觉语言、三端入口、学生端双面板、聊天室、教师端可视化、响应式与可访问性。
 
+### 7. 功能深潜（实现层补充，新）
+
+下面这组文档是对前 12 篇主索引的**实现层补充**：把"追问 / 测试 / 聊天 / 预算 / 计划书"五大模块的 Python 文件、JSON 落盘格式、HTTP 路由、前端组件**逐字段拉通**，便于答辩、迭代与扩展。完整索引见 [`./feature-deep-dives/README.md`](./feature-deep-dives/README.md)。
+
+- [追问策略库与挑战机制（语气变奏 + 评委角色卡 + Critic）](./feature-deep-dives/01-challenge-and-probing.md)
+- [测试用例库与回归脚本体系（test_final01_*.py 全套）](./feature-deep-dives/02-test-library-and-regression.md)
+- [聊天室与对话双轨制（room vs conversation）](./feature-deep-dives/03-chat-room-and-conversations.md)
+- [财务预算系统（BudgetStorage + finance_guard + finance_analyst）](./feature-deep-dives/04-finance-budget-system.md)
+- [商业计划书运行时（章节模板 → pending_revisions → coaching_mode）](./feature-deep-dives/05-business-plan-runtime.md)
+
 ## 使用建议
 
 - 如果是写最终说明书，可以直接从这篇主文档中抽取段落。

@@ -1,0 +1,4856 @@
+{
+  "conversation_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca",
+  "project_id": "project-99fed9ab-486c-4b22-8329-b3c6466e17d2",
+  "student_id": "1120230236",
+  "title": "数据使用与用户信任平衡探讨",
+  "summary": "项目方向明确，用户-痛点-方案链条清晰，但缺少其他关键信息。",
+  "created_at": "2026-04-24T18:10:00.337257+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+      "timestamp": "2026-04-24T18:10:46.445596+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "哈喽！收到你的能量啦！✨ 这个问题问得非常棒，它触及了创业中一个非常核心的挑战：**如何在商业增长与用户信任之间找到平衡**。\n\n不过，我必须非常明确地告诉你：**绝对不能默认同意**。\n\n这不仅是一个法律和合规问题（比如GDPR、个人信息保护法），更是一个**商业模式和价值观**的根本问题。让我用创业的视角帮你拆解：\n\n1.  **短期看是“性能”，长期看是“信任”**：默认同意或许能暂时获取更多数据，但一旦用户发现，他们会感到被欺骗，信任会瞬间崩塌。在数字时代，**信任是最稀缺、最值钱的资产**。失去信任，你的产品再好，也会被用户抛弃。\n\n2.  **这会成为你最大的“竞争劣势”**：想象一下，如果你的竞争对手主打“透明、可控、尊重隐私”，而你却因“默认同意”陷入争议，这将是他们攻击你的最好武器。用户会用脚投票。\n\n3.  **正确的创业思路是“价值交换”**：不要想着“偷”数据，而是设计一个**清晰的价值主张**，让用户心甘情愿地同意。比如：\n    *   **明确告知**：清晰说明数据如何改善**他/她**的体验（例如：“允许学习您的使用习惯，能让推荐更精准，每天为您节省10分钟找内容的时间”）。\n    *   **给予控制权**：提供灵活的选择（如“仅用于基础功能”、“用于个性化改进”、“不同意”），并尊重用户的选择。\n    *   **提供激励**：对于同意贡献数据的用户，是否可以提供一些专属权益？这本身就是一种商业模式创新。\n\n**所以，回到你的项目**：与其纠结于“默认同意”这个危险的想法，不如我们一起思考：\n> **如何设计一个更聪明、更尊重用户的机制，既能获取改进模型所需的数据，又能把“隐私透明”打造成你项目的核心亮点和竞争优势？**\n\n我们可以从你的**价值主张**和**用户获取策略**开始重新梳理。你愿意聊聊你的具体项目吗？",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "out_of_scope",
+          "intent_shape": "single",
+          "intent_reason": "消息内容与创业项目无关，涉及数据使用伦理问题；判定为单一主问题；主意图归类为 out_of_scope",
+          "confidence": 0.9,
+          "engine": "llm",
+          "pipeline": [
+            "coach"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "[聚焦模式: out_of_scope]"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "当前问题足够聚焦，由编排器直接生成回答，不额外拆分角色智能体。",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 2,
+          "rag_case_ids": [
+            "case_317f0438a5dd",
+            "case_1135e29de95e"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {},
+          "analyst": {},
+          "advisor": {},
+          "tutor": {},
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "用户",
+              "type": "stakeholder",
+              "source_span": {
+                "quote": "活力四射地跟我说话！如果用户不同意数据用于训练，我们",
+                "offset": 13,
+                "length": 2
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "id": "e2",
+              "label": "不同意数据用于训练",
+              "type": "pain_point",
+              "source_span": {
+                "quote": "四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，",
+                "offset": 15,
+                "length": 9
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "id": "e3",
+              "label": "模型性能下降",
+              "type": "pain_point",
+              "extraction_rule": "llm_inferred",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "id": "e4",
+              "label": "默认同意",
+              "type": "solution",
+              "source_span": {
+                "quote": "，这种情况下我们是否可以默认同意？",
+                "offset": 47,
+                "length": 4
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "id": "e5",
+              "label": "数据训练",
+              "type": "technology",
+              "extraction_rule": "llm_inferred",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e1",
+              "target": "e2",
+              "relation": "面临",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "source": "e2",
+              "target": "e3",
+              "relation": "导致",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "source": "e4",
+              "target": "e2",
+              "relation": "解决",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "source": "e4",
+              "target": "e3",
+              "relation": "缓解",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            },
+            {
+              "source": "e5",
+              "target": "e2",
+              "relation": "涉及",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "2fc30ccc-6a31-4821-b3b3-6f2b3cea45ca#0"
+            }
+          ],
+          "structural_gaps": [
+            "缺少创新",
+            "缺少市场",
+            "缺少竞争对手",
+            "缺少资源",
+            "缺少商业模式",
+            "缺少执行步骤",
+            "缺少风控措施",
+            "缺少团队介绍",
+            "缺少证据"
+          ],
+          "content_strengths": [
+            "用户-痛点-方案链条清晰"
+          ],
+          "completeness_score": 3,
+          "section_scores": {
+            "stakeholder": 3,
+            "pain_point": 3,
+            "solution": 3,
+            "technology": 3
+          },
+          "student_identity": {},
+          "insight": "项目方向明确，用户-痛点-方案链条清晰，但缺少其他关键信息。",
+          "kg_quality": {
+            "entity_specificity": 3.7,
+            "relationship_density": 0.5,
+            "dimension_balance": 0.961,
+            "cross_validation_index": 0.0,
+            "extraction_confidence": 6.39,
+            "entity_count": 5,
+            "relationship_count": 5,
+            "type_distribution": {
+              "stakeholder": 1,
+              "pain_point": 2,
+              "solution": 1,
+              "technology": 1
+            },
+            "formulas": {
+              "entity_specificity": "avg(label_length_score + numeric_bonus + proper_noun_bonus)",
+              "relationship_density": "R / (E*(E-1)/2)",
+              "dimension_balance": "H(type_distribution) / log2(num_types)",
+              "cross_validation_index": "Pearson(kg_section_scores, rubric_scores)",
+              "extraction_confidence": "0.3*entity + 0.25*rel + 0.25*balance + 0.2*specificity"
+            }
+          }
+        },
+        "hypergraph_insight": {},
+        "rag_cases": [
+          {
+            "case_id": "case_317f0438a5dd",
+            "category": "科技创新",
+            "project_name": "数湖启智——多源异构数据湖智算系统",
+            "similarity": 1.0,
+            "score_keyword": 0.0,
+            "score_vector": 0.5103,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:docx",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H15",
+              "risk_rule:H3",
+              "subgraph:innovation_evaluation",
+              "subgraph:business_model_construction"
+            ],
+            "pain_points": [
+              "数据湖中多源异构数据复杂，存在数据质量问题",
+              "数据科学家需耗费大量精力准备数据",
+              "不同任务对数据形态、时效性及质量要求存在冲突"
+            ],
+            "solution": [
+              "人机协作的数据提质，实现低成本高质量数据清洗融合",
+              "任务感知的关系透视，提升数据适配准确率",
+              "数据优选的模型提效，降低模型训练时间成本"
+            ],
+            "innovation_points": [
+              "人机协同的数据清洗融合方法",
+              "任务感知的精准数据发现",
+              "具备理论保证的核心子集选择与更新"
+            ],
+            "business_model": [
+              "为政府和企业提供智慧公安、智慧医疗、智慧政务等服务",
+              "通过合作推广，提升数据管理效率和质量",
+              "推动政府基础设施建设和高新企业创新业务发展"
+            ],
+            "evidence_quotes": [
+              "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题",
+              "数据科学家至少耗费90%的精力准备数据湖中要分析的数据，将数据融合成一个连贯的整体，并进行数据清洗，否则数据湖就会变成数据沼泽"
+            ],
+            "risk_flags": [
+              "H10",
+              "H15",
+              "H3"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "作品设计说明书 作品名称： 数湖启智——多源异构数据湖智算系统 申报类别： 信息技术 作者： 邓宇豪、曾杨杰、杨烨如、王涵驰 钟元浩、程果、李宇航、吴泽学 类别： 自然科学类学术论文 哲学社会科学类社会调查报告和学术论文 科技发明制作A类 科技发明制作B类 摘 要 算力、模型和数据组成了人工智能的三要素，也是大国博弈的关键。其中，华为昇腾、DeepSeek在算力和模型上分别打破了国外技术垄断，但是数据管理领域亟待形成具有国际竞争力的技术突破。数据管理系统历经数据库、数据仓库的迭代升级，直至当前数据湖架构阶段。但是，由于数据湖中多源异构数据的复杂性，若不采取管理措施，难以发挥数据价值。本项目分析",
+            "concept_hits": [],
+            "subgraph_hits": [
+              "business_model_construction"
+            ],
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "数据湖中多源异构数据复杂，存在数据质量问题",
+              "数据科学家需耗费大量精力准备数据",
+              "不同任务对数据形态、时效性及质量要求存在冲突"
+            ],
+            "graph_solutions": [
+              "人机协作的数据提质，实现低成本高质量数据清洗融合",
+              "任务感知的关系透视，提升数据适配准确率",
+              "数据优选的模型提效，降低模型训练时间成本"
+            ],
+            "graph_innovations": [
+              "人机协同的数据清洗融合方法",
+              "任务感知的精准数据发现",
+              "具备理论保证的核心子集选择与更新"
+            ],
+            "graph_biz_models": [
+              "为政府和企业提供智慧公安、智慧医疗、智慧政务等服务",
+              "通过合作推广，提升数据管理效率和质量",
+              "推动政府基础设施建设和高新企业创新业务发展"
+            ],
+            "graph_markets": [
+              "数据湖技术面临数据质量、适配和训练效率的挑战",
+              "国务院和国家数据局强调高质量数据资源的重要性",
+              "数据湖成为数字经济时代的新型基础设施"
+            ],
+            "graph_exec_steps": [
+              "构建人机协作的数据提质、任务感知的关系透视、数据优选的模型提效三大技术创新",
+              "通过企业走访和行业调研，优化系统功能",
+              "为国内多个城市提供智慧服务，推动相关产业发展"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 14,
+            "graph_evidence_samples": [
+              {
+                "type": "pain_points_evidence",
+                "quote": "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题"
+              },
+              {
+                "type": "pain_points_evidence",
+                "quote": "数据科学家至少耗费90%的精力准备数据湖中要分析的数据，将数据融合成一个连贯的整体，并进行数据清洗，否则数据湖就会变成数据沼泽"
+              },
+              {
+                "type": "pain_points_evidence",
+                "quote": "不同任务对数据形态、时效性及质量要求存在根本冲突，导致数据适配难"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [],
+              "only_in_case": [
+                "H10",
+                "H15",
+                "H3"
+              ],
+              "only_in_student": [
+                "H14",
+                "H5"
+              ]
+            }
+          },
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书",
+            "similarity": 0.854,
+            "score_keyword": 0.0,
+            "score_vector": 0.4823,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "risk_control:missing",
+              "risk_gap:compliance_not_covered",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H15",
+              "risk_rule:H3",
+              "risk_rule:H5",
+              "risk_rule:H8",
+              "competition:internet_plus",
+              "subgraph:innovation_evaluation",
+              "subgraph:business_model_construction"
+            ],
+            "pain_points": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "solution": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "innovation_points": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "business_model": [],
+            "evidence_quotes": [
+              "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。",
+              "目前市场上不存在一种通用且高效的大型虚拟空间构建仿真方案，所以元界创生迎接新时代元宇宙技术为建模仿真技术带来的新挑战，针对万人并发、百万人访问、三端一体的技术难题，打造了一个即时高交互数字云空间一体化全流程平台。"
+            ],
+            "risk_flags": [
+              "H10",
+              "H15",
+              "H3",
+              "H5",
+              "H8"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 .....................................................",
+            "concept_hits": [],
+            "subgraph_hits": [
+              "business_model_construction"
+            ],
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "graph_solutions": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "graph_innovations": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "graph_biz_models": [],
+            "graph_markets": [
+              "随着 Web 3.0 与 5G 普及，沉浸式交互空间市场预计呈指数增长",
+              "不仅是工具提供商，更旨在构建“元宇宙内容生成协议”标准"
+            ],
+            "graph_exec_steps": [
+              "技术研发规划：积累更丰富的模型数据与算法指纹库，提升 GPU 利用率",
+              "市场推广规划：先行在红色文旅与教育培训领域落地"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H9",
+                "name": "增长逻辑跳跃",
+                "severity": "medium"
+              },
+              {
+                "id": "H4",
+                "name": "TAM/SAM/SOM口径混乱",
+                "severity": "high"
+              },
+              {
+                "id": "H8",
+                "name": "单位经济不成立",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 3,
+            "graph_evidence_samples": [
+              {
+                "type": "user_evidence",
+                "quote": "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。"
+              },
+              {
+                "type": "business_model_evidence",
+                "quote": "目前市场上不存在一种通用且高效的大型虚拟空间构建仿真方案，所以元界创生迎接新时代元宇宙技术为建模仿真技术带来的新挑战，针对万人并发、百万人访问、三端一体的技术难题，打造了一个即时高交互数字云空间一体化全流程平台。"
+              },
+              {
+                "type": "risk_evidence",
+                "quote": "我国在这方面的技术储备目前还有所欠缺。虽然我国在虚拟空间描述方法、高精度三维仿真与渲染引擎设计、基于高沉浸的协同编辑与辅助技术方面有一定的科研与产品生产，但缺乏应对虚拟场景构建、高交互角色映射、多样虚拟空间服务需求的平台和成型系统。"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [
+                "H5"
+              ],
+              "only_in_case": [
+                "H10",
+                "H13",
+                "H15",
+                "H3",
+                "H4",
+                "H7",
+                "H8",
+                "H9"
+              ],
+              "only_in_student": [
+                "H14"
+              ]
+            }
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创新创业 请活力四射 同意数据用",
+          "results": [
+            {
+              "title": "创新创业",
+              "snippet": "创新创业是通过对已有技术、产品和服务的更优化组合，对现有资源的更优化配置。能够给客户带来更大、更多的新价值，从而开创所在创业领域的“蓝海”，获取更多的竞争优势，也获取更大的回报。 · 创新创业是在创新基础上的创业活动，创新是创业的基础和前提，同时创业又是创新成果的载体和呈现，并在创业活动过程中，不断优化资源配置、总结提炼，以实现创新的更新与升级。创新带动创业，创业促进创新。",
+              "url": "https://baike.baidu.com/item/创新创业/708490"
+            },
+            {
+              "title": "【【专家观点】为青年学生创新创业营造更好更优环境】-国家发展和改革委员会",
+              "snippet": "June 5, 2025 -青年是最富活力、最具创造性的群体，是创新的生力军。习近平总书记强调，全社会都要关心青年的成长和发展，营造良好创新创业氛围，让广大青年在中国式现代化的广阔天地中更好展现才华。这对优化青年创新创业环...",
+              "url": "https://www.ndrc.gov.cn/wsdwhfz/202506/t20250605_1398280.html"
+            },
+            {
+              "title": "创新创业_创业基础_课后作业原创",
+              "snippet": "February 16, 2020 -本课程深入探讨创新创业过程中关键资源的获取与管理，以及创业风险识别与应对策略。内容覆盖创业团队建设、创业动机分析、商业模式设计、创业融资渠道、资源开发方法等，旨在提升大学生的创业能力和素质。",
+              "url": "https://blog.csdn.net/weixin_42859280/article/details/87540333"
+            }
+          ],
+          "summary": "- 创新创业是通过对已有技术、产品和服务的更优化组合，对现有资源的更优化配置。能够给客户带来更大、更多的新价值，从而开创所在创业领域的“蓝海”，获取更多的竞争优势，也获取更大的回报。 · 创新创业是在创新基础上的创业活动，创新是创业的基础和前提，同时创业又是创新成果的载体和呈现，并在创业活动过程中，不断优化资源配置、总结提炼，以实现创新的更新与升级。创新带动创业，创业促进创新。\n- June 5, 2025 -青年是最富活力、最具创造性的群体，是创新的生力军。习近平总书记强调，全社会都要关心青年的成长和发展，营造良好创新创业氛围，让广大青年在中国式现代化的广阔天地中更好展现才华。这对优化青年创新创业环...\n- February 16, 2020 -本课程深入探讨创新创业过程中关键资源的获取与管理，以及创业风险识别与应对策略。内容覆盖创业团队建设、创业动机分析、商业模式设计、创业融资渠道、资源开发方法等，旨在提升大学生的创业能力和素质。"
+        },
+        "hypergraph_student": {},
+        "hyper_consistency_issues": [],
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 6.6,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "probing_layers_default": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "tone": "cool",
+            "tone_descriptor": "学术冷静、就事论事、不带情绪；像审稿人。",
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "matched_keywords": [],
+            "matched_rules": [
+              "H5"
+            ],
+            "strategy_type": "adversarial",
+            "applies_to_stage": [],
+            "applies_to_competition": []
+          },
+          {
+            "strategy_id": "CS05",
+            "name": "商业模式闭环断裂",
+            "match_score": 3.6,
+            "probing_layers": [
+              "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+              "渠道可达性: 你说通过XX渠道获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+              "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。"
+            ],
+            "probing_layers_default": [
+              "价值传递检验: 你的产品给用户提供什么价值？这个价值用户自己认可吗？",
+              "渠道可达性: 你说通过XX渠道获客，这个渠道的单次触达成本是多少？转化率预期是多少？依据是什么？",
+              "收入逻辑检验: '先做大用户再变现'——请给出一个具体的变现时间点和方式。没有变现路径的用户增长是烧钱。"
+            ],
+            "tone": "cool",
+            "tone_descriptor": "学术冷静、就事论事、不带情绪；像审稿人。",
+            "expected_evidence": [
+              "价值主张画布",
+              "渠道成本数据",
+              "变现路径和时间表"
+            ],
+            "counterfactual": "如果你的免费用户永远不转化为付费用户，公司的现金流能撑多久？",
+            "preferred_edge_types": [
+              "Value_Loop_Edge",
+              "Execution_Gap_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "单位经济未证成",
+              "客群与价值错位",
+              "用户价值与收入混淆"
+            ],
+            "strategy_logic": "价值闭环逻辑 + 现金流生存逻辑",
+            "matched_edge_types": [
+              "Value_Loop_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "matched_keywords": [],
+            "matched_rules": [],
+            "strategy_type": "adversarial",
+            "applies_to_stage": [],
+            "applies_to_competition": []
+          },
+          {
+            "strategy_id": "CS08",
+            "name": "定价无支撑",
+            "match_score": 3.6,
+            "probing_layers": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "probing_layers_default": [
+              "支付意愿检验: 你的定价依据是什么？做过价格敏感性测试吗？",
+              "竞品定价对比: 类似产品的市场价格区间是多少？你比他们贵还是便宜？为什么？",
+              "价格弹性检验: 如果价格上涨50%，你预计流失多少用户？如果下降50%，能多获取多少？"
+            ],
+            "tone": "cool",
+            "tone_descriptor": "学术冷静、就事论事、不带情绪；像审稿人。",
+            "expected_evidence": [
+              "价格测试数据",
+              "竞品定价对比表",
+              "价格弹性分析"
+            ],
+            "counterfactual": "如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+            "preferred_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Market_Competition_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "定价无支撑"
+            ],
+            "strategy_logic": "价格敏感度逻辑 + 免费替代品比较",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "matched_keywords": [],
+            "matched_rules": [],
+            "strategy_type": "adversarial",
+            "applies_to_stage": [],
+            "applies_to_competition": []
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "需求假设谬误",
+          "fallacy_rule_id": "H5",
+          "retrieved_heterogeneous_subgraph": [],
+          "selected_strategy": "需求证据缺失",
+          "selected_strategy_id": "CS04",
+          "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+          "generated_question": "你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+          "consistency_pressure_questions": [],
+          "evidence_quotes": [
+            "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？"
+          ],
+          "tone": "cool"
+        },
+        "competition": {
+          "active_judge": "tech_lead",
+          "active_judge_name": "技术流专家（算法总监）",
+          "active_judge_archetype": "大厂算法/工程负责人，最在意可复现性和工程边界",
+          "preferred_tone": "cool",
+          "tone_origin": "explicit"
+        },
+        "learning": null,
+        "category": "科技创新",
+        "track_vector": {
+          "innov_venture": -0.0594,
+          "biz_public": -0.7083,
+          "source": "inferred",
+          "updated_at": "2026-04-24T18:10:41.269349+08:00"
+        },
+        "project_stage_v2": "idea",
+        "track_inference_meta": {
+          "confidence": 0.44,
+          "source_mix": {
+            "message": 1.0,
+            "diagnosis": 1.0,
+            "structured_signals": 1.0
+          },
+          "last_reason": "基于当前轮文本信号、诊断摘要与结构化证据推断双光谱位置。",
+          "last_evidence": [
+            "创新信号 1.0",
+            "创业信号 1.0"
+          ],
+          "streaks": {
+            "innov_venture": {
+              "direction": "neutral",
+              "count": 0
+            },
+            "biz_public": {
+              "direction": "neutral",
+              "count": 0
+            }
+          }
+        },
+        "track_labels": {
+          "innov_venture_label": "中性创新/创业",
+          "biz_public_label": "偏商业 71%",
+          "summary": "中性创新/创业 · 偏商业 71%"
+        },
+        "matched_teacher_interventions": [],
+        "kb_utilization": {
+          "retrieval_mode": "vector",
+          "total_kb_cases": 110,
+          "excluded_history_count": 0,
+          "hits_count": 2,
+          "neo4j_enriched": true,
+          "neo4j_enriched_count": 2,
+          "complementary_count": 2,
+          "category_filter": "科技创新",
+          "top_k_requested": 4,
+          "search_trace": [
+            {
+              "case_id": "case_317f0438a5dd",
+              "score": 1.0,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "数湖启智——多源异构数据湖智算系统"
+            },
+            {
+              "case_id": "case_1135e29de95e",
+              "score": 0.854,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书"
+            }
+          ],
+          "query_preview": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+          "weak_dims_for_complementary": [
+            "Problem Definition",
+            "User Evidence Strength",
+            "Solution Feasibility",
+            "Market & Competition"
+          ],
+          "dual_channel": {
+            "vector_hits": 2,
+            "graph_hits": 0,
+            "graph_details": []
+          },
+          "incremental_stats": {
+            "total_accumulated": 5,
+            "new_this_turn": 5,
+            "total_rels": 5,
+            "project_maturity": "exploring",
+            "readiness_score": 5,
+            "message_chars": 52,
+            "filled_slots": 2,
+            "vague_hits": 0,
+            "concrete_hits": 1
+          }
+        },
+        "rag_enrichment_insight": "风险对比: H14(你独有), H5(你独有)——参考案例中都没有触发这些规则，说明这可能是你项目特有的薄弱环节。\n参考案例普遍覆盖的维度: Risk Control, Problem Definition, Solution Feasibility, Market & Competition, Innovation & Differentiation。",
+        "neo4j_graph_hits": [],
+        "incremental_stats": {},
+        "dim_results": {},
+        "agent_hyper_details": [],
+        "analysis_refresh": {
+          "intent": "out_of_scope",
+          "carried": false,
+          "carried_reason": "",
+          "fresh_components": [
+            "diagnosis",
+            "track_vector",
+            "challenge_strategies",
+            "kg_analysis",
+            "rag_cases",
+            "ability_subgraphs",
+            "ontology_grounding"
+          ],
+          "carried_components": []
+        },
+        "ability_subgraphs": [
+          {
+            "id": "business_model_construction",
+            "name": "商业模式构建",
+            "description": "价值主张→渠道→收入→成本→单位经济的闭环子图，判断商业模式是否自洽。",
+            "purpose": "把项目从“点子”推到可持续的商业闭环：确认收入来源、成本结构、获客路径与单位经济。",
+            "focus_brief": "商业模式构建子图触发：请按“目标客群 → 价值主张 → 渠道 → 收入 → 成本 → 单位经济”顺序逐项检查闭环是否自洽：是否能给出一个可量化的 LTV/CAC 假设来源；渠道是否真能触达目标客群；收入与成本结构是否对应同一类用户。若涉及公益侧重，请同时讨论补贴/资助渠道与“可及性 vs 可持续”的取舍。",
+            "ontology_nodes": [
+              {
+                "id": "C_business_model",
+                "kind": "concept",
+                "label": "Business Model",
+                "description": "价值主张、渠道、收入、成本之间的闭环结构"
+              },
+              {
+                "id": "C_value_proposition",
+                "kind": "concept",
+                "label": "Value Proposition",
+                "description": "痛点→收益→产品主张之间的一致性"
+              },
+              {
+                "id": "C_user_segment",
+                "kind": "concept",
+                "label": "Target User Segment",
+                "description": "可操作的细分客群，而不是泛泛的所有人"
+              },
+              {
+                "id": "C_channel",
+                "kind": "concept",
+                "label": "Acquisition Channel",
+                "description": "获客与触达用户的路径"
+              },
+              {
+                "id": "C_revenue_stream",
+                "kind": "concept",
+                "label": "Revenue Stream",
+                "description": "项目收入来源构成"
+              },
+              {
+                "id": "C_cost_structure",
+                "kind": "concept",
+                "label": "Cost Structure",
+                "description": "固定成本与变动成本结构"
+              },
+              {
+                "id": "C_growth_model",
+                "kind": "concept",
+                "label": "Growth Model",
+                "description": "项目增长路径与飞轮机制"
+              },
+              {
+                "id": "C_kpi",
+                "kind": "concept",
+                "label": "Key KPI",
+                "description": "衡量项目阶段性成效的关键指标"
+              },
+              {
+                "id": "M_leancanvas",
+                "kind": "method",
+                "label": "Lean Canvas",
+                "description": "用一页画布串联核心要素"
+              },
+              {
+                "id": "M_unit_economics",
+                "kind": "method",
+                "label": "Unit Economics Modeling",
+                "description": "围绕单个用户或订单构建收益/成本模型"
+              },
+              {
+                "id": "M_tam_sam_som",
+                "kind": "method",
+                "label": "TAM/SAM/SOM Modeling",
+                "description": "自下而上量化市场空间"
+              },
+              {
+                "id": "M_sensitivity_analysis",
+                "kind": "method",
+                "label": "Sensitivity Analysis",
+                "description": "对关键假设做敏感性分析"
+              },
+              {
+                "id": "D_financial_model",
+                "kind": "deliverable",
+                "label": "Financial Model",
+                "description": "收入、成本、现金流与盈亏平衡测算表"
+              },
+              {
+                "id": "D_kpi_report",
+                "kind": "deliverable",
+                "label": "KPI Report",
+                "description": "阶段性关键指标达成情况报告"
+              },
+              {
+                "id": "X_cac",
+                "kind": "metric",
+                "label": "CAC",
+                "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+              },
+              {
+                "id": "X_ltv",
+                "kind": "metric",
+                "label": "LTV",
+                "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+              },
+              {
+                "id": "X_payback",
+                "kind": "metric",
+                "label": "Payback Period",
+                "description": "收回获客成本所需时间"
+              },
+              {
+                "id": "X_arpu",
+                "kind": "metric",
+                "label": "ARPU",
+                "description": "Average Revenue Per User — 用户平均收入"
+              },
+              {
+                "id": "X_margin",
+                "kind": "metric",
+                "label": "Gross Margin",
+                "description": "毛利率"
+              },
+              {
+                "id": "X_runway",
+                "kind": "metric",
+                "label": "Runway",
+                "description": "可维持运营的时间"
+              },
+              {
+                "id": "C_iplus_tam_sam_som",
+                "kind": "concept",
+                "label": "互联网+ 市场论证",
+                "description": "互联网+评审重点：TAM/SAM/SOM论证清晰度和市场可进入性分析"
+              },
+              {
+                "id": "P_market_size_fallacy",
+                "kind": "pitfall",
+                "label": "1% 市场规模幻觉",
+                "description": "典型误区：用 TAM×1% 直接推算营收，自上而下估算缺乏自下而上的可达路径。"
+              }
+            ],
+            "rubric_dimensions": [
+              "Business Model Consistency",
+              "Market & Competition",
+              "Financial Logic"
+            ],
+            "hyperedge_families": [
+              "business_model",
+              "revenue_stream",
+              "cost_structure",
+              "unit_economics",
+              "channel",
+              "growth",
+              "market_size"
+            ],
+            "related_rule_ids": [
+              "H1",
+              "H2",
+              "H3",
+              "H4",
+              "H8",
+              "H9"
+            ],
+            "applies_to_stage": [],
+            "applies_to_spectrum": [
+              "venture_strong",
+              "biz_strong"
+            ],
+            "score": 0.5,
+            "matched_signals": [
+              "默认兜底（无明确触发）"
+            ]
+          }
+        ],
+        "ontology_grounding": {
+          "covered_concepts": [
+            {
+              "id": "C_rubric_dimension_evidence",
+              "kind": "concept",
+              "label": "Rubric: Evidence",
+              "description": "评审维度：证据链完整度",
+              "aliases": [],
+              "parent": null,
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_problem",
+              "kind": "concept",
+              "label": "Problem Definition",
+              "description": "对目标用户的具体问题和场景进行清晰刻画的能力",
+              "aliases": [
+                "问题定义",
+                "痛点",
+                "用户痛点",
+                "problem",
+                "pain point"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "idea",
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "目标用户在什么场景下遇到了这个问题？",
+                "他们目前用什么方式解决，付出的代价是什么？"
+              ]
+            },
+            {
+              "id": "C_solution",
+              "kind": "concept",
+              "label": "Solution",
+              "description": "为目标用户设计的产品/服务组合",
+              "aliases": [
+                "解决方案",
+                "产品方案",
+                "solution",
+                "产品形态"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "方案的核心步骤有几步？哪些是你最有把握做好的？",
+                "如果只能保留一个功能，你会留哪个，为什么？"
+              ]
+            },
+            {
+              "id": "C_user_segment",
+              "kind": "concept",
+              "label": "Target User Segment",
+              "description": "可操作的细分客群，而不是泛泛的所有人",
+              "aliases": [
+                "目标用户",
+                "细分客群",
+                "客群",
+                "user segment",
+                "target user"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "idea",
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你描述的用户是不是足够具体？比如年龄、地域、岗位、消费能力？",
+                "这群人为什么是你最先服务的，而不是其他相邻人群？"
+              ]
+            }
+          ],
+          "missing_concepts": [
+            {
+              "id": "C_business_model",
+              "kind": "concept",
+              "label": "Business Model",
+              "description": "价值主张、渠道、收入、成本之间的闭环结构",
+              "aliases": [
+                "商业模式",
+                "盈利模式",
+                "business model",
+                "BM"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你向谁收费？为什么是他们而不是用户本身？",
+                "成本结构里最大的一块是什么，能不能被规模摊薄？"
+              ]
+            },
+            {
+              "id": "C_value_proposition",
+              "kind": "concept",
+              "label": "Value Proposition",
+              "description": "痛点→收益→产品主张之间的一致性",
+              "aliases": [
+                "价值主张",
+                "价值定位",
+                "value prop",
+                "value proposition",
+                "卖点逻辑"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "用一句话说出'为什么用户要选你而不是替代方案'？",
+                "这个价值能不能被一个具体的指标量化？"
+              ]
+            },
+            {
+              "id": "C_channel",
+              "kind": "concept",
+              "label": "Acquisition Channel",
+              "description": "获客与触达用户的路径",
+              "aliases": [
+                "渠道",
+                "获客渠道",
+                "channel",
+                "GTM"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你打算用哪条渠道触达目标用户？这条渠道的成本和转化大概是多少？"
+              ]
+            },
+            {
+              "id": "C_revenue_stream",
+              "kind": "concept",
+              "label": "Revenue Stream",
+              "description": "项目收入来源构成",
+              "aliases": [
+                "收入来源",
+                "营收结构",
+                "revenue stream"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_cost_structure",
+              "kind": "concept",
+              "label": "Cost Structure",
+              "description": "固定成本与变动成本结构",
+              "aliases": [
+                "成本结构",
+                "cost structure"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_growth_model",
+              "kind": "concept",
+              "label": "Growth Model",
+              "description": "项目增长路径与飞轮机制",
+              "aliases": [
+                "增长模式",
+                "增长飞轮",
+                "growth model",
+                "growth loop"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_kpi",
+              "kind": "concept",
+              "label": "Key KPI",
+              "description": "衡量项目阶段性成效的关键指标",
+              "aliases": [
+                "关键指标",
+                "KPI",
+                "key metric"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_iplus_tam_sam_som",
+              "kind": "concept",
+              "label": "互联网+ 市场论证",
+              "description": "互联网+评审重点：TAM/SAM/SOM论证清晰度和市场可进入性分析",
+              "aliases": [],
+              "parent": null,
+              "stage_expected": [],
+              "probing_questions": []
+            }
+          ],
+          "evidence_required": [
+            {
+              "id": "C_problem",
+              "kind": "concept",
+              "label": "Problem Definition",
+              "description": "对目标用户的具体问题和场景进行清晰刻画的能力",
+              "aliases": [
+                "问题定义",
+                "痛点",
+                "用户痛点",
+                "problem",
+                "pain point"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "idea",
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "目标用户在什么场景下遇到了这个问题？",
+                "他们目前用什么方式解决，付出的代价是什么？"
+              ]
+            },
+            {
+              "id": "C_user_segment",
+              "kind": "concept",
+              "label": "Target User Segment",
+              "description": "可操作的细分客群，而不是泛泛的所有人",
+              "aliases": [
+                "目标用户",
+                "细分客群",
+                "客群",
+                "user segment",
+                "target user"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "idea",
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你描述的用户是不是足够具体？比如年龄、地域、岗位、消费能力？",
+                "这群人为什么是你最先服务的，而不是其他相邻人群？"
+              ]
+            },
+            {
+              "id": "C_user_journey",
+              "kind": "concept",
+              "label": "User Journey",
+              "description": "用户从认知到复购的完整旅程",
+              "aliases": [
+                "用户旅程",
+                "user journey",
+                "用户路径"
+              ],
+              "parent": "C_user_segment",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_interview_notes",
+              "kind": "deliverable",
+              "label": "Interview Notes",
+              "description": "用户访谈记录与痛点频次统计表",
+              "aliases": [
+                "访谈记录",
+                "interview notes",
+                "访谈纪要"
+              ],
+              "parent": "M_user_interview",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_rubric_dimension_evidence",
+              "kind": "concept",
+              "label": "Rubric: Evidence",
+              "description": "评审维度：证据链完整度",
+              "aliases": [],
+              "parent": null,
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "M_user_interview",
+              "kind": "method",
+              "label": "User Interview",
+              "description": "通过半结构化访谈收集用户原话与场景信息",
+              "aliases": [
+                "用户访谈",
+                "深访",
+                "user interview",
+                "1v1 访谈"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "idea",
+                "structured",
+                "validated"
+              ],
+              "probing_questions": [
+                "你完成过几次访谈？被访谈者是不是真的目标用户？"
+              ]
+            },
+            {
+              "id": "M_survey",
+              "kind": "method",
+              "label": "Survey",
+              "description": "通过问卷定量验证需求、支付意愿等假设",
+              "aliases": [
+                "问卷",
+                "survey",
+                "调查"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated"
+              ],
+              "probing_questions": [
+                "问卷样本量多少？是怎么筛选的？"
+              ]
+            },
+            {
+              "id": "D_survey_report",
+              "kind": "deliverable",
+              "label": "Survey Report",
+              "description": "问卷设计、样本说明与关键结论",
+              "aliases": [
+                "问卷报告",
+                "survey report"
+              ],
+              "parent": "M_survey",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_solution",
+              "kind": "concept",
+              "label": "Solution",
+              "description": "为目标用户设计的产品/服务组合",
+              "aliases": [
+                "解决方案",
+                "产品方案",
+                "solution",
+                "产品形态"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "方案的核心步骤有几步？哪些是你最有把握做好的？",
+                "如果只能保留一个功能，你会留哪个，为什么？"
+              ]
+            },
+            {
+              "id": "M_mvp",
+              "kind": "method",
+              "label": "MVP Experiment",
+              "description": "用最小可行产品验证关键假设",
+              "aliases": [
+                "MVP",
+                "最小可行产品",
+                "minimum viable product"
+              ],
+              "parent": "C_solution",
+              "stage_expected": [
+                "structured",
+                "validated"
+              ],
+              "probing_questions": [
+                "有没有跑过 MVP？最小验证目标是什么？"
+              ]
+            },
+            {
+              "id": "M_usability_test",
+              "kind": "method",
+              "label": "Usability Test",
+              "description": "针对产品可用性的可用性测试",
+              "aliases": [
+                "可用性测试",
+                "usability test"
+              ],
+              "parent": "M_mvp",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_usability_report",
+              "kind": "deliverable",
+              "label": "Usability Test Report",
+              "description": "可用性测试设计与结果",
+              "aliases": [
+                "可用性测试报告"
+              ],
+              "parent": "M_usability_test",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_business_model",
+              "kind": "concept",
+              "label": "Business Model",
+              "description": "价值主张、渠道、收入、成本之间的闭环结构",
+              "aliases": [
+                "商业模式",
+                "盈利模式",
+                "business model",
+                "BM"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你向谁收费？为什么是他们而不是用户本身？",
+                "成本结构里最大的一块是什么，能不能被规模摊薄？"
+              ]
+            },
+            {
+              "id": "C_value_proposition",
+              "kind": "concept",
+              "label": "Value Proposition",
+              "description": "痛点→收益→产品主张之间的一致性",
+              "aliases": [
+                "价值主张",
+                "价值定位",
+                "value prop",
+                "value proposition",
+                "卖点逻辑"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "用一句话说出'为什么用户要选你而不是替代方案'？",
+                "这个价值能不能被一个具体的指标量化？"
+              ]
+            },
+            {
+              "id": "C_channel",
+              "kind": "concept",
+              "label": "Acquisition Channel",
+              "description": "获客与触达用户的路径",
+              "aliases": [
+                "渠道",
+                "获客渠道",
+                "channel",
+                "GTM"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你打算用哪条渠道触达目标用户？这条渠道的成本和转化大概是多少？"
+              ]
+            },
+            {
+              "id": "C_revenue_stream",
+              "kind": "concept",
+              "label": "Revenue Stream",
+              "description": "项目收入来源构成",
+              "aliases": [
+                "收入来源",
+                "营收结构",
+                "revenue stream"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_cost_structure",
+              "kind": "concept",
+              "label": "Cost Structure",
+              "description": "固定成本与变动成本结构",
+              "aliases": [
+                "成本结构",
+                "cost structure"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "M_unit_economics",
+              "kind": "method",
+              "label": "Unit Economics Modeling",
+              "description": "围绕单个用户或订单构建收益/成本模型",
+              "aliases": [
+                "单位经济",
+                "unit economics",
+                "单笔经济模型"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "LTV/CAC 比值是多少？",
+                "Payback 周期超过 12 个月吗？"
+              ]
+            },
+            {
+              "id": "D_financial_model",
+              "kind": "deliverable",
+              "label": "Financial Model",
+              "description": "收入、成本、现金流与盈亏平衡测算表",
+              "aliases": [
+                "财务模型",
+                "financial model",
+                "财务测算"
+              ],
+              "parent": "C_business_model",
+              "stage_expected": [
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_market_size",
+              "kind": "concept",
+              "label": "Market Size",
+              "description": "TAM/SAM/SOM 分层的市场规模逻辑",
+              "aliases": [
+                "市场规模",
+                "市场容量",
+                "TAM/SAM/SOM",
+                "市场空间"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "你估算市场规模的口径是自下而上还是自上而下？",
+                "三年内你最有把握拿到的 SOM 是多少？"
+              ]
+            },
+            {
+              "id": "M_tam_sam_som",
+              "kind": "method",
+              "label": "TAM/SAM/SOM Modeling",
+              "description": "自下而上量化市场空间",
+              "aliases": [
+                "TAM/SAM/SOM",
+                "市场拆分",
+                "TAM"
+              ],
+              "parent": "C_market_size",
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_competition",
+              "kind": "concept",
+              "label": "Competition Landscape",
+              "description": "直接/间接竞品与替代品构成的竞争格局",
+              "aliases": [
+                "竞品",
+                "竞争格局",
+                "替代方案",
+                "竞争对手",
+                "competition"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "用户当前最常用的替代方案是什么？为什么它还没解决问题？",
+                "和直接竞品相比，你最难被复制的优势是什么？"
+              ]
+            },
+            {
+              "id": "M_competition_mapping",
+              "kind": "method",
+              "label": "Competition Mapping",
+              "description": "绘制竞争格局与替代品地图",
+              "aliases": [
+                "竞争地图",
+                "competition mapping"
+              ],
+              "parent": "C_competition",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_competitor_table",
+              "kind": "deliverable",
+              "label": "Competitor Comparison Table",
+              "description": "主流方案的对比矩阵",
+              "aliases": [
+                "竞品对比表",
+                "competitor table"
+              ],
+              "parent": "M_competitor_matrix",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_risk_category_financial",
+              "kind": "concept",
+              "label": "Financial Risk",
+              "description": "现金流与盈利能力风险",
+              "aliases": [
+                "财务风险",
+                "现金流风险",
+                "financial risk"
+              ],
+              "parent": "C_risk_control",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "M_sensitivity_analysis",
+              "kind": "method",
+              "label": "Sensitivity Analysis",
+              "description": "对关键假设做敏感性分析",
+              "aliases": [
+                "敏感性分析",
+                "sensitivity analysis"
+              ],
+              "parent": "M_unit_economics",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "X_cac",
+              "kind": "metric",
+              "label": "CAC",
+              "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本",
+              "aliases": [
+                "CAC",
+                "获客成本",
+                "客户获取成本",
+                "拉新成本",
+                "新客成本",
+                "单客成本"
+              ],
+              "parent": "C_risk_category_financial",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "X_ltv",
+              "kind": "metric",
+              "label": "LTV",
+              "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利",
+              "aliases": [
+                "LTV",
+                "客户生命周期价值"
+              ],
+              "parent": "C_risk_category_financial",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "X_payback",
+              "kind": "metric",
+              "label": "Payback Period",
+              "description": "收回获客成本所需时间",
+              "aliases": [
+                "回本周期",
+                "Payback",
+                "Payback Period"
+              ],
+              "parent": "C_risk_category_financial",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "X_margin",
+              "kind": "metric",
+              "label": "Gross Margin",
+              "description": "毛利率",
+              "aliases": [
+                "毛利率",
+                "Gross Margin",
+                "margin"
+              ],
+              "parent": "C_cost_structure",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_moat",
+              "kind": "concept",
+              "label": "Competitive Moat",
+              "description": "难以被复制的竞争壁垒",
+              "aliases": [
+                "壁垒",
+                "护城河",
+                "moat",
+                "差异化"
+              ],
+              "parent": "C_competition",
+              "stage_expected": [
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            },
+            {
+              "id": "C_positioning",
+              "kind": "concept",
+              "label": "Positioning",
+              "description": "在用户心智中的定位",
+              "aliases": [
+                "定位",
+                "市场定位",
+                "positioning"
+              ],
+              "parent": "C_competition",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "M_competitor_matrix",
+              "kind": "method",
+              "label": "Competitor Matrix",
+              "description": "按关键维度对比直接/间接竞品",
+              "aliases": [
+                "竞品矩阵",
+                "竞品对比表",
+                "competitor matrix"
+              ],
+              "parent": "C_competition",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_competition_map",
+              "kind": "deliverable",
+              "label": "Competition Map",
+              "description": "竞品与替代品可视化地图",
+              "aliases": [
+                "竞品地图"
+              ],
+              "parent": "C_competition",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_case_study_positive",
+              "kind": "deliverable",
+              "label": "Positive Case Study",
+              "description": "正面成功案例分析",
+              "aliases": [],
+              "parent": null,
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_team",
+              "kind": "concept",
+              "label": "Founding Team",
+              "description": "团队角色分工与资源匹配度",
+              "aliases": [
+                "团队",
+                "创始团队",
+                "team",
+                "founding team"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "structured",
+                "validated",
+                "scale"
+              ],
+              "probing_questions": [
+                "团队里谁负责哪一块？关键岗位有没有缺口？",
+                "你们之前一起完成过什么项目，能证明协作能力？"
+              ]
+            },
+            {
+              "id": "C_risk_category_execution",
+              "kind": "concept",
+              "label": "Execution Risk",
+              "description": "团队与资源执行相关风险",
+              "aliases": [
+                "执行风险",
+                "团队风险",
+                "execution risk"
+              ],
+              "parent": "C_risk_control",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_roadmap",
+              "kind": "deliverable",
+              "label": "Roadmap",
+              "description": "阶段里程碑与验收标准清单",
+              "aliases": [
+                "路线图文档",
+                "roadmap doc"
+              ],
+              "parent": "C_roadmap",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_kpi_report",
+              "kind": "deliverable",
+              "label": "KPI Report",
+              "description": "阶段性关键指标达成情况报告",
+              "aliases": [
+                "KPI 报告",
+                "KPI report"
+              ],
+              "parent": "C_kpi",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "C_rubric_dimension_presentation",
+              "kind": "concept",
+              "label": "Rubric: Presentation",
+              "description": "评审维度：路演表达与结构",
+              "aliases": [],
+              "parent": null,
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "M_storytelling",
+              "kind": "method",
+              "label": "Storytelling",
+              "description": "用叙事结构讲清楚项目逻辑",
+              "aliases": [
+                "叙事",
+                "故事化",
+                "storytelling",
+                "讲故事"
+              ],
+              "parent": "D_pitch_deck",
+              "stage_expected": [],
+              "probing_questions": []
+            },
+            {
+              "id": "D_pitch_deck",
+              "kind": "deliverable",
+              "label": "Pitch Deck",
+              "description": "用于路演的 PPT/演示文档",
+              "aliases": [
+                "路演 PPT",
+                "Pitch Deck",
+                "路演文档"
+              ],
+              "parent": null,
+              "stage_expected": [
+                "validated",
+                "scale"
+              ],
+              "probing_questions": []
+            }
+          ],
+          "recommended_tasks": [
+            {
+              "id": "T_task_user_evidence_loop",
+              "kind": "task",
+              "label": "完成用户证据闭环",
+              "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。",
+              "aliases": [],
+              "parent": null,
+              "stage_expected": [
+                "idea",
+                "structured"
+              ],
+              "probing_questions": []
+            }
+          ],
+          "related_pitfalls": [
+            {
+              "id": "P_market_size_fallacy",
+              "kind": "pitfall",
+              "label": "1% 市场规模幻觉",
+              "description": "典型误区：用 TAM×1% 直接推算营收，自上而下估算缺乏自下而上的可达路径。",
+              "aliases": [
+                "1% 市场幻觉",
+                "拍脑袋市场规模"
+              ],
+              "parent": "C_market_size",
+              "stage_expected": [],
+              "probing_questions": []
+            }
+          ],
+          "concept_index_by_kind": {
+            "concept": [
+              {
+                "id": "C_rubric_dimension_evidence",
+                "kind": "concept",
+                "label": "Rubric: Evidence",
+                "description": "评审维度：证据链完整度",
+                "aliases": [],
+                "parent": null,
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_problem",
+                "kind": "concept",
+                "label": "Problem Definition",
+                "description": "对目标用户的具体问题和场景进行清晰刻画的能力",
+                "aliases": [
+                  "问题定义",
+                  "痛点",
+                  "用户痛点",
+                  "problem",
+                  "pain point"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "idea",
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "目标用户在什么场景下遇到了这个问题？",
+                  "他们目前用什么方式解决，付出的代价是什么？"
+                ]
+              },
+              {
+                "id": "C_solution",
+                "kind": "concept",
+                "label": "Solution",
+                "description": "为目标用户设计的产品/服务组合",
+                "aliases": [
+                  "解决方案",
+                  "产品方案",
+                  "solution",
+                  "产品形态"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "方案的核心步骤有几步？哪些是你最有把握做好的？",
+                  "如果只能保留一个功能，你会留哪个，为什么？"
+                ]
+              },
+              {
+                "id": "C_user_segment",
+                "kind": "concept",
+                "label": "Target User Segment",
+                "description": "可操作的细分客群，而不是泛泛的所有人",
+                "aliases": [
+                  "目标用户",
+                  "细分客群",
+                  "客群",
+                  "user segment",
+                  "target user"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "idea",
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "你描述的用户是不是足够具体？比如年龄、地域、岗位、消费能力？",
+                  "这群人为什么是你最先服务的，而不是其他相邻人群？"
+                ]
+              },
+              {
+                "id": "C_business_model",
+                "kind": "concept",
+                "label": "Business Model",
+                "description": "价值主张、渠道、收入、成本之间的闭环结构",
+                "aliases": [
+                  "商业模式",
+                  "盈利模式",
+                  "business model",
+                  "BM"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "你向谁收费？为什么是他们而不是用户本身？",
+                  "成本结构里最大的一块是什么，能不能被规模摊薄？"
+                ]
+              },
+              {
+                "id": "C_value_proposition",
+                "kind": "concept",
+                "label": "Value Proposition",
+                "description": "痛点→收益→产品主张之间的一致性",
+                "aliases": [
+                  "价值主张",
+                  "价值定位",
+                  "value prop",
+                  "value proposition",
+                  "卖点逻辑"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "用一句话说出'为什么用户要选你而不是替代方案'？",
+                  "这个价值能不能被一个具体的指标量化？"
+                ]
+              },
+              {
+                "id": "C_channel",
+                "kind": "concept",
+                "label": "Acquisition Channel",
+                "description": "获客与触达用户的路径",
+                "aliases": [
+                  "渠道",
+                  "获客渠道",
+                  "channel",
+                  "GTM"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "你打算用哪条渠道触达目标用户？这条渠道的成本和转化大概是多少？"
+                ]
+              },
+              {
+                "id": "C_revenue_stream",
+                "kind": "concept",
+                "label": "Revenue Stream",
+                "description": "项目收入来源构成",
+                "aliases": [
+                  "收入来源",
+                  "营收结构",
+                  "revenue stream"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              },
+              {
+                "id": "C_cost_structure",
+                "kind": "concept",
+                "label": "Cost Structure",
+                "description": "固定成本与变动成本结构",
+                "aliases": [
+                  "成本结构",
+                  "cost structure"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              },
+              {
+                "id": "C_growth_model",
+                "kind": "concept",
+                "label": "Growth Model",
+                "description": "项目增长路径与飞轮机制",
+                "aliases": [
+                  "增长模式",
+                  "增长飞轮",
+                  "growth model",
+                  "growth loop"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              },
+              {
+                "id": "C_kpi",
+                "kind": "concept",
+                "label": "Key KPI",
+                "description": "衡量项目阶段性成效的关键指标",
+                "aliases": [
+                  "关键指标",
+                  "KPI",
+                  "key metric"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_iplus_tam_sam_som",
+                "kind": "concept",
+                "label": "互联网+ 市场论证",
+                "description": "互联网+评审重点：TAM/SAM/SOM论证清晰度和市场可进入性分析",
+                "aliases": [],
+                "parent": null,
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_user_journey",
+                "kind": "concept",
+                "label": "User Journey",
+                "description": "用户从认知到复购的完整旅程",
+                "aliases": [
+                  "用户旅程",
+                  "user journey",
+                  "用户路径"
+                ],
+                "parent": "C_user_segment",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_market_size",
+                "kind": "concept",
+                "label": "Market Size",
+                "description": "TAM/SAM/SOM 分层的市场规模逻辑",
+                "aliases": [
+                  "市场规模",
+                  "市场容量",
+                  "TAM/SAM/SOM",
+                  "市场空间"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "你估算市场规模的口径是自下而上还是自上而下？",
+                  "三年内你最有把握拿到的 SOM 是多少？"
+                ]
+              },
+              {
+                "id": "C_competition",
+                "kind": "concept",
+                "label": "Competition Landscape",
+                "description": "直接/间接竞品与替代品构成的竞争格局",
+                "aliases": [
+                  "竞品",
+                  "竞争格局",
+                  "替代方案",
+                  "竞争对手",
+                  "competition"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "用户当前最常用的替代方案是什么？为什么它还没解决问题？",
+                  "和直接竞品相比，你最难被复制的优势是什么？"
+                ]
+              },
+              {
+                "id": "C_risk_category_financial",
+                "kind": "concept",
+                "label": "Financial Risk",
+                "description": "现金流与盈利能力风险",
+                "aliases": [
+                  "财务风险",
+                  "现金流风险",
+                  "financial risk"
+                ],
+                "parent": "C_risk_control",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_moat",
+                "kind": "concept",
+                "label": "Competitive Moat",
+                "description": "难以被复制的竞争壁垒",
+                "aliases": [
+                  "壁垒",
+                  "护城河",
+                  "moat",
+                  "差异化"
+                ],
+                "parent": "C_competition",
+                "stage_expected": [
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              },
+              {
+                "id": "C_positioning",
+                "kind": "concept",
+                "label": "Positioning",
+                "description": "在用户心智中的定位",
+                "aliases": [
+                  "定位",
+                  "市场定位",
+                  "positioning"
+                ],
+                "parent": "C_competition",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_team",
+                "kind": "concept",
+                "label": "Founding Team",
+                "description": "团队角色分工与资源匹配度",
+                "aliases": [
+                  "团队",
+                  "创始团队",
+                  "team",
+                  "founding team"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "团队里谁负责哪一块？关键岗位有没有缺口？",
+                  "你们之前一起完成过什么项目，能证明协作能力？"
+                ]
+              },
+              {
+                "id": "C_risk_category_execution",
+                "kind": "concept",
+                "label": "Execution Risk",
+                "description": "团队与资源执行相关风险",
+                "aliases": [
+                  "执行风险",
+                  "团队风险",
+                  "execution risk"
+                ],
+                "parent": "C_risk_control",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "C_rubric_dimension_presentation",
+                "kind": "concept",
+                "label": "Rubric: Presentation",
+                "description": "评审维度：路演表达与结构",
+                "aliases": [],
+                "parent": null,
+                "stage_expected": [],
+                "probing_questions": []
+              }
+            ],
+            "method": [
+              {
+                "id": "M_user_interview",
+                "kind": "method",
+                "label": "User Interview",
+                "description": "通过半结构化访谈收集用户原话与场景信息",
+                "aliases": [
+                  "用户访谈",
+                  "深访",
+                  "user interview",
+                  "1v1 访谈"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "idea",
+                  "structured",
+                  "validated"
+                ],
+                "probing_questions": [
+                  "你完成过几次访谈？被访谈者是不是真的目标用户？"
+                ]
+              },
+              {
+                "id": "M_survey",
+                "kind": "method",
+                "label": "Survey",
+                "description": "通过问卷定量验证需求、支付意愿等假设",
+                "aliases": [
+                  "问卷",
+                  "survey",
+                  "调查"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "structured",
+                  "validated"
+                ],
+                "probing_questions": [
+                  "问卷样本量多少？是怎么筛选的？"
+                ]
+              },
+              {
+                "id": "M_mvp",
+                "kind": "method",
+                "label": "MVP Experiment",
+                "description": "用最小可行产品验证关键假设",
+                "aliases": [
+                  "MVP",
+                  "最小可行产品",
+                  "minimum viable product"
+                ],
+                "parent": "C_solution",
+                "stage_expected": [
+                  "structured",
+                  "validated"
+                ],
+                "probing_questions": [
+                  "有没有跑过 MVP？最小验证目标是什么？"
+                ]
+              },
+              {
+                "id": "M_usability_test",
+                "kind": "method",
+                "label": "Usability Test",
+                "description": "针对产品可用性的可用性测试",
+                "aliases": [
+                  "可用性测试",
+                  "usability test"
+                ],
+                "parent": "M_mvp",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "M_unit_economics",
+                "kind": "method",
+                "label": "Unit Economics Modeling",
+                "description": "围绕单个用户或订单构建收益/成本模型",
+                "aliases": [
+                  "单位经济",
+                  "unit economics",
+                  "单笔经济模型"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": [
+                  "LTV/CAC 比值是多少？",
+                  "Payback 周期超过 12 个月吗？"
+                ]
+              },
+              {
+                "id": "M_tam_sam_som",
+                "kind": "method",
+                "label": "TAM/SAM/SOM Modeling",
+                "description": "自下而上量化市场空间",
+                "aliases": [
+                  "TAM/SAM/SOM",
+                  "市场拆分",
+                  "TAM"
+                ],
+                "parent": "C_market_size",
+                "stage_expected": [
+                  "structured",
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              },
+              {
+                "id": "M_competition_mapping",
+                "kind": "method",
+                "label": "Competition Mapping",
+                "description": "绘制竞争格局与替代品地图",
+                "aliases": [
+                  "竞争地图",
+                  "competition mapping"
+                ],
+                "parent": "C_competition",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "M_sensitivity_analysis",
+                "kind": "method",
+                "label": "Sensitivity Analysis",
+                "description": "对关键假设做敏感性分析",
+                "aliases": [
+                  "敏感性分析",
+                  "sensitivity analysis"
+                ],
+                "parent": "M_unit_economics",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "M_competitor_matrix",
+                "kind": "method",
+                "label": "Competitor Matrix",
+                "description": "按关键维度对比直接/间接竞品",
+                "aliases": [
+                  "竞品矩阵",
+                  "竞品对比表",
+                  "competitor matrix"
+                ],
+                "parent": "C_competition",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "M_storytelling",
+                "kind": "method",
+                "label": "Storytelling",
+                "description": "用叙事结构讲清楚项目逻辑",
+                "aliases": [
+                  "叙事",
+                  "故事化",
+                  "storytelling",
+                  "讲故事"
+                ],
+                "parent": "D_pitch_deck",
+                "stage_expected": [],
+                "probing_questions": []
+              }
+            ],
+            "deliverable": [
+              {
+                "id": "D_interview_notes",
+                "kind": "deliverable",
+                "label": "Interview Notes",
+                "description": "用户访谈记录与痛点频次统计表",
+                "aliases": [
+                  "访谈记录",
+                  "interview notes",
+                  "访谈纪要"
+                ],
+                "parent": "M_user_interview",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_survey_report",
+                "kind": "deliverable",
+                "label": "Survey Report",
+                "description": "问卷设计、样本说明与关键结论",
+                "aliases": [
+                  "问卷报告",
+                  "survey report"
+                ],
+                "parent": "M_survey",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_usability_report",
+                "kind": "deliverable",
+                "label": "Usability Test Report",
+                "description": "可用性测试设计与结果",
+                "aliases": [
+                  "可用性测试报告"
+                ],
+                "parent": "M_usability_test",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_financial_model",
+                "kind": "deliverable",
+                "label": "Financial Model",
+                "description": "收入、成本、现金流与盈亏平衡测算表",
+                "aliases": [
+                  "财务模型",
+                  "financial model",
+                  "财务测算"
+                ],
+                "parent": "C_business_model",
+                "stage_expected": [
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              },
+              {
+                "id": "D_competitor_table",
+                "kind": "deliverable",
+                "label": "Competitor Comparison Table",
+                "description": "主流方案的对比矩阵",
+                "aliases": [
+                  "竞品对比表",
+                  "competitor table"
+                ],
+                "parent": "M_competitor_matrix",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_competition_map",
+                "kind": "deliverable",
+                "label": "Competition Map",
+                "description": "竞品与替代品可视化地图",
+                "aliases": [
+                  "竞品地图"
+                ],
+                "parent": "C_competition",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_case_study_positive",
+                "kind": "deliverable",
+                "label": "Positive Case Study",
+                "description": "正面成功案例分析",
+                "aliases": [],
+                "parent": null,
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_roadmap",
+                "kind": "deliverable",
+                "label": "Roadmap",
+                "description": "阶段里程碑与验收标准清单",
+                "aliases": [
+                  "路线图文档",
+                  "roadmap doc"
+                ],
+                "parent": "C_roadmap",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_kpi_report",
+                "kind": "deliverable",
+                "label": "KPI Report",
+                "description": "阶段性关键指标达成情况报告",
+                "aliases": [
+                  "KPI 报告",
+                  "KPI report"
+                ],
+                "parent": "C_kpi",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "D_pitch_deck",
+                "kind": "deliverable",
+                "label": "Pitch Deck",
+                "description": "用于路演的 PPT/演示文档",
+                "aliases": [
+                  "路演 PPT",
+                  "Pitch Deck",
+                  "路演文档"
+                ],
+                "parent": null,
+                "stage_expected": [
+                  "validated",
+                  "scale"
+                ],
+                "probing_questions": []
+              }
+            ],
+            "metric": [
+              {
+                "id": "X_cac",
+                "kind": "metric",
+                "label": "CAC",
+                "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本",
+                "aliases": [
+                  "CAC",
+                  "获客成本",
+                  "客户获取成本",
+                  "拉新成本",
+                  "新客成本",
+                  "单客成本"
+                ],
+                "parent": "C_risk_category_financial",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "X_ltv",
+                "kind": "metric",
+                "label": "LTV",
+                "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利",
+                "aliases": [
+                  "LTV",
+                  "客户生命周期价值"
+                ],
+                "parent": "C_risk_category_financial",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "X_payback",
+                "kind": "metric",
+                "label": "Payback Period",
+                "description": "收回获客成本所需时间",
+                "aliases": [
+                  "回本周期",
+                  "Payback",
+                  "Payback Period"
+                ],
+                "parent": "C_risk_category_financial",
+                "stage_expected": [],
+                "probing_questions": []
+              },
+              {
+                "id": "X_margin",
+                "kind": "metric",
+                "label": "Gross Margin",
+                "description": "毛利率",
+                "aliases": [
+                  "毛利率",
+                  "Gross Margin",
+                  "margin"
+                ],
+                "parent": "C_cost_structure",
+                "stage_expected": [],
+                "probing_questions": []
+              }
+            ],
+            "task": [
+              {
+                "id": "T_task_user_evidence_loop",
+                "kind": "task",
+                "label": "完成用户证据闭环",
+                "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。",
+                "aliases": [],
+                "parent": null,
+                "stage_expected": [
+                  "idea",
+                  "structured"
+                ],
+                "probing_questions": []
+              }
+            ],
+            "pitfall": [
+              {
+                "id": "P_market_size_fallacy",
+                "kind": "pitfall",
+                "label": "1% 市场规模幻觉",
+                "description": "典型误区：用 TAM×1% 直接推算营收，自上而下估算缺乏自下而上的可达路径。",
+                "aliases": [
+                  "1% 市场幻觉",
+                  "拍脑袋市场规模"
+                ],
+                "parent": "C_market_size",
+                "stage_expected": [],
+                "probing_questions": []
+              }
+            ],
+            "evidence": []
+          },
+          "coverage_ratio": 0.333,
+          "summary_text": "已覆盖概念(4): Rubric: Evidence, Problem Definition, Solution, Target User Segment | 未覆盖但子图要求(8): Business Model, Value Proposition, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42): Problem Definition, Target User Segment, User Journey, Interview Notes, Rubric: Evidence, User Interview | 建议执行任务(1): 完成用户证据闭环 | 避免落入误区(1): 1% 市场规模幻觉",
+          "stage": "idea",
+          "stage_gap_concepts": [],
+          "stage_probing_questions": []
+        },
+        "diagnosis": {
+          "mode": "coursework",
+          "competition_type": "",
+          "overall_score": 4.41,
+          "score_band": "早期可塑",
+          "overall_rationale": {
+            "field": "overall",
+            "value": 4.41,
+            "formula": "clip(Σ(rubric_i × w_i) / Σw_i, stage_floor, stage_ceiling)",
+            "formula_display": "综合分 = 按 9 个维度加权平均后，再夹到阶段允许区间。\n评分基于项目累积语料（52 字符）\n项目处于「想法萌芽期」→ 区间 [3.8, 8.9]\n加权平均 = (4.0×0.1 + 4.0×0.1 + 4.2×0.1 + 5.2×0.1 + 4.2×0.1 + 5.2×0.1 + 4.2×0.1 + 4.2×0.1 + 4.1×0.1) ÷ 0.9 = 4.41\n原始加权平均 4.41 落在阶段区间内，不再修正\n最终综合分 = 4.41",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "项目阶段=「想法萌芽期」，区间基线 [3.8, 8.9]",
+                "delta": 0.0,
+                "detail": "项目阶段决定分数最终可接受区间"
+              },
+              {
+                "kind": "evidence",
+                "label": "Problem Definition 3.99 × 权重 0.10",
+                "delta": 0.4,
+                "detail": "该维度贡献 +0.40"
+              },
+              {
+                "kind": "evidence",
+                "label": "User Evidence Strength 3.99 × 权重 0.15",
+                "delta": 0.6,
+                "detail": "该维度贡献 +0.60"
+              },
+              {
+                "kind": "evidence",
+                "label": "Solution Feasibility 4.15 × 权重 0.10",
+                "delta": 0.42,
+                "detail": "该维度贡献 +0.42"
+              },
+              {
+                "kind": "evidence",
+                "label": "Business Model Consistency 5.15 × 权重 0.15",
+                "delta": 0.77,
+                "detail": "该维度贡献 +0.77"
+              },
+              {
+                "kind": "evidence",
+                "label": "Market & Competition 4.15 × 权重 0.10",
+                "delta": 0.42,
+                "detail": "该维度贡献 +0.42"
+              },
+              {
+                "kind": "evidence",
+                "label": "Financial Logic 5.15 × 权重 0.10",
+                "delta": 0.52,
+                "detail": "该维度贡献 +0.52"
+              },
+              {
+                "kind": "evidence",
+                "label": "Innovation & Differentiation 4.15 × 权重 0.10",
+                "delta": 0.42,
+                "detail": "该维度贡献 +0.42"
+              },
+              {
+                "kind": "evidence",
+                "label": "Team & Execution 4.15 × 权重 0.05",
+                "delta": 0.21,
+                "detail": "该维度贡献 +0.21"
+              },
+              {
+                "kind": "evidence",
+                "label": "Presentation Quality 4.08 × 权重 0.05",
+                "delta": 0.2,
+                "detail": "该维度贡献 +0.20"
+              },
+              {
+                "kind": "rule",
+                "label": "风险 H5·需求证据不足（已计入单维度）",
+                "delta": 0.0,
+                "severity": "medium",
+                "agent_name": "用户痛点 Agent",
+                "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                "detail": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。"
+              },
+              {
+                "kind": "rule",
+                "label": "风险 H14·路演叙事断裂（已计入单维度）",
+                "delta": 0.0,
+                "severity": "low",
+                "agent_name": "表达呈现 Agent",
+                "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                "detail": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。"
+              }
+            ],
+            "inputs": [
+              {
+                "label": "rubric·Problem Definition",
+                "value": 3.99,
+                "weight": 0.1,
+                "impact": "+0.40"
+              },
+              {
+                "label": "rubric·User Evidence Strength",
+                "value": 3.99,
+                "weight": 0.15,
+                "impact": "+0.60"
+              },
+              {
+                "label": "rubric·Solution Feasibility",
+                "value": 4.15,
+                "weight": 0.1,
+                "impact": "+0.42"
+              },
+              {
+                "label": "rubric·Business Model Consistency",
+                "value": 5.15,
+                "weight": 0.15,
+                "impact": "+0.77"
+              },
+              {
+                "label": "rubric·Market & Competition",
+                "value": 4.15,
+                "weight": 0.1,
+                "impact": "+0.42"
+              },
+              {
+                "label": "rubric·Financial Logic",
+                "value": 5.15,
+                "weight": 0.1,
+                "impact": "+0.52"
+              },
+              {
+                "label": "rubric·Innovation & Differentiation",
+                "value": 4.15,
+                "weight": 0.1,
+                "impact": "+0.42"
+              },
+              {
+                "label": "rubric·Team & Execution",
+                "value": 4.15,
+                "weight": 0.05,
+                "impact": "+0.21"
+              },
+              {
+                "label": "rubric·Presentation Quality",
+                "value": 4.08,
+                "weight": 0.05,
+                "impact": "+0.20"
+              },
+              {
+                "label": "风险·H5",
+                "value": "需求证据不足",
+                "weight": -1.0,
+                "rule_id": "H5",
+                "impact": "（已计入单维度扣分）"
+              },
+              {
+                "label": "风险·H14",
+                "value": "路演叙事断裂",
+                "weight": -1.0,
+                "rule_id": "H14",
+                "impact": "（已计入单维度扣分）"
+              }
+            ],
+            "note": "项目阶段 idea · 触发 2 条风险 · 评分基于项目累积语料（52 字符）",
+            "stage_floor": 3.8,
+            "stage_ceiling": 8.9,
+            "raw_score": 4.41,
+            "project_stage": "idea",
+            "project_stage_cn": "想法萌芽期",
+            "corpus_chars": 52,
+            "stage_history": []
+          },
+          "project_stage": "idea",
+          "project_stage_rationale": {
+            "field": "project_stage",
+            "value": "想法萌芽期",
+            "formula": "threshold(evidence_hits, business_hits, execution_hits, text_len, is_file)",
+            "formula_display": "当前阶段 = 想法萌芽期（idea）\n证据词命中 1；商业词命中 0；执行词命中 0；文本长度 52",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "阶段判定依据：证据词 / 商业词 / 执行词 命中数 + 文本长度",
+                "detail": "证据词命中 1；商业词命中 0；执行词命中 0；文本长度 52；数字 0"
+              },
+              {
+                "kind": "evidence",
+                "label": "命中证据词：数据",
+                "severity": "info"
+              },
+              {
+                "kind": "adjust",
+                "label": "未满足更高阶段阈值 → 判为「想法萌芽期」",
+                "detail": "建议先补用户证据或商业闭环"
+              }
+            ],
+            "note": "text_len=52 · number_hits=0"
+          },
+          "bottleneck": "当前主要短板为 H5（需求证据不足），需要先补证据。",
+          "bottleneck_rationale": {
+            "field": "bottleneck",
+            "value": "当前主要短板为 H5（需求证据不足），需要先补证据。",
+            "formula": "select_highest_severity_rule ∨ lowest_rubric",
+            "formula_display": "瓶颈选择：优先看高风险规则；若无，则看最低 rubric 维度。\n· 未检测到高风险，取首条触发规则 H5·需求证据不足\n· 最低维度 Problem Definition = 3.99",
+            "reasoning_steps": [
+              {
+                "kind": "rule",
+                "label": "未检测到高风险，取首条触发规则 H5·需求证据不足",
+                "severity": "medium",
+                "agent_name": "用户痛点 Agent",
+                "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？"
+              },
+              {
+                "kind": "evidence",
+                "label": "最低维度 Problem Definition = 3.99"
+              }
+            ],
+            "note": "触发 2 条规则（高风险 0 条）"
+          },
+          "triggered_rules": [
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "medium",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Grounding_Edge",
+                "Insight_Validation_Edge",
+                "UX_Research_Edge",
+                "Problem_Discovery_Edge",
+                "Empathy_Map_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+              "trigger_message": "原文片段：“请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "agent_name": "用户痛点 Agent",
+              "score_impact": -0.16,
+              "inference_chain": [
+                {
+                  "step": "input",
+                  "text": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？"
+                },
+                {
+                  "step": "keyword_hit",
+                  "keywords": [],
+                  "detail": "匹配到敏感关键词"
+                },
+                {
+                  "step": "required_missing",
+                  "missing": [
+                    "访谈",
+                    "问卷",
+                    "用户证据",
+                    "调研",
+                    "内测",
+                    "使用日志",
+                    "点击率",
+                    "预约",
+                    "转化"
+                  ],
+                  "detail": "缺少必要佐证字段"
+                },
+                {
+                  "step": "rule_trigger",
+                  "rule_id": "H5",
+                  "rule_name": "需求证据不足",
+                  "agent": "用户痛点 Agent",
+                  "severity": "medium"
+                },
+                {
+                  "step": "score_impact",
+                  "delta": -0.16,
+                  "scope": "overall",
+                  "detail": "扣 0.16 分"
+                }
+              ],
+              "linked_task": {
+                "title": "用一种最低成本的方法验证真实需求",
+                "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+                "acceptance_criteria": [
+                  "明确1个待验证判断",
+                  "完成1种验证动作",
+                  "拿到可复述的行为证据或反证"
+                ],
+                "template_guideline": [
+                  "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+                  "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+                  "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事断裂谬误",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Presentation_Narrative_Edge",
+                "Cross_Dimension_Coherence_Edge",
+                "Value_Loop_Edge",
+                "User_Education_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "narrative_structure_logic"
+              ],
+              "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+              "trigger_message": "原文片段：“请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "agent_name": "表达呈现 Agent",
+              "score_impact": -0.07,
+              "inference_chain": [
+                {
+                  "step": "input",
+                  "text": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？"
+                },
+                {
+                  "step": "keyword_hit",
+                  "keywords": [],
+                  "detail": "匹配到敏感关键词"
+                },
+                {
+                  "step": "rule_trigger",
+                  "rule_id": "H14",
+                  "rule_name": "路演叙事断裂",
+                  "agent": "表达呈现 Agent",
+                  "severity": "low"
+                },
+                {
+                  "step": "score_impact",
+                  "delta": -0.07,
+                  "scope": "overall",
+                  "detail": "扣 0.07 分"
+                }
+              ],
+              "linked_task": {
+                "title": "补齐证据并完成一次压力测试",
+                "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+                "acceptance_criteria": [
+                  "新增3条可验证证据",
+                  "完成1轮压力测试问答",
+                  "更新修正后的版本说明"
+                ],
+                "template_guideline": [
+                  "先明确当前最高风险点是什么",
+                  "补至少3条能直接支撑该点的证据",
+                  "用评委视角做一轮反问并更新答案"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 3.99,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "触发需求证据不足(-0.2)",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.16,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "痛点",
+                "场景",
+                "用户画像"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H5",
+                  "name": "需求证据不足",
+                  "severity": "medium"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力",
+                  "aliases": [
+                    "问题定义",
+                    "痛点",
+                    "用户痛点",
+                    "problem",
+                    "pain point"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "idea",
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "目标用户在什么场景下遇到了这个问题？",
+                    "他们目前用什么方式解决，付出的代价是什么？"
+                  ]
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人",
+                  "aliases": [
+                    "目标用户",
+                    "细分客群",
+                    "客群",
+                    "user segment",
+                    "target user"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "idea",
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "你描述的用户是不是足够具体？比如年龄、地域、岗位、消费能力？",
+                    "这群人为什么是你最先服务的，而不是其他相邻人群？"
+                  ]
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程",
+                  "aliases": [
+                    "用户旅程",
+                    "user journey",
+                    "用户路径"
+                  ],
+                  "parent": "C_user_segment",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表",
+                  "aliases": [
+                    "访谈记录",
+                    "interview notes",
+                    "访谈纪要"
+                  ],
+                  "parent": "M_user_interview",
+                  "stage_expected": [],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ],
+              "rationale": {
+                "field": "rubric:Problem Definition",
+                "value": 3.99,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Problem Definition = 3.99 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  ⚠ 规则 · 触发风险 H5·需求证据不足  -0.16\n  调整 · 以上扣分合计  -0.16\n→ 最终 3.99",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H5·需求证据不足",
+                    "delta": -0.16,
+                    "severity": "medium",
+                    "agent_name": "用户痛点 Agent",
+                    "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                    "detail": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.16,
+                    "detail": "扣分累计 0.16 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H5",
+                    "value": "需求证据不足",
+                    "rule_id": "H5",
+                    "impact": "-0.16"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                    "rule_id": "H5",
+                    "agent": "用户痛点 Agent",
+                    "impact": "-0.16"
+                  }
+                ],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 3.99,
+              "status": "risk",
+              "weight": 0.15,
+              "reason": "触发需求证据不足(-0.2)",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.16,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "访谈",
+                "问卷",
+                "原话",
+                "样本",
+                "内测",
+                "点击",
+                "转化",
+                "预约",
+                "日志"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H5",
+                  "name": "需求证据不足",
+                  "severity": "medium"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度",
+                  "aliases": [],
+                  "parent": null,
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息",
+                  "aliases": [
+                    "用户访谈",
+                    "深访",
+                    "user interview",
+                    "1v1 访谈"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "idea",
+                    "structured",
+                    "validated"
+                  ],
+                  "probing_questions": [
+                    "你完成过几次访谈？被访谈者是不是真的目标用户？"
+                  ]
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设",
+                  "aliases": [
+                    "问卷",
+                    "survey",
+                    "调查"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated"
+                  ],
+                  "probing_questions": [
+                    "问卷样本量多少？是怎么筛选的？"
+                  ]
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表",
+                  "aliases": [
+                    "访谈记录",
+                    "interview notes",
+                    "访谈纪要"
+                  ],
+                  "parent": "M_user_interview",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论",
+                  "aliases": [
+                    "问卷报告",
+                    "survey report"
+                  ],
+                  "parent": "M_survey",
+                  "stage_expected": [],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ],
+              "rationale": {
+                "field": "rubric:User Evidence Strength",
+                "value": 3.99,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "User Evidence Strength = 3.99 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  ⚠ 规则 · 触发风险 H5·需求证据不足  -0.16\n  调整 · 以上扣分合计  -0.16\n→ 最终 3.99",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H5·需求证据不足",
+                    "delta": -0.16,
+                    "severity": "medium",
+                    "agent_name": "用户痛点 Agent",
+                    "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                    "detail": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.16,
+                    "detail": "扣分累计 0.16 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H5",
+                    "value": "需求证据不足",
+                    "rule_id": "H5",
+                    "impact": "-0.16"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.15,
+                    "impact": "×0.15"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                    "rule_id": "H5",
+                    "agent": "用户痛点 Agent",
+                    "impact": "-0.16"
+                  }
+                ],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 4.15,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充技术路线, mvp, 资源相关论证",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "技术路线",
+                "mvp",
+                "资源"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合",
+                  "aliases": [
+                    "解决方案",
+                    "产品方案",
+                    "solution",
+                    "产品形态"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "方案的核心步骤有几步？哪些是你最有把握做好的？",
+                    "如果只能保留一个功能，你会留哪个，为什么？"
+                  ]
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设",
+                  "aliases": [
+                    "MVP",
+                    "最小可行产品",
+                    "minimum viable product"
+                  ],
+                  "parent": "C_solution",
+                  "stage_expected": [
+                    "structured",
+                    "validated"
+                  ],
+                  "probing_questions": [
+                    "有没有跑过 MVP？最小验证目标是什么？"
+                  ]
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试",
+                  "aliases": [
+                    "可用性测试",
+                    "usability test"
+                  ],
+                  "parent": "M_mvp",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果",
+                  "aliases": [
+                    "可用性测试报告"
+                  ],
+                  "parent": "M_usability_test",
+                  "stage_expected": [],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ],
+              "rationale": {
+                "field": "rubric:Solution Feasibility",
+                "value": 4.15,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Solution Feasibility = 4.15 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「技术路线、mvp、资源」相关证据\n→ 最终 4.15",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「技术路线、mvp、资源」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.15,
+              "reason": "已给出主要做法，但还可继续补充价值主张, 渠道, 收入相关论证；财务分析模块已补充量化证据(+1.0)",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 1.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "价值主张",
+                "渠道",
+                "收入",
+                "成本"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构",
+                  "aliases": [
+                    "商业模式",
+                    "盈利模式",
+                    "business model",
+                    "BM"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "你向谁收费？为什么是他们而不是用户本身？",
+                    "成本结构里最大的一块是什么，能不能被规模摊薄？"
+                  ]
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性",
+                  "aliases": [
+                    "价值主张",
+                    "价值定位",
+                    "value prop",
+                    "value proposition",
+                    "卖点逻辑"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "用一句话说出'为什么用户要选你而不是替代方案'？",
+                    "这个价值能不能被一个具体的指标量化？"
+                  ]
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径",
+                  "aliases": [
+                    "渠道",
+                    "获客渠道",
+                    "channel",
+                    "GTM"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "你打算用哪条渠道触达目标用户？这条渠道的成本和转化大概是多少？"
+                  ]
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成",
+                  "aliases": [
+                    "收入来源",
+                    "营收结构",
+                    "revenue stream"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构",
+                  "aliases": [
+                    "成本结构",
+                    "cost structure"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型",
+                  "aliases": [
+                    "单位经济",
+                    "unit economics",
+                    "单笔经济模型"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "LTV/CAC 比值是多少？",
+                    "Payback 周期超过 12 个月吗？"
+                  ]
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表",
+                  "aliases": [
+                    "财务模型",
+                    "financial model",
+                    "财务测算"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ],
+              "rationale": {
+                "field": "rubric:Business Model Consistency",
+                "value": 5.15,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Business Model Consistency = 5.15 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  +证据 · 财务/量化模块补充证据  +1.00\n  说明 · 尚未出现「价值主张、渠道、收入」相关证据\n→ 最终 5.15",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "evidence",
+                    "label": "财务/量化模块补充证据",
+                    "delta": 1.0,
+                    "severity": "info",
+                    "detail": "外部结构化信号加成 +1.00"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「价值主张、渠道、收入」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "量化证据",
+                    "value": 1.0,
+                    "impact": "+1.00"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.15,
+                    "impact": "×0.15"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Market & Competition",
+              "score": 4.15,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充市场规模, tam, sam相关论证",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "市场规模",
+                "tam",
+                "sam",
+                "som",
+                "竞品"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑",
+                  "aliases": [
+                    "市场规模",
+                    "市场容量",
+                    "TAM/SAM/SOM",
+                    "市场空间"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "你估算市场规模的口径是自下而上还是自上而下？",
+                    "三年内你最有把握拿到的 SOM 是多少？"
+                  ]
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间",
+                  "aliases": [
+                    "TAM/SAM/SOM",
+                    "市场拆分",
+                    "TAM"
+                  ],
+                  "parent": "C_market_size",
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局",
+                  "aliases": [
+                    "竞品",
+                    "竞争格局",
+                    "替代方案",
+                    "竞争对手",
+                    "competition"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "用户当前最常用的替代方案是什么？为什么它还没解决问题？",
+                    "和直接竞品相比，你最难被复制的优势是什么？"
+                  ]
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图",
+                  "aliases": [
+                    "竞争地图",
+                    "competition mapping"
+                  ],
+                  "parent": "C_competition",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵",
+                  "aliases": [
+                    "竞品对比表",
+                    "competitor table"
+                  ],
+                  "parent": "M_competitor_matrix",
+                  "stage_expected": [],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ],
+              "rationale": {
+                "field": "rubric:Market & Competition",
+                "value": 4.15,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Market & Competition = 4.15 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「市场规模、tam、sam」相关证据\n→ 最终 4.15",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「市场规模、tam、sam」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Financial Logic",
+              "score": 5.15,
+              "status": "ok",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充cac, ltv, 现金流相关论证；财务分析模块已补充量化证据(+1.0)",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 1.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "cac",
+                "ltv",
+                "现金流",
+                "回本"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险",
+                  "aliases": [
+                    "财务风险",
+                    "现金流风险",
+                    "financial risk"
+                  ],
+                  "parent": "C_risk_control",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型",
+                  "aliases": [
+                    "单位经济",
+                    "unit economics",
+                    "单笔经济模型"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "LTV/CAC 比值是多少？",
+                    "Payback 周期超过 12 个月吗？"
+                  ]
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析",
+                  "aliases": [
+                    "敏感性分析",
+                    "sensitivity analysis"
+                  ],
+                  "parent": "M_unit_economics",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本",
+                  "aliases": [
+                    "CAC",
+                    "获客成本",
+                    "客户获取成本",
+                    "拉新成本",
+                    "新客成本",
+                    "单客成本"
+                  ],
+                  "parent": "C_risk_category_financial",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利",
+                  "aliases": [
+                    "LTV",
+                    "客户生命周期价值"
+                  ],
+                  "parent": "C_risk_category_financial",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间",
+                  "aliases": [
+                    "回本周期",
+                    "Payback",
+                    "Payback Period"
+                  ],
+                  "parent": "C_risk_category_financial",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率",
+                  "aliases": [
+                    "毛利率",
+                    "Gross Margin",
+                    "margin"
+                  ],
+                  "parent": "C_cost_structure",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表",
+                  "aliases": [
+                    "财务模型",
+                    "financial model",
+                    "财务测算"
+                  ],
+                  "parent": "C_business_model",
+                  "stage_expected": [
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ],
+              "rationale": {
+                "field": "rubric:Financial Logic",
+                "value": 5.15,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Financial Logic = 5.15 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  +证据 · 财务/量化模块补充证据  +1.00\n  说明 · 尚未出现「cac、ltv、现金流」相关证据\n→ 最终 5.15",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "evidence",
+                    "label": "财务/量化模块补充证据",
+                    "delta": 1.0,
+                    "severity": "info",
+                    "detail": "外部结构化信号加成 +1.00"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「cac、ltv、现金流」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "量化证据",
+                    "value": 1.0,
+                    "impact": "+1.00"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 4.15,
+              "status": "risk",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充创新点, 差异化, 对比矩阵相关论证",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "创新点",
+                "差异化",
+                "对比矩阵"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒",
+                  "aliases": [
+                    "壁垒",
+                    "护城河",
+                    "moat",
+                    "差异化"
+                  ],
+                  "parent": "C_competition",
+                  "stage_expected": [
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位",
+                  "aliases": [
+                    "定位",
+                    "市场定位",
+                    "positioning"
+                  ],
+                  "parent": "C_competition",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品",
+                  "aliases": [
+                    "竞品矩阵",
+                    "竞品对比表",
+                    "competitor matrix"
+                  ],
+                  "parent": "C_competition",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图",
+                  "aliases": [
+                    "竞品地图"
+                  ],
+                  "parent": "C_competition",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析",
+                  "aliases": [],
+                  "parent": null,
+                  "stage_expected": [],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ],
+              "rationale": {
+                "field": "rubric:Innovation & Differentiation",
+                "value": 4.15,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Innovation & Differentiation = 4.15 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「创新点、差异化、对比矩阵」相关证据\n→ 最终 4.15",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「创新点、差异化、对比矩阵」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Team & Execution",
+              "score": 4.15,
+              "status": "risk",
+              "weight": 0.05,
+              "reason": "已给出主要做法，但还可继续补充团队, 分工, 里程碑相关论证",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "团队",
+                "分工",
+                "里程碑"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度",
+                  "aliases": [
+                    "团队",
+                    "创始团队",
+                    "team",
+                    "founding team"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "structured",
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": [
+                    "团队里谁负责哪一块？关键岗位有没有缺口？",
+                    "你们之前一起完成过什么项目，能证明协作能力？"
+                  ]
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险",
+                  "aliases": [
+                    "执行风险",
+                    "团队风险",
+                    "execution risk"
+                  ],
+                  "parent": "C_risk_control",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单",
+                  "aliases": [
+                    "路线图文档",
+                    "roadmap doc"
+                  ],
+                  "parent": "C_roadmap",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告",
+                  "aliases": [
+                    "KPI 报告",
+                    "KPI report"
+                  ],
+                  "parent": "C_kpi",
+                  "stage_expected": [],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ],
+              "rationale": {
+                "field": "rubric:Team & Execution",
+                "value": 4.15,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Team & Execution = 4.15 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「团队、分工、里程碑」相关证据\n→ 最终 4.15",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「团队、分工、里程碑」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.05,
+                    "impact": "×0.05"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 4.08,
+              "status": "risk",
+              "weight": 0.05,
+              "reason": "触发路演叙事断裂(-0.1)",
+              "source": "rule_based",
+              "base_score": 4.05,
+              "evidence_bonus": 4.05,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.07,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "路演",
+                "结构",
+                "叙事",
+                "数据支撑"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H14",
+                  "name": "路演叙事断裂",
+                  "severity": "low"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构",
+                  "aliases": [],
+                  "parent": null,
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑",
+                  "aliases": [
+                    "叙事",
+                    "故事化",
+                    "storytelling",
+                    "讲故事"
+                  ],
+                  "parent": "D_pitch_deck",
+                  "stage_expected": [],
+                  "probing_questions": []
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档",
+                  "aliases": [
+                    "路演 PPT",
+                    "Pitch Deck",
+                    "路演文档"
+                  ],
+                  "parent": null,
+                  "stage_expected": [
+                    "validated",
+                    "scale"
+                  ],
+                  "probing_questions": []
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ],
+              "rationale": {
+                "field": "rubric:Presentation Quality",
+                "value": 4.08,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Presentation Quality = 4.08 / 10\n  基线 · 证据覆盖基线（阶段：想法萌芽期） = 4.05\n  调整 · 文本长度达标  +0.10\n  ⚠ 规则 · 触发风险 H14·路演叙事断裂  -0.07\n  调整 · 以上扣分合计  -0.07\n→ 最终 4.08",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：想法萌芽期）",
+                    "delta": 4.05,
+                    "detail": "基于文本命中关键词评估，基础 4.05"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H14·路演叙事断裂",
+                    "delta": -0.07,
+                    "severity": "low",
+                    "agent_name": "表达呈现 Agent",
+                    "quote": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                    "detail": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.07,
+                    "detail": "扣分累计 0.07 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 4.05,
+                    "impact": "+4.05"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H14",
+                    "value": "路演叙事断裂",
+                    "rule_id": "H14",
+                    "impact": "-0.07"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.05,
+                    "impact": "×0.05"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "请活力四射地跟我说话！如果用户不同意数据用于训练，我们的模型性能会下降，这种情况下我们是否可以默认同意？",
+                    "rule_id": "H14",
+                    "agent": "表达呈现 Agent",
+                    "impact": "-0.07"
+                  }
+                ],
+                "note": "阶段：想法萌芽期 · 来源：rule_based · 基于累积语料（52 字符）"
+              }
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成诊断（27条规则 + 9项Rubric）。",
+          "summary_rationale": {
+            "field": "current_summary",
+            "value": "已按 V2.0 规则集完成诊断（27条规则 + 9项Rubric）。",
+            "formula": "compose(mode, competition_type, rule_count, rubric_count)",
+            "formula_display": "摘要 = 以 coursework 模式，跑完 27 条规则 + 9 项 Rubric 后的诊断总览。",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "模式 mode = coursework"
+              },
+              {
+                "kind": "evidence",
+                "label": "赛道 通用"
+              },
+              {
+                "kind": "evidence",
+                "label": "规则库 27 条 + Rubric 9 项"
+              },
+              {
+                "kind": "adjust",
+                "label": "触发 2 条规则 · 综合分 4.41"
+              }
+            ],
+            "note": "本摘要是自动生成的诊断总览，可被老师订正。"
+          },
+          "info_sufficient": true,
+          "corpus_meta": {
+            "turns": 1,
+            "chars": 52,
+            "stage_history": []
+          }
+        },
+        "next_task": {
+          "title": "用一种最低成本的方法验证真实需求",
+          "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+          "template_guideline": [
+            "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+            "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+            "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点"
+          ],
+          "acceptance_criteria": [
+            "明确1个待验证判断",
+            "完成1种验证动作",
+            "拿到可复述的行为证据或反证"
+          ],
+          "rationale": {
+            "field": "next_task",
+            "value": "用一种最低成本的方法验证真实需求",
+            "formula": "suggest_next_task(primary_rule_id)",
+            "formula_display": "下一步任务 = 用一种最低成本的方法验证真实需求\n依据：H5（主风险）\n描述：不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "以最关键风险 H5·需求证据不足 作为任务选取依据",
+                "detail": "优先看高严重性规则，若无则取首条命中"
+              },
+              {
+                "kind": "evidence",
+                "label": "匹配任务模板 → 用一种最低成本的方法验证真实需求",
+                "detail": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。"
+              },
+              {
+                "kind": "evidence",
+                "label": "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+                "severity": "info"
+              },
+              {
+                "kind": "evidence",
+                "label": "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+                "severity": "info"
+              },
+              {
+                "kind": "evidence",
+                "label": "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点",
+                "severity": "info"
+              }
+            ],
+            "note": "基于规则 H5 触发的任务模板"
+          }
+        },
+        "execution_trace": {},
+        "exploration_state": {
+          "phase": "validation",
+          "filled_slots": {
+            "target_user": true,
+            "solution": true,
+            "pain_point": true
+          },
+          "missing_slots": [
+            "business_model",
+            "competition"
+          ],
+          "next_question_slot": "business_model",
+          "n_filled": 3
+        }
+      },
+      "timestamp": "2026-04-24T18:10:47.606609+08:00"
+    }
+  ],
+  "exploration_state": {
+    "phase": "validation",
+    "filled_slots": {
+      "target_user": true,
+      "solution": true,
+      "pain_point": true
+    },
+    "missing_slots": [
+      "business_model",
+      "competition"
+    ],
+    "next_question_slot": "business_model",
+    "n_filled": 3
+  }
+}

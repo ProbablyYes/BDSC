@@ -1133,7 +1133,7 @@ export default function TeacherPage() {
   }, []);
   const studentPlanTrackPoints = useMemo(() => {
     const points: Array<{ id: string; x: number; y: number; label: string; stage: string }> = [];
-    studentPlansTeams.forEach((team: any) => {
+    studentPlansState.teams.forEach((team: any) => {
       (team.students || []).forEach((stu: any) => {
         const tv = stu?.track_vector || {};
         points.push({
@@ -1146,7 +1146,7 @@ export default function TeacherPage() {
       });
     });
     return points;
-  }, [studentPlansTeams]);
+  }, [studentPlansState.teams]);
   const [expandedSubmission, setExpandedSubmission] = useState<number | null>(null);
 
   // 班级页面状态

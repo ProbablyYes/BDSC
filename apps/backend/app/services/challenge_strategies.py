@@ -17,6 +17,26 @@ from app.config import settings
 from app.services.project_cognition import normalize_track_vector
 
 
+# ── 追问语气库（表达风格层 · "怎么问"）──
+# 这是「追问策略库」的第三层（前两层：触发条件、追问目的，分别由 trigger_*、
+# probing_layers + counterfactual 表达）。这一层只控"语气/腔调"，不改语义。
+#
+# - 默认 tone = cool，等价于现有 probing_layers，无需在 tone_variants 中重复
+# - 高频 CS（CS01/02/03/04/05/07/08/10）有完整 5 种非默认 tone 重写文本
+# - 其他 CS 走 LLM 重写兜底（advisor / coach 在 system prompt 中按
+#   TONE_DESCRIPTORS 风格指南即时改写 cool 版本）
+TONE_DESCRIPTORS: dict[str, str] = {
+    "cool": "学术冷静、就事论事、不带情绪；像审稿人。",
+    "strict": "严肃克制、压力高、追问短促有力；像投资人尽调或合规审计。",
+    "humorous": "幽默风趣、可以用反讽和打比方；底线是不能伤学生自尊；像段子手老师。",
+    "warm": "共情温柔、先接住情绪、再轻轻指出问题；像可信赖的学姐。",
+    "coaching": "鼓励引导、把追问变成『你觉得呢』式的开放问题；像启发式教练。",
+    "socratic": "纯反问、不给答案、一层层暴露假设；像苏格拉底本人。",
+}
+
+VALID_TONES: tuple[str, ...] = tuple(TONE_DESCRIPTORS.keys())
+
+
 @dataclass
 class ChallengeStrategy:
     id: str
@@ -31,6 +51,9 @@ class ChallengeStrategy:
     applies_to_stage: list[str] = field(default_factory=list)
     applies_to_competition: list[str] = field(default_factory=list)
     strategy_type: str = "adversarial"
+    # tone_variants[tone_id] = 同语义不同语气的 probing_layers 重写
+    # 未设置 / 不在表内 → 自动 fallback 到 self.probing_layers (=cool)
+    tone_variants: dict[str, list[str]] = field(default_factory=dict)
 
 
 STRATEGIES: list[ChallengeStrategy] = [
@@ -46,6 +69,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["替代方案分析", "竞品对比矩阵", "用户切换成本评估"],
         counterfactual="如果市场真的是蓝海，为什么没有任何人尝试过？是需求不存在，还是你没看到竞争者？",
+        tone_variants={
+            "strict": [
+                "替代方案：用户今天怎么凑合解决这件事？把那个方案拿出来，这就是你的对手。",
+                "巨头复刻：腾讯/阿里上线一个同款，3 个月内你靠什么不被吃掉？给我具体壁垒。",
+                "切换成本：用户从原方案搬到你这，要付出什么？数字给我，不接受感觉。",
+            ],
+            "humorous": [
+                "你说没竞争对手——那我斗胆问一句，用户在你出现之前是用『祈祷』解决的吗？",
+                "假设腾讯产品经理今晚就在工位抄你这一页 PPT，明天上线，你的护城河是什么？是公司名比他们短吗？",
+                "用户从老方案搬家到你这，是不是连习惯都得换？这次搬家费谁付，你算过吗？",
+            ],
+            "warm": [
+                "我先帮你理一下：用户在没有你之前，肯定有自己的临时办法，那个办法就是你最直接的对手——你能描述一下他们目前是怎么做的吗？",
+                "如果哪天大厂也想做一样的事情，我们可能就要拼一些更结构性的东西了。你觉得自己最难被复制的那一点是什么？",
+                "用户要从现在的习惯切到你这，多少都会有点别扭。咱们一起想想，这个『别扭成本』有多大？",
+            ],
+            "coaching": [
+                "你觉得，用户在没有你之前到底是怎么把这件事凑合做完的？把它写下来，可能就是你的第一个竞争对手。",
+                "如果有一天大厂真的下场了，你希望评委记住你的护城河是哪一句话？",
+                "你打算怎么衡量『切换成本足够低』这件事？有没有一个可以试的小指标？",
+            ],
+            "socratic": [
+                "如果真的没有竞争者，用户此刻是不是处于完全无解的状态？",
+                "为什么之前从没有团队尝试过这件事？是因为不可能，还是因为不值得？",
+                "如果切换到你这里需要付出代价，他们凭什么愿意付出？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS02",
@@ -59,6 +109,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["获客渠道和CAC估算", "LTV计算依据", "前100用户获取计划"],
         counterfactual="'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+        tone_variants={
+            "strict": [
+                "渠道：那 1% 用户散在哪几个具体渠道？给我拉名单。",
+                "单经济：CAC 多少？LTV 多少？没估过别说市场千亿，没意义。",
+                "前 100 个：第一周怎么拿到第一批付费用户？写出执行步骤。",
+            ],
+            "humorous": [
+                "你想拿 1%——那剩下 99% 是不是『因为没听说过你』就主动让出来了？",
+                "CAC 和 LTV 这两位老朋友你今天打算聊一下吗？还是继续假装他们不存在？",
+                "前 100 个付费用户，除了『发朋友圈』之外，你还有什么招？",
+            ],
+            "warm": [
+                "1% 听起来不大，但落到具体渠道其实挺难的。你打算先从哪一类用户切入？",
+                "我们一起做个粗算吧——拉一个用户大概要花多少？他能给我们带来多少？",
+                "前 100 个用户其实是最关键的，咱们一起想想怎么找到第一批愿意付费的人。",
+            ],
+            "coaching": [
+                "你觉得这 1% 用户最有可能聚集在哪？我们可以先从最浓的那一池切入。",
+                "你愿不愿意试着估一估自己的 CAC 上限？哪怕是个粗的范围。",
+                "如果只有一周时间拉到第一批 10 个付费用户，你会怎么做？",
+            ],
+            "socratic": [
+                "凭什么这 1% 会先用你而不是别人？",
+                "如果获取一个用户的成本高于他带来的收入，市场再大有意义吗？",
+                "前 100 个用户都搞不定的产品，凭什么相信能扩到 100 万？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS03",
@@ -72,6 +149,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["技术复现时间估算", "用户需求优先级排序", "资源-需求匹配表"],
         counterfactual="如果你的技术优势在12个月后被开源方案追平，你的产品还有存在价值吗？",
+        tone_variants={
+            "strict": [
+                "复现时间：同等团队多久能追上你？给我月数，不接受『很难』。",
+                "用户视角：用户买的是技术还是效果？8 成效果的简单方案存在吗？",
+                "资源缺口：你这条路线缺什么？数据/算力/人——一项一项列。",
+            ],
+            "humorous": [
+                "你说技术门槛极高——是高到连你团队自己复现一下都得加班吗？",
+                "用户其实不在乎你用的是 Transformer 还是 Excel，他在乎的是省没省时间。说说你给他省了多少？",
+                "你这套技术路线缺的资源，是『再凑凑就有』还是『重新读个博士才有』？",
+            ],
+            "warm": [
+                "我相信你们的技术是有亮点的——一起想想，如果换个团队做，他们大概要花多久才能追上？",
+                "用户最终在乎的可能不是技术本身，而是它带来的体验。这一层你们做了哪些验证？",
+                "做技术路线，资源缺口是常态。你们目前最缺的是哪一类？我们看怎么补。",
+            ],
+            "coaching": [
+                "你觉得自己技术上的真正护城河，是『更快』『更准』，还是『别人很难凑齐资源』？",
+                "如果让你用一句话告诉用户『你为什么值得买』，会怎么说？",
+                "如果资源到位时间比预期晚 6 个月，你会怎么调整路线？",
+            ],
+            "socratic": [
+                "如果技术能被复现，那它真的是壁垒吗？",
+                "用户为效果买单，还是为技术买单？",
+                "如果资源永远凑不齐，这条技术路线还成立吗？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS04",
@@ -85,6 +189,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=[">=5份用户访谈原话", "付费意愿数据", "需求频次统计"],
         counterfactual="如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+        tone_variants={
+            "strict": [
+                "你说『很多人需要』——多少？聊过几个？把原话拿出来。",
+                "他们目前为这事花过多少钱？没花就是『感兴趣但不付费』。",
+                "『挺好的』和『我每月愿意付 200 元』，你拿到的是哪一种？别混着说。",
+            ],
+            "humorous": [
+                "『我觉得很多人需要』——你的『我觉得』是 36 氪首页那种，还是宿舍夜聊那种？",
+                "用户夸你『挺好的』时，他其实在说『我不想伤害你』。要不咱们一起翻译一下？",
+                "如果用户连一杯奶茶钱都不愿掏，那他口里的『需要』可能只是『同情』。",
+            ],
+            "warm": [
+                "你能告诉我，到目前为止你最深入聊过的那位用户，是怎么描述自己的痛点的吗？",
+                "我们一起想想，用户为这件事现在到底花了多少钱、花在哪？",
+                "用户的反馈有时候很客气。咱们一起想个办法，让他们用行为而不是话语来告诉我们。",
+            ],
+            "coaching": [
+                "你觉得，怎样的用户反应才能让你确信『这个需求是真的』？",
+                "如果只允许做一个验证小实验，你会怎么设计？",
+                "你能不能下周找 3 位真实用户，问一个让他们必须给出『行为答案』的问题？",
+            ],
+            "socratic": [
+                "如果『很多人需要』，为什么没有一个真的付钱过？",
+                "用户『愿意试一试』和『愿意付费』之间，到底差着什么？",
+                "如果朋友圈以外没人在意，这个需求真的存在吗？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS05",
@@ -98,6 +229,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["价值主张画布", "渠道成本数据", "变现路径和时间表"],
         counterfactual="如果你的免费用户永远不转化为付费用户，公司的现金流能撑多久？",
+        tone_variants={
+            "strict": [
+                "价值：用户拿到了什么？他自己认不认？别替他认。",
+                "渠道：单次触达多少钱、转化多少？没数就是空话。",
+                "变现：哪一天、用什么方式开始收钱？没时间表的免费等于慢性自杀。",
+            ],
+            "humorous": [
+                "你的产品给用户的价值——是『真的有用』还是『PPT 上看着有用』？",
+                "渠道说『投放一点广告』就行了——是抖音那种『一点』，还是分众那种『一点』？",
+                "『先做大用户量再变现』——历史上这么说的项目，现在大多在哪？提示：不是上市了。",
+            ],
+            "warm": [
+                "我们一起把价值这件事拆细：用户最想要的是哪一种结果？",
+                "渠道成本这块挺难一开始就估准的。我们至少先聊一个最有可能的渠道？",
+                "免费一段时间是合理的，关键是中间留个明确的『切换信号』，咱们一起想想。",
+            ],
+            "coaching": [
+                "你怎么知道用户真的认可你的价值？我们能不能一起设计一个验证信号？",
+                "你觉得自己最有把握的渠道是哪个？为什么？",
+                "你心里有没有一个『再过多久还没变现就要警惕』的红线？",
+            ],
+            "socratic": [
+                "如果用户感受不到价值，他凭什么留下来？",
+                "如果获客成本永远高于收入，规模再大有意义吗？",
+                "免费的用户为什么要变成付费的？什么时候会愿意？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS06",
@@ -124,6 +282,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["数据流向图", "隐私协议草案", "监管风险评估"],
         counterfactual="如果个人信息保护法要求你删除所有用户数据，你的商业模式是否还成立？",
+        tone_variants={
+            "strict": [
+                "数据：收哪些、存哪、谁能看？合法性基础给我具体到法条。",
+                "滥用：最坏情况是什么？谁负责？有没有应急下架预案？",
+                "监管收紧：政策出台第二天，你的产品形态要改哪一块？写出来。",
+            ],
+            "humorous": [
+                "你说『隐私当然要保护』——是『写在隐私协议第 17 页』那种保护，还是真的保护？",
+                "假设明天有个用户起诉你，你的法务……是 ChatGPT 吗？",
+                "教育双减、医疗 AI 审查这些剧本你看过吧？你打算演哪个角色？",
+            ],
+            "warm": [
+                "合规这件事不轻松，但越早想清楚越好。能告诉我目前你们收集了哪些数据吗？",
+                "如果哪天产品被滥用，对你来说最难承受的是什么？我们就从那一点开始防。",
+                "监管随时可能变，咱们一起想个最小变更预案，让你不至于被动。",
+            ],
+            "coaching": [
+                "如果让你写一份『最让用户安心』的数据使用说明，你会怎么写第一条？",
+                "你觉得最容易出问题的环节是哪一个？我们能不能先加一道护栏？",
+                "如果监管突然收紧，你最想保住的是什么？",
+            ],
+            "socratic": [
+                "用户没有真正知情同意，你的合法性来自哪里？",
+                "如果这件事被滥用一次，你的项目还能继续吗？",
+                "如果监管要求你删掉所有数据，你的模式还成立吗？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS08",
@@ -137,6 +322,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["价格测试数据", "竞品定价对比表", "价格弹性分析"],
         counterfactual="如果用户觉得你的产品值0元（因为有免费替代品），你怎么说服他们付费？",
+        tone_variants={
+            "strict": [
+                "定价依据：拍脑袋还是测过？测的方法和样本说一下。",
+                "竞品对比：同档次产品都什么价？你贵在哪？",
+                "弹性：上调 50% 谁先走？下调 50% 能拉来谁？给数。",
+            ],
+            "humorous": [
+                "你这个定价——是『参考了行业最佳实践』，还是『参考了我心情好坏』？",
+                "竞品都免费，你卖 199——你的产品自带情绪价值还是健身教练？",
+                "价格上调 50% 用户不流失？那要么你给他们下了降头，要么你高估自己。",
+            ],
+            "warm": [
+                "定价确实是最难的一关。你目前对这个价位最有把握的依据是什么？",
+                "我们一起把竞品摆出来对比一下，看看你的差异化能撑多少溢价。",
+                "如果上调一点，用户是觉得『还能接受』还是『立刻走人』？我们怎么知道？",
+            ],
+            "coaching": [
+                "如果只能做一次价格测试，你会设计成什么样？",
+                "你觉得用户付钱的真正理由是什么？这个理由能撑多少价钱？",
+                "如果竞品降到你一半价格，你会怎么应对？",
+            ],
+            "socratic": [
+                "你凭什么相信用户愿意为这件事付这个价？",
+                "如果免费替代品同样能用 80%，他为什么要付钱？",
+                "价格上下浮动 50%，结果你真的预测得了吗？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS09",
@@ -163,6 +375,33 @@ STRATEGIES: list[ChallengeStrategy] = [
         ],
         expected_evidence=["TAM/SAM/SOM三层估算", "自下而上的市场测算", "增长路径规划"],
         counterfactual="一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+        tone_variants={
+            "strict": [
+                "口径：你说的是 TAM 还是 SOM？别混着说，给我三层都列出来。",
+                "自下而上：单价 × 目标用户数 × 频次，第一年实际能切多少？",
+                "增长路径：从 SOM 到 SAM，你需要哪几个里程碑？写清楚。",
+            ],
+            "humorous": [
+                "万亿市场——这数字大得像微信群里的『好』字一样廉价，能不能给我一个『真能吃到嘴里的』？",
+                "你说『中国 14 亿人都可能用』——那是不是连嬴政再生都得用？",
+                "TAM 千亿、SOM 不知道——这就像说我可能成为亚洲首富，也可能不是。",
+            ],
+            "warm": [
+                "TAM 大很正常，但评委更想看你能切到的那一小块。我们一起做个粗算？",
+                "我们用『一个真实付费用户每年付多少 × 你能接触多少这种用户』来算个起点吧？",
+                "增长路径不用一步登天，先看清楚第一公里我们怎么走。",
+            ],
+            "coaching": [
+                "你觉得『最现实的第一年市场』有多大？给一个范围就行。",
+                "如果只能用一种方式估市场，你会怎么估？",
+                "你能不能找一个最相似的项目，看他们用了几年才到达 SOM 上限？",
+            ],
+            "socratic": [
+                "万亿 TAM 跟你今年能赚多少有什么关系？",
+                "你凭什么认为 SOM 不需要论证？",
+                "如果第一年只能拿到 SOM 的 1%，你的项目还成立吗？",
+            ],
+        },
     ),
     ChallengeStrategy(
         id="CS11",
@@ -448,6 +687,18 @@ def _in_spectrum_window(strategy: ChallengeStrategy, track_vector: dict[str, Any
     return True
 
 
+def _resolve_tone_layers(strategy: ChallengeStrategy, tone: str) -> list[str]:
+    """按 tone 取 probing_layers 重写文本；缺失则 fallback 到默认 cool。"""
+    safe_tone = (tone or "cool").lower()
+    if safe_tone == "cool" or safe_tone not in VALID_TONES:
+        return list(strategy.probing_layers)
+    variants = strategy.tone_variants or {}
+    layers = variants.get(safe_tone)
+    if layers:
+        return list(layers)
+    return list(strategy.probing_layers)
+
+
 def select_probing_strategies(
     text: str,
     *,
@@ -458,6 +709,7 @@ def select_probing_strategies(
     project_stage: str = "",
     competition_type: str = "",
     max_results: int = 3,
+    tone: str = "cool",
 ) -> list[dict[str, Any]]:
     scored: list[tuple[float, ChallengeStrategy, list[str], list[str], list[str]]] = []
     text_lower = str(text or "").lower()
@@ -494,12 +746,20 @@ def select_probing_strategies(
 
     scored.sort(key=lambda x: x[0], reverse=True)
     results: list[dict[str, Any]] = []
+    safe_tone = (tone or "cool").lower()
+    if safe_tone not in VALID_TONES:
+        safe_tone = "cool"
     for score, s, kw_hits, rule_hits, edge_hits in scored[:max_results]:
+        rendered_layers = _resolve_tone_layers(s, safe_tone)
+        tone_used = safe_tone if (safe_tone == "cool" or safe_tone in (s.tone_variants or {})) else "cool"
         results.append({
             "strategy_id": s.id,
             "name": s.name,
             "match_score": round(score, 2),
-            "probing_layers": s.probing_layers,
+            "probing_layers": rendered_layers,
+            "probing_layers_default": list(s.probing_layers),
+            "tone": tone_used,
+            "tone_descriptor": TONE_DESCRIPTORS.get(safe_tone, ""),
             "expected_evidence": s.expected_evidence,
             "counterfactual": s.counterfactual,
             "preferred_edge_types": _STRATEGY_EDGE_PREFS.get(s.id, []),
@@ -524,6 +784,7 @@ def match_strategies(
     track_vector: dict[str, Any] | None = None,
     project_stage: str = "",
     competition_type: str = "",
+    tone: str = "cool",
 ) -> list[dict[str, Any]]:
     """Find matching challenge strategies based on text keywords and/or triggered rules."""
     return select_probing_strategies(
@@ -535,20 +796,44 @@ def match_strategies(
         project_stage=project_stage,
         competition_type=competition_type,
         max_results=max_results,
+        tone=tone,
     )
 
 
-def format_for_critic(strategies: list[dict[str, Any]], max_chars: int = 800) -> str:
-    """Format matched strategies into context for the Critic agent."""
+def format_for_critic(
+    strategies: list[dict[str, Any]],
+    max_chars: int = 800,
+    tone: str = "cool",
+) -> str:
+    """
+    Format matched strategies into context for the Critic agent.
+
+    若 strategies 列表里的条目带 tone（来自 select_probing_strategies），优先用其
+    rendered probing_layers；否则按传入 tone 现场重取（兼容旧调用）。
+    """
     if not strategies:
         return ""
+    safe_tone = (tone or "cool").lower()
+    if safe_tone not in VALID_TONES:
+        safe_tone = "cool"
     parts: list[str] = []
     for s in strategies[:2]:
-        part = f"**策略: {s['name']}**\n"
-        for i, layer in enumerate(s["probing_layers"], 1):
+        # 优先用 select_probing_strategies 已经按 tone 渲染过的 layers；
+        # 旧调用没有时，按 strategy_id 现场拉一次 tone_variants
+        layers = s.get("probing_layers") or []
+        if not layers and s.get("strategy_id"):
+            base = _STRATEGY_BY_ID.get(s["strategy_id"])
+            if base:
+                layers = _resolve_tone_layers(base, safe_tone)
+        part = f"**策略: {s['name']}**（语气 tone={s.get('tone', safe_tone)}）\n"
+        for i, layer in enumerate(layers, 1):
             part += f"  追问{i}: {layer}\n"
-        part += f"  反事实: {s['counterfactual']}\n"
-        part += f"  需要学生提供: {', '.join(s['expected_evidence'])}\n"
+        if s.get("counterfactual"):
+            part += f"  反事实: {s['counterfactual']}\n"
+        if s.get("expected_evidence"):
+            part += f"  需要学生提供: {', '.join(s['expected_evidence'])}\n"
         parts.append(part)
+    if safe_tone != "cool":
+        parts.append(f"## 本轮追问语气\ntone={safe_tone}：{TONE_DESCRIPTORS.get(safe_tone, '')}")
     text = "\n".join(parts)
     return text[:max_chars]

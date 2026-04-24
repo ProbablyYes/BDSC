@@ -50,6 +50,8 @@
 - [八、从代码视角看 Prompt 设计的三个层次](#八从代码视角看-prompt-设计的三个层次)
 - [8.4 Orchestrator Prompt 的去模板化设计](#84-第四层orchestrator-prompt-的去模板化设计)
 - [8.6 按智能体逐一的 Prompt 图鉴](#86-按智能体逐一的-prompt-图鉴)
+- [8.7 答辩模式：评委角色卡库](#87-答辩模式评委角色卡库)
+- [8.8 追问策略库 · 表达风格层（语气变奏）](#88-追问策略库--表达风格层语气变奏)
 - [九、建议在说明书中重点强调的特色](#九建议在说明书中重点强调的特色)
 - [十、可直接写入最终说明书的正式表述](#十可直接写入最终说明书的正式表述)
 
@@ -3485,6 +3487,213 @@ sequenceDiagram
 - **三段都强制 JSON / 纯文本格式**，避免上一轮 v1 的混合自由文本难以下游处理。
 - **section_id / anchor_text 都必须 grounded 到 plan 真实数据**，LLM 拍脑袋编出来的 section_id 会被 `_normalize_agenda_item` 直接丢弃。
 - **三处 LLM 调用都带回退**：抽取失败 → 关键词兜底；巡检失败 → `_review_status` 标 error；patch 失败 → fallback 到旧版"末尾拼接评委块"。这样即便 LLM 不可用，议题板仍能给学生交付最低限度的产出。
+
+---
+
+## 8.7 答辩模式：评委角色卡库
+
+测试用例 3 要求"模拟激进型 VC、技术流专家、保守型银行家等毒舌提问"。原本这套口径是学生在每一轮消息里手写"请扮演 X"，advisor 临时切口径，导致每次都要重新拼提示词、风格漂移大、也没法复用。本节把这套常用评委沉淀成**代码层的角色卡库**。
+
+### 8.7.1 角色卡库的两层文件
+
+#### A. 配置文件 `apps/backend/config/competition_judges.json`
+
+集中维护 10 个评委 persona，每条字段约定：
+
+```json
+{
+  "id": "aggressive_vc",
+  "name": "激进型VC",
+  "archetype": "增长狂",
+  "focus": ["市场规模", "扩张速度", "护城河"],
+  "tone": "压迫感强、节奏快",
+  "trigger_keywords": ["VC", "投资人", "增长"],
+  "signature_questions": ["规模天花板？", "你的护城河 18 个月内会被复制吗？"],
+  "killer_metrics": ["LTV/CAC", "渗透率"],
+  "typical_pitfalls": ["项目方常常用 TAM 替代 SAM"]
+}
+```
+
+10 个角色覆盖了三个原始角色 + 7 个老师暗示要扩充的角色：
+
+| id | 角色 | 触发场景 |
+|---|---|---|
+| `aggressive_vc` | 激进型 VC | 互联网+ 默认评委，关键词：VC / 投资人 |
+| `tech_lead` | 技术流专家 | 涉及算法 / 模型 / 工程实现的项目 |
+| `conservative_banker` | 保守型银行家 | 涉及现金流 / 还款 / 抵押的财务讨论 |
+| `policy_compliance_officer` | 政策合规官 | 教育 / 医疗 / 金融受监管赛道 |
+| `product_pm` | 产品经理评委 | 用户体验 / 留存 / NPS 视角 |
+| `social_impact_judge` | 社会价值评委 | 公益赛道（对应 CS16/CS17） |
+| `serial_entrepreneur` | 连续创业者 | 执行落地 / 运营效率审视 |
+| `industry_expert` | 行业资深专家 | 行业准入 / 渠道 / 牌照 |
+| `academic_reviewer` | 学术评委 | 挑战杯默认 / 大创科研性 |
+| `career_coach` | 高校就业指导 | 教学合理性、对应「教师视角」账号 |
+
+文件里同时挂了 `default_by_competition` 字段：互联网+ 默认 `aggressive_vc`、挑战杯默认 `academic_reviewer`、大创默认 `industry_expert`。
+
+#### B. 服务模块 `apps/backend/app/services/competition_judges.py`
+
+只暴露 4 个对外接口：
+
+- `load_judges()`：读 JSON + 进程级缓存。
+- `parse_explicit_judge(message)`：识别"请扮演 X / 切到 X 视角 / 用 X 的口吻追问"等显式指令，返回 `judge_id` 或空。
+- `pick_judge(message, mode, competition_type, sticky_id)`：按"显式 > 关键词 > 会话粘性 > 赛事默认"四级优先级挑出本轮 persona。
+- `format_judge_for_advisor(judge)` / `format_judge_directory()`：分别输出"完整角色卡"和"角色目录摘要"，用作 system prompt 的注入片段。
+
+### 8.7.2 注入位置：advisor / orchestrator 双重注入
+
+这是评委角色卡库与已有"竞赛冲刺/答辩"章节的关键差别：
+
+- 在 `router_agent` 入口处调用 `resolve_judge_for_state(state)`，把命中的 persona 写进 `state["competition_judge_id"]` 和 `state["active_judge_persona_block"]`，并放入 `agent_trace.competition.active_judge`。
+- `_advisor_analyze` 在 system prompt 里**只放完整 persona 一段**（约 200 字），同时附"角色目录摘要"，让 advisor 看到当前是哪位评委 + 其它备选评委。
+- `orchestrator` 也注入同一段 persona，避免最终回复阶段忘了"用谁的口吻"。
+
+这样的好处：
+
+- system prompt 体积可控（不展开全部 10 个 persona，只展开当前一个）。
+- 评委身份在整个本轮 workflow 里都是稳定的，不会出现"advisor 用 VC 口吻、orchestrator 又改回学术评委"的串味。
+- 前端只读 `agent_trace.competition.active_judge` 就能展示"本轮你正在被 XX 角色追问"。
+
+### 8.7.3 切换方式：仍然走自然语言指令
+
+`intent_router.update_session_state_from_message` 在每轮入口扫描学生消息，识别"请扮演 X / 切到 X 视角"等模式，写到 `state["competition_judge_id"]`，并打上**会话级粘性**——除非学生再下一次显式切换，否则后续轮次都沿用同一个评委。
+
+这是有意为之的设计：
+
+- 不在前端引入"评委选择器"控件，保持 chat-only 体验；
+- 学生从"我想被 VC 追问 5 轮"到"换银行家给我做一遍"都只需要写一句话；
+- 同一会话里可以多次切换评委，每次切换都会反映到 `agent_trace.competition.active_judge`，便于教师端看"该学生今天被几个评委轮番打过"。
+
+## 8.8 追问策略库 · 表达风格层（语气变奏）
+
+测试用例 7 要求"追问策略库支持变换不同语气"。系统原本已经有完整的"追问策略库"（[challenge_strategies.py](apps/backend/app/services/challenge_strategies.py) 共 20 条 CS01–CS20，每条带 `trigger_keywords` / `probing_layers` / `expected_evidence` / `counterfactual`），覆盖了：
+
+- ① 触发条件（什么时候问）— `trigger_keywords` + `trigger_rules`
+- ② 追问目的（为什么问）— `strategy_logic` + `expected_evidence`
+
+但缺少老师特别强调的：
+
+- ③ **表达风格（怎么问）** — 同一个追问可以幽默、严肃、温和、苏格拉底式问出来
+
+本节就是补这第三层。
+
+### 8.8.1 6 种 tone 与 `TONE_DESCRIPTORS`
+
+在 `challenge_strategies.py` 顶部定义统一的 6 种语气：
+
+```python
+TONE_DESCRIPTORS: dict[str, str] = {
+    "cool":     "学术冷静：克制、不带情绪、像审稿人——默认值",
+    "strict":   "严肃严苛：像审计员，强调数字与事实，不接受感觉",
+    "humorous": "幽默风趣：可以用反讽和打比方，但底线是不伤学生自尊",
+    "warm":     "共情温柔：先承认学生付出，再问问题，避免劝退",
+    "coaching": "鼓励引导：用'你觉得 / 你打算怎么 …'帮学生自己长出答案",
+    "socratic": "苏格拉底式：纯反问，让学生在自己的话里发现矛盾",
+}
+VALID_TONES = tuple(TONE_DESCRIPTORS.keys())
+```
+
+`TONE_DESCRIPTORS` 同时被三个地方共用：
+
+- `format_for_critic` 拼 prompt 时附在追问块末尾；
+- coach 维度写手 prompt 末尾追加"按 preferred_tone 重写 guiding_questions"；
+- orchestrator 最终输出时拼一句风格指南，确保最后一段语气也对齐。
+
+### 8.8.2 双层实现：高频 CS 写好版本 + 其余走 advisor 改写
+
+`ChallengeStrategy` 数据类多了一个字段：
+
+```python
+@dataclass
+class ChallengeStrategy:
+    ...
+    tone_variants: dict[str, list[str]] = field(default_factory=dict)
+    # key = tone id，value = 同语义但语气重写后的 probing_layers
+```
+
+第一阶段只给**高频 8 条**（CS01/02/03/04/05/07/08/10）写完整 5 个非默认 tone 的文本，其余 12 条挂空 dict —— 走 fallback：
+
+- `select_probing_strategies(..., tone="strict")` 找不到 `tone_variants["strict"]` 时，退回到默认 `probing_layers`；
+- 同时把 `TONE_DESCRIPTORS["strict"]` 文本透传给 advisor / coach，让 LLM 在生成 `guiding_questions` 阶段按风格再写一遍，达到"低频 CS 也能换语气"的效果。
+
+这样的取舍是：
+
+- 8 条高频 CS 直接 hit 模板，零 LLM 成本、风格 100% 可控；
+- 12 条低频 CS 仍能上线，由 LLM 兜底重写，质量略有波动但不阻塞功能；
+- 后续要补哪条，只需要在 `tone_variants` 里加一行即可，逐步覆盖。
+
+### 8.8.3 第三处硬编码：`_compose_pressure_question`
+
+`graph_workflow._compose_pressure_question` 原本对 5 个高频 CS_id 写了硬编码追问模板（CS01 没有竞争对手、CS02 只要 1% 市场、CS05、CS07、CS08）。本次改造把它扩成"CS_id × tone"二级分支：
+
+```python
+_PRESSURE_QUESTION_TONE_VARIANTS: dict[str, dict[str, str]] = {
+    "CS01": {
+        "cool":     "...",
+        "strict":   "...",
+        "humorous": "...",
+        "warm":     "...",
+        "coaching": "...",
+        "socratic": "...",
+    },
+    "CS02": { ... },
+    ...
+}
+
+_TONE_FALLBACK_PROMPT: dict[str, str] = {
+    "cool":     "如果把你这句话拆开来看，哪一个前提其实还没有被真正证明？",
+    "strict":   "把你刚才那句话最关键的前提拎出来——它有什么证据支撑？没有就承认。",
+    ...
+}
+```
+
+执行流程：
+
+1. 命中高频 CS_id + 命中 tone → 直接返回模板；
+2. 命中 CS_id 但 tone 没写过 → 退回该 CS 的 `cool` 版本；
+3. 完全没命中（普通 CS）→ 用兜底 `_TONE_FALLBACK_PROMPT[tone]` + 一句"你现在的说法主要依赖 X"前缀。
+
+### 8.8.4 切换方式与默认 tone 策略
+
+学生用自然语言切换：
+
+- "严肃一点 / 狠一点 / 像审计员那样问" → strict
+- "幽默 / 别那么严肃" → humorous
+- "温和一点 / 别打击我" → warm
+- "鼓励我一下 / 让我自己想" → coaching
+- "用苏格拉底的方式问" → socratic
+- "正常问就行" → cool
+
+这套识别在 `intent_router.detect_preferred_tone` 里实现，命中后写进 `state["preferred_tone"]`，会话级粘性直到下一次显式切换。
+
+未显式指定时，由 `resolve_tone_for_state` 按以下优先级推一个默认值：
+
+1. 本轮消息显式指令（`explicit`）
+2. 最近 5 条历史用户消息里最近一次显式指令（`sticky`）
+3. `project_state.preferred_tone`（`project_state`）
+4. 按 `reply_strategy` / intent 推：`progressive`→warm，`challenge`→strict，`teach_concept`→coaching，其余→cool（`default`）
+
+最后还有两道**安全闸门**：
+
+- **高风险强制 strict**：`finance_advisory.triggered` 或诊断命中 H7 / H11 时，无论之前是什么 tone，强制覆盖为 strict（`forced_strict`），避免幽默语气冲淡风险信号。
+- **想法期禁用 strict**：`exploration_state.phase == "direction"` 时，把 strict 降到 warm（`forced_warm`），避免在学生还没成型时就被严苛口吻劝退。
+
+origin 字段会写进 `agent_trace.tone_origin`，让前端 / 教师端能看到"为什么这一轮用 strict"的判断链路。
+
+### 8.8.5 评委角色卡库 vs 语气变奏层 —— 两条线为什么不耦合
+
+这两个能力很容易被混在一起，但本次实现刻意保持解耦：
+
+| 维度 | 评委角色卡库 | 语气变奏层 |
+|---|---|---|
+| 解决的问题 | 答辩场景下"评委是谁" | 任意场景下"用什么口吻问" |
+| 适用模式 | 仅 competition | 全部模式（coursework / competition / learning） |
+| 触发指令 | "请扮演 VC / 切到银行家视角" | "严肃一点 / 幽默一点 / 像苏格拉底那样问" |
+| 状态字段 | `competition_judge_id` / `active_judge_persona_block` | `preferred_tone` / `tone_origin` |
+| 注入位置 | advisor / orchestrator system prompt | format_for_critic / coach writer / orchestrator / `_compose_pressure_question` |
+| 是否可叠加 | ✅ 可与 tone 叠加："让 VC 用幽默一点的方式追问我" |
+
+也就是说：评委角色卡决定"这一轮谁来问"，tone 决定"他用什么语气问"。两条线互相正交，组合起来才完整覆盖老师对"答辩模式"和"追问策略库表达风格"的双重要求。
 
 ---
 

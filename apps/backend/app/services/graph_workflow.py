@@ -64,6 +64,13 @@ from app.services.ontology_runtime import (
     build_ontology_grounding,
     render_ontology_prompt,
 )
+from app.services.competition_judges import (
+    JudgePersona,
+    format_judge_directory,
+    format_judge_for_advisor,
+    load_judges,
+    pick_judge,
+)
 
 logger = logging.getLogger(__name__)
 _llm = LlmClient()
@@ -128,6 +135,10 @@ class WorkflowState(TypedDict, total=False):
     challenge_strategies: list
     pressure_test_trace: dict
     competition: dict
+    competition_judge_id: str
+    active_judge_persona_block: str
+    preferred_tone: str
+    tone_origin: str
     learning: dict
     kb_utilization: dict
     needs_clarification: bool
@@ -1957,51 +1968,184 @@ def _top_triggered_rule(diag: dict, message: str = "") -> dict[str, Any]:
     return high[0] if high else rules[0]
 
 
+_PRESSURE_QUESTION_TONE_VARIANTS: dict[str, dict[str, str]] = {
+    "CS01": {
+        "cool": (
+            "你提到“{quote}”。如果用户今天不用你们，他会先用什么办法把这件事凑合做完？"
+            "那个方案虽然笨，但为什么他们还愿意继续用？如果你们想让他切过来，最大的迁移成本是什么？"
+        ),
+        "strict": (
+            "你提到“{quote}”。我直接问三件事：用户今天到底用什么凑合解决？"
+            "他为什么还愿意继续用？让他切到你这，要付出哪些具体成本？三个回答都要给我数据或事实，不接受感觉。"
+        ),
+        "humorous": (
+            "你说没竞争对手——那用户在你出现之前，是不是把这事『默念三遍就解决』了？"
+            "他用的那个『凑合方案』哪怕是 Excel + 人脑，也是你的对手哦。要让他搬家到你这，搬家费谁付？"
+        ),
+        "warm": (
+            "我先帮你理一下：用户在没有你之前肯定有自己的临时办法。"
+            "你能描述一下他们目前是怎么做的、为什么还能凑合用吗？切到你这，他们最难放下的是什么？"
+        ),
+        "coaching": (
+            "你觉得用户在没有你之前是怎么把这件事凑合做完的？把那个办法写下来——它就是你最直接的对手。"
+            "你打算用什么来衡量『切换成本足够低』这件事？"
+        ),
+        "socratic": (
+            "如果真的没有竞争者，用户此刻是不是处于完全无解的状态？"
+            "为什么之前从没有团队尝试过这件事？切换到你这里需要付出代价，他们凭什么愿意付出？"
+        ),
+    },
+    "CS02": {
+        "cool": (
+            "你提到“{quote}”。这批人具体散落在哪些渠道里？"
+            "你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。"
+        ),
+        "strict": (
+            "1% 是个很危险的句式。我要三个数：渠道是哪个、CAC 多少、前 100 个付费用户的获取计划。"
+            "拿不出来，1% 这话就别再说。"
+        ),
+        "humorous": (
+            "你说『拿到 1% 就行』——那剩下 99% 是不是『因为没听说过你』就主动让出来了？"
+            "CAC 和 LTV 这两位老朋友你今天打算聊一下吗，还是继续假装他们不存在？"
+        ),
+        "warm": (
+            "1% 听起来不大，但落到具体渠道其实挺难。你打算先从哪一类用户切入？"
+            "我们一起做个粗算吧，拉一个用户大概要花多少？"
+        ),
+        "coaching": (
+            "你觉得这 1% 用户最有可能聚集在哪？我们可以先从最浓的那一池切入。"
+            "如果只有一周时间拉到第一批 10 个付费用户，你会怎么做？"
+        ),
+        "socratic": (
+            "凭什么这 1% 会先用你而不是别人？如果获取一个用户的成本高于他带来的收入，市场再大有意义吗？"
+        ),
+    },
+    "CS05": {
+        "cool": (
+            "如果未来 6 个月没有外部融资，你们账上的现金最先会被哪一项成本吃掉？"
+            "这条价值链里，谁先付钱、为什么现在就付、以及这笔钱能不能覆盖持续服务成本？"
+        ),
+        "strict": (
+            "现金流模型给我看：6 个月静态 runway 是多少？最先被哪项成本吃掉？"
+            "谁先付钱、为什么现在付、付的钱能不能覆盖持续服务成本——一个一个回答。"
+        ),
+        "humorous": (
+            "『先做大用户量再变现』——历史上这么说的项目大多去哪了？提示：不是上市了。"
+            "你账上的钱够撑到下一轮融资，还是够撑到下一杯咖啡？"
+        ),
+        "warm": (
+            "免费一段时间是合理的，关键是中间留一个明确的『切换信号』。"
+            "我们一起想想，这个信号是什么、什么时候应该响起来？"
+        ),
+        "coaching": (
+            "你心里有没有一个『再过多久还没变现就要警惕』的红线？"
+            "你觉得自己最有把握的渠道是哪个？为什么？"
+        ),
+        "socratic": (
+            "如果获客成本永远高于收入，规模再大有意义吗？免费的用户为什么要变成付费的？"
+        ),
+    },
+    "CS08": {
+        "cool": (
+            "你提到“{quote}”。用户现在已经有哪些免费或更便宜的替代方案？"
+            "你凭什么判断他会为你多付这笔钱？如果价格上调 50%，你预计谁会先流失？"
+        ),
+        "strict": (
+            "定价依据：拍脑袋还是测过？同档次产品都什么价？你贵在哪？"
+            "上调 50% 谁先走、下调 50% 能拉来谁——给我数。"
+        ),
+        "humorous": (
+            "竞品都免费，你卖 199——产品自带情绪价值还是健身教练？"
+            "价格上调 50% 用户不流失？要么你给他们下了降头，要么你高估自己。"
+        ),
+        "warm": (
+            "定价确实是最难的一关。你目前对这个价位最有把握的依据是什么？"
+            "我们一起把竞品摆出来对比一下，看看你的差异化能撑多少溢价。"
+        ),
+        "coaching": (
+            "如果只能做一次价格测试，你会设计成什么样？"
+            "你觉得用户付钱的真正理由是什么？这个理由能撑多少价钱？"
+        ),
+        "socratic": (
+            "如果免费替代品同样能用 80%，他为什么要付钱？价格上下浮动 50% 你真预测得了吗？"
+        ),
+    },
+    "CS07": {
+        "cool": (
+            "你说已经考虑了风险控制。那如果明天真的发生一次数据滥用或合规抽查，"
+            "你们具体靠哪一个流程、哪一个责任人、哪一份记录去应对，而不是只靠原则性表述？"
+        ),
+        "strict": (
+            "明天就来一次合规抽查：靠哪个流程、谁是责任人、哪份记录撑得住？"
+            "拿不出三个具体名字 / 文件，就是没有真正的风控。"
+        ),
+        "humorous": (
+            "你说『隐私当然要保护』——是『写在隐私协议第 17 页』那种保护，还是真的保护？"
+            "明天真要起诉你，你的法务……是 ChatGPT 吗？"
+        ),
+        "warm": (
+            "合规这件事不轻松，但越早想清楚越好。"
+            "如果哪天产品被滥用，对你来说最难承受的是什么？我们就从那一点开始防。"
+        ),
+        "coaching": (
+            "如果让你写一份『最让用户安心』的数据使用说明，你会怎么写第一条？"
+            "你觉得最容易出问题的环节是哪一个？"
+        ),
+        "socratic": (
+            "用户没有真正知情同意，你的合法性来自哪里？"
+            "如果这件事被滥用一次，你的项目还能继续吗？"
+        ),
+    },
+}
+
+_TONE_FALLBACK_PROMPT: dict[str, str] = {
+    "cool": "如果把你现在这句话拆开来看，哪一个前提其实还没有被真正证明？你准备用什么证据补上它？",
+    "strict": "把你刚才那句话最关键的前提拎出来——它有什么证据支撑？没有就承认。",
+    "humorous": "刚才那句话挺漂亮的，但漂亮不能上 PPT 当数据用。最薄的那块前提是哪一个？",
+    "warm": "我感觉你那句话里有一个前提其实还没怎么展开，能一起补一下吗？",
+    "coaching": "你觉得自己刚才说的话里，最该先验证的那个前提是什么？我们怎么验？",
+    "socratic": "你刚才那句话，到底建立在哪个未被验证的假设之上？",
+}
+
+
 def _compose_pressure_question(
     message: str,
     rule: dict[str, Any],
     strategy: dict[str, Any],
     retrieved_edges: list[dict[str, Any]],
+    tone: str = "cool",
 ) -> str:
     quote = str(rule.get("quote") or "").strip()
     strategy_id = str(strategy.get("strategy_id") or "")
     edge_types = [str(edge.get("edge_type") or edge.get("type") or "") for edge in retrieved_edges if isinstance(edge, dict)]
+    safe_tone = (tone or "cool").lower()
 
-    if strategy_id == "CS01":
-        return (
-            f"你提到“{quote or '没有竞争对手'}”。如果用户今天不用你们，他会先用什么办法把这件事凑合做完？"
-            "那个方案虽然笨，但为什么他们还愿意继续用？如果你们想让他切过来，最大的迁移成本是什么？"
-        )
-    if strategy_id == "CS02":
-        return (
-            f"你提到“{quote or '只要拿到1%市场'}”。这批人具体散落在哪些渠道里？"
-            "你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。"
-        )
-    if strategy_id == "CS05":
-        return (
-            "如果未来 6 个月没有外部融资，你们账上的现金最先会被哪一项成本吃掉？"
-            "这条价值链里，谁先付钱、为什么现在就付、以及这笔钱能不能覆盖持续服务成本？"
-        )
-    if strategy_id == "CS08":
-        return (
-            f"你提到“{quote or '准备收费'}”。用户现在已经有哪些免费或更便宜的替代方案？"
-            "你凭什么判断他会为你多付这笔钱？如果价格上调 50%，你预计谁会先流失？"
-        )
-    if strategy_id == "CS07":
-        return (
-            "你说已经考虑了风险控制。那如果明天真的发生一次数据滥用或合规抽查，"
-            "你们具体靠哪一个流程、哪一个责任人、哪一份记录去应对，而不是只靠原则性表述？"
-        )
+    cs_variants = _PRESSURE_QUESTION_TONE_VARIANTS.get(strategy_id)
+    if cs_variants:
+        # 兜底：若 tone 不在 5 个高频 CS 的写好版本里，回 cool
+        template = cs_variants.get(safe_tone) or cs_variants.get("cool")
+        if template:
+            default_quote = {
+                "CS01": "没有竞争对手",
+                "CS02": "只要拿到1%市场",
+                "CS08": "准备收费",
+            }.get(strategy_id, "")
+            return template.format(quote=quote or default_quote)
 
+    # 非高频 CS：先取 strategy.probing_layers[0]，再叠加 tone 风格提示
     layer = ""
     probing_layers = strategy.get("probing_layers") or []
     if probing_layers:
         layer = str(probing_layers[0]).split(":", 1)[-1].strip()
     if layer:
-        return layer
+        if safe_tone == "cool":
+            return layer
+        return f"{layer}（用 {safe_tone} 语气追问，但保留信息密度）"
+
     if edge_types:
-        return f"你现在的说法主要依赖 {edge_types[0]}。如果把这个逻辑拆开，最先需要你补证明的那个环节到底是什么？"
-    return "如果把你现在这句话拆开来看，哪一个前提其实还没有被真正证明？你准备用什么证据补上它？"
+        prefix = f"你现在的说法主要依赖 {edge_types[0]}。"
+        return prefix + _TONE_FALLBACK_PROMPT.get(safe_tone, _TONE_FALLBACK_PROMPT["cool"])
+    return _TONE_FALLBACK_PROMPT.get(safe_tone, _TONE_FALLBACK_PROMPT["cool"])
 
 
 def _build_pressure_test_trace(
@@ -2010,6 +2154,7 @@ def _build_pressure_test_trace(
     hypergraph_insight: dict,
     message: str = "",
     consistency_issues: list[dict[str, Any]] | None = None,
+    tone: str = "cool",
 ) -> dict:
     top_rule = _top_triggered_rule(diag, message)
     top_strategy = strategies[0] if strategies and isinstance(strategies[0], dict) else {}
@@ -2025,7 +2170,7 @@ def _build_pressure_test_trace(
             "nodes": edge.get("nodes") or [],
             "evidence_quotes": edge.get("evidence_quotes") or [],
         })
-    generated_question = _compose_pressure_question(message, top_rule, top_strategy, edge_items)
+    generated_question = _compose_pressure_question(message, top_rule, top_strategy, edge_items, tone=tone)
 
     # Merge consistency-rule pressure questions as fallback/supplement
     consistency_questions = []
@@ -2053,6 +2198,7 @@ def _build_pressure_test_trace(
         "generated_question": generated_question,
         "consistency_pressure_questions": consistency_questions[:3],
         "evidence_quotes": evidence_quotes[:3],
+        "tone": tone,
     }
 
 
@@ -2320,6 +2466,178 @@ def _adjust_pipeline_for_mode(agents: list[str], mode: str, intent: str) -> list
     return [a for a in agents if a in AGENT_FNS][:2] or ["coach"]
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  Judge / Tone selection helpers (Defense Mode + Probing Tone Library)
+# ═══════════════════════════════════════════════════════════════════
+
+# 6 种语气的一句话风格指南。复用给 _compose_pressure_question /
+# coach guiding_questions / orchestrator 三处，作为 LLM prompt 片段。
+TONE_DESCRIPTORS: dict[str, str] = {
+    "cool": "学术冷静、就事论事、不带情绪；像审稿人。",
+    "strict": "严肃克制、压力高、追问短促有力；像投资人尽调或合规审计。",
+    "humorous": "幽默风趣、可以用反讽和打比方；底线是不能伤学生自尊；像段子手老师。",
+    "warm": "共情温柔、先接住情绪、再轻轻指出问题；像可信赖的学姐。",
+    "coaching": "鼓励引导、把追问变成『你觉得呢』式的开放问题；像启发式教练。",
+    "socratic": "纯反问、不给答案、一层层暴露假设；像苏格拉底本人。",
+}
+
+VALID_TONES = tuple(TONE_DESCRIPTORS.keys())
+
+# 学生主动指定语气的关键词（中文友好），命中即覆盖默认 tone
+_TONE_TRIGGERS: list[tuple[str, list[str]]] = [
+    ("strict",   ["严肃", "严厉", "狠一点", "狠点", "凶一点", "凌厉", "压力大", "尖锐", "毒舌"]),
+    ("humorous", ["幽默", "风趣", "搞笑", "轻松一点", "段子", "调侃", "活泼"]),
+    ("warm",     ["温和", "温柔", "温暖", "柔和一点", "别太凶", "舒服一点"]),
+    ("coaching", ["鼓励", "正向", "教练式", "启发", "陪伴"]),
+    ("socratic", ["苏格拉底", "苏格拉底式", "反问", "只反问", "只问不答"]),
+    ("cool",     ["学术", "冷静", "中立", "默认"]),
+]
+
+
+_TONE_NEGATION_PREFIXES = ("别", "不要", "不那么", "不太", "少点", "少一点", "没那么")
+
+
+def _is_tone_negated(text: str, pos: int) -> bool:
+    """命中关键词位置的前 5 个字符里若出现否定词（如「别那么严肃」），视为负向。"""
+    if pos <= 0:
+        return False
+    window = text[max(0, pos - 5):pos]
+    return any(neg in window for neg in _TONE_NEGATION_PREFIXES)
+
+
+def parse_explicit_tone(message: str) -> str:
+    """从学生消息抽取显式的语气指令。返回 '' 表示没显式说。
+
+    规则：
+      1) 同时命中多个关键词时，取**位置最靠后**的（更接近本轮真实意图）；
+      2) 命中位置前 5 字符里若有否定词（别 / 不要 / 不那么），跳过该关键词
+         （例：「别那么严肃」不算 strict）。
+    """
+    if not message:
+        return ""
+    text = message.lower()
+    best_pos = -1
+    best_tone = ""
+    for tone, triggers in _TONE_TRIGGERS:
+        for kw in triggers:
+            kw_l = kw.lower()
+            pos = text.rfind(kw_l)
+            if pos < 0:
+                continue
+            if _is_tone_negated(text, pos):
+                continue
+            if pos > best_pos:
+                best_pos = pos
+                best_tone = tone
+    return best_tone
+
+
+def _default_tone_for(reply_strategy: str, intent: str) -> str:
+    """未指定时按 reply_strategy/intent 推一个默认 tone。"""
+    rs = (reply_strategy or "").lower()
+    if rs == "challenge":
+        return "strict"
+    if rs == "progressive":
+        return "warm"
+    if rs == "teach_concept":
+        return "coaching"
+    if intent in ("idea_brainstorm", "general_chat"):
+        return "warm"
+    if intent in ("pressure_test", "competition_prep"):
+        return "strict"
+    return "cool"
+
+
+def _last_user_messages(conv: list, limit: int = 5) -> list[str]:
+    if not conv:
+        return []
+    return [
+        str(m.get("content", "")) for m in conv[-(limit * 2):]
+        if isinstance(m, dict) and m.get("role") == "user"
+    ][-limit:]
+
+
+def resolve_tone_for_state(
+    state: dict,
+    reply_strategy: str = "",
+    intent: str = "",
+) -> tuple[str, str]:
+    """
+    返回 (tone, origin)。origin ∈ {explicit, sticky, project_state, default, forced_strict, forced_warm}.
+
+    优先级：
+      1) 学生本轮消息显式指令
+      2) 最近 5 条历史用户消息里最近一次显式指令（粘性）
+      3) project_state.preferred_tone
+      4) 默认（按 reply_strategy / intent 推）
+    高风险场景（finance_advisory.triggered / 高 H 风险）→ 强制 strict 覆盖；
+    探索期（exploration_phase=direction）→ 禁用 strict，自动降到 warm/coaching。
+    """
+    msg = str(state.get("message") or "")
+    project_state = state.get("project_state") or {}
+
+    tone = parse_explicit_tone(msg)
+    origin = "explicit" if tone else ""
+
+    if not tone:
+        for past in reversed(_last_user_messages(state.get("conversation_messages") or [], limit=5)):
+            t = parse_explicit_tone(past)
+            if t:
+                tone, origin = t, "sticky"
+                break
+
+    if not tone:
+        ps_tone = str(project_state.get("preferred_tone") or "").strip().lower()
+        if ps_tone in VALID_TONES:
+            tone, origin = ps_tone, "project_state"
+
+    if not tone:
+        tone = _default_tone_for(reply_strategy, intent)
+        origin = origin or "default"
+
+    # ── 安全闸门 ──
+    diag = state.get("diagnosis") or {}
+    triggered_ids = {
+        str(r.get("id") or "").upper()
+        for r in (diag.get("triggered_rules") or []) if isinstance(r, dict)
+    }
+    high_risk = bool(state.get("finance_advisory", {}).get("triggered")) or bool(
+        triggered_ids & {"H7", "H11"}
+    )
+    if high_risk and tone != "strict":
+        tone, origin = "strict", "forced_strict"
+
+    exploration_phase = (state.get("exploration_state") or {}).get("phase", "")
+    if exploration_phase == "direction" and tone == "strict":
+        tone, origin = "warm", "forced_warm"
+
+    return tone, origin
+
+
+def resolve_judge_for_state(state: dict) -> JudgePersona | None:
+    """挑选当前应注入的评委 persona。"""
+    msg = str(state.get("message") or "")
+    mode = str(state.get("mode") or "")
+    competition_type = str(state.get("competition_type") or "")
+    project_state = state.get("project_state") or {}
+
+    sticky_id = str(state.get("competition_judge_id") or project_state.get("competition_judge_id") or "")
+    if not sticky_id:
+        for past in reversed(_last_user_messages(state.get("conversation_messages") or [], limit=5)):
+            from app.services.competition_judges import parse_explicit_judge as _peek
+            past_judge = _peek(past)
+            if past_judge:
+                sticky_id = past_judge.id
+                break
+
+    return pick_judge(
+        msg,
+        mode=mode,
+        competition_type=competition_type,
+        sticky_judge_id=sticky_id,
+    )
+
+
 def router_agent(state: WorkflowState) -> dict:
     conv = state.get("conversation_messages", [])
     mode = state.get("mode", "coursework")
@@ -2337,6 +2655,19 @@ def router_agent(state: WorkflowState) -> dict:
         state.get("exploration_state"), message, kg_entities, conv,
     )
 
+    # Judge + tone resolution（不依赖 dim_results / 重型上下文，可在 router 阶段完成）
+    judge_persona = resolve_judge_for_state(state)
+    judge_block = format_judge_for_advisor(judge_persona) if judge_persona else ""
+    competition_meta: dict = {}
+    if judge_persona:
+        competition_meta = {
+            "active_judge": judge_persona.id,
+            "active_judge_name": judge_persona.name,
+            "active_judge_archetype": judge_persona.archetype,
+        }
+
+    tone, tone_origin = resolve_tone_for_state(state, intent=c["intent"])
+
     return {
         "intent": c["intent"],
         "intent_confidence": c["confidence"],
@@ -2349,6 +2680,11 @@ def router_agent(state: WorkflowState) -> dict:
         "conversation_continuation_mode": _conversation_continuation_mode(state),
         "dim_activations": dim_activations,
         "exploration_state": exploration_state,
+        "competition": competition_meta,
+        "competition_judge_id": judge_persona.id if judge_persona else "",
+        "active_judge_persona_block": judge_block,
+        "preferred_tone": tone,
+        "tone_origin": tone_origin,
         "agents_called": ["router"],
         "nodes_visited": ["router"],
     }
@@ -3205,7 +3541,10 @@ def gather_context_node(state: WorkflowState) -> dict:
             "diagnosis": diag_data,
             "kg_analysis": kg_for_clarify,
         })
-        pressure_trace = _build_pressure_test_trace(diag_data, strategies, {}, msg)
+        pressure_trace = _build_pressure_test_trace(
+            diag_data, strategies, {}, msg,
+            tone=str(state.get("preferred_tone") or "cool"),
+        )
         # 浅层 gather 也保留上一轮的重型组件，避免“跳过 LLM 抽取 ⇒ 面板清空”。
         return {
             "diagnosis": diag_data,
@@ -4011,6 +4350,7 @@ def gather_context_node(state: WorkflowState) -> dict:
     pressure_trace = _build_pressure_test_trace(
         diag_data, strategies, collected.get("hypergraph_insight", {}), msg,
         consistency_issues=hyper_student.get("consistency_issues", []) if isinstance(hyper_student, dict) else [],
+        tone=str(state.get("preferred_tone") or "cool"),
     )
 
     # V2: refine dimension activations with actual data
@@ -5287,6 +5627,18 @@ def _coach_analyze(state: dict) -> dict:
     _is_exploring = _inc_stats.get("project_maturity") == "exploring"
     _entity_total = _inc_stats.get("total_accumulated", 0)
 
+    _preferred_tone = str(state.get("preferred_tone") or "cool").lower()
+    if _preferred_tone not in VALID_TONES:
+        _preferred_tone = "cool"
+    _tone_descriptor = TONE_DESCRIPTORS.get(_preferred_tone, TONE_DESCRIPTORS["cool"])
+    _tone_instruction = (
+        f"\n## 本轮追问语气\n"
+        f"- preferred_tone={_preferred_tone}\n"
+        f"- 风格指南：{_tone_descriptor}\n"
+        f"- 请按上述风格重写 guiding_questions 的语言表达（保持信息密度与追问深度，只换语气包装）\n"
+        f"- 如果学生情绪明显低落或处于探索期，遇到 strict 等高压语气请自动安全降档为 warm/coaching\n"
+    )
+
     if mode == "coursework":
         _exploring_hint = ""
         if _is_exploring:
@@ -5324,6 +5676,7 @@ def _coach_analyze(state: dict) -> dict:
                 "- 如果学生问的是概念、写法或框架，不要把回答写成大诊断报告，优先讲清楚这一题\n"
                 "- 如果有案例、联网或图谱依据，可在 source_note 里自然交代\n"
                 + _exploring_hint
+                + _tone_instruction
             ),
             user_prompt=(
                 f"模式提示: {mode_hint}\n"
@@ -5434,6 +5787,7 @@ def _coach_analyze(state: dict) -> dict:
                 "- 如果你建议做验证、访谈、搜索或比较，请明确：验证哪一个判断、找哪类人、看哪个行为信号；不要泛泛说“做问卷”\n"
                 "- 你不是行动规划师，不要输出详细执行方案\n"
                 "- 如果学生目前还只是提出一个大方向或大赛道，先帮他收敛场景、用户和切口，不要一上来就像成熟项目一样宣布“最大瓶颈”\n"
+                + _tone_instruction
             ),
             user_prompt=(
                 f"模式提示: {mode_hint}\n"
@@ -5670,6 +6024,14 @@ def _advisor_analyze(state: dict) -> dict:
     if advisor_oriented_hint:
         comp_hint = (advisor_oriented_hint + ("\n\n" + comp_hint if comp_hint else "")).strip()
 
+    # 答辩评委角色卡注入：竞赛模式下，把当前选中的评委 persona 拼进 system prompt
+    judge_block = str(state.get("active_judge_persona_block") or "").strip()
+    judge_directory = format_judge_directory() if mode == "competition" else ""
+    if judge_block:
+        comp_hint = (comp_hint + ("\n\n" + judge_block if comp_hint else judge_block)).strip()
+    if judge_directory:
+        comp_hint = (comp_hint + ("\n\n" + judge_directory if comp_hint else judge_directory)).strip()
+
     n_rules = len(diag.get("triggered_rules", []) or [])
     quality_hint = ""
     if n_rules <= 2:
@@ -5750,6 +6112,7 @@ def _advisor_analyze(state: dict) -> dict:
         "ppt_adjustments": ppt_adjustments,
         "prize_readiness": prize_readiness,
         "hyper_context_sent": hyper_advisor_ctx,
+        "active_judge": str(state.get("competition_judge_id") or ""),
     }
 
 
@@ -7014,10 +7377,19 @@ def orchestrator(state: WorkflowState) -> dict:
                         ("- 赛道：" + {"internet_plus": "互联网+", "challenge_cup": "挑战杯", "dachuang": "大创"}.get(state.get("competition_type", ""), "通用") + "\n\n")
                         if state.get("competition_type") else "\n"
                     )
+                    + (
+                        ("\n" + str(state.get("active_judge_persona_block") or "").strip() + "\n\n")
+                        if state.get("active_judge_persona_block") else ""
+                    )
                     if mode == "competition"
                     else "## 项目教练模式额外要求\n"
                     "- 先判断项目阶段，聚焦最关键瓶颈\n"
                     "- 启发式追问优先于直接给答案\n\n"
+                )
+                + (
+                    f"\n## 本轮追问语气（preferred_tone={state.get('preferred_tone','cool')}）\n"
+                    f"- 风格指南：{TONE_DESCRIPTORS.get(str(state.get('preferred_tone') or 'cool'), TONE_DESCRIPTORS['cool'])}\n"
+                    "- 全文遵循以上语气；如学生情绪明显低落，可临时降档为 warm，但禁止凌厉打压\n\n"
                 )
                 + structure_guide
                 + "## 必须做到\n"
@@ -7121,6 +7493,15 @@ def orchestrator(state: WorkflowState) -> dict:
             else "你好！告诉我你的项目想法，我来帮你诊断和分析。"
         )
 
+    # Surface judge / tone trace to main.py 的 agent_trace
+    _competition_existing = state.get("competition") or {}
+    _competition_out = dict(_competition_existing) if isinstance(_competition_existing, dict) else {}
+    _judge_id = str(state.get("competition_judge_id") or "")
+    if _judge_id and "active_judge" not in _competition_out:
+        _competition_out["active_judge"] = _judge_id
+    _competition_out["preferred_tone"] = str(state.get("preferred_tone") or "")
+    _competition_out["tone_origin"] = str(state.get("tone_origin") or "")
+
     return {
         "assistant_message": reply.strip(),
         "conversation_continuation_mode": continuation_mode,
@@ -7128,6 +7509,9 @@ def orchestrator(state: WorkflowState) -> dict:
         "reply_strategy": v2_reply_strategy or state.get("reply_strategy", ""),
         "execution_trace": state.get("execution_trace", {}),
         "exploration_state": state.get("exploration_state", {}),
+        "competition": _competition_out,
+        "preferred_tone": str(state.get("preferred_tone") or ""),
+        "tone_origin": str(state.get("tone_origin") or ""),
         "nodes_visited": ["orchestrator"],
     }
 

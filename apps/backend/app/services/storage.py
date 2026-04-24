@@ -317,6 +317,15 @@ class ConversationStorage:
             return None
         return json.loads(path.read_text(encoding="utf-8"))
 
+    def get_by_conversation_id(self, conversation_id: str) -> dict | None:
+        """Find a conversation by conversation_id across all project directories."""
+        for project_dir in self.root.iterdir():
+            if project_dir.is_dir():
+                path = project_dir / f"{conversation_id}.json"
+                if path.exists():
+                    return json.loads(path.read_text(encoding="utf-8"))
+        return None
+
     def delete(self, project_id: str, conversation_id: str) -> bool:
         path = self._conv_dir(project_id) / f"{conversation_id}.json"
         if not path.exists():

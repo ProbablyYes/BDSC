@@ -1,0 +1,5 @@
+account,name,role,email,student_id,team_name,invite_code,password
+teacher101,张三,teacher,zhangsan@example.com,T001,团队A,INVITEA,pass001
+teacher102,李四,teacher,li4@example.com,T002,团队B,INVITEB,pass002
+student101,王五,student,wangwu@example.com,S101,团队A,INVITEA,pass003
+student102,赵六,student,zhaoliu@example.com,,,pass004

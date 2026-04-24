@@ -17,6 +17,7 @@ type UserRecord = {
   name: string;
   role: UserRole;
   email: string;
+  student_id?: string;
   teams: string[];
   status: "active" | "disabled";
   last_login: string;
@@ -210,6 +211,7 @@ export default function AdminPage() {
 
   // User management
   const [users, setUsers] = useState<UserRecord[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<"" | UserRole>("");
   const [teamFilter, setTeamFilter] = useState<string>("");
@@ -217,7 +219,7 @@ export default function AdminPage() {
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editRole, setEditRole] = useState<UserRole>("student");
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUser, setNewUser] = useState({ id: "", name: "", role: "student" as UserRole, email: "", password: "" });
+  const [newUser, setNewUser] = useState({ id: "", name: "", role: "student" as UserRole, email: "", password: "", student_id: "" });
 
   // Batch user creation
   const [showBatchCreate, setShowBatchCreate] = useState(false);
@@ -253,7 +255,7 @@ export default function AdminPage() {
   const [showHealthDetail, setShowHealthDetail] = useState(false);
 
   // 批量导入相关字段
-  const IMPORT_FIELDS = ["account", "name", "role", "email", "team_name", "invite_code", "password"];
+  const IMPORT_FIELDS = ["account", "name", "role", "email", "student_id", "team_name", "invite_code", "password"];
   // 批量导入
   const [showImport, setShowImport] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -332,6 +334,8 @@ export default function AdminPage() {
       setImportResult(d);
       // @ts-ignore
       await Promise.all([(typeof loadUsers === "function" ? loadUsers() : Promise.resolve()), (typeof loadTeams === "function" ? loadTeams() : Promise.resolve())]);
+      usersLoadedRef.current = false;
+      teamsLoadedRef.current = false;
     } catch (err: any) {
       setImportError("导入失败: " + (err?.message || err));
     } finally {
@@ -355,6 +359,10 @@ export default function AdminPage() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  const usersLoadedRef = useRef(false);
+  const teamsLoadedRef = useRef(false);
+  const teachersLoadedRef = useRef(false);
+
   useEffect(() => {
     loadDashboard();
     loadUsers();
@@ -364,10 +372,20 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (tab === "users") {
-      loadUsers();
-      loadTeams();
+      // Only reload if data is empty to avoid unnecessary API calls
+      if (!usersLoadedRef.current || users.length === 0) {
+        loadUsers();
+        usersLoadedRef.current = true;
+      }
+      if (!teamsLoadedRef.current || teams.length === 0) {
+        loadTeams();
+        teamsLoadedRef.current = true;
+      }
     } else if (tab === "teachers") {
-      loadTeachers();
+      if (!teachersLoadedRef.current || teachers.length === 0) {
+        loadTeachers();
+        teachersLoadedRef.current = true;
+      }
     } else if (tab === "interventions") {
       loadInterventions();
     } else if (tab === "logs") {
@@ -428,12 +446,14 @@ export default function AdminPage() {
           : [],
       }));
       setTeams(rows);
+      teamsLoadedRef.current = true;
     } catch {
       setTeams([]);
     }
   }
 
   async function loadUsers() {
+    setUsersLoading(true);
     try {
       const r = await fetch(`${API}/api/admin/users`);
       const d = await r.json();
@@ -442,14 +462,18 @@ export default function AdminPage() {
         name: u.display_name ?? u.email ?? u.user_id,
         role: u.role as UserRole,
         email: u.email,
+        student_id: u.student_id,
         teams: Array.isArray(u.team_names) ? (u.team_names as string[]).filter(Boolean) : [],
         status: (u.status as "active" | "disabled") ?? "active",
         last_login: u.last_login || "",
         project_count: typeof u.project_count === "number" ? u.project_count : 0,
       }));
       setUsers(rows);
+      usersLoadedRef.current = true;
     } catch {
       setUsers([]);
+    } finally {
+      setUsersLoading(false);
     }
   }
 
@@ -471,6 +495,7 @@ export default function AdminPage() {
         rank: typeof t.rank === "number" ? t.rank : 0,
       }));
       setTeachers(rows);
+      teachersLoadedRef.current = true;
     } catch {
       setTeachers([]);
     }
@@ -797,6 +822,8 @@ export default function AdminPage() {
         return;
       }
       await Promise.all([loadTeams(), loadUsers()]);
+      usersLoadedRef.current = false;
+      teamsLoadedRef.current = false;
       setNewTeamName("");
       setNewTeamInviteCode("");
     } catch {
@@ -823,6 +850,8 @@ export default function AdminPage() {
         return;
       }
       await Promise.all([loadTeams(), loadUsers()]);
+      usersLoadedRef.current = false;
+      teamsLoadedRef.current = false;
     } catch {
       window.alert("删除团队失败，请稍后再试");
     }
@@ -871,6 +900,8 @@ export default function AdminPage() {
         return;
       }
       await Promise.all([loadTeams(), loadUsers()]);
+      usersLoadedRef.current = false;
+      teamsLoadedRef.current = false;
       setNewMemberUserId("");
     } catch {
       window.alert("添加成员失败，请稍后再试");
@@ -886,6 +917,7 @@ export default function AdminPage() {
       <div key={u.id} className={`admin-table-row ${u.status === "disabled" ? "disabled" : ""}`}>
         <span className="admin-cell-primary">{u.id}</span>
         <span>{u.name}</span>
+        <span className="admin-cell-muted">{u.student_id || "-"}</span>
         <span>
           {editingUser === u.id ? (
             <select
@@ -1037,7 +1069,7 @@ export default function AdminPage() {
       role: newUser.role,
       display_name: newUser.name,
       email: newUser.email || `${newUser.id}@local`,
-      student_id: newUser.id,
+      student_id: newUser.student_id || newUser.id,
       password: newUser.password || undefined,
     };
     try {
@@ -1050,6 +1082,8 @@ export default function AdminPage() {
       if (!r.ok) {
         if (typeof d?.detail === "string" && d.detail.includes("该账号名已存在")) {
           window.alert("该账号名已存在");
+        } else if (typeof d?.detail === "string" && d.detail.includes("学号已被占用")) {
+          window.alert("学号已被占用");
         } else {
           window.alert(d?.detail || "添加用户失败");
         }
@@ -1061,13 +1095,14 @@ export default function AdminPage() {
         name: u.display_name ?? u.email ?? u.user_id,
         role: u.role as UserRole,
         email: u.email,
+        student_id: u.student_id,
         teams: Array.isArray(u.team_names) ? (u.team_names as string[]).filter(Boolean) : [],
         status: (u.status as "active" | "disabled") ?? "active",
         last_login: u.last_login || "从未登录",
         project_count: typeof u.project_count === "number" ? u.project_count : 0,
       };
       setUsers((prev) => [...prev, record]);
-      setNewUser({ id: "", name: "", role: "student", email: "", password: "" });
+      setNewUser({ id: "", name: "", role: "student", email: "", password: "", student_id: "" });
       setShowAddUser(false);
     } catch (err: any) {
       window.alert("添加用户失败: " + (err?.message || err));
@@ -1093,6 +1128,8 @@ export default function AdminPage() {
         body: JSON.stringify({ teacher_id: teacherId, team_name: name.trim() }),
       });
       await Promise.all([loadTeams(), loadUsers()]);
+      usersLoadedRef.current = false;
+      teamsLoadedRef.current = false;
     } catch {
       /* noop */
     }
@@ -1105,6 +1142,8 @@ export default function AdminPage() {
         method: "DELETE",
       });
       await Promise.all([loadTeams(), loadUsers()]);
+      usersLoadedRef.current = false;
+      teamsLoadedRef.current = false;
     } catch {
       /* noop */
     }
@@ -1181,6 +1220,8 @@ export default function AdminPage() {
         });
         // 自动刷新用户和团队
         await Promise.all([loadUsers(), loadTeams()]);
+        usersLoadedRef.current = false;
+        teamsLoadedRef.current = false;
         window.alert(`已创建 ${d.results?.length || 0} 个教师账号`);
       } catch {
         window.alert("批量创建失败，请稍后再试");
@@ -1664,6 +1705,7 @@ export default function AdminPage() {
                   <h4>添加新用户</h4>
                   <div className="admin-form-grid">
                     <label>用户ID <input value={newUser.id} onChange={(e) => setNewUser({ ...newUser, id: e.target.value })} placeholder="如 student-005" /></label>
+                    <label>学号 <input value={newUser.student_id} onChange={(e) => setNewUser({ ...newUser, student_id: e.target.value })} placeholder="学号（留空则使用用户ID）" /></label>
                     <label>姓名 <input value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} placeholder="真实姓名" /></label>
                     <label>邮箱 <input value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="xxx@edu.cn" /></label>
                     <label>初始密码 <input type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} placeholder="留空则自动生成" /></label>
@@ -1709,6 +1751,7 @@ export default function AdminPage() {
                         onChange={(e) => setBatchPrefix(e.target.value)}
                         placeholder={batchRole === "teacher" ? "tea" : "stu"}
                       />
+                      <small style={{color: "var(--text-muted)", fontSize: "11px"}}>账号将作为学号使用</small>
                     </label>
                     <label>起始序号
                       <input
@@ -1786,7 +1829,7 @@ export default function AdminPage() {
                         <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
                           <thead>
                             <tr style={{ background: "var(--bg-card)", color: "var(--text-primary)", borderBottom: "1px solid var(--border-strong)" }}>
-                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>账号</th>
+                              <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>账号（学号）</th>
                               <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>姓名</th>
                               <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>团队名</th>
                               <th style={{ padding: "8px 0", fontWeight: 600, textAlign: "left" }}>团队邀请码</th>
@@ -1961,7 +2004,11 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {groupByTeam ? (
+              {usersLoading ? (
+                <div style={{ padding: "40px", textAlign: "center", color: "var(--muted, #888)" }}>
+                  正在加载...
+                </div>
+              ) : groupByTeam ? (
                 <div className="admin-team-groups">
                   {(() => {
                     const teamsForView = teamFilter && teamFilter !== "__no_team__"
@@ -2000,7 +2047,7 @@ export default function AdminPage() {
                               </div>
                               <div className="admin-table">
                                 <div className="admin-table-header">
-                                  <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
+                                  <span>用户ID</span><span>姓名</span><span>学号</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
                                 </div>
                                 {teamUsers.map((u) => renderUserRow(u, t))}
                               </div>
@@ -2012,7 +2059,7 @@ export default function AdminPage() {
                             <h3>未加入任何团队</h3>
                             <div className="admin-table">
                               <div className="admin-table-header">
-                                <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
+                                <span>用户ID</span><span>姓名</span><span>学号</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
                               </div>
                               {unassignedUsers.map((u) => renderUserRow(u))}
                             </div>
@@ -2025,7 +2072,7 @@ export default function AdminPage() {
               ) : (
                 <div className="admin-table">
                   <div className="admin-table-header">
-                    <span>用户ID</span><span>姓名</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
+                    <span>用户ID</span><span>姓名</span><span>学号</span><span>角色</span><span>邮箱</span><span>团队</span><span>状态</span><span>最后登录</span><span>操作</span>
                   </div>
                   {filteredUsers.map((u) => renderUserRow(u))}
                 </div>

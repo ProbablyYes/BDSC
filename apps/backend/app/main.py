@@ -6,6 +6,7 @@ import random
 import re
 import time
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -526,7 +527,7 @@ def admin_batch_create_users(payload: AdminBatchCreateUsersPayload) -> dict:
             "role": role,
             "display_name": account,
             "email": email,
-            "student_id": None,
+            "student_id": account,
             "password": raw_password,
         }
 
@@ -666,6 +667,28 @@ def admin_list_teachers() -> dict:
             continue
         teacher_teams.setdefault(tid, []).append(team)
 
+    # Collect all student IDs upfront
+    all_student_ids: set[str] = set()
+    for t in teachers:
+        teacher_id = _safe_str(t.get("user_id", ""))
+        if not teacher_id:
+            continue
+        teams = teacher_teams.get(teacher_id, [])
+        for team in teams:
+            for m in team.get("members", []) or []:
+                sid = _safe_str(m.get("user_id", ""))
+                if sid:
+                    all_student_ids.add(sid)
+
+    # Batch load all project states for students to avoid repeated I/O
+    project_cache: dict[str, dict] = {}
+    for sid in all_student_ids:
+        project_id = f"project-{sid}"
+        try:
+            project_cache[project_id] = json_store.load_project(project_id)
+        except Exception:
+            project_cache[project_id] = {}
+
     rows: list[dict[str, Any]] = []
     for t in teachers:
         teacher_id = _safe_str(t.get("user_id", ""))
@@ -689,23 +712,41 @@ def admin_list_teachers() -> dict:
         last_active_overall = ""
 
         for sid in student_ids:
-            stats = _aggregate_student_data(sid, include_detail=False)
-            subs = int(stats.get("total_submissions", 0) or 0)
-            risks = int(stats.get("risk_count", 0) or 0)
-            avg_sc = float(stats.get("avg_score", 0) or 0)
-            last_act = _safe_str(stats.get("last_active", ""))
-            total_submissions += subs
-            total_risks += risks
-            if subs > 0:
+            # Use cached project state instead of loading multiple times
+            project_id = f"project-{sid}"
+            project_state = project_cache.get(project_id, {})
+            
+            # Aggregate student data from cached state
+            subs = list(project_state.get("submissions", []) or [])
+            scores = []
+            risk_count = 0
+            for s in subs:
+                sc = 0.0
+                diag = s.get("diagnosis", {})
+                if isinstance(diag, dict):
+                    sc = float(diag.get("overall_score", 0) or 0)
+                if not sc:
+                    sc = float(s.get("overall_score", 0) or 0)
+                if sc > 0:
+                    scores.append(sc)
+                triggered = s.get("triggered_rules") or ((s.get("diagnosis") or {}).get("triggered_rules") if isinstance(s.get("diagnosis"), dict) else []) or []
+                if triggered:
+                    risk_count += 1
+            
+            sub_count = len(subs)
+            avg_sc = round(sum(scores) / len(scores), 1) if scores else 0.0
+            last_act = subs[-1].get("created_at", "") if subs else ""
+            
+            total_submissions += sub_count
+            total_risks += risk_count
+            if sub_count > 0:
                 active_students += 1
             if avg_sc > 0:
                 student_scores.append(avg_sc)
             if last_act and last_act > last_active_overall:
                 last_active_overall = last_act
 
-            # Check if this teacher has ever created an intervention for this student
-            project_id = f"project-{sid}"
-            project_state = json_store.load_project(project_id)
+            # Check interventions from cached state
             interventions = project_state.get("teacher_interventions", []) or []
             for item in interventions:
                 if isinstance(item, dict) and _safe_str(item.get("teacher_id", "")) == teacher_id:
@@ -2389,6 +2430,20 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
     project_id = f"project-{user_id}"
     project = json_store.load_project(project_id)
     subs = list(project.get("submissions", []) or [])
+    
+    # If no submissions found in user_id-based project file, search across all project files
+    if not subs:
+        # Search all project files for submissions matching this student_id
+        all_projects = json_store.list_projects()
+        for proj in all_projects:
+            proj_id = proj.get("project_id", "")
+            if proj_id != project_id:  # Skip the user_id-based project we already checked
+                proj_data = json_store.load_project(proj_id)
+                proj_subs = proj_data.get("submissions", []) or []
+                # Filter submissions for this student
+                matching_subs = [s for s in proj_subs if str(s.get("student_id", "")) == str(user_id)]
+                if matching_subs:
+                    subs.extend(matching_subs)
     scores = []
     risk_count = 0
     projects_map: dict[str, list] = {}
@@ -2589,8 +2644,19 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
 
         # ── Student portrait enrichment (read from raw subs to avoid _safe_diagnosis stripping rubric) ──
         rubric_scores_all: dict[str, list[float]] = {}
+        rubric_evidence_all: dict[str, list[str]] = {}
         growth_points: list[dict] = []
         submission_dates: list[str] = []
+        
+        # Build rubric scores with full original text evidence
+        all_raw_subs = []
+        for _pid, raw_psubs in projects_map.items():
+            all_raw_subs.extend(raw_psubs)
+        
+        # Pass None as project_id to search across all project directories
+        # since conversations are stored under UUID-based project_ids, not user_id-based ones
+        rubric_with_quotes = build_rubric_scores_with_quotes(all_raw_subs, conv_store, None)
+        
         for _pid, raw_psubs in projects_map.items():
             for sub in raw_psubs:
                 diag = sub.get("diagnosis", {})
@@ -2608,8 +2674,28 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
         rubric_heatmap = []
         strength_dims: list[str] = []
         weakness_dims: list[str] = []
+        # Track used evidence texts across all dimensions to avoid duplication
+        used_evidence_texts: set[str] = set()
+        
         for rname, rscores in rubric_scores_all.items():
             avg_rs = round(sum(rscores) / len(rscores), 1) if rscores else 0
+            # Get evidence texts with scores, filter out "未找到相关证据", sort by score descending, take top 5
+            evidence_texts = rubric_with_quotes.get(rname, [])
+            evidence_with_scores = [{"score": score, "text": text} for score, text in evidence_texts]
+            # Filter out empty evidence
+            evidence_with_scores = [e for e in evidence_with_scores if e["text"] and e["text"] != "未找到相关证据"]
+            evidence_with_scores.sort(key=lambda x: x["score"], reverse=True)
+            
+            # Deduplicate: only keep evidence texts not already used in other dimensions
+            deduplicated_evidence = []
+            for e in evidence_with_scores:
+                if e["text"] not in used_evidence_texts:
+                    deduplicated_evidence.append(e)
+                    used_evidence_texts.add(e["text"])
+                    if len(deduplicated_evidence) >= 5:
+                        break
+            evidence_quotes = deduplicated_evidence
+            
             dim_rationale = {
                 "field": f"rubric_heatmap:{rname}",
                 "value": avg_rs,
@@ -2632,6 +2718,7 @@ def _aggregate_student_data(user_id: str, include_detail: bool = False) -> dict:
                 "avg_score": avg_rs,
                 "count": len(rscores),
                 "rationale": dim_rationale,
+                "evidence_quotes": evidence_quotes,  # Full original text evidence
             })
             if avg_rs >= 7:
                 strength_dims.append(rname)
@@ -4946,7 +5033,8 @@ def teacher_project_case_benchmark(project_id: str, logical_project_id: str = ""
 
 
 @app.get("/api/teacher/submissions")
-def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None = None, limit: int = 50) -> dict:
+def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None = None, limit: int = 50, offset: int = 0) -> dict:
+    """优化的提交列表API，支持分页和缓存"""
     projects = json_store.list_projects()
     rows: list[dict[str, Any]] = []
     _user_name_cache: dict[str, str] = {}
@@ -4958,6 +5046,8 @@ def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None 
             u = user_store.get_by_id(real_sid)
             _user_name_cache[real_sid] = (u or {}).get("display_name", "") if u else ""
         return real_sid, _user_name_cache.get(real_sid, "")
+
+    # 优化：先过滤，再排序，最后分页
     for project in projects:
         pid = project.get("project_id", "")
         for sub in project.get("submissions", []):
@@ -4998,8 +5088,11 @@ def teacher_list_submissions(class_id: str | None = None, cohort_id: str | None 
                 ],
                 "agent_trace_meta": _safe_agent_summary(sub).get("_meta", {}),
             })
+
     rows.sort(key=lambda x: x.get("created_at", ""), reverse=True)
-    return {"count": len(rows), "submissions": rows[:limit]}
+    # 支持分页：先应用offset，再应用limit
+    paginated_rows = rows[offset:offset + limit] if offset > 0 else rows[:limit]
+    return {"count": len(rows), "submissions": paginated_rows, "offset": offset, "limit": limit}
 
 
 @app.post("/api/teacher/generate-report")
@@ -7795,8 +7888,23 @@ def teacher_project_deep_diagnosis(project_id: str) -> dict:
 
 
 @app.get("/api/teacher/project/{project_id}/rubric-assessment")
-def teacher_rubric_assessment(project_id: str) -> dict:
-    """形成性评价：Rubric评分表（9个维度R1-R9）"""
+def teacher_rubric_assessment(project_id: str, conversation_id: str | None = None) -> dict:
+    """形成性评价：Rubric评分表（9个维度R1-R9）
+    
+    支持通过 conversation_id 查询：如果提供 conversation_id，会自动查找对应的 project_id
+    """
+    # 如果提供了 conversation_id，尝试查找对应的 project_id
+    if conversation_id:
+        conversation_id = conversation_id.strip()
+        for project in json_store.list_projects():
+            pid = str(project.get("project_id") or "")
+            for row in reversed(project.get("submissions", []) or []):
+                if str(row.get("conversation_id", "")) == conversation_id:
+                    project_id = pid
+                    break
+            if project_id != str(project.get("project_id", "")):
+                break
+    
     project_state = json_store.load_project(project_id)
     submissions = project_state.get("submissions", []) or []
     
@@ -7806,6 +7914,12 @@ def teacher_rubric_assessment(project_id: str) -> dict:
             "error": "该项目还没有提交记录",
         }
     
+    # 如果指定了 conversation_id，筛选出该会话的提交
+    if conversation_id:
+        filtered_subs = [s for s in submissions if str(s.get("conversation_id", "")) == conversation_id]
+        if filtered_subs:
+            submissions = filtered_subs
+    
     latest_sub = submissions[-1]
     diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
     rubric_scores = _assessment_rubric(latest_sub)
@@ -7813,6 +7927,7 @@ def teacher_rubric_assessment(project_id: str) -> dict:
     
     return {
         "project_id": project_id,
+        "conversation_id": conversation_id,
         "student_id": latest_sub.get("student_id", ""),
         "evaluation_time": datetime.utcnow().isoformat(),
         "rubric_items": rubric_scores,
@@ -7822,68 +7937,6 @@ def teacher_rubric_assessment(project_id: str) -> dict:
         "project_stage": diagnosis.get("project_stage", ""),
         "grading_principles": diagnosis.get("grading_principles", []),
         "missing_evidence": ["用户验证数据", "竞品对比", "财务模型"],
-    }
-
-
-@app.get("/api/teacher/project/{project_id}/competition-score")
-def teacher_competition_score_predict(project_id: str) -> dict:
-    """竞赛评分预测与快速修复清单"""
-    project_state = json_store.load_project(project_id)
-    submissions = project_state.get("submissions", []) or []
-    
-    if not submissions:
-        return {
-            "project_id": project_id,
-            "error": "该项目还没有提交记录",
-        }
-    
-    latest_sub = submissions[-1]
-    diagnosis = latest_sub.get("diagnosis", {}) if isinstance(latest_sub.get("diagnosis"), dict) else {}
-    overall_score = _safe_float(diagnosis.get("overall_score", 0))
-    triggered_rules = diagnosis.get("triggered_rules", []) or []
-    high_risk = sum(1 for r in triggered_rules if isinstance(r, dict) and r.get("severity") == "high")
-    medium_risk = sum(1 for r in triggered_rules if isinstance(r, dict) and r.get("severity") == "medium")
-    project_stage = _safe_str(diagnosis.get("project_stage", ""))
-    stage_bonus = {"idea": -6, "structured": 0, "validated": 5, "document": 8}.get(project_stage, 0)
-
-    # 竞赛预测评分：强调证据链和成熟度，避免过高或过低
-    competition_score = overall_score * 8.0 + 20 + stage_bonus - high_risk * 4.0 - medium_risk * 1.5
-    if overall_score > 0:
-        competition_score = max(35, competition_score)
-    competition_score = min(95, max(0, competition_score))
-    
-    # 计算评分范围，并进行精确的四舍五入
-    score_lower = max(0, competition_score - 10)
-    score_upper = min(100, competition_score + 10)
-    
-    # 四舍五入到1位小数
-    predicted_score = round(competition_score, 1)
-    # 调整范围为十的整倍数
-    score_lower_rounded = int(round(score_lower / 10) * 10)
-    score_upper_rounded = int(round(score_upper / 10) * 10)
-    
-    return {
-        "project_id": project_id,
-        "student_id": latest_sub.get("student_id", ""),
-        "predicted_competition_score": predicted_score,
-        "score_range": f"{score_lower_rounded}-{score_upper_rounded}",  # 格式化为字符串
-        "score_range_min": score_lower_rounded,
-        "score_range_max": score_upper_rounded,
-        "quick_fixes_24h": [
-            "完成高风险规则（H1-H5）的证据补充",
-            "制作1页对标用户验证的数据总结",
-            "更新Pitch开场和结尾逻辑",
-        ],
-        "quick_fixes_72h": [
-            "完成商业模式画布的全部9个要素",
-            "补齐竞品对比表和市场规模估算",
-            "制作完整的财务模型（CAC、LTV、BEP）",
-            "进行班级内部模拟路演，录制视频",
-        ],
-        "high_risk_rules_for_competition": [
-            {"rule": r.get("id"), "name": r.get("name"), "priority": "高"}
-            for r in triggered_rules[:3]
-        ] if triggered_rules else [],
     }
 
 
@@ -8633,6 +8686,7 @@ async def chat_websocket(websocket: WebSocket, room_id: str, user_id: str = "", 
 # ═══════════════════════════════════════════════════════════════════════
 
 from app.services.budget_storage import PURPOSE_META as BUDGET_PURPOSE_META
+from app.services.evidence_text_service import build_rubric_scores_with_quotes
 
 
 @app.get("/api/budget/purposes")
@@ -10688,16 +10742,43 @@ def student_portrait_conversation_detail(user_id: str, conversation_id: str) -> 
         if _safe_str(s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id") or "") == conversation_id
     ]
     # 本会话的 rubric heatmap
-    rubric_scores: dict[str, list[float]] = {}
+    # First, collect all user messages from the conversation in chronological order
+    conv_user_messages: dict[str, list[str]] = {}
+    for sub in proj.get("submissions", []):
+        sub_cid = sub.get("conversation_id", "")
+        if sub_cid and sub_cid not in conv_user_messages:
+            try:
+                conv = conv_store.get(project_id, sub_cid)
+                if conv:
+                    messages = conv.get("messages", [])
+                    user_messages = [_safe_str(msg.get("content", "")) for msg in messages if msg.get("role") == "user"]
+                    conv_user_messages[sub_cid] = user_messages
+            except Exception:
+                conv_user_messages[sub_cid] = []
+    
+    rubric_scores: dict[str, list[tuple[float, str]]] = {}
+    # Track submission index per conversation for chronological mapping
+    sub_index_per_conv: dict[str, int] = {}
     for sub in proj.get("submissions", []):
         diag = sub.get("diagnosis") or {}
+        sub_cid = sub.get("conversation_id", "")
+        # Get the submission's raw_text or fetch from conversation messages
+        raw_text = _safe_str(sub.get("raw_text", ""))
+        if not raw_text and sub_cid:
+            user_messages = conv_user_messages.get(sub_cid, [])
+            sub_index = sub_index_per_conv.get(sub_cid, 0)
+            if sub_index < len(user_messages):
+                raw_text = user_messages[sub_index]
+            sub_index_per_conv[sub_cid] = sub_index + 1
         for r in (diag.get("rubric") or []):
             if isinstance(r, dict) and r.get("item"):
-                rubric_scores.setdefault(r["item"], []).append(float(r.get("score", 0) or 0))
+                rubric_scores.setdefault(r["item"], []).append((float(r.get("score", 0) or 0), raw_text))
     heatmap = []
     strength_dims_conv: list[str] = []
     weakness_dims_conv: list[str] = []
-    for name, arr in rubric_scores.items():
+    for name, score_texts in rubric_scores.items():
+        arr = [st[0] for st in score_texts]
+        texts = [st[1] for st in score_texts]
         avg_rs = round(sum(arr) / len(arr), 2) if arr else 0
         if avg_rs >= 7:
             strength_dims_conv.append(name)
@@ -10716,584 +10797,14 @@ def student_portrait_conversation_detail(user_id: str, conversation_id: str) -> 
                     + (" + …" if len(arr) > 6 else "")
                     + f") ÷ {len(arr)} = {avg_rs}"
                 ),
-                "inputs": [{"label": f"第{i+1}次", "value": round(float(x), 2)} for i, x in enumerate(arr[:10])],
-                "note": f"仅统计本会话 {len(arr)} 次评分",
-            },
-        })
-    # 本会话趋势
-    p_scores = []
-    for sub in proj.get("submissions", []):
-        sc = float(sub.get("overall_score", 0) or 0)
-        if not sc:
-            diag = sub.get("diagnosis") or {}
-            sc = float(diag.get("overall_score", 0) or 0) if isinstance(diag, dict) else 0
-        if sc > 0:
-            p_scores.append(sc)
-    conv_avg = round(sum(p_scores) / len(p_scores), 1) if p_scores else 0.0
-    conv_trend = 0.0
-    if len(p_scores) >= 4:
-        mid = len(p_scores) // 2
-        conv_trend = round(sum(p_scores[mid:]) / (len(p_scores) - mid) - sum(p_scores[:mid]) / mid, 1)
-    conv_risk_count = sum(1 for s in proj_raw_subs if (s.get("triggered_rules") or []))
-
-    panorama = _build_student_panorama(
-        submissions=proj_raw_subs,
-        rubric_heatmap=heatmap,
-        avg_score=conv_avg,
-        trend=conv_trend,
-        risk_count=conv_risk_count,
-        strength_dims=strength_dims_conv,
-        weakness_dims=weakness_dims_conv,
-        scope_label="本会话",
-    )
-    # 本会话的最近一次 maturity（从最新 bp 取）
-    try:
-        latest_bp = business_plan_service.get_latest(project_id, conversation_id) or {}
-    except Exception:
-        latest_bp = {}
-    maturity_snapshot = (latest_bp.get("readiness") or {}) if isinstance(latest_bp, dict) else {}
-    # 提供与 overall 对齐的 portrait 对象
-    portrait_payload = {
-        **panorama,
-        "avg_score": conv_avg,
-        "trend": conv_trend,
-        "risk_count": conv_risk_count,
-        "total_submissions": len(proj_raw_subs),
-        "rubric_heatmap": heatmap,
-        "strength_dimensions": strength_dims_conv,
-        "weakness_dimensions": weakness_dims_conv,
-        "latest_phase": proj.get("project_phase", ""),
-        "overview_rationale": {
-            "field": f"portrait:conversation:{conversation_id}",
-            "value": conv_avg,
-            "formula": "avg(scores in this conversation)",
-            "formula_display": (
-                f"本会话共 {len(proj_raw_subs)} 次提交，\n"
-                f"有效打分 {len(p_scores)} 次 → 均分 {conv_avg}\n"
-                f"近中期变化 {conv_trend:+.1f}\n"
-                f"健康指数 = {panorama['health_score']}（{panorama['health_label']}）"
-            ),
-            "inputs": [
-                {"label": "提交数", "value": len(proj_raw_subs)},
-                {"label": "有效打分", "value": len(p_scores)},
-                {"label": "触发风险次数", "value": conv_risk_count},
-                {"label": "健康指数", "value": panorama["health_score"]},
-            ],
-            "note": "只统计该会话（项目）内的数据",
-        },
-    }
-    payload = {
-        "conversation_id": conversation_id,
-        "project_card": proj,
-        "rubric_heatmap": heatmap,
-        "maturity_snapshot": maturity_snapshot,
-        "portrait": portrait_payload,
-    }
-    return _apply_overrides_everywhere(payload, project_id, [conversation_id, None])
-
-
-# ───────────────── 教师订正 endpoints ─────────────────
-@app.get("/api/teacher/overrides")
-def teacher_overrides_list(
-    project_id: str,
-    conversation_id: str = "",
-    target_type: str = "",
-    target_key: str = "",
-) -> dict:
-    cid = conversation_id.strip() or None
-    return {
-        "overrides": ai_override_store.list(
-            project_id,
-            cid,
-            target_type=target_type or None,
-            target_key=target_key or None,
-        )
-    }
-
-
-@app.post("/api/teacher/overrides")
-def teacher_overrides_upsert(payload: dict) -> dict:
-    if not isinstance(payload, dict):
-        return {"status": "error", "detail": "invalid payload"}
-    try:
-        record = ai_override_store.upsert(payload)
-        return {"status": "ok", "override": record}
-    except ValueError as exc:
-        return {"status": "error", "detail": str(exc)}
-
-
-@app.delete("/api/teacher/overrides/{override_id}")
-def teacher_overrides_delete(override_id: str, project_id: str, conversation_id: str = "") -> dict:
-    cid = conversation_id.strip() or None
-    ok = ai_override_store.delete(project_id, cid, override_id)
-    return {"status": "ok" if ok else "not_found"}
-
-
-# ───────────────── 重构版 evidence-trace ─────────────────
-@app.get("/api/teacher/project/{project_id}/evidence-trace-v2")
-def teacher_project_evidence_trace_v2(project_id: str, logical_project_id: str = "") -> dict:
-    """「按结论分组」的证据树：每个 rubric 维度 / 风险规则 / 综合分 都单独成组，
-    其下挂相关证据消息（含 source_message_id）。前端可以直接树形渲染。"""
-    project_state = json_store.load_project(project_id)
-    filtered_subs = _project_submissions_by_logical_id(project_state, logical_project_id)
-    if not filtered_subs:
-        return {
-            "project_id": project_id,
-            "logical_project_id": logical_project_id,
-            "error": "该项目暂无可用于证据溯源的提交记录",
-        }
-    evidence_chain = _assessment_evidence_chain(filtered_subs)
-
-    # 收集每个 submission 对应的 conversation_id，用于消息回定
-    sub_to_cid: dict[str, str] = {}
-    for sub in filtered_subs:
-        sid = str(sub.get("submission_id") or "")
-        cid = str(sub.get("conversation_id") or "")
-        if sid:
-            sub_to_cid[sid] = cid
-
-    # 1) rubric 维度分组
-    rubric_groups: dict[str, dict] = {}
-    rule_groups: dict[str, dict] = {}
-    for row in evidence_chain:
-        sid = str(row.get("submission_id") or "")
-        cid = sub_to_cid.get(sid, "")
-        quote = str(row.get("quote") or "")
-        link = None
-        if cid and quote:
-            links = evidence_linker.link_text(project_id, cid, quote, top_k=1)
-            link = links[0] if links else None
-        enriched_ev = {
-            **row,
-            "conversation_id": cid,
-            "source_message_id": (link or {}).get("message_id"),
-            "source_message_turn": (link or {}).get("turn_index"),
-            "source_message_role": (link or {}).get("role"),
-            "source_message_confidence": (link or {}).get("confidence"),
-        }
-        for rubric in (row.get("rubric_items") or []):
-            bucket = rubric_groups.setdefault(rubric, {
-                "conclusion_type": "rubric",
-                "conclusion_key": rubric,
-                "label": rubric,
-                "evidence": [],
-            })
-            bucket["evidence"].append(enriched_ev)
-        for rid in (row.get("rule_ids") or []):
-            rid_u = str(rid).upper()
-            if not rid_u:
-                continue
-            bucket = rule_groups.setdefault(rid_u, {
-                "conclusion_type": "risk",
-                "conclusion_key": rid_u,
-                "label": f"{rid_u} · {get_rule_name(rid_u)}",
-                "fallacy": RULE_FALLACY_MAP.get(rid_u, ""),
-                "edge_families": RULE_EDGE_MAP.get(rid_u, []),
-                "evidence": [],
-            })
-            bucket["evidence"].append(enriched_ev)
-
-    # 2) 综合分分组 —— 把最近一次 diagnosis 的 overall_rationale 拿出来
-    overall_group = None
-    tier1_groups: list[dict] = []
-    last_sub = filtered_subs[-1] if filtered_subs else None
-    last_diag_obj: dict = {}
-    if last_sub:
-        last_diag_obj = last_sub.get("diagnosis") or {}
-        overall_rat = last_diag_obj.get("overall_rationale")
-        if overall_rat:
-            overall_group = {
-                "conclusion_type": "overall",
-                "conclusion_key": "overall",
-                "label": "综合分",
-                "rationale": overall_rat,
-                "evidence": [],
-            }
-        # ── Tier 1：挂上 project_phase / bottleneck / summary / next_task 的 rationale ──
-        for tier1_key, tier1_label, tier1_rat_key in [
-            ("project_phase", "项目阶段判定", "project_phase_rationale"),
-            ("bottleneck", "核心瓶颈", "bottleneck_rationale"),
-            ("summary", "诊断总结", "summary_rationale"),
-        ]:
-            rat = last_diag_obj.get(tier1_rat_key)
-            if rat:
-                tier1_groups.append({
-                    "conclusion_type": "tier1",
-                    "conclusion_key": tier1_key,
-                    "label": tier1_label,
-                    "rationale": rat,
-                    "evidence": [],
-                })
-        # next_task 的 rationale 放在 next_task.rationale 里
-        last_next = last_sub.get("next_task") or {}
-        if isinstance(last_next, dict) and last_next.get("rationale"):
-            tier1_groups.append({
-                "conclusion_type": "tier1",
-                "conclusion_key": "next_task",
-                "label": "下一步任务",
-                "rationale": last_next.get("rationale"),
-                "evidence": [],
-            })
-
-    # ── 把每个 rubric 维度的 rationale（含 reasoning_steps）挂到分组 ──
-    if last_diag_obj:
-        for _rb in (last_diag_obj.get("rubric") or []):
-            if not isinstance(_rb, dict):
-                continue
-            _item = str(_rb.get("item") or "")
-            if not _item or _item not in rubric_groups:
-                # 如果有 rubric 但没有证据也露出 rationale
-                if _item and _rb.get("rationale"):
-                    rubric_groups[_item] = {
-                        "conclusion_type": "rubric",
-                        "conclusion_key": _item,
-                        "label": _item,
-                        "evidence": [],
+                "inputs": [
+                    {
+                        "label": f"第{i+1}次",
+                        "value": round(float(x), 2),
+                        "source_quote": texts[i] if i < len(texts) else ""
                     }
-            if _item and _rb.get("rationale") and _item in rubric_groups:
-                rubric_groups[_item]["rationale"] = _rb.get("rationale")
-                rubric_groups[_item]["score"] = _rb.get("score")
-
-    all_cids = list({cid for cid in sub_to_cid.values() if cid})
-    payload = {
-        "project_id": project_id,
-        "logical_project_id": logical_project_id,
-        "overall": overall_group,
-        "tier1_groups": tier1_groups,
-        "rubric_groups": sorted(rubric_groups.values(), key=lambda g: -len(g["evidence"])),
-        "rule_groups": sorted(rule_groups.values(), key=lambda g: -len(g["evidence"])),
-        "total_evidence": sum(len(g["evidence"]) for g in rubric_groups.values())
-                         + sum(len(g["evidence"]) for g in rule_groups.values()),
-    }
-    return _apply_overrides_everywhere(payload, project_id, all_cids or [None])
-
-
-
-# ══════════════════════════════════════════════════════════════════
-# 学生画像 / 教师订正 / 证据溯源  ——  新增接口
-# ══════════════════════════════════════════════════════════════════
-
-def _apply_overrides_everywhere(payload: dict, project_id: str, conversation_ids: list[str | None] | None = None) -> dict:
-    """在任意返回对象上批量应用教师订正（直接 walk 所有 rationale）。"""
-    try:
-        cids: list[str | None] = conversation_ids if conversation_ids is not None else [None]
-        overrides = ai_override_store.list_many(project_id, cids)
-        if overrides:
-            _ov_walk_apply(payload, overrides)
-    except Exception as exc:  # noqa: BLE001
-        logger.debug("apply overrides failed: %s", exc)
-    return payload
-
-
-def _link_triggered_rule_messages(
-    project_id: str,
-    conversation_id: str,
-    triggered_rules: list[dict],
-) -> None:
-    """原地为每条 triggered_rule 补 source_message 信息。"""
-    if not triggered_rules or not conversation_id:
-        return
-    for rule in triggered_rules:
-        if not isinstance(rule, dict):
-            continue
-        quote = str(rule.get("quote") or "").strip()
-        if not quote:
-            continue
-        hits = evidence_linker.link_text(project_id, conversation_id, quote, top_k=1)
-        if hits:
-            h = hits[0]
-            rule["source_message_id"] = h["message_id"]
-            rule["source_message_turn"] = h["turn_index"]
-            rule["source_message_role"] = h["role"]
-            rule["source_message_excerpt"] = h["excerpt"]
-            rule["source_message_confidence"] = h["confidence"]
-
-
-# ───────────────── 学生画像 endpoints ─────────────────
-def _compute_student_health(avg_score: float, risk_count: int, submission_count: int) -> dict:
-    """单学生 0-100 健康指数（与团队同风格）。"""
-    score = 40.0
-    if avg_score > 0:
-        score = min(60, avg_score * 7)
-    activity_bonus = min(20, submission_count * 4)
-    score += activity_bonus
-    risk_penalty = min(30, risk_count * 2)
-    score = max(0, min(100, score - risk_penalty + 10))
-    score = round(score, 1)
-    if score >= 75:
-        level, label = "healthy", "表现良好"
-    elif score >= 50:
-        level, label = "warning", "一般可提升"
-    else:
-        level, label = "critical", "需重点关注"
-    return {"score": score, "level": level, "label": label}
-
-
-def _build_student_panorama(
-    submissions: list[dict],
-    rubric_heatmap: list[dict],
-    avg_score: float,
-    trend: float,
-    risk_count: int,
-    strength_dims: list[str],
-    weakness_dims: list[str],
-    scope_label: str = "全部会话",
-) -> dict:
-    """把单学生（或单会话）聚合数据整理成与团队画像同 schema 的 panorama 结构。"""
-    total_subs = len(submissions or [])
-    # Health
-    health = _compute_student_health(avg_score, risk_count, total_subs)
-
-    # rubric_heatmap 补 item_cn
-    heatmap_team_style = []
-    for rh in (rubric_heatmap or []):
-        if not isinstance(rh, dict) or not rh.get("item"):
-            continue
-        heatmap_team_style.append({
-            "item": rh["item"],
-            "item_cn": _dim_cn(rh["item"]),
-            "avg_score": rh.get("avg_score", 0),
-            "sample_count": rh.get("count", 0),
-        })
-    heatmap_team_style.sort(key=lambda h: h["avg_score"])
-
-    # 中文强/弱
-    top_strengths_cn = [_dim_cn(d) for d in (strength_dims or [])[:3]]
-    top_weaknesses_cn = [_dim_cn(d) for d in (weakness_dims or [])[:3]]
-
-    # 风险 Top3
-    rule_counter: dict[str, int] = {}
-    score_distribution = {"good": 0, "average": 0, "weak": 0, "no_data": 0}
-    recent_scores: list[float] = []
-    for s in (submissions or []):
-        sc = 0.0
-        diag = s.get("diagnosis") or {}
-        if isinstance(diag, dict):
-            sc = float(diag.get("overall_score", 0) or 0)
-        if not sc:
-            sc = float(s.get("overall_score", 0) or 0)
-        if sc >= 7:
-            score_distribution["good"] += 1
-        elif sc >= 5:
-            score_distribution["average"] += 1
-        elif sc > 0:
-            score_distribution["weak"] += 1
-        else:
-            score_distribution["no_data"] += 1
-        if sc > 0:
-            recent_scores.append(sc)
-        triggered = s.get("triggered_rules") or []
-        if not triggered and isinstance(diag, dict):
-            triggered = diag.get("triggered_rules") or []
-        for tr in triggered:
-            if isinstance(tr, dict):
-                rid = str(tr.get("id") or tr.get("rule_id") or "")
-            else:
-                rid = str(tr or "")
-            if rid:
-                rule_counter[rid] = rule_counter.get(rid, 0) + 1
-    risk_top3 = sorted(rule_counter.items(), key=lambda kv: kv[1], reverse=True)[:3]
-    risk_rule_top3_list = [
-        {"rule_id": rid, "count": cnt, "label": _dim_cn(rid) if rid in DIM_CN else rid}
-        for rid, cnt in risk_top3
-    ]
-
-    # Engagement（单学生语义：总提交、近 7 天节奏、最近一次）
-    engagement_stats = {
-        "total_submissions": total_subs,
-        "scored_count": len(recent_scores),
-        "risk_count": risk_count,
-    }
-
-    # trend_summary
-    if total_subs >= 4:
-        if trend > 0.3:
-            trend_summary = f"近期趋势 +{trend:.1f}，呈稳步进步"
-        elif trend < -0.3:
-            trend_summary = f"近期趋势 {trend:.1f}，需关注回落"
-        else:
-            trend_summary = f"近期波动 {trend:+.1f}，整体平稳"
-    elif total_subs > 0:
-        trend_summary = "数据量较少，暂无法判断趋势"
-    else:
-        trend_summary = "尚无诊断数据"
-
-    # detail_bullets
-    detail_bullets: list[str] = []
-    if avg_score > 0:
-        detail_bullets.append(f"{scope_label}均分 {avg_score}/10，健康指数 {health['score']}")
-    else:
-        detail_bullets.append(f"{scope_label}尚无完整打分数据，先完成一次提交即可建立画像")
-    if top_strengths_cn:
-        detail_bullets.append(f"优势维度：{'、'.join(top_strengths_cn)}")
-    if top_weaknesses_cn:
-        detail_bullets.append(f"待加强：{'、'.join(top_weaknesses_cn)}")
-    if risk_rule_top3_list:
-        detail_bullets.append(
-            "高频风险："
-            + "、".join(f"{r['rule_id']}({r['count']}次)" for r in risk_rule_top3_list)
-        )
-
-    # overall_assessment
-    parts: list[str] = []
-    if health["level"] == "healthy":
-        parts.append(f"整体表现良好（{health['score']}）")
-    elif health["level"] == "warning":
-        parts.append(f"整体中等水平（{health['score']}），有提升空间")
-    else:
-        parts.append(f"整体需要重点关注（{health['score']}）")
-    if top_strengths_cn:
-        parts.append(f"继续保持「{top_strengths_cn[0]}」优势")
-    if top_weaknesses_cn:
-        parts.append(f"优先补强「{top_weaknesses_cn[0]}」")
-    if risk_rule_top3_list:
-        parts.append(f"当前最高频风险为 {risk_rule_top3_list[0]['rule_id']}")
-    overall_assessment = "；".join(parts) + "。"
-
-    return {
-        "health_score": health["score"],
-        "health_level": health["level"],
-        "health_label": health["label"],
-        "rubric_heatmap_team": heatmap_team_style,
-        "top_strengths": top_strengths_cn,
-        "top_weaknesses": top_weaknesses_cn,
-        "risk_rule_top3": risk_rule_top3_list,
-        "engagement_stats": engagement_stats,
-        "trend_summary": trend_summary,
-        "overall_assessment": overall_assessment,
-        "detail_bullets": detail_bullets,
-        "score_distribution": score_distribution,
-    }
-
-
-@app.get("/api/student/{user_id}/portrait/overall")
-def student_portrait_overall(user_id: str) -> dict:
-    """学生总画像：跨所有会话聚合。"""
-    data = _aggregate_student_data(user_id, include_detail=True)
-    portrait = dict(data.get("portrait") or {})
-    portrait["total_submissions"] = data.get("total_submissions", 0)
-    portrait["project_count"] = data.get("project_count", 0)
-    portrait["avg_score"] = data.get("avg_score", 0.0)
-    portrait["trend"] = data.get("trend", 0.0)
-    portrait["risk_count"] = data.get("risk_count", 0)
-    portrait["latest_phase"] = data.get("latest_phase", "")
-    portrait["intent_distribution"] = data.get("intent_distribution", {}) or {}
-    portrait["intent_shape_distribution"] = data.get("intent_shape_distribution", {}) or {}
-    portrait["student_case_summary"] = data.get("student_case_summary", "") or ""
-    # 团队画像同结构字段（panorama）
-    project_id = f"project-{user_id}"
-    project = json_store.load_project(project_id)
-    all_subs = list(project.get("submissions", []) or [])
-    panorama = _build_student_panorama(
-        submissions=all_subs,
-        rubric_heatmap=portrait.get("rubric_heatmap") or [],
-        avg_score=float(data.get("avg_score", 0.0) or 0.0),
-        trend=float(data.get("trend", 0.0) or 0.0),
-        risk_count=int(data.get("risk_count", 0) or 0),
-        strength_dims=portrait.get("strength_dimensions") or [],
-        weakness_dims=portrait.get("weakness_dimensions") or [],
-        scope_label="总画像",
-    )
-    portrait.update(panorama)
-    # 汇总用：overview_rationale 说明这张画像是如何算出来的
-    portrait["overview_rationale"] = {
-        "field": "portrait:overall",
-        "value": data.get("avg_score", 0.0),
-        "formula": "avg(scores across all submissions)",
-        "formula_display": (
-            f"总画像聚合了该学生全部 {data.get('total_submissions', 0)} 条提交，"
-            f"分布在 {data.get('project_count', 0)} 个项目（会话）上。\n"
-            f"综合均分 = 全部打分的算术平均 = {data.get('avg_score', 0.0)}\n"
-            f"近中期变化 = {data.get('trend', 0.0):+.1f}\n"
-            f"健康指数 = {panorama['health_score']}（{panorama['health_label']}）"
-        ),
-        "inputs": [
-            {"label": "项目数", "value": data.get("project_count", 0)},
-            {"label": "提交数", "value": data.get("total_submissions", 0)},
-            {"label": "触发风险次数", "value": data.get("risk_count", 0)},
-            {"label": "健康指数", "value": panorama["health_score"]},
-        ],
-        "note": "默认按所有会话聚合，若要按会话单独查看请切换 Tab。",
-    }
-    all_cids = [None] + [str((c.get("conversation_id") or "")) for c in conv_store.list_conversations(project_id)]
-    return _apply_overrides_everywhere({"portrait": portrait}, project_id, all_cids)
-
-
-@app.get("/api/student/{user_id}/portrait/conversations")
-def student_portrait_conversations(user_id: str) -> dict:
-    """学生按会话的画像列表：每个会话一张卡（轻量版）。"""
-    project_id = f"project-{user_id}"
-    data = _aggregate_student_data(user_id, include_detail=True)
-    project_snapshots = data.get("project_snapshots") or []
-    # 会话列表（精简：取每个 conversation_id 最近一次画像切面）
-    convs = conv_store.list_conversations(project_id)
-    conv_meta = {str(c["conversation_id"]): c for c in convs}
-    # 把 project_snapshots 按 project_id 对齐 conversation_id（约定两者相同时）
-    cards = []
-    for snap in project_snapshots:
-        cid = str(snap.get("project_id") or "")
-        meta = conv_meta.get(cid, {}) if cid else {}
-        cards.append({
-            "conversation_id": cid,
-            "title": meta.get("title") or snap.get("project_name") or cid[:8],
-            "last_score": snap.get("latest_score", 0),
-            "project_phase": snap.get("project_phase", ""),
-            "summary": snap.get("current_summary", ""),
-            "top_risks": snap.get("top_risks", []),
-            "intent_distribution": snap.get("intent_distribution", {}),
-            "message_count": meta.get("message_count", 0),
-            "created_at": meta.get("created_at", ""),
-        })
-    return _apply_overrides_everywhere(
-        {"project_id": project_id, "cards": cards},
-        project_id,
-        [c["conversation_id"] for c in cards if c.get("conversation_id")],
-    )
-
-
-@app.get("/api/student/{user_id}/portrait/conversation/{conversation_id}")
-def student_portrait_conversation_detail(user_id: str, conversation_id: str) -> dict:
-    """单个会话的画像详情：rubric 趋势、风险、成熟度、消息数量等。"""
-    project_id = f"project-{user_id}"
-    data = _aggregate_student_data(user_id, include_detail=True)
-    proj = next((p for p in (data.get("projects") or []) if p.get("project_id") == conversation_id), None)
-    if not proj:
-        return {"status": "not_found", "conversation_id": conversation_id}
-    # 本会话的原始 submissions（用于 panorama 的风险统计）
-    proj_raw_subs = [
-        s for s in (json_store.load_project(project_id).get("submissions") or [])
-        if _safe_str(s.get("logical_project_id") or s.get("project_id") or s.get("conversation_id") or "") == conversation_id
-    ]
-    # 本会话的 rubric heatmap
-    rubric_scores: dict[str, list[float]] = {}
-    for sub in proj.get("submissions", []):
-        diag = sub.get("diagnosis") or {}
-        for r in (diag.get("rubric") or []):
-            if isinstance(r, dict) and r.get("item"):
-                rubric_scores.setdefault(r["item"], []).append(float(r.get("score", 0) or 0))
-    heatmap = []
-    strength_dims_conv: list[str] = []
-    weakness_dims_conv: list[str] = []
-    for name, arr in rubric_scores.items():
-        avg_rs = round(sum(arr) / len(arr), 2) if arr else 0
-        if avg_rs >= 7:
-            strength_dims_conv.append(name)
-        elif avg_rs < 5:
-            weakness_dims_conv.append(name)
-        heatmap.append({
-            "item": name,
-            "avg_score": avg_rs,
-            "count": len(arr),
-            "rationale": {
-                "field": f"rubric_heatmap:{conversation_id}:{name}",
-                "value": avg_rs,
-                "formula": "avg(dim scores in this conversation)",
-                "formula_display": (
-                    f"本会话 {name} 均分 = ({' + '.join(f'{x:.1f}' for x in arr[:6])}"
-                    + (" + …" if len(arr) > 6 else "")
-                    + f") ÷ {len(arr)} = {avg_rs}"
-                ),
-                "inputs": [{"label": f"第{i+1}次", "value": round(float(x), 2)} for i, x in enumerate(arr[:10])],
+                    for i, x in enumerate(arr[:10])
+                ],
                 "note": f"仅统计本会话 {len(arr)} 次评分",
             },
         })
@@ -11557,12 +11068,13 @@ async def admin_import_users_csv(
     request: Request = None
 ):
     """
-    支持 CSV/Excel/JSON 批量导入用户与团队，字段：account, name, role, email, team_name, invite_code, password
+    支持 CSV/Excel/JSON 批量导入用户与团队，字段：account, name, role, email, student_id, team_name, invite_code, password
     1. 解析文件或 data 字段
     2. 校验字段完整性、格式、重复
     3. 自动创建/合并团队，成员自动加入
     4. 只追加新用户/团队，不做删除/覆盖
     5. 生成导入日志，错误项单独返回
+    注：student_id 为可选字段，如果提供则使用该值，否则使用 account 作为学号
     """
     import os
     import json as _json
@@ -11590,6 +11102,7 @@ async def admin_import_users_csv(
         raise HTTPException(status_code=400, detail="未检测到有效数据")
     # 2. 校验与处理
     required_fields = ["account", "name", "role", "email", "team_name", "invite_code", "password"]
+    optional_fields = ["student_id"]
     success, failed, errors = 0, 0, []
     new_users, new_teams = [], []
     user_ids, team_ids = set(), set()
@@ -11606,20 +11119,26 @@ async def admin_import_users_csv(
         teams_data = []
     existing_emails = set()
     existing_names = set()
+    existing_student_ids = set()
     for u in users_data:
         user_ids.add(str(u.get("user_id") or u.get("email") or u.get("account") or "").strip())
         email = str(u.get("email") or "").strip().lower()
         name = str(u.get("display_name") or u.get("name") or "").strip()
+        student_id = str(u.get("student_id") or "").strip()
         if email:
             existing_emails.add(email)
         if name:
             existing_names.add(name)
+        if student_id:
+            existing_student_ids.add(student_id)
     for t in teams_data:
         team_ids.add(str(t.get("team_id") or t.get("invite_code") or t.get("team_name") or "").strip())
     # 3. 处理每一行
     for idx, row in enumerate(rows):
         # 字段标准化
         item = {k: str(row.get(k, "")).strip() for k in required_fields}
+        # 获取可选的 student_id 字段
+        csv_student_id = str(row.get("student_id", "")).strip()
         # team_name 和 invite_code 可以为空
         # email 和 password 可自动填充
         if not item["account"] or not item["name"] or not item["role"]:
@@ -11652,6 +11171,13 @@ async def admin_import_users_csv(
         # 导入后也要加入集合，防止本批次重复
         existing_emails.add(email_lower)
         existing_names.add(item["name"])
+        # 学号唯一性校验：优先使用 CSV 的 student_id 字段，否则使用 account
+        student_id = csv_student_id if csv_student_id else item["account"]
+        if student_id in existing_student_ids:
+            failed += 1
+            errors.append({"row": idx+1, "reason": "学号已存在", "item": item})
+            continue
+        existing_student_ids.add(student_id)
         # 检查团队是否存在，不存在则创建（team_name/invite_code都为空则不创建团队）
         team = None
         if item["team_name"] or item["invite_code"]:
@@ -11676,15 +11202,25 @@ async def admin_import_users_csv(
                 new_teams.append(team)
         # 创建用户
         user_id = f"user-{uuid4().hex[:8]}"
+        # Hash password properly
+        from hashlib import pbkdf2_hmac
+        import secrets
+        salt = secrets.token_hex(16)
+        password_hash = pbkdf2_hmac("sha256", item["password"].encode("utf-8"), salt.encode("utf-8"), 120000).hex()
         user = {
             "user_id": user_id,
             "display_name": item["name"],
             "role": item["role"],
             "email": item["email"],
-            "password": item["password"],
+            "student_id": student_id,
+            "password_salt": salt,
+            "password_hash": password_hash,
             "status": "active",
             "team_names": [item["team_name"]] if item["team_name"] else [],
             "last_login": "",
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat(),
+            "project_serial_counter": 0,
         }
         users_data.append(user)
         user_ids.add(item["account"])
@@ -11764,6 +11300,7 @@ def admin_batch_create_teachers_with_teams(
                 "role": "teacher",
                 "display_name": name,
                 "email": account,
+                "student_id": account,
                 "password": password,
             })
         except Exception as e:

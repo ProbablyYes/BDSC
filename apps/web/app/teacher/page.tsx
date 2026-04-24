@@ -2,12 +2,28 @@
 
 import { CSSProperties, FormEvent, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useAuth, logout } from "../hooks/useAuth";
 import { RationaleCard, EvidencePopover, type Rationale } from "../components/RationaleCard";
-import { AiOverrideDrawer } from "../components/AiOverrideDrawer";
-import KBGraphPanel from "../knowledge/KBGraphPanel";
+
+// 懒加载重型组件
+const AiOverrideDrawer = dynamic(
+  () => import("../components/AiOverrideDrawer").then(m => ({ default: m.AiOverrideDrawer })),
+  {
+    loading: () => <div>加载中...</div>,
+    ssr: false
+  }
+) as any;
+const KBGraphPanel = dynamic(() => import("../knowledge/KBGraphPanel"), {
+  loading: () => <div>加载中...</div>,
+  ssr: false
+});
 
 const API = (process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8037").trim().replace(/\/+$/, "");
+
+// API缓存，避免重复请求
+const apiCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
 type Tab = "overview" | "assistant" | "conversation-analytics" | "submissions" | "compare" | "evidence" | "report" | "feedback" | "capability" | "rule-coverage" | "interventions" | "class" | "project" | "rubric" | "competition" | "student-plans";
 type TeamView = "comparison" | "team-detail" | "student-detail" | "project-detail";
 
@@ -665,7 +681,7 @@ type TeamRadarDim = {
   score: number;
   max: number;
   rationale?: any;
-  evidence_quotes?: string[];
+  evidence_quotes?: Array<string | { text: string }>;
   revision_suggestion?: string;
   trend?: number[]; // 历史分数 sparkline
 };
@@ -744,8 +760,10 @@ function TeamRadarDimensionPanel({
             {(d.evidence_quotes || []).length > 0 && (
               <div className="team-dim-quotes">
                 <div className="team-dim-quotes-title">原文证据</div>
-                {(d.evidence_quotes || []).slice(0, 3).map((q, i) => (
-                  <div key={i} className="team-dim-quote">"{q}"</div>
+                {(d.evidence_quotes || []).map((q, i) => (
+                  <div key={i} className="team-dim-quote">
+                    "{typeof q === 'object' ? q.text : q}"
+                  </div>
                 ))}
               </div>
             )}
@@ -967,28 +985,40 @@ export default function TeacherPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [assistantView, setAssistantView] = useState<"queue" | "assessment" | "intervention" | "conversation" | "impact">("queue");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [kbPanelOpen, setKbPanelOpen] = useState(false);
   const [projectId, setProjectId] = useState("");
   const [teacherId, setTeacherId] = useState("teacher-001");
   const [classId, setClassId] = useState("");
   const [cohortId, setCohortId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("正在加载");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+
+  // 合并 UI 通知状态
+  const [uiState, setUiState] = useState({
+    loading: false,
+    loadingMessage: "正在加载",
+    successMessage: "",
+    errorMessage: ""
+  });
+
+  // 合并 KB 相关状态
+  const [kbState, setKbState] = useState({
+    panelOpen: false,
+    stats: null as any,
+    insightTab: "pains",
+    expandedCase: -1,
+    rulesOpen: false,
+    rubricOpen: false
+  });
+
+  // 合并 HG 相关状态
+  const [hgState, setHgState] = useState({
+    catalog: null as any,
+    panoOpen: false,
+    groupOpen: new Set<string>(),
+    rulesOpen: false
+  });
 
   const [dashboard, setDashboard] = useState<any>(null);
   const [studentOverview, setStudentOverview] = useState<any>(null);
-  const [kbStats, setKbStats] = useState<any>(null);
-  const [kbInsightTab, setKbInsightTab] = useState<string>("pains");
-  const [kbExpandedCase, setKbExpandedCase] = useState<number>(-1);
-  const [kbRulesOpen, setKbRulesOpen] = useState(false);
-  const [kbRubricOpen, setKbRubricOpen] = useState(false);
-  const [hgCatalog, setHgCatalog] = useState<any>(null);
-  const [hgPanoOpen, setHgPanoOpen] = useState(false);
-  const [hgGroupOpen, setHgGroupOpen] = useState<Set<string>>(new Set());
-  const [hgRulesOpen, setHgRulesOpen] = useState(false);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [compareData, setCompareData] = useState<any>(null);
   const [evidence, setEvidence] = useState<any>(null);
@@ -997,18 +1027,57 @@ export default function TeacherPage() {
 
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackTags, setFeedbackTags] = useState("evidence,feasibility");
-  const [selectedProject, setSelectedProject] = useState("");
-  const [selectedLogicalProjectId, setSelectedLogicalProjectId] = useState("");
 
-  // ── 学生计划书 Tab 数据源（按学生聚合，告别输入 proj-xxx） ──
-  const [studentPlansTeams, setStudentPlansTeams] = useState<any[]>([]);
-  const [studentPlansLoading, setStudentPlansLoading] = useState(false);
-  const [studentPlansError, setStudentPlansError] = useState("");
-  const [studentPlansQuery, setStudentPlansQuery] = useState("");
-  const [selectedBpStudent, setSelectedBpStudent] = useState<string>("");
-  const [studentPlansView, setStudentPlansView] = useState<"by_student" | "by_category">("by_student");
-  const [studentPlansGroups, setStudentPlansGroups] = useState<any[]>([]);
-  const [selectedPlanIdsForCompare, setSelectedPlanIdsForCompare] = useState<string[]>([]);
+  // 合并项目选择状态
+  const [projectSelection, setProjectSelection] = useState({
+    selectedProject: "",
+    selectedLogicalProjectId: ""
+  });
+
+  // 合并学生计划书相关状态
+  const [studentPlansState, setStudentPlansState] = useState({
+    teams: [] as any[],
+    loading: false,
+    error: "",
+    query: "",
+    selectedBpStudent: "",
+    view: "by_student" as "by_student" | "by_category",
+    groups: [] as any[],
+    selectedPlanIdsForCompare: [] as string[]
+  });
+
+  // 为兼容现有代码，从复合状态中提取独立的 setter 和变量
+  const setLoading = (v: boolean) => setUiState(s => ({ ...s, loading: v }));
+  const setLoadingMessage = (v: string) => setUiState(s => ({ ...s, loadingMessage: v }));
+  const setErrorMessage = (v: string) => setUiState(s => ({ ...s, errorMessage: v }));
+  const setSuccessMessage = (v: string) => setUiState(s => ({ ...s, successMessage: v }));
+  const setKbStats = (v: any) => setKbState(s => ({ ...s, stats: v }));
+  const setHgCatalog = (v: any) => setHgState(s => ({ ...s, catalog: v }));
+  const setSelectedProject = (v: string) => setProjectSelection(s => ({ ...s, selectedProject: v }));
+  const setSelectedLogicalProjectId = (v: string) => setProjectSelection(s => ({ ...s, selectedLogicalProjectId: v }));
+  const selectedProject = projectSelection.selectedProject;
+  const selectedLogicalProjectId = projectSelection.selectedLogicalProjectId;
+  const loading = uiState.loading;
+  const loadingMessage = uiState.loadingMessage;
+  const successMessage = uiState.successMessage;
+  const errorMessage = uiState.errorMessage;
+  const kbStats = kbState.stats;
+  const kbPanelOpen = kbState.panelOpen;
+  const setKbPanelOpen = (v: boolean | ((prev: boolean) => boolean)) => setKbState(s => ({ ...s, panelOpen: typeof v === 'function' ? v(s.panelOpen) : v }));
+  const kbInsightTab = kbState.insightTab;
+  const setKbInsightTab = (v: string) => setKbState(s => ({ ...s, insightTab: v }));
+  const kbRubricOpen = kbState.rubricOpen;
+  const setKbRubricOpen = (v: boolean) => setKbState(s => ({ ...s, rubricOpen: v }));
+  const kbRulesOpen = kbState.rulesOpen;
+  const setKbRulesOpen = (v: boolean) => setKbState(s => ({ ...s, rulesOpen: v }));
+  const kbExpandedCase = kbState.expandedCase;
+  const setKbExpandedCase = (v: number) => setKbState(s => ({ ...s, expandedCase: v }));
+  const hgCatalog = hgState.catalog;
+  const hgPanoOpen = hgState.panoOpen;
+  const setHgPanoOpen = (v: boolean) => setHgState(s => ({ ...s, panoOpen: v }));
+  const hgGroupOpen = hgState.groupOpen;
+  const setHgGroupOpen = (v: Set<string> | ((prev: Set<string>) => Set<string>)) => setHgState(s => ({ ...s, groupOpen: typeof v === 'function' ? v(s.groupOpen) : v }));
+  const setSelectedPlanIdsForCompare = (v: string[]) => setStudentPlansState(s => ({ ...s, selectedPlanIdsForCompare: v }));
 
   const loadStudentPlansGrouped = useCallback(async (teacherIdIn: string) => {
     const tid = (teacherIdIn || "").trim();
@@ -1016,54 +1085,55 @@ export default function TeacherPage() {
     try {
       const data = await api(`/api/teacher/student-plans-grouped?teacher_id=${encodeURIComponent(tid)}`);
       const groups = Array.isArray(data?.groups) ? data.groups : [];
-      setStudentPlansGroups(groups);
+      setStudentPlansState(prev => ({ ...prev, groups }));
     } catch {
-      setStudentPlansGroups([]);
+      setStudentPlansState(prev => ({ ...prev, groups: [] }));
     }
   }, []);
 
   const togglePlanCompareSelect = useCallback((planId: string) => {
-    setSelectedPlanIdsForCompare((prev) => {
-      if (prev.includes(planId)) return prev.filter((p) => p !== planId);
-      if (prev.length >= 5) return prev;
-      return [...prev, planId];
-    });
+    setStudentPlansState(prev => ({
+      ...prev,
+      selectedPlanIdsForCompare: prev.selectedPlanIdsForCompare.includes(planId)
+        ? prev.selectedPlanIdsForCompare.filter((p) => p !== planId)
+        : prev.selectedPlanIdsForCompare.length >= 5
+        ? prev.selectedPlanIdsForCompare
+        : [...prev.selectedPlanIdsForCompare, planId]
+    }));
   }, []);
 
   const openComparePage = useCallback(() => {
-    if (selectedPlanIdsForCompare.length < 2) return;
+    if (studentPlansState.selectedPlanIdsForCompare.length < 2) return;
     const params = new URLSearchParams({
-      plan_ids: selectedPlanIdsForCompare.join(","),
+      plan_ids: studentPlansState.selectedPlanIdsForCompare.join(","),
     });
     window.open(`/business-plan/compare?${params.toString()}`, "_blank", "noreferrer");
-  }, [selectedPlanIdsForCompare]);
+  }, [studentPlansState.selectedPlanIdsForCompare]);
 
   const loadStudentPlans = useCallback(async (teacherIdIn: string) => {
     const tid = (teacherIdIn || "").trim();
     if (!tid) {
-      setStudentPlansTeams([]);
-      setStudentPlansError("尚未识别到当前教师身份，请登录后重试。");
+      setStudentPlansState(prev => ({ ...prev, teams: [], error: "尚未识别到当前教师身份，请登录后重试。" }));
       return;
     }
-    setStudentPlansLoading(true);
-    setStudentPlansError("");
+    setStudentPlansState(prev => ({ ...prev, loading: true, error: "" }));
     try {
       const data = await api(`/api/teacher/student-plans?teacher_id=${encodeURIComponent(tid)}`);
       const rows = Array.isArray(data?.teams) ? data.teams : [];
-      setStudentPlansTeams(rows);
-      if (rows.length === 0) {
-        setStudentPlansError("当前没有学生计划书。一旦有学生生成草稿，会自动出现在这里。");
-      }
+      setStudentPlansState(prev => ({
+        ...prev,
+        teams: rows,
+        error: rows.length === 0 ? "当前没有学生计划书。一旦有学生生成草稿，会自动出现在这里。" : ""
+      }));
     } catch (err: any) {
-      setStudentPlansError(err?.message || "获取学生计划书列表失败。");
-      setStudentPlansTeams([]);
+      setStudentPlansState(prev => ({ ...prev, error: err?.message || "获取学生计划书列表失败。", teams: [] }));
     } finally {
-      setStudentPlansLoading(false);
+      setStudentPlansState(prev => ({ ...prev, loading: false }));
     }
   }, []);
   const studentPlanTrackPoints = useMemo(() => {
     const points: Array<{ id: string; x: number; y: number; label: string; stage: string }> = [];
-    studentPlansTeams.forEach((team: any) => {
+    studentPlansState.teams.forEach((team: any) => {
       (team.students || []).forEach((stu: any) => {
         const tv = stu?.track_vector || {};
         points.push({
@@ -1076,7 +1146,7 @@ export default function TeacherPage() {
       });
     });
     return points;
-  }, [studentPlansTeams]);
+  }, [studentPlansState.teams]);
   const [expandedSubmission, setExpandedSubmission] = useState<number | null>(null);
 
   // 班级页面状态
@@ -1274,13 +1344,28 @@ export default function TeacherPage() {
   const feedbackFileInputRef = useRef<HTMLInputElement>(null);
 
   async function api(path: string, opts?: RequestInit) {
+    // 检查缓存（仅GET请求）
+    const cacheKey = `${path}${JSON.stringify(opts || {})}`;
+    if (!opts || opts.method !== 'POST') {
+      const cached = apiCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return cached.data;
+      }
+    }
+    
     const r = await fetch(`${API}${path}`, opts);
     if (!r.ok) {
-      let msg = `请求失败 (${r.status})`;
-      try { const j = await r.json(); msg = j.detail || j.message || msg; } catch {}
-      throw new Error(msg);
+      const errText = await r.text();
+      throw new Error(`API错误 ${r.status}: ${errText}`);
     }
-    return r.json();
+    const data = await r.json();
+    
+    // 缓存GET请求的响应
+    if (!opts || opts.method !== 'POST') {
+      apiCache.set(cacheKey, { data, timestamp: Date.now() });
+    }
+    
+    return data;
   }
 
   // 响应验证函数
@@ -2103,23 +2188,30 @@ export default function TeacherPage() {
       setLoading(true);
       setErrorMessage("");
       const q = categoryFilter ? `?category=${encodeURIComponent(categoryFilter)}` : "";
-      const [dashData, subsData, kbData, kbInsightData, hgCatData] = await Promise.all([
+      // 优化：分阶段加载，优先加载核心数据
+      const [dashData, subsData] = await Promise.all([
         api(`/api/teacher/dashboard${q}`).catch(() => null),
-        api("/api/teacher/submissions?limit=50").catch(() => ({ submissions: [] })),
-        api("/api/kb-stats").catch(() => null),
-        api("/api/kb-insights").catch(() => null),
-        api("/api/hypergraph/catalog").catch(() => null),
+        api("/api/teacher/submissions?limit=30").catch(() => ({ submissions: [] })),
       ]);
       if (dashData && !dashData.error) {
         setDashboard(dashData.data);
         setStudentOverview(dashData.student_overview ?? null);
       }
       setOverviewSubmissions(subsData?.submissions ?? []);
-      if (kbData) {
-        if (kbInsightData && !kbInsightData.error) Object.assign(kbData, { insights: kbInsightData });
-        setKbStats(kbData);
-      }
-      if (hgCatData && !hgCatData.error) setHgCatalog(hgCatData);
+      
+      // 延迟加载知识库数据
+      setTimeout(async () => {
+        const [kbData, kbInsightData, hgCatData] = await Promise.all([
+          api("/api/kb-stats").catch(() => null),
+          api("/api/kb-insights").catch(() => null),
+          api("/api/hypergraph/catalog").catch(() => null),
+        ]);
+        if (kbData) {
+          if (kbInsightData && !kbInsightData.error) Object.assign(kbData, { insights: kbInsightData });
+          setKbStats(kbData);
+        }
+        if (hgCatData && !hgCatData.error) setHgCatalog(hgCatData);
+      }, 200);
     } catch (error) {
       setErrorMessage(`${error instanceof Error ? error.message : "加载总览数据失败"}`);
       setDashboard(null);
@@ -2133,18 +2225,26 @@ export default function TeacherPage() {
     setLoading(true);
     setErrorMessage("");
     try {
-      const [subsData, capData, ruleData, intervData, compData] = await Promise.all([
-        api(`/api/teacher/submissions?class_id=${encodeURIComponent(cid)}&limit=300`).catch(() => ({ submissions: [] })),
+      // 优化：分阶段加载，先加载关键数据，再加载次要数据
+      const [subsData, capData, ruleData] = await Promise.all([
+        api(`/api/teacher/submissions?class_id=${encodeURIComponent(cid)}&limit=100`).catch(() => ({ submissions: [] })),
         api(`/api/teacher/capability-map/${encodeURIComponent(cid)}`).catch(() => null),
         api(`/api/teacher/rule-coverage/${encodeURIComponent(cid)}`).catch(() => null),
-        api(`/api/teacher/teaching-interventions/${encodeURIComponent(cid)}`).catch(() => null),
-        api(`/api/teacher/compare?class_id=${encodeURIComponent(cid)}`).catch(() => null),
       ]);
       setClassSubmissions(subsData?.submissions ?? []);
       if (capData) setCapabilityMap(capData);
       if (ruleData) setRuleCoverage(ruleData);
-      if (intervData) setTeachingInterventions(intervData);
-      if (compData) setCompareData(compData);
+      
+      // 延迟加载次要数据
+      setTimeout(async () => {
+        const [intervData, compData] = await Promise.all([
+          api(`/api/teacher/teaching-interventions/${encodeURIComponent(cid)}`).catch(() => null),
+          api(`/api/teacher/compare?class_id=${encodeURIComponent(cid)}`).catch(() => null),
+        ]);
+        if (intervData) setTeachingInterventions(intervData);
+        if (compData) setCompareData(compData);
+      }, 100);
+      
       setClassView("overview");
       setSelectedClassStudent("");
       setSelectedClassStudentProject("");
@@ -6247,22 +6347,22 @@ export default function TeacherPage() {
                     className="bp-sp-search"
                     type="text"
                     placeholder="按学生姓名 / 学号搜索…"
-                    value={studentPlansQuery}
-                    onChange={(e) => setStudentPlansQuery(e.target.value)}
+                    value={studentPlansState.query}
+                    onChange={(e) => setStudentPlansState(prev => ({ ...prev, query: e.target.value }))}
                   />
                   <button
                     className="tch-sm-btn"
                     onClick={() => void loadStudentPlans(currentUser?.user_id || teacherId || "")}
-                    disabled={studentPlansLoading}
+                    disabled={studentPlansState.loading}
                   >
-                    {studentPlansLoading ? "刷新中…" : "刷新"}
+                    {studentPlansState.loading ? "刷新中…" : "刷新"}
                   </button>
                 </div>
               </div>
-              {studentPlansError && (
-                <div className="bp-sp-err">{studentPlansError}</div>
+              {studentPlansState.error && (
+                <div className="bp-sp-err">{studentPlansState.error}</div>
               )}
-              {!studentPlansLoading && !studentPlansError && studentPlansTeams.length === 0 && (
+              {!studentPlansState.loading && !studentPlansState.error && studentPlansState.teams.length === 0 && (
                 <div className="bp-sp-empty">当前没有找到任何学生计划书。</div>
               )}
               {studentPlanTrackPoints.length > 0 && (
@@ -6310,28 +6410,28 @@ export default function TeacherPage() {
               <div className="tch-plans-toolbar">
                 <span style={{ fontSize: 12, color: "var(--text-secondary, #94a3b8)" }}>视图：</span>
                 <button
-                  className={`tch-sm-btn ${studentPlansView === "by_student" ? "is-primary" : ""}`}
-                  onClick={() => setStudentPlansView("by_student")}
+                  className={`tch-sm-btn ${studentPlansState.view === "by_student" ? "is-primary" : ""}`}
+                  onClick={() => setStudentPlansState(prev => ({ ...prev, view: "by_student" }))}
                 >按学生</button>
                 <button
-                  className={`tch-sm-btn ${studentPlansView === "by_category" ? "is-primary" : ""}`}
+                  className={`tch-sm-btn ${studentPlansState.view === "by_category" ? "is-primary" : ""}`}
                   onClick={() => {
-                    setStudentPlansView("by_category");
-                    if (studentPlansGroups.length === 0) {
+                    setStudentPlansState(prev => ({ ...prev, view: "by_category" }));
+                    if (studentPlansState.groups.length === 0) {
                       void loadStudentPlansGrouped(currentUser?.user_id || teacherId || "");
                     }
                   }}
                 >按项目分类</button>
                 <span style={{ fontSize: 11.5, color: "var(--text-secondary, #94a3b8)", marginLeft: 8 }}>
-                  已勾选 <b style={{ color: "#60a5fa" }}>{selectedPlanIdsForCompare.length}</b> / 5 份用于对比
+                  已勾选 <b style={{ color: "#60a5fa" }}>{studentPlansState.selectedPlanIdsForCompare.length}</b> / 5 份用于对比
                 </span>
                 <button
                   className="tch-plans-compare-btn"
-                  disabled={selectedPlanIdsForCompare.length < 2}
+                  disabled={studentPlansState.selectedPlanIdsForCompare.length < 2}
                   onClick={openComparePage}
                   title="选中 2~5 份计划书，打开跨学生对比页"
-                >📑 对比选中（{selectedPlanIdsForCompare.length}）</button>
-                {selectedPlanIdsForCompare.length > 0 && (
+                >📑 对比选中（{studentPlansState.selectedPlanIdsForCompare.length}）</button>
+                {studentPlansState.selectedPlanIdsForCompare.length > 0 && (
                   <button
                     className="tch-sm-btn"
                     onClick={() => setSelectedPlanIdsForCompare([])}
@@ -6340,12 +6440,12 @@ export default function TeacherPage() {
               </div>
 
               <div className="bp-sp-body">
-                {studentPlansView === "by_category" && (
+                {studentPlansState.view === "by_category" && (
                   <div className="tch-plans-grouped">
-                    {studentPlansGroups.length === 0 && (
+                    {studentPlansState.groups.length === 0 && (
                       <div className="bp-sp-empty">暂无分类数据。点击"按项目分类"会自动刷新。</div>
                     )}
-                    {studentPlansGroups.map((g: any) => (
+                    {studentPlansState.groups.map((g: any) => (
                       <div key={g.category} className="tch-group-card">
                         <div className="tch-group-head">
                           <span>{g.category}</span>
@@ -6353,14 +6453,14 @@ export default function TeacherPage() {
                         </div>
                         <div className="tch-group-list">
                           {(g.plans || []).map((p: any) => {
-                            const checked = selectedPlanIdsForCompare.includes(p.plan_id);
+                            const checked = studentPlansState.selectedPlanIdsForCompare.includes(p.plan_id);
                             const typeTag = p.plan_type === "competition_fork" ? "竞赛版" : "主干";
                             return (
                               <label key={p.plan_id} className="tch-group-row">
                                 <input
                                   type="checkbox"
                                   checked={checked}
-                                  disabled={!checked && selectedPlanIdsForCompare.length >= 5}
+                                  disabled={!checked && studentPlansState.selectedPlanIdsForCompare.length >= 5}
                                   onChange={() => togglePlanCompareSelect(p.plan_id)}
                                 />
                                 <span className={`tch-group-row-type ${p.plan_type === "competition_fork" ? "fork" : "main"}`}>
@@ -6390,8 +6490,8 @@ export default function TeacherPage() {
                     ))}
                   </div>
                 )}
-                {studentPlansView === "by_student" && studentPlansTeams.map((team: any) => {
-                  const q = studentPlansQuery.trim().toLowerCase();
+                {studentPlansState.view === "by_student" && studentPlansState.teams.map((team: any) => {
+                  const q = studentPlansState.query.trim().toLowerCase();
                   const filtered = (team.students || []).filter((s: any) => {
                     if (!q) return true;
                     return (
@@ -6408,8 +6508,8 @@ export default function TeacherPage() {
                           {filtered.map((stu: any) => (
                             <button
                               key={stu.student_id}
-                              className={`bp-sp-stu ${selectedBpStudent === stu.student_id ? "is-active" : ""}`}
-                              onClick={() => setSelectedBpStudent(stu.student_id)}
+                              className={`bp-sp-stu ${studentPlansState.selectedBpStudent === stu.student_id ? "is-active" : ""}`}
+                              onClick={() => setStudentPlansState(prev => ({ ...prev, selectedBpStudent: stu.student_id }))}
                               title={stu.display_name}
                             >
                               <div className="bp-sp-stu-name">{stu.display_name}</div>
@@ -6426,7 +6526,7 @@ export default function TeacherPage() {
                         </aside>
                         <section className="bp-sp-right">
                           {(() => {
-                            const stu = filtered.find((s: any) => s.student_id === selectedBpStudent) || filtered[0];
+                            const stu = filtered.find((s: any) => s.student_id === studentPlansState.selectedBpStudent) || filtered[0];
                             if (!stu) return <div className="bp-sp-empty">该团队内暂无计划书。</div>;
                             const plans: any[] = stu.plans || [];
                             return (
@@ -6445,8 +6545,8 @@ export default function TeacherPage() {
                                         <div className="bp-sp-plan-title">
                                           <input
                                             type="checkbox"
-                                            checked={selectedPlanIdsForCompare.includes(p.plan_id)}
-                                            disabled={!selectedPlanIdsForCompare.includes(p.plan_id) && selectedPlanIdsForCompare.length >= 5}
+                                            checked={studentPlansState.selectedPlanIdsForCompare.includes(p.plan_id)}
+                                            disabled={!studentPlansState.selectedPlanIdsForCompare.includes(p.plan_id) && studentPlansState.selectedPlanIdsForCompare.length >= 5}
                                             onChange={() => togglePlanCompareSelect(p.plan_id)}
                                             title="勾选用于对比"
                                             style={{ marginRight: 6, accentColor: "#3b82f6" }}
@@ -11702,6 +11802,33 @@ export default function TeacherPage() {
                                     aiValue: d.score ?? "",
                                   })}
                                 />
+                              </div>
+                            </div>
+                            {/* 维度证据 section */}
+                            <div className="tm-portrait-col" style={{ gridColumn: "span 3" }}>
+                              <div className="tm-portrait-label">维度证据</div>
+                              <div className="tm-evidence-section">
+                                {rubricHeat.map((r: any) => (
+                                  <div key={r.item} className="tm-evidence-item">
+                                    <div className="tm-evidence-header">
+                                      <strong>{r.item}</strong>
+                                      <span className="tm-evidence-score">{r.avg_score}/{maxRubric}</span>
+                                    </div>
+                                    {(r.evidence_quotes && r.evidence_quotes.length > 0) ? (
+                                      <div className="tm-evidence-content">
+                                        {r.evidence_quotes.map((quote: any, idx: number) => (
+                                          <div key={idx} className="tm-evidence-quote">
+                                            <span className="tm-evidence-quote-mark">"</span>
+                                            {typeof quote === 'object' ? quote.text : quote}
+                                            <span className="tm-evidence-quote-mark">"</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div className="tm-evidence-empty">暂无证据原文</div>
+                                    )}
+                                  </div>
+                                ))}
                               </div>
                             </div>
                             {growth.length >= 2 && (

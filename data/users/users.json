@@ -11,8 +11,8 @@
     "password_salt": "24a789ba9e3c49d92f2d344dfbaad4c8",
     "password_hash": "769a037d1e957e50ab7d4e052777a3c8897c2a7c6441c27ece7a893a179e642a",
     "created_at": "2026-03-26T01:38:01.045169",
-    "updated_at": "2026-04-11T23:28:27.118335+08:00",
-    "last_login": "2026-04-11T23:28:27.118335+08:00"
+    "updated_at": "2026-04-24T17:49:51.215030+08:00",
+    "last_login": "2026-04-24T17:49:51.215001+08:00"
   },
   {
     "user_id": "7c221e48-9dee-42bd-8e53-fbf921759a38",
@@ -241,8 +241,8 @@
     "password_salt": "cefd3d27d87f41c1db0a1c949b6e613c",
     "password_hash": "aa3f08e31f9b9dd10f7d136a0ac82bb720568d3c9e3d681d94c25f72af1f25b0",
     "created_at": "2026-03-31T16:11:13.274205+08:00",
-    "updated_at": "2026-04-21T22:31:32.458596+08:00",
-    "last_login": "2026-04-21T22:31:32.458565+08:00"
+    "updated_at": "2026-04-24T17:45:27.713893+08:00",
+    "last_login": "2026-04-24T17:45:27.713857+08:00"
   },
   {
     "user_id": "f2d66084-5486-4395-8abf-81034512ddf4",
@@ -289,9 +289,9 @@
     "password_salt": "edade240d8d00de5e5e51992135114d6",
     "password_hash": "761ce51eab13394f6311f08b3f953979b75a5cc47a9b3aea267bb1a8d3592c02",
     "status": "active",
-    "last_login": "2026-04-21T23:33:45.207343+08:00",
+    "last_login": "2026-04-24T03:03:34.996288+08:00",
     "created_at": "2026-04-09T16:49:14.991910+08:00",
-    "updated_at": "2026-04-21T23:33:45.207364+08:00"
+    "updated_at": "2026-04-24T03:03:34.996320+08:00"
   },
   {
     "user_id": "276368a5-6780-44e8-8a1a-cccffda08a73",
@@ -516,52 +516,6 @@
     "last_login": "",
     "created_at": "2026-04-20T03:15:41.748766+08:00",
     "updated_at": "2026-04-20T03:15:41.748766+08:00"
-  },
-  {
-    "user_id": "user-6f365367",
-    "display_name": "张三",
-    "role": "teacher",
-    "email": "zhangsan@example.com",
-    "password": "pass001",
-    "status": "active",
-    "team_names": [
-      "团队A"
-    ],
-    "last_login": ""
-  },
-  {
-    "user_id": "user-e3428adb",
-    "display_name": "李四",
-    "role": "teacher",
-    "email": "li4@example.com",
-    "password": "pass002",
-    "status": "active",
-    "team_names": [
-      "团队B"
-    ],
-    "last_login": ""
-  },
-  {
-    "user_id": "user-ca1dda5e",
-    "display_name": "王五",
-    "role": "student",
-    "email": "wangwu@example.com",
-    "password": "pass003",
-    "status": "active",
-    "team_names": [
-      "团队A"
-    ],
-    "last_login": ""
-  },
-  {
-    "user_id": "user-7fec43da",
-    "display_name": "赵六",
-    "role": "student",
-    "email": "student102@local",
-    "password": "student102+123",
-    "status": "active",
-    "team_names": [],
-    "last_login": ""
   },
   {
     "user_id": "95adedbd-1996-447c-b056-3063e6309045",

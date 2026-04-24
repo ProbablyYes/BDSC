@@ -66,9 +66,9 @@ const MODULE_ICON: Record<string, string> = {
 };
 
 const VERDICT_LABEL: Record<string, string> = {
-  red: "高风险",
-  yellow: "警戒",
-  green: "合理",
+  red: "重点复核",
+  yellow: "需补假设",
+  green: "已分析",
   gray: "信息不足",
 };
 
@@ -84,8 +84,8 @@ function fmtKV(k: string, v: unknown): string {
     payback_period_months: "Payback",
     monthly_price: "月价",
     monthly_retention: "月留存",
-    industry_range: "行业区间",
-    deviation_ratio: "偏离比",
+    reference_range: "参考区间",
+    reference_gap_ratio: "参考差异",
     cost_per_beneficiary: "单位受益人成本",
   };
   const label = keyMap[k] || k;
@@ -117,6 +117,7 @@ const FinanceAdvisoryCard: React.FC<FinanceAdvisoryCardProps> = ({ advisory, onO
       </div>
       {advisory.cards.map((card, idx) => {
         const level = card.verdict?.level || "gray";
+        const analysisConclusion = typeof card.outputs?.analysis_conclusion === "string" ? card.outputs.analysis_conclusion : "";
         const reasonNumericKeys = Object.entries(card.outputs || {})
           .filter(([_, v]) => typeof v === "number" || typeof v === "string" || Array.isArray(v))
           .filter(([k]) =>
@@ -135,6 +136,9 @@ const FinanceAdvisoryCard: React.FC<FinanceAdvisoryCardProps> = ({ advisory, onO
               "cost_per_beneficiary",
               "breakeven_month",
               "runway_months",
+              "bottom_up_tam",
+              "bottom_up_sam",
+              "bottom_up_som_yr1",
             ].includes(k),
           )
           .slice(0, 4);
@@ -145,6 +149,7 @@ const FinanceAdvisoryCard: React.FC<FinanceAdvisoryCardProps> = ({ advisory, onO
               <span className="fr-advisory-card-title">{card.title}</span>
               <span className={`fr-advisory-chip fr-chip-${level}`}>{VERDICT_LABEL[level] || level}</span>
             </div>
+            {analysisConclusion && <div className="fr-advisory-reason">{analysisConclusion}</div>}
             {card.verdict?.reason && <div className="fr-advisory-reason">{card.verdict.reason}</div>}
             {reasonNumericKeys.length > 0 && (
               <div className="fr-advisory-metrics">
@@ -182,9 +187,9 @@ const FinanceAdvisoryCard: React.FC<FinanceAdvisoryCardProps> = ({ advisory, onO
               <div className="fr-advisory-source">
                 <span
                   className={`fr-advisory-source-chip fr-source-${card.baseline_meta.source}`}
-                  title={`行业基准数据来源：${SOURCE_LABEL[card.baseline_meta.source] || card.baseline_meta.source}`}
+                  title={`参考资料来源：${SOURCE_LABEL[card.baseline_meta.source] || card.baseline_meta.source}`}
                 >
-                  基准：{SOURCE_LABEL[card.baseline_meta.source] || card.baseline_meta.source}
+                  参考：{SOURCE_LABEL[card.baseline_meta.source] || card.baseline_meta.source}
                 </span>
                 {card.baseline_meta.updated_at && (
                   <span className="fr-advisory-source-date">
@@ -207,7 +212,7 @@ const FinanceAdvisoryCard: React.FC<FinanceAdvisoryCardProps> = ({ advisory, onO
             查看完整财务分析 →
           </button>
         )}
-        <span className="fr-advisory-hint">提醒不影响得分主逻辑，仅在检测到价格/商业模式讨论时触发</span>
+        <span className="fr-advisory-hint">这里只做计算拆解与待补假设提示，不直接下“高低优劣”结论</span>
       </div>
     </div>
   );

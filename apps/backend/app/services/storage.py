@@ -8,6 +8,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from app.services.project_cognition import (
+    default_track_inference_meta,
+    default_track_vector,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +81,10 @@ class JsonStorage:
                 "teacher_document_edits": [],
                 "video_analyses": [],
                 "business_plans": [],
+                "track_vector": default_track_vector(),
+                "project_stage_v2": "structured",
+                "track_history": [],
+                "track_inference_meta": default_track_inference_meta(),
             }
         data = json.loads(target.read_text(encoding="utf-8"))
         # new确保新增字段存在
@@ -93,6 +102,18 @@ class JsonStorage:
             data["video_analyses"] = []
         if "business_plans" not in data:
             data["business_plans"] = []
+        if "track_vector" not in data or not isinstance(data.get("track_vector"), dict):
+            data["track_vector"] = default_track_vector()
+        else:
+            merged_tv = default_track_vector()
+            merged_tv.update(data["track_vector"])
+            data["track_vector"] = merged_tv
+        if not data.get("project_stage_v2"):
+            data["project_stage_v2"] = "structured"
+        if "track_history" not in data or not isinstance(data.get("track_history"), list):
+            data["track_history"] = []
+        if "track_inference_meta" not in data or not isinstance(data.get("track_inference_meta"), dict):
+            data["track_inference_meta"] = default_track_inference_meta()
         return data
 
     def save_project(self, project_id: str, payload: dict) -> None:
@@ -458,9 +479,12 @@ class UserStorage:
 
     def authenticate(self, email: str, password: str) -> dict | None:
         users = self._load()
-        email_key = email.strip().lower()
+        login_key = email.strip()
+        email_key = login_key.lower()
         for user in users:
-            if str(user.get("email", "")).strip().lower() != email_key:
+            user_email = str(user.get("email", "")).strip().lower()
+            user_sid = str(user.get("student_id", "")).strip()
+            if user_email != email_key and user_sid != login_key:
                 continue
             salt = str(user.get("password_salt", ""))
             _, password_hash = self._hash_password(password, salt)

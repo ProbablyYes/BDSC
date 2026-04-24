@@ -1,0 +1,3862 @@
+{
+  "conversation_id": "6b557217-f99c-4d51-9716-738b5c398bbc",
+  "project_id": "project-0cfb36f4-db33-4cab-b7cb-6258204c454e",
+  "student_id": "1120233400",
+  "title": "科技创新项目市场分析详解",
+  "summary": "学生仅提到市场分析概念，缺乏具体项目细节，需要更多维度的信息来完善项目描述。",
+  "created_at": "2026-04-22T13:38:55.403069+08:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+      "timestamp": "2026-04-22T13:41:58.296994+08:00"
+    },
+    {
+      "role": "assistant",
+      "content": "我完全理解你的感受。很多同学都能背出TAM、SAM、SOM的定义，但一到自己的项目，面对茫茫市场，就不知道从哪里下手，算出来的数字自己都不信。这种感觉很常见，但也很危险，因为它会让你的整个商业计划根基不稳。\n\n别担心，我们今天不背概念，就用一个你案例库里的真实项目，一步步拆解它的计算逻辑，让你看明白高手是怎么把抽象概念变成具体数字的。然后，我们再把它“桥接”到你的项目上。\n\n### 第一步：我们先搞清楚，这三个M到底在问什么？\n\n简单来说，这三个M是一个**层层聚焦**的过程，目的是让你从“星辰大海”的理想，回到“脚踏实地”的现实。\n\n1.  **TAM (Total Addressable Market，总潜在市场)**：你的产品或服务，理论上能覆盖的**最大市场范围**。这是一个“如果所有人都用我的产品”的理想天花板数字，用来展示赛道的想象空间。\n2.  **SAM (Serviceable Addressable Market，可服务市场)**：在TAM里，你的产品**真正有能力去服务**的那一部分市场。这由你的产品功能、定位、价格、渠道等因素决定。它比TAM小得多，也真实得多。\n3.  **SOM (Serviceable Obtainable Market，可获得市场)**：在SAM里，考虑到竞争、团队能力、资源限制和时间（比如创业头1-3年），你**实际能拿到手**的市场份额。这是你最应该关注的、指导你第一步行动的“小目标”。\n\n评判一个市场分析是否扎实，老师或评委主要看四点：\n*   **口径是否一致**：三个M是否由宽到窄、逻辑清晰地收敛？\n*   **假设是否合理**：每一步的收缩，是否有明确的理由（如用户画像、产品边界、竞争格局）？\n*   **数据是否有据**：引用的市场规模数据是否有可靠来源（如行业报告、统计局数据）？\n*   **SOM是否可信**：你设定的初期目标，是否与你的团队规模、资源和执行计划相匹配？\n\n### 第二步：用真实案例“元界创生”走一遍\n\n我们来看你案例库里的“元界创生”项目（AI生成3D交互空间的云服务）。假设你是他们的创始人，你会怎么算？\n\n**1. 定义TAM：展示赛道的天花板**\n\n*   **思考**：我们的技术能用来生成3D交互空间。那么，所有需要创建3D内容的行业，理论上都是我们的潜在市场。\n*   **具体化**：这包括游戏开发、电影特效、建筑设计、线上展览、虚拟教育、数字营销等等。\n*   **量化**：我们会去查找权威的行业分析报告。比如，可能会引用 **“全球3D动画与可视化软件市场规模”** 的数据。假设一份Gartner或IDC的报告显示，这个市场在2025年预计达到 **200亿美元**。\n*   **结论**：所以，我们的TAM就是 **200亿美元**。这个数字很大，很有冲击力，告诉评委我们所在的是一条宽阔的赛道。\n\n**2. 定义SAM：找到我们的精准战场**\n\n*   **思考**：我们不可能吃下整个200亿的市场。我们的产品是“**云服务**”，主打“**快速、低成本生成可交互内容**”。那么，哪些客户最需要这个特性，并且能接受云端模式？\n*   **具体化**：\n    *   **排除**：需要电影级超高质量的好莱坞工作室（我们做不到），对数据安全有极端本地化要求的军工企业（我们模式不符）。\n    *   **聚焦**：中小企业、线上营销团队、展览设计公司、职业培训机-构。他们预算有限、缺乏专业3D设计师，但又有快速搭建线上3D展厅、模拟教学场景的强烈需求。\n*   **量化**：我们需要进一步研究。比如，聚焦到“**中国地区的线上展览和数字营销领域**”。我们去查这个细分市场的规模。假设根据艾瑞咨询的报告，2024年中国数字展览市场规模约为 **50亿人民币**。\n*   **结论**：我们的SAM就是 **50亿人民币**。你看，从200亿美元（约1400亿人民币）的TAM，收缩到50亿人民币的SAM，因为我们明确了产品边界和客户画像。\n\n**3. 定义SOM：设定我们第一年的小目标**\n\n*   **思考**：在50亿的SAM里，我们第一年能拿到多少？我们是一个初创团队，资源有限。\n*   **具体化**：\n    *   **切入点**：我们决定从“**长三角地区的会展设计公司**”切入，因为他们数字化需求旺盛，我们也有地域人脉。\n    *   **市场占有率**：第一年，我们能接触到这个细分群体里可能10%的公司，其中又有多少会买单？基于对销售能力的保守估计，我们设定一个现实的目标。\n*   **量化**：\n    1.  假设长三角地区专注数字展览的设计公司约有1000家。\n    2.  我们第一年通过行业沙龙、朋友推荐等方式，能有效触达其中100家（10%）。\n    3.  按照SaaS行业常见的初期转化率，我们预计能签约其中10家客户。\n    4.  我们的产品客单价预计为每年10万元。\n*   **结论**：我们的SOM = 10家客户 × 10万元/年 = **100万元人民币**。\n\n让我们用流程图来可视化这个思考过程：\n\n```mermaid\ngraph TD\n    A[TAM: 全球3D内容市场<br>200亿美元] --> B{如何收缩? <br>产品与客户定位};\n    B --> C[SAM: 中国数字展览市场<br>50亿人民币];\n    C --> D{如何获取? <br>团队能力与资源];\n    D --> E[SOM: 首年签约10家客户<br>100万人民币];\n    \n    B -- 定位依据 --> F[产品: 云端/快速/交互<br>客户: 预算有限/求快的中小企业];\n    D -- 获取依据 --> G[策略: 地域切入(长三角)<br>资源: 行业人脉/初创团队];\n```\n\n看到没？从200亿到100万，每一步的收缩都不是随意拍脑袋，而是基于**产品特性、客户选择和团队能力**做出的具体假设。这才是扎实的市场分析。\n\n### 第三步：桥接到你的项目——一个小练习\n\n现在，轮到你了。我知道你现在的项目信息还不多，但正是这样，我们才更需要通过这个练习来逼自己把想法具体化。\n\n请先回答下面这个最核心的问题（哪怕只是假设）：\n> **你的项目，是为谁（一类具体的用户），在什么具体场景下，解决了一个什么核心问题？**\n\n举个例子，如果你的项目和技术相关：\n*   **不要**说：“我们做了一个AI工具给开发者用。”\n*   **要尝试说**：“我们为**独立游戏开发工作室**（用户），解决他们在**开发初期缺乏高质量3D角色模型**（场景）的问题，通过一个AI模型快速生成风格化角色原型（解决方案）。”\n\n好，基于你这个初步的答案，我们来做一个快速的“纸上推演”：\n\n1.  **你的TAM可能是什么？**\n    （接上例）可能是“全球3D游戏资产制作市场”或“游戏开发工具市场”。你需要去搜索一个相关的行业报告名称。\n\n2.  **你的SAM会怎样收缩？**\n    因为你的工具是“AI生成”、“风格化”，可能主要服务于**中小型独立工作室或个人开发者**，而不是追求写实AAA大作的大厂。你的SAM可能就是“全球独立游戏开发者的3D资产采购预算”。这个数字需要你去估算。\n\n3.  **你的SOM第一年目标怎么定？**\n    你是一个学生团队，可能先从**国内的独立游戏开发者社区**（如 itch.io, 国内一些论坛）开始。你第一年能影响多少人？转化多少付费用户？客单价多少？乘起来就是你的SOM。\n\n**这个练习的目的，不是要你立刻算出完美数字，而是让你体验“从模糊到具体”的思考过程。** 你会发现，一旦你试图去量化，就会立刻暴露出你对用户、场景、竞争和自身能力的理解是否清晰。哪些地方“发虚”，就是你接下来需要去调研和深挖的地方。\n\n试着按这个思路，为你脑海中的项目画一个简单的三层市场图。画完我们再讨论，哪里卡住了，我们就去哪里找答案。",
+      "agent_trace": {
+        "orchestration": {
+          "mode": "coursework",
+          "llm_enabled": true,
+          "intent": "learning_concept",
+          "intent_shape": "single",
+          "intent_reason": "学生询问如何计算TAM、SAM、SOM，并希望用真实例子学习；判定为单一主问题；主意图归类为 learning_concept",
+          "confidence": 1.0,
+          "engine": "llm",
+          "pipeline": [
+            "tutor"
+          ],
+          "nodes_visited": [
+            "router",
+            "gather_context",
+            "role_agents",
+            "orchestrator"
+          ],
+          "agents_called": [
+            "router",
+            "tutor",
+            "coach"
+          ],
+          "resolved_agents": [],
+          "agent_reasoning": "激活2个维度+自动补充引导维度→共5个(method_bridge, probing_questions, status_judgment, strategy_directions, action_plan)。缺失方向: 核心瓶颈识别, 结构层原因, 反直觉洞察/挑战, 评委/老师判断标准",
+          "score_request_detected": false,
+          "eval_followup_detected": false,
+          "conversation_continuation_mode": "new_analysis",
+          "conversation_state_summary": "",
+          "rag_hits": 3,
+          "rag_case_ids": [
+            "case_1135e29de95e",
+            "case_317f0438a5dd",
+            "case_1512b0f26aa4"
+          ],
+          "strategy": "langgraph_v4_parallel"
+        },
+        "role_agents": {
+          "coach": {
+            "agent": "项目教练",
+            "analysis": "【项目状态判断】\n你的问题核心是H4风险，即TAM/SAM/SOM口径混乱，这直接导致项目市场潜力无法被量化评估，是项目落地的大忌。要解决这个“发虚”的问题，关键在于**明确定义你的目标用户，并选择与商业模式匹配的计算口径**。\n\n我们以参考案例“元界创生”为例，看他们如何清晰界定市场。他们的方案是“AI生成3D交互空间的云服务”。其**TAM（总潜在市场）** 可以定位为“全球3D内容创作软件及服务市场”，这是一个数十亿美元的广阔市场，用于展示赛道想象力。其**SAM（可服务市场）** 则收缩为“有快速创建高质量、可交互虚拟空间需求的企业客户”，比如文旅、教育、线上展会等行业，这比TAM小得多，但更精准。其**SOM（可获得市场）** 进一步聚焦，例如在启动期，只针对“中国地区的数字展厅设计公司”，并通过标杆客户切入。他们的计算逻辑是：从宏观赛道（TAM）到目标行业（SAM），再到初期能实实在在触达的客户群（SOM），层层收敛，每一步都有对应的用户定义和商业逻辑。\n\n反观你的项目，目前最大的问题是**缺少具体的用户和痛点描述**，这导致你根本无法开始计算。TAM/SAM不是凭空想象的数据，而是基于“谁有XX问题，我如何解决”推导出来的。例如，如果你的项目也是科技创新类，类似“数湖启智”，那么你的TAM可能是“企业数据治理与分析市场”，SAM是“受困于多源异构数据清洗效率的金融或政府机构”，SOM则是“某个城市开发区内首批有意向的5家高新技术企业”。\n\n所以，你的当务之急不是找公式，而是先补全项目背景：你的产品具体是什么？它解决了哪一类用户的什么核心痛点（像“元界创生”明确列出了三条痛点）？你计划如何收费（这直接影响你按用户数、交易额还是用量计算市场）？回答了这些，你才能像案例一样，画出从广阔市场到脚下起点的清晰路径，摆脱“发虚”的状态。\n\n【启发式追问】\n你当前对TAM/SAM/SOM的理解停留在概念层面，这直接导致了H4风险（口径混乱），这是你项目当前最核心的瓶颈。这种模糊会像多米诺骨牌一样，影响后续的商业模式、财务预测和落地可行性。要打破这个僵局，关键在于将抽象概念与你的具体项目场景深度绑定。我们可以参考“数湖启智”项目，它清晰地界定了其服务对象是“需要处理多源异构数据湖的政府与企业”，并基于此测算市场。你的第一步，是必须明确回答：你的产品究竟是为谁、在什么具体场景下解决什么问题？没有这个锚点，所有市场测算都是空中楼阁。\n\n基于你提到的“市场分析概念”，我假设你有一个科技创新类项目。那么，你的技术或方案，其核心价值是作为一种“工具”被其他开发者或企业采购使用，还是作为一种“终端服务”直接提供给最终消费者？这决定了你测算市场的根本逻辑。例如，“元界创生”项目将自己定位为“元宇宙内容生成协议”的提供者，其TAM测算就必然基于全球3D内容创作、游戏开发及元宇宙基础设施的市场规模，而非泛泛的“科技市场”。\n\n明确了定位后，你需要像外科手术一样进行市场分层。SAM是你真正有能力触达并服务的细分市场。参考案例中，“数湖启智”将SAM锁定在“中国的智慧公安、智慧医疗、智慧政务等特定领域的政府与企业数据湖项目”，这比泛泛的“中国大数据市场”精准得多。你的SAM应该同样具体：是基于地理区域（如长三角制造业）、特定行业（如AIGC初创公司）、还是某种技术栈的客户（如使用特定云服务的开发者）？列出这些限制条件，就是厘清SAM的过程。\n\n最后，SOM才是现实主义的起点，它关乎你团队的执行能力。你需要审视：在锁定的SAM中，你第一年能实际签约多少客户？这个数字必须与你的团队规模、销售渠道、产品成熟度匹配。超图教学启发指出，科技创新项目常因过于乐观的SOM假设而拖累“商业模型一致性”。因此，请基于你已有的资源（哪怕只有你自己），给出一个保守但可信的SOM，并说明你将通过哪些具体的、可验证的步骤（例如，参加3场行业展会、对接5家试点客户）来实现它。从回答这三个追问开始，你的市场分析将从“发虚”变得扎实。\n\n【粗粒度策略方向】\n你的核心问题在于对TAM/SAM/SOM的理解停留在概念，缺乏将其与具体项目、尤其是自身项目假设相结合的计算逻辑。这直接导致你的市场分析（H4风险）口径混乱，无法为项目可行性提供有力支撑，是当前最高风险点。要解决这个问题，关键在于**将抽象概念转化为基于具体假设的量化过程**，并理解不同假设会导向截然不同的策略。\n\n我们可以用你参考案例库中的「数湖启智——多源异构数据湖智算系统」为例，反向推导其TAM/SAM/SOM的可能计算路径。该项目方案是“为政府和企业提供智慧公安、智慧医疗、智慧政务等服务”。其TAM（总潜在市场）可能是**中国数据治理与智能应用市场的总规模**，例如引用第三方报告，2025年该市场规模预计为5000亿元。但直接说“我们要做5000亿市场”是虚的。因此需要收敛到SAM（可服务市场），这里就需要**做出第一个关键假设**：我们初期只聚焦于“智慧公安”中的“涉诈资金流分析”这一具体场景，并且只服务于省级公安厅。那么SAM可能基于“全国省级公安厅数量”×“该类系统年均预算”来估算，例如31个省份×年均300万预算 ≈ 9300万元。进一步收敛到SOM（可获得市场），需要**做出第二个关键假设**：我们团队有公安领域资源，首年能切入3个标杆省份。那么SOM就是3×300万=900万元。你看，从5000亿到900万，这个过程就是通过不断添加限制条件（行业、场景、客户类型、团队能力、时间）来实现的，每一步都需要合理的假设和数据支撑。\n\n基于这个“假设驱动量化”的核心思路，结合你项目信息严重不足（缺少用户、痛点等）的现状，你有两条可选策略方向：\n\n**策略方向一：快速定位，假设先行。** 既然你缺乏具体项目细节，就不要空想。立即为你脑海中的项目构想一个最具体的初始用户和场景。例如，假设你做“智能学习工具”，不要泛泛说“学生”，而是锁定为“备战考研的工科大三学生”。然后，像「数湖启智」案例那样，基于这个假设进行估算：TAM（中国高等教育市场规模）→ SAM（考研培训市场规模）→ SOM（工科考研生使用的智能刷题工具细分市场）。即使数字不精确，这个过程能立刻暴露出你对用户和场景的理解是否清晰，并引导你去收集真实数据（如考研人数、客单价）来修正假设。这是最快打破“概念发虚”状态的方法。\n\n**策略方向二：对标校准，收敛场景。** 参考「元界创生云」案例，它从广阔的“元宇宙内容生成”市场（TAM），通过痛点“建模门槛高、交互体验弱”收敛到“为中小企业提供快速生成3D交互营销空间的服务”（SAM）。你可以模仿此路径：先找一个你感兴趣的广阔领域（如案例中的Web 3.0交互空间），然后问自己——其中最让某一类用户头疼的**一个**具体问题是什么？这个问题的解决方案，是否构成了一个清晰的、可估算的SAM？例如，你不能说“解决企业营销问题”，而要像案例一样说“解决中小企业缺少技术团队制作3D交互式线上展厅的问题”。场景收得越窄，SAM和SOM才越容易算得实在，也越能避开“面向所有用户”的陷阱。",
+            "tools_used": [
+              "dim_analysis"
+            ],
+            "hyper_context_sent": "超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [证据锚定超边] 科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Stren\n超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [市场细分超边] 交通运输类项目说'面向所有用户'太宽了——哪个细分群体？什么场景？请把用户画像收窄到一个具体的人。"
+          },
+          "analyst": {},
+          "advisor": {},
+          "tutor": {
+            "agent": "课程导师",
+            "analysis": "【方法论桥接】\n你目前对TAM/SAM/SOM的理解停留在概念层面，一到自己的项目就发虚，这直接对应了H4风险——市场测算口径混乱。这个风险之所以致命，是因为它会动摇整个商业计划的根基，让投资人对市场规模和你的获取能力产生根本性质疑。要解决这个问题，不能只背定义，必须通过一个具体案例，把抽象概念“桥接”到你项目思考的每一步。\n\n我们以参考案例“元界创生”为例，来拆解它的市场测算逻辑。这个项目做的是“云上交互空间智能生成”。首先，它的**总体有效市场（TAM）** 瞄准的是全球需要创建3D交互空间的所有潜在客户。这可能包括游戏开发、虚拟展厅、在线教育、数字地产等多个行业。他们会引用行业报告，估算这些领域每年在3D内容制作上的总支出，比如“全球3D动画与可视化软件市场规模预计2025年达XX亿美元”。这是一个非常宽泛的顶层数字，用来展示赛道天花板。\n\n关键在于第二步，**可服务市场（SAM）**。元界创生不会声称能吃下整个TAM，因为他们的技术有特定边界。他们的SAM会聚焦于“那些对快速、低成本生成**可交互**3D空间有强烈需求，且愿意采用云端SaaS模式的企业客户”。这立刻排除了需要电影级画质的影视公司、极度注重数据本地化的军工企业等。他们会进一步细化，比如“中国及东南亚地区的中大型互联网企业、展览设计公司、职业教育机构”，并估算这个细分群体的相关支出。SAM的划定直接体现了你对产品定位和客户画像的精准理解。\n\n最后是**可获得市场（SOM）**，这是你创业头1-3年 realistically 能拿下的份额。元界创生可能会计算：在SAM中，通过现有渠道合作伙伴能触达的客户数量，基于团队销售能力估算的签约速度，再参考类似SaaS产品的初期市场渗透率，得出一个具体的营收数字。例如，“目标在三年内，获取中国虚拟会展领域SAM的5%，对应约XXX万元收入”。SOM必须与你团队规模、资源、竞争态势匹配。\n\n现在桥接到你的项目：你发虚的核心原因，是缺少像案例中那样具体的“用户”、“痛点”和“执行步骤”。要算清楚，你必须先回答：你具体解决了谁的、什么具体问题？你的技术或方案边界在哪里？这决定了你的SAM。比如，如果你的项目也涉及数据处理，参考“数湖启智”案例，它的SAM就明确限定为“受困于多源异构数据质量问题的政府与企业数据湖项目”，而非所有数据软件市场。你的SOM则取决于你第一步打算从哪个最容易切入的细分场景或区域市场做起，以及你凭什么能拿下它。你需要立刻补上这些缺失维度，把模糊的概念替换为你项目的具体假设数字，市场分析才能从虚转实，规避H4风险。",
+            "tools_used": [
+              "dim_analysis"
+            ],
+            "hyper_context_sent": "超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。"
+          },
+          "grader": {},
+          "planner": {}
+        },
+        "kg_analysis": {
+          "entities": [
+            {
+              "id": "e1",
+              "label": "TAM",
+              "type": "market",
+              "source_span": {
+                "quote": "TAM、SAM、SOM 到底怎",
+                "offset": 0,
+                "length": 3
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            },
+            {
+              "id": "e2",
+              "label": "SAM",
+              "type": "market",
+              "source_span": {
+                "quote": "TAM、SAM、SOM 到底怎么算？我",
+                "offset": 4,
+                "length": 3
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            },
+            {
+              "id": "e3",
+              "label": "SOM",
+              "type": "market",
+              "source_span": {
+                "quote": "TAM、SAM、SOM 到底怎么算？我知道概念",
+                "offset": 8,
+                "length": 3
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            },
+            {
+              "id": "e4",
+              "label": "真实例子",
+              "type": "evidence",
+              "source_span": {
+                "quote": "目里就发虚，能带我用一个真实例子走一遍吗？",
+                "offset": 41,
+                "length": 4
+              },
+              "extraction_rule": "llm_entity_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            }
+          ],
+          "relationships": [
+            {
+              "source": "e4",
+              "target": "e1",
+              "relation": "包含",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            },
+            {
+              "source": "e4",
+              "target": "e2",
+              "relation": "包含",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            },
+            {
+              "source": "e4",
+              "target": "e3",
+              "relation": "包含",
+              "extraction_rule": "llm_relation_extraction",
+              "source_message_id": "6b557217-f99c-4d51-9716-738b5c398bbc#0"
+            }
+          ],
+          "structural_gaps": [
+            "缺少执行步骤",
+            "缺少风控措施",
+            "缺少团队介绍",
+            "缺少用户",
+            "缺少痛点",
+            "缺少解决方案",
+            "缺少创新",
+            "缺少技术",
+            "缺少竞品",
+            "缺少资源",
+            "缺少商业模式"
+          ],
+          "content_strengths": [
+            "提到市场分析概念"
+          ],
+          "completeness_score": 1,
+          "section_scores": {
+            "market": 1,
+            "evidence": 1
+          },
+          "student_identity": {},
+          "insight": "学生仅提到市场分析概念，缺乏具体项目细节，需要更多维度的信息来完善项目描述。",
+          "kg_quality": {
+            "entity_specificity": 3.5,
+            "relationship_density": 0.5,
+            "dimension_balance": 0.8113,
+            "cross_validation_index": 0.0,
+            "extraction_confidence": 4.83,
+            "entity_count": 4,
+            "relationship_count": 3,
+            "type_distribution": {
+              "market": 3,
+              "evidence": 1
+            },
+            "formulas": {
+              "entity_specificity": "avg(label_length_score + numeric_bonus + proper_noun_bonus)",
+              "relationship_density": "R / (E*(E-1)/2)",
+              "dimension_balance": "H(type_distribution) / log2(num_types)",
+              "cross_validation_index": "Pearson(kg_section_scores, rubric_scores)",
+              "extraction_confidence": "0.3*entity + 0.25*rel + 0.25*balance + 0.2*specificity"
+            }
+          }
+        },
+        "hypergraph_insight": {
+          "ok": true,
+          "summary": "本轮超图主要命中了风险模式超边、风险模式超边、价值闭环超边，说明当前问题更集中在Category、RiskRule、RubricItem、BusinessModelAspect。",
+          "top_signals": [
+            "优先命中的超边类型：风险模式超边、风险模式超边、价值闭环超边",
+            "当前高连接节点：交通运输、其他、H10",
+            "当前偏好的超边族：Market_Segmentation_Edge、Metric_Definition_Edge、Scenario_Analysis_Edge、Risk_Pattern_Edge、Evidence_Grounding_Edge、Insight_Validation_Edge、UX_Research_Edge、Problem_Discovery_Edge、Empathy_Map_Edge、Presentation_Narrative_Edge、Cross_Dimension_Coherence_Edge、Value_Loop_Edge、User_Education_Edge、Ontology_Grounded_Edge、Design_Thinking_Edge、Ideation_Edge、Concept_Evaluation_Edge"
+          ],
+          "key_dimensions": [
+            "Category",
+            "RiskRule",
+            "RubricItem",
+            "BusinessModelAspect",
+            "Market",
+            "PainPoint"
+          ],
+          "edges": [
+            {
+              "hyperedge_id": "he_risk_001",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 5,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_106839a62240",
+                "case_1135e29de95e",
+                "case_1512b0f26aa4",
+                "case_43210f67ee34",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.81,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 7.8
+            },
+            {
+              "hyperedge_id": "he_risk_002",
+              "type": "Risk_Pattern_Edge",
+              "family_label": "风险模式超边",
+              "support": 4,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "医疗健康"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "未来将应用在医院、养老院、社区、家庭等场景中，实现健康评估、脉象体质分析和中医调养建议。",
+                "由于脉诊主要依赖医者的主观感受和经验判断，限制了脉诊现代化的发展，研发脉诊仪对脉搏信号量化采集和处理十分必要。",
+                "项目成果已部署医院原型系统支持基层筛查与远程诊疗"
+              ],
+              "retrieval_reason": "风险规则与Rubric覆盖共同命中，适合做风险模式检索。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::医疗健康",
+                  "type": "Category",
+                  "name": "医疗健康",
+                  "display": "医疗健康"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_15e831df090d",
+                "case_2ec8ca03bca5",
+                "case_4f02070b3113",
+                "case_c661aa0d29b3"
+              ],
+              "confidence": 0.862,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.6
+            },
+            {
+              "hyperedge_id": "he_value_001",
+              "type": "Value_Loop_Edge",
+              "family_label": "价值闭环超边",
+              "support": 1,
+              "teaching_note": "交通运输类项目常围绕“城市低空交通监管部门—传统监管系统无法对非合作无人机进行实时检测—采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性”形成价值闭环，并需要通过核心价值主张：提供高效、准确的无人机检测系统完成变现。",
+              "categories": [
+                "交通运输"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H19",
+                "H3",
+                "H4",
+                "H5",
+                "H9",
+                "execution_vague",
+                "market_size_fallacy",
+                "no_execution_plan",
+                "weak_user_evidence"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "Innovation & Differentiation",
+                "Market & Competition",
+                "Presentation Quality",
+                "Problem Definition",
+                "Risk Control",
+                "Solution Feasibility"
+              ],
+              "evidence_quotes": [
+                "以数据平台备案方式为主的传统监管系统无法对非合作的无人机进行实时检测监控",
+                "无人机在城市中的应用场景增加，传统监管系统的探测手段在复杂城市地形下性能有限"
+              ],
+              "retrieval_reason": "目标用户、痛点、方案与商业模式同时出现，适合做价值闭环检索。",
+              "nodes": [
+                "BusinessModelAspect::核心价值主张：提供高效、准确的无人机检测系统",
+                "Category::交通运输",
+                "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                "Solution::采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性",
+                "Stakeholder::城市低空交通监管部门"
+              ],
+              "member_nodes": [
+                {
+                  "key": "BusinessModelAspect::核心价值主张：提供高效、准确的无人机检测系统",
+                  "type": "BusinessModelAspect",
+                  "name": "核心价值主张：提供高效、准确的无人机检测系统",
+                  "display": "核心价值主张：提供高效、准确的无人机检测系统"
+                },
+                {
+                  "key": "Category::交通运输",
+                  "type": "Category",
+                  "name": "交通运输",
+                  "display": "交通运输"
+                },
+                {
+                  "key": "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                  "type": "Market",
+                  "name": "低空经济市场规模预计到2035年将达到3.5万亿元",
+                  "display": "低空经济市场规模预计到2035年将达到3.5万亿元"
+                },
+                {
+                  "key": "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                  "type": "PainPoint",
+                  "name": "传统监管系统无法对非合作无人机进行实时检测",
+                  "display": "传统监管系统无法对非合作无人机进行实时检测"
+                },
+                {
+                  "key": "Solution::采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性",
+                  "type": "Solution",
+                  "name": "采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性",
+                  "display": "采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性"
+                },
+                {
+                  "key": "Stakeholder::城市低空交通监管部门",
+                  "type": "Stakeholder",
+                  "name": "城市低空交通监管部门",
+                  "display": "城市低空交通监管部门"
+                }
+              ],
+              "source_project_ids": [
+                "case_18e94d2d521b"
+              ],
+              "confidence": 0.9,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.0
+            },
+            {
+              "hyperedge_id": "he_value_002",
+              "type": "Value_Loop_Edge",
+              "family_label": "价值闭环超边",
+              "support": 1,
+              "teaching_note": "交通运输类项目常围绕“城市低空交通监管部门—传统监管系统无法对非合作无人机进行实时检测—利用交叉注意力机制和多尺度Transformer，实现雷达信号与遥感地图的高效融合”形成价值闭环，并需要通过核心价值主张：提供高效、准确的无人机检测系统完成变现。",
+              "categories": [
+                "交通运输"
+              ],
+              "rules": [
+                "H10",
+                "H15",
+                "H19",
+                "H3",
+                "H4",
+                "H5",
+                "H9",
+                "execution_vague",
+                "market_size_fallacy",
+                "no_execution_plan",
+                "weak_user_evidence"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "Innovation & Differentiation",
+                "Market & Competition",
+                "Presentation Quality",
+                "Problem Definition",
+                "Risk Control",
+                "Solution Feasibility"
+              ],
+              "evidence_quotes": [
+                "以数据平台备案方式为主的传统监管系统无法对非合作的无人机进行实时检测监控",
+                "无人机在城市中的应用场景增加，传统监管系统的探测手段在复杂城市地形下性能有限"
+              ],
+              "retrieval_reason": "目标用户、痛点、方案与商业模式同时出现，适合做价值闭环检索。",
+              "nodes": [
+                "BusinessModelAspect::核心价值主张：提供高效、准确的无人机检测系统",
+                "Category::交通运输",
+                "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                "Solution::利用交叉注意力机制和多尺度Transformer，实现雷达信号与遥感地图的高效融合",
+                "Stakeholder::城市低空交通监管部门"
+              ],
+              "member_nodes": [
+                {
+                  "key": "BusinessModelAspect::核心价值主张：提供高效、准确的无人机检测系统",
+                  "type": "BusinessModelAspect",
+                  "name": "核心价值主张：提供高效、准确的无人机检测系统",
+                  "display": "核心价值主张：提供高效、准确的无人机检测系统"
+                },
+                {
+                  "key": "Category::交通运输",
+                  "type": "Category",
+                  "name": "交通运输",
+                  "display": "交通运输"
+                },
+                {
+                  "key": "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                  "type": "Market",
+                  "name": "低空经济市场规模预计到2035年将达到3.5万亿元",
+                  "display": "低空经济市场规模预计到2035年将达到3.5万亿元"
+                },
+                {
+                  "key": "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                  "type": "PainPoint",
+                  "name": "传统监管系统无法对非合作无人机进行实时检测",
+                  "display": "传统监管系统无法对非合作无人机进行实时检测"
+                },
+                {
+                  "key": "Solution::利用交叉注意力机制和多尺度Transformer，实现雷达信号与遥感地图的高效融合",
+                  "type": "Solution",
+                  "name": "利用交叉注意力机制和多尺度Transformer，实现雷达信号与遥感地图的高效融合",
+                  "display": "利用交叉注意力机制和多尺度Transformer，实现雷达信号与遥感地图的高效融合"
+                },
+                {
+                  "key": "Stakeholder::城市低空交通监管部门",
+                  "type": "Stakeholder",
+                  "name": "城市低空交通监管部门",
+                  "display": "城市低空交通监管部门"
+                }
+              ],
+              "source_project_ids": [
+                "case_18e94d2d521b"
+              ],
+              "confidence": 0.9,
+              "severity": "高",
+              "score_impact": 10.0,
+              "stage_scope": "验证期",
+              "match_score": 5.0
+            },
+            {
+              "hyperedge_id": "he_segment_001",
+              "type": "Market_Segmentation_Edge",
+              "family_label": "市场细分超边",
+              "support": 1,
+              "teaching_note": "交通运输类项目说'面向所有用户'太宽了——哪个细分群体？什么场景？请把用户画像收窄到一个具体的人。",
+              "categories": [
+                "交通运输"
+              ],
+              "rules": [
+                "H19",
+                "H4",
+                "H9",
+                "market_size_fallacy"
+              ],
+              "rubrics": [
+                "Market & Competition",
+                "Problem Definition"
+              ],
+              "evidence_quotes": [
+                "以数据平台备案方式为主的传统监管系统无法对非合作的无人机进行实时检测监控",
+                "无人机在城市中的应用场景增加，传统监管系统的探测手段在复杂城市地形下性能有限"
+              ],
+              "retrieval_reason": "用户、市场与痛点的细分聚焦分析。",
+              "nodes": [
+                "Category::交通运输",
+                "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                "Stakeholder::城市低空交通监管部门"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::交通运输",
+                  "type": "Category",
+                  "name": "交通运输",
+                  "display": "交通运输"
+                },
+                {
+                  "key": "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                  "type": "Market",
+                  "name": "低空经济市场规模预计到2035年将达到3.5万亿元",
+                  "display": "低空经济市场规模预计到2035年将达到3.5万亿元"
+                },
+                {
+                  "key": "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                  "type": "PainPoint",
+                  "name": "传统监管系统无法对非合作无人机进行实时检测",
+                  "display": "传统监管系统无法对非合作无人机进行实时检测"
+                },
+                {
+                  "key": "Stakeholder::城市低空交通监管部门",
+                  "type": "Stakeholder",
+                  "name": "城市低空交通监管部门",
+                  "display": "城市低空交通监管部门"
+                }
+              ],
+              "source_project_ids": [
+                "case_18e94d2d521b"
+              ],
+              "confidence": 0.9,
+              "severity": "高",
+              "score_impact": 9.85,
+              "stage_scope": "验证期",
+              "match_score": 5.0
+            },
+            {
+              "hyperedge_id": "he_segment_003",
+              "type": "Market_Segmentation_Edge",
+              "family_label": "市场细分超边",
+              "support": 1,
+              "teaching_note": "交通运输类项目说'面向所有用户'太宽了——哪个细分群体？什么场景？请把用户画像收窄到一个具体的人。",
+              "categories": [
+                "交通运输"
+              ],
+              "rules": [
+                "H19",
+                "H4",
+                "H9",
+                "market_size_fallacy"
+              ],
+              "rubrics": [
+                "Problem Definition"
+              ],
+              "evidence_quotes": [
+                "这些非同轴两轮无人平台具有强非线性、紧耦合、静不定、时变和非完整约束特征，给复杂不平路面、侧向风等时变干扰下的运动控制器设计带来挑战。",
+                "首先采用查普雷金方程建立窄轨非同轴两轮平台动力学模型，针对平台转速及转角控制提出分层闭环控制策略；其次基于动力学模型设计线性二次型调节器(LQR)和比例-积分-微分(PID)自平衡控制器。"
+              ],
+              "retrieval_reason": "用户、市场与痛点的细分聚焦分析。",
+              "nodes": [
+                "Category::交通运输",
+                "Market::应用广泛，需求明确",
+                "PainPoint::复杂不平路面的运动控制困难",
+                "Stakeholder::环境探测人员"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::交通运输",
+                  "type": "Category",
+                  "name": "交通运输",
+                  "display": "交通运输"
+                },
+                {
+                  "key": "Market::应用广泛，需求明确",
+                  "type": "Market",
+                  "name": "应用广泛，需求明确",
+                  "display": "应用广泛，需求明确"
+                },
+                {
+                  "key": "PainPoint::复杂不平路面的运动控制困难",
+                  "type": "PainPoint",
+                  "name": "复杂不平路面的运动控制困难",
+                  "display": "复杂不平路面的运动控制困难"
+                },
+                {
+                  "key": "Stakeholder::环境探测人员",
+                  "type": "Stakeholder",
+                  "name": "环境探测人员",
+                  "display": "环境探测人员"
+                }
+              ],
+              "source_project_ids": [
+                "case_a8b6b65b6e82"
+              ],
+              "confidence": 0.9,
+              "severity": "高",
+              "score_impact": 9.55,
+              "stage_scope": "原型期",
+              "match_score": 5.0
+            },
+            {
+              "hyperedge_id": "he_coherence_005",
+              "type": "Cross_Dimension_Coherence_Edge",
+              "family_label": "跨维度一致性超边",
+              "support": 1,
+              "teaching_note": "交通运输类项目你的目标用户、解决方案、商业模式和市场定位之间讲的是同一个故事吗？评委会检查叙事一致性。",
+              "categories": [
+                "交通运输"
+              ],
+              "rules": [
+                "H14",
+                "innovation_unclear",
+                "no_innovation"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "Problem Definition",
+                "Risk Control"
+              ],
+              "evidence_quotes": [
+                "城市交通管理部门、公共安全机构等",
+                "交通管理力量却严重不足，传统道路监控系统难以满足日益增长的交通管理需求"
+              ],
+              "retrieval_reason": "多维度之间叙事一致性与逻辑自洽分析。",
+              "nodes": [
+                "BusinessModelAspect::目标客户为城市交通管理部门和公共安全机构",
+                "Category::交通运输",
+                "Market::智慧交通市场年均复合增长率达13.72%",
+                "Solution::提供交通长时视频实时分析系统",
+                "Stakeholder::城市交通管理部门"
+              ],
+              "member_nodes": [
+                {
+                  "key": "BusinessModelAspect::目标客户为城市交通管理部门和公共安全机构",
+                  "type": "BusinessModelAspect",
+                  "name": "目标客户为城市交通管理部门和公共安全机构",
+                  "display": "目标客户为城市交通管理部门和公共安全机构"
+                },
+                {
+                  "key": "Category::交通运输",
+                  "type": "Category",
+                  "name": "交通运输",
+                  "display": "交通运输"
+                },
+                {
+                  "key": "Market::智慧交通市场年均复合增长率达13.72%",
+                  "type": "Market",
+                  "name": "智慧交通市场年均复合增长率达13.72%",
+                  "display": "智慧交通市场年均复合增长率达13.72%"
+                },
+                {
+                  "key": "Solution::提供交通长时视频实时分析系统",
+                  "type": "Solution",
+                  "name": "提供交通长时视频实时分析系统",
+                  "display": "提供交通长时视频实时分析系统"
+                },
+                {
+                  "key": "Stakeholder::城市交通管理部门",
+                  "type": "Stakeholder",
+                  "name": "城市交通管理部门",
+                  "display": "城市交通管理部门"
+                }
+              ],
+              "source_project_ids": [
+                "case_8172b015c1a9"
+              ],
+              "confidence": 0.9,
+              "severity": "中",
+              "score_impact": 6.52,
+              "stage_scope": "验证期",
+              "match_score": 5.0
+            },
+            {
+              "hyperedge_id": "he_evidence_001",
+              "type": "Evidence_Grounding_Edge",
+              "family_label": "证据锚定超边",
+              "support": 3,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H10",
+                "no_execution_plan"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "项目具有以下创新点：创新性提出了飞秒激光电子动态闭环调控观测系统，可实现150飞秒的超高的时间分辨率、20纳米的超高空间分辨率，并在国内首次利用电子能量分布特性，实现温度等电子层面信息的直接获取。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::solution_evidence",
+                "RiskRule::H10",
+                "RiskRule::no_execution_plan",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::pain_points_evidence",
+                  "type": "EvidenceType",
+                  "name": "pain_points_evidence",
+                  "display": "pain_points_evidence"
+                },
+                {
+                  "key": "EvidenceType::solution_evidence",
+                  "type": "EvidenceType",
+                  "name": "solution_evidence",
+                  "display": "solution_evidence"
+                },
+                {
+                  "key": "RiskRule::H10",
+                  "type": "RiskRule",
+                  "name": "H10",
+                  "display": "H10"
+                },
+                {
+                  "key": "RiskRule::no_execution_plan",
+                  "type": "RiskRule",
+                  "name": "no_execution_plan",
+                  "display": "no_execution_plan"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_1512b0f26aa4",
+                "case_317f0438a5dd",
+                "case_821844d1eaed"
+              ],
+              "confidence": 0.85,
+              "severity": "中",
+              "score_impact": 6.08,
+              "stage_scope": "验证期",
+              "match_score": 4.4
+            },
+            {
+              "hyperedge_id": "he_evidence_012",
+              "type": "Evidence_Grounding_Edge",
+              "family_label": "证据锚定超边",
+              "support": 2,
+              "teaching_note": "科技创新类项目常用“pain_points_evidence、user_evidence”类证据支撑Business Model Consistency、User Evidence Strength。",
+              "categories": [
+                "科技创新"
+              ],
+              "rules": [
+                "H15",
+                "H3"
+              ],
+              "rubrics": [
+                "Business Model Consistency",
+                "User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "通过鼻腔、咽喉、胃肠道等腔道实施剥离探查、病灶切除等手术操作，有效地避免了传统开放式手术的体表切口创伤，解决了多孔 /单孔腔镜手术存在的术后疼痛及切口感染等问题， 实现了最小化创伤的无瘢痕治疗。",
+                "然而，由于人体自然腔道弯曲狭长、动态柔软、操作复杂，对器械的尺寸、刚度和灵巧性提出了巨大挑战。",
+                "本作品针对以上技术瓶颈， 结合人体自然腔道手术环境和操作任务特点， 研制小尺寸多自由度手术执行器， 开发基于虚拟现实技术的主从控制系统， 集成可快速部署的小型化手术机器人系统， 开展性能和功能实验验证。"
+              ],
+              "retrieval_reason": "证据类型与评分维度能对齐，适合做证据锚定检索。",
+              "nodes": [
+                "Category::科技创新",
+                "EvidenceType::pain_points_evidence",
+                "EvidenceType::user_evidence",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::科技创新",
+                  "type": "Category",
+                  "name": "科技创新",
+                  "display": "科技创新"
+                },
+                {
+                  "key": "EvidenceType::pain_points_evidence",
+                  "type": "EvidenceType",
+                  "name": "pain_points_evidence",
+                  "display": "pain_points_evidence"
+                },
+                {
+                  "key": "EvidenceType::user_evidence",
+                  "type": "EvidenceType",
+                  "name": "user_evidence",
+                  "display": "user_evidence"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RubricItem::Business Model Consistency",
+                  "type": "RubricItem",
+                  "name": "Business Model Consistency",
+                  "display": "Business Model Consistency"
+                },
+                {
+                  "key": "RubricItem::User Evidence Strength",
+                  "type": "RubricItem",
+                  "name": "User Evidence Strength",
+                  "display": "User Evidence Strength"
+                }
+              ],
+              "source_project_ids": [
+                "case_81bd41c4f863",
+                "case_a498ec8c0770"
+              ],
+              "confidence": 0.9,
+              "severity": "中",
+              "score_impact": 5.88,
+              "stage_scope": "想法期",
+              "match_score": 4.2
+            },
+            {
+              "hyperedge_id": "he_tension_005",
+              "type": "Rule_Rubric_Tension_Edge",
+              "family_label": "规则评分张力超边",
+              "support": 2,
+              "teaching_note": "工业制造类项目中，某些规则风险会同时拉低多个评分维度，形成“规则-评分张力”。",
+              "categories": [
+                "工业制造"
+              ],
+              "rules": [
+                "H15",
+                "H3",
+                "H5"
+              ],
+              "rubrics": [
+                "Problem Definition",
+                "Risk Control",
+                "Solution Feasibility"
+              ],
+              "evidence_quotes": [
+                "工业机器人加工过程依赖于传统的人工示教模式，面临种类繁杂的加工工艺数据时，存在参数适用范围窄和智能决策程度低的瓶颈问题，难以满足当前智能制造的高效率、高质量要求。",
+                "助力合作公司中标近亿元头部企业重大项目。",
+                "煤矿井下作业人员面临传统传感器易失效、人工监测存在盲区等行业痛点"
+              ],
+              "retrieval_reason": "规则命中和评分维度同时存在，适合解释为什么一个问题会被连续追问。",
+              "nodes": [
+                "Category::工业制造",
+                "EvidenceType::user_evidence",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Problem Definition",
+                "RubricItem::Risk Control",
+                "RubricItem::Solution Feasibility"
+              ],
+              "member_nodes": [
+                {
+                  "key": "Category::工业制造",
+                  "type": "Category",
+                  "name": "工业制造",
+                  "display": "工业制造"
+                },
+                {
+                  "key": "EvidenceType::user_evidence",
+                  "type": "EvidenceType",
+                  "name": "user_evidence",
+                  "display": "user_evidence"
+                },
+                {
+                  "key": "RiskRule::H15",
+                  "type": "RiskRule",
+                  "name": "H15",
+                  "display": "H15"
+                },
+                {
+                  "key": "RiskRule::H3",
+                  "type": "RiskRule",
+                  "name": "H3",
+                  "display": "H3"
+                },
+                {
+                  "key": "RiskRule::H5",
+                  "type": "RiskRule",
+                  "name": "H5",
+                  "display": "H5"
+                },
+                {
+                  "key": "RubricItem::Problem Definition",
+                  "type": "RubricItem",
+                  "name": "Problem Definition",
+                  "display": "Problem Definition"
+                },
+                {
+                  "key": "RubricItem::Risk Control",
+                  "type": "RubricItem",
+                  "name": "Risk Control",
+                  "display": "Risk Control"
+                },
+                {
+                  "key": "RubricItem::Solution Feasibility",
+                  "type": "RubricItem",
+                  "name": "Solution Feasibility",
+                  "display": "Solution Feasibility"
+                }
+              ],
+              "source_project_ids": [
+                "case_7e656049929a",
+                "case_f8130b75b4aa"
+              ],
+              "confidence": 0.825,
+              "severity": "高",
+              "score_impact": 9.65,
+              "stage_scope": "验证期",
+              "match_score": 3.4
+            }
+          ],
+          "matched_by": {
+            "category": "科技创新",
+            "rule_ids": [
+              "H4",
+              "H5",
+              "H14"
+            ],
+            "expanded_rule_ids": [
+              "H14",
+              "H19",
+              "H4",
+              "H5",
+              "H9",
+              "innovation_unclear",
+              "market_size_fallacy",
+              "no_innovation",
+              "weak_user_evidence"
+            ],
+            "preferred_edge_types": [
+              "Market_Segmentation_Edge",
+              "Metric_Definition_Edge",
+              "Scenario_Analysis_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge",
+              "Insight_Validation_Edge",
+              "UX_Research_Edge",
+              "Problem_Discovery_Edge",
+              "Empathy_Map_Edge",
+              "Presentation_Narrative_Edge",
+              "Cross_Dimension_Coherence_Edge",
+              "Value_Loop_Edge",
+              "User_Education_Edge",
+              "Ontology_Grounded_Edge",
+              "Design_Thinking_Edge",
+              "Ideation_Edge",
+              "Concept_Evaluation_Edge"
+            ],
+            "diversity_cap": 2,
+            "family_distribution": {
+              "Risk_Pattern_Edge": 2,
+              "Value_Loop_Edge": 2,
+              "Market_Segmentation_Edge": 2,
+              "Cross_Dimension_Coherence_Edge": 1,
+              "Evidence_Grounding_Edge": 2,
+              "Rule_Rubric_Tension_Edge": 1
+            }
+          },
+          "topology": {
+            "hub_nodes": [
+              {
+                "node": "Category::交通运输",
+                "degree": 259,
+                "interpretation": "「交通运输」类别出现在259种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "Category::其他",
+                "degree": 49,
+                "interpretation": "「其他」类别出现在49种超边中，是最活跃的赛道"
+              },
+              {
+                "node": "RiskRule::H10",
+                "degree": 45,
+                "interpretation": "风险规则「H10」关联45种模式，是最普遍的问题"
+              },
+              {
+                "node": "RubricItem::User Evidence Strength",
+                "degree": 38,
+                "interpretation": "评分维度「User Evidence Strength」被38种模式反复命中，是重要教学检查点"
+              },
+              {
+                "node": "RiskRule::H15",
+                "degree": 28,
+                "interpretation": "风险规则「H15」关联28种模式，是最普遍的问题"
+              }
+            ],
+            "avg_edge_size": 6.8,
+            "max_edge_size": 7,
+            "family_leaderboard": [
+              {
+                "type": "Risk_Pattern_Edge",
+                "label": "风险模式超边",
+                "count": 18
+              },
+              {
+                "type": "Value_Loop_Edge",
+                "label": "价值闭环超边",
+                "count": 16
+              },
+              {
+                "type": "Evidence_Grounding_Edge",
+                "label": "证据锚定超边",
+                "count": 12
+              },
+              {
+                "type": "User_Pain_Fit_Edge",
+                "label": "用户痛点匹配超边",
+                "count": 12
+              },
+              {
+                "type": "Execution_Gap_Edge",
+                "label": "执行断裂超边",
+                "count": 10
+              },
+              {
+                "type": "Market_Competition_Edge",
+                "label": "市场竞争超边",
+                "count": 10
+              }
+            ]
+          },
+          "meta": {
+            "engine": "hypernetx",
+            "edge_count": 362,
+            "node_count": 168,
+            "family_counts": {
+              "Risk_Pattern_Edge": 18,
+              "Value_Loop_Edge": 16,
+              "User_Pain_Fit_Edge": 12,
+              "Evidence_Grounding_Edge": 12,
+              "Execution_Gap_Edge": 10,
+              "Market_Competition_Edge": 10,
+              "Compliance_Safety_Edge": 8,
+              "Innovation_Validation_Edge": 8,
+              "Pricing_Unit_Economics_Edge": 10,
+              "Substitute_Migration_Edge": 10,
+              "Trust_Adoption_Edge": 8,
+              "Retention_Workflow_Embed_Edge": 8,
+              "Stage_Goal_Fit_Edge": 8,
+              "Rule_Rubric_Tension_Edge": 10,
+              "Ontology_Grounded_Edge": 6,
+              "Team_Capability_Gap_Edge": 8,
+              "User_Journey_Edge": 10,
+              "Social_Impact_Edge": 6,
+              "Data_Flywheel_Edge": 8,
+              "Scalability_Bottleneck_Edge": 8,
+              "IP_Moat_Edge": 6,
+              "Pivot_Signal_Edge": 6,
+              "Cost_Structure_Edge": 8,
+              "Ecosystem_Dependency_Edge": 6,
+              "MVP_Scope_Edge": 8,
+              "Stakeholder_Conflict_Edge": 6,
+              "Channel_Conversion_Edge": 8,
+              "Regulatory_Landscape_Edge": 6,
+              "Presentation_Narrative_Edge": 8,
+              "Resource_Leverage_Edge": 6,
+              "Timing_Window_Edge": 6,
+              "Revenue_Sustainability_Edge": 8,
+              "Demand_Supply_Match_Edge": 8,
+              "Founder_Risk_Edge": 6,
+              "Ethical_Bias_Edge": 6,
+              "Assumption_Stack_Edge": 8,
+              "Metric_Definition_Edge": 6,
+              "Market_Segmentation_Edge": 8,
+              "Competitive_Response_Edge": 6,
+              "Milestone_Dependency_Edge": 6,
+              "Funding_Stage_Fit_Edge": 6,
+              "Switching_Cost_Edge": 6,
+              "Network_Effect_Edge": 8,
+              "Cross_Dimension_Coherence_Edge": 6,
+              "ESG_Measurability_Edge": 6
+            }
+          }
+        },
+        "rag_cases": [
+          {
+            "case_id": "case_1135e29de95e",
+            "category": "科技创新",
+            "project_name": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书",
+            "similarity": 0.4559,
+            "score_keyword": 0.0,
+            "score_vector": 0.4559,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "risk_control:missing",
+              "risk_gap:compliance_not_covered",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H15",
+              "risk_rule:H3",
+              "risk_rule:H5",
+              "risk_rule:H8",
+              "competition:internet_plus"
+            ],
+            "pain_points": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "solution": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "innovation_points": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "business_model": [],
+            "evidence_quotes": [
+              "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。",
+              "目前市场上不存在一种通用且高效的大型虚拟空间构建仿真方案，所以元界创生迎接新时代元宇宙技术为建模仿真技术带来的新挑战，针对万人并发、百万人访问、三端一体的技术难题，打造了一个即时高交互数字云空间一体化全流程平台。"
+            ],
+            "risk_flags": [
+              "H10",
+              "H15",
+              "H3",
+              "H5",
+              "H8"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "第九届中国国际“互联网+”大学生创新创业大赛参赛作品 1 第九届中国国际“互联网+” 大学生创新创业大赛 项目计划书 学 校 名 称： 北京理工大学 参 赛 赛 道： 高教主赛道 参 赛 组 别： 研究生创意组 项 目 类 别： 新文科类 项 目 名 称： 元界创生——云交互空间智能生成技术领航者 项目负责人 ： 何 莲 联 系 电 话： 13529146379 负责人邮箱 ： helian000505@163.com 第九届中国国际“互联网+”大学生创新创业大赛参赛作品 2 目录 前言 .....................................................",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "建模门槛高：传统 3D 空间制作依赖专业建模师，手工周期以月为单位计算",
+              "交互体验弱：多数虚拟空间仅能“看”不能“动”，缺乏深层次的逻辑交互",
+              "更新成本高：一旦场景需要修改，往往需要重新渲染并发布，时效性差"
+            ],
+            "graph_solutions": [
+              "云端渲染引擎：采用“云端计算、指令传输、终端显示”架构",
+              "AI 空间生成：通过 AIGC 技术，实现从平面图或语言描述到 3D 交互空间的自动转化",
+              "细粒度流水线：优化渲染管线任务拆分，实现高并发、低延迟的云交互体验"
+            ],
+            "graph_innovations": [
+              "三端协作优化：利用云、边、端协同处理，大幅降低渲染带宽成本",
+              "实时逻辑重构：支持在不停止服务的情况下，动态修改空间内的交互逻辑与视觉元素"
+            ],
+            "graph_biz_models": [],
+            "graph_markets": [
+              "随着 Web 3.0 与 5G 普及，沉浸式交互空间市场预计呈指数增长",
+              "不仅是工具提供商，更旨在构建“元宇宙内容生成协议”标准"
+            ],
+            "graph_exec_steps": [
+              "技术研发规划：积累更丰富的模型数据与算法指纹库，提升 GPU 利用率",
+              "市场推广规划：先行在红色文旅与教育培训领域落地"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              },
+              {
+                "id": "H9",
+                "name": "增长逻辑跳跃",
+                "severity": "medium"
+              },
+              {
+                "id": "H4",
+                "name": "TAM/SAM/SOM口径混乱",
+                "severity": "high"
+              },
+              {
+                "id": "H8",
+                "name": "单位经济不成立",
+                "severity": "high"
+              },
+              {
+                "id": "H13",
+                "name": "实验设计不合格",
+                "severity": "medium"
+              },
+              {
+                "id": "H7",
+                "name": "创新点不可验证",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 3,
+            "graph_evidence_samples": [
+              {
+                "type": "user_evidence",
+                "quote": "项目面向多个领域，并针对多类型用户提供大型数字空间的构建和实时高可交互的体验，涉及互动游戏虚拟空间游戏行业、影视娱乐行业、教育行业、零售行业以及医疗保健行业等。"
+              },
+              {
+                "type": "business_model_evidence",
+                "quote": "目前市场上不存在一种通用且高效的大型虚拟空间构建仿真方案，所以元界创生迎接新时代元宇宙技术为建模仿真技术带来的新挑战，针对万人并发、百万人访问、三端一体的技术难题，打造了一个即时高交互数字云空间一体化全流程平台。"
+              },
+              {
+                "type": "risk_evidence",
+                "quote": "我国在这方面的技术储备目前还有所欠缺。虽然我国在虚拟空间描述方法、高精度三维仿真与渲染引擎设计、基于高沉浸的协同编辑与辅助技术方面有一定的科研与产品生产，但缺乏应对虚拟场景构建、高交互角色映射、多样虚拟空间服务需求的平台和成型系统。"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [
+                "H4",
+                "H5"
+              ],
+              "only_in_case": [
+                "H10",
+                "H13",
+                "H15",
+                "H3",
+                "H7",
+                "H8",
+                "H9"
+              ],
+              "only_in_student": [
+                "H14"
+              ]
+            }
+          },
+          {
+            "case_id": "case_317f0438a5dd",
+            "category": "科技创新",
+            "project_name": "数湖启智——多源异构数据湖智算系统",
+            "similarity": 0.4427,
+            "score_keyword": 0.0,
+            "score_vector": 0.4427,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:docx",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H15",
+              "risk_rule:H3"
+            ],
+            "pain_points": [
+              "数据湖中多源异构数据复杂，存在数据质量问题",
+              "数据科学家需耗费大量精力准备数据",
+              "不同任务对数据形态、时效性及质量要求存在冲突"
+            ],
+            "solution": [
+              "人机协作的数据提质，实现低成本高质量数据清洗融合",
+              "任务感知的关系透视，提升数据适配准确率",
+              "数据优选的模型提效，降低模型训练时间成本"
+            ],
+            "innovation_points": [
+              "人机协同的数据清洗融合方法",
+              "任务感知的精准数据发现",
+              "具备理论保证的核心子集选择与更新"
+            ],
+            "business_model": [
+              "为政府和企业提供智慧公安、智慧医疗、智慧政务等服务",
+              "通过合作推广，提升数据管理效率和质量",
+              "推动政府基础设施建设和高新企业创新业务发展"
+            ],
+            "evidence_quotes": [
+              "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题",
+              "数据科学家至少耗费90%的精力准备数据湖中要分析的数据，将数据融合成一个连贯的整体，并进行数据清洗，否则数据湖就会变成数据沼泽"
+            ],
+            "risk_flags": [
+              "H10",
+              "H15",
+              "H3"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "作品设计说明书 作品名称： 数湖启智——多源异构数据湖智算系统 申报类别： 信息技术 作者： 邓宇豪、曾杨杰、杨烨如、王涵驰 钟元浩、程果、李宇航、吴泽学 类别： 自然科学类学术论文 哲学社会科学类社会调查报告和学术论文 科技发明制作A类 科技发明制作B类 摘 要 算力、模型和数据组成了人工智能的三要素，也是大国博弈的关键。其中，华为昇腾、DeepSeek在算力和模型上分别打破了国外技术垄断，但是数据管理领域亟待形成具有国际竞争力的技术突破。数据管理系统历经数据库、数据仓库的迭代升级，直至当前数据湖架构阶段。但是，由于数据湖中多源异构数据的复杂性，若不采取管理措施，难以发挥数据价值。本项目分析",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "数据湖中多源异构数据复杂，存在数据质量问题",
+              "数据科学家需耗费大量精力准备数据",
+              "不同任务对数据形态、时效性及质量要求存在冲突"
+            ],
+            "graph_solutions": [
+              "人机协作的数据提质，实现低成本高质量数据清洗融合",
+              "任务感知的关系透视，提升数据适配准确率",
+              "数据优选的模型提效，降低模型训练时间成本"
+            ],
+            "graph_innovations": [
+              "人机协同的数据清洗融合方法",
+              "任务感知的精准数据发现",
+              "具备理论保证的核心子集选择与更新"
+            ],
+            "graph_biz_models": [
+              "为政府和企业提供智慧公安、智慧医疗、智慧政务等服务",
+              "通过合作推广，提升数据管理效率和质量",
+              "推动政府基础设施建设和高新企业创新业务发展"
+            ],
+            "graph_markets": [
+              "数据湖技术面临数据质量、适配和训练效率的挑战",
+              "国务院和国家数据局强调高质量数据资源的重要性",
+              "数据湖成为数字经济时代的新型基础设施"
+            ],
+            "graph_exec_steps": [
+              "构建人机协作的数据提质、任务感知的关系透视、数据优选的模型提效三大技术创新",
+              "通过企业走访和行业调研，优化系统功能",
+              "为国内多个城市提供智慧服务，推动相关产业发展"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 14,
+            "graph_evidence_samples": [
+              {
+                "type": "pain_points_evidence",
+                "quote": "由于数据湖中多源异构数据的复杂性，若不采取一定关键措施，其将面临严重的数据质量问题"
+              },
+              {
+                "type": "pain_points_evidence",
+                "quote": "数据科学家至少耗费90%的精力准备数据湖中要分析的数据，将数据融合成一个连贯的整体，并进行数据清洗，否则数据湖就会变成数据沼泽"
+              },
+              {
+                "type": "pain_points_evidence",
+                "quote": "不同任务对数据形态、时效性及质量要求存在根本冲突，导致数据适配难"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [],
+              "only_in_case": [
+                "H10",
+                "H15",
+                "H3"
+              ],
+              "only_in_student": [
+                "H14",
+                "H4",
+                "H5"
+              ]
+            }
+          },
+          {
+            "case_id": "case_1512b0f26aa4",
+            "category": "科技创新",
+            "project_name": "禾光智能——智能激光除草机器人系统",
+            "similarity": 0.4183,
+            "score_keyword": 0.0,
+            "score_vector": 0.4183,
+            "retrieval_mode": "vector",
+            "tags": [
+              "category:科技创新",
+              "education_level:unknown",
+              "doc_type:pdf",
+              "rubric:Problem Definition",
+              "rubric:Solution Feasibility",
+              "rubric:Market & Competition",
+              "rubric:Innovation & Differentiation",
+              "rubric:Presentation Quality",
+              "risk_rule:H10",
+              "risk_rule:H15",
+              "risk_rule:H3",
+              "risk_rule:H5",
+              "competition:challenge_cup"
+            ],
+            "pain_points": [
+              "传统除草方式高污染",
+              "除草效率低",
+              "除草成本高"
+            ],
+            "solution": [
+              "低延迟植物识别算法",
+              "高能激光除草技术",
+              "厘米级导航系统"
+            ],
+            "innovation_points": [
+              "低延迟植物识别算法",
+              "亚毫米级精度激光除草",
+              "多源感知融合导航"
+            ],
+            "business_model": [
+              "减少农药使用",
+              "降低劳动力强度"
+            ],
+            "evidence_quotes": [
+              "传统杂草管理方式面临高污染、低效率、高成本等多重瓶颈，严重制约农业可持续发展。",
+              "提出并研发了“禾光智能”无人驾驶激光除草机器人系统，融合计算机视觉、人工智能、大模型技术与新能源系统，打造出一整套智能、环保、高效的田间除草解决方案。"
+            ],
+            "risk_flags": [
+              "H10",
+              "H15",
+              "H3",
+              "H5"
+            ],
+            "rubric_coverage": [
+              {
+                "rubric_item": "Problem Definition",
+                "covered": true
+              },
+              {
+                "rubric_item": "User Evidence Strength",
+                "covered": false
+              },
+              {
+                "rubric_item": "Solution Feasibility",
+                "covered": true
+              },
+              {
+                "rubric_item": "Business Model Consistency",
+                "covered": false
+              },
+              {
+                "rubric_item": "Market & Competition",
+                "covered": true
+              },
+              {
+                "rubric_item": "Financial Logic",
+                "covered": false
+              },
+              {
+                "rubric_item": "Innovation & Differentiation",
+                "covered": true
+              },
+              {
+                "rubric_item": "Team & Execution",
+                "covered": false
+              },
+              {
+                "rubric_item": "Presentation Quality",
+                "covered": true
+              }
+            ],
+            "summary": "第 22 届北京理工大学“挑战杯” 2 / 39 智能激光除草机器人系统 王宇行，田甜，朱啸闻，林馨耀，杜一苇，郭宸溪，王德浩，毛子鸣 摘要：随着全球农业向智能化、绿色化、高效化转型，传统杂草管理方式面临 高污染、低效率、高成本等多重瓶颈，严重制约农业可持续发展。为此，本文 提出并研发了“禾光智能”无人驾驶激光除草机器人系统，融合计算机视觉、 人工智能、大模型技术与新能源系统，打造出一整套智能、环保、高效的田间 除草解决方案。该系统集成多项技术创新：包括低延迟的“赤胆”植物识别算 法、亚毫米级精度的高能激光除草技术、多源感知融合的厘米级导航系统、适 应复杂地形的全地形线控底盘、固态电池与超级电",
+            "neo4j_enriched": true,
+            "graph_pains": [
+              "传统除草方式高污染",
+              "除草效率低",
+              "除草成本高"
+            ],
+            "graph_solutions": [
+              "低延迟植物识别算法",
+              "高能激光除草技术",
+              "厘米级导航系统",
+              "全地形线控底盘"
+            ],
+            "graph_innovations": [
+              "低延迟植物识别算法",
+              "亚毫米级精度激光除草",
+              "多源感知融合导航"
+            ],
+            "graph_biz_models": [
+              "减少农药使用",
+              "降低劳动力强度"
+            ],
+            "graph_markets": [
+              "全球农业向智能化、绿色化、高效化转型",
+              "传统杂草管理方式面临多重瓶颈"
+            ],
+            "graph_exec_steps": [
+              "研发低延迟植物识别算法",
+              "集成高能激光除草技术",
+              "构建农业种植大模型",
+              "适应复杂地形的全地形线控底盘"
+            ],
+            "graph_rules": [
+              {
+                "id": "H10",
+                "name": "里程碑不可交付",
+                "severity": "medium"
+              },
+              {
+                "id": "H15",
+                "name": "评分项证据覆盖不足",
+                "severity": "medium"
+              },
+              {
+                "id": "H3",
+                "name": "定价无支付意愿证据",
+                "severity": "medium"
+              },
+              {
+                "id": "H5",
+                "name": "需求证据不足",
+                "severity": "high"
+              }
+            ],
+            "graph_rubric_covered": [
+              "Risk Control",
+              "Problem Definition",
+              "Solution Feasibility",
+              "Market & Competition",
+              "Innovation & Differentiation",
+              "Presentation Quality"
+            ],
+            "graph_rubric_uncovered": [
+              "User Evidence Strength",
+              "Business Model Consistency",
+              "Financial Logic",
+              "Team & Execution"
+            ],
+            "graph_evidence_count": 7,
+            "graph_evidence_samples": [
+              {
+                "type": "pain_points_evidence",
+                "quote": "传统杂草管理方式面临高污染、低效率、高成本等多重瓶颈，严重制约农业可持续发展。"
+              },
+              {
+                "type": "solution_evidence",
+                "quote": "提出并研发了“禾光智能”无人驾驶激光除草机器人系统，融合计算机视觉、人工智能、大模型技术与新能源系统，打造出一整套智能、环保、高效的田间除草解决方案。"
+              },
+              {
+                "type": "innovation_points_evidence",
+                "quote": "该系统集成多项技术创新：包括低延迟的“赤胆”植物识别算法、亚毫米级精度的高能激光除草技术、多源感知融合的厘米级导航系统、适应复杂地形的全地形线控底盘、固态电池与超级电容组合的高效能源管理方案。"
+              }
+            ],
+            "rule_overlap": {
+              "shared": [
+                "H5"
+              ],
+              "only_in_case": [
+                "H10",
+                "H15",
+                "H3"
+              ],
+              "only_in_student": [
+                "H14",
+                "H4"
+              ]
+            }
+          }
+        ],
+        "web_search": {
+          "searched": true,
+          "query": "创新创业 方法论 案例 TAM SAM",
+          "results": [
+            {
+              "title": "路演中的\"市场规模\"：TAM、SAM、SOM如何清晰界定？",
+              "snippet": "通过这个案例可以清晰地看到TAM、SAM和SOM在企业实际运营中的体现以及它们之间的相互关系。 清晰界定路演中的\"市场规模\"，准确把握TAM、SAM和SOM的概念及关系，对于企业的发展具有极其重要的意义。",
+              "url": "https://www.toutiao.com/article/7540564294744687158/"
+            },
+            {
+              "title": "TAM SAM SOM分析：准确确定市场潜力 - foundor.ai",
+              "snippet": "TAM、SAM和 SOM 是用来描述市场规模的三个术语，简单解释如下： -TAM（总可用市场）：指产品或服务在全球范围内的最大潜在市场规模，假设没有任何限制，所有潜在客户都能购买。 - SAM（可服务市场）：指在TAM中，企业实际能够覆盖和服务的市场部分，考虑了地理、法规或产品适用性等限制。 - SOM ...",
+              "url": "https://foundor.ai/zh-Hans/blog/tam-sam-som"
+            },
+            {
+              "title": "投資人想看的 TAM SAM SOM 怎麼算？從果園理論到實戰公式解析 - UpToGo",
+              "snippet": "前言 在商業計畫書（Business Plan）或募資簡報（Pitch Deck）中，「市場規模」往往是投資人目光停留最久的頁面之一。許多創業者或行銷人在面對這頁時，常誤以為只要引用一份看起來很龐大的產業報告數據即可交差，卻忽略了數字背後的邏輯與說服力。當被問到「TAMSAMSOM 怎麼算？」時，如果只能 ...",
+              "url": "https://uptogo.com.tw/商業/tam-sam-som-怎麼算？/"
+            }
+          ],
+          "summary": "- 通过这个案例可以清晰地看到TAM、SAM和SOM在企业实际运营中的体现以及它们之间的相互关系。 清晰界定路演中的\"市场规模\"，准确把握TAM、SAM和SOM的概念及关系，对于企业的发展具有极其重要的意义。\n- TAM、SAM和 SOM 是用来描述市场规模的三个术语，简单解释如下： -TAM（总可用市场）：指产品或服务在全球范围内的最大潜在市场规模，假设没有任何限制，所有潜在客户都能购买。 - SAM（可服务市场）：指在TAM中，企业实际能够覆盖和服务的市场部分，考虑了地理、法规或产品适用性等限制。 - SOM ...\n- 前言 在商業計畫書（Business Plan）或募資簡報（Pitch Deck）中，「市場規模」往往是投資人目光停留最久的頁面之一。許多創業者或行銷人在面對這頁時，常誤以為只要引用一份看起來很龐大的產業報告數據即可交差，卻忽略了數字背後的邏輯與說服力。當被問到「TAMSAMSOM 怎麼算？」時，如果只能 ..."
+        },
+        "hypergraph_student": {},
+        "hyper_consistency_issues": [],
+        "critic": null,
+        "challenge_strategies": [
+          {
+            "strategy_id": "CS02",
+            "name": "1%市场份额幻觉",
+            "match_score": 9.1,
+            "probing_layers": [
+              "获客路径验证: 你打算怎么接触到这1%的用户？具体的获客渠道是什么？",
+              "单位经济核算: 获取一个用户的成本(CAC)是多少？这个用户一生能给你带来多少收入(LTV)？",
+              "增长瓶颈追问: 从0到前100个用户，你的具体计划是什么？不要说'自然增长'。"
+            ],
+            "expected_evidence": [
+              "获客渠道和CAC估算",
+              "LTV计算依据",
+              "前100用户获取计划"
+            ],
+            "counterfactual": "'只要拿到1%的市场'是创业计划书中最危险的假设。请证明你能拿到第一个1000个付费用户。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "大数幻觉谬误",
+              "市场规模口径谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS10",
+            "name": "TAM/SAM/SOM混乱",
+            "match_score": 9.1,
+            "probing_layers": [
+              "口径检验: 你说的市场规模是TAM还是SAM？你实际能触达的市场(SOM)有多大？",
+              "自下而上估算: 请用'单价×目标用户数×复购频次'来估算你第一年的实际可获得市场。",
+              "增长合理性: 从SOM到SAM，你的增长路径是什么？每一步需要什么资源？"
+            ],
+            "expected_evidence": [
+              "TAM/SAM/SOM三层估算",
+              "自下而上的市场测算",
+              "增长路径规划"
+            ],
+            "counterfactual": "一个万亿的TAM对你毫无意义——关键是你第一年能从中切到多少。",
+            "preferred_edge_types": [
+              "Market_Competition_Edge",
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ],
+            "supported_fallacies": [
+              "市场规模口径谬误",
+              "大数幻觉谬误",
+              "可触达市场缺失"
+            ],
+            "strategy_logic": "TAM/SAM/SOM 口径校验 + 增长合理性",
+            "matched_edge_types": [
+              "Risk_Pattern_Edge",
+              "Evidence_Grounding_Edge"
+            ]
+          },
+          {
+            "strategy_id": "CS04",
+            "name": "需求证据缺失",
+            "match_score": 6.6,
+            "probing_layers": [
+              "证据来源追问: 你说'很多人需要'，具体跟多少人聊过？他们怎么描述自己的痛点？",
+              "付费意愿检验: 他们目前为解决这个问题花了多少钱？如果你的产品定价X元，他们愿意付吗？你怎么知道的？",
+              "伪需求识别: 用户说'这个挺好的'和用户说'我愿意每月花200块钱用'是完全不同的信号。你拿到的是哪种？"
+            ],
+            "expected_evidence": [
+              ">=5份用户访谈原话",
+              "付费意愿数据",
+              "需求频次统计"
+            ],
+            "counterfactual": "如果你的'需求'只来自身边朋友的礼貌性认可，而非真实用户的行为证据，这个项目就建立在沙子上。",
+            "preferred_edge_types": [
+              "User_Pain_Fit_Edge",
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ],
+            "supported_fallacies": [
+              "需求证据不足",
+              "证据覆盖不足",
+              "证据与结论错配"
+            ],
+            "strategy_logic": "需求证据逻辑 + 支付意愿检验",
+            "matched_edge_types": [
+              "Evidence_Grounding_Edge",
+              "Value_Loop_Edge"
+            ]
+          }
+        ],
+        "pressure_test_trace": {
+          "fallacy_label": "大数幻觉谬误",
+          "fallacy_rule_id": "H4",
+          "retrieved_heterogeneous_subgraph": [
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_001",
+              "support": 5,
+              "teaching_note": "科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::科技创新",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+                "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。",
+                "人工除草效率难以满足规模化农田管理需求，化学除草虽具短期效果，却伴随严重的生态环境破坏与农产品安全风险。"
+              ]
+            },
+            {
+              "edge_type": "Risk_Pattern_Edge",
+              "hyperedge_id": "he_risk_002",
+              "support": 4,
+              "teaching_note": "医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。",
+              "nodes": [
+                "Category::医疗健康",
+                "RiskRule::H10",
+                "RiskRule::H15",
+                "RiskRule::H3",
+                "RiskRule::H5",
+                "RubricItem::Business Model Consistency",
+                "RubricItem::User Evidence Strength"
+              ],
+              "evidence_quotes": [
+                "未来将应用在医院、养老院、社区、家庭等场景中，实现健康评估、脉象体质分析和中医调养建议。",
+                "由于脉诊主要依赖医者的主观感受和经验判断，限制了脉诊现代化的发展，研发脉诊仪对脉搏信号量化采集和处理十分必要。",
+                "项目成果已部署医院原型系统支持基层筛查与远程诊疗"
+              ]
+            },
+            {
+              "edge_type": "Value_Loop_Edge",
+              "hyperedge_id": "he_value_001",
+              "support": 1,
+              "teaching_note": "交通运输类项目常围绕“城市低空交通监管部门—传统监管系统无法对非合作无人机进行实时检测—采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性”形成价值闭环，并需要通过核心价值主张：提供高效、准确的无人机检测系统完成变现。",
+              "nodes": [
+                "BusinessModelAspect::核心价值主张：提供高效、准确的无人机检测系统",
+                "Category::交通运输",
+                "Market::低空经济市场规模预计到2035年将达到3.5万亿元",
+                "PainPoint::传统监管系统无法对非合作无人机进行实时检测",
+                "Solution::采用AI雷达和多模态融合技术，提高无人机检测的准确性和实时性",
+                "Stakeholder::城市低空交通监管部门"
+              ],
+              "evidence_quotes": [
+                "以数据平台备案方式为主的传统监管系统无法对非合作的无人机进行实时检测监控",
+                "无人机在城市中的应用场景增加，传统监管系统的探测手段在复杂城市地形下性能有限"
+              ]
+            }
+          ],
+          "selected_strategy": "1%市场份额幻觉",
+          "selected_strategy_id": "CS02",
+          "strategy_logic": "精准获客逻辑 + CAC/LTV 逻辑 + 自下而上市场估算",
+          "generated_question": "你提到“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发”。这批人具体散落在哪些渠道里？你打算花多少钱找到第一个100个用户？请给我一个单人获客成本 CAC 的估算，而不是只讲总体市场有多大。",
+          "consistency_pressure_questions": [],
+          "evidence_quotes": [
+            "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+            "为实现飞秒激光高质量精密制造，存在以下两个痛点：痛点1，电子层面调控机理尚不明确难以指导高质量加工；痛点2，制造工艺优化时间周期长且难以进行闭环优化。",
+            "本项目首次开发的飞秒激光电子动态调控闭环观测系统，可对光子-材料相互作用的全周期进行三维可视化表征，为电子层面调控提供理论基础及实测依据，通过闭环优化将微纳结构制造精度从传统微米量级提升至纳米量级。"
+          ]
+        },
+        "competition": null,
+        "learning": null,
+        "category": "科技创新",
+        "matched_teacher_interventions": [],
+        "kb_utilization": {
+          "retrieval_mode": "vector",
+          "total_kb_cases": 110,
+          "excluded_history_count": 0,
+          "hits_count": 3,
+          "neo4j_enriched": true,
+          "neo4j_enriched_count": 3,
+          "complementary_count": 0,
+          "category_filter": "科技创新",
+          "top_k_requested": 5,
+          "search_trace": [
+            {
+              "case_id": "case_1135e29de95e",
+              "score": 0.456,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "指导案例——元界创生云上交互空间智能生成技术领跑者_计划书"
+            },
+            {
+              "case_id": "case_317f0438a5dd",
+              "score": 0.443,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "数湖启智——多源异构数据湖智算系统"
+            },
+            {
+              "case_id": "case_1512b0f26aa4",
+              "score": 0.418,
+              "category": "科技创新",
+              "neo4j_enriched": true,
+              "complementary": false,
+              "hyper_driven": false,
+              "snippet": "禾光智能——智能激光除草机器人系统"
+            }
+          ],
+          "query_preview": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+          "weak_dims_for_complementary": [],
+          "dual_channel": {
+            "vector_hits": 3,
+            "graph_hits": 1,
+            "graph_details": [
+              {
+                "project_id": "case_5b8111094417",
+                "project_name": "AI驱动的思政实践育人系统",
+                "category": "教育服务",
+                "matched_dimensions": [
+                  "market"
+                ],
+                "matched_nodes": [
+                  "market:该操作由 librosa.load() 实现， 若原始音频的采样率与目标采样率不一致， 则通过 librosa.resample()对信号进行线性重采样。"
+                ],
+                "match_sources": [
+                  "shared_node"
+                ],
+                "context": {
+                  "pains": [
+                    "单向知识传输",
+                    "情感共鸣不足",
+                    "数字化资源交互性弱"
+                  ],
+                  "solutions": [
+                    "构建动态知识图谱，实现理论阐释的精准化与对话化",
+                    "打造可交互的数字人，支持多模态人机交互",
+                    "开发多模态思政资源检索系统，实现精准检索与个性化推荐",
+                    "搭建混合现实叙事引擎，构建具身交互式学习空间"
+                  ],
+                  "innovations": [
+                    "融合生成式大模型与检索增强生成技术",
+                    "结合扩散模型与神经辐射场技术实现数字人自然协同",
+                    "多模态预训练模型支持资源结构化与端到端编码",
+                    "基于NeRF技术还原历史场景"
+                  ],
+                  "biz_models": [],
+                  "evidences": []
+                }
+              }
+            ]
+          },
+          "incremental_stats": {
+            "total_accumulated": 4,
+            "new_this_turn": 4,
+            "total_rels": 3,
+            "project_maturity": "exploring",
+            "readiness_score": 1,
+            "message_chars": 50,
+            "filled_slots": 0,
+            "vague_hits": 0,
+            "concrete_hits": 0
+          }
+        },
+        "rag_enrichment_insight": "风险对比: H14(你独有), H4(你独有), H5(你独有)——参考案例中都没有触发这些规则，说明这可能是你项目特有的薄弱环节。\n参考案例普遍覆盖的维度: Risk Control, Problem Definition, Solution Feasibility, Market & Competition, Innovation & Differentiation。",
+        "neo4j_graph_hits": [],
+        "incremental_stats": {},
+        "dim_results": {
+          "status_judgment": {
+            "dim": "status_judgment",
+            "value": "你的问题核心是H4风险，即TAM/SAM/SOM口径混乱，这直接导致项目市场潜力无法被量化评估，是项目落地的大忌。要解决这个“发虚”的问题，关键在于**明确定义你的目标用户，并选择与商业模式匹配的计算口径**。\n\n我们以参考案例“元界创生”为例，看他们如何清晰界定市场。他们的方案是“AI生成3D交互空间的云服务”。其**TAM（总潜在市场）** 可以定位为“全球3D内容创作软件及服务市场”，这是一个数十亿美元的广阔市场，用于展示赛道想象力。其**SAM（可服务市场）** 则收缩为“有快速创建高质量、可交互虚拟空间需求的企业客户”，比如文旅、教育、线上展会等行业，这比TAM小得多，但更精准。其**SOM（可获得市场）** 进一步聚焦，例如在启动期，只针对“中国地区的数字展厅设计公司”，并通过标杆客户切入。他们的计算逻辑是：从宏观赛道（TAM）到目标行业（SAM），再到初期能实实在在触达的客户群（SOM），层层收敛，每一步都有对应的用户定义和商业逻辑。\n\n反观你的项目，目前最大的问题是**缺少具体的用户和痛点描述**，这导致你根本无法开始计算。TAM/SAM不是凭空想象的数据，而是基于“谁有XX问题，我如何解决”推导出来的。例如，如果你的项目也是科技创新类，类似“数湖启智”，那么你的TAM可能是“企业数据治理与分析市场”，SAM是“受困于多源异构数据清洗效率的金融或政府机构”，SOM则是“某个城市开发区内首批有意向的5家高新技术企业”。\n\n所以，你的当务之急不是找公式，而是先补全项目背景：你的产品具体是什么？它解决了哪一类用户的什么核心痛点（像“元界创生”明确列出了三条痛点）？你计划如何收费（这直接影响你按用户数、交易额还是用量计算市场）？回答了这些，你才能像案例一样，画出从广阔市场到脚下起点的清晰路径，摆脱“发虚”的状态。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "coach",
+            "challenges": [],
+            "hyper_context_sent": "超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。"
+          },
+          "probing_questions": {
+            "dim": "probing_questions",
+            "value": "你当前对TAM/SAM/SOM的理解停留在概念层面，这直接导致了H4风险（口径混乱），这是你项目当前最核心的瓶颈。这种模糊会像多米诺骨牌一样，影响后续的商业模式、财务预测和落地可行性。要打破这个僵局，关键在于将抽象概念与你的具体项目场景深度绑定。我们可以参考“数湖启智”项目，它清晰地界定了其服务对象是“需要处理多源异构数据湖的政府与企业”，并基于此测算市场。你的第一步，是必须明确回答：你的产品究竟是为谁、在什么具体场景下解决什么问题？没有这个锚点，所有市场测算都是空中楼阁。\n\n基于你提到的“市场分析概念”，我假设你有一个科技创新类项目。那么，你的技术或方案，其核心价值是作为一种“工具”被其他开发者或企业采购使用，还是作为一种“终端服务”直接提供给最终消费者？这决定了你测算市场的根本逻辑。例如，“元界创生”项目将自己定位为“元宇宙内容生成协议”的提供者，其TAM测算就必然基于全球3D内容创作、游戏开发及元宇宙基础设施的市场规模，而非泛泛的“科技市场”。\n\n明确了定位后，你需要像外科手术一样进行市场分层。SAM是你真正有能力触达并服务的细分市场。参考案例中，“数湖启智”将SAM锁定在“中国的智慧公安、智慧医疗、智慧政务等特定领域的政府与企业数据湖项目”，这比泛泛的“中国大数据市场”精准得多。你的SAM应该同样具体：是基于地理区域（如长三角制造业）、特定行业（如AIGC初创公司）、还是某种技术栈的客户（如使用特定云服务的开发者）？列出这些限制条件，就是厘清SAM的过程。\n\n最后，SOM才是现实主义的起点，它关乎你团队的执行能力。你需要审视：在锁定的SAM中，你第一年能实际签约多少客户？这个数字必须与你的团队规模、销售渠道、产品成熟度匹配。超图教学启发指出，科技创新项目常因过于乐观的SOM假设而拖累“商业模型一致性”。因此，请基于你已有的资源（哪怕只有你自己），给出一个保守但可信的SOM，并说明你将通过哪些具体的、可验证的步骤（例如，参加3场行业展会、对接5家试点客户）来实现它。从回答这三个追问开始，你的市场分析将从“发虚”变得扎实。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "coach",
+            "challenges": [],
+            "hyper_context_sent": "超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [证据锚定超边] 科技创新类项目常用“pain_points_evidence、solution_evidence”类证据支撑Business Model Consistency、User Evidence Stren"
+          },
+          "method_bridge": {
+            "dim": "method_bridge",
+            "value": "你目前对TAM/SAM/SOM的理解停留在概念层面，一到自己的项目就发虚，这直接对应了H4风险——市场测算口径混乱。这个风险之所以致命，是因为它会动摇整个商业计划的根基，让投资人对市场规模和你的获取能力产生根本性质疑。要解决这个问题，不能只背定义，必须通过一个具体案例，把抽象概念“桥接”到你项目思考的每一步。\n\n我们以参考案例“元界创生”为例，来拆解它的市场测算逻辑。这个项目做的是“云上交互空间智能生成”。首先，它的**总体有效市场（TAM）** 瞄准的是全球需要创建3D交互空间的所有潜在客户。这可能包括游戏开发、虚拟展厅、在线教育、数字地产等多个行业。他们会引用行业报告，估算这些领域每年在3D内容制作上的总支出，比如“全球3D动画与可视化软件市场规模预计2025年达XX亿美元”。这是一个非常宽泛的顶层数字，用来展示赛道天花板。\n\n关键在于第二步，**可服务市场（SAM）**。元界创生不会声称能吃下整个TAM，因为他们的技术有特定边界。他们的SAM会聚焦于“那些对快速、低成本生成**可交互**3D空间有强烈需求，且愿意采用云端SaaS模式的企业客户”。这立刻排除了需要电影级画质的影视公司、极度注重数据本地化的军工企业等。他们会进一步细化，比如“中国及东南亚地区的中大型互联网企业、展览设计公司、职业教育机构”，并估算这个细分群体的相关支出。SAM的划定直接体现了你对产品定位和客户画像的精准理解。\n\n最后是**可获得市场（SOM）**，这是你创业头1-3年 realistically 能拿下的份额。元界创生可能会计算：在SAM中，通过现有渠道合作伙伴能触达的客户数量，基于团队销售能力估算的签约速度，再参考类似SaaS产品的初期市场渗透率，得出一个具体的营收数字。例如，“目标在三年内，获取中国虚拟会展领域SAM的5%，对应约XXX万元收入”。SOM必须与你团队规模、资源、竞争态势匹配。\n\n现在桥接到你的项目：你发虚的核心原因，是缺少像案例中那样具体的“用户”、“痛点”和“执行步骤”。要算清楚，你必须先回答：你具体解决了谁的、什么具体问题？你的技术或方案边界在哪里？这决定了你的SAM。比如，如果你的项目也涉及数据处理，参考“数湖启智”案例，它的SAM就明确限定为“受困于多源异构数据质量问题的政府与企业数据湖项目”，而非所有数据软件市场。你的SOM则取决于你第一步打算从哪个最容易切入的细分场景或区域市场做起，以及你凭什么能拿下它。你需要立刻补上这些缺失维度，把模糊的概念替换为你项目的具体假设数字，市场分析才能从虚转实，规避H4风险。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "tutor",
+            "challenges": [],
+            "hyper_context_sent": "超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。"
+          },
+          "strategy_directions": {
+            "dim": "strategy_directions",
+            "value": "你的核心问题在于对TAM/SAM/SOM的理解停留在概念，缺乏将其与具体项目、尤其是自身项目假设相结合的计算逻辑。这直接导致你的市场分析（H4风险）口径混乱，无法为项目可行性提供有力支撑，是当前最高风险点。要解决这个问题，关键在于**将抽象概念转化为基于具体假设的量化过程**，并理解不同假设会导向截然不同的策略。\n\n我们可以用你参考案例库中的「数湖启智——多源异构数据湖智算系统」为例，反向推导其TAM/SAM/SOM的可能计算路径。该项目方案是“为政府和企业提供智慧公安、智慧医疗、智慧政务等服务”。其TAM（总潜在市场）可能是**中国数据治理与智能应用市场的总规模**，例如引用第三方报告，2025年该市场规模预计为5000亿元。但直接说“我们要做5000亿市场”是虚的。因此需要收敛到SAM（可服务市场），这里就需要**做出第一个关键假设**：我们初期只聚焦于“智慧公安”中的“涉诈资金流分析”这一具体场景，并且只服务于省级公安厅。那么SAM可能基于“全国省级公安厅数量”×“该类系统年均预算”来估算，例如31个省份×年均300万预算 ≈ 9300万元。进一步收敛到SOM（可获得市场），需要**做出第二个关键假设**：我们团队有公安领域资源，首年能切入3个标杆省份。那么SOM就是3×300万=900万元。你看，从5000亿到900万，这个过程就是通过不断添加限制条件（行业、场景、客户类型、团队能力、时间）来实现的，每一步都需要合理的假设和数据支撑。\n\n基于这个“假设驱动量化”的核心思路，结合你项目信息严重不足（缺少用户、痛点等）的现状，你有两条可选策略方向：\n\n**策略方向一：快速定位，假设先行。** 既然你缺乏具体项目细节，就不要空想。立即为你脑海中的项目构想一个最具体的初始用户和场景。例如，假设你做“智能学习工具”，不要泛泛说“学生”，而是锁定为“备战考研的工科大三学生”。然后，像「数湖启智」案例那样，基于这个假设进行估算：TAM（中国高等教育市场规模）→ SAM（考研培训市场规模）→ SOM（工科考研生使用的智能刷题工具细分市场）。即使数字不精确，这个过程能立刻暴露出你对用户和场景的理解是否清晰，并引导你去收集真实数据（如考研人数、客单价）来修正假设。这是最快打破“概念发虚”状态的方法。\n\n**策略方向二：对标校准，收敛场景。** 参考「元界创生云」案例，它从广阔的“元宇宙内容生成”市场（TAM），通过痛点“建模门槛高、交互体验弱”收敛到“为中小企业提供快速生成3D交互营销空间的服务”（SAM）。你可以模仿此路径：先找一个你感兴趣的广阔领域（如案例中的Web 3.0交互空间），然后问自己——其中最让某一类用户头疼的**一个**具体问题是什么？这个问题的解决方案，是否构成了一个清晰的、可估算的SAM？例如，你不能说“解决企业营销问题”，而要像案例一样说“解决中小企业缺少技术团队制作3D交互式线上展厅的问题”。场景收得越窄，SAM和SOM才越容易算得实在，也越能避开“面向所有用户”的陷阱。",
+            "confidence": 0.75,
+            "evidence_source": "dim_analysis",
+            "writer": "coach",
+            "challenges": [],
+            "hyper_context_sent": "超图教学启发:\n- [风险模式超边] 科技创新类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [风险模式超边] 医疗健康类项目常见风险模式为“H10、H15、H3、H5”，通常会拖累Business Model Consistency、User Evidence Strength。\n- [市场细分超边] 交通运输类项目说'面向所有用户'太宽了——哪个细分群体？什么场景？请把用户画像收窄到一个具体的人。"
+          }
+        },
+        "agent_hyper_details": [],
+        "diagnosis": {
+          "mode": "coursework",
+          "competition_type": "",
+          "overall_score": 6.35,
+          "score_band": "基本成形",
+          "overall_rationale": {
+            "field": "overall",
+            "value": 6.35,
+            "formula": "clip(Σ(rubric_i × w_i) / Σw_i, stage_floor, stage_ceiling)",
+            "formula_display": "综合分 = 按 9 个维度加权平均后，再夹到阶段允许区间。\n评分基于项目累积语料（50 字符）\n项目处于「结构化阶段」→ 区间 [5.9, 9.7]\n加权平均 = (5.5×0.1 + 5.5×0.1 + 5.7×0.1 + 5.7×0.1 + 9.3×0.1 + 5.7×0.1 + 5.7×0.1 + 5.7×0.1 + 5.6×0.1) ÷ 0.9 = 6.35\n原始加权平均 6.35 落在阶段区间内，不再修正\n最终综合分 = 6.35",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "项目阶段=「结构化阶段」，区间基线 [5.9, 9.7]",
+                "delta": 0.0,
+                "detail": "项目阶段决定分数最终可接受区间"
+              },
+              {
+                "kind": "evidence",
+                "label": "Problem Definition 5.46 × 权重 0.10",
+                "delta": 0.55,
+                "detail": "该维度贡献 +0.55"
+              },
+              {
+                "kind": "evidence",
+                "label": "User Evidence Strength 5.46 × 权重 0.15",
+                "delta": 0.82,
+                "detail": "该维度贡献 +0.82"
+              },
+              {
+                "kind": "evidence",
+                "label": "Solution Feasibility 5.65 × 权重 0.10",
+                "delta": 0.57,
+                "detail": "该维度贡献 +0.57"
+              },
+              {
+                "kind": "evidence",
+                "label": "Business Model Consistency 5.65 × 权重 0.15",
+                "delta": 0.85,
+                "detail": "该维度贡献 +0.85"
+              },
+              {
+                "kind": "evidence",
+                "label": "Market & Competition 9.29 × 权重 0.10",
+                "delta": 0.93,
+                "detail": "该维度贡献 +0.93"
+              },
+              {
+                "kind": "evidence",
+                "label": "Financial Logic 5.65 × 权重 0.10",
+                "delta": 0.57,
+                "detail": "该维度贡献 +0.57"
+              },
+              {
+                "kind": "evidence",
+                "label": "Innovation & Differentiation 5.65 × 权重 0.10",
+                "delta": 0.57,
+                "detail": "该维度贡献 +0.57"
+              },
+              {
+                "kind": "evidence",
+                "label": "Team & Execution 5.65 × 权重 0.05",
+                "delta": 0.28,
+                "detail": "该维度贡献 +0.28"
+              },
+              {
+                "kind": "evidence",
+                "label": "Presentation Quality 5.57 × 权重 0.05",
+                "delta": 0.28,
+                "detail": "该维度贡献 +0.28"
+              },
+              {
+                "kind": "rule",
+                "label": "风险 H4·TAM/SAM/SOM口径混乱（已计入单维度）",
+                "delta": 0.0,
+                "severity": "high",
+                "agent_name": "市场洞察 Agent",
+                "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+                "detail": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。"
+              },
+              {
+                "kind": "rule",
+                "label": "风险 H5·需求证据不足（已计入单维度）",
+                "delta": 0.0,
+                "severity": "medium",
+                "agent_name": "用户痛点 Agent",
+                "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                "detail": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。"
+              },
+              {
+                "kind": "rule",
+                "label": "风险 H14·路演叙事断裂（已计入单维度）",
+                "delta": 0.0,
+                "severity": "low",
+                "agent_name": "表达呈现 Agent",
+                "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                "detail": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。"
+              }
+            ],
+            "inputs": [
+              {
+                "label": "rubric·Problem Definition",
+                "value": 5.46,
+                "weight": 0.1,
+                "impact": "+0.55"
+              },
+              {
+                "label": "rubric·User Evidence Strength",
+                "value": 5.46,
+                "weight": 0.15,
+                "impact": "+0.82"
+              },
+              {
+                "label": "rubric·Solution Feasibility",
+                "value": 5.65,
+                "weight": 0.1,
+                "impact": "+0.57"
+              },
+              {
+                "label": "rubric·Business Model Consistency",
+                "value": 5.65,
+                "weight": 0.15,
+                "impact": "+0.85"
+              },
+              {
+                "label": "rubric·Market & Competition",
+                "value": 9.29,
+                "weight": 0.1,
+                "impact": "+0.93"
+              },
+              {
+                "label": "rubric·Financial Logic",
+                "value": 5.65,
+                "weight": 0.1,
+                "impact": "+0.57"
+              },
+              {
+                "label": "rubric·Innovation & Differentiation",
+                "value": 5.65,
+                "weight": 0.1,
+                "impact": "+0.57"
+              },
+              {
+                "label": "rubric·Team & Execution",
+                "value": 5.65,
+                "weight": 0.05,
+                "impact": "+0.28"
+              },
+              {
+                "label": "rubric·Presentation Quality",
+                "value": 5.57,
+                "weight": 0.05,
+                "impact": "+0.28"
+              },
+              {
+                "label": "风险·H4",
+                "value": "TAM/SAM/SOM口径混乱",
+                "weight": -1.0,
+                "rule_id": "H4",
+                "impact": "（已计入单维度扣分）"
+              },
+              {
+                "label": "风险·H5",
+                "value": "需求证据不足",
+                "weight": -1.0,
+                "rule_id": "H5",
+                "impact": "（已计入单维度扣分）"
+              },
+              {
+                "label": "风险·H14",
+                "value": "路演叙事断裂",
+                "weight": -1.0,
+                "rule_id": "H14",
+                "impact": "（已计入单维度扣分）"
+              }
+            ],
+            "note": "项目阶段 structured · 触发 3 条风险 · 评分基于项目累积语料（50 字符）",
+            "stage_floor": 5.9,
+            "stage_ceiling": 9.7,
+            "raw_score": 6.35,
+            "project_stage": "structured",
+            "project_stage_cn": "结构化阶段",
+            "corpus_chars": 50,
+            "stage_history": []
+          },
+          "project_stage": "structured",
+          "project_stage_rationale": {
+            "field": "project_stage",
+            "value": "结构化阶段",
+            "formula": "threshold(evidence_hits, business_hits, execution_hits, text_len, is_file)",
+            "formula_display": "当前阶段 = 结构化阶段（structured）\n证据词命中 0；商业词命中 3；执行词命中 0；文本长度 50",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "阶段判定依据：证据词 / 商业词 / 执行词 命中数 + 文本长度",
+                "detail": "证据词命中 0；商业词命中 3；执行词命中 0；文本长度 50；数字 0"
+              },
+              {
+                "kind": "evidence",
+                "label": "命中商业词：tam、sam、som",
+                "severity": "info"
+              },
+              {
+                "kind": "adjust",
+                "label": "触发了结构化阈值，判为「基本成形期」",
+                "detail": "满足以下任一条件：商业词≥1、执行词≥1、长度≥250、或证据词≥1且长度≥180、或数字≥2且长度≥260。"
+              }
+            ],
+            "note": "text_len=50 · number_hits=0"
+          },
+          "bottleneck": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+          "bottleneck_rationale": {
+            "field": "bottleneck",
+            "value": "当前最高风险为 H4（TAM/SAM/SOM口径混乱），会直接影响项目落地可行性。",
+            "formula": "select_highest_severity_rule ∨ lowest_rubric",
+            "formula_display": "瓶颈选择：优先看高风险规则；若无，则看最低 rubric 维度。\n· 检测到高严重性风险 H4·TAM/SAM/SOM口径混乱\n· 最低维度 Problem Definition = 5.46",
+            "reasoning_steps": [
+              {
+                "kind": "rule",
+                "label": "检测到高严重性风险 H4·TAM/SAM/SOM口径混乱",
+                "severity": "critical",
+                "agent_name": "市场洞察 Agent",
+                "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+                "detail": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。"
+              },
+              {
+                "kind": "evidence",
+                "label": "最低维度 Problem Definition = 5.46",
+                "detail": "可作为瓶颈突破口"
+              }
+            ],
+            "note": "触发 3 条规则（高风险 1 条）"
+          },
+          "triggered_rules": [
+            {
+              "id": "H4",
+              "name": "TAM/SAM/SOM口径混乱",
+              "fallacy_label": "大数幻觉谬误",
+              "severity": "high",
+              "explanation": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "fix_hint": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "matched_keywords": [
+                "tam",
+                "sam",
+                "som"
+              ],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Market_Segmentation_Edge",
+                "Metric_Definition_Edge",
+                "Scenario_Analysis_Edge",
+                "Risk_Pattern_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "market_sizing_logic"
+              ],
+              "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+              "trigger_message": "原文片段：“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发” → 触发「TAM/SAM/SOM口径混乱」，因为提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。",
+              "impact": "市场口径混乱会直接削弱商业论证，评委通常会在这一页重点追问。",
+              "fix_task": "从下往上算：SOM=你第1年能触达的付费用户×客单价，SAM=你的产品理论上能服务的市场，TAM=整个行业规模。",
+              "agent_name": "市场洞察 Agent",
+              "score_impact": -0.41,
+              "inference_chain": [
+                {
+                  "step": "input",
+                  "text": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发"
+                },
+                {
+                  "step": "keyword_hit",
+                  "keywords": [
+                    "tam",
+                    "sam",
+                    "som"
+                  ],
+                  "detail": "匹配到敏感关键词"
+                },
+                {
+                  "step": "rule_trigger",
+                  "rule_id": "H4",
+                  "rule_name": "TAM/SAM/SOM口径混乱",
+                  "agent": "市场洞察 Agent",
+                  "severity": "high"
+                },
+                {
+                  "step": "score_impact",
+                  "delta": -0.41,
+                  "scope": "overall",
+                  "detail": "扣 0.41 分"
+                }
+              ],
+              "linked_task": {
+                "title": "补齐证据并完成一次压力测试",
+                "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+                "acceptance_criteria": [
+                  "新增3条可验证证据",
+                  "完成1轮压力测试问答",
+                  "更新修正后的版本说明"
+                ],
+                "template_guideline": [
+                  "先明确当前最高风险点是什么",
+                  "补至少3条能直接支撑该点的证据",
+                  "用评委视角做一轮反问并更新答案"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "X_tam",
+                  "kind": "metric",
+                  "label": "TAM",
+                  "description": "总体可服务市场总量"
+                },
+                {
+                  "id": "X_sam",
+                  "kind": "metric",
+                  "label": "SAM",
+                  "description": "产品理论可覆盖的细分市场"
+                },
+                {
+                  "id": "X_som",
+                  "kind": "metric",
+                  "label": "SOM",
+                  "description": "在现实约束下可获得的市场份额"
+                }
+              ]
+            },
+            {
+              "id": "H5",
+              "name": "需求证据不足",
+              "fallacy_label": "需求假设谬误",
+              "severity": "medium",
+              "explanation": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "fix_hint": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "matched_keywords": [],
+              "missing_requires": [
+                "访谈",
+                "问卷",
+                "用户证据",
+                "调研",
+                "内测",
+                "使用日志",
+                "点击率",
+                "预约",
+                "转化"
+              ],
+              "preferred_edge_types": [
+                "Evidence_Grounding_Edge",
+                "Insight_Validation_Edge",
+                "UX_Research_Edge",
+                "Problem_Discovery_Edge",
+                "Empathy_Map_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "evidence_validation_logic"
+              ],
+              "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+              "trigger_message": "原文片段：“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？” → 触发「需求证据不足」，因为你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。",
+              "impact": "缺少用户证据意味着真实需求未被证明，项目容易被归类为想当然。",
+              "fix_task": "先选一种最低成本的验证动作：场景访谈、演示观察、小范围内测、预约页点击测试四选一，用结果证明用户真的在意这个问题。",
+              "agent_name": "用户痛点 Agent",
+              "score_impact": -0.19,
+              "inference_chain": [
+                {
+                  "step": "input",
+                  "text": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？"
+                },
+                {
+                  "step": "keyword_hit",
+                  "keywords": [],
+                  "detail": "匹配到敏感关键词"
+                },
+                {
+                  "step": "required_missing",
+                  "missing": [
+                    "访谈",
+                    "问卷",
+                    "用户证据",
+                    "调研",
+                    "内测",
+                    "使用日志",
+                    "点击率",
+                    "预约",
+                    "转化"
+                  ],
+                  "detail": "缺少必要佐证字段"
+                },
+                {
+                  "step": "rule_trigger",
+                  "rule_id": "H5",
+                  "rule_name": "需求证据不足",
+                  "agent": "用户痛点 Agent",
+                  "severity": "medium"
+                },
+                {
+                  "step": "score_impact",
+                  "delta": -0.19,
+                  "scope": "overall",
+                  "detail": "扣 0.19 分"
+                }
+              ],
+              "linked_task": {
+                "title": "用一种最低成本的方法验证真实需求",
+                "description": "不要默认做大而全调研，先从场景访谈、演示观察、小范围内测、预约页点击测试里选1种最适合你项目的验证方式。",
+                "acceptance_criteria": [
+                  "明确1个待验证判断",
+                  "完成1种验证动作",
+                  "拿到可复述的行为证据或反证"
+                ],
+                "template_guideline": [
+                  "先明确你要验证的唯一判断，例如“研究生会不会因为文献追踪而持续使用”",
+                  "在四种动作里只选一种：5次场景访谈、10人演示观察、一次小范围内测、一个预约页点击测试",
+                  "只记录一个行为信号：是否愿意继续用、是否愿意预约、是否愿意留下联系方式、是否愿意反馈具体痛点"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "ontology_tasks": [
+                {
+                  "id": "T_task_user_evidence_loop",
+                  "kind": "task",
+                  "label": "完成用户证据闭环",
+                  "description": "围绕单一用户场景完成至少8份访谈/若干份问卷，并形成痛点频次与反证样本矩阵。"
+                }
+              ]
+            },
+            {
+              "id": "H14",
+              "name": "路演叙事断裂",
+              "fallacy_label": "叙事断裂谬误",
+              "severity": "low",
+              "explanation": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "fix_hint": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "matched_keywords": [],
+              "missing_requires": [],
+              "preferred_edge_types": [
+                "Presentation_Narrative_Edge",
+                "Cross_Dimension_Coherence_Edge",
+                "Value_Loop_Edge",
+                "User_Education_Edge"
+              ],
+              "preferred_strategy_ids": [
+                "narrative_structure_logic"
+              ],
+              "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+              "trigger_message": "原文片段：“TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？” → 触发「路演叙事断裂」，因为内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。",
+              "impact": "路演叙事断裂如果不修复，会继续拖低项目可信度和评审得分。",
+              "fix_task": "按照'问题→方案→市场→商业模式→团队→里程碑'的框架重新组织你的内容。",
+              "agent_name": "表达呈现 Agent",
+              "score_impact": -0.08,
+              "inference_chain": [
+                {
+                  "step": "input",
+                  "text": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？"
+                },
+                {
+                  "step": "keyword_hit",
+                  "keywords": [],
+                  "detail": "匹配到敏感关键词"
+                },
+                {
+                  "step": "rule_trigger",
+                  "rule_id": "H14",
+                  "rule_name": "路演叙事断裂",
+                  "agent": "表达呈现 Agent",
+                  "severity": "low"
+                },
+                {
+                  "step": "score_impact",
+                  "delta": -0.08,
+                  "scope": "overall",
+                  "detail": "扣 0.08 分"
+                }
+              ],
+              "linked_task": {
+                "title": "补齐证据并完成一次压力测试",
+                "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+                "acceptance_criteria": [
+                  "新增3条可验证证据",
+                  "完成1轮压力测试问答",
+                  "更新修正后的版本说明"
+                ],
+                "template_guideline": [
+                  "先明确当前最高风险点是什么",
+                  "补至少3条能直接支撑该点的证据",
+                  "用评委视角做一轮反问并更新答案"
+                ]
+              },
+              "ontology_nodes": [
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ]
+            }
+          ],
+          "rubric": [
+            {
+              "item": "Problem Definition",
+              "score": 5.46,
+              "status": "ok",
+              "weight": 0.1,
+              "reason": "触发需求证据不足(-0.2)",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.19,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "痛点",
+                "场景",
+                "用户画像"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H5",
+                  "name": "需求证据不足",
+                  "severity": "medium"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_problem",
+                  "kind": "concept",
+                  "label": "Problem Definition",
+                  "description": "对目标用户的具体问题和场景进行清晰刻画的能力"
+                },
+                {
+                  "id": "C_user_segment",
+                  "kind": "concept",
+                  "label": "Target User Segment",
+                  "description": "可操作的细分客群，而不是泛泛的所有人"
+                },
+                {
+                  "id": "C_user_journey",
+                  "kind": "concept",
+                  "label": "User Journey",
+                  "description": "用户从认知到复购的完整旅程"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                }
+              ],
+              "common_mistakes": [
+                "目标用户过于宽泛（所有人/大学生/上班族）",
+                "场景描述抽象，缺少具体时空与行为",
+                "痛点只是抱怨而非具体代价"
+              ],
+              "rationale": {
+                "field": "rubric:Problem Definition",
+                "value": 5.46,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Problem Definition = 5.46 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  ⚠ 规则 · 触发风险 H5·需求证据不足  -0.19\n  调整 · 以上扣分合计  -0.19\n→ 最终 5.46",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H5·需求证据不足",
+                    "delta": -0.19,
+                    "severity": "medium",
+                    "agent_name": "用户痛点 Agent",
+                    "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                    "detail": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.19,
+                    "detail": "扣分累计 0.19 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H5",
+                    "value": "需求证据不足",
+                    "rule_id": "H5",
+                    "impact": "-0.19"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                    "rule_id": "H5",
+                    "agent": "用户痛点 Agent",
+                    "impact": "-0.19"
+                  }
+                ],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "User Evidence Strength",
+              "score": 5.46,
+              "status": "ok",
+              "weight": 0.15,
+              "reason": "触发需求证据不足(-0.2)",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.19,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "访谈",
+                "问卷",
+                "原话",
+                "样本",
+                "内测",
+                "点击",
+                "转化",
+                "预约",
+                "日志"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H5",
+                  "name": "需求证据不足",
+                  "severity": "medium"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_evidence",
+                  "kind": "concept",
+                  "label": "Rubric: Evidence",
+                  "description": "评审维度：证据链完整度"
+                },
+                {
+                  "id": "M_user_interview",
+                  "kind": "method",
+                  "label": "User Interview",
+                  "description": "通过半结构化访谈收集用户原话与场景信息"
+                },
+                {
+                  "id": "M_survey",
+                  "kind": "method",
+                  "label": "Survey",
+                  "description": "通过问卷定量验证需求、支付意愿等假设"
+                },
+                {
+                  "id": "D_interview_notes",
+                  "kind": "deliverable",
+                  "label": "Interview Notes",
+                  "description": "用户访谈记录与痛点频次统计表"
+                },
+                {
+                  "id": "D_survey_report",
+                  "kind": "deliverable",
+                  "label": "Survey Report",
+                  "description": "问卷设计、样本说明与关键结论"
+                }
+              ],
+              "common_mistakes": [
+                "只凭个人直觉，没有任何访谈或问卷",
+                "样本量过小且无目标客群筛选",
+                "没有记录用户原话，仅有总结性描述"
+              ],
+              "rationale": {
+                "field": "rubric:User Evidence Strength",
+                "value": 5.46,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "User Evidence Strength = 5.46 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  ⚠ 规则 · 触发风险 H5·需求证据不足  -0.19\n  调整 · 以上扣分合计  -0.19\n→ 最终 5.46",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H5·需求证据不足",
+                    "delta": -0.19,
+                    "severity": "medium",
+                    "agent_name": "用户痛点 Agent",
+                    "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                    "detail": "你的描述中缺少用户需求验证的证据（如访谈记录、内测数据、预约/点击转化等）。没有证据的需求只是假设。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.19,
+                    "detail": "扣分累计 0.19 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H5",
+                    "value": "需求证据不足",
+                    "rule_id": "H5",
+                    "impact": "-0.19"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.15,
+                    "impact": "×0.15"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                    "rule_id": "H5",
+                    "agent": "用户痛点 Agent",
+                    "impact": "-0.19"
+                  }
+                ],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Solution Feasibility",
+              "score": 5.65,
+              "status": "ok",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充技术路线, mvp, 资源相关论证",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "技术路线",
+                "mvp",
+                "资源"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_solution",
+                  "kind": "concept",
+                  "label": "Solution",
+                  "description": "为目标用户设计的产品/服务组合"
+                },
+                {
+                  "id": "M_mvp",
+                  "kind": "method",
+                  "label": "MVP Experiment",
+                  "description": "用最小可行产品验证关键假设"
+                },
+                {
+                  "id": "M_usability_test",
+                  "kind": "method",
+                  "label": "Usability Test",
+                  "description": "针对产品可用性的可用性测试"
+                },
+                {
+                  "id": "D_usability_report",
+                  "kind": "deliverable",
+                  "label": "Usability Test Report",
+                  "description": "可用性测试设计与结果"
+                }
+              ],
+              "common_mistakes": [
+                "方案停留在口号，缺少可执行步骤",
+                "没有任何原型/MVP 演示或测试记录",
+                "技术路线与团队能力/资源不匹配"
+              ],
+              "rationale": {
+                "field": "rubric:Solution Feasibility",
+                "value": 5.65,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Solution Feasibility = 5.65 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「技术路线、mvp、资源」相关证据\n→ 最终 5.65",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「技术路线、mvp、资源」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Business Model Consistency",
+              "score": 5.65,
+              "status": "ok",
+              "weight": 0.15,
+              "reason": "已给出主要做法，但还可继续补充价值主张, 渠道, 收入相关论证",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "价值主张",
+                "渠道",
+                "收入",
+                "成本"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_business_model",
+                  "kind": "concept",
+                  "label": "Business Model",
+                  "description": "价值主张、渠道、收入、成本之间的闭环结构"
+                },
+                {
+                  "id": "C_value_proposition",
+                  "kind": "concept",
+                  "label": "Value Proposition",
+                  "description": "痛点→收益→产品主张之间的一致性"
+                },
+                {
+                  "id": "C_channel",
+                  "kind": "concept",
+                  "label": "Acquisition Channel",
+                  "description": "获客与触达用户的路径"
+                },
+                {
+                  "id": "C_revenue_stream",
+                  "kind": "concept",
+                  "label": "Revenue Stream",
+                  "description": "项目收入来源构成"
+                },
+                {
+                  "id": "C_cost_structure",
+                  "kind": "concept",
+                  "label": "Cost Structure",
+                  "description": "固定成本与变动成本结构"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "价值主张与收费对象不一致",
+                "渠道不可达目标用户，仅依赖自然裂变",
+                "收入来源与成本结构无对应关系"
+              ],
+              "rationale": {
+                "field": "rubric:Business Model Consistency",
+                "value": 5.65,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Business Model Consistency = 5.65 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「价值主张、渠道、收入」相关证据\n→ 最终 5.65",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「价值主张、渠道、收入」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.15,
+                    "impact": "×0.15"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Market & Competition",
+              "score": 9.29,
+              "status": "ok",
+              "weight": 0.1,
+              "reason": "触发TAM/SAM/SOM口径混乱(-0.4)",
+              "source": "rule_based",
+              "base_score": 9.6,
+              "evidence_bonus": 9.6,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.41,
+              "matched_evidence": [
+                "tam",
+                "sam",
+                "som"
+              ],
+              "missing_evidence": [
+                "市场规模",
+                "竞品"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H4",
+                  "name": "TAM/SAM/SOM口径混乱",
+                  "severity": "high"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_market_size",
+                  "kind": "concept",
+                  "label": "Market Size",
+                  "description": "TAM/SAM/SOM 分层的市场规模逻辑"
+                },
+                {
+                  "id": "M_tam_sam_som",
+                  "kind": "method",
+                  "label": "TAM/SAM/SOM Modeling",
+                  "description": "自下而上量化市场空间"
+                },
+                {
+                  "id": "C_competition",
+                  "kind": "concept",
+                  "label": "Competition Landscape",
+                  "description": "直接/间接竞品与替代品构成的竞争格局"
+                },
+                {
+                  "id": "M_competition_mapping",
+                  "kind": "method",
+                  "label": "Competition Mapping",
+                  "description": "绘制竞争格局与替代品地图"
+                },
+                {
+                  "id": "D_competitor_table",
+                  "kind": "deliverable",
+                  "label": "Competitor Comparison Table",
+                  "description": "主流方案的对比矩阵"
+                }
+              ],
+              "common_mistakes": [
+                "声称没有竞争对手或只有巨头",
+                "TAM/SAM/SOM 口径混乱，自上而下拍脑袋",
+                "只罗列产品功能，不分析替代方案"
+              ],
+              "rationale": {
+                "field": "rubric:Market & Competition",
+                "value": 9.29,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Market & Competition = 9.29 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 9.60\n  调整 · 文本长度达标  +0.10\n  +证据 · 命中关键证据「tam」\n  +证据 · 命中关键证据「sam」\n  +证据 · 命中关键证据「som」\n  ⚠ 规则 · 触发风险 H4·TAM/SAM/SOM口径混乱  -0.41\n  调整 · 以上扣分合计  -0.41\n→ 最终 9.29",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 9.6,
+                    "detail": "基于文本命中关键词评估，基础 9.60"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "evidence",
+                    "label": "命中关键证据「tam」",
+                    "delta": 0.0,
+                    "severity": "info",
+                    "detail": "文本中检测到相关表述"
+                  },
+                  {
+                    "kind": "evidence",
+                    "label": "命中关键证据「sam」",
+                    "delta": 0.0,
+                    "severity": "info",
+                    "detail": "文本中检测到相关表述"
+                  },
+                  {
+                    "kind": "evidence",
+                    "label": "命中关键证据「som」",
+                    "delta": 0.0,
+                    "severity": "info",
+                    "detail": "文本中检测到相关表述"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H4·TAM/SAM/SOM口径混乱",
+                    "delta": -0.41,
+                    "severity": "high",
+                    "agent_name": "市场洞察 Agent",
+                    "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+                    "detail": "提到了市场规模相关概念，但TAM/SAM/SOM三层逻辑需要严格区分。很多项目把TAM当SOM用，会被评委秒杀。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.41,
+                    "detail": "扣分累计 0.41 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 9.6,
+                    "impact": "+9.60"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H4",
+                    "value": "TAM/SAM/SOM口径混乱",
+                    "rule_id": "H4",
+                    "impact": "-0.41"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发",
+                    "rule_id": "H4",
+                    "agent": "市场洞察 Agent",
+                    "impact": "-0.41"
+                  }
+                ],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Financial Logic",
+              "score": 5.65,
+              "status": "ok",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充cac, ltv, 现金流相关论证",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "cac",
+                "ltv",
+                "现金流",
+                "回本"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_risk_category_financial",
+                  "kind": "concept",
+                  "label": "Financial Risk",
+                  "description": "现金流与盈利能力风险"
+                },
+                {
+                  "id": "M_unit_economics",
+                  "kind": "method",
+                  "label": "Unit Economics Modeling",
+                  "description": "围绕单个用户或订单构建收益/成本模型"
+                },
+                {
+                  "id": "M_sensitivity_analysis",
+                  "kind": "method",
+                  "label": "Sensitivity Analysis",
+                  "description": "对关键假设做敏感性分析"
+                },
+                {
+                  "id": "X_cac",
+                  "kind": "metric",
+                  "label": "CAC",
+                  "description": "Customer Acquisition Cost — 获得一个付费用户的全部成本"
+                },
+                {
+                  "id": "X_ltv",
+                  "kind": "metric",
+                  "label": "LTV",
+                  "description": "Lifetime Value — 单个用户在生命周期内贡献的毛利"
+                },
+                {
+                  "id": "X_payback",
+                  "kind": "metric",
+                  "label": "Payback Period",
+                  "description": "收回获客成本所需时间"
+                },
+                {
+                  "id": "X_margin",
+                  "kind": "metric",
+                  "label": "Gross Margin",
+                  "description": "毛利率"
+                },
+                {
+                  "id": "D_financial_model",
+                  "kind": "deliverable",
+                  "label": "Financial Model",
+                  "description": "收入、成本、现金流与盈亏平衡测算表"
+                }
+              ],
+              "common_mistakes": [
+                "未计算 CAC/LTV，仅口头说能赚钱",
+                "现金流与资金需求缺乏测算",
+                "依赖不现实的转化率或增长假设"
+              ],
+              "rationale": {
+                "field": "rubric:Financial Logic",
+                "value": 5.65,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Financial Logic = 5.65 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「cac、ltv、现金流」相关证据\n→ 最终 5.65",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「cac、ltv、现金流」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Innovation & Differentiation",
+              "score": 5.65,
+              "status": "ok",
+              "weight": 0.1,
+              "reason": "已给出主要做法，但还可继续补充创新点, 差异化, 对比矩阵相关论证",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "创新点",
+                "差异化",
+                "对比矩阵"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_moat",
+                  "kind": "concept",
+                  "label": "Competitive Moat",
+                  "description": "难以被复制的竞争壁垒"
+                },
+                {
+                  "id": "C_positioning",
+                  "kind": "concept",
+                  "label": "Positioning",
+                  "description": "在用户心智中的定位"
+                },
+                {
+                  "id": "M_competitor_matrix",
+                  "kind": "method",
+                  "label": "Competitor Matrix",
+                  "description": "按关键维度对比直接/间接竞品"
+                },
+                {
+                  "id": "D_competition_map",
+                  "kind": "deliverable",
+                  "label": "Competition Map",
+                  "description": "竞品与替代品可视化地图"
+                },
+                {
+                  "id": "D_case_study_positive",
+                  "kind": "deliverable",
+                  "label": "Positive Case Study",
+                  "description": "正面成功案例分析"
+                }
+              ],
+              "common_mistakes": [
+                "只说创新，不给出可验证的对比依据",
+                "差异化停留在宣传语层面",
+                "忽视用户现有解决方案的满意度"
+              ],
+              "rationale": {
+                "field": "rubric:Innovation & Differentiation",
+                "value": 5.65,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Innovation & Differentiation = 5.65 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「创新点、差异化、对比矩阵」相关证据\n→ 最终 5.65",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「创新点、差异化、对比矩阵」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.1,
+                    "impact": "×0.1"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Team & Execution",
+              "score": 5.65,
+              "status": "ok",
+              "weight": 0.05,
+              "reason": "已给出主要做法，但还可继续补充团队, 分工, 里程碑相关论证",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.0,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "团队",
+                "分工",
+                "里程碑"
+              ],
+              "dim_rules": [],
+              "evidence_chain": [
+                {
+                  "id": "C_team",
+                  "kind": "concept",
+                  "label": "Founding Team",
+                  "description": "团队角色分工与资源匹配度"
+                },
+                {
+                  "id": "C_risk_category_execution",
+                  "kind": "concept",
+                  "label": "Execution Risk",
+                  "description": "团队与资源执行相关风险"
+                },
+                {
+                  "id": "D_roadmap",
+                  "kind": "deliverable",
+                  "label": "Roadmap",
+                  "description": "阶段里程碑与验收标准清单"
+                },
+                {
+                  "id": "D_kpi_report",
+                  "kind": "deliverable",
+                  "label": "KPI Report",
+                  "description": "阶段性关键指标达成情况报告"
+                }
+              ],
+              "common_mistakes": [
+                "团队履历与项目领域完全不相关",
+                "里程碑时间表过于激进且无验收标准",
+                "关键岗位缺失或一人身兼数职"
+              ],
+              "rationale": {
+                "field": "rubric:Team & Execution",
+                "value": 5.65,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Team & Execution = 5.65 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  说明 · 尚未出现「团队、分工、里程碑」相关证据\n→ 最终 5.65",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "尚未出现「团队、分工、里程碑」相关证据",
+                    "delta": 0.0,
+                    "detail": "未额外加分也未扣分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.05,
+                    "impact": "×0.05"
+                  }
+                ],
+                "contributing_evidence": [],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            },
+            {
+              "item": "Presentation Quality",
+              "score": 5.57,
+              "status": "ok",
+              "weight": 0.05,
+              "reason": "触发路演叙事断裂(-0.1)",
+              "source": "rule_based",
+              "base_score": 5.55,
+              "evidence_bonus": 5.55,
+              "length_bonus": 0.1,
+              "signal_bonus": 0.0,
+              "rule_penalty": 0.08,
+              "matched_evidence": [],
+              "missing_evidence": [
+                "路演",
+                "结构",
+                "叙事",
+                "数据支撑"
+              ],
+              "dim_rules": [
+                {
+                  "id": "H14",
+                  "name": "路演叙事断裂",
+                  "severity": "low"
+                }
+              ],
+              "evidence_chain": [
+                {
+                  "id": "C_rubric_dimension_presentation",
+                  "kind": "concept",
+                  "label": "Rubric: Presentation",
+                  "description": "评审维度：路演表达与结构"
+                },
+                {
+                  "id": "M_storytelling",
+                  "kind": "method",
+                  "label": "Storytelling",
+                  "description": "用叙事结构讲清楚项目逻辑"
+                },
+                {
+                  "id": "D_pitch_deck",
+                  "kind": "deliverable",
+                  "label": "Pitch Deck",
+                  "description": "用于路演的 PPT/演示文档"
+                }
+              ],
+              "common_mistakes": [
+                "路演结构混乱，缺少问题→方案→市场→模式→团队→里程碑的基本顺序",
+                "大量堆砌概念与行话，缺少以用户故事开场",
+                "数据与图表无来源说明或与口头表述矛盾"
+              ],
+              "rationale": {
+                "field": "rubric:Presentation Quality",
+                "value": 5.57,
+                "formula": "base_evidence + bonuses − rule_penalties",
+                "formula_display": "Presentation Quality = 5.57 / 10\n  基线 · 证据覆盖基线（阶段：结构化阶段） = 5.55\n  调整 · 文本长度达标  +0.10\n  ⚠ 规则 · 触发风险 H14·路演叙事断裂  -0.08\n  调整 · 以上扣分合计  -0.08\n→ 最终 5.57",
+                "reasoning_steps": [
+                  {
+                    "kind": "base",
+                    "label": "证据覆盖基线（阶段：结构化阶段）",
+                    "delta": 5.55,
+                    "detail": "基于文本命中关键词评估，基础 5.55"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "文本长度达标",
+                    "delta": 0.1,
+                    "detail": "文本完整度加成 +0.10"
+                  },
+                  {
+                    "kind": "rule",
+                    "label": "触发风险 H14·路演叙事断裂",
+                    "delta": -0.08,
+                    "severity": "low",
+                    "agent_name": "表达呈现 Agent",
+                    "quote": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                    "detail": "内容篇幅较短或叙事跳跃，尚未形成完整的路演结构（问题→方案→市场→模式→团队）。"
+                  },
+                  {
+                    "kind": "adjust",
+                    "label": "以上扣分合计",
+                    "delta": -0.08,
+                    "detail": "扣分累计 0.08 分"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "label": "基础分",
+                    "value": 5.55,
+                    "impact": "+5.55"
+                  },
+                  {
+                    "label": "文本长度",
+                    "value": 0.1,
+                    "impact": "+0.10"
+                  },
+                  {
+                    "label": "风险 H14",
+                    "value": "路演叙事断裂",
+                    "rule_id": "H14",
+                    "impact": "-0.08"
+                  },
+                  {
+                    "label": "权重",
+                    "value": 0.05,
+                    "impact": "×0.05"
+                  }
+                ],
+                "contributing_evidence": [
+                  {
+                    "excerpt": "TAM、SAM、SOM 到底怎么算？我知道概念但一到自己项目里就发虚，能带我用一个真实例子走一遍吗？",
+                    "rule_id": "H14",
+                    "agent": "表达呈现 Agent",
+                    "impact": "-0.08"
+                  }
+                ],
+                "note": "阶段：结构化阶段 · 来源：rule_based · 基于累积语料（50 字符）"
+              }
+            }
+          ],
+          "capability_map": [
+            {
+              "stage": "痛点发现",
+              "dimension": "敏锐度与同理心",
+              "focus": "识别真需求并给出用户证据"
+            },
+            {
+              "stage": "方案策划",
+              "dimension": "创造力与可行性",
+              "focus": "验证创新点并匹配资源"
+            },
+            {
+              "stage": "商业建模",
+              "dimension": "商业逻辑性",
+              "focus": "打通价值-渠道-收入闭环"
+            },
+            {
+              "stage": "团队与资源",
+              "dimension": "协作与执行力",
+              "focus": "分工、里程碑与交付能力"
+            },
+            {
+              "stage": "路演表达",
+              "dimension": "叙事与抗压",
+              "focus": "结构完整、数据可信、问答稳定"
+            }
+          ],
+          "grading_principles": [
+            "先按项目阶段评分，不把早期想法按成熟计划书标准苛评",
+            "有初步逻辑但证据未补齐的项目，分数应落在中低段而不是接近零分",
+            "高分必须建立在用户证据、市场竞争、商业闭环和执行计划同时较完整之上"
+          ],
+          "summary": "已按 V2.0 规则集完成诊断（27条规则 + 9项Rubric）。",
+          "summary_rationale": {
+            "field": "current_summary",
+            "value": "已按 V2.0 规则集完成诊断（27条规则 + 9项Rubric）。",
+            "formula": "compose(mode, competition_type, rule_count, rubric_count)",
+            "formula_display": "摘要 = 以 coursework 模式，跑完 27 条规则 + 9 项 Rubric 后的诊断总览。",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "模式 mode = coursework"
+              },
+              {
+                "kind": "evidence",
+                "label": "赛道 通用"
+              },
+              {
+                "kind": "evidence",
+                "label": "规则库 27 条 + Rubric 9 项"
+              },
+              {
+                "kind": "adjust",
+                "label": "触发 3 条规则 · 综合分 6.35"
+              }
+            ],
+            "note": "本摘要是自动生成的诊断总览，可被老师订正。"
+          },
+          "info_sufficient": true,
+          "corpus_meta": {
+            "turns": 1,
+            "chars": 50,
+            "stage_history": []
+          }
+        },
+        "next_task": {
+          "title": "补齐证据并完成一次压力测试",
+          "description": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+          "template_guideline": [
+            "先明确当前最高风险点是什么",
+            "补至少3条能直接支撑该点的证据",
+            "用评委视角做一轮反问并更新答案"
+          ],
+          "acceptance_criteria": [
+            "新增3条可验证证据",
+            "完成1轮压力测试问答",
+            "更新修正后的版本说明"
+          ],
+          "rationale": {
+            "field": "next_task",
+            "value": "补齐证据并完成一次压力测试",
+            "formula": "suggest_next_task(primary_rule_id)",
+            "formula_display": "下一步任务 = 补齐证据并完成一次压力测试\n依据：H4（主风险）\n描述：围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。",
+            "reasoning_steps": [
+              {
+                "kind": "base",
+                "label": "以最关键风险 H4·TAM/SAM/SOM口径混乱 作为任务选取依据",
+                "detail": "优先看高严重性规则，若无则取首条命中"
+              },
+              {
+                "kind": "evidence",
+                "label": "匹配任务模板 → 补齐证据并完成一次压力测试",
+                "detail": "围绕当前最高风险点，补证据并完成一轮反事实问答压力测试。"
+              },
+              {
+                "kind": "evidence",
+                "label": "先明确当前最高风险点是什么",
+                "severity": "info"
+              },
+              {
+                "kind": "evidence",
+                "label": "补至少3条能直接支撑该点的证据",
+                "severity": "info"
+              },
+              {
+                "kind": "evidence",
+                "label": "用评委视角做一轮反问并更新答案",
+                "severity": "info"
+              }
+            ],
+            "note": "基于规则 H4 触发的任务模板"
+          }
+        },
+        "execution_trace": {},
+        "exploration_state": {
+          "phase": "direction",
+          "filled_slots": {},
+          "missing_slots": [
+            "target_user",
+            "pain_point",
+            "solution",
+            "business_model",
+            "competition"
+          ],
+          "next_question_slot": "target_user",
+          "n_filled": 0
+        }
+      },
+      "timestamp": "2026-04-22T13:42:00.168571+08:00"
+    }
+  ],
+  "exploration_state": {
+    "phase": "direction",
+    "filled_slots": {},
+    "missing_slots": [
+      "target_user",
+      "pain_point",
+      "solution",
+      "business_model",
+      "competition"
+    ],
+    "next_question_slot": "target_user",
+    "n_filled": 0
+  }
+}

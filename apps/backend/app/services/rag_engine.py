@@ -173,6 +173,38 @@ def _build_search_text(case: dict) -> str:
     return "\n".join(parts)[:2000]
 
 
+def _infer_subgraph_tags(case: dict, search_text: str) -> list[str]:
+    """根据 case 文本/字段推断它属于哪些"能力子图"，给它打 subgraph:xxx tag。
+
+    判定规则（粗规则即可，目的是让 RAG 在选 subgraph_filter 时能命中）：
+      - innovation_evaluation：含创新/壁垒/差异化关键词 ≥2 ，或 innovation_points 非空
+      - business_model_construction：含商业模式/收入/成本/客单价等 ≥2 ，或 business_model 非空
+      - simulated_roadshow：含路演/答辩/评委/Q&A 等 ≥1
+    """
+    try:
+        from app.services.ability_subgraphs import ABILITY_SUBGRAPHS
+    except Exception:
+        return []
+
+    text_low = (search_text or "").lower()
+    profile = case.get("project_profile") or {}
+    out: list[str] = []
+
+    for sub_id, sub in ABILITY_SUBGRAPHS.items():
+        kws = [kw.lower() for kw in sub.trigger_keywords]
+        hits = sum(1 for kw in kws if kw and kw in text_low)
+        # 字段加权
+        if sub_id == "innovation_evaluation" and (profile.get("innovation_points") or []):
+            hits += 1
+        if sub_id == "business_model_construction" and (profile.get("business_model") or []):
+            hits += 1
+        # 阈值：路演子图允许 1 命中即打标签（关键词更稀疏），其它要 2
+        threshold = 1 if sub_id == "simulated_roadshow" else 2
+        if hits >= threshold:
+            out.append(f"subgraph:{sub_id}")
+    return out
+
+
 def _load_cases(case_dir: Path) -> list[CaseChunk]:
     raw_chunks: list[tuple[float, CaseChunk]] = []
     for fp in sorted(case_dir.glob("case_*.json")):
@@ -207,6 +239,12 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
             elif "大创" in cname or "创青春" in cname:
                 tags.append("competition:dachuang")
 
+        search_text = _build_search_text(data)
+        # 自动给 case 打 ability subgraph 标签（subgraph:innovation_evaluation 等）
+        # 这样 retrieve(subgraph_filter=...) 才能真正在 RAG 里加权
+        auto_tags = _infer_subgraph_tags(data, search_text)
+        merged_tags = [_fix_garbled(str(t)) for t in tags if str(t).strip()] + auto_tags
+
         chunk = CaseChunk(
             case_id=data.get("case_id", fp.stem),
             category=data.get("source", {}).get("category", "未分类"),
@@ -221,8 +259,8 @@ def _load_cases(case_dir: Path) -> list[CaseChunk]:
             risk_flags=data.get("risk_flags", []),
             rubric_coverage=data.get("rubric_coverage", []),
             confidence=float(data.get("confidence", 0)),
-            tags=[_fix_garbled(str(t)) for t in tags if str(t).strip()],
-            text_for_search=_build_search_text(data),
+            tags=merged_tags,
+            text_for_search=search_text,
         )
         raw_chunks.append((quality, chunk))
 
@@ -421,6 +459,8 @@ class RagEngine:
         mode: str = "auto",
         exclude_ids: set[str] | None = None,
         competition_type: str | None = None,
+        subgraph_filter: list[str] | None = None,
+        ontology_boost: bool = True,
     ) -> list[dict[str, Any]]:
         """Retrieve most relevant cases with diversity-aware reranking.
 
@@ -509,8 +549,72 @@ class RagEngine:
                 if comp_tag in (chunk.tags or []):
                     scores_normed[i] = min(1.0, float(scores_normed[i]) + 0.08)
 
+        # ── 子图加权（P2 配套） ──
+        # subgraph_filter 来自 select_ability_subgraphs 的结果（如 ["innovation_eval"]），
+        # 命中 case.tags 里 "subgraph:xxx" 的 case 加分。
+        if subgraph_filter:
+            sub_tags = {f"subgraph:{s}" for s in subgraph_filter if s}
+            for i, chunk in enumerate(working_chunks):
+                ct = set(chunk.tags or [])
+                if ct & sub_tags:
+                    scores_normed[i] = min(1.0, float(scores_normed[i]) + 0.12)
+
+        # ── 本体驱动加权（Step 6: RAG 接入 ontology resolver） ──
+        # 1) normalize 查询 → 一组 canonical concept_id
+        # 2) 把这些概念 + 其祖先（父概念命中=子概念也算相关）作为本体上下文
+        # 3) 检查每个 case.text_for_search 含有这些概念的 label / aliases 多少次，按命中数加分
+        # 4) 在结果里返回 concept_hits（前端可显示"为何召回该 case"）
+        case_concept_hits: list[list[str]] = [[] for _ in working_chunks]
+        if ontology_boost:
+            try:
+                from app.services.ontology_resolver import get_resolver
+                from app.services.kg_ontology import ONTOLOGY_NODES
+                resolver = get_resolver()
+                q_ids = resolver.normalize(query)
+                if q_ids:
+                    # 同时考虑祖先：用户问 CAC，提到"商业模式"的 case 也算相关
+                    ctx_ids: set[str] = set()
+                    for qid in q_ids:
+                        ctx_ids.add(qid)
+                        for anc in resolver.ancestors(qid):
+                            ctx_ids.add(anc)
+
+                    # 收集每个概念的 label/aliases（小写，用作 substring 匹配）
+                    label_to_id: list[tuple[str, str]] = []
+                    for cid in ctx_ids:
+                        node = ONTOLOGY_NODES.get(cid)
+                        if not node:
+                            continue
+                        label_to_id.append((node.label.lower(), cid))
+                        for al in node.aliases:
+                            if al:
+                                label_to_id.append((al.lower(), cid))
+
+                    if label_to_id:
+                        for i, chunk in enumerate(working_chunks):
+                            text_l = (chunk.text_for_search or "").lower()
+                            if not text_l:
+                                continue
+                            hit_set: set[str] = set()
+                            for label, cid in label_to_id:
+                                if not label:
+                                    continue
+                                if label in text_l:
+                                    hit_set.add(cid)
+                            if hit_set:
+                                # 每命中一个概念 +0.04，最多 +0.20
+                                bonus = min(0.20, 0.04 * len(hit_set))
+                                scores_normed[i] = min(1.0, float(scores_normed[i]) + bonus)
+                                case_concept_hits[i] = sorted(hit_set)
+            except Exception:
+                # 本体加权失败不影响主检索流程
+                pass
+
         use_mmr = (self._embed_ready and self._embeddings is not None
                    and vector_scores is not None and len(working_chunks) > top_k)
+
+        # 同步把竞赛/子图/本体加权回写到 raw scores，否则非-MMR 路径排序会忽略这些 boost
+        scores = scores_normed.copy()
 
         def _select(excl: set[str] | None) -> list[int]:
             if use_mmr:
@@ -531,6 +635,8 @@ class RagEngine:
             kw_score = float(keyword_scores[local_idx]) if keyword_scores.size else 0.0
             vec_score = float(vector_scores[local_idx]) if vector_scores is not None else 0.0
             combined = float(scores[local_idx])
+            concept_hits = case_concept_hits[local_idx] if local_idx < len(case_concept_hits) else []
+            sub_hits = sorted(set(c.tags or []) & {f"subgraph:{s}" for s in (subgraph_filter or [])})
             results.append({
                 "case_id": c.case_id,
                 "category": c.category,
@@ -548,6 +654,9 @@ class RagEngine:
                 "risk_flags": c.risk_flags,
                 "rubric_coverage": c.rubric_coverage,
                 "summary": c.summary[:300],
+                # —— 召回原因解释（前端可展示"为何召回该 case"） ——
+                "concept_hits": concept_hits,
+                "subgraph_hits": [t.replace("subgraph:", "") for t in sub_hits],
             })
         return results
 

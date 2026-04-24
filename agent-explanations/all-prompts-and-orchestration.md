@@ -29,6 +29,9 @@
 - [三、学生端 Prompt 体系](#三学生端-prompt-体系)
 - [3.2 学生端多智能体主链路](#32-学生端多智能体主链路)
 - [3.5 `graph_workflow.py` 主链中的 Prompt 细拆](#35-graph_workflowpy-主链中的-prompt-细拆)
+- [3.5.10 双光谱导向 Prompt：创业 / 创新 × 商业 / 公益](#3510-双光谱导向-prompt创业--创新--商业--公益)
+- [3.5.11 不同成熟度与阶段，Prompt 为什么会明显不同](#3511-不同成熟度与阶段prompt-为什么会明显不同)
+- [3.5.12 不同赛事的 Prompt 不只是文案，还带参数权重](#3512-不同赛事的-prompt-不只是文案还带参数权重)
 - [3.6 Focused 单轮 Prompt](#36-focused-单轮-prompt按任务意图直接切换结构导向)
 - [四、学生端专项 Prompt](#四学生端专项-prompt财务计划书视频批注)
 
@@ -611,6 +614,1154 @@ if (
 
 > 系统对赛事的区分，不是停留在前端下拉框，而是已经进入到各角色智能体的 Prompt 层。
 
+### 3.5.10 双光谱导向 Prompt：创业 / 创新 × 商业 / 公益
+
+上面讲的是“模式切换”和“赛事切换”，但这是旧版本最容易被低估的一层。  
+最新实现里，系统已经不再只说“你现在是课程模式/竞赛模式”，而是额外维护了一套**项目认知双光谱**：
+
+- 第一条轴：`innov_venture`
+  - `< 0` 越靠左越偏**创新 / 科研 / 技术突破**
+  - `> 0` 越靠右越偏**创业 / 用户 / 增长 / 商业落地**
+- 第二条轴：`biz_public`
+  - `< 0` 越靠左越偏**商业**
+  - `> 0` 越靠右越偏**公益 / 社会影响**
+
+这不是只拿来前端展示的标签，而是会被 `compose_oriented_prompt()` 直接拼进不同角色智能体的 Prompt 中。
+
+#### 3.5.10.1 双光谱从哪里来
+
+源码在 `track_inference.py`。系统会把以下信息一起送去推断：
+
+- 学生本轮消息
+- 诊断摘要里的 `bottleneck`
+- 项目类别 `category`
+- 赛事类型 `competition_type`
+- 结构化信号 `structured_signals`
+
+下面直接贴出源码中的核心推断逻辑：
+
+```python
+def infer_track_vector(
+    message: str,
+    *,
+    diagnosis: dict[str, Any] | None = None,
+    category: str = "",
+    competition_type: str = "",
+    structured_signals: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    diagnosis = diagnosis if isinstance(diagnosis, dict) else {}
+    structured_signals = structured_signals if isinstance(structured_signals, dict) else {}
+    text = "\n".join(
+        item for item in [
+            str(message or ""),
+            str(diagnosis.get("bottleneck") or ""),
+            str(category or ""),
+            str(competition_type or ""),
+        ] if item
+    )
+
+    innov_score = _keyword_score(text, [
+        "创新", "技术路线", "论文", "实验", "算法", "专利", "baseline",
+        "科研", "可复现", "novelty", "原创", "前沿", "技术突破", "首创",
+    ])
+    venture_score = _keyword_score(text, [
+        "创业", "用户", "mvp", "获客", "增长", "商业模式", "融资",
+        "渠道", "留存", "付费", "试点", "推广", "团队", "市场",
+    ])
+    biz_score = _keyword_score(text, [
+        "营收", "利润", "毛利", "收费", "定价", "现金流", "客户",
+        "合同", "复购", "gmv", "订阅", "广告", "to b", "to c",
+        "回本", "盈利", "成本", "客单价",
+    ])
+    public_score = _keyword_score(text, [
+        "公益", "社会价值", "社会影响", "社会问题", "社会创新",
+        "可持续", "可及性", "普惠", "包容", "包容性", "公共服务",
+        "受益人", "受助", "弱势群体", "弱势", "独居", "留守", "残障",
+        "失能", "孤儿", "老人", "儿童", "助老", "助残", "助学",
+        "志愿者", "义工", "捐赠", "非营利", "ngo", "公益基金",
+        "社会企业", "民政", "街道", "社区", "乡村", "扶贫", "帮扶",
+        "赋能", "义诊", "义教",
+        "政府购买", "政府支持", "csr", "资助", "公益基金", "社会资本",
+        "sroi",
+    ])
+
+    if "公益" in category or "社会" in category:
+        public_score += 1.5
+    if competition_type == "challenge_cup":
+        innov_score += 0.3
+        public_score += 0.3
+    if competition_type == "internet_plus":
+        venture_score += 0.5
+        biz_score += 0.4
+
+    if public_score >= 2.0 and biz_score < 1.5:
+        public_score += 1.0
+
+    signal_bonus = 0.0
+    for key, value in structured_signals.items():
+        try:
+            num = float(value or 0)
+        except Exception:
+            continue
+        if num <= 0:
+            continue
+        if any(token in key.lower() for token in ["revenue", "ltv", "cac", "pricing", "budget"]):
+            biz_score += min(num, 1.0) * 0.5
+            venture_score += min(num, 1.0) * 0.2
+            signal_bonus += 0.1
+        if any(token in key.lower() for token in ["evidence", "interview", "experiment", "validation"]):
+            innov_score += min(num, 1.0) * 0.25
+            venture_score += min(num, 1.0) * 0.25
+            signal_bonus += 0.1
+
+    iv_total = innov_score + venture_score
+    bp_total = biz_score + public_score
+    innov_venture = clamp_track_value(math.tanh((venture_score - innov_score) / 2.0)) if iv_total > 0 else 0.0
+    biz_public = clamp_track_value(math.tanh((public_score - biz_score) / 2.0)) if bp_total > 0 else 0.0
+
+    confidence = min(0.92, 0.30 + iv_total * 0.07 + bp_total * 0.07 + signal_bonus)
+    evidence = []
+    if innov_score:
+        evidence.append(f"创新信号 {innov_score:.1f}")
+    if venture_score:
+        evidence.append(f"创业信号 {venture_score:.1f}")
+    if biz_score:
+        evidence.append(f"商业信号 {biz_score:.1f}")
+    if public_score:
+        evidence.append(f"公益信号 {public_score:.1f}")
+
+    return {
+        "track_vector": {
+            "innov_venture": innov_venture,
+            "biz_public": biz_public,
+            "source": "inferred",
+            "updated_at": _now_iso(),
+        },
+        "confidence": round(confidence, 4),
+        "source_mix": {
+            "message": 1.0,
+            "diagnosis": 1.0 if diagnosis else 0.0,
+            "structured_signals": 1.0 if structured_signals else 0.0,
+        },
+        "reason": "基于当前轮文本信号、诊断摘要与结构化证据推断双光谱位置。",
+        "evidence": evidence,
+    }
+```
+
+然后分别对四组信号打分：
+
+- `innov_score`：创新、技术路线、论文、实验、专利、baseline、科研、原创、首创……
+- `venture_score`：创业、用户、MVP、获客、增长、渠道、付费、留存、市场……
+- `biz_score`：营收、利润、毛利、收费、定价、现金流、复购、订阅、盈利……
+- `public_score`：公益、社会价值、受益人、弱势群体、志愿者、捐赠、SROI、政府购买……
+
+再用下面这套公式把关键词信号压成 `[-1, 1]` 的双轴位置：
+
+```python
+innov_venture = tanh((venture_score - innov_score) / 2.0)
+biz_public = tanh((public_score - biz_score) / 2.0)
+```
+
+这里用 `tanh` 很关键。旧做法容易把“既有创新又有创业”的项目压回 0；新做法的优点是：
+
+- 差 1 个关键词就能产生约 `±0.46` 的可感知偏移
+- 差 2 个关键词约 `±0.76`
+- 差 3 个以上很快接近 `±1`
+
+也就是说，这套双光谱不再是“有一点感觉”，而是会把项目明确推向“偏创新/偏创业、偏商业/偏公益”的一侧。
+
+#### 3.5.10.2 双光谱不是硬分类，而是强度分层
+
+在 `project_cognition.py` 里，双光谱不是直接离散成单个标签，而是先按强度切成：
+
+- `|value| < 0.2`：中性，不触发额外取向 Prompt
+- `0.2 <= |value| < 0.5`：`light`
+- `|value| >= 0.5`：`strong`
+
+因此系统真正注入 Prompt 的不是一句“这是创业项目”，而是：
+
+- **偏创新 / 强创新**
+- **偏创业 / 强创业**
+- **偏商业 / 强商业**
+- **偏公益 / 强公益**
+
+#### 3.5.10.3 它具体怎么改 Prompt
+
+`compose_oriented_prompt()` 会按固定顺序拼装导向片段：
+
+1. `role_base`：当前角色的基础职责
+2. `spectrum_fragments`：双光谱端点片段
+3. `stage_fragments`：项目阶段片段
+4. `conflict_fragments`：冲突型片段
+5. `competition prompt fragment`：赛事片段
+6. `modifier_fragments`：重点组合片段
+
+也就是说，Prompt 的导向已经从“你是谁”升级为：
+
+> 你是谁 + 这个项目更偏哪一类 + 当前在哪个阶段 + 当前最该处理哪种冲突。
+
+对应的源码如下：
+
+```python
+def compose_oriented_prompt(
+    role: str,
+    track_vector: dict[str, Any] | None,
+    stage: str,
+    comp_type: str = "",
+) -> str:
+    cfg = load_track_spectrum()
+    if not isinstance(cfg, dict):
+        return ""
+    stage_key = str(stage or "").strip() or "structured"
+    parts: list[str] = []
+
+    base = _get_nested_text(cfg, "role_base", role)
+    if base:
+        parts.append(base)
+
+    for hit in resolve_endpoint_hits(track_vector):
+        endpoint = str(hit.get("endpoint") or "")
+        intensity = str(hit.get("intensity") or "light")
+        frag = _get_nested_text(cfg, "spectrum_fragments", endpoint, intensity, role)
+        if frag:
+            parts.append(frag)
+
+    stage_frag = _get_nested_text(cfg, "stage_fragments", stage_key, role)
+    if stage_frag:
+        parts.append(stage_frag)
+
+    for conflict_key in _conflict_keys(track_vector):
+        frag = _get_nested_text(cfg, "conflict_fragments", conflict_key, role)
+        if frag:
+            parts.append(frag)
+
+    comp_frag = _competition_prompt_fragment(comp_type, role)
+    if comp_frag:
+        parts.append(comp_frag)
+
+    for modifier_key in _modifier_keys(track_vector, stage_key):
+        frag = _get_nested_text(cfg, "modifier_fragments", modifier_key, role)
+        if frag:
+            parts.append(frag)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for part in parts:
+        normalized = part.replace(" ", "").replace("\n", "")
+        if part and normalized not in seen:
+            seen.add(normalized)
+            deduped.append(part)
+    return "\n".join(deduped).strip()
+```
+
+在主链里，这段导向 Prompt 是这样真正接到各个 agent 上的：
+
+```python
+def _oriented_hint(state: dict, role: str) -> str:
+    base = compose_oriented_prompt(
+        role=role,
+        track_vector=state.get("track_vector"),
+        stage=_state_stage(state),
+        comp_type=str(state.get("competition_type") or ""),
+    )
+    subgraphs = state.get("ability_subgraphs") if isinstance(state, dict) else None
+    if isinstance(subgraphs, list) and subgraphs:
+        focus = collect_subgraph_focus_briefs(subgraphs[:2])
+        if focus:
+            sub_names = " / ".join(str(sg.get("name", "")) for sg in subgraphs[:2] if isinstance(sg, dict))
+            base = (base + "\n\n" if base else "") + (
+                f"### 本轮能力子图焦点（{sub_names}）\n{focus}"
+            )
+    ontology = state.get("ontology_grounding") if isinstance(state, dict) else None
+    onto_block = render_ontology_prompt(ontology, role=role)
+    if onto_block:
+        base = (base + "\n\n" if base else "") + onto_block
+    return base
+```
+
+#### 3.5.10.4 双光谱片段的真实含义
+
+下面这些不是抽象概念，而是配置文件 `track_spectrum.json` 里已经写死的原始设计思想：
+
+下面直接贴出最关键的 Prompt 配置代码。
+
+##### `role_base`
+
+```json
+{
+  "coach": "【角色基调】你是项目教练。你的职责是帮助学生识别当前真正该先想清楚的问题，并把抽象方向收敛成可判断的项目问题。",
+  "analyst": "【角色基调】你是风险分析师。你的职责是解释风险为什么成立、风险背后的结构原因是什么，而不是机械挑刺。",
+  "advisor": "【角色基调】你是竞赛顾问。你的职责是把项目翻译成评委能理解的说服逻辑，重点看证据链、叙事顺序与答辩薄弱点。",
+  "tutor": "【角色基调】你是课程导师。你的职责是把概念、方法和评判标准讲清楚，再桥接回学生项目。",
+  "grader": "【角色基调】你是评分官。你的职责是给出结构化评价、解释为什么这样评，并指出最值得优先补强的维度。",
+  "planner": "【角色基调】你是行动规划师。你的职责是把当前最关键的缺口压缩成少量可执行动作，不要泛泛铺任务。",
+  "critic": "【角色基调】你是追问策略智能体。你的职责是用高质量追问逼近证据缺口，而不是直接替学生下结论。"
+}
+```
+
+##### `spectrum_fragments`（摘录最核心端点）
+
+```json
+{
+  "innov": {
+    "light": {
+      "coach": "【偏创新】顺带关注：项目的“新”究竟是问题新、方法新还是验证视角新；不要只因为学生第一次见到就默认它是创新。",
+      "analyst": "【偏创新】顺带检查：创新点是否能被验证、是否有对照基线、是否存在“概念新但效果不显著”的风险。",
+      "advisor": "【偏创新】顺带提醒：评委会追问创新点相对谁而新、证据是否足够、技术贡献是否能被清楚表述。",
+      "tutor": "【偏创新】讲解时顺带说明：创新不等于功能堆叠，更要看增量证据、方法边界和可复现性。",
+      "grader": "【偏创新】评分时额外注意：创新维度不只看口号，要看增量证据、对照组与方法清晰度。",
+      "planner": "【偏创新】优先考虑：需要哪一个最小实验或对照测试，才能证明这不是一句空泛的“创新”叙事。",
+      "critic": "【偏创新】追问优先落在：baseline、实验设计、可复现性、创新边界。"
+    },
+    "strong": {
+      "coach": "【强创新】请重点引导学生想清：相对最接近已有方案到底多了什么；如果拿掉“全球首创/颠覆性”这些词，剩下的可验证增量是什么。",
+      "analyst": "【强创新】请重点审查：方法是否可复现、实验设计是否严谨、效果提升是否超过噪声、是否把研究叙事误当成落地价值。",
+      "advisor": "【强创新】请重点准备：评委对创新含量、验证样本、对照实验和科研贡献边界的追问，避免只有技术名词没有证据。",
+      "tutor": "【强创新】请把创新讲成一套判断问题：相对谁而新、用什么证据证明、有哪些边界条件、为什么别人不容易直接复现。",
+      "grader": "【强创新】评分时请提高对创新证据链的要求：没有 baseline、没有实验或没有效果量化时，不能把创新性评得过高。",
+      "planner": "【强创新】行动上优先推动：实验方案、指标口径、对照基线、复现记录，而不是先写大而全的商业叙事。",
+      "critic": "【强创新】必须追问：创新点是否可实验验证、是否有替代性、是否存在“学生认知新鲜感”误判。"
+    }
+  },
+  "venture": {
+    "strong": {
+      "coach": "【强创业】请重点引导学生回答：谁会先用、为什么现在就会用、凭什么从现有替代方案切过来、第一批用户从哪里来。",
+      "analyst": "【强创业】请重点审查：PMF 证据、用户行为信号、渠道成本、留存与付费逻辑；不要让“方向不错”掩盖执行断点。",
+      "advisor": "【强创业】请重点准备：用户验证、竞品矩阵、差异化与商业模式的答辩话术，避免把创业问题讲成空泛愿景。",
+      "tutor": "【强创业】请把方法讲成能直接拿去判断项目的框架：最危险假设、MVP、渠道实验、留存信号、转向条件。",
+      "grader": "【强创业】评分时请提高对用户证据、增长逻辑和商业模式一致性的要求，不能只因故事完整就高分。",
+      "planner": "【强创业】行动上优先推动：真实用户接触、最小产品验证、获客漏斗和定价实验，而不是过早铺大团队。",
+      "critic": "【强创业】必须追问：痛点够不够强、用户为什么会切换、第一批用户如何获得、失败后如何转向。"
+    }
+  },
+  "public": {
+    "strong": {
+      "coach": "【强公益】请重点引导学生回答：受益人是谁、问题严重度如何量化、谁是实际支付/资助方、项目不靠盈利时凭什么能持续。",
+      "analyst": "【强公益】请重点审查：社会影响是否可量化、受益人是否被真实接触验证、资金结构是否单点依赖、复制是否只靠创始人个人热情。",
+      "advisor": "【强公益】请重点准备：影响力指标、受益人证据、合作机构、资助结构和推广复制话术，避免只讲使命不讲机制。",
+      "tutor": "【强公益】请把公益项目讲成判断清单：影响定义、受益人、资助方、持续机制、合作网络和退出后的存活能力。",
+      "grader": "【强公益】评分时请提高对社会影响、可持续性、合作资源和推广复制逻辑的要求，不要把商业闭环弱直接等同低分。",
+      "planner": "【强公益】行动上优先推动：受益人原话、前后对比指标、资助/支付方列表、合作网络和持续运营方案。",
+      "critic": "【强公益】必须追问：社会影响如何测、谁来买单、为什么能持续、如何规模复制、创始人退出后怎么办。"
+    }
+  }
+}
+```
+
+##### A. 强创新项目
+
+例如 `coach` 会额外被要求：
+
+> 相对最接近已有方案到底多了什么；如果拿掉“全球首创/颠覆性”这些词，剩下的可验证增量是什么。
+
+`analyst` 会额外被要求：
+
+> 审查方法是否可复现、实验设计是否严谨、效果提升是否超过噪声、是否把研究叙事误当成落地价值。
+
+这意味着系统面对强创新项目时，会天然把 Prompt 往：
+
+- baseline
+- 实验设计
+- 对照组
+- 可复现性
+- 创新边界
+
+这些维度推。
+
+##### B. 强创业项目
+
+例如 `coach` 会被要求重点问：
+
+> 谁会先用、为什么现在就会用、凭什么从现有替代方案切过来、第一批用户从哪里来。
+
+`planner` 会被要求优先推动：
+
+> 真实用户接触、最小产品验证、获客漏斗和定价实验，而不是过早铺大团队。
+
+也就是说，一旦项目明显偏创业，Prompt 会自动从“技术对不对”转向：
+
+- 痛点够不够强
+- 用户为什么切换
+- 第一批用户怎么来
+- 留存和付费怎么验证
+
+##### C. 强公益项目
+
+例如 `coach` 会被要求回答：
+
+> 受益人是谁、问题严重度如何量化、谁是实际支付/资助方、项目不靠盈利时凭什么能持续。
+
+`grader` 会被要求：
+
+> 不要把商业闭环弱直接等同低分，而是提高对社会影响、可持续性、合作资源和推广复制逻辑的要求。
+
+这个变化很重要，因为它说明系统已经不再用纯商业创业项目的标准去“误伤”公益项目。
+
+#### 3.5.10.5 双光谱冲突：不是加标签，而是调度矛盾
+
+最新配置里还多了一层很有价值的设计：`conflict_fragments`。  
+它不是说“这个项目是什么”，而是说“这个项目同时带着两种会互相拉扯的属性”。
+
+目前最关键的两类冲突是：
+
+##### `venture_public`
+
+即：**既强创业，又强公益**
+
+这时系统不会简单说“你们既有商业价值也有社会价值，很好”，而是会主动让 Prompt 去处理下面这些真实张力：
+
+- 盈利能力 vs 可及性
+- 受益方 vs 支付方
+- 增长目标 vs 社会覆盖
+- 社会使命 vs 商业化压力
+
+##### `innov_venture`
+
+即：**研究转产品 / 创新转落地**
+
+这时系统会显式提醒：
+
+- 技术上成立吗？
+- 市场上有人会用吗？
+- 学术 novelty 能不能转化成用户价值？
+
+这说明 Prompt 已经具备了“冲突调度能力”，而不只是“多加几个标签”。
+
+对应配置如下：
+
+```json
+{
+  "venture_public": {
+    "coach": "【冲突调度】该项目同时带有强创业与强公益属性，请主动帮助学生处理“盈利能力 vs 可及性”之间的张力，而不是把两者都当作自动成立。",
+    "analyst": "【冲突调度】请明确检查：目标用户与支付方是否分离、增长目标是否会伤害社会覆盖、是否需要双结构设计。",
+    "advisor": "【冲突调度】请提醒学生准备好回答：为什么商业化不会削弱社会使命、为什么扩大覆盖不会击穿资金结构。",
+    "tutor": "【冲突调度】讲解时强调：社会企业、交叉补贴、双边结构、支付方与受益方分离这些判断框架。",
+    "grader": "【冲突调度】评分时不要把商业性和公益性当作简单加分项，要看二者是否通过结构设计被真正协调。",
+    "planner": "【冲突调度】行动优先考虑：受益方/支付方拆分、双结构方案、持续资金与覆盖范围的权衡。 "
+  },
+  "innov_venture": {
+    "coach": "【冲突调度】该项目处在研究转产品的交界处，请帮助学生同时回答“技术上成立吗”和“市场上有人真的会用吗”。",
+    "analyst": "【冲突调度】请明确检查：学术 novelty 是否真的能转化为用户价值，还是停留在研究叙事层面。",
+    "advisor": "【冲突调度】请提醒学生准备两类追问：技术贡献如何证明、落地价值如何证明，不能只答其中一边。",
+    "tutor": "【冲突调度】讲解时强调：研究问题与产品问题是两套标准，需要分别验证再建立桥梁。",
+    "grader": "【冲突调度】评分时同时看创新证据与落地可交付，不要让任一侧完全掩盖另一侧短板。",
+    "planner": "【冲突调度】行动优先考虑：一条技术验证线 + 一条用户价值验证线，避免只推进其中一条。 "
+  }
+}
+```
+
+#### 3.5.10.6 重点组合修饰：双光谱 × 阶段 联动
+
+在 `modifier_fragments` 里，系统还会对“特定光谱 + 特定阶段”做二次收紧，例如：
+
+- `innov_validated`：强创新 + 验证期  
+  Prompt 会更强调“如何把验证数据翻译成可复述的增量 claim”
+
+- `public_scale`：强公益 + 规模化  
+  Prompt 会更强调“规模扩张后社会影响如何不失真、资金结构如何承接扩张”
+
+- `venture_idea`：强创业 + 想法期  
+  Prompt 会更强调“最危险假设、一个用户群、一个场景、一个验证方式”
+
+这意味着最新系统里的 Prompt 已经不是“阶段感知”或“类型感知”二选一，而是：
+
+> **双光谱感知 × 阶段感知 × 角色感知** 的叠加式定向。
+
+对应配置如下：
+
+```json
+{
+  "innov_validated": {
+    "coach": "【重点组合】当前更该帮助学生把验证数据翻译成可复述的增量 claim：到底提升了多少、和谁比、在什么条件下成立。",
+    "analyst": "【重点组合】当前更该检查：验证结果是否足够支撑学术或技术主张，是否存在样本偏差或过拟合式叙事。",
+    "advisor": "【重点组合】当前更该准备：如何把验证结果讲成评委能快速理解的“创新证据”。",
+    "grader": "【重点组合】当前更该提高对对照组、效果量化和可复现性的要求。 "
+  },
+  "public_scale": {
+    "coach": "【重点组合】当前更该帮助学生说清：规模扩张后社会影响如何不失真、资金结构如何承接扩张。",
+    "analyst": "【重点组合】当前更该检查：复制是否依赖创始人个人、合作网络是否足够稳、边际组织成本是否失控。",
+    "advisor": "【重点组合】当前更该准备：规模复制、政策协同与持续资金三者之间的说明逻辑。",
+    "grader": "【重点组合】当前更该提高对复制机制、合作网络与持续资金的要求。 "
+  },
+  "venture_idea": {
+    "coach": "【重点组合】当前更该帮助学生识别最危险假设，并围绕用户访谈与最小场景收敛方向，而不是急于谈融资与扩张。",
+    "analyst": "【重点组合】当前更该检查：学生是不是在没有做问题发现的前提下，过早锁定了解决方案。",
+    "advisor": "【重点组合】当前更该提醒：评委不会因为你讲得热血就默认需求成立，他们会先问为什么有人会先用。",
+    "planner": "【重点组合】当前更该把动作压到最小：一个用户群、一个场景、一个最危险假设、一种验证方式。 "
+  }
+}
+```
+
+### 3.5.11 不同成熟度与阶段，Prompt 为什么会明显不同
+
+文档前面已经提过“探索期”和“成熟期”会触发不同 Prompt，但最新代码里，这一层已经拆成了**两套机制**，而不是一个模糊概念：
+
+1. **成熟度判断**：项目现在整体上是 `exploring` 还是 `mature`
+2. **阶段判断**：项目当前更像 `idea / structured / validated / scale`
+
+这两者相关，但并不完全相同。
+
+#### 3.5.11.1 第一套：成熟度判断（exploring / mature）
+
+源码在 `graph_workflow.py` 的 `_assess_project_maturity()`。
+
+它综合以下信号给项目打“成熟度准备分”：
+
+- 文本长度 `char_len`
+- 已填槽位数 `filled_slots`
+- 结构化实体数量 `entity_count`
+- 具体项目信号命中数 `concrete_hits`
+- 历史对话轮数 `history_turns`
+- 消息复杂度 `complexity`
+- 探索状态 `exploration_state.phase`
+
+最后输出：
+
+- `project_maturity: exploring | mature`
+- `readiness_score`
+- `maturity_reason`
+
+也就是说，系统不是凭“感觉”判断项目成熟不成熟，而是在看：
+
+> 你到底说清了多少骨架、给了多少具体证据、项目描述有没有真正长成一个“可分析对象”。
+
+#### 3.5.11.2 第二套：结构槽位阶段（direction / convergence / validation / full_analysis）
+
+这一层更接近“对话编排阶段”，主要由 `EXPLORATION_SLOTS` + `EXPLORATION_PHASES` 控制。
+
+系统会检查 5 个核心槽位是否已经在学生表述中出现：
+
+- `target_user`
+- `pain_point`
+- `solution`
+- `business_model`
+- `competition`
+
+对应阶段规则是：
+
+```python
+EXPLORATION_PHASES = {
+    "direction":   {"min_slots": 0, "max_slots": 1, "reply_strategy": "progressive"},
+    "convergence": {"min_slots": 2, "max_slots": 3, "reply_strategy": "progressive"},
+    "validation":  {"min_slots": 3, "max_slots": 4, "reply_strategy": "deep_dive"},
+    "full_analysis": {"min_slots": 4, "max_slots": 5, "reply_strategy": None},
+}
+```
+
+这意味着：
+
+- 槽位只有 0-1 个：只能先做方向收敛
+- 槽位到 2-3 个：可以开始收敛判断，但仍不宜做重分析
+- 槽位到 3-4 个：开始允许 `deep_dive`
+- 槽位基本补全：才真正放行完整分析
+
+#### 3.5.11.3 第三套：项目阶段标签（idea / structured / validated / scale）
+
+这是最新加入到 `project_state.project_stage_v2` 的标准阶段标签，由 `infer_project_stage_v2()` 统一输出：
+
+- `idea`：想法期
+- `structured`：原型期
+- `validated`：验证期
+- `scale`：规模化
+
+它来自诊断阶段 `diagnosis.project_stage` 的映射：
+
+```python
+"idea" -> "idea"
+"structured" -> "structured"
+"validated" -> "validated"
+"document" -> "validated"
+"scale" -> "scale"
+```
+
+也就是说，最新系统不再只有模糊的“初期 / 中期 / 后期”，而是把阶段压成可以被 Prompt 精确消费的标准枚举。
+
+对应源码如下：
+
+```python
+def infer_project_stage_v2(diagnosis: dict[str, Any] | None, current_state: dict[str, Any] | None = None) -> str:
+    diagnosis = diagnosis if isinstance(diagnosis, dict) else {}
+    raw_stage = str(diagnosis.get("project_stage") or "").strip()
+    mapped = {
+        "idea": "idea",
+        "structured": "structured",
+        "validated": "validated",
+        "document": "validated",
+        "scale": "scale",
+    }.get(raw_stage)
+    if mapped:
+        return mapped
+    state = ensure_project_cognition(current_state)
+    prev = str(state.get("project_stage_v2") or "").strip()
+    return prev or "structured"
+```
+
+#### 3.5.11.4 阶段片段怎么改变 Prompt
+
+在 `track_spectrum.json` 的 `stage_fragments` 里，不同角色都已经有了明确阶段指令：
+
+下面直接贴出完整阶段 Prompt 配置：
+
+```json
+{
+  "idea": {
+    "coach": "【想法期】此阶段优先帮助学生缩小问题空间，确认目标用户、场景和最危险假设，不要过早要求完整商业闭环。",
+    "analyst": "【想法期】风险提示应克制，优先指出1-2个最关键的不确定性，避免把探索期材料当成熟项目来批判。",
+    "advisor": "【想法期】竞赛视角下先看方向是否聚焦、问题是否真实、切口是否足够小，少谈规模化包装。",
+    "tutor": "【想法期】讲方法时强调问题定义、场景收敛和最小验证，不要直接跳到复杂财务模型。",
+    "grader": "【想法期】评分时要承认阶段限制，更看问题真实性和验证设计，而不是要求成熟商业数据。",
+    "planner": "【想法期】任务应该尽量小：先验证一个关键假设，不要同时铺开访谈、产品、商业模式和答辩材料。"
+  },
+  "structured": {
+    "coach": "【原型期】此阶段优先看假设、方案和证据是否开始闭合，推动学生把“想法”变成“能验证的原型路径”。",
+    "analyst": "【原型期】重点检查方案可行性、资源匹配和证据缺口，帮助学生看清哪些问题已经不是靠讲故事能掩盖的。",
+    "advisor": "【原型期】竞赛视角下，评委会开始要求看到原型、测试、用户反馈和结构化证据，而不是只有方向描述。",
+    "tutor": "【原型期】讲方法时强调 MVP、实验设计、证据链和评判标准，让学生知道“做出来一点”和“验证过”不是一回事。",
+    "grader": "【原型期】评分时同时看方向和执行开始度：是否已有原型、验证、用户反馈或阶段性成果。",
+    "planner": "【原型期】任务应围绕证据闭环：原型边界、验证设计、样本获取、指标口径和最小演示。"
+  },
+  "validated": {
+    "coach": "【验证期】此阶段优先推动学生从“有一些反馈”走向“有可复用的证据”，重点看对照、复盘与可重复信号。",
+    "analyst": "【验证期】重点检查数据可信度、样本质量、对照基线与外部约束，防止把偶然成功误判成已验证。",
+    "advisor": "【验证期】竞赛视角下，评委会会追问数据来源、实验方法、样本代表性和为什么这些证据足以支持结论。",
+    "tutor": "【验证期】讲方法时强调证据质量、baseline、效果解释和如何从验证结果反推策略调整。",
+    "grader": "【验证期】评分时提高对证据链、效果量化和逻辑一致性的要求，避免只凭原型存在就高分。",
+    "planner": "【验证期】任务应围绕补强证据链、结构化复盘和下一轮验证，而不是重新发散回概念讨论。"
+  },
+  "scale": {
+    "coach": "【规模化】此阶段优先看复制机制、组织能力、资金节奏和创始人离场后的项目存活能力。",
+    "analyst": "【规模化】重点检查增长飞轮是否真实、边际成本是否失控、组织与合作网络是否支撑扩张。",
+    "advisor": "【规模化】竞赛视角下，评委会会问复制路径、组织协同、扩张逻辑和为什么这不是只在小范围有效。",
+    "tutor": "【规模化】讲方法时强调复制经济学、组织能力、合作网络和规模化常见失真问题。",
+    "grader": "【规模化】评分时提高对复制能力、执行稳定性、资金结构和长期可持续性的要求。",
+    "planner": "【规模化】任务应围绕复制标准化、伙伴网络、组织协同和关键资源配置，而不是继续做零散局部优化。"
+  }
+}
+```
+
+##### A. `idea` 想法期
+
+关键词是：
+
+- 缩小问题空间
+- 确认目标用户和场景
+- 找最危险假设
+- 不要过早要求完整商业闭环
+
+例如 `planner` 会被要求：
+
+> 先验证一个关键假设，不要同时铺开访谈、产品、商业模式和答辩材料。
+
+##### B. `structured` 原型期
+
+关键词是：
+
+- 看方案和证据是否开始闭合
+- 把“想法”变成“能验证的原型路径”
+- 强调 MVP、实验设计、证据链和评判标准
+
+##### C. `validated` 验证期
+
+关键词是：
+
+- 数据可信度
+- 样本质量
+- 对照基线
+- 可重复信号
+
+这一期最典型的变化是：  
+Prompt 会从“有没有做”转向“你这次验证到底够不够支撑结论”。
+
+##### D. `scale` 规模化
+
+关键词是：
+
+- 复制机制
+- 组织能力
+- 资金节奏
+- 创始人离场后的项目存活能力
+
+这说明系统在规模化阶段已经不满足于“项目能跑”，而是开始用更接近组织与复制经济学的 Prompt 去看项目。
+
+#### 3.5.11.5 为什么这层设计重要
+
+这层最新设计的意义，不只是“说起来更专业”，而是它真的改变了系统回答的姿态：
+
+- 对想法期项目，不会一上来像评委判死刑
+- 对原型期项目，不会只停留在鼓励和概念解释
+- 对验证期项目，会追数据质量和 baseline
+- 对规模化项目，会追组织能力和复制逻辑
+
+换句话说，本项目已经把“阶段感知型 Prompt”从口号做成了配置和代码。
+
+### 3.5.12 不同赛事的 Prompt 不只是文案，还带参数权重
+
+前面 3.5.8 和 3.5.9 讲的是赛事会附加不同的提示词。  
+但最新版本里，赛事设计已经进一步升级：**赛事不只是改说法，还会改评分维度权重、阶段权重、双光谱权重和评委等级描述。**
+
+这个能力集中在：
+
+- `competition_templates.json`
+- `project_cognition.py` 中的 `resolve_competition_rubric()`
+
+#### 3.5.12.1 一套赛事模板里包含什么
+
+每个赛事模板现在至少包含 7 层信息：
+
+1. `base_weights`：基础维度权重
+2. `item_map`：Rubric 项如何映射到比赛关注桶
+3. `bucket_rules`：按双光谱位置动态改权重
+4. `stage_adjustments`：按项目阶段改权重
+5. `track_adjustments`：按端点命中再改一轮
+6. `band_descriptors`：不同分档的人话解释
+7. `judge_focus_notes / prompt_fragments`：真正写回 Prompt 的评委导向文本
+
+所以现在的赛事模板，已经不是“几句赛事说明”，而是一套：
+
+> **Prompt + Rubric + 评分解释 + 项目取向偏置**
+
+的统一配置。
+
+下面先贴出权重解析的核心函数：
+
+```python
+def resolve_competition_rubric(
+    comp_type: str,
+    track_vector: dict[str, Any] | None,
+    stage: str,
+) -> dict[str, Any]:
+    templates = load_competition_templates()
+    comp = templates.get(comp_type, {}) if isinstance(templates, dict) else {}
+    if not isinstance(comp, dict):
+        return {"weights": {}, "band_descriptors": {}, "judge_focus_notes": {}}
+
+    base_weights = comp.get("base_weights") or {}
+    weights: dict[str, float] = {}
+    for key, value in base_weights.items():
+        try:
+            weights[str(key)] = float(value or 0)
+        except Exception:
+            continue
+
+    tv = normalize_track_vector(track_vector)
+    bucket_rules = comp.get("bucket_rules") or {}
+    if isinstance(bucket_rules, dict):
+        for axis, buckets in bucket_rules.items():
+            if axis not in {"innov_venture", "biz_public"} or not isinstance(buckets, list):
+                continue
+            axis_value = float(tv.get(axis, 0.0) or 0.0)
+            for bucket in buckets:
+                if isinstance(bucket, dict) and _bucket_match(axis_value, bucket):
+                    _apply_weight_delta(weights, bucket.get("delta"))
+                    break
+
+    stage_adjustments = comp.get("stage_adjustments") or {}
+    if isinstance(stage_adjustments, dict):
+        _apply_weight_delta(weights, stage_adjustments.get(stage) or stage_adjustments.get("structured"))
+
+    track_adjustments = comp.get("track_adjustments") or {}
+    if isinstance(track_adjustments, dict):
+        for hit in resolve_endpoint_hits(tv):
+            endpoint = str(hit.get("endpoint") or "")
+            _apply_weight_delta(weights, track_adjustments.get(endpoint))
+
+    total = sum(max(v, 0.0) for v in weights.values()) or 1.0
+    normalized = {key: round((max(value, 0.0) / total) * 100, 2) for key, value in weights.items()}
+    return {
+        "weights": normalized,
+        "band_descriptors": comp.get("band_descriptors") or {},
+        "judge_focus_notes": comp.get("judge_focus_notes") or {},
+        "item_map": comp.get("item_map") or {},
+    }
+```
+
+#### 3.5.12.2 `互联网+` 的权重逻辑
+
+基础权重：
+
+| 维度 | 权重 |
+| --- | --- |
+| `business_model` | 24 |
+| `market` | 22 |
+| `innovation` | 18 |
+| `execution` | 14 |
+| `social_impact` | 12 |
+| `team` | 10 |
+
+这和文案里的导向是一致的：  
+`互联网+` 默认最看重的就是**商业模式 + 市场 + 创新**，不是纯技术。
+
+如果项目进一步偏不同方向，权重还会二次改动：
+
+- **偏创新**（`innov_venture < 0`）  
+  最高可把 `innovation` 再加 `+6`
+- **偏创业**（`innov_venture > 0.5`）  
+  会把 `business_model +5`、`market +2`
+- **偏公益**（`biz_public > 0.5`）  
+  会把 `social_impact +7`
+
+阶段也会继续影响权重：
+
+- `idea`：`innovation +2`，`execution -2`
+- `validated`：`execution +2`，`market +1`
+- `scale`：`execution +4`，`team +2`，`innovation -2`
+
+这意味着互联网+的评估逻辑已经从“统一评分表”升级成：
+
+> **互联网+基础盘 + 项目当前双光谱位置 + 当前阶段**
+
+的动态权重系统。
+
+下面直接贴 `internet_plus` 的完整模板：
+
+```json
+{
+  "base_weights": {
+    "market": 22,
+    "innovation": 18,
+    "business_model": 24,
+    "execution": 14,
+    "team": 10,
+    "social_impact": 12
+  },
+  "item_map": {
+    "Problem Definition": "market",
+    "User Evidence Strength": "market",
+    "Solution Feasibility": "innovation",
+    "Business Model Consistency": "business_model",
+    "Market & Competition": "market",
+    "Financial Logic": "business_model",
+    "Innovation & Differentiation": "innovation",
+    "Team & Execution": "execution",
+    "Presentation Quality": "team"
+  },
+  "bucket_rules": {
+    "innov_venture": [
+      { "min": -1.0, "max": -0.5, "delta": { "innovation": 6, "business_model": -4, "market": -2 } },
+      { "min": -0.5, "max": 0.0, "delta": { "innovation": 3, "business_model": -2, "market": -1 } },
+      { "min": 0.0, "max": 0.5, "delta": { "business_model": 3, "execution": 2 } },
+      { "min": 0.5, "max": 1.0, "delta": { "business_model": 5, "market": 2, "innovation": -2 } }
+    ],
+    "biz_public": [
+      { "min": -1.0, "max": -0.5, "delta": { "business_model": 4, "market": 2, "social_impact": -3 } },
+      { "min": -0.5, "max": 0.0, "delta": { "business_model": 2, "social_impact": -1 } },
+      { "min": 0.0, "max": 0.5, "delta": { "social_impact": 3, "business_model": -1 } },
+      { "min": 0.5, "max": 1.0, "delta": { "social_impact": 7, "business_model": -3, "market": -1 } }
+    ]
+  },
+  "stage_adjustments": {
+    "idea": { "innovation": 2, "execution": -2, "team": -1, "market": 1 },
+    "structured": { "execution": 1, "business_model": 1 },
+    "validated": { "execution": 2, "market": 1, "innovation": 1 },
+    "scale": { "execution": 4, "team": 2, "innovation": -2 }
+  },
+  "track_adjustments": {
+    "innov": { "innovation": 3 },
+    "venture": { "business_model": 3, "execution": 1 },
+    "biz": { "business_model": 3, "market": 1 },
+    "public": { "social_impact": 4 }
+  },
+  "band_descriptors": {
+    "A": "证据链完整，商业与影响力逻辑能自洽，关键追问基本可答。",
+    "B+": "核心逻辑成立，但关键证据或量化深度仍不足，补齐后有明显上升空间。",
+    "B": "方向基本清楚，但市场、商业模式或执行证据仍存在明显短板。",
+    "C": "仍停留在概念层，评委很容易在用户、市场或持续性上连续追问。 "
+  },
+  "judge_focus_notes": {
+    "coach": "【赛事视角】互联网+更看重商业模式、市场机会与持续增长，辅导时要帮助学生把用户、价值、渠道和盈利讲成一个闭环。",
+    "analyst": "【赛事视角】互联网+更看重市场与商业证据，请优先检查市场口径、竞品差异、定价依据和获客路径。",
+    "advisor": "【赛事视角】互联网+答辩里最常见的追问落在：市场大不大、怎么获客、为什么用户愿意付费、你的差异化能不能守住。",
+    "tutor": "【赛事视角】讲概念时优先连接商业模式、价值主张、市场分析、增长与答辩说服力。",
+    "grader": "【赛事视角】互联网+评分时更看重市场、商业模式、执行与社会价值的组合质量，而不只是技术新不新。",
+    "planner": "【赛事视角】行动上优先补用户证据、竞品矩阵、商业闭环和演示材料的关键数据页。"
+  },
+  "prompt_fragments": {
+    "coach": "【竞赛补充】回答里顺带提醒学生：评委更关心为什么这个项目能成立、为什么现在成立、为什么你们能做成。",
+    "analyst": "【竞赛补充】请把风险翻译成评委会真正会追问的证据缺口，而不是泛泛的行业风险。",
+    "advisor": "【竞赛补充】请把判断贴近路演和答辩，不要写成纯理论分析。",
+    "tutor": "【竞赛补充】请把概念解释与评委标准连接起来，让学生知道为什么这会影响得分。",
+    "grader": "【竞赛补充】请把评分说成结构化评审摘要，并说明哪些维度值得优先补分。",
+    "planner": "【竞赛补充】请优先安排会直接提升答辩与材料说服力的动作。"
+  }
+}
+```
+
+#### 3.5.12.3 `挑战杯` 的权重逻辑
+
+基础权重：
+
+| 维度 | 权重 |
+| --- | --- |
+| `innovation` | 32 |
+| `execution` | 18 |
+| `market` | 12 |
+| `evidence` | 12 |
+| `business_model` | 10 |
+| `team` | 10 |
+| `social_impact` | 6 |
+
+这很清楚地说明：
+
+- `挑战杯` 的核心不是商业包装
+- 而是 **创新性 + 证据严谨性 + 方法论**
+
+如果项目强偏创新，模板还会进一步提高：
+
+- `innovation +8`
+- `evidence +4`
+- `business_model -4`
+
+这正好体现“挑战杯不因为商业故事漂亮就高分”。
+
+对应的人话解释也已经写进模板：
+
+- `A`：创新点明确，实验或验证证据扎实
+- `B+`：方向成立，但实验设计、样本质量或论证深度仍可提升
+- `B`：创新叙事存在，但可验证性不足
+- `C`：停留在概念或愿景层
+
+下面直接贴 `challenge_cup` 的完整模板：
+
+```json
+{
+  "base_weights": {
+    "market": 12,
+    "innovation": 32,
+    "business_model": 10,
+    "execution": 18,
+    "team": 10,
+    "social_impact": 6,
+    "evidence": 12
+  },
+  "item_map": {
+    "Problem Definition": "market",
+    "User Evidence Strength": "evidence",
+    "Solution Feasibility": "innovation",
+    "Business Model Consistency": "business_model",
+    "Market & Competition": "market",
+    "Financial Logic": "business_model",
+    "Innovation & Differentiation": "innovation",
+    "Team & Execution": "execution",
+    "Presentation Quality": "team"
+  },
+  "bucket_rules": {
+    "innov_venture": [
+      { "min": -1.0, "max": -0.5, "delta": { "innovation": 8, "evidence": 4, "business_model": -4 } },
+      { "min": -0.5, "max": 0.0, "delta": { "innovation": 4, "evidence": 2, "business_model": -2 } },
+      { "min": 0.0, "max": 0.5, "delta": { "execution": 2, "business_model": 1 } },
+      { "min": 0.5, "max": 1.0, "delta": { "business_model": 2, "innovation": -3 } }
+    ],
+    "biz_public": [
+      { "min": -1.0, "max": -0.5, "delta": { "business_model": 2 } },
+      { "min": -0.5, "max": 0.0, "delta": {} },
+      { "min": 0.0, "max": 0.5, "delta": { "social_impact": 2 } },
+      { "min": 0.5, "max": 1.0, "delta": { "social_impact": 4, "business_model": -1 } }
+    ]
+  },
+  "stage_adjustments": {
+    "idea": { "innovation": 2, "evidence": -2, "execution": -1 },
+    "structured": { "evidence": 1, "execution": 1 },
+    "validated": { "innovation": 2, "evidence": 3, "execution": 2 },
+    "scale": { "execution": 3, "team": 1, "innovation": -1 }
+  },
+  "track_adjustments": {
+    "innov": { "innovation": 4, "evidence": 2 },
+    "venture": { "execution": 2 },
+    "biz": { "business_model": 2 },
+    "public": { "social_impact": 3 }
+  },
+  "band_descriptors": {
+    "A": "创新点明确，实验或验证证据扎实，方法论与结论之间基本闭合。",
+    "B+": "研究或创新方向成立，但实验设计、样本质量或论证深度仍有提升空间。",
+    "B": "创新叙事存在，但可验证性和证据严谨性不足，评委会持续追问。",
+    "C": "主要停留在概念或愿景层，缺少足以支撑技术/学术判断的证据。 "
+  },
+  "judge_focus_notes": {
+    "coach": "【赛事视角】挑战杯更看重技术创新、方法论严谨性和验证质量，辅导时要帮助学生把“创新点”说成可检验的研究命题。",
+    "analyst": "【赛事视角】挑战杯风险分析要优先落在实验设计、样本代表性、对照基线和可复现性上。",
+    "advisor": "【赛事视角】挑战杯答辩最常见追问：相对谁而新、为什么这个验证足够、结果是否可复现、技术门槛是否真实。",
+    "tutor": "【赛事视角】讲概念时优先连接研究设计、创新边界、验证逻辑和科研表达。",
+    "grader": "【赛事视角】挑战杯评分时更看重创新性与证据严谨性，不会因为商业包装漂亮就给高分。",
+    "planner": "【赛事视角】行动上优先补实验、对照、样本、方法与技术说明，而不是先做路演包装。 "
+  },
+  "prompt_fragments": {
+    "coach": "【竞赛补充】请帮助学生把技术/研究问题说成评委能判断的证据命题。",
+    "analyst": "【竞赛补充】请优先审查实验设计和证据链，而不是先谈市场规模。",
+    "advisor": "【竞赛补充】请把建议尽量贴近答辩与评审追问。",
+    "tutor": "【竞赛补充】请把概念解释和科研判断标准连起来。",
+    "grader": "【竞赛补充】请把评分解释成创新性、证据链和执行成熟度的组合判断。",
+    "planner": "【竞赛补充】请优先安排能快速补强技术与证据链的动作。 "
+  }
+}
+```
+
+#### 3.5.12.4 `大创` 的权重逻辑
+
+基础权重：
+
+| 维度 | 权重 |
+| --- | --- |
+| `execution` | 24 |
+| `innovation` | 22 |
+| `team` | 16 |
+| `market` | 14 |
+| `business_model` | 12 |
+| `evidence` | 8 |
+| `social_impact` | 4 |
+
+也就是说，大创模板默认最看重的是：
+
+- 你能不能做出来
+- 阶段成果是不是清楚
+- 团队和执行是不是跟得上
+
+这和它在 `judge_focus_notes` 中的人话完全一致：
+
+> 大创更看重可行性、执行力和阶段成果，辅导时要帮助学生把想法压成能做出来、能展示的计划。
+
+下面直接贴 `dachuang` 的完整模板：
+
+```json
+{
+  "base_weights": {
+    "market": 14,
+    "innovation": 22,
+    "business_model": 12,
+    "execution": 24,
+    "team": 16,
+    "social_impact": 4,
+    "evidence": 8
+  },
+  "item_map": {
+    "Problem Definition": "market",
+    "User Evidence Strength": "evidence",
+    "Solution Feasibility": "execution",
+    "Business Model Consistency": "business_model",
+    "Market & Competition": "market",
+    "Financial Logic": "business_model",
+    "Innovation & Differentiation": "innovation",
+    "Team & Execution": "execution",
+    "Presentation Quality": "team"
+  },
+  "bucket_rules": {
+    "innov_venture": [
+      { "min": -1.0, "max": -0.5, "delta": { "innovation": 4, "execution": -2 } },
+      { "min": -0.5, "max": 0.0, "delta": { "innovation": 2 } },
+      { "min": 0.0, "max": 0.5, "delta": { "execution": 2, "business_model": 1 } },
+      { "min": 0.5, "max": 1.0, "delta": { "execution": 4, "business_model": 2, "innovation": -2 } }
+    ],
+    "biz_public": [
+      { "min": -1.0, "max": -0.5, "delta": { "business_model": 2 } },
+      { "min": -0.5, "max": 0.0, "delta": {} },
+      { "min": 0.0, "max": 0.5, "delta": { "social_impact": 1 } },
+      { "min": 0.5, "max": 1.0, "delta": { "social_impact": 3, "execution": 1 } }
+    ]
+  },
+  "stage_adjustments": {
+    "idea": { "innovation": 2, "execution": -2, "team": -1 },
+    "structured": { "execution": 2, "team": 1 },
+    "validated": { "execution": 3, "evidence": 2, "team": 1 },
+    "scale": { "execution": 3, "team": 2, "innovation": -1 }
+  },
+  "track_adjustments": {
+    "innov": { "innovation": 2 },
+    "venture": { "execution": 2, "business_model": 1 },
+    "biz": { "business_model": 2 },
+    "public": { "social_impact": 2 }
+  },
+  "band_descriptors": {
+    "A": "方案可行、执行路径清楚、阶段成果与团队能力匹配良好。",
+    "B+": "整体可做，但里程碑、证据或资源匹配还不够扎实。",
+    "B": "方向不差，但执行与验证仍较空，项目推进说服力不足。",
+    "C": "停留在概念层，缺少足够的动手成果与阶段性证明。 "
+  },
+  "judge_focus_notes": {
+    "coach": "【赛事视角】大创更看重可行性、执行力和阶段成果，辅导时要帮助学生把想法压成能做出来、能展示的计划。",
+    "analyst": "【赛事视角】大创风险分析要优先落在执行能力、资源匹配和阶段成果上。",
+    "advisor": "【赛事视角】大创答辩最常见追问：你们现在做到哪一步、谁来做、接下来怎么推进、已经拿到什么结果。",
+    "tutor": "【赛事视角】讲概念时优先连接 MVP、阶段性成果、里程碑与团队分工。",
+    "grader": "【赛事视角】大创评分时更看重可行性、执行成熟度和训练过程，不是只看宏大叙事。",
+    "planner": "【赛事视角】行动上优先补原型、测试、分工、时间线和阶段成果。 "
+  },
+  "prompt_fragments": {
+    "coach": "【竞赛补充】请把建议压到阶段成果与可执行动作上。",
+    "analyst": "【竞赛补充】请把风险翻译成执行断点与资源缺口。",
+    "advisor": "【竞赛补充】请把判断贴近项目训练和答辩场景。",
+    "tutor": "【竞赛补充】请把概念解释连到阶段成果与训练要求。",
+    "grader": "【竞赛补充】请把评分说明成可行性、执行和成果展示的组合判断。",
+    "planner": "【竞赛补充】请优先安排能在短周期内交付出来的动作。 "
+  }
+}
+```
+
+#### 3.5.12.5 权重是怎么被程序真正用起来的
+
+`resolve_competition_rubric()` 的逻辑可以概括为四步：
+
+##### 第一步：加载基础权重
+
+先取赛事自己的 `base_weights`。
+
+##### 第二步：按双光谱 bucket 修正
+
+例如在 `internet_plus` 里：
+
+```python
+if innov_venture in [-1.0, -0.5]:
+    innovation += 6
+    business_model -= 4
+    market -= 2
+```
+
+也就是：明显偏创新，就把评估重心从商业闭环拉回技术/创新。
+
+##### 第三步：按阶段修正
+
+例如：
+
+- `idea` 会降低执行权重
+- `scale` 会提高执行和团队权重
+
+##### 第四步：按端点命中再做修正
+
+如果 `resolve_endpoint_hits()` 判断项目已经命中某个强端点，例如：
+
+- `innov`
+- `venture`
+- `biz`
+- `public`
+
+就再叠加一轮 `track_adjustments`。
+
+最后把所有权重重新归一化成 100 分制百分比。
+
+#### 3.5.12.6 赛事 Prompt 和赛事权重是联动的
+
+这里最值得强调的一点是：
+
+> 赛事相关的 Prompt 文案，和赛事相关的评分权重，并不是两套互不相干的系统。
+
+它们现在已经在同一个模板文件里联动了。
+
+例如：
+
+- `judge_focus_notes.coach` 决定教练怎么讲
+- `prompt_fragments.coach` 决定附加什么口径
+- `base_weights / bucket_rules / stage_adjustments` 决定系统真正更看重什么
+
+所以现在的“赛事差异”已经形成了三层闭环：
+
+1. **Prompt 差异**：不同赛事说法不同
+2. **Rubric 差异**：不同赛事关注点不同
+3. **参数权重差异**：同一项目在不同赛事下，优先补强点也不同
+
+#### 3.5.12.7 这层设计为什么值得写进说明书
+
+如果只写“系统支持互联网+、挑战杯和大创”，说服力是不够的。  
+真正值得强调的是：
+
+> 系统已经把赛事差异编码进 Prompt、评分模板和动态权重逻辑里，因此“不同赛事下该怎么辅导、怎么评分、怎么解释分数”不再是人工切换话术，而是程序化编排出来的。
+
 ---
 
 ## 3.6 Focused 单轮 Prompt：按任务意图直接切换结构导向
@@ -1142,7 +2293,10 @@ flowchart TD
 | --- | --- |
 | 模式不同 | 课程辅导模式与竞赛推进模式切换不同 Prompt |
 | 项目成熟度不同 | 探索期用引导式 Prompt，成熟期用深分析 Prompt |
+| 双光谱位置不同 | 偏创新/偏创业、偏商业/偏公益会注入不同导向片段 |
+| 项目标准阶段不同 | `idea / structured / validated / scale` 会切换不同阶段型 Prompt 约束 |
 | 项目类型不同 | 商业项目与公益项目加载不同分析偏置 |
+| 赛事模板不同 | `互联网+ / 挑战杯 / 大创` 不只切换话术，也会切换评分权重与评委关注点 |
 | 输入内容不同 | 概念问题、竞赛问题、计划书问题、财务问题分别走不同专项 Prompt |
 | 是否有上游结果 | 有诊断、KG、RAG、教师反馈时，Prompt 会自动拼接更多上下文 |
 | 是否需要结构化输出 | 某些环节返回 JSON，某些环节返回自然语言，某些环节返回 Markdown |

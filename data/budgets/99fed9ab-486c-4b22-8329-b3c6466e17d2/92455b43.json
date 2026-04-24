@@ -1,0 +1,684 @@
+{
+  "plan_id": "92455b43",
+  "user_id": "99fed9ab-486c-4b22-8329-b3c6466e17d2",
+  "name": "finance-reg-commercial",
+  "purpose": "business",
+  "visible_tabs": [
+    "cost",
+    "biz",
+    "comp",
+    "compare",
+    "fund"
+  ],
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-24T04:09:20.375993+08:00",
+  "updated_at": "2026-04-24T04:09:20.392145+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "云服务器",
+            "unit_price": 0,
+            "quantity": 12,
+            "total": 0.0,
+            "note": "按月计费×12",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "域名",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "API / 模型调用",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "开发工具 / 许可证",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "线上推广",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "线下活动",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "内容制作",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "人力成本",
+        "items": [
+          {
+            "name": "兼职开发",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "设计外包",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": []
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [
+      {
+        "name": "C 端订阅 / 会员（AI 自动建立）",
+        "pattern_key": "subscription",
+        "inputs": {
+          "conversion_rate": 0.08
+        },
+        "monthly_revenue": 0.0,
+        "_ai_meta": {
+          "ai_created": true,
+          "source": "msg:turn-1",
+          "ts": 1776974960.392145,
+          "fields": {
+            "conversion_rate": {
+              "ai_filled": true,
+              "value": 0.08,
+              "prev_value": null,
+              "raw": "付费转化率 8%",
+              "reference_note": "公开样例常见记录约在 0.01-0.15比例",
+              "source": "msg:turn-1",
+              "ts": 1776974960.392145,
+              "confidence": 0.85
+            }
+          }
+        },
+        "active_units": 0.0
+      }
+    ],
+    "fixed_costs_monthly": 0,
+    "variable_cost_per_user": 0,
+    "growth_rate_monthly": 0.1,
+    "months_to_breakeven": 2,
+    "cash_flow_projection": [
+      {
+        "month": 1,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 2,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 3,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 4,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 5,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 6,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 7,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 8,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 9,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 10,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 11,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      },
+      {
+        "month": 12,
+        "revenue": 0.0,
+        "cost": 0.0,
+        "net": 0.0,
+        "cumulative": 0.0
+      }
+    ],
+    "scenario_models": {
+      "conservative": {
+        "label": "悲观",
+        "revenue_multiplier": 0.75,
+        "conversion_multiplier": 0.85,
+        "growth_rate_monthly": 0.05,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "更保守地估计增长与转化，适合答辩时说明风险边界。"
+      },
+      "baseline": {
+        "label": "基准",
+        "revenue_multiplier": 1.0,
+        "conversion_multiplier": 1.0,
+        "growth_rate_monthly": 0.1,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "当前最可信的执行版本，用于常规预算讨论。"
+      },
+      "optimistic": {
+        "label": "乐观",
+        "revenue_multiplier": 1.25,
+        "conversion_multiplier": 1.15,
+        "growth_rate_monthly": 0.18,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "假设推广与口碑扩散顺利，用于展示潜在上限。"
+      }
+    },
+    "scenario_results": {
+      "conservative": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      },
+      "baseline": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      },
+      "optimistic": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 2,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 3,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 4,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 5,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 6,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 7,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 8,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 9,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 10,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 11,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          },
+          {
+            "month": 12,
+            "revenue": 0.0,
+            "cost": 0.0,
+            "net": 0.0,
+            "cumulative": 0.0
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 0.0,
+        "annual_cost": 0.0,
+        "annual_net": 0.0,
+        "monthly_revenue_base": 0.0
+      }
+    },
+    "key_levers": [
+      {
+        "field": "conversion_rate",
+        "label": "付费转化率",
+        "from_patterns": [
+          "C 端订阅 / 会员"
+        ],
+        "weighted_revenue": 0.0
+      },
+      {
+        "field": "monthly_users",
+        "label": "总注册或月活用户",
+        "from_patterns": [
+          "C 端订阅 / 会员"
+        ],
+        "weighted_revenue": 0.0
+      }
+    ],
+    "pattern_levers": {
+      "subscription": [
+        {
+          "field": "conversion_rate",
+          "label": "付费转化率",
+          "scenarios": {
+            "pessimistic": 0.5,
+            "baseline": 1.0,
+            "optimistic": 1.6
+          }
+        },
+        {
+          "field": "monthly_users",
+          "label": "月活规模",
+          "scenarios": {
+            "pessimistic": 0.6,
+            "baseline": 1.0,
+            "optimistic": 1.8
+          }
+        },
+        {
+          "field": "price",
+          "label": "月价",
+          "scenarios": {
+            "pessimistic": 0.85,
+            "baseline": 1.0,
+            "optimistic": 1.2
+          }
+        }
+      ]
+    }
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "参赛报名费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "差旅交通",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "住宿",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "材料打印/展板",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "原型开发费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "样品制作",
+        "amount": 0.0,
+        "note": ""
+      }
+    ],
+    "stages": [
+      {
+        "name": "筹备期",
+        "items": []
+      },
+      {
+        "name": "初赛",
+        "items": []
+      },
+      {
+        "name": "复赛",
+        "items": []
+      },
+      {
+        "name": "决赛",
+        "items": []
+      }
+    ],
+    "funding_sources": [
+      {
+        "name": "自筹",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "学校资助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "企业赞助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "赛事奖金",
+        "amount": 0,
+        "note": ""
+      }
+    ]
+  },
+  "funding_plan": {
+    "startup_capital_needed": 0,
+    "sources": [],
+    "monthly_gap": [],
+    "fundraising_notes": ""
+  },
+  "ai_suggestions": [],
+  "summary": {
+    "project_cost_total": 0.0,
+    "competition_cost_total": 0.0,
+    "total_investment": 0.0,
+    "baseline_monthly_revenue": 0.0,
+    "baseline_annual_net": 0.0,
+    "funding_gap": 0.0,
+    "health_score": 80,
+    "breakeven_fastest": 2,
+    "breakeven_baseline": 2,
+    "breakeven_slowest": 2
+  }
+}

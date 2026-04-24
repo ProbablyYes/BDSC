@@ -1,6 +1,7 @@
 import json
 import logging
 import math
+import os
 import random
 import re
 import time
@@ -57,6 +58,8 @@ from app.schemas import (
     PosterGeneratePayload,
     PosterGenerateResponse,
     ProjectSnapshotResponse,
+    ProjectCognitionResponse,
+    ProjectCognitionUpdatePayload,
     SmsLoginPayload,
     SmsSendPayload,
     SmsSendResponse,
@@ -95,9 +98,15 @@ from app.services.business_plan_service import BusinessPlanService, BusinessPlan
 from app.services.budget_storage import BudgetStorage
 from app.services.finance_report_service import FinanceReportService
 from app.services.finance_guard import scan_message as finance_guard_scan
+from app.services.finance_signal_extractor import (
+    extract_finance_signals as finance_signal_extract,
+    apply_signals_to_budget as finance_signal_apply,
+)
 from app.services import finance_baseline_service
 from app.services.chat_storage import ChatStorage
+from app.services.project_cognition import describe_track_vector, ensure_project_cognition
 from app.services.storage import ConversationStorage, JsonStorage, TeamStorage, UserStorage
+from app.services.track_inference import infer_project_stage_v2, infer_track_vector, merge_track_vector
 from app.teacher_file_feedback_api import setup_teacher_file_feedback_routes
 
 
@@ -172,7 +181,35 @@ composer_llm = LlmClient()
 image_client = ImageClient()
 rag_engine = RagEngine()
 rag_engine.initialize()
-init_workflow_services(rag_engine=rag_engine, graph_service=graph_service, hypergraph_service=hypergraph_service)
+
+# 启动时探活 Neo4j。若实例被暂停（Aura Free 常见）或不可达，则降级为无图谱模式，
+# 避免每次 gather_context 被 55s 超时拖累，并在日志中提示如何恢复。
+_neo4j_disable_env = os.getenv("DISABLE_NEO4J", "").strip().lower() in ("1", "true", "yes", "on")
+_graph_service_for_workflow = graph_service
+if _neo4j_disable_env:
+    logger.warning("Neo4j disabled via DISABLE_NEO4J env; running in graph-less mode.")
+    _graph_service_for_workflow = None
+else:
+    try:
+        _probe = graph_service.health()
+        if not _probe.connected:
+            logger.warning(
+                "Neo4j probe failed (%s). Falling back to graph-less mode. "
+                "Wake the Aura instance at console.neo4j.io or set DISABLE_NEO4J=1 to silence this.",
+                _probe.detail,
+            )
+            _graph_service_for_workflow = None
+        else:
+            logger.info("Neo4j probe ok: %s", _probe.detail)
+    except Exception as _probe_exc:  # noqa: BLE001
+        logger.warning("Neo4j probe exception, falling back to graph-less mode: %s", _probe_exc)
+        _graph_service_for_workflow = None
+
+init_workflow_services(
+    rag_engine=rag_engine,
+    graph_service=_graph_service_for_workflow,
+    hypergraph_service=hypergraph_service if _graph_service_for_workflow else None,
+)
 business_plan_service = BusinessPlanService(
     storage=business_plan_store,
     json_store=json_store,
@@ -2199,6 +2236,10 @@ def _build_agent_trace(
         "competition": result.get("competition"),
         "learning": result.get("learning"),
         "category": result.get("category", ""),
+        "track_vector": result.get("track_vector", {}),
+        "project_stage_v2": result.get("project_stage_v2", ""),
+        "track_inference_meta": result.get("track_inference_meta", {}),
+        "track_labels": describe_track_vector(result.get("track_vector")),
         "matched_teacher_interventions": matched_interventions or [],
         "kb_utilization": result.get("kb_utilization", {}),
         "rag_enrichment_insight": result.get("rag_enrichment_insight", ""),
@@ -2206,6 +2247,12 @@ def _build_agent_trace(
         "incremental_stats": result.get("incremental_stats", {}),
         "dim_results": result.get("dim_results", {}),
         "agent_hyper_details": result.get("agent_hyper_details", []),
+        # 多轮稳定性：哪些重型组件是本轮新跑、哪些是 carry-forward。前端据此做轻提示。
+        "analysis_refresh": result.get("analysis_refresh", {}),
+        # 本轮命中的能力子图（创新评估 / 商业模式 / 模拟路演 等）。
+        "ability_subgraphs": result.get("ability_subgraphs", []),
+        # 运行时本体接入：本轮“覆盖 / 缺失 / 证据 / 任务 / 误区”摘要，前端可视化。
+        "ontology_grounding": result.get("ontology_grounding", {}),
     }
 
 
@@ -3270,6 +3317,60 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
         logger.warning("finance_guard failed silently: %s", _fg_err)
         finance_advisory = {}
 
+    # ── 对话→预算自动回写（finance_signal_extractor）──
+    finance_auto_apply: dict = {}
+    try:
+        if _user_key and _user_key != "none":
+            # fallback pattern 取项目当前 dominant pattern（若有）
+            _fallback_pattern = None
+            try:
+                if _budget_snap:
+                    _biz = _budget_snap.get("business_finance") or {}
+                    _streams = _biz.get("revenue_streams") or []
+                    if _streams:
+                        _fallback_pattern = (_streams[0] or {}).get("pattern_key")
+            except Exception:
+                _fallback_pattern = None
+            _signals = finance_signal_extract(
+                payload.message,
+                history=conv_messages,
+                fallback_pattern=_fallback_pattern,
+            )
+            if _signals.get("triggered") and _signals.get("pattern_inputs"):
+                # 选当前 plan_id（若没有就用第一个）
+                _plan_id_for_apply = ""
+                try:
+                    _plan_id_for_apply = (_plans[0].get("plan_id") if _plans else "") or ""
+                except Exception:
+                    _plan_id_for_apply = ""
+                if _plan_id_for_apply:
+                    _msg_id_for_apply = f"{conv_id}#{len((conv_store.get(payload.project_id, conv_id) or {}).get('messages') or [])}"
+                    _apply_res = finance_signal_apply(
+                        user_id=_user_key,
+                        plan_id=_plan_id_for_apply,
+                        signals=_signals,
+                        source_message_id=_msg_id_for_apply,
+                        confidence_threshold=0.6,
+                        overwrite=False,  # 已有人工值时不覆盖, 仅写入 _ai_meta.suggestions
+                    )
+                    finance_auto_apply = {
+                        "signals": {
+                            "primary_pattern": _signals.get("primary_pattern"),
+                            "primary_pattern_label": _signals.get("primary_pattern_label"),
+                            "summary": _signals.get("summary"),
+                            "candidate_patterns": _signals.get("candidate_patterns"),
+                            "pattern_inputs": _signals.get("pattern_inputs"),
+                            "kind": _signals.get("kind"),
+                        },
+                        "applied": _apply_res.get("applied") or [],
+                        "skipped": _apply_res.get("skipped") or [],
+                        "stream_added": _apply_res.get("stream_added"),
+                        "plan_id": _plan_id_for_apply,
+                    }
+    except Exception as _fa_err:
+        logger.warning("finance_signal auto-apply failed silently: %s", _fa_err)
+        finance_auto_apply = {}
+
     diagnosis = result.get("diagnosis", {})
     next_task = result.get("next_task", {})
     category = result.get("category", "")
@@ -3330,6 +3431,30 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
                         _cr["trend"] = "up" if _diff > 0.1 else "down" if _diff < -0.1 else "stable"
                         _cr["prev_score"] = _prev_s
 
+    # ── persist project cognition state (track vector / stage / history) ──
+    # 注意：必须在 _build_agent_trace 之前完成融合，并把“真正落库的平滑后向量”
+    # 回写到 result，前端 agent_trace 才会和持久化状态保持一致。
+    project_state = ensure_project_cognition(project_state)
+    _raw_track_meta = result.get("track_inference_meta") if isinstance(result.get("track_inference_meta"), dict) else {}
+    project_state, _track_snapshot = merge_track_vector(
+        project_state,
+        {
+            "track_vector": result.get("track_vector", {}),
+            "confidence": _raw_track_meta.get("confidence", 0),
+            "source_mix": _raw_track_meta.get("source_mix", {}),
+            "reason": _raw_track_meta.get("last_reason", ""),
+            "evidence": _raw_track_meta.get("last_evidence", []),
+        },
+        source=str((result.get("track_vector") or {}).get("source") or "inferred"),
+    )
+    project_state["project_stage_v2"] = infer_project_stage_v2(diagnosis, project_state)
+    json_store.save_project(payload.project_id, project_state)
+    # 用平滑后的值回写 result，后续 agent_trace / 前端 / KB 都看到同一份数据。
+    result["track_vector"] = dict(project_state.get("track_vector") or {})
+    result["project_stage_v2"] = project_state.get("project_stage_v2", "")
+    result["track_inference_meta"] = dict(project_state.get("track_inference_meta") or {})
+    result["track_history"] = list(project_state.get("track_history") or [])
+
     agent_trace = _build_agent_trace(
         result,
         mode=payload.mode,
@@ -3338,6 +3463,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
     )
     if finance_advisory.get("triggered"):
         agent_trace["finance_advisory"] = finance_advisory
+    if finance_auto_apply:
+        agent_trace["finance_auto_apply"] = finance_auto_apply
 
     # ── persist to project state ──
     _sync_sid = payload.student_id.strip() if payload.student_id and payload.student_id.lower() != "none" else (
@@ -3358,6 +3485,8 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
             "source_type": "dialogue_turn",
             "mode": payload.mode,
             "raw_text": payload.message[:6000],
+            "track_vector": project_state.get("track_vector", {}),
+            "project_stage_v2": project_state.get("project_stage_v2", ""),
             "diagnosis": diagnosis,
             "next_task": next_task,
             "kg_analysis": kg_analysis,
@@ -3447,6 +3576,11 @@ def dialogue_turn(payload: DialogueTurnPayload) -> DialogueTurnResponse:
                 ]),
             },
         },
+        logical_project_id=logical_project_id or "",
+        track_vector=dict(project_state.get("track_vector") or {}),
+        project_stage_v2=project_state.get("project_stage_v2", "") or "",
+        track_history=list(project_state.get("track_history") or [])[-20:],
+        track_inference_meta=dict(project_state.get("track_inference_meta") or {}),
     )
 
 
@@ -4289,7 +4423,7 @@ def add_teacher_feedback(payload: TeacherFeedbackRequest) -> TeacherFeedbackResp
 
 @app.get("/api/project/{project_id}", response_model=ProjectSnapshotResponse)
 def project_snapshot(project_id: str) -> ProjectSnapshotResponse:
-    data = json_store.load_project(project_id)
+    data = ensure_project_cognition(json_store.load_project(project_id))
     latest_submission = data["submissions"][-1] if data["submissions"] else None
     video_analyses = list(data.get("video_analyses", []) or [])
     graph = graph_service.health()
@@ -4299,6 +4433,78 @@ def project_snapshot(project_id: str) -> ProjectSnapshotResponse:
         teacher_feedback=data["teacher_feedback"],
         video_analyses=video_analyses,
         graph_signals={"connected": graph.connected, "detail": graph.detail},
+        track_vector=data.get("track_vector", {}),
+        project_stage_v2=str(data.get("project_stage_v2") or ""),
+        track_history=list(data.get("track_history", []) or []),
+        track_inference_meta=data.get("track_inference_meta", {}) if isinstance(data.get("track_inference_meta"), dict) else {},
+    )
+
+
+@app.get("/api/project/{project_id}/cognition", response_model=ProjectCognitionResponse)
+def project_cognition_get(project_id: str) -> ProjectCognitionResponse:
+    data = ensure_project_cognition(json_store.load_project(project_id))
+    return ProjectCognitionResponse(
+        project_id=project_id,
+        track_vector=data.get("track_vector", {}),
+        project_stage_v2=str(data.get("project_stage_v2") or ""),
+        track_history=list(data.get("track_history", []) or []),
+        track_inference_meta=data.get("track_inference_meta", {}) if isinstance(data.get("track_inference_meta"), dict) else {},
+        labels=describe_track_vector(data.get("track_vector")),
+    )
+
+
+@app.patch("/api/project/{project_id}/cognition", response_model=ProjectCognitionResponse)
+def project_cognition_update(project_id: str, payload: ProjectCognitionUpdatePayload) -> ProjectCognitionResponse:
+    data = ensure_project_cognition(json_store.load_project(project_id))
+    source = str(payload.source or "student")
+    if isinstance(payload.track_vector, dict):
+        incoming = {
+            "track_vector": payload.track_vector,
+            "confidence": 1.0 if source == "student" else 0.8,
+            "source_mix": {source: 1.0},
+            "reason": payload.reason or "用户手动更新双光谱定位。",
+            "evidence": ["manual_override"],
+        }
+        data, _ = merge_track_vector(data, incoming, source=source)
+    if payload.project_stage_v2:
+        data["project_stage_v2"] = payload.project_stage_v2
+    json_store.save_project(project_id, data)
+    return ProjectCognitionResponse(
+        project_id=project_id,
+        track_vector=data.get("track_vector", {}),
+        project_stage_v2=str(data.get("project_stage_v2") or ""),
+        track_history=list(data.get("track_history", []) or []),
+        track_inference_meta=data.get("track_inference_meta", {}) if isinstance(data.get("track_inference_meta"), dict) else {},
+        labels=describe_track_vector(data.get("track_vector")),
+    )
+
+
+@app.post("/api/project/{project_id}/cognition/infer", response_model=ProjectCognitionResponse)
+def project_cognition_infer(project_id: str, payload: dict | None = None) -> ProjectCognitionResponse:
+    payload = payload or {}
+    data = ensure_project_cognition(json_store.load_project(project_id))
+    diagnosis = data.get("submissions", [])[-1].get("diagnosis", {}) if data.get("submissions") else {}
+    latest_text = str(payload.get("message") or "")
+    if not latest_text and data.get("submissions"):
+        latest_text = str(data["submissions"][-1].get("raw_text") or "")
+    inferred = infer_track_vector(
+        latest_text,
+        diagnosis=diagnosis if isinstance(diagnosis, dict) else {},
+        category=str(payload.get("category") or ""),
+        competition_type=str(payload.get("competition_type") or ""),
+        structured_signals=payload.get("structured_signals") if isinstance(payload.get("structured_signals"), dict) else {},
+    )
+    data, _ = merge_track_vector(data, inferred, source="inferred")
+    if diagnosis:
+        data["project_stage_v2"] = infer_project_stage_v2(diagnosis, data)
+    json_store.save_project(project_id, data)
+    return ProjectCognitionResponse(
+        project_id=project_id,
+        track_vector=data.get("track_vector", {}),
+        project_stage_v2=str(data.get("project_stage_v2") or ""),
+        track_history=list(data.get("track_history", []) or []),
+        track_inference_meta=data.get("track_inference_meta", {}) if isinstance(data.get("track_inference_meta"), dict) else {},
+        labels=describe_track_vector(data.get("track_vector")),
     )
 
 
@@ -8434,6 +8640,30 @@ def budget_purposes() -> dict:
     return {"status": "ok", "purposes": BUDGET_PURPOSE_META}
 
 
+@app.get("/api/budget/revenue-patterns")
+def budget_revenue_patterns(user_id: str | None = None) -> dict:
+    """返回所有可选的收入模式模板。如果传 user_id，会读项目认知里的 track_vector
+    给出 1-3 个推荐 pattern。前端用这些模板动态渲染收入流字段。"""
+    from app.services.revenue_models import (
+        list_pattern_metadata,
+        recommend_patterns,
+    )
+    metadata = list_pattern_metadata()
+    recommended: list[str] = []
+    if user_id:
+        try:
+            project_id = f"project-{user_id}"
+            ps = json_store.load_project(project_id) or {}
+            recommended = recommend_patterns(ps.get("track_vector"))
+        except Exception:
+            recommended = []
+    return {
+        "status": "ok",
+        "patterns": metadata,
+        "recommended": recommended,
+    }
+
+
 @app.get("/api/budget/plans/{user_id}")
 def budget_list_plans(user_id: str) -> dict:
     plans = budget_store.list_plans(user_id)
@@ -8484,6 +8714,50 @@ def budget_save(user_id: str, plan_id: str, payload: BudgetSavePayload) -> dict:
     existing = BudgetStorage.compute_cash_flow(existing)
     saved = budget_store.save(user_id, plan_id, existing)
     return {"status": "ok", "budget": saved}
+
+
+@app.post("/api/budget/{user_id}/{plan_id}/ai-rollback")
+def budget_ai_rollback(user_id: str, plan_id: str, payload: dict) -> dict:
+    """回滚 AI 自动写入的字段。
+    payload: {"stream_index": int, "fields": ["price","monthly_users",...] | "all"}
+    """
+    budget = budget_store.load(user_id, plan_id)
+    if budget is None:
+        return {"status": "not_found"}
+    biz = budget.setdefault("business_finance", {})
+    streams = biz.get("revenue_streams") or []
+    si = int(payload.get("stream_index", 0))
+    fields = payload.get("fields") or "all"
+    rolled: list[dict] = []
+    if 0 <= si < len(streams):
+        s = streams[si]
+        ai_meta = (s or {}).get("_ai_meta") or {}
+        field_meta = ai_meta.get("fields") or {}
+        inputs = (s or {}).get("inputs") or {}
+        targets = list(field_meta.keys()) if fields == "all" else list(fields)
+        for f in targets:
+            if f in field_meta:
+                prev = field_meta[f].get("prev_value")
+                if prev is None:
+                    inputs.pop(f, None)
+                else:
+                    inputs[f] = prev
+                rolled.append({"stream_index": si, "field": f, "restored_to": prev})
+                field_meta.pop(f, None)
+        if not field_meta:
+            ai_meta.pop("fields", None)
+        s["inputs"] = inputs
+        if ai_meta:
+            s["_ai_meta"] = ai_meta
+        else:
+            s.pop("_ai_meta", None)
+        # 如果是整条 AI 创建的 stream 且字段全部回滚, 删除整条
+        if (ai_meta.get("ai_created") and not field_meta and fields == "all"):
+            streams.pop(si)
+            rolled.append({"removed_stream": si})
+    budget = BudgetStorage.compute_cash_flow(budget)
+    saved = budget_store.save(user_id, plan_id, budget)
+    return {"status": "ok", "rolled": rolled, "budget": saved}
 
 
 @app.post("/api/budget/{user_id}/{plan_id}/ai-suggest")
@@ -8879,6 +9153,7 @@ def teacher_student_plans(teacher_id: str = "", team_id: str = "") -> dict:
                 continue
             user_info = user_store.get_by_id(uid) or {}
             project_id = f"project-{uid}"
+            student_project_state = ensure_project_cognition(json_store.load_project(project_id))
             plans = business_plan_store.list_by_project(project_id)
             enriched_plans: list[dict[str, Any]] = []
             for p in plans:
@@ -8909,6 +9184,9 @@ def teacher_student_plans(teacher_id: str = "", team_id: str = "") -> dict:
                     "student_id_code": user_info.get("student_id") or "",
                     "class_id": user_info.get("class_id") or "",
                     "project_id": project_id,
+                    "track_vector": student_project_state.get("track_vector", {}),
+                    "project_stage_v2": student_project_state.get("project_stage_v2", ""),
+                    "track_labels": describe_track_vector(student_project_state.get("track_vector")),
                     "plans": enriched_plans,
                 })
         if students_out:
@@ -9310,8 +9588,55 @@ from uuid import uuid4
 
 @app.get("/api/kg/subgraphs")
 def kg_subgraphs() -> dict:
-    """Return entire KG organized into dimension-based logical subgraphs for force-graph rendering."""
-    return graph_service.get_subgraph_data()
+    """Return entire KG organized into dimension-based logical subgraphs for force-graph rendering.
+
+    在原有"维度子图（Neo4j 投影）"之外，附加 `ability_subgraphs` 字段：
+    把 `app.services.ability_subgraphs.ABILITY_SUBGRAPHS` 的运行时能力子图也透出，
+    让前端 KG 可视化页可以同时展示"知识库维度子图 + 运行时能力子图"。
+    它不是 Neo4j 里的子图，而是本体节点的话题切片（创新评估 / 商业模式构建 / 模拟路演）。
+    """
+    base = graph_service.get_subgraph_data() or {}
+    try:
+        from app.services.ability_subgraphs import ABILITY_SUBGRAPHS
+        from app.services.kg_ontology import ONTOLOGY_NODES, serialize_node
+        ability_payload: list[dict] = []
+        # 颜色与 KBGraphPanel 既有 subgraphs 区分开（避免色盘冲突）
+        color_map = {
+            "innovation_evaluation": "#a78bfa",
+            "business_model_construction": "#60a5fa",
+            "simulated_roadshow": "#f472b6",
+        }
+        for sub in ABILITY_SUBGRAPHS.values():
+            nodes_full: list[dict] = []
+            kind_count: dict[str, int] = {}
+            for nid in sub.ontology_nodes:
+                node = ONTOLOGY_NODES.get(nid)
+                if not node:
+                    continue
+                payload = serialize_node(node)
+                nodes_full.append(payload)
+                kind_count[payload["kind"]] = kind_count.get(payload["kind"], 0) + 1
+            ability_payload.append({
+                "id": sub.id,
+                "name": sub.name,
+                "description": sub.description,
+                "purpose": sub.purpose,
+                "color": color_map.get(sub.id, "#94a3b8"),
+                "node_count": len(nodes_full),
+                "ontology_nodes": nodes_full,
+                "rubric_dimensions": list(sub.rubric_dimensions),
+                "hyperedge_families": list(sub.hyperedge_families),
+                "related_rule_ids": list(sub.related_rule_ids),
+                "trigger_keywords": list(sub.trigger_keywords),
+                "applies_to_stage": list(sub.applies_to_stage),
+                "applies_to_spectrum": list(sub.applies_to_spectrum),
+                "kind_distribution": kind_count,
+            })
+        base["ability_subgraphs"] = ability_payload
+    except Exception as exc:  # noqa: BLE001
+        base["ability_subgraphs"] = []
+        base.setdefault("warnings", []).append(f"ability_subgraphs failed: {exc}")
+    return base
 
 
 @app.get("/api/kg/subgraph-overview")

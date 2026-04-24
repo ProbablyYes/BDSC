@@ -47,11 +47,11 @@ class GraphService:
             return self._shared_driver
         driver_kwargs: dict[str, Any] = dict(
             auth=(self.username, self.password),
-            connection_timeout=15,
+            connection_timeout=5,
             max_connection_lifetime=300,
             max_connection_pool_size=10,
-            connection_acquisition_timeout=30,
-            max_transaction_retry_time=30,
+            connection_acquisition_timeout=8,
+            max_transaction_retry_time=8,
         )
         # Neo4j Python driver 5.7+ / 6.x 通过 notifications_min_severity="OFF"
         # 从源头关闭服务器端通知（避免 "label does not exist" 告警刷屏）。
@@ -92,30 +92,42 @@ class GraphService:
 
     def _query_with_fallback(self, query_fn, *, max_retries: int = 2):
         """
-        Try configured database first; fallback to default database when routing/db lookup is unstable.
-        Retries on transient network errors (timeout, connection reset, service unavailable).
-        """
-        db_candidates: list[str] = [self.database] if self.database else [""]
-        if self.database:
-            db_candidates.append("")
+        Run a query against the configured database with transient-error retry.
 
+        注意：历史版本里会把 database="" 作为兜底候选一起尝试，但在 Aura Free 实例
+        上没有可用的默认 `neo4j` 库，该兜底只会触发 DatabaseNotFound / 路由错误，
+        反而把真正短暂的抖动放大成 6 次失败、50+s 超时。这里改为只使用配置库，
+        并把 DatabaseNotFound 当作永久错立即抛出。
+        """
+        target_db = self.database or ""
         last_exc: Exception | None = None
+
         for attempt in range(max_retries + 1):
-            for db_name in db_candidates:
-                driver = self._driver()
-                try:
-                    session_kwargs = {"database": db_name} if db_name else {}
-                    with driver.session(**session_kwargs) as session:
-                        return query_fn(session)
-                except _TRANSIENT_ERRORS as exc:
-                    last_exc = exc
-                    logger.warning(
-                        "Neo4j transient error (attempt %d/%d, db=%r): %s",
-                        attempt + 1, max_retries + 1, db_name, exc,
+            driver = self._driver()
+            try:
+                session_kwargs = {"database": target_db} if target_db else {}
+                with driver.session(**session_kwargs) as session:
+                    return query_fn(session)
+            except _TRANSIENT_ERRORS as exc:
+                last_exc = exc
+                logger.warning(
+                    "Neo4j transient error (attempt %d/%d, db=%r): %s",
+                    attempt + 1, max_retries + 1, target_db, exc,
+                )
+                self.close()
+            except Neo4jError as exc:
+                code = getattr(exc, "code", "") or ""
+                if "DatabaseNotFound" in code or "Database.DatabaseNotFound" in code:
+                    logger.error(
+                        "Neo4j database %r not found — check NEO4J_DATABASE config; not retrying.",
+                        target_db,
                     )
-                    self.close()
-                except Exception as exc:  # noqa: BLE001
-                    last_exc = exc
+                    raise
+                last_exc = exc
+                break
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+                break
             if attempt < max_retries:
                 wait = min(2 ** attempt, 4)
                 logger.info("Retrying Neo4j in %.1fs …", wait)

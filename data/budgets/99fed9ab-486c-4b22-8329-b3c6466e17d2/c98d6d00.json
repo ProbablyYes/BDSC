@@ -1,0 +1,790 @@
+{
+  "plan_id": "c98d6d00",
+  "user_id": "99fed9ab-486c-4b22-8329-b3c6466e17d2",
+  "name": "finance-reg-public-detailed",
+  "purpose": "business",
+  "visible_tabs": [
+    "cost",
+    "biz",
+    "comp",
+    "compare",
+    "fund"
+  ],
+  "version": 1,
+  "currency": "CNY",
+  "created_at": "2026-04-24T08:15:28.929322+08:00",
+  "updated_at": "2026-04-24T08:15:28.962855+08:00",
+  "project_costs": {
+    "categories": [
+      {
+        "name": "技术开发",
+        "items": [
+          {
+            "name": "云服务器",
+            "unit_price": 0,
+            "quantity": 12,
+            "total": 0.0,
+            "note": "按月计费×12",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "域名",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "API / 模型调用",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "开发工具 / 许可证",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "运营推广",
+        "items": [
+          {
+            "name": "线上推广",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "线下活动",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          },
+          {
+            "name": "内容制作",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "人力成本",
+        "items": [
+          {
+            "name": "兼职开发",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "monthly"
+          },
+          {
+            "name": "设计外包",
+            "unit_price": 0,
+            "quantity": 1,
+            "total": 0.0,
+            "note": "",
+            "cost_type": "once"
+          }
+        ]
+      },
+      {
+        "name": "其他",
+        "items": []
+      }
+    ]
+  },
+  "business_finance": {
+    "revenue_streams": [
+      {
+        "name": "公益 · 政府/基金资助（AI 自动建立）",
+        "pattern_key": "grant_funded",
+        "inputs": {
+          "active_grants": 12.0,
+          "grant_value_yearly": 150000.0,
+          "renewal_rate": 0.7,
+          "beneficiaries_served": 6000.0
+        },
+        "monthly_revenue": 127500.0,
+        "_ai_meta": {
+          "ai_created": true,
+          "source": "msg:turn-3",
+          "ts": 1776989728.94593,
+          "fields": {
+            "active_grants": {
+              "ai_filled": true,
+              "value": 12.0,
+              "prev_value": null,
+              "raw": "在期资助 12 个",
+              "reference_note": "公开样例常见记录约在 1-10个",
+              "source": "msg:turn-3",
+              "ts": 1776989728.94593,
+              "confidence": 0.85
+            },
+            "grant_value_yearly": {
+              "ai_filled": true,
+              "value": 150000.0,
+              "prev_value": null,
+              "raw": "单个资助年度金额 150000",
+              "reference_note": "公开样例常见记录约在 30000-2e+06元/年",
+              "source": "msg:turn-3",
+              "ts": 1776989728.94593,
+              "confidence": 0.85
+            },
+            "renewal_rate": {
+              "ai_filled": true,
+              "value": 0.7,
+              "prev_value": null,
+              "raw": "续期率 70%",
+              "reference_note": "公开样例常见记录约在 0.3-0.85比例",
+              "source": "msg:turn-3",
+              "ts": 1776989728.94593,
+              "confidence": 0.85
+            },
+            "beneficiaries_served": {
+              "ai_filled": true,
+              "value": 6000.0,
+              "prev_value": null,
+              "raw": "受益人 6000 人",
+              "reference_note": "公开样例常见记录约在 50-50000人/月",
+              "source": "msg:turn-3",
+              "ts": 1776989728.94593,
+              "confidence": 0.85
+            }
+          }
+        },
+        "active_units": 6000.0
+      }
+    ],
+    "fixed_costs_monthly": 85000.0,
+    "variable_cost_per_user": 0,
+    "growth_rate_monthly": 0.1,
+    "months_to_breakeven": 2,
+    "cash_flow_projection": [
+      {
+        "month": 1,
+        "revenue": 127500.0,
+        "cost": 0.0,
+        "net": 127500.0,
+        "cumulative": 127500.0
+      },
+      {
+        "month": 2,
+        "revenue": 140250.0,
+        "cost": 0.0,
+        "net": 140250.0,
+        "cumulative": 267750.0
+      },
+      {
+        "month": 3,
+        "revenue": 154275.0,
+        "cost": 0.0,
+        "net": 154275.0,
+        "cumulative": 422025.0
+      },
+      {
+        "month": 4,
+        "revenue": 169702.5,
+        "cost": 0.0,
+        "net": 169702.5,
+        "cumulative": 591727.5
+      },
+      {
+        "month": 5,
+        "revenue": 186672.75,
+        "cost": 0.0,
+        "net": 186672.75,
+        "cumulative": 778400.25
+      },
+      {
+        "month": 6,
+        "revenue": 205340.03,
+        "cost": 0.0,
+        "net": 205340.03,
+        "cumulative": 983740.28
+      },
+      {
+        "month": 7,
+        "revenue": 225874.03,
+        "cost": 0.0,
+        "net": 225874.03,
+        "cumulative": 1209614.31
+      },
+      {
+        "month": 8,
+        "revenue": 248461.43,
+        "cost": 0.0,
+        "net": 248461.43,
+        "cumulative": 1458075.74
+      },
+      {
+        "month": 9,
+        "revenue": 273307.57,
+        "cost": 0.0,
+        "net": 273307.57,
+        "cumulative": 1731383.31
+      },
+      {
+        "month": 10,
+        "revenue": 300638.33,
+        "cost": 0.0,
+        "net": 300638.33,
+        "cumulative": 2032021.64
+      },
+      {
+        "month": 11,
+        "revenue": 330702.16,
+        "cost": 0.0,
+        "net": 330702.16,
+        "cumulative": 2362723.8
+      },
+      {
+        "month": 12,
+        "revenue": 363772.38,
+        "cost": 0.0,
+        "net": 363772.38,
+        "cumulative": 2726496.18
+      }
+    ],
+    "scenario_models": {
+      "conservative": {
+        "label": "悲观",
+        "revenue_multiplier": 0.75,
+        "conversion_multiplier": 0.85,
+        "growth_rate_monthly": 0.05,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "更保守地估计增长与转化，适合答辩时说明风险边界。"
+      },
+      "baseline": {
+        "label": "基准",
+        "revenue_multiplier": 1.0,
+        "conversion_multiplier": 1.0,
+        "growth_rate_monthly": 0.1,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "当前最可信的执行版本，用于常规预算讨论。"
+      },
+      "optimistic": {
+        "label": "乐观",
+        "revenue_multiplier": 1.25,
+        "conversion_multiplier": 1.15,
+        "growth_rate_monthly": 0.18,
+        "fixed_costs_monthly": 0.0,
+        "variable_cost_per_user": 0.0,
+        "note": "假设推广与口碑扩散顺利，用于展示潜在上限。"
+      }
+    },
+    "scenario_results": {
+      "conservative": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 27956.25,
+            "cost": 0.0,
+            "net": 27956.25,
+            "cumulative": 27956.25
+          },
+          {
+            "month": 2,
+            "revenue": 29354.06,
+            "cost": 0.0,
+            "net": 29354.06,
+            "cumulative": 57310.31
+          },
+          {
+            "month": 3,
+            "revenue": 30821.77,
+            "cost": 0.0,
+            "net": 30821.77,
+            "cumulative": 88132.08
+          },
+          {
+            "month": 4,
+            "revenue": 32362.85,
+            "cost": 0.0,
+            "net": 32362.85,
+            "cumulative": 120494.93
+          },
+          {
+            "month": 5,
+            "revenue": 33981.0,
+            "cost": 0.0,
+            "net": 33981.0,
+            "cumulative": 154475.93
+          },
+          {
+            "month": 6,
+            "revenue": 35680.05,
+            "cost": 0.0,
+            "net": 35680.05,
+            "cumulative": 190155.98
+          },
+          {
+            "month": 7,
+            "revenue": 37464.05,
+            "cost": 0.0,
+            "net": 37464.05,
+            "cumulative": 227620.03
+          },
+          {
+            "month": 8,
+            "revenue": 39337.25,
+            "cost": 0.0,
+            "net": 39337.25,
+            "cumulative": 266957.28
+          },
+          {
+            "month": 9,
+            "revenue": 41304.11,
+            "cost": 0.0,
+            "net": 41304.11,
+            "cumulative": 308261.39
+          },
+          {
+            "month": 10,
+            "revenue": 43369.32,
+            "cost": 0.0,
+            "net": 43369.32,
+            "cumulative": 351630.71
+          },
+          {
+            "month": 11,
+            "revenue": 45537.79,
+            "cost": 0.0,
+            "net": 45537.79,
+            "cumulative": 397168.5
+          },
+          {
+            "month": 12,
+            "revenue": 47814.67,
+            "cost": 0.0,
+            "net": 47814.67,
+            "cumulative": 444983.17
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 444983.17,
+        "annual_cost": 0.0,
+        "annual_net": 444983.17,
+        "monthly_revenue_base": 27956.25
+      },
+      "baseline": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 127500.0,
+            "cost": 0.0,
+            "net": 127500.0,
+            "cumulative": 127500.0
+          },
+          {
+            "month": 2,
+            "revenue": 140250.0,
+            "cost": 0.0,
+            "net": 140250.0,
+            "cumulative": 267750.0
+          },
+          {
+            "month": 3,
+            "revenue": 154275.0,
+            "cost": 0.0,
+            "net": 154275.0,
+            "cumulative": 422025.0
+          },
+          {
+            "month": 4,
+            "revenue": 169702.5,
+            "cost": 0.0,
+            "net": 169702.5,
+            "cumulative": 591727.5
+          },
+          {
+            "month": 5,
+            "revenue": 186672.75,
+            "cost": 0.0,
+            "net": 186672.75,
+            "cumulative": 778400.25
+          },
+          {
+            "month": 6,
+            "revenue": 205340.03,
+            "cost": 0.0,
+            "net": 205340.03,
+            "cumulative": 983740.28
+          },
+          {
+            "month": 7,
+            "revenue": 225874.03,
+            "cost": 0.0,
+            "net": 225874.03,
+            "cumulative": 1209614.31
+          },
+          {
+            "month": 8,
+            "revenue": 248461.43,
+            "cost": 0.0,
+            "net": 248461.43,
+            "cumulative": 1458075.74
+          },
+          {
+            "month": 9,
+            "revenue": 273307.57,
+            "cost": 0.0,
+            "net": 273307.57,
+            "cumulative": 1731383.31
+          },
+          {
+            "month": 10,
+            "revenue": 300638.33,
+            "cost": 0.0,
+            "net": 300638.33,
+            "cumulative": 2032021.64
+          },
+          {
+            "month": 11,
+            "revenue": 330702.16,
+            "cost": 0.0,
+            "net": 330702.16,
+            "cumulative": 2362723.8
+          },
+          {
+            "month": 12,
+            "revenue": 363772.38,
+            "cost": 0.0,
+            "net": 363772.38,
+            "cumulative": 2726496.18
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 2726496.18,
+        "annual_cost": 0.0,
+        "annual_net": 2726496.18,
+        "monthly_revenue_base": 127500.0
+      },
+      "optimistic": {
+        "cash_flow_projection": [
+          {
+            "month": 1,
+            "revenue": 401100.0,
+            "cost": 0.0,
+            "net": 401100.0,
+            "cumulative": 401100.0
+          },
+          {
+            "month": 2,
+            "revenue": 473298.0,
+            "cost": 0.0,
+            "net": 473298.0,
+            "cumulative": 874398.0
+          },
+          {
+            "month": 3,
+            "revenue": 558491.64,
+            "cost": 0.0,
+            "net": 558491.64,
+            "cumulative": 1432889.64
+          },
+          {
+            "month": 4,
+            "revenue": 659020.14,
+            "cost": 0.0,
+            "net": 659020.14,
+            "cumulative": 2091909.78
+          },
+          {
+            "month": 5,
+            "revenue": 777643.76,
+            "cost": 0.0,
+            "net": 777643.76,
+            "cumulative": 2869553.54
+          },
+          {
+            "month": 6,
+            "revenue": 917619.64,
+            "cost": 0.0,
+            "net": 917619.64,
+            "cumulative": 3787173.18
+          },
+          {
+            "month": 7,
+            "revenue": 1082791.17,
+            "cost": 0.0,
+            "net": 1082791.17,
+            "cumulative": 4869964.35
+          },
+          {
+            "month": 8,
+            "revenue": 1277693.58,
+            "cost": 0.0,
+            "net": 1277693.58,
+            "cumulative": 6147657.93
+          },
+          {
+            "month": 9,
+            "revenue": 1507678.43,
+            "cost": 0.0,
+            "net": 1507678.43,
+            "cumulative": 7655336.36
+          },
+          {
+            "month": 10,
+            "revenue": 1779060.54,
+            "cost": 0.0,
+            "net": 1779060.54,
+            "cumulative": 9434396.9
+          },
+          {
+            "month": 11,
+            "revenue": 2099291.44,
+            "cost": 0.0,
+            "net": 2099291.44,
+            "cumulative": 11533688.34
+          },
+          {
+            "month": 12,
+            "revenue": 2477163.9,
+            "cost": 0.0,
+            "net": 2477163.9,
+            "cumulative": 14010852.24
+          }
+        ],
+        "months_to_breakeven": 2,
+        "annual_revenue": 14010852.24,
+        "annual_cost": 0.0,
+        "annual_net": 14010852.24,
+        "monthly_revenue_base": 401100.0
+      }
+    },
+    "key_levers": [
+      {
+        "field": "active_grants",
+        "label": "在期资助项目数",
+        "from_patterns": [
+          "公益 · 政府/基金资助"
+        ],
+        "weighted_revenue": 127500.0
+      },
+      {
+        "field": "grant_value_yearly",
+        "label": "单项目年度金额",
+        "from_patterns": [
+          "公益 · 政府/基金资助"
+        ],
+        "weighted_revenue": 127500.0
+      }
+    ],
+    "pattern_levers": {
+      "grant_funded": [
+        {
+          "field": "active_grants",
+          "label": "在期资助数",
+          "scenarios": {
+            "pessimistic": 0.5,
+            "baseline": 1.0,
+            "optimistic": 1.6
+          }
+        },
+        {
+          "field": "grant_value_yearly",
+          "label": "单笔年额",
+          "scenarios": {
+            "pessimistic": 0.7,
+            "baseline": 1.0,
+            "optimistic": 1.4
+          }
+        },
+        {
+          "field": "renewal_rate",
+          "label": "续期概率",
+          "scenarios": {
+            "pessimistic": 0.6,
+            "baseline": 1.0,
+            "optimistic": 1.3
+          }
+        }
+      ]
+    },
+    "_ai_flat_meta": {
+      "monthly_price": {
+        "ai_filled": true,
+        "value": 480.0,
+        "prev_value": 150000.0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "annual_arpu": {
+        "ai_filled": true,
+        "value": 480.0,
+        "prev_value": 1800000.0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "paid_conversion_rate": {
+        "ai_filled": true,
+        "value": 0.65,
+        "prev_value": 0.65,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "target_user_population": {
+        "ai_filled": true,
+        "value": 180000.0,
+        "prev_value": 180000.0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "serviceable_user_population": {
+        "ai_filled": true,
+        "value": 24000.0,
+        "prev_value": 24000.0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "first_year_reach_users": {
+        "ai_filled": true,
+        "value": 6000.0,
+        "prev_value": 6000.0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "cost_per_beneficiary": {
+        "ai_filled": true,
+        "value": 38.0,
+        "prev_value": 38.0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "fixed_costs_monthly": {
+        "ai_filled": true,
+        "value": 85000.0,
+        "prev_value": 0,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      },
+      "initial_capital": {
+        "ai_filled": true,
+        "value": 1200000.0,
+        "prev_value": null,
+        "source": "msg:turn-5",
+        "ts": 1776989728.9628556
+      }
+    },
+    "monthly_price": 480.0,
+    "annual_arpu": 480.0,
+    "paid_conversion_rate": 0.65,
+    "target_user_population": 180000.0,
+    "serviceable_user_population": 24000.0,
+    "first_year_reach_users": 6000.0,
+    "cost_per_beneficiary": 38.0,
+    "initial_capital": 1200000.0
+  },
+  "competition_budget": {
+    "items": [
+      {
+        "name": "参赛报名费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "差旅交通",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "住宿",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "材料打印/展板",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "原型开发费",
+        "amount": 0.0,
+        "note": ""
+      },
+      {
+        "name": "样品制作",
+        "amount": 0.0,
+        "note": ""
+      }
+    ],
+    "stages": [
+      {
+        "name": "筹备期",
+        "items": []
+      },
+      {
+        "name": "初赛",
+        "items": []
+      },
+      {
+        "name": "复赛",
+        "items": []
+      },
+      {
+        "name": "决赛",
+        "items": []
+      }
+    ],
+    "funding_sources": [
+      {
+        "name": "自筹",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "学校资助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "企业赞助",
+        "amount": 0,
+        "note": ""
+      },
+      {
+        "name": "赛事奖金",
+        "amount": 0,
+        "note": ""
+      }
+    ]
+  },
+  "funding_plan": {
+    "startup_capital_needed": 0,
+    "sources": [],
+    "monthly_gap": [],
+    "fundraising_notes": ""
+  },
+  "ai_suggestions": [],
+  "summary": {
+    "project_cost_total": 0.0,
+    "competition_cost_total": 0.0,
+    "total_investment": 0.0,
+    "baseline_monthly_revenue": 127500.0,
+    "baseline_annual_net": 2726496.18,
+    "funding_gap": 0.0,
+    "health_score": 100,
+    "breakeven_fastest": 2,
+    "breakeven_baseline": 2,
+    "breakeven_slowest": 2
+  }
+}

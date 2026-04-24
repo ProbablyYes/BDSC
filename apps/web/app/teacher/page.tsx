@@ -1061,6 +1061,22 @@ export default function TeacherPage() {
       setStudentPlansLoading(false);
     }
   }, []);
+  const studentPlanTrackPoints = useMemo(() => {
+    const points: Array<{ id: string; x: number; y: number; label: string; stage: string }> = [];
+    studentPlansTeams.forEach((team: any) => {
+      (team.students || []).forEach((stu: any) => {
+        const tv = stu?.track_vector || {};
+        points.push({
+          id: String(stu.student_id || stu.display_name || Math.random()),
+          x: Number(tv.biz_public || 0),
+          y: Number(tv.innov_venture || 0),
+          label: `${stu.display_name || stu.student_id}${stu.project_stage_v2 ? ` · ${stu.project_stage_v2}` : ""}`,
+          stage: String(stu.project_stage_v2 || "structured"),
+        });
+      });
+    });
+    return points;
+  }, [studentPlansTeams]);
   const [expandedSubmission, setExpandedSubmission] = useState<number | null>(null);
 
   // 班级页面状态
@@ -6248,6 +6264,46 @@ export default function TeacherPage() {
               )}
               {!studentPlansLoading && !studentPlansError && studentPlansTeams.length === 0 && (
                 <div className="bp-sp-empty">当前没有找到任何学生计划书。</div>
+              )}
+              {studentPlanTrackPoints.length > 0 && (
+                <div className="ov-chart-card" style={{ marginBottom: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div>
+                      <h3 style={{ margin: 0 }}>项目双光谱分布</h3>
+                      <div className="right-hint">横轴：商业 ←→ 公益，纵轴：创新 ←→ 创业。用于快速看全班项目的认知定位。</div>
+                    </div>
+                    <span className="tch-group-chip">{studentPlanTrackPoints.length} 个项目</span>
+                  </div>
+                  <ScatterPlot
+                    data={studentPlanTrackPoints.map((p) => ({ id: p.id, x: p.x, y: p.y }))}
+                    width={520}
+                    height={280}
+                    xLabel="商业 ←→ 公益"
+                    yLabel="创新 ←→ 创业"
+                    xThreshold={0}
+                    yThreshold={0}
+                    quadrantLabels={{
+                      topRight: "创业 × 公益",
+                      topLeft: "创新 × 公益",
+                      bottomRight: "创业 × 商业",
+                      bottomLeft: "创新 × 商业",
+                    }}
+                    colorScale={(point) => {
+                      const raw = studentPlanTrackPoints.find((item) => item.id === point.id);
+                      const stage = raw?.stage || "structured";
+                      return ({
+                        idea: "rgba(115,204,255,0.9)",
+                        structured: "rgba(99,102,241,0.9)",
+                        validated: "rgba(92,189,138,0.9)",
+                        scale: "rgba(224,168,76,0.9)",
+                      } as any)[stage] || "rgba(154,164,191,0.85)";
+                    }}
+                    getTooltip={(point) => {
+                      const raw = studentPlanTrackPoints.find((item) => item.id === point.id);
+                      return raw ? raw.label : point.id;
+                    }}
+                  />
+                </div>
               )}
 
               {/* 视图切换 + 对比工具栏 */}

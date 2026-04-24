@@ -59,6 +59,11 @@ _FINANCE_TRIGGERS: dict[str, list[str]] = {
     "nonprofit": [
         "公益", "慈善", "非营利", "志愿", "受益人", "服务对象",
         "帮扶", "留守", "独居", "社工", "捐赠", "募捐", "支教",
+        # 放宽: 加入更多公益/社会创新口径词汇
+        "受助", "资助", "帮助", "弱势群体", "社区服务", "社会创新", "可持续",
+        "乡村振兴", "环保", "环境保护", "残障", "残疾人", "失能老人",
+        "困境儿童", "公益组织", "NGO", "ngo", "基金会", "社会企业", "社创",
+        "csr", "CSR", "义卖", "义诊", "义教", "公益传播", "倡导", "公共服务",
     ],
 }
 
@@ -202,25 +207,34 @@ def _extract_number_near(text: str, keywords: list[str]) -> float:
     """在关键词附近抓一个纯数字（含 10k/万这种单位）。"""
     if not text:
         return 0.0
+    def _parse(window: str) -> float:
+        m = re.search(r"(\d{1,8}(?:\.\d{1,3})?)\s*(万|千|k|m)?", window, re.IGNORECASE)
+        if not m:
+            return 0.0
+        try:
+            v = float(m.group(1))
+            unit = (m.group(2) or "").lower()
+            if unit == "万":
+                v *= 1e4
+            elif unit in ("千", "k"):
+                v *= 1e3
+            elif unit == "m":
+                v *= 1e6
+            return v
+        except (TypeError, ValueError):
+            return 0.0
     for kw in keywords:
         idx = text.find(kw)
         if idx < 0:
             continue
+        after = text[idx + len(kw): idx + len(kw) + 24]
+        v = _parse(after)
+        if v > 0:
+            return v
         window = text[max(0, idx - 5): idx + len(kw) + 20]
-        m = re.search(r"(\d{1,8}(?:\.\d{1,3})?)\s*(万|千|k|m)?", window, re.IGNORECASE)
-        if m:
-            try:
-                v = float(m.group(1))
-                unit = (m.group(2) or "").lower()
-                if unit == "万":
-                    v *= 1e4
-                elif unit in ("千", "k"):
-                    v *= 1e3
-                elif unit == "m":
-                    v *= 1e6
-                return v
-            except (TypeError, ValueError):
-                continue
+        v = _parse(window)
+        if v > 0:
+            return v
     return 0.0
 
 
@@ -261,18 +275,38 @@ def slot_fill_from_text(text: str, history: list[dict] | None = None) -> dict[st
         out["cac"] = cac
 
     # users
-    users = _extract_number_near(merged, ["用户", "付费用户", "DAU", "MAU"])
-    if users > 0:
-        out["target_user_population"] = users
-        if "new_users_per_month" not in out and "paid_conversion_rate" in out:
-            out["new_users_per_month"] = users * out["paid_conversion_rate"]
+    target_population = _extract_number_near(
+        merged,
+        ["目标总人群", "总人群", "目标市场", "目标客户", "客户总量", "企业客户", "用户", "付费用户", "DAU", "MAU"],
+    )
+    if target_population > 0:
+        out["target_user_population"] = target_population
+    monthly_active = _extract_number_near(merged, ["月活用户", "活跃用户", "月活", "MAU", "DAU"])
+    if monthly_active > 0 and "paid_conversion_rate" in out and "new_users_per_month" not in out:
+        out["new_users_per_month"] = monthly_active * out["paid_conversion_rate"]
+    explicit_new_users = _extract_number_near(merged, ["每月新增付费客户", "每月新增客户", "月新增付费客户", "月新增客户", "每月新增"])
+    if explicit_new_users > 0:
+        out["new_users_per_month"] = explicit_new_users
+    serviceable_users = _extract_number_near(merged, ["可服务", "可覆盖", "能覆盖", "可触达用户池", "服务人群", "真正能服务"])
+    if serviceable_users > 0:
+        out["serviceable_user_population"] = serviceable_users
+    first_year_reach = _extract_number_near(merged, ["首年预计能触达", "首年触达", "第一年触达", "首年覆盖", "第一年覆盖", "首年可达", "首年"])
+    if first_year_reach > 0:
+        out["first_year_reach_users"] = first_year_reach
 
     # ARPU / annual
-    arpu_yr = _extract_number_near(merged, ["年付", "年客单价", "年 arpu", "annual arpu"])
+    arpu_yr = _extract_number_near(merged, ["年 ARPU", "年 arpu", "annual arpu", "年客单价", "年付"])
     if arpu_yr > 0:
         out["annual_arpu"] = arpu_yr
     elif "monthly_price" in out:
         out["annual_arpu"] = out["monthly_price"] * 12
+
+    fixed_costs = _extract_number_near(merged, ["月固定成本", "固定成本", "每月固定支出"])
+    if fixed_costs > 0:
+        out["fixed_costs_monthly"] = fixed_costs
+    initial_capital = _extract_number_near(merged, ["启动资金", "起始资金", "初始资金", "账上现金"])
+    if initial_capital > 0:
+        out["initial_capital"] = initial_capital
 
     # 公益：单位受益人成本（"每服务一个 X 的成本是 Y 元"、"人均成本 Y 元"）
     cpb = _extract_number_near(
@@ -317,7 +351,20 @@ def scan_message(
             return {"triggered": False}
 
         # 命中 nonprofit 关键词时：文本已经明确是公益项目，覆盖前端传的 industry_hint
-        if "nonprofit" in hits:
+        # 放宽公益识别: 即使没命中 nonprofit, 但 history 里曾命中过公益词且本轮没有商业反向词, 仍切公益
+        is_public_hint = "nonprofit" in hits
+        if not is_public_hint and history:
+            recent_text = " ".join(
+                str((m or {}).get("content", ""))
+                for m in (history[-12:] or []) if isinstance(m, dict)
+            )
+            recent_lower = recent_text.lower()
+            public_kw_hits = sum(1 for kw in _FINANCE_TRIGGERS["nonprofit"] if kw.lower() in recent_lower)
+            biz_strong = ["盈利", "估值", "上市", "融资", "ipo", "退出", "收入翻番", "市值"]
+            biz_hits = sum(1 for kw in biz_strong if kw in recent_lower)
+            if public_kw_hits >= 2 and biz_hits == 0:
+                is_public_hint = True
+        if is_public_hint:
             industry = "社会公益"
         else:
             industry = _match_industry(industry_hint or "")

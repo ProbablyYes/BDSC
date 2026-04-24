@@ -441,12 +441,16 @@ export default function StudentPage() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [latestResult, setLatestResult] = useState<any>(null);
+  const [projectCognition, setProjectCognition] = useState<any>(null);
+  const [cognitionBusy, setCognitionBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rightTab, setRightTab] = useState<RightTab>("task");
   const [rightOpen, setRightOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [topbarMoreOpen, setTopbarMoreOpen] = useState(false);
   const [budgetPanelOpen, setBudgetPanelOpen] = useState(false);
+  // 当前激活的预算方案 id（FinanceReportView 需要它来定位 plan）
+  const [activeBudgetPlanId, setActiveBudgetPlanId] = useState<string>("");
   const [kbPanelOpen, setKbPanelOpen] = useState(false);
   const [dockCompOpen, setDockCompOpen] = useState(false);
   const [teacherFeedback, setTeacherFeedback] = useState<any[]>([]);
@@ -648,6 +652,25 @@ export default function StudentPage() {
   }, []);
   useEffect(() => { refreshKbStats(); }, [refreshKbStats]);
   useEffect(() => { if (rightTab === "kg") refreshKbStats(); }, [rightTab, refreshKbStats]);
+
+  // 拉一次预算方案列表，把第一份的 plan_id 缓存为"当前激活预算方案"
+  // 用于 FinanceReportView / 对话→预算自动回写 显示
+  useEffect(() => {
+    const uid = (currentUser?.user_id || "").toString();
+    if (!uid) return;
+    let cancelled = false;
+    fetch(`${API_BASE}/api/budget/plans/${encodeURIComponent(uid)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((d: any) => {
+        if (cancelled || !d) return;
+        const plans = Array.isArray(d?.plans) ? d.plans : (Array.isArray(d) ? d : []);
+        if (plans.length > 0 && plans[0]?.plan_id) {
+          setActiveBudgetPlanId(plans[0].plan_id);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [currentUser?.user_id, budgetPanelOpen]);
 
   // apply theme
   useEffect(() => {
@@ -851,11 +874,59 @@ export default function StudentPage() {
       } else {
         setSelectedVideoHistoryIdx(-1);
       }
+      setProjectCognition({
+        track_vector: data?.track_vector ?? { innov_venture: 0, biz_public: 0 },
+        project_stage_v2: data?.project_stage_v2 ?? "",
+        track_history: data?.track_history ?? [],
+        track_inference_meta: data?.track_inference_meta ?? {},
+        labels: data?.track_vector ? null : undefined,
+      });
     } catch {
       setVideoHistory([]);
       setSelectedVideoHistoryIdx(-1);
+      setProjectCognition(null);
     }
   }, [projectId]);
+
+  const saveProjectCognition = useCallback(async (nextVector: any, nextStage?: string) => {
+    if (!projectId) return;
+    setCognitionBusy(true);
+    try {
+      const resp = await fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}/cognition`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          track_vector: nextVector,
+          project_stage_v2: nextStage,
+          source: "student",
+        }),
+      });
+      const data = await resp.json();
+      setProjectCognition(data);
+    } finally {
+      setCognitionBusy(false);
+    }
+  }, [projectId]);
+
+  const inferProjectCognition = useCallback(async () => {
+    if (!projectId) return;
+    setCognitionBusy(true);
+    try {
+      const resp = await fetch(`${API_BASE}/api/project/${encodeURIComponent(projectId)}/cognition/infer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: input || latestResult?.raw_text || "",
+          category: latestResult?.category || latestResult?.agent_trace?.category || "",
+          competition_type: competitionType || "",
+        }),
+      });
+      const data = await resp.json();
+      setProjectCognition(data);
+    } finally {
+      setCognitionBusy(false);
+    }
+  }, [projectId, input, latestResult, competitionType]);
 
   const loadBusinessPlan = useCallback(async () => {
     if (!projectId || !conversationId) return;
@@ -2036,6 +2107,14 @@ export default function StudentPage() {
       setLatestResult(data);
       setResultHistory((prev) => [...prev, data]);
       if (data.conversation_id && !conversationId) setConversationId(data.conversation_id);
+      // 立即把本轮的 logical_project_id 写入映射，避免要等 /submissions 拉取
+      if (data?.conversation_id && data?.logical_project_id) {
+        setConvToLogicalId((prev) => (
+          prev[data.conversation_id] === data.logical_project_id
+            ? prev
+            : { ...prev, [data.conversation_id]: data.logical_project_id }
+        ));
+      }
       const reply = (data?.assistant_message ?? "").trim() || "（智能体未返回有效回复）";
 
       // Typewriter effect: reveal the reply character by character
@@ -2304,6 +2383,9 @@ export default function StudentPage() {
         missing_evidence: latestRow.missing_evidence,
         rationale: latestRow.rationale,
         status: latestRow.status,
+        // 本体证据链 + 常见误区（来自 diagnosis_engine 的 evidence_chain / common_mistakes）
+        evidence_chain: latestRow.evidence_chain,
+        common_mistakes: latestRow.common_mistakes,
       };
     });
   }, [resultHistory, latestResult]);
@@ -2485,10 +2567,24 @@ export default function StudentPage() {
   }, [resultHistory, latestResult]);
 
   const hyperStudent = useMemo(() => {
+    // 多轮稳定性：取最近一条 ok 的超图结果；若“本轮”不是这条，则打上 _carried 标记
+    // 让 UI 显示“沿用上一轮分析”，避免学生误以为系统不工作。
     const pick = (r: any) => r?.hypergraph_student ?? r?.agent_trace?.hypergraph_student ?? null;
-    const all = [...resultHistory.map(pick), pick(latestResult)].filter((h) => h?.ok);
-    return all.length > 0 ? all[all.length - 1] : null;
+    const series = [...resultHistory.map(pick), pick(latestResult)];
+    let lastOkIdx = -1;
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i]?.ok) { lastOkIdx = i; break; }
+    }
+    if (lastOkIdx === -1) return null;
+    const isLatest = lastOkIdx === series.length - 1;
+    const turnsBehind = series.length - 1 - lastOkIdx;
+    return { ...series[lastOkIdx], _carried: !isLatest, _turnsBehind: turnsBehind };
   }, [resultHistory, latestResult]);
+
+  // 当前轮次的 analysis_refresh 元数据（gather_context 输出）
+  const analysisRefresh = useMemo(() => {
+    return latestResult?.agent_trace?.analysis_refresh ?? latestResult?.analysis_refresh ?? null;
+  }, [latestResult]);
 
   const hyperConsistencyIssues = useMemo(() => {
     const pick = (r: any) => r?.hyper_consistency_issues ?? r?.agent_trace?.hyper_consistency_issues ?? [];
@@ -2667,13 +2763,17 @@ export default function StudentPage() {
   }, [resultHistory, overallScore]);
   const scoreBand = latestResult?.diagnosis?.score_band ?? "";
   const projectStage = latestResult?.diagnosis?.project_stage ?? "";
+  const cognitionTrack = projectCognition?.track_vector ?? { innov_venture: 0, biz_public: 0 };
+  const cognitionStage = projectCognition?.project_stage_v2 || "";
+  const cognitionHistory = Array.isArray(projectCognition?.track_history) ? projectCognition.track_history : [];
   const gradingPrinciples: string[] = latestResult?.diagnosis?.grading_principles ?? [];
   const projectStageLabel = ({
     idea: "想法探索期",
     structured: "基本成形期",
     validated: "已验证推进期",
     document: "计划书完善期",
-  } as Record<string, string>)[projectStage] ?? projectStage;
+    scale: "规模化推进期",
+  } as Record<string, string>)[cognitionStage || projectStage] ?? (cognitionStage || projectStage);
   const modeGuide = useMemo(() => ({
     coursework: "学怎么把项目想清楚，适合拆方法、补概念、看案例。",
     competition: "按评委视角提分，适合路演、答辩、证据链和 rubric 优化。",
@@ -2725,23 +2825,50 @@ export default function StudentPage() {
             (() => {
               const lid = currentLogicalProjectId;
               const isStd = !!lid && /^P-[A-Za-z0-9_-]+-\d{2,}$/.test(lid);
+              const hasSid = !!(currentUser?.student_id && String(currentUser.student_id).trim());
+              // 三态：standard（已规范）/ no-sid（缺学号）/ pending（待生成）
+              const state: "standard" | "legacy" | "no-sid" | "pending" =
+                isStd ? "standard"
+                  : !hasSid ? "no-sid"
+                  : lid ? "legacy"
+                  : "pending";
+
+              const handleClick = () => {
+                if (state === "no-sid") {
+                  setSidBannerDismissed(false);
+                  if (typeof window !== "undefined") window.location.href = "/student/profile";
+                  return;
+                }
+                if (lid) copyProjectId();
+              };
+              const titleMap: Record<typeof state, string> = {
+                standard: "规范项目编号 · 点击复制",
+                legacy: "历史会话编号 · 点击复制（建议补填学号以获得规范编号）",
+                "no-sid": "未填学号 · 点击前往个人中心补填后即可获得 P-学号-NN",
+                pending: "本会话尚未生成规范编号，发送一条消息后自动生成",
+              };
+              const valueMap: Record<typeof state, string> = {
+                standard: lid,
+                legacy: `#${lid.slice(0, 8)}`,
+                "no-sid": "未填学号 · 点此设置",
+                pending: "P-?? 待生成",
+              };
+
               return (
                 <button
                   type="button"
-                  className={`topbar-pid-pill${isStd ? " standard" : lid ? " legacy" : " empty"}`}
-                  onClick={copyProjectId}
-                  disabled={!lid}
-                  title={lid ? (isStd ? "规范项目编号 · 点击复制" : "历史会话编号 · 点击复制") : "尚未分配项目编号（填入学号后新会话会自动生成）"}
+                  className={`topbar-pid-pill ${state}`}
+                  onClick={handleClick}
+                  disabled={state === "pending"}
+                  title={titleMap[state]}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.7 1.7"/>
                     <path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.7-1.7"/>
                   </svg>
                   <span className="topbar-pid-label">项目编号</span>
-                  <code className="topbar-pid-value">
-                    {isStd ? lid : lid ? `#${lid.slice(0, 8)}` : "—"}
-                  </code>
-                  {pidCopied && <span className="topbar-pid-copied">已复制</span>}
+                  <code className="topbar-pid-value">{valueMap[state]}</code>
+                  {pidCopied && state === "standard" && <span className="topbar-pid-copied">已复制</span>}
                 </button>
               );
             })()
@@ -5488,6 +5615,78 @@ export default function StudentPage() {
                           </div>
                         </div>
 
+                        <div className="pcg-card">
+                          <div className="pcg-head">
+                            <div>
+                              <strong>项目认知定位</strong>
+                              <div className="pcg-sub">保留多智能体框架，只给各角色注入当前项目的双光谱与阶段信息。</div>
+                            </div>
+                            <div className="pcg-actions">
+                              <button className="tch-sm-btn" onClick={() => void inferProjectCognition()} disabled={cognitionBusy}>
+                                {cognitionBusy ? "识别中…" : "让 AI 帮我定位"}
+                              </button>
+                              <button
+                                className="tch-sm-btn is-primary"
+                                onClick={() => void saveProjectCognition(cognitionTrack, cognitionStage || undefined)}
+                                disabled={cognitionBusy}
+                              >
+                                保存定位
+                              </button>
+                            </div>
+                          </div>
+                          <div className="pcg-grid">
+                            <label className="pcg-field">
+                              <span>创新 ←→ 创业</span>
+                              <input
+                                type="range"
+                                min={-100}
+                                max={100}
+                                value={Math.round(Number(cognitionTrack?.innov_venture || 0) * 100)}
+                                onChange={(e) => setProjectCognition((prev: any) => ({
+                                  ...(prev || {}),
+                                  track_vector: {
+                                    ...(prev?.track_vector || {}),
+                                    innov_venture: Number(e.target.value) / 100,
+                                    biz_public: Number(prev?.track_vector?.biz_public || 0),
+                                  },
+                                }))}
+                              />
+                              <div className="pcg-scale"><span>偏创新</span><b>{Math.round(Number(cognitionTrack?.innov_venture || 0) * 100)}%</b><span>偏创业</span></div>
+                            </label>
+                            <label className="pcg-field">
+                              <span>商业 ←→ 公益</span>
+                              <input
+                                type="range"
+                                min={-100}
+                                max={100}
+                                value={Math.round(Number(cognitionTrack?.biz_public || 0) * 100)}
+                                onChange={(e) => setProjectCognition((prev: any) => ({
+                                  ...(prev || {}),
+                                  track_vector: {
+                                    ...(prev?.track_vector || {}),
+                                    innov_venture: Number(prev?.track_vector?.innov_venture || 0),
+                                    biz_public: Number(e.target.value) / 100,
+                                  },
+                                }))}
+                              />
+                              <div className="pcg-scale"><span>偏商业</span><b>{Math.round(Number(cognitionTrack?.biz_public || 0) * 100)}%</b><span>偏公益</span></div>
+                            </label>
+                            <label className="pcg-field">
+                              <span>项目阶段</span>
+                              <select
+                                value={cognitionStage || "structured"}
+                                onChange={(e) => setProjectCognition((prev: any) => ({ ...(prev || {}), project_stage_v2: e.target.value }))}
+                              >
+                                <option value="idea">想法期</option>
+                                <option value="structured">原型期</option>
+                                <option value="validated">验证期</option>
+                                <option value="scale">规模化</option>
+                              </select>
+                              <div className="pcg-scale"><span>当前</span><b>{projectStageLabel || "原型期"}</b><span>{cognitionHistory.length > 0 ? `最近记录 ${cognitionHistory.length} 次` : "暂无历史"}</span></div>
+                            </label>
+                          </div>
+                        </div>
+
                         {/* Radar */}
                         <div className="sc-radar-wrap">
                           <svg viewBox="0 0 240 240" className="sc-radar-svg">
@@ -5674,6 +5873,46 @@ export default function StudentPage() {
                                           <pre className="sc-dim-rationale-text">{rationale.formula_display}</pre>
                                         </details>
                                       )}
+
+                                      {/* 语义参考节点（来自 kg_ontology.RUBRIC_EVIDENCE_CHAIN；仅用于引导提问，不计入评分） */}
+                                      {Array.isArray((r as any).evidence_chain) && (r as any).evidence_chain.length > 0 && (
+                                        <details className="sc-dim-rationale">
+                                          <summary title="只用于引导追问，不计入评分">语义参考节点 ({(r as any).evidence_chain.length})</summary>
+                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "6px 0" }}>
+                                            {(r as any).evidence_chain.map((node: any) => (
+                                              <span
+                                                key={node.id}
+                                                title={node.description}
+                                                style={{
+                                                  padding: "3px 8px",
+                                                  background: node.kind === "deliverable" ? "#e0e7ff" :
+                                                              node.kind === "method" ? "#fef9c3" :
+                                                              node.kind === "metric" ? "#fce7f3" :
+                                                              "#f1f5f9",
+                                                  color: "#1e293b",
+                                                  borderRadius: 4,
+                                                  fontSize: 11,
+                                                }}
+                                              >
+                                                <span style={{ opacity: 0.6, marginRight: 4 }}>{node.kind}</span>
+                                                {node.label}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </details>
+                                      )}
+
+                                      {/* 该维度的常见误区（来自 RUBRIC_ERROR_POOL） */}
+                                      {Array.isArray((r as any).common_mistakes) && (r as any).common_mistakes.length > 0 && (
+                                        <details className="sc-dim-rationale">
+                                          <summary>常见误区 ({(r as any).common_mistakes.length})</summary>
+                                          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#7f1d1d" }}>
+                                            {(r as any).common_mistakes.map((m: string, i: number) => (
+                                              <li key={i}>{m}</li>
+                                            ))}
+                                          </ul>
+                                        </details>
+                                      )}
                                     </div>
                                   );
                                 })()}
@@ -5814,6 +6053,7 @@ export default function StudentPage() {
                     apiBase={API_BASE}
                     userId={(currentUser?.user_id || studentId || "").toString()}
                     projectId={projectId}
+                    planId={activeBudgetPlanId || undefined}
                     conversationId={conversationId || undefined}
                     industryHint={(latestResult?.category || "") as string}
                     onJumpBudget={() => {
@@ -6297,6 +6537,27 @@ export default function StudentPage() {
 
                     return (
                     <>
+                      {/* 多轮稳定性：本轮没刷新时显示 carry-forward 提示 */}
+                      {(hyperStudent as any)?._carried && (
+                        <div className="ht-carry-banner" style={{
+                          background: "var(--bg-muted, #fff7e6)",
+                          border: "1px solid #f0c36d",
+                          color: "#7a5a00",
+                          padding: "6px 10px",
+                          borderRadius: 6,
+                          fontSize: 12,
+                          marginBottom: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}>
+                          <span>🔄 本轮未重新生成超图分析，沿用 {(hyperStudent as any)._turnsBehind} 轮前结果</span>
+                          {analysisRefresh?.carried_reason && (
+                            <span style={{ opacity: 0.7 }}>· 原因: {analysisRefresh.carried_reason}</span>
+                          )}
+                        </div>
+                      )}
+
                       {/* ── 1. Hero: Coverage Ring + Stats ── */}
                       <div className="ht-hero">
                         <svg width="96" height="96" viewBox="0 0 96 96" className="ht-hero-ring">

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from app.config import settings
+from app.services.project_cognition import normalize_track_vector
 
 
 @dataclass
@@ -26,6 +27,10 @@ class ChallengeStrategy:
     expected_evidence: list[str]
     counterfactual: str
     severity: str = "high"
+    applies_to_spectrum: dict[str, tuple[float, float]] = field(default_factory=dict)
+    applies_to_stage: list[str] = field(default_factory=list)
+    applies_to_competition: list[str] = field(default_factory=list)
+    strategy_type: str = "adversarial"
 
 
 STRATEGIES: list[ChallengeStrategy] = [
@@ -224,6 +229,90 @@ STRATEGIES: list[ChallengeStrategy] = [
         expected_evidence=["至少1个完整增长实验闭环", "增长实验数据记录", "主要增长杠杆及其上限估算"],
         counterfactual="没有经过严谨设计和验证的'增长黑客'，通常只是换了一种说法的'多发几条朋友圈'。",
     ),
+    ChallengeStrategy(
+        id="CS16",
+        name="公益影响力量化缺口",
+        trigger_keywords=["社会价值", "公益", "帮助别人", "社会影响", "受益人"],
+        trigger_rules=[],
+        probing_layers=[
+            "你说这个项目有社会价值，具体改变了谁的什么结果？有没有一个改变前后可以比较的指标？",
+            "如果评委追问'为什么这不是一项善意活动而是一个可评估的项目'，你会拿出什么证据？",
+            "除了受益人数量，你还能用什么指标证明影响质量，而不是只证明覆盖范围？",
+        ],
+        expected_evidence=["受益人画像", "影响指标定义", "改变前后对比数据或原话"],
+        counterfactual="如果无法定义影响力，你就很难证明这个项目真正缓解了社会问题，而不是只传递了善意。",
+        severity="medium",
+        applies_to_spectrum={"biz_public": (0.3, 1.0)},
+        applies_to_stage=["idea", "structured", "validated"],
+        strategy_type="socratic",
+    ),
+    ChallengeStrategy(
+        id="CS17",
+        name="公益持续资金追问",
+        trigger_keywords=["资助", "可持续", "基金会", "政府支持", "长期运营"],
+        trigger_rules=[],
+        probing_layers=[
+            "如果项目不靠盈利，未来3年的主要资金来源分别是什么？是单一依赖，还是多元结构？",
+            "谁是真正的支付/资助方？他们为什么愿意持续买单？你能给他们什么可复命的结果？",
+            "如果当前最关键的资助渠道消失，这个项目还能以什么方式继续活下去？",
+        ],
+        expected_evidence=["资金来源结构图", "支付/资助方清单", "持续运营假设"],
+        counterfactual="没有持续资金结构的公益项目，往往只能依靠创始人热情短暂存在。",
+        severity="high",
+        applies_to_spectrum={"biz_public": (0.4, 1.0)},
+        applies_to_stage=["structured", "validated", "scale"],
+        strategy_type="adversarial",
+    ),
+    ChallengeStrategy(
+        id="CS18",
+        name="创新点锚定与对照组校验",
+        trigger_keywords=["创新", "首创", "原创", "突破", "新方法"],
+        trigger_rules=[],
+        probing_layers=[
+            "你说这个方案有创新性，它相对最接近的已有方案到底多了哪一个可验证增量？",
+            "如果评委让你给出 baseline，你会拿哪个现有方案做对照？为什么？",
+            "去掉'首创/突破'这些词后，你还能用什么指标证明这个创新不是口号？",
+        ],
+        expected_evidence=["baseline 选择理由", "对照指标", "创新增量说明"],
+        counterfactual="如果说不清相对谁而新，创新性很容易变成学生主观感受，而不是可评估结论。",
+        severity="high",
+        applies_to_spectrum={"innov_venture": (-1.0, -0.25)},
+        applies_to_stage=["idea", "structured", "validated"],
+        strategy_type="adversarial",
+    ),
+    ChallengeStrategy(
+        id="CS19",
+        name="研究到产品跳跃校验",
+        trigger_keywords=["论文", "算法", "模型", "科研", "落地"],
+        trigger_rules=[],
+        probing_layers=[
+            "你的技术成果转成产品后，用户真正感知到的价值是什么？这一步有没有被证明？",
+            "如果技术效果成立但用户体验很差，项目还能成立吗？你准备怎么验证这两条线？",
+            "研究问题和产品问题分别是什么？现在是不是只证明了前者，还没证明后者？",
+        ],
+        expected_evidence=["技术验证结果", "用户价值验证", "研究问题/产品问题拆分"],
+        counterfactual="很多项目不是技术不行，而是把“研究成立”误以为“产品成立”。",
+        severity="medium",
+        applies_to_spectrum={"innov_venture": (-0.6, 0.2)},
+        applies_to_stage=["validated", "scale"],
+        strategy_type="socratic",
+    ),
+    ChallengeStrategy(
+        id="CS20",
+        name="想法期过早收敛防护",
+        trigger_keywords=["已经决定", "就做这个", "方案已定", "最后选了", "不考虑别的"],
+        trigger_rules=["H_PREMATURE_LOCK"],
+        probing_layers=[
+            "你在锁定这个方向之前对比过哪几种方案？为什么另外几种被排除了？",
+            "如果6周后发现当前核心假设不成立，你准备通过什么信号尽快知道，而不是越做越深？",
+            "现在最不确定的一点是什么？有没有一个100元、3天内能做完的小实验去先证伪它？",
+        ],
+        expected_evidence=["备选方向对比", "关键假设清单", "最小证伪实验"],
+        counterfactual="想法期最大的风险往往不是选错，而是锁定太早，放弃了还没展开的搜索空间。",
+        severity="medium",
+        applies_to_stage=["idea"],
+        strategy_type="socratic",
+    ),
 ]
 
 
@@ -263,6 +352,10 @@ def _apply_strategy_overrides(
                     expected_evidence=list(ov.get("expected_evidence", [])),
                     counterfactual=str(ov.get("counterfactual", "")),
                     severity=str(ov.get("severity", "high")),
+                    applies_to_spectrum=dict(ov.get("applies_to_spectrum", {})),
+                    applies_to_stage=list(ov.get("applies_to_stage", [])),
+                    applies_to_competition=list(ov.get("applies_to_competition", [])),
+                    strategy_type=str(ov.get("strategy_type", "adversarial")),
                 )
             except Exception:  # noqa: BLE001
                 continue
@@ -278,6 +371,10 @@ def _apply_strategy_overrides(
                     expected_evidence=list(ov.get("expected_evidence", base.expected_evidence)),
                     counterfactual=str(ov.get("counterfactual", base.counterfactual)),
                     severity=str(ov.get("severity", base.severity)),
+                    applies_to_spectrum=dict(ov.get("applies_to_spectrum", base.applies_to_spectrum)),
+                    applies_to_stage=list(ov.get("applies_to_stage", base.applies_to_stage)),
+                    applies_to_competition=list(ov.get("applies_to_competition", base.applies_to_competition)),
+                    strategy_type=str(ov.get("strategy_type", base.strategy_type)),
                 )
             except Exception:  # noqa: BLE001
                 continue
@@ -333,55 +430,112 @@ _STRATEGY_LOGIC: dict[str, str] = {
 }
 
 
-def match_strategies(
+def _in_spectrum_window(strategy: ChallengeStrategy, track_vector: dict[str, Any] | None) -> bool:
+    if not strategy.applies_to_spectrum:
+        return True
+    tv = normalize_track_vector(track_vector)
+    for axis, window in strategy.applies_to_spectrum.items():
+        if not isinstance(window, (list, tuple)) or len(window) != 2:
+            continue
+        try:
+            low = float(window[0])
+            high = float(window[1])
+            value = float(tv.get(axis, 0.0) or 0.0)
+        except Exception:
+            continue
+        if value < low or value > high:
+            return False
+    return True
+
+
+def select_probing_strategies(
     text: str,
+    *,
     triggered_rule_ids: list[str] | None = None,
-    max_results: int = 3,
     fallacy_label: str = "",
     edge_types: list[str] | None = None,
+    track_vector: dict[str, Any] | None = None,
+    project_stage: str = "",
+    competition_type: str = "",
+    max_results: int = 3,
 ) -> list[dict[str, Any]]:
-    """Find matching challenge strategies based on text keywords and/or triggered rules."""
-    scored: list[tuple[float, ChallengeStrategy]] = []
-    text_lower = text.lower()
+    scored: list[tuple[float, ChallengeStrategy, list[str], list[str], list[str]]] = []
+    text_lower = str(text or "").lower()
     safe_edge_types = [str(x) for x in (edge_types or []) if x]
+    safe_rules = [str(x) for x in (triggered_rule_ids or []) if x]
 
     for strategy in STRATEGIES:
+        if not _in_spectrum_window(strategy, track_vector):
+            continue
+        if strategy.applies_to_stage and project_stage and project_stage not in strategy.applies_to_stage:
+            continue
+        if strategy.applies_to_competition and competition_type and competition_type not in strategy.applies_to_competition:
+            continue
+
         score = 0.0
-        kw_hits = [k for k in strategy.trigger_keywords if k in text_lower]
+        kw_hits = [k for k in strategy.trigger_keywords if k and k.lower() in text_lower]
         if kw_hits:
             score += len(kw_hits) * 2.0
-
-        rule_hits = [r for r in strategy.trigger_rules if r in (triggered_rule_ids or [])]
+        rule_hits = [r for r in strategy.trigger_rules if r in safe_rules]
         if rule_hits:
             score += len(rule_hits) * 3.0
-
         fallacy_hits = [f for f in _STRATEGY_FALLACY_PREFS.get(strategy.id, []) if f and f in fallacy_label]
         if fallacy_hits:
             score += len(fallacy_hits) * 2.5
-
         edge_hits = [e for e in _STRATEGY_EDGE_PREFS.get(strategy.id, []) if e in safe_edge_types]
         if edge_hits:
             score += len(edge_hits) * 1.8
-
+        if strategy.applies_to_stage and project_stage:
+            score += 0.8
+        if strategy.applies_to_spectrum:
+            score += 0.8
         if score > 0:
-            scored.append((score, strategy))
+            scored.append((score, strategy, kw_hits, rule_hits, edge_hits))
 
     scored.sort(key=lambda x: x[0], reverse=True)
     results: list[dict[str, Any]] = []
-    for score, s in scored[:max_results]:
+    for score, s, kw_hits, rule_hits, edge_hits in scored[:max_results]:
         results.append({
             "strategy_id": s.id,
             "name": s.name,
-            "match_score": score,
+            "match_score": round(score, 2),
             "probing_layers": s.probing_layers,
             "expected_evidence": s.expected_evidence,
             "counterfactual": s.counterfactual,
             "preferred_edge_types": _STRATEGY_EDGE_PREFS.get(s.id, []),
             "supported_fallacies": _STRATEGY_FALLACY_PREFS.get(s.id, []),
             "strategy_logic": _STRATEGY_LOGIC.get(s.id, ""),
-            "matched_edge_types": [e for e in _STRATEGY_EDGE_PREFS.get(s.id, []) if e in safe_edge_types],
+            "matched_edge_types": edge_hits,
+            "matched_keywords": kw_hits,
+            "matched_rules": rule_hits,
+            "strategy_type": s.strategy_type,
+            "applies_to_stage": s.applies_to_stage,
+            "applies_to_competition": s.applies_to_competition,
         })
     return results
+
+
+def match_strategies(
+    text: str,
+    triggered_rule_ids: list[str] | None = None,
+    max_results: int = 3,
+    fallacy_label: str = "",
+    edge_types: list[str] | None = None,
+    track_vector: dict[str, Any] | None = None,
+    project_stage: str = "",
+    competition_type: str = "",
+) -> list[dict[str, Any]]:
+    """Find matching challenge strategies based on text keywords and/or triggered rules."""
+    return select_probing_strategies(
+        text,
+        triggered_rule_ids=triggered_rule_ids,
+        fallacy_label=fallacy_label,
+        edge_types=edge_types,
+        track_vector=track_vector,
+        project_stage=project_stage,
+        competition_type=competition_type,
+        max_results=max_results,
+    )
 
 
 def format_for_critic(strategies: list[dict[str, Any]], max_chars: int = 800) -> str:

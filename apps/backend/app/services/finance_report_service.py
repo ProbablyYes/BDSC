@@ -41,6 +41,85 @@ def _now_iso() -> str:
     return datetime.now(BJ_TZ).isoformat()
 
 
+def _module_conclusion(module: dict[str, Any]) -> str:
+    outputs = module.get("outputs") or {}
+    conclusion = outputs.get("analysis_conclusion")
+    if isinstance(conclusion, str) and conclusion.strip():
+        return conclusion.strip()
+    verdict = (module.get("verdict") or {}).get("reason")
+    if isinstance(verdict, str) and verdict.strip():
+        return verdict.strip()
+    return ""
+
+
+def _build_finance_summary_card(modules: list[dict[str, Any]]) -> dict[str, Any]:
+    by_key = {m.get("module"): m for m in modules if isinstance(m, dict)}
+    focus_keys = ["unit_economics", "cash_flow", "rationality", "market_size"]
+    findings = []
+    missing_fields: list[str] = []
+    has_red = False
+    has_yellow = False
+
+    for key in focus_keys:
+        mod = by_key.get(key) or {}
+        verdict = mod.get("verdict") or {}
+        level = verdict.get("level")
+        if level == "red":
+            has_red = True
+        elif level == "yellow":
+            has_yellow = True
+        title = mod.get("title") or key
+        conclusion = _module_conclusion(mod)
+        if conclusion:
+            findings.append(f"{title}：{conclusion}")
+        for item in (mod.get("missing_inputs") or [])[:3]:
+            field = item.get("field")
+            if field and field not in missing_fields:
+                missing_fields.append(field)
+
+    if has_red:
+        overall = "当前模型已经能算出结果，但至少有一条关键财务链路存在内部冲突，继续放大会放大这个问题。"
+        level = "red"
+        score = 0.35
+    elif has_yellow:
+        overall = "当前财务模型已形成主链路，但仍有部分关键假设需要补齐，结论更适合用于校准而不是直接定案。"
+        level = "yellow"
+        score = 0.58
+    else:
+        overall = "当前财务模型的主要链路已经闭环，可以开始进入版本结构、敏感性和资源配置优化。"
+        level = "green"
+        score = 0.82
+
+    suggestions = []
+    for key in focus_keys:
+        for item in ((by_key.get(key) or {}).get("suggestions") or [])[:2]:
+            if item not in suggestions:
+                suggestions.append(item)
+    if missing_fields:
+        suggestions.insert(0, f"优先补齐这些关键假设：{', '.join(missing_fields[:6])}")
+
+    return {
+        "module": "finance_summary",
+        "title": "财务结论摘要",
+        "inputs": {},
+        "outputs": {
+            "analysis_conclusion": overall,
+            "key_findings": findings[:4],
+            "missing_fields": missing_fields,
+        },
+        "verdict": {
+            "level": level,
+            "score": score,
+            "reason": overall,
+        },
+        "framework_explain": "这是对单位经济、现金流、假设自检和市场规模四个模块的合成判断，用来回答“当前商业模式意味着什么”。",
+        "suggestions": suggestions[:5],
+        "missing_inputs": [],
+        "evidence_for_diagnosis": {},
+        "baseline_meta": {},
+    }
+
+
 class FinanceReportService:
     """深度财务分析报告生成 + 持久化。"""
 
@@ -222,9 +301,13 @@ class FinanceReportService:
             self._set_status(user_id, "running", "建模 TAM/SAM/SOM")
             mkt_hints = {
                 "target_user_population": assumptions.get("target_user_population"),
-                "first_year_reach_users": assumptions.get("new_users_per_month", 0) * 12 if assumptions.get("new_users_per_month") else None,
+                "serviceable_user_population": assumptions.get("serviceable_user_population"),
+                "serviceable_ratio": assumptions.get("serviceable_ratio"),
+                "first_year_reach_users": assumptions.get("first_year_reach_users") or (assumptions.get("new_users_per_month", 0) * 12 if assumptions.get("new_users_per_month") else None),
                 "paid_conversion_rate": assumptions.get("paid_conversion_rate"),
                 "annual_arpu": assumptions.get("annual_arpu"),
+                "industry_tam_billions": assumptions.get("industry_tam_billions"),
+                "industry_sam_billions": assumptions.get("industry_sam_billions"),
             }
             mkt = estimate_market_size(description, industry=industry, hints=mkt_hints)
             self._set_status(user_id, "running", "推荐定价策略")
@@ -236,7 +319,82 @@ class FinanceReportService:
             self._set_status(user_id, "running", "匹配融资节奏")
             fs = match_funding_stage(project_state=project_state, current_need={})
 
-            modules = [ue, cf, rat, mkt, pf, fs]
+            # ── 新增模块: 财务画像（按 RevenuePattern 大类）──
+            try:
+                from app.services.finance_pattern_formulas import (
+                    detect_pattern_kind_mix, evaluate_stream_unit_econ, PATTERN_KIND,
+                )
+                from app.services.revenue_models import PATTERNS as _PATTERNS
+                by_stream = assumptions.get("by_stream") or []
+                mix = detect_pattern_kind_mix(by_stream) if by_stream else {
+                    "dominant_kind": None, "dominant_pattern": None,
+                    "kind_mix": {}, "pattern_mix": {}, "is_public": False,
+                    "total_monthly_revenue": 0.0,
+                }
+                _persona_label_map = {
+                    "growth":    "增长型 SaaS / C 端",
+                    "enterprise": "B 端项目制 / 企业服务",
+                    "platform":  "双边平台型",
+                    "hardware":  "硬件 / 实体产品",
+                    "public":    "公益可持续型",
+                    None:        "未识别",
+                }
+                persona = _persona_label_map.get(mix.get("dominant_kind"), "混合型")
+                # 每条流跑一遍 unit_econ 拿 KPI
+                stream_kpis = []
+                for s in by_stream:
+                    r = evaluate_stream_unit_econ(s)
+                    pkey = r.get("pattern_key")
+                    stream_kpis.append({
+                        "name": s.get("name") or (_PATTERNS[pkey].label if pkey in _PATTERNS else pkey),
+                        "pattern_key": pkey,
+                        "kind": r.get("kind"),
+                        "monthly_revenue": s.get("monthly_revenue"),
+                        "primary_kpi": r.get("primary_kpi"),
+                        "health": r.get("health"),
+                        "reason": r.get("reason"),
+                    })
+                persona_card = {
+                    "module": "finance_persona",
+                    "title": "财务画像（按收入模式）",
+                    "inputs": {
+                        "stream_count": len(by_stream),
+                        "is_public": mix.get("is_public"),
+                        "industry": industry,
+                    },
+                    "outputs": {
+                        "persona_label": persona,
+                        "dominant_pattern": mix.get("dominant_pattern"),
+                        "dominant_kind": mix.get("dominant_kind"),
+                        "kind_mix": mix.get("kind_mix"),
+                        "pattern_mix": mix.get("pattern_mix"),
+                        "total_monthly_revenue": mix.get("total_monthly_revenue"),
+                        "stream_kpis": stream_kpis,
+                    },
+                    "verdict": {
+                        "level": "green" if by_stream else "gray",
+                        "score": 0.7 if by_stream else 0.3,
+                        "reason": (
+                            f"识别为「{persona}」, 共 {len(by_stream)} 条收入流, 月营收 ¥{mix.get('total_monthly_revenue',0):,.0f}"
+                            if by_stream else "尚未识别到收入流, 后续模块可能数据不全"
+                        ),
+                    },
+                    "framework_explain": (
+                        "**财务画像**根据项目当前的收入流模式分布, 给出"
+                        "「增长型 / B 端 / 平台 / 硬件 / 公益」等画像标签, "
+                        "后续模块的公式与分析视角会据此分支。"
+                    ),
+                    "suggestions": [],
+                    "evidence_for_diagnosis": {},
+                    "missing_inputs": [],
+                }
+                modules = [persona_card, ue, cf, rat, mkt, pf, fs]
+            except Exception as _persona_err:
+                logger.warning("finance_persona module failed: %s", _persona_err)
+                modules = [ue, cf, rat, mkt, pf, fs]
+
+            summary_card = _build_finance_summary_card(modules)
+            modules = [summary_card] + modules
 
             # LLM 润色 framework_explain（可选）
             if use_llm_explain and self.llm is not None and getattr(self.llm, "enabled", False):

@@ -26,8 +26,8 @@
     "password_salt": "bc67925c77ec4b0128472e01e819991c",
     "password_hash": "1857838b74f8475c7b959af2c332197bee7ffc35332b71f4d4e9d67ea2204198",
     "created_at": "2026-03-26T01:40:21.284834",
-    "updated_at": "2026-04-21T23:58:11.394098+08:00",
-    "last_login": "2026-04-21T23:58:11.394098+08:00"
+    "updated_at": "2026-04-24T12:56:16.809998+08:00",
+    "last_login": "2026-04-24T12:56:16.809998+08:00"
   },
   {
     "user_id": "34dfb3d0-f976-42cc-a96f-16c32c79a7ad",
@@ -272,10 +272,10 @@
     "password_salt": "f209dfdace7a20d0733a84a24b5df135",
     "password_hash": "d287c45405da5e406b3493f12a20962ef49394d9c5a511837b3331e82e5f108d",
     "status": "active",
-    "last_login": "2026-04-22T03:18:28.009434+08:00",
+    "last_login": "2026-04-24T12:37:53.405277+08:00",
     "created_at": "2026-04-08T11:33:50.900316+08:00",
-    "updated_at": "2026-04-22T11:47:54.510019+08:00",
-    "project_serial_counter": 3
+    "updated_at": "2026-04-24T12:37:53.405277+08:00",
+    "project_serial_counter": 7
   },
   {
     "user_id": "81bf0d7f-b536-4d04-be59-eea4d1751960",
@@ -613,5 +613,39 @@
     "created_at": "2026-04-21T19:35:09.385920+08:00",
     "updated_at": "2026-04-21T19:35:09.385920+08:00",
     "project_serial_counter": 0
+  },
+  {
+    "user_id": "e65cbe90-e5f2-4cbd-9550-e4d1bd958295",
+    "role": "student",
+    "display_name": "????0423",
+    "email": "test.student.0423.cognition@example.com",
+    "student_id": null,
+    "class_id": "AI-TEST",
+    "cohort_id": "2026-spring",
+    "bio": "????????????",
+    "password_salt": "f9abe79a9c1aa7dab80c989295a69c81",
+    "password_hash": "82bd97e150dcc1f709bcd820c2716d26357514179018e21e378e652645d42d1b",
+    "status": "active",
+    "last_login": "",
+    "created_at": "2026-04-23T15:34:22.486858+08:00",
+    "updated_at": "2026-04-23T15:34:22.486858+08:00",
+    "project_serial_counter": 0
+  },
+  {
+    "user_id": "99fed9ab-486c-4b22-8329-b3c6466e17d2",
+    "role": "student",
+    "display_name": "五一快放假",
+    "email": "final-01",
+    "student_id": "1120230236",
+    "class_id": "None",
+    "cohort_id": "None",
+    "bio": "",
+    "password_salt": "d9a67c0d5856f6670f19f73a20941ffa",
+    "password_hash": "74baa337059b44a6bdc28aec00787874aa73b7d84db90330893cf04835076b81",
+    "status": "active",
+    "last_login": "2026-04-24T13:13:06.039820+08:00",
+    "created_at": "2026-04-23T18:02:35.137688+08:00",
+    "updated_at": "2026-04-24T13:13:06.039820+08:00",
+    "project_serial_counter": 16
   }
 ]

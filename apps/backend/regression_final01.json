@@ -1,0 +1,728 @@
+{
+  "case-A 商业+创业（SaaS 法务工具，目标象限：右上）": [
+    {
+      "turn": 1,
+      "user_text_preview": "我们团队最近在做一款叫 LegalScan 的 AI 合同审查工具，目标用户是中小企业里的法务或行政岗。我们前期访谈了 14 家公司，其中 9 家明确告诉我们：…",
+      "logical_project_id": "P-1120230236-14",
+      "conversation_id": "f23af0a1-84ee-4af5-86ce-b13b91aeb4b3",
+      "track_vector": {
+        "innov_venture": 0.318,
+        "biz_public": 0.116
+      },
+      "project_stage_v2": "structured",
+      "overall_score": 6.27,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 8.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 5.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          2.2
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(6): Target User Segment, Problem Definition, Rubric: Evidence, Solution, Market Size | 未覆盖但子图要求(8): Business Model, Value Proposition, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42): Problem D…",
+      "ontology_coverage_ratio": 0.429,
+      "ontology_missing_count": 8,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "你们这个LegalScan的想法，基础打得非常扎实。从访谈14家公司、聚焦“没钱请律所但合同量大”这个痛点，到具体到“1小时完成4小时工作”的效率提升方案，逻辑是通顺的。能做到这一步，已经超过很多空想的项目了。  不过，你现在描述的这个方案，很像一个功能完备的“产品”，而不是一个用来验证核心假设的“项目”。这可能是目前最大的盲点。我们得把步子收回来一点，先别急着想Web端、30秒输出这些实现细节，而是聚焦在一个更根本的问题上：  > **如何用最小的代价，最快地证明“有人真的愿意为这个功能掏钱”？**  你看，你们访谈中一个最关键的发现是，9家公司说“*…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "project_diagnosis",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 100.3
+    },
+    {
+      "turn": 2,
+      "user_text_preview": "技术上我们用了百万级中文合同语料微调了一个 7B 模型，目前在自建测试集上 F1 = 0.87，在风险条款识别这一项上比 GPT-4 直接 prompt 高 6…",
+      "logical_project_id": "P-1120230236-14",
+      "conversation_id": "f23af0a1-84ee-4af5-86ce-b13b91aeb4b3",
+      "track_vector": {
+        "innov_venture": 0.036,
+        "biz_public": -0.113
+      },
+      "project_stage_v2": "structured",
+      "overall_score": 6.94,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 8.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H12",
+        "H26"
+      ],
+      "ability_subgraphs": [
+        [
+          "innovation_evaluation",
+          2.4
+        ],
+        [
+          "business_model_construction",
+          1.2
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(8): Execution Risk, Risk & Compliance, Competitive Moat, Rubric: Evidence, Solution | 未覆盖但子图要求(12): Positioning, Value Proposition, 挑战杯 科技创新含量, 挑战杯 调研严谨性, 互联网+ 商业模式创新 | 评分需要的证据/方法(42): Problem Definition, Target Us…",
+      "ontology_coverage_ratio": 0.4,
+      "ontology_missing_count": 12,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "你补充的技术数据和商业化进展，让整个项目从“一个想法”变得**非常扎实**。技术指标（F1=0.87，领先GPT-4 6%）和初步的付费意愿（3家试用，1家明确付费意向）是两块硬邦邦的基石，证明你们已经跨越了从0到0.5的初步验证。  你对自己的判断是“一个能稳定赚钱的工具型产品”，这个定位非常务实和清晰。从你描述的技术方案、定价和已有客户来看，这确实是一个典型的B2B SaaS项目逻辑，判断是准确的。  不过，现在项目正处在一个非常关键的**转折点**：从“技术验证/早期试用”转向“商业落地和规模化”。你提到的“数据闭环和行业知识图谱”作为护城河，是一…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "business_model",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 112.1
+    },
+    {
+      "turn": 3,
+      "user_text_preview": "获客渠道上我们打算分两步走：先做内容获客，在「智合」「无讼」这类法律垂类社群发布「常见合同 10 大坑」之类的实操干货，吸引法务关注；然后通过 LinkedIn…",
+      "logical_project_id": "P-1120230236-14",
+      "conversation_id": "f23af0a1-84ee-4af5-86ce-b13b91aeb4b3",
+      "track_vector": {
+        "innov_venture": 0.557,
+        "biz_public": -0.419
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 8.24,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 8.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 7.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 8.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H8",
+        "H12",
+        "H21",
+        "H26"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          5.4
+        ],
+        [
+          "simulated_roadshow",
+          2.2
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(13): CAC, Execution Risk, Competitive Moat, Milestone Roadmap, Acquisition Channel | 未覆盖但子图要求(14): Value Proposition, Target User Segment, Revenue Stream, Cost Structure, Growth Model | 评分需要的证据/方法(42): Problem Defi…",
+      "ontology_coverage_ratio": 0.481,
+      "ontology_missing_count": 14,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "听你讲完获客和财务计划，我感觉我们得停下来，好好审视一下你现在的状态。你有了扎实的技术指标（F1=0.87，领先GPT-4 6%），也有了初步的商业化框架（299/999元定价）和试用客户，这说明项目已经从“想法”走到了“产品成形”的阶段。但恰恰是这个阶段最危险，因为你会不自觉地用“产品经理”的思维去规划一切，把一个充满未知的商业冒险，包装成一个看似逻辑自洽、数字漂亮的商业计划书。  你现在最该担心的，不是技术，也不是产品功能，而是**整个商业模式建立在未经实证的假设之上**。你的CAC（600元）、LTV（8000元）、增长路径（内容→LinkedIn…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "project_diagnosis",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 195.7
+    },
+    {
+      "turn": 4,
+      "user_text_preview": "好的，那我把我们的财务模型说得更细一点你帮我看看合不合理：  收入端：基础版 299/月，假设按月付，平均生命周期 12 个月（订阅）；企业版 999/月，12…",
+      "logical_project_id": "P-1120230236-14",
+      "conversation_id": "f23af0a1-84ee-4af5-86ce-b13b91aeb4b3",
+      "track_vector": {
+        "innov_venture": 0.259,
+        "biz_public": -0.579
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 7.92,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 8.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H8",
+        "H12",
+        "H21"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          3.8
+        ],
+        [
+          "simulated_roadshow",
+          2.2
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(13): CAC, Risk & Compliance, Execution Risk, Growth Model, Milestone Roadmap | 未覆盖但子图要求(14): Value Proposition, Target User Segment, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42): Problem Def…",
+      "ontology_coverage_ratio": 0.481,
+      "ontology_missing_count": 14,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "你这次把财务模型摆出来，是个非常关键的进步。数字一出来，很多之前模糊的、感觉“差不多”的问题，就变得清晰可见了。我们不用纠结数字本身是299还是999，而是要看这些数字背后，你**凭什么**这样假设。  听你算完，我的第一感觉是：这个模型从公式上看是自洽的，但它的“生命线”非常脆弱，就系在一根未经任何验证的假设上。  我们先来看你问的第一个问题：**这个商业模型里，最容易被高估的假设是什么？**  不是定价，不是客户数，甚至不是CAC，而是你视为理所当然的 **“平均生命周期12个月”**。  你所有的计算，LTV=8000元、LTV/CAC≈13，乃至…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "business_model",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 191.3
+    },
+    {
+      "turn": 5,
+      "user_text_preview": "再问一个比较具体的：我们准备参加一些创新创业竞赛，但又有点犹豫——我们这个项目本质上是个「正经做生意」的 SaaS，不是那种特别炫酷的 deeptech 或者改…",
+      "logical_project_id": "P-1120230236-14",
+      "conversation_id": "f23af0a1-84ee-4af5-86ce-b13b91aeb4b3",
+      "track_vector": {
+        "innov_venture": 0.239,
+        "biz_public": -0.559
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 7.98,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H7",
+        "H8",
+        "H12",
+        "H21"
+      ],
+      "ability_subgraphs": [
+        [
+          "simulated_roadshow",
+          3.4
+        ],
+        [
+          "innovation_evaluation",
+          2.0
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(18): CAC, Execution Risk, Retention, Target User Segment, Growth Model | 未覆盖但子图要求(12): Rubric: Presentation, Rubric: Evidence, Rubric: Business Model, Rubric: Risk, 互联网+ Competition Rules | 评分需要的证据/方法(42): Problem …",
+      "ontology_coverage_ratio": 0.6,
+      "ontology_missing_count": 12,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "我先直接回答你最关心的问题：**务实SaaS项目在竞赛中恰恰是优势**。  你的犹豫我特别理解，很多做实事的团队都有这个顾虑，觉得评委是不是只喜欢听“改变世界”的故事。但根据我们看到的很多获奖案例，比如**京工智演**（解决大型演出编排效率问题）和**PushPlus**（解决排版自动化问题），评委，尤其是有产业和投资背景的评委，对那种只有宏大叙事、但商业逻辑一戳就破的“PPT项目”已经非常厌倦了。  他们真正渴望看到的，恰恰是你这种**用户-痛点-方案链条清晰，且有初步数据验证的商业逻辑**。一个能“正经做生意”的项目，其故事性不在于“炫酷”，而在于*…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "competition_prep",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 296.3
+    }
+  ],
+  "case-C 创业+公益（社会企业，乡村女性卫生，目标象限：右下）": [
+    {
+      "turn": 1,
+      "user_text_preview": "我们的项目叫 BlossomBox，目标人群是乡镇寄宿制中学的青春期女生。我们做了 6 所学校的入校调研（贵州、云南、甘肃各 2 所，覆盖约 1800 名女生）…",
+      "logical_project_id": "P-1120230236-15",
+      "conversation_id": "083855f0-f4e0-4abd-b583-f232cdedc5ca",
+      "track_vector": {
+        "innov_venture": 0.184,
+        "biz_public": -0.508
+      },
+      "project_stage_v2": "structured",
+      "overall_score": 5.9,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 5.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H4"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          3.0
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(9): Target User Segment, Problem Definition, Rubric: Evidence, Positioning, Solution | 未覆盖但子图要求(7): Value Proposition, Acquisition Channel, Revenue Stream, Cost Structure, Growth Model | 评分需要的证据/方法(42): Problem Def…",
+      "ontology_coverage_ratio": 0.562,
+      "ontology_missing_count": 7,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "看到你补充的财务模型，我注意到一个关键的思维跳跃。你刚才在谈 **BlossomBox** 这个公益项目，现在却直接切换到一个订阅制的 SaaS 模型，把学校作为客户。这让我有点困惑，因为这两个项目的**价值主张、客户和付费逻辑**完全不同。  > 收入端：基础版 299/月，企业版 999/月...  这听起来更像是一个为学校提供管理工具或服务的商业产品。而 BlossomBox 的核心是解决女生的经期物资和知识问题，它的“买方”是谁？是学校吗？学校为什么要为这个项目每月支付299元？是为了“提升健康管理效率”还是“履行社会责任”？这个价值点需要非常具…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "project_diagnosis",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 73.5
+    },
+    {
+      "turn": 2,
+      "user_text_preview": "运营方面我们目前是这么想的：  **物资端（免费/低价）**：和一家国产卫生巾品牌（已在谈）合作，按出厂价 + 公益折扣给我们供货，平均成本 ≈ 0.8 元/片…",
+      "logical_project_id": "P-1120230236-15",
+      "conversation_id": "083855f0-f4e0-4abd-b583-f232cdedc5ca",
+      "track_vector": {
+        "innov_venture": 0.119,
+        "biz_public": -0.006
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 7.0,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H3",
+        "H4"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          3.4
+        ],
+        [
+          "simulated_roadshow",
+          0.8
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(6): Risk & Compliance, Solution, Market Size, Financial Risk, Founding Team | 未覆盖但子图要求(15): Value Proposition, Target User Segment, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42): Problem Defi…",
+      "ontology_coverage_ratio": 0.286,
+      "ontology_missing_count": 15,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "你的运营思路很清晰，特别是“免费+超售低价”的设计，兼顾了可及性和可持续性的考量，这个平衡感很好。从你描述的细节来看，项目已经从“方向探索”进入了“项目成形”阶段，现在最关键的瓶颈，就是如何让这个精巧的混合资金模式真正转起来，而不是停在纸面上。  你问核心财务风险，我的判断是：**风险不在于模式复杂，而在于“收入的不确定”与“支出的刚性”之间存在致命的时间差。**  你的四项收入——政府专项、企业CSR、C端众筹、数据咨询——每一类都充满了“如果”：如果审批顺利、如果预算充足、如果流量爆发、如果数据有价值……但另一边，你承诺每月给女生提供20片卫生巾，这…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "business_model",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 128.5
+    },
+    {
+      "turn": 3,
+      "user_text_preview": "影响力侧我们规划了三层指标： 1. 输出（output）：覆盖学校数、覆盖女生数、发放卫生巾片数、教育课时数； 2. 成果（outcome）：女生「曾经使用替代…",
+      "logical_project_id": "P-1120230236-15",
+      "conversation_id": "083855f0-f4e0-4abd-b583-f232cdedc5ca",
+      "track_vector": {
+        "innov_venture": 0.266,
+        "biz_public": 0.275
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 8.14,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 8.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 7.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H3",
+        "H4",
+        "H11",
+        "H21",
+        "H25"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          4.0
+        ],
+        [
+          "simulated_roadshow",
+          1.4
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(7): Rubric: Evidence, Survey, Business Model, Solution, Market Size | 未覆盖但子图要求(14): Value Proposition, Target User Segment, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42): Problem Definition, …",
+      "ontology_coverage_ratio": 0.333,
+      "ontology_missing_count": 14,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "你这次补充的影响力和团队规划，让我觉得整个项目的骨架已经非常清晰了。三层指标（Output、Outcome、Impact）的递进逻辑，以及物资、数据、资金、团队的分工，都说明你已经从“想做个好事”的阶段，进入了“认真思考如何把事做成”的“项目成形”阶段。这是一个巨大的进步。  但正因为骨架清晰了，那些连接处的脆弱性才暴露得更彻底。你现在的感觉，就像一个建筑师画好了漂亮的效果图，但还没计算承重墙的受力。评委或任何严肃的资助方，不会只被效果图打动，他们会直接敲打你最薄弱的连接点。  你问的两个问题——**(a) 评委挑战点**和**(b) 如何讲清财务故事*…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "competition_prep",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 236.3
+    },
+    {
+      "turn": 4,
+      "user_text_preview": "我把财务模型展开一下，请你重点看是不是过于乐观或者结构上有问题：  假设第 12 个月稳定运营 20 所学校： - 物资成本：20 校 × 300 女生/校 ×…",
+      "logical_project_id": "P-1120230236-15",
+      "conversation_id": "083855f0-f4e0-4abd-b583-f232cdedc5ca",
+      "track_vector": {
+        "innov_venture": 0.205,
+        "biz_public": 0.106
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 7.7,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H3",
+        "H4",
+        "H11",
+        "H21",
+        "H25"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          5.8
+        ],
+        [
+          "simulated_roadshow",
+          0.8
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(7): Rubric: Evidence, Business Model, Solution, Market Size, Founding Team | 未覆盖但子图要求(14): Value Proposition, Target User Segment, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42): Problem Defin…",
+      "ontology_coverage_ratio": 0.333,
+      "ontology_missing_count": 14,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "看到你展开的财务模型，我感觉我们终于触及到了这个项目最核心、也最脆弱的神经。你问“是不是过于乐观或者结构上有问题”，我的直接感受是：**数字本身算得挺清楚，但支撑这些数字的整个地基，是建立在流沙之上的。** 你担心的CSR波动，就像一个房间的窗户漏风，但真正的问题是，这栋房子的承重墙设计错了。  我们来一层层拆解。  ### 一、核心诊断：价值与支付的“致命错配”  你的模型最根本的结构性问题，我称之为 **“价值与支付的致命错配”**。  你为**学校里的女生**（用户）创造了“免费/低价物资+教育”的核心价值。但为你付钱的**主要客户**，却是远在另…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "business_model",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 219.2
+    },
+    {
+      "turn": 5,
+      "user_text_preview": "最后我想跟你聊一下我们参赛和长期发展的策略： 我们打算同时报名「挑战杯」（公益赛道）和「互联网+」（公益创业赛道）。我了解到「挑战杯」更看重学术性 + 社会效益…",
+      "logical_project_id": "P-1120230236-15",
+      "conversation_id": "083855f0-f4e0-4abd-b583-f232cdedc5ca",
+      "track_vector": {
+        "innov_venture": 0.368,
+        "biz_public": 0.34
+      },
+      "project_stage_v2": "validated",
+      "overall_score": 7.7,
+      "rubric_top3": [
+        {
+          "item": "Problem Definition",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        },
+        {
+          "item": "User Evidence Strength",
+          "score": 6.0,
+          "weight": 0.15,
+          "evidence_chain_len": 5
+        },
+        {
+          "item": "Solution Feasibility",
+          "score": 7.0,
+          "weight": 0.1,
+          "evidence_chain_len": 4
+        }
+      ],
+      "triggered_rules": [
+        "H3",
+        "H4",
+        "H11",
+        "H21",
+        "H25"
+      ],
+      "ability_subgraphs": [
+        [
+          "business_model_construction",
+          5.2
+        ],
+        [
+          "simulated_roadshow",
+          0.8
+        ]
+      ],
+      "ontology_summary": "已覆盖概念(11): Competitive Moat, Rubric: Evidence, Milestone Roadmap, Business Plan, Business Model | 未覆盖但子图要求(14): Value Proposition, Target User Segment, Acquisition Channel, Revenue Stream, Cost Structure | 评分需要的证据/方法(42)…",
+      "ontology_coverage_ratio": 0.44,
+      "ontology_missing_count": 14,
+      "kg_hits": 0,
+      "hypergraph_size": [
+        0,
+        0
+      ],
+      "assistant_excerpt": "很高兴看到你已经从具体的运营、财务，开始思考整个项目的策略和叙事层面了。这通常是一个项目从“成形”走向“成熟”的关键一步。你提的这两个问题——参赛策略和商业模式——问得非常到位，因为它们恰恰指向了**你现在项目里最核心、也最纠结的那个矛盾**。  我先直接回答你的问题，然后我们再深入拆解这个矛盾到底是什么，以及它如何影响你的一切。  ### 一、针对两个比赛，应该突出什么？  你的理解基本正确，但我们可以再聚焦和深化一下。  **对于“挑战杯”（公益赛道）：** 你需要讲一个 **“社会问题驱动”** 的故事。评委想看到的是一个严谨的社会创新项目。你的叙…",
+      "agent_responses_preview": [],
+      "analysis_refresh": {
+        "intent": "competition_prep",
+        "carried": false,
+        "carried_reason": "",
+        "fresh_components": [
+          "diagnosis",
+          "track_vector",
+          "challenge_strategies",
+          "kg_analysis",
+          "rag_cases",
+          "ability_subgraphs",
+          "ontology_grounding"
+        ],
+        "carried_components": []
+      },
+      "latency_s": 227.0
+    }
+  ]
+}

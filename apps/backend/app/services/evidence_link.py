@@ -16,7 +16,9 @@ from typing import Any
 from app.services.storage import ConversationStorage
 
 
-_PUNCT_RE = re.compile(r"[\s，。！？、；：""''「」【】（）《》,.!?;:(){}\[\]\-\u3000]+")
+_PUNCT_RE = re.compile(
+    r'[\s，。！？、；：""\u2018\u2019「」【】（）《》,.!?;:(){}\[\]\-\u3000]+'
+)
 
 
 def _normalize(text: str) -> str:

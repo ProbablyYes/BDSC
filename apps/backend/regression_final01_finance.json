@@ -1,0 +1,1497 @@
+﻿[
+    {
+        "case":  "finance-subscription",
+        "plan_id":  "68806163",
+        "conversation_id":  "6e4b6dc8-fbf0-4f38-bb35-d6381cc55de6",
+        "logical_project_id":  "P-1120230236-10",
+        "turns":  [
+                      {
+                          "assistant":  "ä½ æåºäºä¸ä¸ªé¢åä¸­å°ä¼ä¸æ³å¡çååå®¡æ¥SaaSï¼å¹¶ç»åºäº299å\u0085å999å\u0085ä¸¤ä¸ªå®ä»·ãæ¹åå¾æç¡",
+                          "pid":  "P-1120230236-08",
+                          "score":  null,
+                          "stage":  "idea",
+                          "finance_auto_apply":  null
+                      },
+                      {
+                          "assistant":  "å¥½ï¼æä»¬æ¥çèãä½ è¿æ¬¡ç»åºäºè´¢å¡é¢æµï¼è¿å¾å¥½ï¼è¯´æä½ å¨æèé¡¹ç®çç»æµå¯è¡æ§ãä½è¯´",
+                          "pid":  "P-1120230236-10",
+                          "score":  6.17,
+                          "stage":  "structured",
+                          "finance_auto_apply":  null
+                      },
+                      {
+                          "assistant":  "ä½ ç»çæ°å­ææ¶å°äºãåºå®ææ¬æ¯æ9ä¸ï¼åå§èµé60ä¸ï¼è¿å¾å\u0085·ä½ï¼è¯´æä½ å¨è®¤çè®¡åãä½ ",
+                          "pid":  "P-1120230236-10",
+                          "score":  6.67,
+                          "stage":  "structured",
+                          "finance_auto_apply":  null
+                      }
+                  ],
+        "streams":  [
+
+                    ],
+        "summary":  {
+                        "project_cost_total":  0.0,
+                        "competition_cost_total":  0.0,
+                        "total_investment":  0.0,
+                        "baseline_monthly_revenue":  0.0,
+                        "baseline_annual_net":  0.0,
+                        "funding_gap":  0.0,
+                        "health_score":  54,
+                        "breakeven_fastest":  2,
+                        "breakeven_baseline":  2,
+                        "breakeven_slowest":  2
+                    },
+        "finance_persona":  {
+                                "module":  "finance_persona",
+                                "title":  "è´¢å¡ç»åï¼ææ¶å\u0085¥æ¨¡å¼ï¼",
+                                "inputs":  {
+                                               "stream_count":  0,
+                                               "is_public":  false,
+                                               "industry":  "SaaS"
+                                           },
+                                "outputs":  {
+                                                "persona_label":  "æªè¯å«",
+                                                "dominant_pattern":  null,
+                                                "dominant_kind":  null,
+                                                "kind_mix":  {
+
+                                                             },
+                                                "pattern_mix":  {
+
+                                                                },
+                                                "total_monthly_revenue":  0.0,
+                                                "stream_kpis":  [
+
+                                                                ]
+                                            },
+                                "verdict":  {
+                                                "level":  "gray",
+                                                "score":  0.3,
+                                                "reason":  "å°æªè¯å«å°æ¶å\u0085¥æµ, åç»­æ¨¡åå¯è½æ°æ®ä¸å\u0085¨"
+                                            },
+                                "framework_explain":  "**è´¢å¡ç»å**æ ¹æ®é¡¹ç®å½åçæ¶å\u0085¥æµæ¨¡å¼åå¸, ç»åºãå¢é¿å / B ç«¯ / å¹³å° / ç¡¬ä»¶ / å\u0085¬çãç­ç»åæ ç­¾, åç»­æ¨¡åçå\u0085¬å¼ä¸éå¼ä¼æ®æ­¤åæ¯ã",
+                                "suggestions":  [
+
+                                                ],
+                                "evidence_for_diagnosis":  {
+
+                                                           },
+                                "missing_inputs":  [
+
+                                                   ]
+                            },
+        "unit_economics":  {
+                               "module":  "unit_economics",
+                               "title":  "åä½ç»æµåæ",
+                               "inputs":  {
+                                              "monthly_price":  299.0,
+                                              "gross_margin":  0.78,
+                                              "monthly_retention":  0.88,
+                                              "cac":  180.0,
+                                              "industry":  "SaaS"
+                                          },
+                               "outputs":  {
+                                               "arpu":  299.0,
+                                               "gross_margin":  0.78,
+                                               "avg_lifetime_months":  8.3,
+                                               "ltv":  1943.5,
+                                               "cac":  180.0,
+                                               "ltv_cac_ratio":  10.8,
+                                               "payback_period_months":  0.8,
+                                               "ltv_cac_healthy":  3.0,
+                                               "ltv_cac_warning":  1.5,
+                                               "payback_healthy_months":  12.0,
+                                               "payback_warning_months":  18.0
+                                           },
+                               "verdict":  {
+                                               "level":  "green",
+                                               "score":  1.0,
+                                               "reason":  "LTV/CAC = 10.80 â¥ 3.0ï¼SaaSè¡ä¸åä½ç»æµå¥åº·ï¼Payback â 0.8 æ"
+                                           },
+                               "framework_explain":  "**åä½ç»æµä¸ä»¶å¥**ï¼\n- LTVï¼ç¨æ·ç»èº«ä»·å¼ï¼= æ ARPU Ã æ¯å©ç Ã å¹³åçå½å¨æææ°\n- CACï¼è·å®¢ææ¬ï¼= è·å®¢æå\u0085¥ / æ°å¢ä»è´¹ç¨æ·æ°\n- Paybackï¼åæ¬å¨æï¼= CAC / ææ¯å©\n\n**æ¬æ¬¡è¯åéå¼ï¼SaaSè¡ä¸ï¼**ï¼\n- LTV/CACï¼â¥ 3.0 ç»¿ï¼â¥ 1.5 é»ï¼å¦åçº¢\n- Paybackï¼â¤ 12 æç»¿ï¼â¤ 18 æé»ï¼å¦åçº¢\n\néç¨ VC é»è®¤å¼ï¼æç§ä¹¦ï¼ï¼LTV/CAC â¥ 3ãPayback â¤ 6 æãæ¬ç³»ç»æè¡ä¸å·®å¼åè°æ´ï¼å¦çµåæ¶ç´§å° Payback â¤ 3 æï¼SaaS æ¾å®½å° Payback â¤ 12 æã",
+                               "suggestions":  [
+                                                   "LTV/CAC å·²å¥åº·ï¼å¯å°è¯å å¤§è·å®¢æå\u0085¥æ©è§æ¨¡"
+                                               ],
+                               "missing_inputs":  [
+
+                                                  ],
+                               "evidence_for_diagnosis":  {
+                                                              "H8":  0.85,
+                                                              "H18":  0.6
+                                                          },
+                               "baseline_meta":  {
+                                                     "industry":  "SaaS",
+                                                     "source":  "seed",
+                                                     "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                     "evidence_count":  0,
+                                                     "never_refresh":  false,
+                                                     "bg_refresh_state":  "n/a",
+                                                     "bg_refresh_window_days":  30
+                                                 },
+                               "thresholds_used":  {
+                                                       "values":  {
+                                                                      "ltv_cac_healthy":  3.0,
+                                                                      "ltv_cac_warning":  1.5,
+                                                                      "payback_healthy_months":  12.0,
+                                                                      "payback_warning_months":  18.0,
+                                                                      "runway_red_months":  12.0,
+                                                                      "runway_warning_months":  18.0,
+                                                                      "breakeven_green_months":  24.0,
+                                                                      "breakeven_warning_months":  36.0,
+                                                                      "cpb_healthy_ratio":  1.0,
+                                                                      "cpb_warning_ratio":  1.5
+                                                                  },
+                                                       "source":  "seed_v2"
+                                                   }
+                           },
+        "cash_flow":  {
+                          "module":  "cash_flow",
+                          "title":  "ç°éæµæ¨æ¼ä¸ Runway",
+                          "inputs":  {
+                                         "initial_capital":  50000.0,
+                                         "fixed_costs_monthly":  0.0,
+                                         "variable_cost_per_user":  0.0,
+                                         "monthly_price":  299.0,
+                                         "new_users_per_month":  0.0,
+                                         "monthly_retention":  0.88,
+                                         "growth_rate_monthly":  0.1,
+                                         "streams_baseline_revenue":  null,
+                                         "stream_count":  0
+                                     },
+                          "outputs":  {
+                                          "months_simulated":  36,
+                                          "breakeven_month":  null,
+                                          "runway_exhausted_month":  null,
+                                          "avg_burn_rate_first6":  0.0,
+                                          "runway_months":  null,
+                                          "end_cash":  50000.0,
+                                          "projection":  [
+                                                             {
+                                                                 "month":  1,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  2,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  3,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  4,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  5,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  6,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  7,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  8,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  9,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  10,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  11,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  12,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  13,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  14,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  15,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  16,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  17,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  18,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  19,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  20,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  21,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  22,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  23,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  24,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  25,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  26,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  27,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  28,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  29,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  30,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  31,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  32,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  33,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  34,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  35,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             },
+                                                             {
+                                                                 "month":  36,
+                                                                 "paying_users":  0.0,
+                                                                 "revenue":  0.0,
+                                                                 "cost":  0.0,
+                                                                 "net":  0.0,
+                                                                 "cash":  50000.0
+                                                             }
+                                                         ],
+                                          "peak_paying_users":  0.0,
+                                          "total_revenue_36m":  0.0,
+                                          "runway_red_months":  12.0,
+                                          "runway_warning_months":  18.0,
+                                          "breakeven_green_months":  24.0,
+                                          "breakeven_warning_months":  36.0
+                                      },
+                          "verdict":  {
+                                          "level":  "yellow",
+                                          "score":  0.55,
+                                          "reason":  "36 ä¸ªæå\u0085æªå®ç°åæåç°éè½¬æ­£ï¼æ«æç°é Â¥50000ï¼SaaSè¡ä¸ç»¿çº¿ â¤ 24 æï¼"
+                                      },
+                          "framework_explain":  "**ç°éæµæ¨æ¼ 36 ææ¨¡å**ï¼éæè®¡ç®ä»è´¹å­é = ä¸æå­é Ã çå­ç + æ°å¢ï¼\nMRR = ä»è´¹å­é Ã ARPUï¼ææ¬ = åºå® + åå¨Ãä»è´¹æ°ï¼åç°é = MRR - ææ¬ï¼ç´¯è®¡ç°é = ä¸æç´¯è®¡ + åã\n\n**æ¬æ¬¡è¯åéå¼ï¼SaaSè¡ä¸ï¼**ï¼\n- Runwayï¼ç°éèå°½ â¤ 12 æ â çº¢ï¼â¤ 18 æ â é»\n- çäºå¹³è¡¡ï¼è½¬æ­£ â¤ 24 æ â ç»¿ï¼â¤ 36 æ â é»ï¼å¦åçº¢\n\néç¨ VC é»è®¤å¼ï¼Runway \u003c 12 æçº¢ã\u003c 18 æé»ï¼Breakeven â¤ 18 æç»¿ãâ¤ 24 æé»ãæ¬ç³»ç»æè¡ä¸å·®å¼åè°æ´ï¼çµåçº¢çº¿æ¶ç´§å° 6 æï¼SaaS Breakeven æ¾å®½å° 24 æã",
+                          "suggestions":  [
+                                              "çäºå¹³è¡¡è¶\u0085è¿è¡ä¸çº¢çº¿ 36 æï¼è¯ä¼°æ¯å¦æä»· / å¢å ä»è´¹è½¬åç / éä½åå¨ææ¬",
+                                              "åæææ§åæï¼ä»·æ ¼ +10% / çå­ +5pp / CAC -20% ä¸ç§åºæ¯ä¸ç Runway å¯¹æ¯"
+                                          ],
+                          "missing_inputs":  [
+                                                 {
+                                                     "field":  "fixed_costs_monthly",
+                                                     "hint":  "æåºå®ææ¬ï¼æå¡å¨/æ¿ç§/å·¥èµï¼",
+                                                     "target_tab":  "cost"
+                                                 }
+                                             ],
+                          "evidence_for_diagnosis":  {
+                                                         "H24":  0.3
+                                                     },
+                          "baseline_meta":  {
+                                                "industry":  "SaaS",
+                                                "source":  "seed",
+                                                "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                "evidence_count":  0,
+                                                "never_refresh":  false,
+                                                "bg_refresh_state":  "n/a",
+                                                "bg_refresh_window_days":  30
+                                            },
+                          "thresholds_used":  {
+                                                  "values":  {
+                                                                 "ltv_cac_healthy":  3.0,
+                                                                 "ltv_cac_warning":  1.5,
+                                                                 "payback_healthy_months":  12.0,
+                                                                 "payback_warning_months":  18.0,
+                                                                 "runway_red_months":  12.0,
+                                                                 "runway_warning_months":  18.0,
+                                                                 "breakeven_green_months":  24.0,
+                                                                 "breakeven_warning_months":  36.0,
+                                                                 "cpb_healthy_ratio":  1.0,
+                                                                 "cpb_warning_ratio":  1.5
+                                                             },
+                                                  "source":  "seed_v2"
+                                              }
+                      },
+        "rationality":  {
+                            "module":  "rationality",
+                            "title":  "è´¢å¡åè®¾åçæ§",
+                            "inputs":  {
+                                           "industry":  "SaaS",
+                                           "monthly_price":  299.0,
+                                           "monthly_retention":  0.88,
+                                           "gross_margin":  0.78,
+                                           "cac":  180.0
+                                       },
+                            "outputs":  {
+                                            "checks":  [
+                                                           {
+                                                               "field":  "monthly_price",
+                                                               "value":  299.0,
+                                                               "range":  [
+                                                                             99,
+                                                                             999
+                                                                         ],
+                                                               "level":  "green",
+                                                               "note":  "æä»· 299.0 è½å¨è¡ä¸åºé´ [99, 999]"
+                                                           },
+                                                           {
+                                                               "field":  "cac",
+                                                               "value":  180.0,
+                                                               "range":  [
+                                                                             200,
+                                                                             1500
+                                                                         ],
+                                                               "level":  "green",
+                                                               "note":  "CAC 180.0 ä½äºè¡ä¸åºé´ [200, 1500]ââè¥çå®å¯è¾¾åæ¯ç«äºä¼å¿ï¼å»ºè®®ç¨æ¸ éææ¬æ ¸ç®å¤æ ¸ä¸æ¬¡"
+                                                           },
+                                                           {
+                                                               "field":  "monthly_retention",
+                                                               "value":  0.88,
+                                                               "range":  [
+                                                                             0.85,
+                                                                             0.97
+                                                                         ],
+                                                               "level":  "green",
+                                                               "note":  "æçå­ç 0.88 è½å¨è¡ä¸åºé´ [0.85, 0.97]"
+                                                           },
+                                                           {
+                                                               "field":  "gross_margin",
+                                                               "value":  0.78,
+                                                               "range":  [
+                                                                             0.7,
+                                                                             0.85
+                                                                         ],
+                                                               "level":  "green",
+                                                               "note":  "æ¯å©ç 0.78 è½å¨è¡ä¸åºé´ [0.7, 0.85]"
+                                                           }
+                                                       ],
+                                            "industry_note":  "SaaS å\u0085³é®çåæ¶å\u0085¥çå­ï¼NRRï¼ååæ¬å¨æ",
+                                            "baseline":  {
+                                                             "cac_range":  [
+                                                                               200,
+                                                                               1500
+                                                                           ],
+                                                             "monthly_price_range":  [
+                                                                                         99,
+                                                                                         999
+                                                                                     ],
+                                                             "monthly_retention":  [
+                                                                                       0.85,
+                                                                                       0.97
+                                                                                   ],
+                                                             "gross_margin":  [
+                                                                                  0.7,
+                                                                                  0.85
+                                                                              ]
+                                                         }
+                                        },
+                            "verdict":  {
+                                            "level":  "green",
+                                            "score":  0.9,
+                                            "reason":  "4 é¡¹åè®¾åè½å¨è¡ä¸åºé´å\u0085"
+                                        },
+                            "framework_explain":  "**è¡ä¸åºåå¯¹æ¯**ï¼SaaSï¼ï¼ç¨å¤´é¨é¡¹ç®çä¸­ä½åºé´åéï¼å¤æ­ä½ çåè®¾æ¯å¦å¨åè¡åçèå´ã\n- æä»· [[99, 999]]\n- CAC [[200, 1500]]\n- æçå­ [[0.85, 0.97]]\n- æ¯å©ç [[0.7, 0.85]]\n\nSaaS å\u0085³é®çåæ¶å\u0085¥çå­ï¼NRRï¼ååæ¬å¨æ",
+                            "suggestions":  [
+                                                "è´¢å¡åè®¾æ´ä½åçï¼å»ºè®®è¿å\u0085¥ä¸ä¸æ­¥ï¼æ\u0085æ¯åæ + æææ§æ«æ"
+                                            ],
+                            "missing_inputs":  [
+
+                                               ],
+                            "evidence_for_diagnosis":  {
+                                                           "H3":  0.8,
+                                                           "H26":  0.7
+                                                       },
+                            "baseline_meta":  {
+                                                  "industry":  "SaaS",
+                                                  "source":  "seed",
+                                                  "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                  "evidence_count":  0,
+                                                  "never_refresh":  false,
+                                                  "bg_refresh_state":  "n/a",
+                                                  "bg_refresh_window_days":  30
+                                              },
+                            "thresholds_used":  {
+                                                    "values":  {
+                                                                   "ltv_cac_healthy":  3.0,
+                                                                   "ltv_cac_warning":  1.5,
+                                                                   "payback_healthy_months":  12.0,
+                                                                   "payback_warning_months":  18.0,
+                                                                   "runway_red_months":  12.0,
+                                                                   "runway_warning_months":  18.0,
+                                                                   "breakeven_green_months":  24.0,
+                                                                   "breakeven_warning_months":  36.0,
+                                                                   "cpb_healthy_ratio":  1.0,
+                                                                   "cpb_warning_ratio":  1.5
+                                                               },
+                                                    "source":  "seed_v2"
+                                                }
+                        }
+    },
+    {
+        "case":  "finance-b2b",
+        "plan_id":  "30acdcdb",
+        "conversation_id":  "269f113e-4378-413b-a022-33766a1b63e4",
+        "logical_project_id":  "P-1120230236-12",
+        "turns":  [
+                      {
+                          "assistant":  "ä½ è¿é¡¹ç®æè·¯å\u0085¶å®æºæ¸\u0085æ°çï¼Bç«¯ãå­¦æ ¡ãé¡¹ç®å¶ï¼è¿å ä¸ªç¹æå¾æºåãå°¤å\u0085¶æ¯å¨å±ä»¬è¿ä¸ªç",
+                          "pid":  "P-1120230236-12",
+                          "score":  null,
+                          "stage":  "idea",
+                          "finance_auto_apply":  null
+                      },
+                      {
+                          "assistant":  "**å½åä¸»è¦ç­æ¿ä¸º H5ï¼éæ±è¯æ®ä¸è¶³ï¼ï¼éè¦å\u0085è¡¥è¯æ®ã**  \u003e ä¸ä¸æ­¥ï¼ç¨ä¸ç§æä½ææ¬çæ¹æ",
+                          "pid":  "P-1120230236-12",
+                          "score":  4.63,
+                          "stage":  "idea",
+                          "finance_auto_apply":  {
+                                                     "signals":  {
+                                                                     "primary_pattern":  "project_b2b",
+                                                                     "primary_pattern_label":  "B ç«¯é¡¹ç®å¶ / æå¡éè´­",
+                                                                     "summary":  "è¯å«å°ãB ç«¯é¡¹ç®å¶ / æå¡éè´­ã: ææ°ç­¾ååæ°=1ä»½/æãæå¡å¨æ=12æ",
+                                                                     "candidate_patterns":  [
+                                                                                                [
+                                                                                                    "project_b2b",
+                                                                                                    1
+                                                                                                ]
+                                                                                            ],
+                                                                     "pattern_inputs":  {
+                                                                                            "project_b2b":  {
+                                                                                                                "contracts_per_month":  {
+                                                                                                                                            "value":  1.0,
+                                                                                                                                            "raw":  "ææ°ç­¾ 1",
+                                                                                                                                            "confidence":  0.85,
+                                                                                                                                            "range_status":  "in_range",
+                                                                                                                                            "range":  {
+                                                                                                                                                          "low":  0.2,
+                                                                                                                                                          "median":  1.0,
+                                                                                                                                                          "high":  4.0,
+                                                                                                                                                          "unit":  "ä»½/æ",
+                                                                                                                                                          "note":  "æ©æé¡¹ç®å¶å\u0085¬å¸"
+                                                                                                                                                      }
+                                                                                                                                        },
+                                                                                                                "contract_duration_months":  {
+                                                                                                                                                 "value":  12.0,
+                                                                                                                                                 "raw":  "æå¡å¨æ 12 ä¸ªæ",
+                                                                                                                                                 "confidence":  0.85,
+                                                                                                                                                 "range_status":  "in_range",
+                                                                                                                                                 "range":  {
+                                                                                                                                                               "low":  3,
+                                                                                                                                                               "median":  6,
+                                                                                                                                                               "high":  24,
+                                                                                                                                                               "unit":  "æ",
+                                                                                                                                                               "note":  ""
+                                                                                                                                                           }
+                                                                                                                                             }
+                                                                                                            }
+                                                                                        },
+                                                                     "kind":  "enterprise"
+                                                                 },
+                                                     "applied":  [
+                                                                     {
+                                                                         "stream_index":  0,
+                                                                         "pattern":  "project_b2b",
+                                                                         "field":  "contracts_per_month",
+                                                                         "old":  null,
+                                                                         "new":  1.0
+                                                                     },
+                                                                     {
+                                                                         "stream_index":  0,
+                                                                         "pattern":  "project_b2b",
+                                                                         "field":  "contract_duration_months",
+                                                                         "old":  null,
+                                                                         "new":  12.0
+                                                                     }
+                                                                 ],
+                                                     "skipped":  [
+
+                                                                 ],
+                                                     "stream_added":  true,
+                                                     "plan_id":  "30acdcdb"
+                                                 }
+                      },
+                      {
+                          "assistant":  "ä¸æ¬¡æä»¬èå°ï¼ä½ çé¡¹ç®æè·¯å¾æ¸\u0085æ°ï¼ä½æ ¸å¿çé£é©å¨äº**éæ±è¯æ®ä¸è¶³**ãä»å¤©ä½ è¡¥å\u0085\u0085äºå\u0085",
+                          "pid":  "P-1120230236-12",
+                          "score":  6.88,
+                          "stage":  "structured",
+                          "finance_auto_apply":  null
+                      }
+                  ],
+        "streams":  [
+                        {
+                            "name":  "B ç«¯é¡¹ç®å¶ / æå¡éè´­ï¼AI èªå¨å»ºç«ï¼",
+                            "pattern_key":  "project_b2b",
+                            "inputs":  {
+                                           "contracts_per_month":  1.0,
+                                           "contract_duration_months":  12.0
+                                       },
+                            "monthly_revenue":  0.0,
+                            "_ai_meta":  {
+                                             "ai_created":  true,
+                                             "source":  "msg:269f113e-4378-413b-a022-33766a1b63e4#2",
+                                             "ts":  1776972497.1301641,
+                                             "fields":  {
+                                                            "contracts_per_month":  {
+                                                                                        "ai_filled":  true,
+                                                                                        "value":  1.0,
+                                                                                        "prev_value":  null,
+                                                                                        "raw":  "ææ°ç­¾ 1",
+                                                                                        "range_status":  "in_range",
+                                                                                        "source":  "msg:269f113e-4378-413b-a022-33766a1b63e4#2",
+                                                                                        "ts":  1776972497.1301641,
+                                                                                        "confidence":  0.85
+                                                                                    },
+                                                            "contract_duration_months":  {
+                                                                                             "ai_filled":  true,
+                                                                                             "value":  12.0,
+                                                                                             "prev_value":  null,
+                                                                                             "raw":  "æå¡å¨æ 12 ä¸ªæ",
+                                                                                             "range_status":  "in_range",
+                                                                                             "source":  "msg:269f113e-4378-413b-a022-33766a1b63e4#2",
+                                                                                             "ts":  1776972497.1301641,
+                                                                                             "confidence":  0.85
+                                                                                         }
+                                                        }
+                                         },
+                            "active_units":  12.0
+                        }
+                    ],
+        "summary":  {
+                        "project_cost_total":  0.0,
+                        "competition_cost_total":  0.0,
+                        "total_investment":  0.0,
+                        "baseline_monthly_revenue":  0.0,
+                        "baseline_annual_net":  0.0,
+                        "funding_gap":  0.0,
+                        "health_score":  54,
+                        "breakeven_fastest":  2,
+                        "breakeven_baseline":  2,
+                        "breakeven_slowest":  2
+                    },
+        "finance_persona":  {
+                                "module":  "finance_persona",
+                                "title":  "è´¢å¡ç»åï¼ææ¶å\u0085¥æ¨¡å¼ï¼",
+                                "inputs":  {
+                                               "stream_count":  1,
+                                               "is_public":  false,
+                                               "industry":  "æè²"
+                                           },
+                                "outputs":  {
+                                                "persona_label":  "B ç«¯é¡¹ç®å¶ / ä¼ä¸æå¡",
+                                                "dominant_pattern":  "project_b2b",
+                                                "dominant_kind":  "enterprise",
+                                                "kind_mix":  {
+                                                                 "enterprise":  1.0
+                                                             },
+                                                "pattern_mix":  {
+                                                                    "project_b2b":  1.0
+                                                                },
+                                                "total_monthly_revenue":  1.0,
+                                                "stream_kpis":  [
+                                                                    {
+                                                                        "name":  "B ç«¯é¡¹ç®å¶ / æå¡éè´­ï¼AI èªå¨å»ºç«ï¼",
+                                                                        "pattern_key":  "project_b2b",
+                                                                        "kind":  "enterprise",
+                                                                        "monthly_revenue":  0.0,
+                                                                        "primary_kpi":  null,
+                                                                        "health":  "gray",
+                                                                        "reason":  "ç¼ºå°åååéé¢"
+                                                                    }
+                                                                ]
+                                            },
+                                "verdict":  {
+                                                "level":  "green",
+                                                "score":  0.7,
+                                                "reason":  "è¯å«ä¸ºãB ç«¯é¡¹ç®å¶ / ä¼ä¸æå¡ã, å\u0085± 1 æ¡æ¶å\u0085¥æµ, æè¥æ¶ Â¥1"
+                                            },
+                                "framework_explain":  "**è´¢å¡ç»å**æ ¹æ®é¡¹ç®å½åçæ¶å\u0085¥æµæ¨¡å¼åå¸, ç»åºãå¢é¿å / B ç«¯ / å¹³å° / ç¡¬ä»¶ / å\u0085¬çãç­ç»åæ ç­¾, åç»­æ¨¡åçå\u0085¬å¼ä¸éå¼ä¼æ®æ­¤åæ¯ã",
+                                "suggestions":  [
+
+                                                ],
+                                "evidence_for_diagnosis":  {
+
+                                                           },
+                                "missing_inputs":  [
+
+                                                   ]
+                            },
+        "unit_economics":  {
+                               "module":  "unit_economics",
+                               "title":  "åä½ç»æµåæï¼ææ¶å\u0085¥æ¨¡å¼åæ¯ï¼",
+                               "inputs":  {
+                                              "industry":  "æè²",
+                                              "stream_count":  1,
+                                              "is_public_project":  false,
+                                              "dominant_pattern":  "project_b2b",
+                                              "dominant_kind":  "enterprise",
+                                              "kind_mix":  {
+                                                               "enterprise":  1.0
+                                                           },
+                                              "pattern_mix":  {
+                                                                  "project_b2b":  1.0
+                                                              }
+                                          },
+                               "outputs":  {
+                                               "per_stream":  [
+                                                                  {
+                                                                      "applicable":  false,
+                                                                      "metrics":  {
+
+                                                                                  },
+                                                                      "health":  "gray",
+                                                                      "reason":  "ç¼ºå°åååéé¢",
+                                                                      "missing":  [
+
+                                                                                  ],
+                                                                      "pattern_key":  "project_b2b",
+                                                                      "pattern_label":  "B ç«¯é¡¹ç®å¶ / æå¡éè´­",
+                                                                      "kind":  "enterprise",
+                                                                      "weight":  0.0,
+                                                                      "stream_name":  "B ç«¯é¡¹ç®å¶ / æå¡éè´­ï¼AI èªå¨å»ºç«ï¼"
+                                                                  }
+                                                              ],
+                                               "total_monthly_revenue":  0.0,
+                                               "weighted_health_score":  0.5
+                                           },
+                               "verdict":  {
+                                               "level":  "yellow",
+                                               "score":  0.5,
+                                               "reason":  "[B ç«¯é¡¹ç®å¶ / æå¡éè´­] =None Â· gray"
+                                           },
+                               "framework_explain":  "**åä½ç»æµ(ææ¶å\u0085¥æ¨¡å¼åæ¯)**ï¼æ¬é¡¹ç®è¯å«å° 1 æ¡æ¶å\u0085¥æµ, ä¸»å¯¼æ¨¡å¼ project_b2b(enterprise å¤§ç±»)ã\n\n- è®¢é\u0085å: LTV = ææ¯å© Ã çå­çå½æ, ç LTV/CAC â¥ 3\n- äº¤æå: ç Payback = CAC / æäººåæ¯å©, çµå â¤ 3 æ\n- é¡¹ç®å¶ B2B: ç ARR + ç»­çº¦ç, ç»­çº¦ â¥ 70% å¥åº·\n- å¹³å°æ½ä½£: ç Take rate ä¸åå®¶ ARPU, 3-15% åºé´å¥åº·\n- ç¡¬ä»¶: çåä½æ¯å©ç, â¥ 30% æè½æå®å\n- å\u0085¬ç: ç CPB ä¸èµå©ç»­æç, ä¸å¼ºæ± LTV/CAC",
+                               "suggestions":  [
+
+                                               ],
+                               "missing_inputs":  [
+
+                                                  ],
+                               "evidence_for_diagnosis":  {
+                                                              "H8":  0.55
+                                                          },
+                               "baseline_meta":  {
+                                                     "industry":  "æè²",
+                                                     "source":  "seed",
+                                                     "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                     "evidence_count":  0,
+                                                     "never_refresh":  false,
+                                                     "bg_refresh_state":  "n/a",
+                                                     "bg_refresh_window_days":  30
+                                                 },
+                               "thresholds_used":  {
+                                                       "values":  {
+                                                                      "ltv_cac_healthy":  3.0,
+                                                                      "ltv_cac_warning":  1.5,
+                                                                      "payback_healthy_months":  9.0,
+                                                                      "payback_warning_months":  15.0,
+                                                                      "runway_red_months":  9.0,
+                                                                      "runway_warning_months":  15.0,
+                                                                      "breakeven_green_months":  18.0,
+                                                                      "breakeven_warning_months":  24.0,
+                                                                      "cpb_healthy_ratio":  1.0,
+                                                                      "cpb_warning_ratio":  1.5
+                                                                  },
+                                                       "source":  "seed_v2"
+                                                   }
+                           },
+        "cash_flow":  {
+                          "module":  "cash_flow",
+                          "title":  "ç°éæµæ¨æ¼ä¸ Runway",
+                          "inputs":  {
+                                         "initial_capital":  50000.0,
+                                         "fixed_costs_monthly":  0.0,
+                                         "variable_cost_per_user":  0.0,
+                                         "monthly_price":  0.0,
+                                         "new_users_per_month":  12.0,
+                                         "monthly_retention":  0.0,
+                                         "growth_rate_monthly":  0.1,
+                                         "streams_baseline_revenue":  null,
+                                         "stream_count":  1
+                                     },
+                          "outputs":  {
+
+                                      },
+                          "verdict":  {
+                                          "level":  "gray",
+                                          "score":  0.0,
+                                          "reason":  "ç¼ºå°æåºå®ææ¬æå®ä»·/æ¶å\u0085¥æµï¼æ æ³æ¨¡æç°éæµ"
+                                      },
+                          "framework_explain":  "**ç°éæµæ¨æ¼**ä¸è¬ç¨ 36 ä¸ªæ Excel æ¨¡åï¼éææ¨¡æä»è´¹ç¨æ·å­éãMRRãææ¬ãåç°éåç´¯è®¡ç°éã**Runwayï¼å©ä½è·éï¼** = å½åç°é / å¹³åæç§é±çï¼æ¯æèµäººå¤æ­ä¸ä¸è½®ç´§è¿«åº¦çæ ¸å¿ææ ã",
+                          "suggestions":  [
+
+                                          ],
+                          "missing_inputs":  [
+                                                 {
+                                                     "field":  "fixed_costs_monthly",
+                                                     "hint":  "æåºå®ææ¬ï¼æå¡å¨/æ¿ç§/å·¥èµï¼",
+                                                     "target_tab":  "cost"
+                                                 },
+                                                 {
+                                                     "field":  "monthly_price",
+                                                     "hint":  "æååä»·",
+                                                     "target_tab":  "biz"
+                                                 }
+                                             ],
+                          "evidence_for_diagnosis":  {
+
+                                                     },
+                          "baseline_meta":  {
+                                                "industry":  "æè²",
+                                                "source":  "seed",
+                                                "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                "evidence_count":  0,
+                                                "never_refresh":  false,
+                                                "bg_refresh_state":  "n/a",
+                                                "bg_refresh_window_days":  30
+                                            },
+                          "thresholds_used":  {
+                                                  "values":  {
+                                                                 "ltv_cac_healthy":  3.0,
+                                                                 "ltv_cac_warning":  1.5,
+                                                                 "payback_healthy_months":  9.0,
+                                                                 "payback_warning_months":  15.0,
+                                                                 "runway_red_months":  9.0,
+                                                                 "runway_warning_months":  15.0,
+                                                                 "breakeven_green_months":  18.0,
+                                                                 "breakeven_warning_months":  24.0,
+                                                                 "cpb_healthy_ratio":  1.0,
+                                                                 "cpb_warning_ratio":  1.5
+                                                             },
+                                                  "source":  "seed_v2"
+                                              }
+                      },
+        "rationality":  {
+                            "module":  "rationality",
+                            "title":  "è´¢å¡åè®¾åçæ§",
+                            "inputs":  {
+                                           "industry":  "æè²",
+                                           "gross_margin":  0.52
+                                       },
+                            "outputs":  {
+                                            "checks":  [
+                                                           {
+                                                               "field":  "gross_margin",
+                                                               "value":  0.52,
+                                                               "range":  [
+                                                                             0.6,
+                                                                             0.85
+                                                                         ],
+                                                               "level":  "yellow",
+                                                               "note":  "æ¯å©ç 0.52 ç¥ä½äºè¡ä¸åºé´ [0.6, 0.85]"
+                                                           }
+                                                       ],
+                                            "industry_note":  "æè²ç±»çéçå­ä¸ç»­è´¹ï¼CAC å¯¹ä»·æ ¼ææåº¦é«",
+                                            "baseline":  {
+                                                             "cac_range":  [
+                                                                               30,
+                                                                               120
+                                                                           ],
+                                                             "monthly_price_range":  [
+                                                                                         29,
+                                                                                         99
+                                                                                     ],
+                                                             "monthly_retention":  [
+                                                                                       0.7,
+                                                                                       0.9
+                                                                                   ],
+                                                             "gross_margin":  [
+                                                                                  0.6,
+                                                                                  0.85
+                                                                              ]
+                                                         }
+                                        },
+                            "verdict":  {
+                                            "level":  "yellow",
+                                            "score":  0.55,
+                                            "reason":  "æ¯å©ç 0.52 ç¥ä½äºè¡ä¸åºé´ [0.6, 0.85]"
+                                        },
+                            "framework_explain":  "**è¡ä¸åºåå¯¹æ¯**ï¼æè²ï¼ï¼ç¨å¤´é¨é¡¹ç®çä¸­ä½åºé´åéï¼å¤æ­ä½ çåè®¾æ¯å¦å¨åè¡åçèå´ã\n- æä»· [[29, 99]]\n- CAC [[30, 120]]\n- æçå­ [[0.7, 0.9]]\n- æ¯å©ç [[0.6, 0.85]]\n\næè²ç±»çéçå­ä¸ç»­è´¹ï¼CAC å¯¹ä»·æ ¼ææåº¦é«",
+                            "suggestions":  [
+                                                "æ¯å©ç 0.52 ç¥ä½äºè¡ä¸åºé´ [0.6, 0.85]ââå¯éè¿ A/B æµè¯æç«åæ½æ ·è¿ä¸æ­¥éªè¯"
+                                            ],
+                            "missing_inputs":  [
+
+                                               ],
+                            "evidence_for_diagnosis":  {
+                                                           "H3":  0.8,
+                                                           "H26":  0.7
+                                                       },
+                            "baseline_meta":  {
+                                                  "industry":  "æè²",
+                                                  "source":  "seed",
+                                                  "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                  "evidence_count":  0,
+                                                  "never_refresh":  false,
+                                                  "bg_refresh_state":  "n/a",
+                                                  "bg_refresh_window_days":  30
+                                              },
+                            "thresholds_used":  {
+                                                    "values":  {
+                                                                   "ltv_cac_healthy":  3.0,
+                                                                   "ltv_cac_warning":  1.5,
+                                                                   "payback_healthy_months":  9.0,
+                                                                   "payback_warning_months":  15.0,
+                                                                   "runway_red_months":  9.0,
+                                                                   "runway_warning_months":  15.0,
+                                                                   "breakeven_green_months":  18.0,
+                                                                   "breakeven_warning_months":  24.0,
+                                                                   "cpb_healthy_ratio":  1.0,
+                                                                   "cpb_warning_ratio":  1.5
+                                                               },
+                                                    "source":  "seed_v2"
+                                                }
+                        }
+    },
+    {
+        "case":  "finance-public",
+        "plan_id":  "1be4b94d",
+        "conversation_id":  "8df1218c-a5f7-4843-87f4-1cf4aec621f3",
+        "logical_project_id":  "P-1120230236-13",
+        "turns":  [
+                      {
+                          "assistant":  "ä½ çé¡¹ç®æ¹åâââé¢åç¬å±\u0085èäººçå¤é´å¥åº·çæµå\u0085¬çé¡¹ç®âââåºåç¹éå¸¸å¥½ï¼å\u0085\u0085æ»¡äºç¤¾",
+                          "pid":  "P-1120230236-13",
+                          "score":  null,
+                          "stage":  "idea",
+                          "finance_auto_apply":  null
+                      },
+                      {
+                          "assistant":  "ä½ åææå°äºâ5ä¸ªé¡¹ç®ï¼åä¸ªé¡¹ç®å¹´åº¦éé¢20ä¸ï¼ç»­æç70%ï¼æ¯ææå¡åçäºº800äººâãè¿ç»",
+                          "pid":  "P-1120230236-13",
+                          "score":  4.26,
+                          "stage":  "idea",
+                          "finance_auto_apply":  {
+                                                     "signals":  {
+                                                                     "primary_pattern":  "grant_funded",
+                                                                     "primary_pattern_label":  "å\u0085¬ç Â· æ¿åº/åºéèµå©",
+                                                                     "summary":  "è¯å«å°ãå\u0085¬ç Â· æ¿åº/åºéèµå©ã: åé¡¹ç®å¹´åº¦éé¢=200,000å\u0085/å¹´ãå¹´åº¦ç»­ææ¦ç=70.0%ãæè§¦è¾¾åçäººæ°=800äºº/æ",
+                                                                     "candidate_patterns":  [
+                                                                                                [
+                                                                                                    "grant_funded",
+                                                                                                    2
+                                                                                                ]
+                                                                                            ],
+                                                                     "pattern_inputs":  {
+                                                                                            "grant_funded":  {
+                                                                                                                 "grant_value_yearly":  {
+                                                                                                                                            "value":  200000.0,
+                                                                                                                                            "raw":  "åä¸ªé¡¹ç®å¹´åº¦éé¢ 20 ä¸",
+                                                                                                                                            "confidence":  0.85,
+                                                                                                                                            "range_status":  "in_range",
+                                                                                                                                            "range":  {
+                                                                                                                                                          "low":  30000,
+                                                                                                                                                          "median":  200000,
+                                                                                                                                                          "high":  2000000,
+                                                                                                                                                          "unit":  "å\u0085/å¹´",
+                                                                                                                                                          "note":  "æ ¡å­ / ä¸­åå\u0085¬çåç¬"
+                                                                                                                                                      }
+                                                                                                                                        },
+                                                                                                                 "renewal_rate":  {
+                                                                                                                                      "value":  0.7,
+                                                                                                                                      "raw":  "ç»­æç 70%",
+                                                                                                                                      "confidence":  0.85,
+                                                                                                                                      "range_status":  "in_range",
+                                                                                                                                      "range":  {
+                                                                                                                                                    "low":  0.3,
+                                                                                                                                                    "median":  0.6,
+                                                                                                                                                    "high":  0.85,
+                                                                                                                                                    "unit":  "æ¯ä¾",
+                                                                                                                                                    "note":  "ç»­ææ¦ç"
+                                                                                                                                                }
+                                                                                                                                  },
+                                                                                                                 "beneficiaries_served":  {
+                                                                                                                                              "value":  800.0,
+                                                                                                                                              "raw":  "åçäºº 800 äºº",
+                                                                                                                                              "confidence":  0.85,
+                                                                                                                                              "range_status":  "in_range",
+                                                                                                                                              "range":  {
+                                                                                                                                                            "low":  50,
+                                                                                                                                                            "median":  500,
+                                                                                                                                                            "high":  50000,
+                                                                                                                                                            "unit":  "äºº/æ",
+                                                                                                                                                            "note":  "æè§¦è¾¾åçäºº"
+                                                                                                                                                        }
+                                                                                                                                          }
+                                                                                                             }
+                                                                                        },
+                                                                     "kind":  "public"
+                                                                 },
+                                                     "applied":  [
+                                                                     {
+                                                                         "stream_index":  0,
+                                                                         "pattern":  "grant_funded",
+                                                                         "field":  "grant_value_yearly",
+                                                                         "old":  null,
+                                                                         "new":  200000.0
+                                                                     },
+                                                                     {
+                                                                         "stream_index":  0,
+                                                                         "pattern":  "grant_funded",
+                                                                         "field":  "renewal_rate",
+                                                                         "old":  null,
+                                                                         "new":  0.7
+                                                                     },
+                                                                     {
+                                                                         "stream_index":  0,
+                                                                         "pattern":  "grant_funded",
+                                                                         "field":  "beneficiaries_served",
+                                                                         "old":  null,
+                                                                         "new":  800.0
+                                                                     }
+                                                                 ],
+                                                     "skipped":  [
+
+                                                                 ],
+                                                     "stream_added":  true,
+                                                     "plan_id":  "1be4b94d"
+                                                 }
+                      },
+                      {
+                          "assistant":  "æçè§£ä½ ç°å¨æå\u0085³å¿çæ¯âæåºå®ææ¬2ä¸ï¼è¿ä¸ªé¡¹ç®ç»ææ¯å¦ç¨³âãè¿æ¯ä¸ä¸ªéå¸¸å®é\u0085çé",
+                          "pid":  "P-1120230236-13",
+                          "score":  6.4,
+                          "stage":  "structured",
+                          "finance_auto_apply":  null
+                      }
+                  ],
+        "streams":  [
+                        {
+                            "name":  "å\u0085¬ç Â· æ¿åº/åºéèµå©ï¼AI èªå¨å»ºç«ï¼",
+                            "pattern_key":  "grant_funded",
+                            "inputs":  {
+                                           "grant_value_yearly":  200000.0,
+                                           "renewal_rate":  0.7,
+                                           "beneficiaries_served":  800.0
+                                       },
+                            "monthly_revenue":  0.0,
+                            "_ai_meta":  {
+                                             "ai_created":  true,
+                                             "source":  "msg:8df1218c-a5f7-4843-87f4-1cf4aec621f3#2",
+                                             "ts":  1776972916.9733534,
+                                             "fields":  {
+                                                            "grant_value_yearly":  {
+                                                                                       "ai_filled":  true,
+                                                                                       "value":  200000.0,
+                                                                                       "prev_value":  null,
+                                                                                       "raw":  "åä¸ªé¡¹ç®å¹´åº¦éé¢ 20 ä¸",
+                                                                                       "range_status":  "in_range",
+                                                                                       "source":  "msg:8df1218c-a5f7-4843-87f4-1cf4aec621f3#2",
+                                                                                       "ts":  1776972916.9733534,
+                                                                                       "confidence":  0.85
+                                                                                   },
+                                                            "renewal_rate":  {
+                                                                                 "ai_filled":  true,
+                                                                                 "value":  0.7,
+                                                                                 "prev_value":  null,
+                                                                                 "raw":  "ç»­æç 70%",
+                                                                                 "range_status":  "in_range",
+                                                                                 "source":  "msg:8df1218c-a5f7-4843-87f4-1cf4aec621f3#2",
+                                                                                 "ts":  1776972916.9733534,
+                                                                                 "confidence":  0.85
+                                                                             },
+                                                            "beneficiaries_served":  {
+                                                                                         "ai_filled":  true,
+                                                                                         "value":  800.0,
+                                                                                         "prev_value":  null,
+                                                                                         "raw":  "åçäºº 800 äºº",
+                                                                                         "range_status":  "in_range",
+                                                                                         "source":  "msg:8df1218c-a5f7-4843-87f4-1cf4aec621f3#2",
+                                                                                         "ts":  1776972916.9733534,
+                                                                                         "confidence":  0.85
+                                                                                     }
+                                                        }
+                                         },
+                            "active_units":  800.0
+                        }
+                    ],
+        "summary":  {
+                        "project_cost_total":  0.0,
+                        "competition_cost_total":  0.0,
+                        "total_investment":  0.0,
+                        "baseline_monthly_revenue":  0.0,
+                        "baseline_annual_net":  0.0,
+                        "funding_gap":  0.0,
+                        "health_score":  54,
+                        "breakeven_fastest":  2,
+                        "breakeven_baseline":  2,
+                        "breakeven_slowest":  2
+                    },
+        "finance_persona":  {
+                                "module":  "finance_persona",
+                                "title":  "è´¢å¡ç»åï¼ææ¶å\u0085¥æ¨¡å¼ï¼",
+                                "inputs":  {
+                                               "stream_count":  1,
+                                               "is_public":  true,
+                                               "industry":  "ç¤¾ä¼å\u0085¬ç"
+                                           },
+                                "outputs":  {
+                                                "persona_label":  "å\u0085¬çå¯æç»­å",
+                                                "dominant_pattern":  "grant_funded",
+                                                "dominant_kind":  "public",
+                                                "kind_mix":  {
+                                                                 "public":  1.0
+                                                             },
+                                                "pattern_mix":  {
+                                                                    "grant_funded":  1.0
+                                                                },
+                                                "total_monthly_revenue":  1.0,
+                                                "stream_kpis":  [
+                                                                    {
+                                                                        "name":  "å\u0085¬ç Â· æ¿åº/åºéèµå©ï¼AI èªå¨å»ºç«ï¼",
+                                                                        "pattern_key":  "grant_funded",
+                                                                        "kind":  "public",
+                                                                        "monthly_revenue":  0.0,
+                                                                        "primary_kpi":  null,
+                                                                        "health":  "gray",
+                                                                        "reason":  "ç¼ºå°å¨æèµå©æ°æå¹´éé¢"
+                                                                    }
+                                                                ]
+                                            },
+                                "verdict":  {
+                                                "level":  "green",
+                                                "score":  0.7,
+                                                "reason":  "è¯å«ä¸ºãå\u0085¬çå¯æç»­åã, å\u0085± 1 æ¡æ¶å\u0085¥æµ, æè¥æ¶ Â¥1"
+                                            },
+                                "framework_explain":  "**è´¢å¡ç»å**æ ¹æ®é¡¹ç®å½åçæ¶å\u0085¥æµæ¨¡å¼åå¸, ç»åºãå¢é¿å / B ç«¯ / å¹³å° / ç¡¬ä»¶ / å\u0085¬çãç­ç»åæ ç­¾, åç»­æ¨¡åçå\u0085¬å¼ä¸éå¼ä¼æ®æ­¤åæ¯ã",
+                                "suggestions":  [
+
+                                                ],
+                                "evidence_for_diagnosis":  {
+
+                                                           },
+                                "missing_inputs":  [
+
+                                                   ]
+                            },
+        "unit_economics":  {
+                               "module":  "unit_economics",
+                               "title":  "åä½ç»æµåæï¼ææ¶å\u0085¥æ¨¡å¼åæ¯ï¼",
+                               "inputs":  {
+                                              "industry":  "ç¤¾ä¼å\u0085¬ç",
+                                              "stream_count":  1,
+                                              "is_public_project":  true,
+                                              "dominant_pattern":  "grant_funded",
+                                              "dominant_kind":  "public",
+                                              "kind_mix":  {
+                                                               "public":  1.0
+                                                           },
+                                              "pattern_mix":  {
+                                                                  "grant_funded":  1.0
+                                                              }
+                                          },
+                               "outputs":  {
+                                               "per_stream":  [
+                                                                  {
+                                                                      "applicable":  false,
+                                                                      "metrics":  {
+
+                                                                                  },
+                                                                      "health":  "gray",
+                                                                      "reason":  "ç¼ºå°å¨æèµå©æ°æå¹´éé¢",
+                                                                      "missing":  [
+
+                                                                                  ],
+                                                                      "pattern_key":  "grant_funded",
+                                                                      "pattern_label":  "å\u0085¬ç Â· æ¿åº/åºéèµå©",
+                                                                      "kind":  "public",
+                                                                      "weight":  0.0,
+                                                                      "stream_name":  "å\u0085¬ç Â· æ¿åº/åºéèµå©ï¼AI èªå¨å»ºç«ï¼"
+                                                                  }
+                                                              ],
+                                               "total_monthly_revenue":  0.0,
+                                               "weighted_health_score":  0.5
+                                           },
+                               "verdict":  {
+                                               "level":  "yellow",
+                                               "score":  0.5,
+                                               "reason":  "[å\u0085¬ç Â· æ¿åº/åºéèµå©] =None Â· gray"
+                                           },
+                               "framework_explain":  "**åä½ç»æµ(ææ¶å\u0085¥æ¨¡å¼åæ¯)**ï¼æ¬é¡¹ç®è¯å«å° 1 æ¡æ¶å\u0085¥æµ, ä¸»å¯¼æ¨¡å¼ grant_funded(public å¤§ç±»)ã\n\n- è®¢é\u0085å: LTV = ææ¯å© Ã çå­çå½æ, ç LTV/CAC â¥ 3\n- äº¤æå: ç Payback = CAC / æäººåæ¯å©, çµå â¤ 3 æ\n- é¡¹ç®å¶ B2B: ç ARR + ç»­çº¦ç, ç»­çº¦ â¥ 70% å¥åº·\n- å¹³å°æ½ä½£: ç Take rate ä¸åå®¶ ARPU, 3-15% åºé´å¥åº·\n- ç¡¬ä»¶: çåä½æ¯å©ç, â¥ 30% æè½æå®å\n- å\u0085¬ç: ç CPB ä¸èµå©ç»­æç, ä¸å¼ºæ± LTV/CAC",
+                               "suggestions":  [
+
+                                               ],
+                               "missing_inputs":  [
+
+                                                  ],
+                               "evidence_for_diagnosis":  {
+                                                              "H8":  0.55
+                                                          },
+                               "baseline_meta":  {
+                                                     "industry":  "ç¤¾ä¼å\u0085¬ç",
+                                                     "source":  "seed",
+                                                     "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                     "evidence_count":  0,
+                                                     "never_refresh":  false,
+                                                     "bg_refresh_state":  "n/a",
+                                                     "bg_refresh_window_days":  30
+                                                 },
+                               "thresholds_used":  {
+                                                       "values":  {
+                                                                      "ltv_cac_healthy":  3.0,
+                                                                      "ltv_cac_warning":  1.5,
+                                                                      "payback_healthy_months":  6.0,
+                                                                      "payback_warning_months":  12.0,
+                                                                      "runway_red_months":  6.0,
+                                                                      "runway_warning_months":  12.0,
+                                                                      "breakeven_green_months":  24.0,
+                                                                      "breakeven_warning_months":  36.0,
+                                                                      "cpb_healthy_ratio":  1.0,
+                                                                      "cpb_warning_ratio":  1.5
+                                                                  },
+                                                       "source":  "seed_v2"
+                                                   }
+                           },
+        "cash_flow":  {
+                          "module":  "cash_flow",
+                          "title":  "ç°éæµæ¨æ¼ä¸ Runway",
+                          "inputs":  {
+                                         "initial_capital":  50000.0,
+                                         "fixed_costs_monthly":  0.0,
+                                         "variable_cost_per_user":  0.0,
+                                         "monthly_price":  0.0,
+                                         "new_users_per_month":  800.0,
+                                         "monthly_retention":  0.0,
+                                         "growth_rate_monthly":  0.1,
+                                         "streams_baseline_revenue":  null,
+                                         "stream_count":  1
+                                     },
+                          "outputs":  {
+
+                                      },
+                          "verdict":  {
+                                          "level":  "gray",
+                                          "score":  0.0,
+                                          "reason":  "ç¼ºå°æåºå®ææ¬æå®ä»·/æ¶å\u0085¥æµï¼æ æ³æ¨¡æç°éæµ"
+                                      },
+                          "framework_explain":  "**ç°éæµæ¨æ¼**ä¸è¬ç¨ 36 ä¸ªæ Excel æ¨¡åï¼éææ¨¡æä»è´¹ç¨æ·å­éãMRRãææ¬ãåç°éåç´¯è®¡ç°éã**Runwayï¼å©ä½è·éï¼** = å½åç°é / å¹³åæç§é±çï¼æ¯æèµäººå¤æ­ä¸ä¸è½®ç´§è¿«åº¦çæ ¸å¿ææ ã",
+                          "suggestions":  [
+
+                                          ],
+                          "missing_inputs":  [
+                                                 {
+                                                     "field":  "fixed_costs_monthly",
+                                                     "hint":  "æåºå®ææ¬ï¼æå¡å¨/æ¿ç§/å·¥èµï¼",
+                                                     "target_tab":  "cost"
+                                                 },
+                                                 {
+                                                     "field":  "monthly_price",
+                                                     "hint":  "æååä»·",
+                                                     "target_tab":  "biz"
+                                                 }
+                                             ],
+                          "evidence_for_diagnosis":  {
+
+                                                     },
+                          "baseline_meta":  {
+                                                "industry":  "ç¤¾ä¼å\u0085¬ç",
+                                                "source":  "seed",
+                                                "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                "evidence_count":  0,
+                                                "never_refresh":  false,
+                                                "bg_refresh_state":  "n/a",
+                                                "bg_refresh_window_days":  30
+                                            },
+                          "thresholds_used":  {
+                                                  "values":  {
+                                                                 "ltv_cac_healthy":  3.0,
+                                                                 "ltv_cac_warning":  1.5,
+                                                                 "payback_healthy_months":  6.0,
+                                                                 "payback_warning_months":  12.0,
+                                                                 "runway_red_months":  6.0,
+                                                                 "runway_warning_months":  12.0,
+                                                                 "breakeven_green_months":  24.0,
+                                                                 "breakeven_warning_months":  36.0,
+                                                                 "cpb_healthy_ratio":  1.0,
+                                                                 "cpb_warning_ratio":  1.5
+                                                             },
+                                                  "source":  "seed_v2"
+                                              }
+                      },
+        "rationality":  {
+                            "module":  "rationality",
+                            "title":  "è´¢å¡åè®¾åçæ§",
+                            "inputs":  {
+                                           "industry":  "ç¤¾ä¼å\u0085¬ç"
+                                       },
+                            "outputs":  {
+                                            "checks":  [
+
+                                                       ],
+                                            "industry_note":  "å\u0085¬çé¡¹ç®ä¸éç¨ LTV/CAC å£å¾ï¼åºçåä½åçäººææ¬ä¸å¯æç»­æ§",
+                                            "baseline":  {
+                                                             "cac_range":  [
+                                                                               10,
+                                                                               80
+                                                                           ],
+                                                             "monthly_price_range":  [
+                                                                                         0,
+                                                                                         0
+                                                                                     ],
+                                                             "monthly_retention":  [
+                                                                                       0.4,
+                                                                                       0.75
+                                                                                   ],
+                                                             "gross_margin":  [
+                                                                                  0,
+                                                                                  0
+                                                                              ]
+                                                         }
+                                        },
+                            "verdict":  {
+                                            "level":  "gray",
+                                            "score":  0.0,
+                                            "reason":  "æ²¡æä»»ä½å¯ä¸è¡ä¸åºåå¯¹æ¯çæ°å­ï¼å\u0085è¡¥ CAC/çå­/å®ä»·/æ¯å© ä¸­çè³å°ä¸é¡¹"
+                                        },
+                            "framework_explain":  "",
+                            "suggestions":  [
+
+                                            ],
+                            "missing_inputs":  [
+                                                   {
+                                                       "field":  "monthly_price",
+                                                       "hint":  "æä»· / ARPU",
+                                                       "target_tab":  "biz"
+                                                   },
+                                                   {
+                                                       "field":  "cac",
+                                                       "hint":  "è·å®¢ææ¬",
+                                                       "target_tab":  "biz"
+                                                   },
+                                                   {
+                                                       "field":  "monthly_retention",
+                                                       "hint":  "æçå­ç",
+                                                       "target_tab":  "biz"
+                                                   },
+                                                   {
+                                                       "field":  "gross_margin",
+                                                       "hint":  "æ¯å©ç",
+                                                       "target_tab":  "biz"
+                                                   }
+                                               ],
+                            "evidence_for_diagnosis":  {
+
+                                                       },
+                            "baseline_meta":  {
+                                                  "industry":  "ç¤¾ä¼å\u0085¬ç",
+                                                  "source":  "seed",
+                                                  "updated_at":  "2026-04-21T01:13:05+00:00",
+                                                  "evidence_count":  0,
+                                                  "never_refresh":  false,
+                                                  "bg_refresh_state":  "n/a",
+                                                  "bg_refresh_window_days":  30
+                                              },
+                            "thresholds_used":  {
+                                                    "values":  {
+                                                                   "ltv_cac_healthy":  3.0,
+                                                                   "ltv_cac_warning":  1.5,
+                                                                   "payback_healthy_months":  6.0,
+                                                                   "payback_warning_months":  12.0,
+                                                                   "runway_red_months":  6.0,
+                                                                   "runway_warning_months":  12.0,
+                                                                   "breakeven_green_months":  24.0,
+                                                                   "breakeven_warning_months":  36.0,
+                                                                   "cpb_healthy_ratio":  1.0,
+                                                                   "cpb_warning_ratio":  1.5
+                                                               },
+                                                    "source":  "seed_v2"
+                                                }
+                        }
+    }
+]

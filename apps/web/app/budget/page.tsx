@@ -56,11 +56,11 @@ function cny(n: number) {
 }
 
 function healthGrade(s: number) {
-  if (s >= 80) return { grade: "A", color: "#51cf66" };
-  if (s >= 65) return { grade: "B+", color: "#6b8aff" };
-  if (s >= 50) return { grade: "B", color: "#ffa94d" };
-  if (s >= 35) return { grade: "C", color: "#ff922b" };
-  return { grade: "D", color: "#ff6b6b" };
+  if (s >= 80) return { grade: "完整", color: "#51cf66" };
+  if (s >= 65) return { grade: "较完整", color: "#6b8aff" };
+  if (s >= 50) return { grade: "初步", color: "#ffa94d" };
+  if (s >= 35) return { grade: "待补", color: "#ff922b" };
+  return { grade: "空白", color: "#ff6b6b" };
 }
 
 export default function BudgetPage() {
